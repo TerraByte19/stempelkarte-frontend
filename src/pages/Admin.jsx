@@ -1,91 +1,69 @@
 import { useState, useEffect } from 'react'
 
-const BASE_URL = 'https://stempelkarte-backend.onrender.com'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
 export default function Admin() {
-  const [secret, setSecret] = useState(sessionStorage.getItem('adminSecret') || '')
-  const [loggedIn, setLoggedIn] = useState(!!sessionStorage.getItem('adminSecret'))
+  const [secret, setSecret] = useState('')
+  const [loggedIn, setLoggedIn] = useState(false)
   const [shops, setShops] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
- useEffect(() => {
-  const token = sessionStorage.getItem('adminToken')
-  if (token) {
-    setLoggedIn(true)
-    loadShops(token)
-  }
-}, [])
+  useEffect(() => {
+    const token = sessionStorage.getItem('adminToken')
+    if (token) {
+      setLoggedIn(true)
+      loadShops(token)
+    }
+  }, [])
 
   async function login() {
-  setLoading(true)
-  setError('')
-  try {
-    const res = await fetch(`${BASE_URL}/api/admin/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: secret })
-    })
-    const data = await res.json()
-    if (res.ok) {
-      sessionStorage.setItem('adminToken', data.token)
-      setLoggedIn(true)
-      loadShops(data.token)
-    } else {
-      setError(data.error || 'Fehler beim Login')
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: secret })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        sessionStorage.setItem('adminToken', data.token)
+        setLoggedIn(true)
+        loadShops(data.token)
+      } else {
+        setError(data.error || 'Fehler beim Login')
+      }
+    } catch (e) {
+      setError('Server nicht erreichbar')
+    } finally {
+      setLoading(false)
     }
-  } catch (e) {
-    setError('Server nicht erreichbar')
-  } finally {
-    setLoading(false)
   }
-}
 
-async function loadShops(token) {
-  const t = token || sessionStorage.getItem('adminToken')
-  setLoading(true)
-  try {
-    const res = await fetch(`${BASE_URL}/api/admin/shops`, {
-      headers: { 'Authorization': `Bearer ${t}` }
-    })
-    if (res.status === 401) {
-      logout()
-      return
+  async function loadShops(token) {
+    const t = token || sessionStorage.getItem('adminToken')
+    setLoading(true)
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops`, {
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (res.status === 401) { logout(); return }
+      const data = await res.json()
+      setShops(data)
+    } catch (e) {
+      setError('Fehler beim Laden')
+    } finally {
+      setLoading(false)
     }
-    const data = await res.json()
-    setShops(data)
-  } catch (e) {
-    setError('Fehler beim Laden')
-  } finally {
-    setLoading(false)
   }
-}
-
-async function toggleShop(shopId) {
-  const t = sessionStorage.getItem('adminToken')
-  try {
-    await fetch(`${BASE_URL}/api/admin/shops/${shopId}/toggle`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${t}` }
-    })
-    loadShops()
-  } catch (e) {
-    alert('Fehler beim Sperren/Entsperren')
-  }
-}
-
-function logout() {
-  sessionStorage.removeItem('adminToken')
-  setLoggedIn(false)
-  setSecret('')
-  setShops([])
-}
 
   async function toggleShop(shopId) {
+    const t = sessionStorage.getItem('adminToken')
     try {
       await fetch(`${BASE_URL}/api/admin/shops/${shopId}/toggle`, {
         method: 'POST',
-        headers: { 'X-Admin-Secret': sessionStorage.getItem('adminSecret') }
+        headers: { 'Authorization': `Bearer ${t}` }
       })
       loadShops()
     } catch (e) {
@@ -94,18 +72,17 @@ function logout() {
   }
 
   function logout() {
-    sessionStorage.removeItem('adminSecret')
+    sessionStorage.removeItem('adminToken')
     setLoggedIn(false)
     setSecret('')
     setShops([])
   }
 
-  // Login Screen
   if (!loggedIn) {
     return (
       <div style={styles.loginContainer}>
         <div style={styles.loginCard}>
-          <div style={styles.loginLogo}>🔧</div>
+          <div style={styles.loginLogo}>SK</div>
           <h1 style={styles.loginTitle}>Admin-Panel</h1>
           <p style={styles.loginSubtitle}>Nur für Betreiber</p>
           {error && <div style={styles.loginError}>{error}</div>}
@@ -128,12 +105,11 @@ function logout() {
     )
   }
 
-  // Admin Dashboard
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>🔧 Admin-Panel</h1>
+          <h1 style={styles.title}>Admin-Panel</h1>
           <p style={styles.subtitle}>{shops.length} Läden registriert</p>
         </div>
         <button style={styles.btnLogout} onClick={logout}>Ausloggen</button>
@@ -168,20 +144,17 @@ function logout() {
           <span>Aktion</span>
         </div>
         {shops.map(shop => (
-          <div key={shop.id} style={{
-            ...styles.tableRow,
-            opacity: shop.active ? 1 : 0.5,
-          }}>
+          <div key={shop.id} style={{ ...styles.tableRow, opacity: shop.active ? 1 : 0.5 }}>
             <span style={styles.shopName}>{shop.name}</span>
             <span style={styles.shopEmail}>{shop.email}</span>
-            <span style={styles.cell}>{shop.cardCount} Karten</span>
-            <span style={styles.cell}>{shop.customerCount} Kunden</span>
+            <span style={styles.cell}>{shop.cardCount}</span>
+            <span style={styles.cell}>{shop.customerCount}</span>
             <span style={{
               ...styles.status,
               background: shop.active ? '#e6f4ea' : '#fce8e6',
               color: shop.active ? '#2C5F2E' : '#c00',
             }}>
-              {shop.active ? '✅ Aktiv' : '🚫 Gesperrt'}
+              {shop.active ? 'Aktiv' : 'Gesperrt'}
             </span>
             <button
               style={{
@@ -210,64 +183,42 @@ const styles = {
     width: '100%', maxWidth: '380px', textAlign: 'center',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
   },
-  loginLogo: { fontSize: '48px', marginBottom: '16px' },
+  loginLogo: {
+    width: '56px', height: '56px', borderRadius: '14px', background: '#3C3489',
+    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: '18px', fontWeight: '700', margin: '0 auto 16px',
+  },
   loginTitle: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
   loginSubtitle: { fontSize: '14px', color: '#888', margin: '0 0 28px' },
-  loginError: {
-    background: '#fff0f0', color: '#c00', padding: '10px',
-    borderRadius: '8px', fontSize: '14px', marginBottom: '16px',
-  },
+  loginError: { background: '#fff0f0', color: '#c00', padding: '10px', borderRadius: '8px', fontSize: '14px', marginBottom: '16px' },
   field: { marginBottom: '16px', textAlign: 'left' },
   label: { display: 'block', fontSize: '13px', fontWeight: '500', color: '#444', marginBottom: '6px' },
-  input: {
-    width: '100%', padding: '10px 14px', borderRadius: '8px',
-    border: '1.5px solid #e0e0e0', fontSize: '15px',
-    outline: 'none', boxSizing: 'border-box',
-  },
-  btnLogin: {
-    width: '100%', padding: '12px', background: '#3C3489',
-    color: 'white', border: 'none', borderRadius: '10px',
-    fontSize: '15px', fontWeight: '600', cursor: 'pointer',
-  },
-  container: { padding: '32px', maxWidth: '1200px', margin: '0 auto' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' },
-  title: { fontSize: '28px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
+  input: { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '15px', outline: 'none', boxSizing: 'border-box' },
+  btnLogin: { width: '100%', padding: '12px', background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
+  container: { padding: '24px', maxWidth: '1200px', margin: '0 auto' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
+  title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
   subtitle: { fontSize: '14px', color: '#888', margin: 0 },
-  btnLogout: {
-    background: '#f0f0f0', border: 'none', borderRadius: '8px',
-    padding: '8px 16px', cursor: 'pointer', fontSize: '14px',
-  },
-  stats: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' },
-  statCard: {
-    background: 'white', borderRadius: '12px', padding: '20px',
-    textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-  },
-  statNumber: { fontSize: '36px', fontWeight: '700', color: '#3C3489' },
-  statLabel: { fontSize: '13px', color: '#888', marginTop: '4px' },
-  table: {
-    background: 'white', borderRadius: '12px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'hidden',
-  },
+  btnLogout: { background: '#f0f0f0', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '14px' },
+  stats: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', marginBottom: '24px' },
+  statCard: { background: 'white', borderRadius: '12px', padding: '16px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+  statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
+  statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
+  table: { background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'auto' },
   tableHeader: {
     display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr',
-    padding: '14px 20px', background: '#f8f8f8',
-    fontSize: '12px', fontWeight: '600', color: '#888',
-    textTransform: 'uppercase', letterSpacing: '0.5px',
+    padding: '12px 16px', background: '#f8f8f8',
+    fontSize: '11px', fontWeight: '600', color: '#888',
+    textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '600px',
   },
   tableRow: {
     display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr',
-    padding: '16px 20px', borderTop: '1px solid #f0f0f0',
-    alignItems: 'center',
+    padding: '14px 16px', borderTop: '1px solid #f0f0f0',
+    alignItems: 'center', minWidth: '600px',
   },
   shopName: { fontSize: '14px', fontWeight: '600', color: '#1a1a1a' },
-  shopEmail: { fontSize: '13px', color: '#666' },
+  shopEmail: { fontSize: '12px', color: '#666' },
   cell: { fontSize: '13px', color: '#666' },
-  status: {
-    fontSize: '12px', fontWeight: '600', padding: '4px 10px',
-    borderRadius: '20px', display: 'inline-block',
-  },
-  btnToggle: {
-    border: 'none', borderRadius: '8px', padding: '6px 12px',
-    fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-  },
+  status: { fontSize: '12px', fontWeight: '600', padding: '3px 8px', borderRadius: '20px', display: 'inline-block' },
+  btnToggle: { border: 'none', borderRadius: '8px', padding: '5px 10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' },
 }
