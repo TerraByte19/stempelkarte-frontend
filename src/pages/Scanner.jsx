@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 
 export default function Scanner() {
@@ -8,6 +9,7 @@ export default function Scanner() {
   const [cameraActive, setCameraActive] = useState(false)
   const inputRef = useRef()
   const html5QrRef = useRef(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -22,25 +24,23 @@ export default function Scanner() {
     return () => clearTimeout(timer)
   }, [qrInput])
 
-async function startCamera() {
-  try {
-    setCameraActive(true)
-    await new Promise(resolve => setTimeout(resolve, 100))
-    html5QrRef.current = new Html5Qrcode('qr-reader')
-    await html5QrRef.current.start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      (decodedText) => {
-        sendScan(decodedText)
-      },
-      () => {}
-    )
-  } catch (e) {
-    console.error(e)
-    setCameraActive(false)
-    alert('Kamera konnte nicht gestartet werden: ' + e.message)
+  async function startCamera() {
+    try {
+      setCameraActive(true)
+      await new Promise(resolve => setTimeout(resolve, 100))
+      html5QrRef.current = new Html5Qrcode('qr-reader')
+      await html5QrRef.current.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => { sendScan(decodedText) },
+        () => {}
+      )
+    } catch (e) {
+      console.error(e)
+      setCameraActive(false)
+      alert('Kamera konnte nicht gestartet werden: ' + e.message)
+    }
   }
-}
 
   async function stopCamera() {
     if (html5QrRef.current) {
@@ -87,8 +87,17 @@ async function startCamera() {
 
   return (
     <div>
-      <h1 style={styles.title}>Scanner 📷</h1>
-      <p style={styles.subtitle}>Scanne den QR-Code des Kunden</p>
+      {/* Header mit Zurück-Button */}
+      <div style={styles.header}>
+        <button style={styles.backBtn} onClick={() => navigate('/')}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+        </button>
+        <h1 style={styles.title}>Scanner</h1>
+      </div>
+
+      <p style={styles.subtitle}>Halte den Scanner an den QR-Code des Kunden</p>
 
       {/* Ergebnis */}
       {result && (
@@ -104,8 +113,8 @@ async function startCamera() {
           <div style={styles.resultIcon}>
             {result.success
               ? result.data.action === 'redeemed' ? '🎉'
-                : result.data.action === 'full' ? '🎊' : '✅'
-              : '❌'}
+                : result.data.action === 'full' ? '🎊' : '✓'
+              : '✗'}
           </div>
           <div style={styles.resultMessage}>
             {result.success ? result.data.message : result.message}
@@ -122,12 +131,12 @@ async function startCamera() {
               inputRef.current?.focus()
             }}
           >
-            Nächster Kunde →
+            Nachster Kunde
           </button>
         </div>
       )}
 
-      {/* Unsichtbares Eingabefeld für USB/Bluetooth Scanner */}
+      {/* Unsichtbares Eingabefeld */}
       <input
         ref={inputRef}
         style={styles.hiddenInput}
@@ -141,12 +150,12 @@ async function startCamera() {
         spellCheck="false"
       />
 
-      {/* Kamera-Bereich */}
+      {/* Kamera */}
       {cameraActive ? (
         <div style={styles.cameraContainer}>
           <div id="qr-reader" style={{ width: '100%' }} />
           <button style={styles.btnStop} onClick={stopCamera}>
-            ✕ Kamera stoppen
+            Kamera stoppen
           </button>
         </div>
       ) : (
@@ -159,21 +168,26 @@ async function startCamera() {
           onClick={() => inputRef.current?.focus()}
         >
           <div style={styles.scanIcon}>
-            {loading ? '⏳' : '🔍'}
+            {loading ? '...' : (
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3C3489" strokeWidth="1.5">
+                <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/>
+                <rect x="3" y="16" width="5" height="5"/><path d="M16 16h2v2h-2z"/>
+                <path d="M18 16h2v2h-2z"/><path d="M16 18h2v2h-2z"/><path d="M18 18h2v2h-2z"/>
+              </svg>
+            )}
           </div>
           <div style={styles.scanText}>
-            {loading ? 'Stempel wird vergeben...' : 'Bereit zum Scannen'}
+            {loading ? 'Verarbeite...' : 'Bereit zum Scannen'}
           </div>
-          <div style={styles.scanSubtext}>
+          <div style={styles.scanHint}>
             USB/Bluetooth Scanner einfach verwenden
           </div>
         </div>
       )}
 
-      {/* Kamera Button */}
       {!cameraActive && !loading && (
         <button style={styles.btnCamera} onClick={startCamera}>
-          📷 Kamera verwenden
+          Kamera verwenden
         </button>
       )}
     </div>
@@ -181,16 +195,29 @@ async function startCamera() {
 }
 
 const styles = {
-  title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '4px',
+  },
+  backBtn: {
+    background: 'white',
+    border: '1.5px solid #e0e0e0',
+    borderRadius: '8px',
+    padding: '8px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: { fontSize: '24px', fontWeight: '700', color: '#1a1a1a' },
   subtitle: { fontSize: '14px', color: '#888', margin: '0 0 24px' },
   resultBox: {
-    borderRadius: '12px',
-    padding: '24px',
-    marginBottom: '20px',
-    textAlign: 'center',
-    border: '2px solid',
+    borderRadius: '12px', padding: '24px',
+    marginBottom: '20px', textAlign: 'center', border: '2px solid',
   },
-  resultIcon: { fontSize: '48px', marginBottom: '8px' },
+  resultIcon: { fontSize: '36px', marginBottom: '8px' },
   resultMessage: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '4px' },
   resultStamps: { fontSize: '14px', color: '#666', marginBottom: '16px' },
   btnNext: {
@@ -199,50 +226,23 @@ const styles = {
     fontWeight: '600', cursor: 'pointer',
   },
   hiddenInput: {
-    position: 'fixed',
-    top: '-1000px',
-    left: '-1000px',
-    opacity: 0,
-    width: '1px',
-    height: '1px',
+    position: 'fixed', top: '-1000px', left: '-1000px',
+    opacity: 0, width: '1px', height: '1px',
   },
   scanArea: {
-    borderRadius: '16px',
-    padding: '60px 24px',
-    textAlign: 'center',
-    cursor: 'pointer',
-    border: '2px dashed',
-    transition: 'all 0.2s',
-    marginBottom: '16px',
+    borderRadius: '16px', padding: '60px 24px', textAlign: 'center',
+    cursor: 'pointer', border: '2px dashed', transition: 'all 0.2s', marginBottom: '16px',
   },
-  scanIcon: { fontSize: '80px', marginBottom: '20px' },
-  scanText: { fontSize: '20px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' },
-  scanSubtext: { fontSize: '13px', color: '#aaa' },
-  cameraContainer: {
-    borderRadius: '16px',
-    overflow: 'hidden',
-    marginBottom: '16px',
-    background: '#000',
-  },
+  scanIcon: { marginBottom: '16px', display: 'flex', justifyContent: 'center' },
+  scanText: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' },
+  scanHint: { fontSize: '13px', color: '#aaa' },
+  cameraContainer: { borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', background: '#000' },
   btnStop: {
-    width: '100%',
-    padding: '12px',
-    background: '#ff4444',
-    color: 'white',
-    border: 'none',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
+    width: '100%', padding: '12px', background: '#ff4444',
+    color: 'white', border: 'none', fontSize: '14px', fontWeight: '600', cursor: 'pointer',
   },
   btnCamera: {
-    width: '100%',
-    padding: '14px',
-    background: '#f0eeff',
-    color: '#3C3489',
-    border: 'none',
-    borderRadius: '12px',
-    fontSize: '15px',
-    fontWeight: '600',
-    cursor: 'pointer',
+    width: '100%', padding: '14px', background: '#f0eeff', color: '#3C3489',
+    border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '600', cursor: 'pointer',
   },
 }
