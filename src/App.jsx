@@ -6,6 +6,7 @@ import Karten from './pages/Karten'
 import Profil from './pages/Profil'
 import Layout from './components/Layout'
 import Scanner from './pages/Scanner'
+import Admin from './pages/Admin'
 
 // In den Routes:
 <Route path="/scanner" element={<Scanner />} />
@@ -18,6 +19,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/scanner" element={<Scanner />} />
+      <Route path="/admin" element={<Admin />} />
       <Route path="/" element={token ? <Layout /> : <Navigate to="/login" />}>
   <Route index element={<Dashboard />} />
   <Route path="karten" element={<Karten />} />
