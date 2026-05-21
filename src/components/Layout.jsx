@@ -89,6 +89,29 @@ export default function Layout() {
           </svg>
           Profil
         </NavLink>
+        <button
+          onClick={logout}
+          style={{
+            color: '#888',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            fontSize: '11px',
+            gap: '3px',
+            flex: 1,
+            padding: '8px 0',
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </button>
       </nav>
     </div>
   )
