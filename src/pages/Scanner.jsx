@@ -59,7 +59,7 @@ async function startCamera() {
 
     try {
       const token = localStorage.getItem('staffToken')
-      const res = await fetch('http://localhost:8080/api/scan', {
+      const res = await fetch('https://stempelkarte-backend.onrender.com/api/scan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

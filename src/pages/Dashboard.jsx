@@ -5,7 +5,7 @@ export default function Dashboard() {
   const [cards, setCards] = useState([])
   const [selectedCard, setSelectedCard] = useState(null)
   const shop = JSON.parse(localStorage.getItem('shop') || '{}')
-  const baseUrl = 'http://localhost:8080'
+const baseUrl = 'https://stempelkarte-backend.onrender.com'
 
   const printStyle = `
     @media print {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-const BASE_URL = 'http://localhost:8080'
+const BASE_URL = 'https://stempelkarte-backend.onrender.com'
 
 export default function Admin() {
   const [secret, setSecret] = useState(sessionStorage.getItem('adminSecret') || '')
