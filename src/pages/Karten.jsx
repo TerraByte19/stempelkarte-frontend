@@ -39,6 +39,16 @@ export default function Karten() {
     }
   }
 
+  async function deleteCard(cardId, cardName) {
+    if (!confirm(`Karte "${cardName}" wirklich deaktivieren?`)) return
+    try {
+      await api.delete(`/api/shop/cards/${cardId}`)
+      loadCards()
+    } catch (err) {
+      alert('Fehler beim Deaktivieren')
+    }
+  }
+
   return (
     <div>
       <div style={styles.header}>
@@ -47,7 +57,7 @@ export default function Karten() {
           <p style={styles.subtitle}>Erstelle und verwalte deine Stempelkarten</p>
         </div>
         <button style={styles.btnPrimary} onClick={() => setShowForm(!showForm)}>
-          {showForm ? '✕ Abbrechen' : '+ Neue Karte'}
+          {showForm ? 'Abbrechen' : '+ Neue Karte'}
         </button>
       </div>
 
@@ -119,8 +129,14 @@ export default function Karten() {
                 <div style={styles.badge}>{card.rewardThreshold} Stempel</div>
               </div>
               <div style={styles.cardDesc}>{card.description}</div>
-              <div style={styles.cardReward}>🎁 {card.rewardText}</div>
+              <div style={styles.cardReward}>Belohnung: {card.rewardText}</div>
               <div style={styles.cardId}>ID: {card.id}</div>
+              <button
+                style={styles.btnDelete}
+                onClick={() => deleteCard(card.id, card.name)}
+              >
+                Deaktivieren
+              </button>
             </div>
           ))}
         </div>
@@ -143,7 +159,7 @@ const styles = {
     marginBottom: '28px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
   },
   formTitle: { fontSize: '18px', fontWeight: '600', margin: '0 0 20px', color: '#1a1a1a' },
-  formGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' },
+  formGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' },
   field: { display: 'flex', flexDirection: 'column' },
   label: { fontSize: '13px', fontWeight: '500', color: '#444', marginBottom: '6px' },
   input: {
@@ -163,7 +179,12 @@ const styles = {
     background: '#f0eeff', color: '#3C3489', borderRadius: '20px',
     padding: '3px 10px', fontSize: '12px', fontWeight: '600',
   },
-  cardDesc: { fontSize: '13px', color: '#666', marginBottom: '10px' },
-  cardReward: { fontSize: '13px', color: '#2C5F2E', fontWeight: '500', marginBottom: '10px' },
-  cardId: { fontSize: '11px', color: '#bbb', fontFamily: 'monospace' },
+  cardDesc: { fontSize: '13px', color: '#666', marginBottom: '8px' },
+  cardReward: { fontSize: '13px', color: '#2C5F2E', fontWeight: '500', marginBottom: '8px' },
+  cardId: { fontSize: '11px', color: '#bbb', fontFamily: 'monospace', marginBottom: '12px' },
+  btnDelete: {
+    background: '#fce8e6', color: '#c00', border: 'none',
+    borderRadius: '8px', padding: '7px 14px', fontSize: '13px',
+    fontWeight: '600', cursor: 'pointer', width: '100%',
+  },
 }
