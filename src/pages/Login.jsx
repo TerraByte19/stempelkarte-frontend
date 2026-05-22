@@ -70,11 +70,6 @@ async function handleLogin(e) {
             {loading ? 'Einloggen...' : 'Einloggen'}
           </button>
         </form>
-
-        <p style={styles.register}>
-          Noch kein Account?{' '}
-          <a href="/register" style={styles.link}>Jetzt registrieren</a>
-        </p>
       </div>
     </div>
   )
