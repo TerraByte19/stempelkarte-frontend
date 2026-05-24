@@ -6,6 +6,7 @@ const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 export default function Dashboard() {
   const [cards, setCards] = useState([])
   const [selectedCard, setSelectedCard] = useState(null)
+  const [stats, setStats] = useState([])
   const shop = JSON.parse(localStorage.getItem('shop') || '{}')
 
   const printStyle = `
@@ -27,6 +28,7 @@ export default function Dashboard() {
       setCards(res.data)
       if (res.data.length > 0) setSelectedCard(res.data[0])
     })
+    api.get('/api/shop/stats').then(res => setStats(res.data))
   }, [])
 
   return (
@@ -34,12 +36,30 @@ export default function Dashboard() {
       <h1 style={styles.title}>Willkommen, {shop.name}!</h1>
       <p style={styles.subtitle}>Hier ist deine Übersicht</p>
 
-      <div style={styles.statsRow}>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{cards.length}</div>
-          <div style={styles.statLabel}>Aktive Karten</div>
+      {/* Statistiken */}
+      {stats.length > 0 && (
+        <div style={styles.statsGrid}>
+          {stats.map(s => (
+            <div key={s.cardId} style={styles.statCard}>
+              <div style={styles.statCardName}>{s.cardName}</div>
+              <div style={styles.statRow}>
+                <div style={styles.statItem}>
+                  <div style={styles.statNumber}>{s.customerCount}</div>
+                  <div style={styles.statLabel}>Kunden</div>
+                </div>
+                <div style={styles.statItem}>
+                  <div style={styles.statNumber}>{s.totalStamps}</div>
+                  <div style={styles.statLabel}>Stempel</div>
+                </div>
+                <div style={styles.statItem}>
+                  <div style={styles.statNumber}>{s.totalRewards}</div>
+                  <div style={styles.statLabel}>Belohnungen</div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
+      )}
 
       {cards.length === 0 ? (
         <div style={styles.empty}>
@@ -132,18 +152,14 @@ export default function Dashboard() {
 const styles = {
   title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
   subtitle: { fontSize: '14px', color: '#888', margin: '0 0 24px' },
-  statsRow: { display: 'flex', gap: '16px', marginBottom: '28px' },
-  statCard: {
-    background: 'white', borderRadius: '12px', padding: '20px',
-    textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', minWidth: '120px',
-  },
-  statNumber: { fontSize: '36px', fontWeight: '700', color: '#3C3489' },
-  statLabel: { fontSize: '13px', color: '#888', marginTop: '4px' },
-  empty: {
-    background: 'white', borderRadius: '12px', padding: '40px',
-    textAlign: 'center', color: '#888', fontSize: '14px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-  },
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginBottom: '28px' },
+  statCard: { background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+  statCardName: { fontSize: '15px', fontWeight: '600', color: '#1a1a1a', marginBottom: '16px' },
+  statRow: { display: 'flex', gap: '16px' },
+  statItem: { flex: 1, textAlign: 'center' },
+  statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
+  statLabel: { fontSize: '12px', color: '#888', marginTop: '2px' },
+  empty: { background: 'white', borderRadius: '12px', padding: '40px', textAlign: 'center', color: '#888', fontSize: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' },
   card: { background: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   cardTitle: { fontSize: '16px', fontWeight: '600', margin: '0 0 8px', color: '#1a1a1a' },
@@ -156,16 +172,8 @@ const styles = {
   qrContainer: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' },
   qrImage: { width: '200px', height: '200px', borderRadius: '8px' },
   btnRow: { display: 'flex', gap: '10px', marginBottom: '16px' },
-  btnPrimary: {
-    background: '#3C3489', color: 'white', border: 'none',
-    borderRadius: '10px', padding: '10px 16px', fontSize: '14px',
-    fontWeight: '600', cursor: 'pointer', flex: 1,
-  },
-  btnSecondary: {
-    background: '#f0eeff', color: '#3C3489', border: 'none',
-    borderRadius: '10px', padding: '10px 16px', fontSize: '14px',
-    fontWeight: '600', cursor: 'pointer', flex: 1,
-  },
+  btnPrimary: { background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 16px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', flex: 1 },
+  btnSecondary: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: '10px', padding: '10px 16px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', flex: 1 },
   cardInfo: { borderTop: '1px solid #f0f0f0', paddingTop: '16px' },
   cardInfoItem: { display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '13px' },
   cardInfoLabel: { color: '#888' },
