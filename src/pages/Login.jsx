@@ -9,35 +9,34 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-async function handleLogin(e) {
-  e.preventDefault()
-  setLoading(true)
-  setError('')
-  try {
-    const res = await api.post('/api/auth/login', { email, password })
-    localStorage.setItem('token', res.data.token)
-    localStorage.setItem('shop', JSON.stringify({ id: res.data.shopId, name: res.data.name }))
+  async function handleLogin(e) {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    try {
+      const res = await api.post('/api/auth/login', { email, password })
+      localStorage.setItem('token', res.data.token)
+      localStorage.setItem('shop', JSON.stringify({ id: res.data.shopId, name: res.data.name }))
 
-    // Staff-Token automatisch holen und speichern
-    const tokensRes = await api.get('/api/shop/staff-tokens', {
-      headers: { Authorization: `Bearer ${res.data.token}` }
-    })
-    if (tokensRes.data.length > 0) {
-      localStorage.setItem('staffToken', tokensRes.data[0].token)
+      const tokensRes = await api.get('/api/shop/staff-tokens', {
+        headers: { Authorization: `Bearer ${res.data.token}` }
+      })
+      if (tokensRes.data.length > 0) {
+        localStorage.setItem('staffToken', tokensRes.data[0].token)
+      }
+
+      navigate('/')
+    } catch (err) {
+      setError('E-Mail oder Passwort falsch')
+    } finally {
+      setLoading(false)
     }
-
-    navigate('/')
-  } catch (err) {
-    setError('E-Mail oder Passwort falsch')
-  } finally {
-    setLoading(false)
   }
-}
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <div style={styles.logo}>☕</div>
+        <div style={styles.logo}>SK</div>
         <h1 style={styles.title}>Stempelkarte</h1>
         <p style={styles.subtitle}>Laden-Login</p>
 
@@ -93,40 +92,26 @@ const styles = {
     boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
     textAlign: 'center',
   },
-  logo: { fontSize: '48px', marginBottom: '16px' },
+  logo: {
+    width: '56px', height: '56px', borderRadius: '14px', background: '#3C3489',
+    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: '18px', fontWeight: '700', margin: '0 auto 16px',
+  },
   title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
   subtitle: { fontSize: '14px', color: '#888', margin: '0 0 28px' },
   error: {
-    background: '#fff0f0',
-    color: '#d00',
-    padding: '10px 14px',
-    borderRadius: '8px',
-    fontSize: '14px',
-    marginBottom: '16px',
+    background: '#fff0f0', color: '#d00', padding: '10px 14px',
+    borderRadius: '8px', fontSize: '14px', marginBottom: '16px',
   },
   field: { marginBottom: '16px', textAlign: 'left' },
   label: { display: 'block', fontSize: '13px', fontWeight: '500', color: '#444', marginBottom: '6px' },
   input: {
-    width: '100%',
-    padding: '10px 14px',
-    borderRadius: '8px',
-    border: '1.5px solid #e0e0e0',
-    fontSize: '15px',
-    outline: 'none',
-    boxSizing: 'border-box',
+    width: '100%', padding: '10px 14px', borderRadius: '8px',
+    border: '1.5px solid #e0e0e0', fontSize: '15px', outline: 'none', boxSizing: 'border-box',
   },
   button: {
-    width: '100%',
-    padding: '12px',
-    background: '#3C3489',
-    color: 'white',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '15px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    marginTop: '8px',
+    width: '100%', padding: '12px', background: '#3C3489', color: 'white',
+    border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600',
+    cursor: 'pointer', marginTop: '8px',
   },
-  register: { fontSize: '13px', color: '#888', marginTop: '20px' },
-  link: { color: '#3C3489', textDecoration: 'none', fontWeight: '500' },
 }
