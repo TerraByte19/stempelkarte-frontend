@@ -150,6 +150,7 @@ export default function Admin() {
           <span>E-Mail</span>
           <span>Karten</span>
           <span>Kunden</span>
+          <span>Max Tokens</span>
           <span>Status</span>
           <span>Aktionen</span>
         </div>
@@ -159,6 +160,7 @@ export default function Admin() {
             <span style={styles.shopEmail}>{shop.email}</span>
             <span style={styles.cell}>{shop.cardCount}</span>
             <span style={styles.cell}>{shop.customerCount}</span>
+            <span style={styles.cell}>{shop.maxTokens}</span>
             <span style={{
               ...styles.status,
               background: shop.active ? '#e6f4ea' : '#fce8e6',
@@ -192,7 +194,7 @@ export default function Admin() {
 }
 
 function CreateShop({ onCreated }) {
-  const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', maxTokens: 3 })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -207,12 +209,12 @@ function CreateShop({ onCreated }) {
       const res = await fetch(`${BASE_URL}/api/admin/shops/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
-        body: JSON.stringify(form)
+        body: JSON.stringify({ ...form, maxTokens: parseInt(form.maxTokens) })
       })
       const data = await res.json()
       if (res.ok) {
-        setSuccess(`Laden "${data.name}" erstellt! E-Mail: ${data.email}`)
-        setForm({ name: '', email: '', password: '' })
+        setSuccess(`Laden "${data.name}" erstellt! Max Tokens: ${data.maxTokens}`)
+        setForm({ name: '', email: '', password: '', maxTokens: 3 })
         onCreated()
       } else {
         setError(data.error || 'Fehler beim Erstellen')
@@ -233,6 +235,10 @@ function CreateShop({ onCreated }) {
         <input style={createStyles.input} placeholder="Laden-Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
         <input style={createStyles.input} type="email" placeholder="E-Mail" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
         <input style={createStyles.input} type="password" placeholder="Passwort (min. 8 Zeichen)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <label style={{ fontSize: '13px', color: '#444', marginBottom: '6px' }}>Max. Staff-Tokens</label>
+          <input style={createStyles.input} type="number" min="1" max="20" value={form.maxTokens} onChange={e => setForm({ ...form, maxTokens: e.target.value })} required />
+        </div>
         <button style={createStyles.btn} type="submit" disabled={loading}>
           {loading ? 'Erstelle...' : 'Laden erstellen'}
         </button>
@@ -283,14 +289,7 @@ function ChangePassword({ shop, onDone }) {
       {error && <div style={createStyles.error}>{error}</div>}
       {success && <div style={createStyles.success}>{success}</div>}
       <form onSubmit={handleChange} style={createStyles.form}>
-        <input
-          style={createStyles.input}
-          type="password"
-          placeholder="Neues Passwort (min. 8 Zeichen)"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
+        <input style={createStyles.input} type="password" placeholder="Neues Passwort (min. 8 Zeichen)" value={password} onChange={e => setPassword(e.target.value)} required />
         <button style={createStyles.btn} type="submit" disabled={loading}>
           {loading ? 'Andert...' : 'Passwort andern'}
         </button>
@@ -330,8 +329,8 @@ const styles = {
   statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
   statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
   table: { background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'auto' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '600px' },
-  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '600px' },
+  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '700px' },
+  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '700px' },
   shopName: { fontSize: '14px', fontWeight: '600', color: '#1a1a1a' },
   shopEmail: { fontSize: '12px', color: '#666' },
   cell: { fontSize: '13px', color: '#666' },

@@ -75,6 +75,7 @@ export default function Layout() {
           </svg>
           Dashboard
         </NavLink>
+        <NavLink to="/scanner" style={navStyle}>Scanner</NavLink>
         <NavLink to="/karten" style={bottomNavStyle}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="2" y="5" width="20" height="14" rx="2"/>
