@@ -9,6 +9,8 @@ export default function Scanner() {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [cameraActive, setCameraActive] = useState(false)
+  const [pendingScan, setPendingScan] = useState(null) // QR-Payload wartet auf Anzahl
+  const [selectedCount, setSelectedCount] = useState(1)
   const inputRef = useRef()
   const html5QrRef = useRef(null)
   const navigate = useNavigate()
@@ -21,10 +23,49 @@ export default function Scanner() {
   useEffect(() => {
     if (!qrInput.trim()) return
     const timer = setTimeout(() => {
-      sendScan(qrInput.trim())
+      handleQrScanned(qrInput.trim())
     }, 100)
     return () => clearTimeout(timer)
   }, [qrInput])
+
+  function handleQrScanned(payload) {
+    setQrInput('')
+    setPendingScan(payload)
+    setSelectedCount(1)
+    if (cameraActive) stopCamera()
+  }
+
+  async function confirmScan() {
+    if (!pendingScan) return
+    setLoading(true)
+    setResult(null)
+
+    try {
+      const token = localStorage.getItem('staffToken')
+      const res = await fetch(`${API_URL}/api/scan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Staff-Token': token,
+        },
+        body: JSON.stringify({ qrPayload: pendingScan, count: selectedCount }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setResult({ success: true, data })
+      } else {
+        setResult({ success: false, message: 'Ungültiger QR-Code' })
+      }
+    } catch (e) {
+      setResult({ success: false, message: 'Server nicht erreichbar' })
+    } finally {
+      setLoading(false)
+      setPendingScan(null)
+      setTimeout(() => inputRef.current?.focus(), 200)
+    }
+  }
 
   async function startCamera() {
     try {
@@ -34,7 +75,7 @@ export default function Scanner() {
       await html5QrRef.current.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => { sendScan(decodedText) },
+        (decodedText) => { handleQrScanned(decodedText) },
         () => {}
       )
     } catch (e) {
@@ -54,39 +95,6 @@ export default function Scanner() {
     setCameraActive(false)
   }
 
-  async function sendScan(payload) {
-    if (loading) return
-    setLoading(true)
-    setResult(null)
-
-    try {
-      const token = localStorage.getItem('staffToken')
-      const res = await fetch(`${API_URL}/api/scan`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Staff-Token': token,
-        },
-        body: JSON.stringify({ qrPayload: payload }),
-      })
-
-      const data = await res.json()
-
-      if (res.ok) {
-        setResult({ success: true, data })
-        if (cameraActive) await stopCamera()
-      } else {
-        setResult({ success: false, message: 'Ungültiger QR-Code' })
-      }
-    } catch (e) {
-      setResult({ success: false, message: 'Server nicht erreichbar' })
-    } finally {
-      setLoading(false)
-      setQrInput('')
-      setTimeout(() => inputRef.current?.focus(), 200)
-    }
-  }
-
   return (
     <div>
       <div style={styles.header}>
@@ -98,8 +106,7 @@ export default function Scanner() {
         <h1 style={styles.title}>Scanner</h1>
       </div>
 
-      <p style={styles.subtitle}>Halte den Scanner an den QR-Code des Kunden</p>
-
+      {/* Ergebnis */}
       {result && (
         <div style={{
           ...styles.resultBox,
@@ -122,73 +129,143 @@ export default function Scanner() {
           {result.success && (
             <div style={styles.resultStamps}>
               {result.data.stamps}/{result.data.rewardThreshold} Stempel
+              {result.data.stampsAdded > 1 && (
+                <span style={styles.badge}>+{result.data.stampsAdded} Stempel</span>
+              )}
             </div>
           )}
           <button style={styles.btnNext} onClick={() => {
             setResult(null)
             inputRef.current?.focus()
           }}>
-            Nachster Kunde
+            Nächster Kunde
           </button>
         </div>
       )}
 
-      <input
-        ref={inputRef}
-        style={styles.hiddenInput}
-        type="text"
-        value={qrInput}
-        onChange={e => setQrInput(e.target.value)}
-        disabled={loading}
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck="false"
-      />
-
-      {cameraActive ? (
-        <div style={styles.cameraContainer}>
-          <div id="qr-reader" style={{ width: '100%' }} />
-          <button style={styles.btnStop} onClick={stopCamera}>Kamera stoppen</button>
-        </div>
-      ) : (
-        <div
-          style={{
-            ...styles.scanArea,
-            borderColor: loading ? '#3C3489' : '#e0e0e0',
-            background: loading ? '#f0eeff' : '#f8f8f8',
-          }}
-          onClick={() => inputRef.current?.focus()}
-        >
-          <div style={styles.scanIcon}>
-            {loading ? '...' : (
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3C3489" strokeWidth="1.5">
-                <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/>
-                <rect x="3" y="16" width="5" height="5"/><path d="M16 16h2v2h-2z"/>
-                <path d="M18 16h2v2h-2z"/><path d="M16 18h2v2h-2z"/><path d="M18 18h2v2h-2z"/>
-              </svg>
-            )}
+      {/* Anzahl-Popup nach Scan */}
+      {pendingScan && !result && (
+        <div style={styles.popup}>
+          <div style={styles.popupIcon}>✅</div>
+          <h2 style={styles.popupTitle}>QR-Code erkannt!</h2>
+          <p style={styles.popupSubtitle}>Wie viele Stempel soll der Kunde erhalten?</p>
+          <div style={styles.countButtons}>
+            {[1,2,3,4,5,6,7,8,9,10].map(n => (
+              <button
+                key={n}
+                style={{
+                  ...styles.countBtn,
+                  background: selectedCount === n ? '#3C3489' : '#f0f0f0',
+                  color: selectedCount === n ? 'white' : '#333',
+                }}
+                onClick={() => setSelectedCount(n)}
+              >
+                {n}
+              </button>
+            ))}
           </div>
-          <div style={styles.scanText}>{loading ? 'Verarbeite...' : 'Bereit zum Scannen'}</div>
-          <div style={styles.scanHint}>USB/Bluetooth Scanner einfach verwenden</div>
+          <button
+            style={styles.confirmBtn}
+            onClick={confirmScan}
+            disabled={loading}
+          >
+            {loading ? 'Verarbeite...' : `${selectedCount} Stempel vergeben`}
+          </button>
+          <button
+            style={styles.cancelBtn}
+            onClick={() => {
+              setPendingScan(null)
+              inputRef.current?.focus()
+            }}
+          >
+            Abbrechen
+          </button>
         </div>
       )}
 
-      {!cameraActive && !loading && (
-        <button style={styles.btnCamera} onClick={startCamera}>Kamera verwenden</button>
+      {/* Scanner Bereich */}
+      {!pendingScan && !result && (
+        <>
+          <p style={styles.subtitle}>Halte den Scanner an den QR-Code des Kunden</p>
+
+          <input
+            ref={inputRef}
+            style={styles.hiddenInput}
+            type="text"
+            value={qrInput}
+            onChange={e => setQrInput(e.target.value)}
+            disabled={loading}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+          />
+
+          {cameraActive ? (
+            <div style={styles.cameraContainer}>
+              <div id="qr-reader" style={{ width: '100%' }} />
+              <button style={styles.btnStop} onClick={stopCamera}>Kamera stoppen</button>
+            </div>
+          ) : (
+            <div
+              style={styles.scanArea}
+              onClick={() => inputRef.current?.focus()}
+            >
+              <div style={styles.scanIcon}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3C3489" strokeWidth="1.5">
+                  <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/>
+                  <rect x="3" y="16" width="5" height="5"/><path d="M16 16h2v2h-2z"/>
+                  <path d="M18 16h2v2h-2z"/><path d="M16 18h2v2h-2z"/><path d="M18 18h2v2h-2z"/>
+                </svg>
+              </div>
+              <div style={styles.scanText}>Bereit zum Scannen</div>
+              <div style={styles.scanHint}>USB/Bluetooth Scanner einfach verwenden</div>
+            </div>
+          )}
+
+          {!cameraActive && (
+            <button style={styles.btnCamera} onClick={startCamera}>Kamera verwenden</button>
+          )}
+        </>
       )}
     </div>
   )
 }
 
 const styles = {
-  header: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' },
+  header: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' },
   backBtn: {
     background: 'white', border: '1.5px solid #e0e0e0', borderRadius: '8px',
     padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   title: { fontSize: '24px', fontWeight: '700', color: '#1a1a1a' },
-  subtitle: { fontSize: '14px', color: '#888', margin: '0 0 24px' },
+  subtitle: { fontSize: '14px', color: '#888', margin: '0 0 20px' },
+  popup: {
+    background: 'white', borderRadius: '20px', padding: '32px 24px',
+    textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    border: '2px solid #e0e0e0', marginBottom: '20px',
+  },
+  popupIcon: { fontSize: '48px', marginBottom: '12px' },
+  popupTitle: { fontSize: '22px', fontWeight: '700', color: '#1a1a1a', margin: '0 0 6px' },
+  popupSubtitle: { fontSize: '14px', color: '#666', margin: '0 0 20px' },
+  countButtons: { display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '20px' },
+  countBtn: {
+    width: '52px', height: '52px', borderRadius: '12px', border: 'none',
+    fontSize: '18px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.15s',
+  },
+  confirmBtn: {
+    width: '100%', padding: '14px', background: '#3C3489', color: 'white',
+    border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: '700',
+    cursor: 'pointer', marginBottom: '10px',
+  },
+  cancelBtn: {
+    width: '100%', padding: '12px', background: 'transparent', color: '#999',
+    border: 'none', borderRadius: '12px', fontSize: '14px', cursor: 'pointer',
+  },
+  badge: {
+    background: '#3C3489', color: 'white', borderRadius: '20px',
+    padding: '2px 10px', fontSize: '12px', marginLeft: '8px',
+  },
   resultBox: { borderRadius: '12px', padding: '24px', marginBottom: '20px', textAlign: 'center', border: '2px solid' },
   resultIcon: { fontSize: '36px', marginBottom: '8px' },
   resultMessage: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '4px' },
@@ -200,7 +277,8 @@ const styles = {
   hiddenInput: { position: 'fixed', top: '-1000px', left: '-1000px', opacity: 0, width: '1px', height: '1px' },
   scanArea: {
     borderRadius: '16px', padding: '60px 24px', textAlign: 'center',
-    cursor: 'pointer', border: '2px dashed', transition: 'all 0.2s', marginBottom: '16px',
+    cursor: 'pointer', border: '2px dashed #e0e0e0', background: '#f8f8f8',
+    transition: 'all 0.2s', marginBottom: '16px',
   },
   scanIcon: { marginBottom: '16px', display: 'flex', justifyContent: 'center' },
   scanText: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' },
