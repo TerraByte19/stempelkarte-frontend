@@ -9,10 +9,11 @@ export default function Scanner() {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [cameraActive, setCameraActive] = useState(false)
-  const [pendingScan, setPendingScan] = useState(null) // QR-Payload wartet auf Anzahl
+  const [pendingScan, setPendingScan] = useState(null)
   const [selectedCount, setSelectedCount] = useState(1)
   const inputRef = useRef()
   const html5QrRef = useRef(null)
+  const scanningRef = useRef(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -22,13 +23,18 @@ export default function Scanner() {
 
   useEffect(() => {
     if (!qrInput.trim()) return
+    if (scanningRef.current) return
+
     const timer = setTimeout(() => {
+      scanningRef.current = true
       handleQrScanned(qrInput.trim())
-    }, 100)
+    }, 300)
+
     return () => clearTimeout(timer)
   }, [qrInput])
 
   function handleQrScanned(payload) {
+    if (!scanningRef.current) return
     setQrInput('')
     setPendingScan(payload)
     setSelectedCount(1)
@@ -63,7 +69,8 @@ export default function Scanner() {
     } finally {
       setLoading(false)
       setPendingScan(null)
-      setTimeout(() => inputRef.current?.focus(), 200)
+      scanningRef.current = false
+      setTimeout(() => inputRef.current?.focus(), 500)
     }
   }
 
@@ -75,7 +82,12 @@ export default function Scanner() {
       await html5QrRef.current.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => { handleQrScanned(decodedText) },
+        (decodedText) => {
+          if (!scanningRef.current) {
+            scanningRef.current = true
+            handleQrScanned(decodedText)
+          }
+        },
         () => {}
       )
     } catch (e) {
@@ -136,6 +148,7 @@ export default function Scanner() {
           )}
           <button style={styles.btnNext} onClick={() => {
             setResult(null)
+            scanningRef.current = false
             inputRef.current?.focus()
           }}>
             Nächster Kunde
@@ -175,6 +188,7 @@ export default function Scanner() {
             style={styles.cancelBtn}
             onClick={() => {
               setPendingScan(null)
+              scanningRef.current = false
               inputRef.current?.focus()
             }}
           >
