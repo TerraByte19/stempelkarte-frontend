@@ -61,16 +61,28 @@ export default function Scanner() {
 
       if (res.ok) {
         setResult({ success: true, data })
+        setTimeout(() => {
+          setResult(null)
+          scanningRef.current = false
+          startCamera()
+        }, 2000)
       } else {
         setResult({ success: false, message: 'Ungültiger QR-Code' })
+        setTimeout(() => {
+          setResult(null)
+          scanningRef.current = false
+          startCamera()
+        }, 2000)
       }
     } catch (e) {
       setResult({ success: false, message: 'Server nicht erreichbar' })
+      setTimeout(() => {
+        setResult(null)
+        scanningRef.current = false
+      }, 2000)
     } finally {
       setLoading(false)
       setPendingScan(null)
-      scanningRef.current = false
-      setTimeout(() => inputRef.current?.focus(), 500)
     }
   }
 
@@ -146,12 +158,13 @@ export default function Scanner() {
               )}
             </div>
           )}
+          <p style={styles.autoClose}>Kamera öffnet automatisch in 2 Sekunden...</p>
           <button style={styles.btnNext} onClick={() => {
             setResult(null)
             scanningRef.current = false
-            inputRef.current?.focus()
+            startCamera()
           }}>
-            Nächster Kunde
+            Jetzt scannen
           </button>
         </div>
       )}
@@ -189,7 +202,7 @@ export default function Scanner() {
             onClick={() => {
               setPendingScan(null)
               scanningRef.current = false
-              inputRef.current?.focus()
+              startCamera()
             }}
           >
             Abbrechen
@@ -280,10 +293,11 @@ const styles = {
     background: '#3C3489', color: 'white', borderRadius: '20px',
     padding: '2px 10px', fontSize: '12px', marginLeft: '8px',
   },
+  autoClose: { fontSize: '12px', color: '#aaa', margin: '0 0 12px' },
   resultBox: { borderRadius: '12px', padding: '24px', marginBottom: '20px', textAlign: 'center', border: '2px solid' },
   resultIcon: { fontSize: '36px', marginBottom: '8px' },
   resultMessage: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '4px' },
-  resultStamps: { fontSize: '14px', color: '#666', marginBottom: '16px' },
+  resultStamps: { fontSize: '14px', color: '#666', marginBottom: '8px' },
   btnNext: {
     background: '#3C3489', color: 'white', border: 'none',
     borderRadius: '10px', padding: '10px 24px', fontSize: '14px', fontWeight: '600', cursor: 'pointer',
