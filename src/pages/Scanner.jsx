@@ -33,12 +33,11 @@ export default function Scanner() {
     return () => clearTimeout(timer)
   }, [qrInput])
 
-  function handleQrScanned(payload) {
-    if (!scanningRef.current) return
+  async function handleQrScanned(payload) {
     setQrInput('')
+    await stopCamera()
     setPendingScan(payload)
     setSelectedCount(1)
-    if (cameraActive) stopCamera()
   }
 
   async function confirmScan() {
@@ -61,25 +60,11 @@ export default function Scanner() {
 
       if (res.ok) {
         setResult({ success: true, data })
-        setTimeout(() => {
-          setResult(null)
-          scanningRef.current = false
-          startCamera()
-        }, 2000)
       } else {
         setResult({ success: false, message: 'Ungültiger QR-Code' })
-        setTimeout(() => {
-          setResult(null)
-          scanningRef.current = false
-          startCamera()
-        }, 2000)
       }
     } catch (e) {
       setResult({ success: false, message: 'Server nicht erreichbar' })
-      setTimeout(() => {
-        setResult(null)
-        scanningRef.current = false
-      }, 2000)
     } finally {
       setLoading(false)
       setPendingScan(null)
@@ -88,8 +73,6 @@ export default function Scanner() {
 
   async function startCamera() {
     try {
-      setCameraActive(true)
-      await new Promise(resolve => setTimeout(resolve, 100))
       html5QrRef.current = new Html5Qrcode('qr-reader')
       await html5QrRef.current.start(
         { facingMode: 'environment' },
@@ -102,10 +85,10 @@ export default function Scanner() {
         },
         () => {}
       )
+      setCameraActive(true)
     } catch (e) {
       console.error(e)
       setCameraActive(false)
-      alert('Kamera konnte nicht gestartet werden: ' + e.message)
     }
   }
 
@@ -113,10 +96,25 @@ export default function Scanner() {
     if (html5QrRef.current) {
       try {
         await html5QrRef.current.stop()
+        html5QrRef.current.clear()
         html5QrRef.current = null
-      } catch (e) {}
+      } catch (e) {
+        html5QrRef.current = null
+      }
     }
     setCameraActive(false)
+  }
+
+  function nextCustomer() {
+    setResult(null)
+    scanningRef.current = false
+    startCamera()
+  }
+
+  function cancelScan() {
+    setPendingScan(null)
+    scanningRef.current = false
+    startCamera()
   }
 
   return (
@@ -158,13 +156,8 @@ export default function Scanner() {
               )}
             </div>
           )}
-          <p style={styles.autoClose}>Kamera öffnet automatisch in 2 Sekunden...</p>
-          <button style={styles.btnNext} onClick={() => {
-            setResult(null)
-            scanningRef.current = false
-            startCamera()
-          }}>
-            Jetzt scannen
+          <button style={styles.btnNext} onClick={nextCustomer}>
+            Nächster Kunde
           </button>
         </div>
       )}
@@ -197,14 +190,7 @@ export default function Scanner() {
           >
             {loading ? 'Verarbeite...' : `${selectedCount} Stempel vergeben`}
           </button>
-          <button
-            style={styles.cancelBtn}
-            onClick={() => {
-              setPendingScan(null)
-              scanningRef.current = false
-              startCamera()
-            }}
-          >
+          <button style={styles.cancelBtn} onClick={cancelScan}>
             Abbrechen
           </button>
         </div>
@@ -293,11 +279,10 @@ const styles = {
     background: '#3C3489', color: 'white', borderRadius: '20px',
     padding: '2px 10px', fontSize: '12px', marginLeft: '8px',
   },
-  autoClose: { fontSize: '12px', color: '#aaa', margin: '0 0 12px' },
   resultBox: { borderRadius: '12px', padding: '24px', marginBottom: '20px', textAlign: 'center', border: '2px solid' },
   resultIcon: { fontSize: '36px', marginBottom: '8px' },
   resultMessage: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '4px' },
-  resultStamps: { fontSize: '14px', color: '#666', marginBottom: '8px' },
+  resultStamps: { fontSize: '14px', color: '#666', marginBottom: '16px' },
   btnNext: {
     background: '#3C3489', color: 'white', border: 'none',
     borderRadius: '10px', padding: '10px 24px', fontSize: '14px', fontWeight: '600', cursor: 'pointer',
