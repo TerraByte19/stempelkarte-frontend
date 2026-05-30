@@ -128,6 +128,17 @@ export default function Scanner() {
         <h1 style={styles.title}>Scanner</h1>
       </div>
 
+      {/* qr-reader immer im DOM */}
+      <div
+        id="qr-reader"
+        style={{ display: cameraActive ? 'block' : 'none', width: '100%', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px' }}
+      />
+
+      {/* Kamera stoppen Button */}
+      {cameraActive && (
+        <button style={styles.btnStop} onClick={stopCamera}>Kamera stoppen</button>
+      )}
+
       {/* Ergebnis */}
       {result && (
         <div style={{
@@ -197,7 +208,7 @@ export default function Scanner() {
       )}
 
       {/* Scanner Bereich */}
-      {!pendingScan && !result && (
+      {!pendingScan && !result && !cameraActive && (
         <>
           <p style={styles.subtitle}>Halte den Scanner an den QR-Code des Kunden</p>
 
@@ -214,31 +225,24 @@ export default function Scanner() {
             spellCheck="false"
           />
 
-          {cameraActive ? (
-            <div style={styles.cameraContainer}>
-              <div id="qr-reader" style={{ width: '100%' }} />
-              <button style={styles.btnStop} onClick={stopCamera}>Kamera stoppen</button>
+          <div
+            style={styles.scanArea}
+            onClick={() => inputRef.current?.focus()}
+          >
+            <div style={styles.scanIcon}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3C3489" strokeWidth="1.5">
+                <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/>
+                <rect x="3" y="16" width="5" height="5"/><path d="M16 16h2v2h-2z"/>
+                <path d="M18 16h2v2h-2z"/><path d="M16 18h2v2h-2z"/><path d="M18 18h2v2h-2z"/>
+              </svg>
             </div>
-          ) : (
-            <div
-              style={styles.scanArea}
-              onClick={() => inputRef.current?.focus()}
-            >
-              <div style={styles.scanIcon}>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3C3489" strokeWidth="1.5">
-                  <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/>
-                  <rect x="3" y="16" width="5" height="5"/><path d="M16 16h2v2h-2z"/>
-                  <path d="M18 16h2v2h-2z"/><path d="M16 18h2v2h-2z"/><path d="M18 18h2v2h-2z"/>
-                </svg>
-              </div>
-              <div style={styles.scanText}>Bereit zum Scannen</div>
-              <div style={styles.scanHint}>USB/Bluetooth Scanner einfach verwenden</div>
-            </div>
-          )}
+            <div style={styles.scanText}>Bereit zum Scannen</div>
+            <div style={styles.scanHint}>USB/Bluetooth Scanner einfach verwenden</div>
+          </div>
 
-          {!cameraActive && (
-            <button style={styles.btnCamera} onClick={startCamera}>Kamera verwenden</button>
-          )}
+          <button style={styles.btnCamera} onClick={startCamera}>
+            Kamera verwenden
+          </button>
         </>
       )}
     </div>
@@ -296,7 +300,6 @@ const styles = {
   scanIcon: { marginBottom: '16px', display: 'flex', justifyContent: 'center' },
   scanText: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' },
   scanHint: { fontSize: '13px', color: '#aaa' },
-  cameraContainer: { borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', background: '#000' },
-  btnStop: { width: '100%', padding: '12px', background: '#ff4444', color: 'white', border: 'none', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
+  btnStop: { width: '100%', padding: '12px', background: '#ff4444', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '16px' },
   btnCamera: { width: '100%', padding: '14px', background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
 }
