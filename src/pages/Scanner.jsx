@@ -72,6 +72,9 @@ export default function Scanner() {
   }
 
   async function startCamera() {
+    setCameraActive(true)
+    // Warten bis der qr-reader div sichtbar gerendert ist
+    await new Promise(resolve => setTimeout(resolve, 300))
     try {
       html5QrRef.current = new Html5Qrcode('qr-reader')
       await html5QrRef.current.start(
@@ -85,7 +88,6 @@ export default function Scanner() {
         },
         () => {}
       )
-      setCameraActive(true)
     } catch (e) {
       console.error(e)
       setCameraActive(false)
@@ -128,13 +130,12 @@ export default function Scanner() {
         <h1 style={styles.title}>Scanner</h1>
       </div>
 
-      {/* qr-reader immer im DOM */}
+      {/* qr-reader IMMER im DOM */}
       <div
         id="qr-reader"
         style={{ display: cameraActive ? 'block' : 'none', width: '100%', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px' }}
       />
 
-      {/* Kamera stoppen Button */}
       {cameraActive && (
         <button style={styles.btnStop} onClick={stopCamera}>Kamera stoppen</button>
       )}
