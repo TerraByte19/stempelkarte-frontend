@@ -18,14 +18,18 @@ export default function Login() {
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('shop', JSON.stringify({ id: res.data.shopId, name: res.data.name }))
 
-      const tokensRes = await api.get('/api/shop/staff-tokens', {
-        headers: { Authorization: `Bearer ${res.data.token}` }
-      })
-      if (tokensRes.data.length > 0) {
-        localStorage.setItem('staffToken', tokensRes.data[0].token)
+      try {
+        const tokensRes = await api.get('/api/shop/staff-tokens', {
+          headers: { Authorization: `Bearer ${res.data.token}` }
+        })
+        if (tokensRes.data.length > 0) {
+          localStorage.setItem('staffToken', tokensRes.data[0].token)
+        }
+      } catch (e) {
+        // Staff-Token Fehler nicht kritisch
       }
 
-      navigate('/')
+      window.location.href = '/'
     } catch (err) {
       setError('E-Mail oder Passwort falsch')
     } finally {
@@ -66,7 +70,7 @@ export default function Login() {
             />
           </div>
           <button style={styles.button} type="submit" disabled={loading}>
-            {loading ? 'Einloggen...' : 'Einloggen'}
+            {loading ? 'Anmelden...' : 'Anmelden'}
           </button>
         </form>
       </div>
