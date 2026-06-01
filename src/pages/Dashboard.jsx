@@ -1,60 +1,36 @@
 import { useEffect, useState } from 'react'
+import { useLang } from '../LangContext'
 import api from '../api'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
 export default function Dashboard() {
+  const { t } = useLang()
   const [cards, setCards] = useState([])
   const [selectedCard, setSelectedCard] = useState(null)
   const [stats, setStats] = useState([])
   const shop = JSON.parse(localStorage.getItem('shop') || '{}')
-
-  const printStyle = `
-    @media print {
-      body * { visibility: hidden; }
-      #print-qr, #print-qr * { visibility: visible; }
-      #print-qr {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-      }
-    }
-  `
+  const printStyle = `@media print { body * { visibility: hidden; } #print-qr, #print-qr * { visibility: visible; } #print-qr { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; } }`
 
   useEffect(() => {
-    api.get('/api/shop/cards').then(res => {
-      setCards(res.data)
-      if (res.data.length > 0) setSelectedCard(res.data[0])
-    })
+    api.get('/api/shop/cards').then(res => { setCards(res.data); if (res.data.length > 0) setSelectedCard(res.data[0]) })
     api.get('/api/shop/stats').then(res => setStats(res.data))
   }, [])
 
   return (
     <div>
-      <h1 style={styles.title}>Willkommen, {shop.name}!</h1>
-      <p style={styles.subtitle}>Hier ist deine Übersicht</p>
+      <h1 style={styles.title}>{t('dash_welcome')}, {shop.name}!</h1>
+      <p style={styles.subtitle}>{t('dash_subtitle')}</p>
 
-      {/* Statistiken */}
       {stats.length > 0 && (
         <div style={styles.statsGrid}>
           {stats.map(s => (
             <div key={s.cardId} style={styles.statCard}>
               <div style={styles.statCardName}>{s.cardName}</div>
               <div style={styles.statRow}>
-                <div style={styles.statItem}>
-                  <div style={styles.statNumber}>{s.customerCount}</div>
-                  <div style={styles.statLabel}>Kunden</div>
-                </div>
-                <div style={styles.statItem}>
-                  <div style={styles.statNumber}>{s.totalStamps}</div>
-                  <div style={styles.statLabel}>Stempel</div>
-                </div>
-                <div style={styles.statItem}>
-                  <div style={styles.statNumber}>{s.totalRewards}</div>
-                  <div style={styles.statLabel}>Belohnungen</div>
-                </div>
+                <div style={styles.statItem}><div style={styles.statNumber}>{s.customerCount}</div><div style={styles.statLabel}>{t('dash_stat_customers')}</div></div>
+                <div style={styles.statItem}><div style={styles.statNumber}>{s.totalStamps}</div><div style={styles.statLabel}>{t('dash_stat_stamps')}</div></div>
+                <div style={styles.statItem}><div style={styles.statNumber}>{s.totalRewards}</div><div style={styles.statLabel}>{t('dash_stat_rewards')}</div></div>
               </div>
             </div>
           ))}
@@ -62,28 +38,16 @@ export default function Dashboard() {
       )}
 
       {cards.length === 0 ? (
-        <div style={styles.empty}>
-          Noch keine Karten —{' '}
-          <a href="/karten" style={{ color: '#3C3489' }}>Jetzt erstellen</a>
-        </div>
+        <div style={styles.empty}>{t('dash_no_cards')} <a href="/karten" style={{ color: '#3C3489' }}>{t('dash_create_now')}</a></div>
       ) : (
         <div style={styles.grid}>
           <div style={styles.card}>
-            <h2 style={styles.cardTitle}>Karte auswählen</h2>
+            <h2 style={styles.cardTitle}>{t('dash_select_card')}</h2>
             <div style={styles.cardList}>
               {cards.map(card => (
-                <div
-                  key={card.id}
-                  style={{
-                    ...styles.cardItem,
-                    ...(selectedCard?.id === card.id ? styles.cardItemActive : {})
-                  }}
-                  onClick={() => setSelectedCard(card)}
-                >
+                <div key={card.id} style={{ ...styles.cardItem, ...(selectedCard?.id === card.id ? styles.cardItemActive : {}) }} onClick={() => setSelectedCard(card)}>
                   <div style={styles.cardItemName}>{card.name}</div>
-                  <div style={styles.cardItemMeta}>
-                    {card.rewardThreshold} Stempel → {card.rewardText}
-                  </div>
+                  <div style={styles.cardItemMeta}>{card.rewardThreshold} {t('dash_stat_stamps')} → {card.rewardText}</div>
                 </div>
               ))}
             </div>
@@ -91,55 +55,23 @@ export default function Dashboard() {
 
           {selectedCard && (
             <div style={styles.card}>
-              <h2 style={styles.cardTitle}>QR-Code für Kunden</h2>
-              <p style={styles.hint}>
-                Drucke diesen QR-Code aus oder zeige ihn auf einem Tablet.
-              </p>
-
+              <h2 style={styles.cardTitle}>{t('dash_qr_title')}</h2>
+              <p style={styles.hint}>{t('dash_qr_hint')}</p>
               <div style={styles.qrContainer}>
                 <style>{printStyle}</style>
                 <div id="print-qr" style={{ textAlign: 'center' }}>
-                  <img
-                    src={`${baseUrl}/api/customer/card/${selectedCard.id}/qr-shop`}
-                    alt="QR Code"
-                    style={styles.qrImage}
-                  />
-                  <div style={{ marginTop: '12px', fontSize: '14px', color: '#333' }}>
-                    {selectedCard.name} — {shop.name}
-                  </div>
+                  <img src={`${baseUrl}/api/customer/card/${selectedCard.id}/qr-shop`} alt="QR Code" style={styles.qrImage} />
+                  <div style={{ marginTop: '12px', fontSize: '14px', color: '#333' }}>{selectedCard.name} — {shop.name}</div>
                 </div>
               </div>
-
               <div style={styles.btnRow}>
-                <button
-                  style={styles.btnPrimary}
-                  onClick={() => {
-                    const link = document.createElement('a')
-                    link.href = `${baseUrl}/api/customer/card/${selectedCard.id}/qr-shop`
-                    link.download = `qr-${selectedCard.name}.png`
-                    link.click()
-                  }}
-                >
-                  QR-Code herunterladen
-                </button>
-                <button style={styles.btnSecondary} onClick={() => window.print()}>
-                  Drucken
-                </button>
+                <button style={styles.btnPrimary} onClick={() => { const l = document.createElement('a'); l.href = `${baseUrl}/api/customer/card/${selectedCard.id}/qr-shop`; l.download = `qr-${selectedCard.name}.png`; l.click() }}>{t('dash_download_qr')}</button>
+                <button style={styles.btnSecondary} onClick={() => window.print()}>{t('dash_print')}</button>
               </div>
-
               <div style={styles.cardInfo}>
-                <div style={styles.cardInfoItem}>
-                  <span style={styles.cardInfoLabel}>Karten-ID:</span>
-                  <span style={styles.cardInfoValue}>{selectedCard.id}</span>
-                </div>
-                <div style={styles.cardInfoItem}>
-                  <span style={styles.cardInfoLabel}>Stempel:</span>
-                  <span style={styles.cardInfoValue}>{selectedCard.rewardThreshold}</span>
-                </div>
-                <div style={styles.cardInfoItem}>
-                  <span style={styles.cardInfoLabel}>Belohnung:</span>
-                  <span style={styles.cardInfoValue}>{selectedCard.rewardText}</span>
-                </div>
+                <div style={styles.cardInfoItem}><span style={styles.cardInfoLabel}>{t('dash_card_id')}</span><span style={styles.cardInfoValue}>{selectedCard.id}</span></div>
+                <div style={styles.cardInfoItem}><span style={styles.cardInfoLabel}>{t('dash_stamps_label')}</span><span style={styles.cardInfoValue}>{selectedCard.rewardThreshold}</span></div>
+                <div style={styles.cardInfoItem}><span style={styles.cardInfoLabel}>{t('dash_reward_label')}</span><span style={styles.cardInfoValue}>{selectedCard.rewardText}</span></div>
               </div>
             </div>
           )}
