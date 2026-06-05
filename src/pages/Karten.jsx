@@ -119,7 +119,7 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
                 <div><div style={{fontSize:7,fontWeight:700,letterSpacing:0.4,color:d.colorLabel,marginBottom:1}}>BELOHNUNG</div><div style={{fontSize:9,fontWeight:600}}>{rewardText||'—'}</div></div>
                 <div><div style={{fontSize:7,fontWeight:700,letterSpacing:0.4,color:d.colorLabel,marginBottom:1}}>KARTE</div><div style={{fontSize:9,fontWeight:600}}>{cardName||'—'}</div></div>
               </div>
-              {d.heroImageUrl && <img src={d.heroImageUrl} alt="" style={{width:'100%',height:40,objectFit:'cover',display:'block'}}/>}
+
             </>
           )}
           <div style={{display:'flex',justifyContent:'center',padding:7,background:'rgba(255,255,255,0.1)'}}><MockQR size={52}/></div>
