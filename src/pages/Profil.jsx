@@ -1,213 +1,103 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import api from '../api'
 
 export default function Profil() {
   const [shop, setShop] = useState(null)
+  const [stats, setStats] = useState([])
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [heroUrl, setHeroUrl] = useState(null)
-  const [form, setForm] = useState({
-    name: '',
-    colorBackground: '',
-    colorForeground: '',
-    colorLabel: '',
-  })
-  const fileRef = useRef()
-  const heroRef = useRef()
+  const [name, setName] = useState('')
 
   useEffect(() => {
     api.get('/api/shop/me').then(res => {
       setShop(res.data)
-      setHeroUrl(res.data.heroImageUrl || null)
-      setForm({
-        name: res.data.name,
-        colorBackground: res.data.colorBackground,
-        colorForeground: res.data.colorForeground,
-        colorLabel: res.data.colorLabel,
-      })
+      setName(res.data.name)
     })
+    api.get('/api/shop/stats').then(res => setStats(res.data)).catch(() => {})
   }, [])
 
-  async function saveProfile(e) {
+  async function saveName(e) {
     e.preventDefault()
     setLoading(true)
     try {
-      await api.put('/api/shop/me', form)
+      await api.put('/api/shop/me', { name })
       const shopLocal = JSON.parse(localStorage.getItem('shop') || '{}')
-      localStorage.setItem('shop', JSON.stringify({ ...shopLocal, name: form.name }))
+      localStorage.setItem('shop', JSON.stringify({ ...shopLocal, name }))
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
-    } catch (err) {
+    } catch {
       alert('Fehler beim Speichern')
     } finally {
       setLoading(false)
     }
   }
 
-  async function uploadLogo(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = async () => {
-      const base64 = reader.result.split(',')[1]
-      const extension = file.name.split('.').pop().toLowerCase()
-      try {
-        const res = await api.post('/api/shop/logo', { base64, extension })
-        setShop(prev => ({ ...prev, logoUrl: res.data.logoUrl }))
-        alert('Logo erfolgreich hochgeladen!')
-      } catch (err) {
-        alert('Fehler beim Logo-Upload')
-      }
-    }
-    reader.readAsDataURL(file)
-  }
+  if (!shop) return <div style={s.loading}>Lädt…</div>
 
-  async function uploadHero(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = async () => {
-      const base64 = reader.result.split(',')[1]
-      const extension = file.name.split('.').pop().toLowerCase()
-      try {
-        const res = await api.post('/api/shop/hero', { base64, extension })
-        setHeroUrl(res.data.heroImageUrl)
-        alert('Banner erfolgreich hochgeladen!')
-      } catch (err) {
-        alert('Fehler beim Banner-Upload')
-      }
-    }
-    reader.readAsDataURL(file)
-  }
-
-  if (!shop) return <div style={styles.loading}>Ladt...</div>
+  // Gesamt-Statistiken berechnen
+  const totalCustomers = stats.reduce((sum, x) => sum + (x.customerCount || 0), 0)
+  const totalStamps = stats.reduce((sum, x) => sum + (x.totalStamps || 0), 0)
+  const totalRewards = stats.reduce((sum, x) => sum + (x.totalRewards || 0), 0)
 
   return (
-    <div style={styles.page}>
-      <h1 style={styles.title}>Profil</h1>
-      <p style={styles.subtitle}>Passe dein Laden-Profil an</p>
+    <div style={s.page}>
+      <h1 style={s.title}>Profil & Statistiken</h1>
+      <p style={s.subtitle}>{shop.name}</p>
 
-      {/* Google Wallet Vorschau */}
-      <div style={styles.card}>
-        <h2 style={styles.cardTitle}>Google Wallet Vorschau</h2>
-        <div style={{ ...styles.walletCard, background: form.colorBackground, color: form.colorForeground }}>
-          {/* Header */}
-          <div style={styles.walletHeader}>
-            <div style={styles.walletLogo}>
-              {shop.logoUrl
-                ? <img src={shop.logoUrl} alt="Logo" style={styles.walletLogoImg} />
-                : <span style={{ color: '#3C3489', fontWeight: 700 }}>SK</span>}
-            </div>
-            <div style={styles.walletShopName}>{form.name || 'Mein Laden'}</div>
-          </div>
-
-          {/* Datenfelder */}
-          <div style={styles.walletFields}>
-            <div style={styles.walletField}>
-              <div style={{ ...styles.walletFieldLabel, color: form.colorLabel }}>STEMPEL</div>
-              <div style={styles.walletFieldValue}>3/10</div>
-            </div>
-            <div style={styles.walletField}>
-              <div style={{ ...styles.walletFieldLabel, color: form.colorLabel }}>BELOHNUNG</div>
-              <div style={styles.walletFieldValue}>Gratis ☕</div>
-            </div>
-          </div>
-
-          {/* Hero / Banner */}
-          {heroUrl && (
-            <img src={heroUrl} alt="Banner" style={styles.walletHero} />
-          )}
-
-          {/* QR */}
-          <div style={styles.walletQrWrap}>
-            <div style={styles.walletQr}>
-              <svg width="80" height="80" viewBox="0 0 80 80">
-                <rect width="80" height="80" fill="white"/>
-                <rect x="8" y="8" width="20" height="20" fill="black"/>
-                <rect x="14" y="14" width="8" height="8" fill="white"/>
-                <rect x="52" y="8" width="20" height="20" fill="black"/>
-                <rect x="58" y="14" width="8" height="8" fill="white"/>
-                <rect x="8" y="52" width="20" height="20" fill="black"/>
-                <rect x="14" y="58" width="8" height="8" fill="white"/>
-                <rect x="36" y="8" width="6" height="6" fill="black"/>
-                <rect x="36" y="20" width="6" height="6" fill="black"/>
-                <rect x="36" y="36" width="6" height="6" fill="black"/>
-                <rect x="48" y="48" width="6" height="6" fill="black"/>
-                <rect x="60" y="60" width="6" height="6" fill="black"/>
-                <rect x="48" y="60" width="6" height="6" fill="black"/>
-                <rect x="60" y="48" width="6" height="6" fill="black"/>
-              </svg>
-            </div>
-          </div>
+      {/* ── Gesamt-Statistiken ── */}
+      <div style={s.statGrid}>
+        <div style={s.statCard}>
+          <div style={s.statNum}>{stats.length}</div>
+          <div style={s.statLabel}>Karten</div>
         </div>
-        <p style={styles.previewHint}>So sieht die Karte ungefähr in Google Wallet aus.</p>
-      </div>
-
-      {/* Logo */}
-      <div style={styles.card}>
-        <h2 style={styles.cardTitle}>Logo</h2>
-        <div style={styles.logoRow}>
-          <div style={styles.logoPreview}>
-            {shop.logoUrl
-              ? <img src={shop.logoUrl} alt="Logo" style={styles.logoImg} />
-              : <div style={styles.logoPlaceholder}>SK</div>
-            }
-          </div>
-          <div style={styles.logoInfo}>
-          <p style={styles.logoHint}>PNG mit transparentem Hintergrund, empfohlen 480x150px oder schmaler</p>
-            <input type="file" accept="image/*" ref={fileRef} onChange={uploadLogo} style={{ display: 'none' }} />
-            <button style={styles.btnSecondary} onClick={() => fileRef.current.click()}>Logo hochladen</button>
-          </div>
+        <div style={s.statCard}>
+          <div style={s.statNum}>{totalCustomers}</div>
+          <div style={s.statLabel}>Kunden</div>
+        </div>
+        <div style={s.statCard}>
+          <div style={s.statNum}>{totalStamps}</div>
+          <div style={s.statLabel}>Stempel vergeben</div>
+        </div>
+        <div style={s.statCard}>
+          <div style={s.statNum}>{totalRewards}</div>
+          <div style={s.statLabel}>Belohnungen eingelöst</div>
         </div>
       </div>
 
-      {/* Banner / Hero */}
-      <div style={styles.card}>
-        <h2 style={styles.cardTitle}>Banner (Hero-Image)</h2>
-        <div style={styles.heroBox}>
-          {heroUrl
-            ? <img src={heroUrl} alt="Banner" style={styles.heroImg} />
-            : <div style={styles.heroPlaceholder}>Kein Banner</div>}
+      {/* ── Statistik pro Karte ── */}
+      {stats.length > 0 && (
+        <div style={s.card}>
+          <h2 style={s.cardTitle}>Statistik pro Karte</h2>
+          <div style={s.table}>
+            <div style={s.tableHead}>
+              <span>Karte</span>
+              <span style={s.center}>Kunden</span>
+              <span style={s.center}>Stempel</span>
+              <span style={s.center}>Belohnungen</span>
+            </div>
+            {stats.map(x => (
+              <div key={x.cardId} style={s.tableRow}>
+                <span style={s.cardNameCell}>{x.cardName}</span>
+                <span style={s.center}>{x.customerCount}</span>
+                <span style={s.center}>{x.totalStamps}</span>
+                <span style={s.center}>{x.totalRewards}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <p style={styles.logoHint}>PNG oder JPG, empfohlen 1125x369px (3:1 Format) – kein Text im Bild</p>
-        <input type="file" accept="image/*" ref={heroRef} onChange={uploadHero} style={{ display: 'none' }} />
-        <button style={styles.btnSecondary} onClick={() => heroRef.current.click()}>Banner hochladen</button>
-      </div>
+      )}
 
-      {/* Profil bearbeiten */}
-      <div style={styles.card}>
-        <h2 style={styles.cardTitle}>Farben & Name</h2>
-        {saved && <div style={styles.success}>Gespeichert!</div>}
-        <form onSubmit={saveProfile}>
-          <div style={styles.field}>
-            <label style={styles.label}>Laden-Name</label>
-            <input style={styles.input} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
-          </div>
-          <div style={styles.field}>
-            <label style={styles.label}>Hintergrundfarbe</label>
-            <div style={styles.colorRow}>
-              <input type="color" value={form.colorBackground} onChange={e => setForm({ ...form, colorBackground: e.target.value })} style={styles.colorPicker} />
-              <input style={{ ...styles.input, flex: 1 }} value={form.colorBackground} onChange={e => setForm({ ...form, colorBackground: e.target.value })} placeholder="#3C3489" />
-            </div>
-          </div>
-          <div style={styles.field}>
-            <label style={styles.label}>Textfarbe</label>
-            <div style={styles.colorRow}>
-              <input type="color" value={form.colorForeground} onChange={e => setForm({ ...form, colorForeground: e.target.value })} style={styles.colorPicker} />
-              <input style={{ ...styles.input, flex: 1 }} value={form.colorForeground} onChange={e => setForm({ ...form, colorForeground: e.target.value })} placeholder="#FFFFFF" />
-            </div>
-          </div>
-          <div style={styles.field}>
-            <label style={styles.label}>Label-Farbe</label>
-            <div style={styles.colorRow}>
-              <input type="color" value={form.colorLabel} onChange={e => setForm({ ...form, colorLabel: e.target.value })} style={styles.colorPicker} />
-              <input style={{ ...styles.input, flex: 1 }} value={form.colorLabel} onChange={e => setForm({ ...form, colorLabel: e.target.value })} placeholder="#FAC875" />
-            </div>
-          </div>
-          <button style={styles.btnPrimary} type="submit" disabled={loading}>
-            {loading ? 'Speichert...' : 'Speichern'}
+      {/* ── Laden-Name ── */}
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>Laden-Name</h2>
+        {saved && <div style={s.success}>✓ Gespeichert!</div>}
+        <form onSubmit={saveName}>
+          <input style={s.input} value={name} onChange={e => setName(e.target.value)} required />
+          <button style={s.btnPrimary} type="submit" disabled={loading}>
+            {loading ? 'Speichert…' : 'Speichern'}
           </button>
         </form>
+        <p style={s.hint}>💡 Logo, Farben & Banner stellst du jetzt direkt bei jeder Karte ein.</p>
       </div>
 
       <StaffTokens />
@@ -239,97 +129,68 @@ function StaffTokens() {
   }
 
   return (
-    <div style={styles.card}>
-      <h2 style={styles.cardTitle}>Staff-Tokens</h2>
-      <p style={styles.hint}>Mitarbeiter brauchen einen Token um Stempel zu vergeben.</p>
+    <div style={s.card}>
+      <h2 style={s.cardTitle}>Staff-Tokens</h2>
+      <p style={s.hint}>Mitarbeiter brauchen einen Token um Stempel zu vergeben.</p>
 
       {newToken && (
-        <div style={styles.tokenBox}>
-          <div style={styles.tokenLabel}>Neuer Token (kopiere ihn jetzt!):</div>
-          <div style={styles.tokenValue}>{newToken}</div>
-          <button style={styles.btnSecondary} onClick={() => {
+        <div style={s.tokenBox}>
+          <div style={s.tokenLabel}>Neuer Token (kopiere ihn jetzt!):</div>
+          <div style={s.tokenValue}>{newToken}</div>
+          <button style={s.btnSecondary} onClick={() => {
             navigator.clipboard.writeText(newToken)
             alert('Kopiert!')
-          }}>
-            Kopieren
-          </button>
+          }}>Kopieren</button>
         </div>
       )}
 
-      {error && <div style={{ background: '#fff0f0', color: '#c00', padding: '10px', borderRadius: '8px', fontSize: '14px', marginBottom: '12px' }}>{error}</div>}
+      {error && <div style={s.errorBox}>{error}</div>}
 
-      <div style={styles.tokenList}>
+      <div style={s.tokenList}>
         {tokens.map((t, i) => (
-          <div key={i} style={styles.tokenItem}>
-            <span style={styles.tokenItemLabel}>{t.label}</span>
-            <span style={styles.tokenFull}>{t.token}</span>
+          <div key={i} style={s.tokenItem}>
+            <span style={s.tokenItemLabel}>{t.label}</span>
+            <span style={s.tokenFull}>{t.token}</span>
           </div>
         ))}
       </div>
 
       <form onSubmit={createToken}>
-        <input
-          style={{ ...styles.input, marginBottom: '10px' }}
-          value={label}
-          onChange={e => setLabel(e.target.value)}
-          placeholder="z.B. Kasse 1"
-          required
-        />
-        <button style={styles.btnPrimary} type="submit">Erstellen</button>
+        <input style={{ ...s.input, marginBottom: 10 }} value={label}
+          onChange={e => setLabel(e.target.value)} placeholder="z.B. Kasse 1" required />
+        <button style={s.btnPrimary} type="submit">Erstellen</button>
       </form>
     </div>
   )
 }
 
-const styles = {
-  page: { maxWidth: '600px', margin: '0 auto' },
-  loading: { color: '#888', padding: '40px' },
-  title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
-  subtitle: { fontSize: '14px', color: '#888', margin: '0 0 20px' },
-  card: { background: 'white', borderRadius: '12px', padding: '20px', marginBottom: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
-  cardTitle: { fontSize: '16px', fontWeight: '600', margin: '0 0 16px', color: '#1a1a1a' },
-
-  // Google Wallet Vorschau
-  walletCard: { borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.18)' },
-  walletHeader: { display: 'flex', alignItems: 'center', gap: '12px', padding: '16px' },
-  walletLogo: { width: '40px', height: '40px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 },
-  walletLogoImg: { width: '100%', height: '100%', objectFit: 'cover' },
-  walletShopName: { fontSize: '16px', fontWeight: '600' },
-  walletFields: { display: 'flex', gap: '32px', padding: '0 16px 16px' },
-  walletField: {},
-  walletFieldLabel: { fontSize: '11px', fontWeight: '600', letterSpacing: '0.5px', marginBottom: '2px' },
-  walletFieldValue: { fontSize: '16px', fontWeight: '600' },
-  walletHero: { width: '100%', height: '120px', objectFit: 'cover', display: 'block' },
-  walletQrWrap: { display: 'flex', justifyContent: 'center', padding: '16px', background: 'rgba(255,255,255,0.08)' },
-  walletQr: { background: 'white', padding: '8px', borderRadius: '8px', display: 'flex' },
-  previewHint: { fontSize: '12px', color: '#aaa', margin: '10px 0 0', textAlign: 'center' },
-
-  logoRow: { display: 'flex', alignItems: 'center', gap: '16px' },
-  logoPreview: { flexShrink: 0 },
-  logoImg: { width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover' },
-  logoPlaceholder: { width: '80px', height: '80px', borderRadius: '12px', background: '#f0eeff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: '700', color: '#3C3489' },
-  logoInfo: { flex: 1 },
-  logoHint: { fontSize: '12px', color: '#888', marginBottom: '10px' },
-
-  heroBox: { width: '100%', height: '120px', borderRadius: '10px', overflow: 'hidden', background: '#f5f5f7', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  heroImg: { width: '100%', height: '100%', objectFit: 'cover' },
-  heroPlaceholder: { color: '#bbb', fontSize: '14px' },
-
-  success: { background: '#f0fff4', color: '#2C5F2E', padding: '10px 14px', borderRadius: '8px', fontSize: '14px', marginBottom: '16px' },
-  field: { marginBottom: '14px' },
-  label: { display: 'block', fontSize: '13px', fontWeight: '500', color: '#444', marginBottom: '6px' },
-  input: { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '14px', outline: 'none', boxSizing: 'border-box' },
-  colorRow: { display: 'flex', gap: '8px', alignItems: 'center' },
-  colorPicker: { width: '44px', height: '44px', border: 'none', borderRadius: '8px', cursor: 'pointer', padding: '2px', flexShrink: 0 },
-  btnPrimary: { background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', padding: '12px 20px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', width: '100%', marginTop: '4px' },
-  btnSecondary: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: '10px', padding: '10px 16px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
-  hint: { fontSize: '13px', color: '#888', margin: '0 0 16px' },
-  tokenBox: { background: '#f0fff4', borderRadius: '10px', padding: '16px', marginBottom: '16px' },
-  tokenLabel: { fontSize: '13px', fontWeight: '600', color: '#2C5F2E', marginBottom: '8px' },
-  tokenValue: { fontFamily: 'monospace', fontSize: '12px', color: '#1a1a1a', marginBottom: '10px', wordBreak: 'break-all' },
-  tokenList: { marginBottom: '16px' },
-  tokenItem: { padding: '10px 0', borderBottom: '1px solid #f0f0f0', fontSize: '14px' },
-  tokenItemLabel: { fontWeight: '500', color: '#1a1a1a', display: 'block', marginBottom: '4px' },
-  tokenFull: { fontFamily: 'monospace', color: '#666', fontSize: '11px', wordBreak: 'break-all' },
-  tokenForm: { display: 'flex', gap: '10px' },
+const s = {
+  page: { maxWidth: 700, margin: '0 auto' },
+  loading: { color: '#888', padding: 40 },
+  title: { fontSize: 24, fontWeight: 700, margin: '0 0 4px', color: '#1a1a1a' },
+  subtitle: { fontSize: 14, color: '#888', margin: '0 0 24px' },
+  statGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 },
+  statCard: { background: 'white', borderRadius: 12, padding: 18, textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+  statNum: { fontSize: 30, fontWeight: 700, color: '#3C3489' },
+  statLabel: { fontSize: 12, color: '#888', marginTop: 4 },
+  card: { background: 'white', borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+  cardTitle: { fontSize: 16, fontWeight: 600, margin: '0 0 16px', color: '#1a1a1a' },
+  table: {},
+  tableHead: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '8px 0', fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '2px solid #f0f0f0' },
+  tableRow: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '12px 0', borderBottom: '1px solid #f5f5f5', alignItems: 'center' },
+  cardNameCell: { fontSize: 14, fontWeight: 600, color: '#1a1a1a' },
+  center: { textAlign: 'center', fontSize: 14, color: '#666' },
+  success: { background: '#f0fff4', color: '#2C5F2E', padding: '10px 14px', borderRadius: 8, fontSize: 14, marginBottom: 14 },
+  errorBox: { background: '#fff0f0', color: '#c00', padding: 10, borderRadius: 8, fontSize: 14, marginBottom: 12 },
+  input: { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontSize: 14, outline: 'none', boxSizing: 'border-box', marginBottom: 12 },
+  btnPrimary: { background: '#3C3489', color: 'white', border: 'none', borderRadius: 10, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', width: '100%' },
+  btnSecondary: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: 10, padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  hint: { fontSize: 13, color: '#888', margin: '12px 0 0' },
+  tokenBox: { background: '#f0fff4', borderRadius: 10, padding: 16, marginBottom: 16 },
+  tokenLabel: { fontSize: 13, fontWeight: 600, color: '#2C5F2E', marginBottom: 8 },
+  tokenValue: { fontFamily: 'monospace', fontSize: 12, color: '#1a1a1a', marginBottom: 10, wordBreak: 'break-all' },
+  tokenList: { marginBottom: 16 },
+  tokenItem: { padding: '10px 0', borderBottom: '1px solid #f0f0f0', fontSize: 14 },
+  tokenItemLabel: { fontWeight: 500, color: '#1a1a1a', display: 'block', marginBottom: 4 },
+  tokenFull: { fontFamily: 'monospace', color: '#666', fontSize: 11, wordBreak: 'break-all' },
 }
