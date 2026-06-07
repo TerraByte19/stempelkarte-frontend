@@ -459,13 +459,19 @@ export default function Karten() {
         <div style={s.panel}>
           <div style={s.panelTitle}>Karten-Infos</div>
           {[
-            {label:'Kartenname',key:'name',placeholder:'z.B. Kaffee-Karte'},
-            {label:'Beschreibung',key:'description',placeholder:'z.B. 10 Stempel = 1 Gratis-Kaffee'},
-            {label:'Belohnung',key:'rewardText',placeholder:'z.B. Gratis-Kaffee'},
-          ].map(({label,key,placeholder})=>(
+            {label:'Kartenname',key:'name',placeholder:'z.B. Kaffee-Karte',max:18},
+            {label:'Beschreibung',key:'description',placeholder:'z.B. 10 Stempel = 1 Gratis-Kaffee',max:40},
+            {label:'Belohnung',key:'rewardText',placeholder:'z.B. Gratis-Kaffee',max:25},
+          ].map(({label,key,placeholder,max})=>(
             <div key={key} style={s.field}>
-              <label style={s.label}>{label}</label>
-              <input style={s.input} value={form[key]} placeholder={placeholder} onChange={e=>setForm({...form,[key]:e.target.value})}/>
+              <label style={s.label}>
+                {label}
+                <span style={{float:'right',fontSize:11,color:(form[key]?.length||0)>=max?'#c00':'#bbb',fontWeight:500}}>
+                  {form[key]?.length||0}/{max}
+                </span>
+              </label>
+              <input style={s.input} value={form[key]} placeholder={placeholder} maxLength={max}
+                onChange={e=>setForm({...form,[key]:e.target.value})}/>
             </div>
           ))}
           <div style={s.field}>
