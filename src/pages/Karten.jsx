@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import api from '../api'
 
 const PRESETS = [
-  { key: 'coffee', label: '☕ Kaffee' },
-  { key: 'star',   label: '⭐ Stern'  },
-  { key: 'heart',  label: '❤️ Herz'  },
+  { key: 'coffee', label: 'Kaffee' },
+  { key: 'star',   label: 'Stern'  },
+  { key: 'heart',  label: 'Herz'  },
   { key: 'dot',    label: '● Punkt'  },
   { key: 'square', label: '■ Eckig'  },
 ]
@@ -14,6 +14,7 @@ const DEFAULT_DESIGN = {
   colorForeground: '#FFFFFF',
   colorLabel: '#FAC875',
   logoUrl: '',
+  logoRing: false,
   heroImageUrl: '',
   walletStyle: 'number',
   stampIconType: 'preset',
@@ -103,8 +104,8 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
       <div style={{background:'#f2f2f7',borderRadius:20,overflow:'hidden',padding:8}}>
         <div style={{borderRadius:11,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 4px 14px rgba(0,0,0,0.2)'}}>
           <div style={{display:'flex',alignItems:'center',gap:5,padding:'8px 8px 5px'}}>
-            <div style={{width:20,height:20,borderRadius:'50%',background:'rgba(255,255,255,0.95)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0}}>
-              {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : <span style={{fontSize:8,fontWeight:700,color:d.colorBackground}}>SK</span>}
+            <div style={{width:20,height:20,borderRadius:'50%',background:'rgba(255,255,255,0.95)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
+              {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:8,fontWeight:700,color:d.colorBackground}}>SK</span>}
             </div>
             <span style={{fontSize:10,fontWeight:700,flex:1}}>{cardName||'Karte'}</span>
             <span style={{fontSize:10,fontWeight:800,color:d.colorLabel}}>{stamps}/{threshold}</span>
@@ -134,8 +135,8 @@ function GooglePreview({ design, stamps, threshold, rewardText, cardName }) {
   return (
     <div style={{borderRadius:14,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 6px 20px rgba(0,0,0,0.15)'}}>
       <div style={{display:'flex',alignItems:'center',gap:9,padding:'12px 12px 7px'}}>
-        <div style={{width:30,height:30,borderRadius:'50%',background:'white',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0}}>
-          {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : <span style={{color:'#3C3489',fontWeight:700,fontSize:11}}>SK</span>}
+        <div style={{width:30,height:30,borderRadius:'50%',background:'white',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'3px solid white':'none',boxSizing:'border-box'}}>
+          {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{color:'#3C3489',fontWeight:700,fontSize:11}}>SK</span>}
         </div>
         <div style={{fontSize:13,fontWeight:600}}>{cardName||'Karte'}</div>
       </div>
@@ -182,7 +183,7 @@ function DesignPanel({ design, onChange, cardId=null }) {
     <div>
       {/* ── Farben ── */}
       <div style={dp.section}>
-        <div style={dp.sectionTitle}>🎨 Farben</div>
+        <div style={dp.sectionTitle}>Farben</div>
         {[
           {label:'Hintergrund', key:'colorBackground'},
           {label:'Textfarbe',   key:'colorForeground'},
@@ -201,14 +202,14 @@ function DesignPanel({ design, onChange, cardId=null }) {
 
       {/* ── Logo ── */}
       <div style={dp.section}>
-        <div style={dp.sectionTitle}>🖼️ Logo</div>
+        <div style={dp.sectionTitle}>Logo</div>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
           <div style={{width:52,height:52,borderRadius:10,background:'#f0f0f0',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0}}>
             {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : <span style={{fontSize:11,color:'#aaa'}}>SK</span>}
           </div>
           <div>
             <button style={dp.uploadBtn} onClick={()=>logoRef.current?.click()} disabled={uploading==='logo'}>
-              {uploading==='logo'?'Lädt…':'📁 Logo hochladen'}
+              {uploading==='logo'?'Lädt…':'Logo hochladen'}
             </button>
             <div style={{fontSize:11,color:'#aaa',marginTop:4}}>PNG, empfohlen 480×150px</div>
           </div>
@@ -217,9 +218,21 @@ function DesignPanel({ design, onChange, cardId=null }) {
         </div>
       </div>
 
+      {/* ── Logo Ring ── */}
+      <div style={dp.section}>
+        <div style={dp.sectionTitle}>Weisser Ring um Logo</div>
+        <div style={dp.row2}>
+          {[{val:false,label:'Aus'},{val:true,label:'An'}].map(({val,label})=>(
+            <div key={String(val)} style={{...dp.card,...(!!d.logoRing===val?dp.active:{})}} onClick={()=>onChange({...d,logoRing:val})}>
+              <div style={dp.cardLabel}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── Banner ── */}
       <div style={dp.section}>
-        <div style={dp.sectionTitle}>🌅 Banner</div>
+        <div style={dp.sectionTitle}>Banner</div>
         {d.heroImageUrl ? (
           <img src={d.heroImageUrl} alt="" style={{width:'100%',height:70,objectFit:'cover',borderRadius:8,marginBottom:8}}/>
         ) : (
@@ -228,7 +241,7 @@ function DesignPanel({ design, onChange, cardId=null }) {
           </div>
         )}
         <button style={dp.uploadBtn} onClick={()=>heroRef.current?.click()} disabled={uploading==='hero'}>
-          {uploading==='hero'?'Lädt…':'📁 Banner hochladen'}
+          {uploading==='hero'?'Lädt…':'Banner hochladen'}
         </button>
         <div style={{fontSize:11,color:'#aaa',marginTop:4}}>PNG/JPG, empfohlen 1125×369px</div>
         <input ref={heroRef} type="file" accept="image/*" style={{display:'none'}}
@@ -237,9 +250,9 @@ function DesignPanel({ design, onChange, cardId=null }) {
 
       {/* ── Wallet-Stil ── */}
       <div style={dp.section}>
-        <div style={dp.sectionTitle}>📱 Wallet-Stil</div>
+        <div style={dp.sectionTitle}>Wallet-Stil</div>
         <div style={dp.row2}>
-          {[{val:'number',label:'🔢 Zahlen',desc:'Klassisch'},{val:'grid',label:'🟡 Raster',desc:'Stempel-Grid'}].map(({val,label,desc})=>(
+          {[{val:'number',label:'Zahlen',desc:'Klassisch'},{val:'grid',label:'Raster',desc:'Stempel-Grid'}].map(({val,label,desc})=>(
             <div key={val} style={{...dp.card,...(d.walletStyle===val?dp.active:{})}} onClick={()=>onChange({...d,walletStyle:val})}>
               <div style={dp.cardLabel}>{label}</div><div style={dp.cardDesc}>{desc}</div>
             </div>
@@ -249,9 +262,9 @@ function DesignPanel({ design, onChange, cardId=null }) {
 
       {/* ── Stempel-Icon ── */}
       <div style={dp.section}>
-        <div style={dp.sectionTitle}>✏️ Stempel-Icon</div>
+        <div style={dp.sectionTitle}>Stempel-Icon</div>
         <div style={dp.row2}>
-          {[{val:'preset',label:'🎨 Vorlage'},{val:'upload',label:'📁 Eigenes'}].map(({val,label})=>(
+          {[{val:'preset',label:'Vorlage'},{val:'upload',label:'Eigenes'}].map(({val,label})=>(
             <div key={val} style={{...dp.card,...(d.stampIconType===val?dp.active:{})}} onClick={()=>onChange({...d,stampIconType:val})}>
               <div style={dp.cardLabel}>{label}</div>
             </div>
@@ -268,7 +281,7 @@ function DesignPanel({ design, onChange, cardId=null }) {
           <div style={{display:'flex',alignItems:'center',gap:10,marginTop:8}}>
             {d.stampIconUrl && <img src={d.stampIconUrl} alt="" style={{width:36,height:36,borderRadius:8,objectFit:'cover',border:'2px solid #e0e0e0'}}/>}
             <button style={dp.uploadBtn} onClick={()=>stampRef.current?.click()} disabled={uploading==='stamp'}>
-              {uploading==='stamp'?'Lädt…':d.stampIconUrl?'✏️ Ändern':'📁 Hochladen'}
+              {uploading==='stamp'?'Lädt…':d.stampIconUrl?'Ändern':'Hochladen'}
             </button>
             <input ref={stampRef} type="file" accept="image/*" style={{display:'none'}}
               onChange={e=>upload(e.target.files[0], stampEndpoint, 'stamp')}/>
@@ -278,7 +291,7 @@ function DesignPanel({ design, onChange, cardId=null }) {
 
       {/* ── Stempel-Farbe ── */}
       <div style={dp.section}>
-        <div style={dp.sectionTitle}>🎨 Stempel-Farbe</div>
+        <div style={dp.sectionTitle}>Stempel-Farbe</div>
         <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
           {['#6F4E37','#FFD700','#E74C3C','#2ECC71','#3498DB','#9B59B6','#1A1A1A','#FFFFFF'].map(c=>(
             <div key={c} style={{width:26,height:26,borderRadius:'50%',background:c,cursor:'pointer',flexShrink:0,
@@ -293,9 +306,9 @@ function DesignPanel({ design, onChange, cardId=null }) {
 
       {/* ── Leere Stempel ── */}
       <div style={dp.section}>
-        <div style={dp.sectionTitle}>⭕ Leere Stempel</div>
+        <div style={dp.sectionTitle}>Leere Stempel</div>
         <div style={dp.row2}>
-          {[{val:'number',label:'🔢 Nummer'},{val:'faded',label:'👻 Verblasst'}].map(({val,label})=>(
+          {[{val:'number',label:'Nummer'},{val:'faded',label:'Verblasst'}].map(({val,label})=>(
             <div key={val} style={{...dp.card,...(d.emptyStampStyle===val?dp.active:{})}} onClick={()=>onChange({...d,emptyStampStyle:val})}>
               <div style={dp.cardLabel}>{label}</div>
             </div>
@@ -363,6 +376,7 @@ export default function Karten() {
     try {
       await api.post('/api/shop/cards', {
         ...form,
+        description: form.description,
         rewardThreshold: parseInt(form.rewardThreshold),
         ...design,
       })
@@ -399,6 +413,7 @@ export default function Karten() {
       colorForeground: card.colorForeground||'#FFFFFF',
       colorLabel: card.colorLabel||'#FAC875',
       logoUrl: card.logoUrl||'',
+      logoRing: !!card.logoRing,
       heroImageUrl: card.heroImageUrl||'',
       walletStyle: card.walletStyle||'number',
       stampIconType: card.stampIconType||'preset',
@@ -430,14 +445,13 @@ export default function Karten() {
                 <div style={s.cardName}>{card.name}</div>
                 <div style={{...s.badge,background:card.colorBackground||'#3C3489',color:card.colorForeground||'#fff'}}>{card.rewardThreshold} Stempel</div>
               </div>
-              <div style={s.cardDesc}>{card.description}</div>
-              <div style={s.cardReward}>🎁 {card.rewardText}</div>
+              <div style={s.cardReward}>{card.rewardText}</div>
               <div style={s.designBadge}>
-                {card.walletStyle==='grid'?'🟡 Raster':'🔢 Zahlen'} · {PRESETS.find(p=>p.key===card.stampPreset)?.label||'☕ Kaffee'}
+                {card.walletStyle==='grid'?'Raster':'Zahlen'} · {PRESETS.find(p=>p.key===card.stampPreset)?.label||'Kaffee'}
               </div>
               <div style={s.cardId}>ID: {card.id}</div>
               <div style={s.btnRow}>
-                <button style={s.btnEdit} onClick={()=>openEdit(card)}>✏️ Bearbeiten</button>
+                <button style={s.btnEdit} onClick={()=>openEdit(card)}>Bearbeiten</button>
                 <button style={s.btnDelete} onClick={()=>deleteCard(card.id,card.name)}>Löschen</button>
               </div>
             </div>
@@ -495,9 +509,9 @@ export default function Karten() {
 
         {/* Spalte 3: Vorschau */}
         <div>
-          <div style={s.previewLabel}>🍎 Apple Wallet</div>
+          <div style={s.previewLabel}>Apple Wallet</div>
           <ApplePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name}/>
-          <div style={{...s.previewLabel,marginTop:20}}>🤖 Google Wallet</div>
+          <div style={{...s.previewLabel,marginTop:20}}>Google Wallet</div>
           <GooglePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name}/>
         </div>
       </div>
@@ -519,13 +533,13 @@ export default function Karten() {
           <div style={s.panelTitle}>Design</div>
           <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id}/>
           <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
-            {saved?'✓ Gespeichert!':loading?'Speichere…':'💾 Speichern'}
+            {saved?'✓ Gespeichert!':loading?'Speichere…':'Speichern'}
           </button>
         </div>
         <div>
-          <div style={s.previewLabel}>🍎 Apple Wallet</div>
+          <div style={s.previewLabel}>Apple Wallet</div>
           <ApplePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name}/>
-          <div style={{...s.previewLabel,marginTop:20}}>🤖 Google Wallet</div>
+          <div style={{...s.previewLabel,marginTop:20}}>Google Wallet</div>
           <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name}/>
         </div>
       </div>
