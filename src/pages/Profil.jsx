@@ -9,11 +9,16 @@ export default function Profil() {
   const [name, setName] = useState('')
 
   useEffect(() => {
-    api.get('/api/shop/me').then(res => {
-      setShop(res.data)
-      setName(res.data.name)
-    })
-    api.get('/api/shop/stats').then(res => setStats(res.data)).catch(() => {})
+    api.get('/api/shop/me')
+        .then(res => {
+          setShop(res.data)
+          setName(res.data.name)
+        })
+        .catch(() => {})
+
+    api.get('/api/shop/stats')
+        .then(res => setStats(Array.isArray(res.data) ? res.data : []))
+        .catch(() => setStats([]))
   }, [])
 
   async function saveName(e) {
@@ -34,74 +39,70 @@ export default function Profil() {
 
   if (!shop) return <div style={s.loading}>Lädt…</div>
 
-  // Gesamt-Statistiken berechnen
   const totalCustomers = stats.reduce((sum, x) => sum + (x.customerCount || 0), 0)
   const totalStamps = stats.reduce((sum, x) => sum + (x.totalStamps || 0), 0)
   const totalRewards = stats.reduce((sum, x) => sum + (x.totalRewards || 0), 0)
 
   return (
-    <div style={s.page}>
-      <h1 style={s.title}>Profil & Statistiken</h1>
-      <p style={s.subtitle}>{shop.name}</p>
+      <div style={s.page}>
+        <h1 style={s.title}>Profil & Statistiken</h1>
+        <p style={s.subtitle}>{shop.name}</p>
 
-      {/* ── Gesamt-Statistiken ── */}
-      <div style={s.statGrid}>
-        <div style={s.statCard}>
-          <div style={s.statNum}>{stats.length}</div>
-          <div style={s.statLabel}>Karten</div>
-        </div>
-        <div style={s.statCard}>
-          <div style={s.statNum}>{totalCustomers}</div>
-          <div style={s.statLabel}>Kunden</div>
-        </div>
-        <div style={s.statCard}>
-          <div style={s.statNum}>{totalStamps}</div>
-          <div style={s.statLabel}>Stempel vergeben</div>
-        </div>
-        <div style={s.statCard}>
-          <div style={s.statNum}>{totalRewards}</div>
-          <div style={s.statLabel}>Belohnungen eingelöst</div>
-        </div>
-      </div>
-
-      {/* ── Statistik pro Karte ── */}
-      {stats.length > 0 && (
-        <div style={s.card}>
-          <h2 style={s.cardTitle}>Statistik pro Karte</h2>
-          <div style={s.table}>
-            <div style={s.tableHead}>
-              <span>Karte</span>
-              <span style={s.center}>Kunden</span>
-              <span style={s.center}>Stempel</span>
-              <span style={s.center}>Belohnungen</span>
-            </div>
-            {stats.map(x => (
-              <div key={x.cardId} style={s.tableRow}>
-                <span style={s.cardNameCell}>{x.cardName}</span>
-                <span style={s.center}>{x.customerCount}</span>
-                <span style={s.center}>{x.totalStamps}</span>
-                <span style={s.center}>{x.totalRewards}</span>
-              </div>
-            ))}
+        <div style={s.statGrid}>
+          <div style={s.statCard}>
+            <div style={s.statNum}>{stats.length}</div>
+            <div style={s.statLabel}>Karten</div>
+          </div>
+          <div style={s.statCard}>
+            <div style={s.statNum}>{totalCustomers}</div>
+            <div style={s.statLabel}>Kunden</div>
+          </div>
+          <div style={s.statCard}>
+            <div style={s.statNum}>{totalStamps}</div>
+            <div style={s.statLabel}>Stempel vergeben</div>
+          </div>
+          <div style={s.statCard}>
+            <div style={s.statNum}>{totalRewards}</div>
+            <div style={s.statLabel}>Belohnungen eingelöst</div>
           </div>
         </div>
-      )}
 
-      {/* ── Laden-Name ── */}
-      <div style={s.card}>
-        <h2 style={s.cardTitle}>Laden-Name</h2>
-        {saved && <div style={s.success}>✓ Gespeichert!</div>}
-        <form onSubmit={saveName}>
-          <input style={s.input} value={name} onChange={e => setName(e.target.value)} required />
-          <button style={s.btnPrimary} type="submit" disabled={loading}>
-            {loading ? 'Speichert…' : 'Speichern'}
-          </button>
-        </form>
-        <p style={s.hint}>💡 Logo, Farben & Banner stellst du jetzt direkt bei jeder Karte ein.</p>
+        {stats.length > 0 && (
+            <div style={s.card}>
+              <h2 style={s.cardTitle}>Statistik pro Karte</h2>
+              <div style={s.table}>
+                <div style={s.tableHead}>
+                  <span>Karte</span>
+                  <span style={s.center}>Kunden</span>
+                  <span style={s.center}>Stempel</span>
+                  <span style={s.center}>Belohnungen</span>
+                </div>
+                {stats.map(x => (
+                    <div key={x.cardId} style={s.tableRow}>
+                      <span style={s.cardNameCell}>{x.cardName}</span>
+                      <span style={s.center}>{x.customerCount}</span>
+                      <span style={s.center}>{x.totalStamps}</span>
+                      <span style={s.center}>{x.totalRewards}</span>
+                    </div>
+                ))}
+              </div>
+            </div>
+        )}
+
+        <div style={s.card}>
+          <h2 style={s.cardTitle}>Laden-Name</h2>
+          {saved && <div style={s.success}>✓ Gespeichert!</div>}
+          <form onSubmit={saveName}>
+            <input style={s.input} value={name} onChange={e => setName(e.target.value)} required />
+            <button style={s.btnPrimary} type="submit" disabled={loading}>
+              {loading ? 'Speichert…' : 'Speichern'}
+            </button>
+          </form>
+          <p style={s.hint}>💡 Logo, Farben & Banner stellst du jetzt direkt bei jeder Karte ein.</p>
+        </div>
+
+        <StaffTokens />
       </div>
-
-      <StaffTokens />
-    </div>
   )
 }
 
@@ -112,7 +113,9 @@ function StaffTokens() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    api.get('/api/shop/staff-tokens').then(res => setTokens(res.data))
+    api.get('/api/shop/staff-tokens')
+        .then(res => setTokens(Array.isArray(res.data) ? res.data : []))
+        .catch(() => setTokens([]))
   }, [])
 
   async function createToken(e) {
@@ -122,45 +125,47 @@ function StaffTokens() {
       const res = await api.post('/api/shop/staff-token', { label })
       setNewToken(res.data.token)
       setLabel('')
-      api.get('/api/shop/staff-tokens').then(res => setTokens(res.data))
+      api.get('/api/shop/staff-tokens')
+          .then(res => setTokens(Array.isArray(res.data) ? res.data : []))
+          .catch(() => {})
     } catch (err) {
       setError(err.response?.data?.error || 'Fehler beim Erstellen')
     }
   }
 
   return (
-    <div style={s.card}>
-      <h2 style={s.cardTitle}>Staff-Tokens</h2>
-      <p style={s.hint}>Mitarbeiter brauchen einen Token um Stempel zu vergeben.</p>
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>Staff-Tokens</h2>
+        <p style={s.hint}>Mitarbeiter brauchen einen Token um Stempel zu vergeben.</p>
 
-      {newToken && (
-        <div style={s.tokenBox}>
-          <div style={s.tokenLabel}>Neuer Token (kopiere ihn jetzt!):</div>
-          <div style={s.tokenValue}>{newToken}</div>
-          <button style={s.btnSecondary} onClick={() => {
-            navigator.clipboard.writeText(newToken)
-            alert('Kopiert!')
-          }}>Kopieren</button>
+        {newToken && (
+            <div style={s.tokenBox}>
+              <div style={s.tokenLabel}>Neuer Token (kopiere ihn jetzt!):</div>
+              <div style={s.tokenValue}>{newToken}</div>
+              <button style={s.btnSecondary} onClick={() => {
+                navigator.clipboard.writeText(newToken)
+                alert('Kopiert!')
+              }}>Kopieren</button>
+            </div>
+        )}
+
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <div style={s.tokenList}>
+          {tokens.map((t, i) => (
+              <div key={i} style={s.tokenItem}>
+                <span style={s.tokenItemLabel}>{t.label}</span>
+                <span style={s.tokenFull}>{t.token}</span>
+              </div>
+          ))}
         </div>
-      )}
 
-      {error && <div style={s.errorBox}>{error}</div>}
-
-      <div style={s.tokenList}>
-        {tokens.map((t, i) => (
-          <div key={i} style={s.tokenItem}>
-            <span style={s.tokenItemLabel}>{t.label}</span>
-            <span style={s.tokenFull}>{t.token}</span>
-          </div>
-        ))}
+        <form onSubmit={createToken}>
+          <input style={{ ...s.input, marginBottom: 10 }} value={label}
+                 onChange={e => setLabel(e.target.value)} placeholder="z.B. Kasse 1" required />
+          <button style={s.btnPrimary} type="submit">Erstellen</button>
+        </form>
       </div>
-
-      <form onSubmit={createToken}>
-        <input style={{ ...s.input, marginBottom: 10 }} value={label}
-          onChange={e => setLabel(e.target.value)} placeholder="z.B. Kasse 1" required />
-        <button style={s.btnPrimary} type="submit">Erstellen</button>
-      </form>
-    </div>
   )
 }
 

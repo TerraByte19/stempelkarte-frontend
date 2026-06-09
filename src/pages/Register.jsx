@@ -1,75 +1,77 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import api from '../api'
 
-export default function Register() {
+export default function Login() {
   const { t } = useLang()
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
 
-  async function handleRegister(e) {
+  async function handleLogin(e) {
     e.preventDefault()
-    setError('')
-    if (form.password !== form.confirm) { setError(t('reg_error_match')); return }
-    if (form.password.length < 8) { setError(t('reg_error_length')); return }
     setLoading(true)
+    setError('')
     try {
-      const res = await api.post('/api/auth/register', { name: form.name, email: form.email, password: form.password })
+      const res = await api.post('/api/auth/login', { email, password })
+
+      if (!res.data?.token) {
+        setError(t('login_error'))
+        return
+      }
+
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('shop', JSON.stringify({ id: res.data.shopId, name: res.data.name }))
+
       try {
-        const tokensRes = await api.get('/api/shop/staff-tokens', { headers: { Authorization: `Bearer ${res.data.token}` } })
-        if (tokensRes.data.length > 0) localStorage.setItem('staffToken', tokensRes.data[0].token)
-      } catch (e) {}
+        const tokensRes = await api.get('/api/shop/staff-tokens', {
+          headers: { Authorization: `Bearer ${res.data.token}` }
+        })
+        if (Array.isArray(tokensRes.data) && tokensRes.data.length > 0) {
+          localStorage.setItem('staffToken', tokensRes.data[0].token)
+        }
+      } catch (e) {
+        // Staff-Token optional — kein Fehler
+      }
+
       window.location.href = '/'
     } catch (err) {
-      setError(err.response?.status === 400 ? t('reg_error_email') : t('reg_error_generic'))
+      setError(t('login_error'))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.logo}>☕</div>
-        <h1 style={styles.title}>Stempelkarte</h1>
-        <p style={styles.subtitle}>{t('reg_subtitle')}</p>
-        {error && <div style={styles.error}>{error}</div>}
-        <form onSubmit={handleRegister}>
-          <div style={styles.field}>
-            <label style={styles.label}>{t('reg_name')}</label>
-            <input style={styles.input} type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="z.B. Cafe Espresso" required />
-          </div>
-          <div style={styles.field}>
-            <label style={styles.label}>{t('reg_email')}</label>
-            <input style={styles.input} type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="laden@beispiel.de" required />
-          </div>
-          <div style={styles.field}>
-            <label style={styles.label}>{t('reg_password')}</label>
-            <input style={styles.input} type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Mindestens 8 Zeichen" required />
-          </div>
-          <div style={styles.field}>
-            <label style={styles.label}>{t('reg_confirm')}</label>
-            <input style={styles.input} type="password" value={form.confirm} onChange={e => setForm({ ...form, confirm: e.target.value })} placeholder="••••••••" required />
-          </div>
-          <button style={styles.button} type="submit" disabled={loading}>
-            {loading ? t('reg_loading') : t('reg_btn')}
-          </button>
-        </form>
-        <p style={styles.login}>{t('reg_has_account')} <a href="/login" style={styles.link}>{t('reg_login')}</a></p>
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <div style={styles.logo}>SK</div>
+          <h1 style={styles.title}>Stempelkarte</h1>
+          <p style={styles.subtitle}>{t('login_subtitle')}</p>
+          {error && <div style={styles.error}>{error}</div>}
+          <form onSubmit={handleLogin}>
+            <div style={styles.field}>
+              <label style={styles.label}>{t('login_email')}</label>
+              <input style={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+            </div>
+            <div style={styles.field}>
+              <label style={styles.label}>{t('login_password')}</label>
+              <input style={styles.input} type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+            </div>
+            <button style={styles.button} type="submit" disabled={loading}>
+              {loading ? t('login_loading') : t('login_btn')}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
   )
 }
 
 const styles = {
   container: { minHeight: '100vh', background: '#f5f5f7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' },
   card: { background: 'white', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '400px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', textAlign: 'center' },
-  logo: { fontSize: '48px', marginBottom: '16px' },
+  logo: { width: '56px', height: '56px', borderRadius: '14px', background: '#3C3489', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '700', margin: '0 auto 16px' },
   title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
   subtitle: { fontSize: '14px', color: '#888', margin: '0 0 28px' },
   error: { background: '#fff0f0', color: '#d00', padding: '10px 14px', borderRadius: '8px', fontSize: '14px', marginBottom: '16px' },
@@ -77,6 +79,4 @@ const styles = {
   label: { display: 'block', fontSize: '13px', fontWeight: '500', color: '#444', marginBottom: '6px' },
   input: { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '15px', outline: 'none', boxSizing: 'border-box' },
   button: { width: '100%', padding: '12px', background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', marginTop: '8px' },
-  login: { fontSize: '13px', color: '#888', marginTop: '20px' },
-  link: { color: '#3C3489', textDecoration: 'none', fontWeight: '500' },
 }

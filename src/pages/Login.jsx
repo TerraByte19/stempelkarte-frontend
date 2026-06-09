@@ -15,14 +15,26 @@ export default function Login() {
     setError('')
     try {
       const res = await api.post('/api/auth/login', { email, password })
+
+      if (!res.data?.token) {
+        setError(t('login_error'))
+        return
+      }
+
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('shop', JSON.stringify({ id: res.data.shopId, name: res.data.name }))
+
       try {
         const tokensRes = await api.get('/api/shop/staff-tokens', {
           headers: { Authorization: `Bearer ${res.data.token}` }
         })
-        if (tokensRes.data.length > 0) localStorage.setItem('staffToken', tokensRes.data[0].token)
-      } catch (e) {}
+        if (Array.isArray(tokensRes.data) && tokensRes.data.length > 0) {
+          localStorage.setItem('staffToken', tokensRes.data[0].token)
+        }
+      } catch (e) {
+        // Staff-Token optional — kein Fehler
+      }
+
       window.location.href = '/'
     } catch (err) {
       setError(t('login_error'))
@@ -32,27 +44,27 @@ export default function Login() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.logo}>SK</div>
-        <h1 style={styles.title}>Stempelkarte</h1>
-        <p style={styles.subtitle}>{t('login_subtitle')}</p>
-        {error && <div style={styles.error}>{error}</div>}
-        <form onSubmit={handleLogin}>
-          <div style={styles.field}>
-            <label style={styles.label}>{t('login_email')}</label>
-            <input style={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-          </div>
-          <div style={styles.field}>
-            <label style={styles.label}>{t('login_password')}</label>
-            <input style={styles.input} type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-          </div>
-          <button style={styles.button} type="submit" disabled={loading}>
-            {loading ? t('login_loading') : t('login_btn')}
-          </button>
-        </form>
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <div style={styles.logo}>SK</div>
+          <h1 style={styles.title}>Stempelkarte</h1>
+          <p style={styles.subtitle}>{t('login_subtitle')}</p>
+          {error && <div style={styles.error}>{error}</div>}
+          <form onSubmit={handleLogin}>
+            <div style={styles.field}>
+              <label style={styles.label}>{t('login_email')}</label>
+              <input style={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+            </div>
+            <div style={styles.field}>
+              <label style={styles.label}>{t('login_password')}</label>
+              <input style={styles.input} type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+            </div>
+            <button style={styles.button} type="submit" disabled={loading}>
+              {loading ? t('login_loading') : t('login_btn')}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
   )
 }
 
