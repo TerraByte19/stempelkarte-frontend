@@ -7,6 +7,7 @@
   "background_color": "#f5f5f7",
   "theme_color": "#3C3489",
   "orientation": "portrait",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -19,6 +20,15 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Scanner",
+      "short_name": "Scanner",
+      "description": "QR-Code Scanner starten",
+      "url": "/scanner-login",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

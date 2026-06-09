@@ -9,24 +9,28 @@ import Layout from './components/Layout'
 import Scanner from './pages/Scanner'
 import ScannerLogin from './pages/ScannerLogin'
 import Admin from './pages/Admin'
+import InstallBanner from './components/InstallBanner'
 
 function App() {
   const token = localStorage.getItem('token')
   return (
-    <LangProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/scanner-login" element={<ScannerLogin />} />
-        <Route path="/scanner" element={<Scanner />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/" element={token ? <Layout /> : <Navigate to="/login" />}>
-          <Route index element={<Dashboard />} />
-          <Route path="karten" element={<Karten />} />
-          <Route path="profil" element={<Profil />} />
-        </Route>
-      </Routes>
-    </LangProvider>
+      <LangProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/scanner-login" element={<ScannerLogin />} />
+          <Route path="/scanner" element={<Scanner />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/" element={token ? <Layout /> : <Navigate to="/login" />}>
+            <Route index element={<Dashboard />} />
+            <Route path="karten" element={<Karten />} />
+            <Route path="profil" element={<Profil />} />
+          </Route>
+        </Routes>
+
+        {/* Zeigt sich automatisch wenn installierbar — auf allen Seiten */}
+        <InstallBanner />
+      </LangProvider>
   )
 }
 
