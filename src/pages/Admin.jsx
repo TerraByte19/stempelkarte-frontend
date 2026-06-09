@@ -51,7 +51,7 @@ export default function Admin() {
       })
       if (res.status === 401) { logout(); return }
       const data = await res.json()
-      setShops(data)
+      setShops(Array.isArray(data) ? data : [])
     } catch (e) {
       setError('Fehler beim Laden')
     } finally {
@@ -72,6 +72,27 @@ export default function Admin() {
     }
   }
 
+  async function deleteShop(shopId, shopName) {
+    if (!confirm(`⚠️ Shop "${shopName}" wirklich KOMPLETT löschen?\n\nDas löscht:\n- Den Shop-Account\n- Alle Stempelkarten\n- Alle Kundendaten\n- Alle Staff-Tokens\n\nDas kann NICHT rückgängig gemacht werden!`)) return
+    if (!confirm(`Letzter Check: "${shopName}" endgültig löschen?`)) return
+
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shopId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (res.ok) {
+        loadShops()
+      } else {
+        const data = await res.json()
+        alert('Fehler: ' + (data.error || 'Unbekannter Fehler'))
+      }
+    } catch (e) {
+      alert('Fehler beim Löschen')
+    }
+  }
+
   function logout() {
     sessionStorage.removeItem('adminToken')
     setLoggedIn(false)
@@ -81,115 +102,121 @@ export default function Admin() {
 
   if (!loggedIn) {
     return (
-      <div style={styles.loginContainer}>
-        <div style={styles.loginCard}>
-          <div style={styles.loginLogo}>SK</div>
-          <h1 style={styles.loginTitle}>Admin-Panel</h1>
-          <p style={styles.loginSubtitle}>Nur fur Betreiber</p>
-          {error && <div style={styles.loginError}>{error}</div>}
-          <div style={styles.field}>
-            <label style={styles.label}>Admin-Passwort</label>
-            <input
-              style={styles.input}
-              type="password"
-              value={secret}
-              onChange={e => setSecret(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && login()}
-              placeholder="••••••••"
-            />
+        <div style={styles.loginContainer}>
+          <div style={styles.loginCard}>
+            <div style={styles.loginLogo}>SK</div>
+            <h1 style={styles.loginTitle}>Admin-Panel</h1>
+            <p style={styles.loginSubtitle}>Nur fur Betreiber</p>
+            {error && <div style={styles.loginError}>{error}</div>}
+            <div style={styles.field}>
+              <label style={styles.label}>Admin-Passwort</label>
+              <input
+                  style={styles.input}
+                  type="password"
+                  value={secret}
+                  onChange={e => setSecret(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && login()}
+                  placeholder="••••••••"
+              />
+            </div>
+            <button style={styles.btnLogin} onClick={login} disabled={loading}>
+              {loading ? 'Einloggen...' : 'Einloggen'}
+            </button>
           </div>
-          <button style={styles.btnLogin} onClick={login} disabled={loading}>
-            {loading ? 'Einloggen...' : 'Einloggen'}
-          </button>
         </div>
-      </div>
     )
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <div>
-          <h1 style={styles.title}>Admin-Panel</h1>
-          <p style={styles.subtitle}>{shops.length} Laden registriert</p>
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <div>
+            <h1 style={styles.title}>Admin-Panel</h1>
+            <p style={styles.subtitle}>{shops.length} Laden registriert</p>
+          </div>
+          <button style={styles.btnLogout} onClick={logout}>Ausloggen</button>
         </div>
-        <button style={styles.btnLogout} onClick={logout}>Ausloggen</button>
-      </div>
 
-      <div style={styles.stats}>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{shops.length}</div>
-          <div style={styles.statLabel}>Gesamt Laden</div>
+        <div style={styles.stats}>
+          <div style={styles.statCard}>
+            <div style={styles.statNumber}>{shops.length}</div>
+            <div style={styles.statLabel}>Gesamt Laden</div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statNumber}>{shops.filter(s => s.active).length}</div>
+            <div style={styles.statLabel}>Aktive Laden</div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statNumber}>{shops.reduce((sum, s) => sum + s.customerCount, 0)}</div>
+            <div style={styles.statLabel}>Gesamt Kunden</div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statNumber}>{shops.reduce((sum, s) => sum + s.cardCount, 0)}</div>
+            <div style={styles.statLabel}>Gesamt Karten</div>
+          </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{shops.filter(s => s.active).length}</div>
-          <div style={styles.statLabel}>Aktive Laden</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{shops.reduce((sum, s) => sum + s.customerCount, 0)}</div>
-          <div style={styles.statLabel}>Gesamt Kunden</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{shops.reduce((sum, s) => sum + s.cardCount, 0)}</div>
-          <div style={styles.statLabel}>Gesamt Karten</div>
-        </div>
-      </div>
 
-      <CreateShop onCreated={loadShops} />
+        <CreateShop onCreated={loadShops} />
 
-      {changingPasswordFor && (
-        <ChangePassword
-          shop={changingPasswordFor}
-          onDone={() => setChangingPasswordFor(null)}
-        />
-      )}
+        {changingPasswordFor && (
+            <ChangePassword
+                shop={changingPasswordFor}
+                onDone={() => setChangingPasswordFor(null)}
+            />
+        )}
 
-      <div style={styles.table}>
-        <div style={styles.tableHeader}>
-          <span>Laden</span>
-          <span>E-Mail</span>
-          <span>Karten</span>
-          <span>Kunden</span>
-          <span>Max Tokens</span>
-          <span>Status</span>
-          <span>Aktionen</span>
-        </div>
-        {shops.map(shop => (
-          <div key={shop.id} style={{ ...styles.tableRow, opacity: shop.active ? 1 : 0.5 }}>
-            <span style={styles.shopName}>{shop.name}</span>
-            <span style={styles.shopEmail}>{shop.email}</span>
-            <span style={styles.cell}>{shop.cardCount}</span>
-            <span style={styles.cell}>{shop.customerCount}</span>
-            <span style={styles.cell}>{shop.maxTokens}</span>
-            <span style={{
-              ...styles.status,
-              background: shop.active ? '#e6f4ea' : '#fce8e6',
-              color: shop.active ? '#2C5F2E' : '#c00',
-            }}>
+        <div style={styles.table}>
+          <div style={styles.tableHeader}>
+            <span>Laden</span>
+            <span>E-Mail</span>
+            <span>Karten</span>
+            <span>Kunden</span>
+            <span>Max Tokens</span>
+            <span>Status</span>
+            <span>Aktionen</span>
+          </div>
+          {shops.map(shop => (
+              <div key={shop.id} style={{ ...styles.tableRow, opacity: shop.active ? 1 : 0.5 }}>
+                <span style={styles.shopName}>{shop.name}</span>
+                <span style={styles.shopEmail}>{shop.email}</span>
+                <span style={styles.cell}>{shop.cardCount}</span>
+                <span style={styles.cell}>{shop.customerCount}</span>
+                <span style={styles.cell}>{shop.maxTokens}</span>
+                <span style={{
+                  ...styles.status,
+                  background: shop.active ? '#e6f4ea' : '#fce8e6',
+                  color: shop.active ? '#2C5F2E' : '#c00',
+                }}>
               {shop.active ? 'Aktiv' : 'Gesperrt'}
             </span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button
-                style={{
-                  ...styles.btnToggle,
-                  background: shop.active ? '#fce8e6' : '#e6f4ea',
-                  color: shop.active ? '#c00' : '#2C5F2E',
-                }}
-                onClick={() => toggleShop(shop.id)}
-              >
-                {shop.active ? 'Sperren' : 'Entsperren'}
-              </button>
-              <button
-                style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
-                onClick={() => setChangingPasswordFor(shop)}
-              >
-                PW
-              </button>
-            </div>
-          </div>
-        ))}
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                      style={{
+                        ...styles.btnToggle,
+                        background: shop.active ? '#fce8e6' : '#e6f4ea',
+                        color: shop.active ? '#c00' : '#2C5F2E',
+                      }}
+                      onClick={() => toggleShop(shop.id)}
+                  >
+                    {shop.active ? 'Sperren' : 'Entsperren'}
+                  </button>
+                  <button
+                      style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
+                      onClick={() => setChangingPasswordFor(shop)}
+                  >
+                    PW
+                  </button>
+                  <button
+                      style={{ ...styles.btnToggle, background: '#1a1a1a', color: 'white' }}
+                      onClick={() => deleteShop(shop.id, shop.name)}
+                  >
+                    🗑 Löschen
+                  </button>
+                </div>
+              </div>
+          ))}
+        </div>
       </div>
-    </div>
   )
 }
 
@@ -227,23 +254,23 @@ function CreateShop({ onCreated }) {
   }
 
   return (
-    <div style={createStyles.card}>
-      <h2 style={createStyles.title}>Neuen Laden erstellen</h2>
-      {error && <div style={createStyles.error}>{error}</div>}
-      {success && <div style={createStyles.success}>{success}</div>}
-      <form onSubmit={handleCreate} style={createStyles.form}>
-        <input style={createStyles.input} placeholder="Laden-Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
-        <input style={createStyles.input} type="email" placeholder="E-Mail" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
-        <input style={createStyles.input} type="password" placeholder="Passwort (min. 8 Zeichen)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <label style={{ fontSize: '13px', color: '#444', marginBottom: '6px' }}>Max. Staff-Tokens</label>
-          <input style={createStyles.input} type="number" min="1" max="20" value={form.maxTokens} onChange={e => setForm({ ...form, maxTokens: e.target.value })} required />
-        </div>
-        <button style={createStyles.btn} type="submit" disabled={loading}>
-          {loading ? 'Erstelle...' : 'Laden erstellen'}
-        </button>
-      </form>
-    </div>
+      <div style={createStyles.card}>
+        <h2 style={createStyles.title}>Neuen Laden erstellen</h2>
+        {error && <div style={createStyles.error}>{error}</div>}
+        {success && <div style={createStyles.success}>{success}</div>}
+        <form onSubmit={handleCreate} style={createStyles.form}>
+          <input style={createStyles.input} placeholder="Laden-Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
+          <input style={createStyles.input} type="email" placeholder="E-Mail" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+          <input style={createStyles.input} type="password" placeholder="Passwort (min. 8 Zeichen)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={{ fontSize: '13px', color: '#444', marginBottom: '6px' }}>Max. Staff-Tokens</label>
+            <input style={createStyles.input} type="number" min="1" max="20" value={form.maxTokens} onChange={e => setForm({ ...form, maxTokens: e.target.value })} required />
+          </div>
+          <button style={createStyles.btn} type="submit" disabled={loading}>
+            {loading ? 'Erstelle...' : 'Laden erstellen'}
+          </button>
+        </form>
+      </div>
   )
 }
 
@@ -281,20 +308,20 @@ function ChangePassword({ shop, onDone }) {
   }
 
   return (
-    <div style={createStyles.card}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h2 style={{ ...createStyles.title, margin: 0 }}>Passwort andern: {shop.name}</h2>
-        <button onClick={onDone} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888' }}>x</button>
+      <div style={createStyles.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h2 style={{ ...createStyles.title, margin: 0 }}>Passwort andern: {shop.name}</h2>
+          <button onClick={onDone} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888' }}>x</button>
+        </div>
+        {error && <div style={createStyles.error}>{error}</div>}
+        {success && <div style={createStyles.success}>{success}</div>}
+        <form onSubmit={handleChange} style={createStyles.form}>
+          <input style={createStyles.input} type="password" placeholder="Neues Passwort (min. 8 Zeichen)" value={password} onChange={e => setPassword(e.target.value)} required />
+          <button style={createStyles.btn} type="submit" disabled={loading}>
+            {loading ? 'Andert...' : 'Passwort andern'}
+          </button>
+        </form>
       </div>
-      {error && <div style={createStyles.error}>{error}</div>}
-      {success && <div style={createStyles.success}>{success}</div>}
-      <form onSubmit={handleChange} style={createStyles.form}>
-        <input style={createStyles.input} type="password" placeholder="Neues Passwort (min. 8 Zeichen)" value={password} onChange={e => setPassword(e.target.value)} required />
-        <button style={createStyles.btn} type="submit" disabled={loading}>
-          {loading ? 'Andert...' : 'Passwort andern'}
-        </button>
-      </form>
-    </div>
   )
 }
 
@@ -329,8 +356,8 @@ const styles = {
   statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
   statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
   table: { background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'auto' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '700px' },
-  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '700px' },
+  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1.5fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '800px' },
+  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1.5fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '800px' },
   shopName: { fontSize: '14px', fontWeight: '600', color: '#1a1a1a' },
   shopEmail: { fontSize: '12px', color: '#666' },
   cell: { fontSize: '13px', color: '#666' },
