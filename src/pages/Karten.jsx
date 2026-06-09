@@ -1,6 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import api from '../api'
 
+// ─── Responsive Hook ──────────────────────────────────────────────────────────
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return isMobile
+}
+
 const PRESETS = [
   { key: 'coffee', label: 'Kaffee' },
   { key: 'star',   label: 'Stern'  },
@@ -97,7 +108,6 @@ function MockQR({ size=64 }) {
 function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
   const d = {...DEFAULT_DESIGN, ...design}
   const useUpload = d.stampIconType==='upload' && d.stampIconUrl
-  const cols = threshold<=5 ? threshold : Math.ceil(threshold/2)
   return (
     <div style={{width:210,background:'#1c1c1e',borderRadius:30,padding:'10px 8px 14px',boxShadow:'0 16px 48px rgba(0,0,0,0.45)',margin:'0 auto'}}>
       <div style={{width:65,height:8,background:'#333',borderRadius:4,margin:'0 auto 7px'}}/>
@@ -115,13 +125,10 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
               <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={useUpload} stampIconUrl={d.stampIconUrl}/>
             </div>
           ) : (
-            <>
-              <div style={{display:'flex',gap:10,padding:'3px 8px 7px'}}>
-                <div><div style={{fontSize:7,fontWeight:700,letterSpacing:0.4,color:d.colorLabel,marginBottom:1}}>BELOHNUNG</div><div style={{fontSize:9,fontWeight:600}}>{rewardText||'—'}</div></div>
-                <div><div style={{fontSize:7,fontWeight:700,letterSpacing:0.4,color:d.colorLabel,marginBottom:1}}>KARTE</div><div style={{fontSize:9,fontWeight:600}}>{cardName||'—'}</div></div>
-              </div>
-
-            </>
+            <div style={{display:'flex',gap:10,padding:'3px 8px 7px'}}>
+              <div><div style={{fontSize:7,fontWeight:700,letterSpacing:0.4,color:d.colorLabel,marginBottom:1}}>BELOHNUNG</div><div style={{fontSize:9,fontWeight:600}}>{rewardText||'—'}</div></div>
+              <div><div style={{fontSize:7,fontWeight:700,letterSpacing:0.4,color:d.colorLabel,marginBottom:1}}>KARTE</div><div style={{fontSize:9,fontWeight:600}}>{cardName||'—'}</div></div>
+            </div>
           )}
           <div style={{display:'flex',justifyContent:'center',padding:7,background:'rgba(255,255,255,0.1)'}}><MockQR size={52}/></div>
         </div>
@@ -338,6 +345,7 @@ const dp = {
 // ─── Haupt-Komponente ────────────────────────────────────────────────────────
 
 export default function Karten() {
+  const isMobile = useIsMobile()
   const [cards, setCards] = useState([])
   const [shop, setShop] = useState(null)
   const [mode, setMode] = useState('list')
@@ -367,7 +375,7 @@ export default function Karten() {
 
   async function loadCards() {
     const r = await api.get('/api/shop/cards')
-    setCards(r.data)
+    setCards(Array.isArray(r.data) ? r.data : [])
   }
 
   async function createCard() {
@@ -428,6 +436,24 @@ export default function Karten() {
   const threshold = parseInt(form.rewardThreshold)||10
   const editThreshold = editCard?.rewardThreshold||10
 
+  // Vorschau-Bereich — wird unten angezeigt (CREATE + EDIT)
+  const PreviewSection = ({ design: d, stamps, thr, rewardText, cardName }) => (
+    <div style={{
+      background:'white', borderRadius:12, padding:20,
+      boxShadow:'0 2px 8px rgba(0,0,0,0.06)',
+      display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center'
+    }}>
+      <div>
+        <div style={s.previewLabel}>Apple Wallet</div>
+        <ApplePreview design={d} stamps={stamps} threshold={thr} rewardText={rewardText} cardName={cardName}/>
+      </div>
+      <div>
+        <div style={s.previewLabel}>Google Wallet</div>
+        <GooglePreview design={d} stamps={stamps} threshold={thr} rewardText={rewardText} cardName={cardName}/>
+      </div>
+    </div>
+  )
+
   // ─── LIST ───────────────────────────────────────────────────────────────
   if (mode==='list') return (
     <div>
@@ -468,8 +494,16 @@ export default function Karten() {
         <div><h1 style={s.title}>Neue Karte</h1><p style={s.subtitle}>Infos + vollständiges Design</p></div>
         <button style={s.btnSecondary} onClick={()=>setMode('list')}>← Zurück</button>
       </div>
-      <div style={s.createGrid}>
-        {/* Spalte 1: Infos */}
+
+      {/* Auf Mobile: alles untereinander. Auf Desktop: Infos + Design nebeneinander */}
+      <div style={{
+        display:'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap:20,
+        alignItems:'start',
+        marginBottom:20,
+      }}>
+        {/* Infos */}
         <div style={s.panel}>
           <div style={s.panelTitle}>Karten-Infos</div>
           {[
@@ -501,20 +535,21 @@ export default function Karten() {
           </button>
         </div>
 
-        {/* Spalte 2: Design */}
-        <div style={{...s.panel,maxHeight:'80vh',overflowY:'auto'}}>
+        {/* Design */}
+        <div style={{...s.panel, maxHeight: isMobile ? 'none' : '80vh', overflowY: isMobile ? 'visible' : 'auto'}}>
           <div style={s.panelTitle}>Design</div>
           <DesignPanel design={design} onChange={setDesign}/>
         </div>
-
-        {/* Spalte 3: Vorschau */}
-        <div>
-          <div style={s.previewLabel}>Apple Wallet</div>
-          <ApplePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name}/>
-          <div style={{...s.previewLabel,marginTop:20}}>Google Wallet</div>
-          <GooglePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name}/>
-        </div>
       </div>
+
+      {/* Vorschau — immer volle Breite unten */}
+      <PreviewSection
+        design={design}
+        stamps={previewStamps}
+        thr={threshold}
+        rewardText={form.rewardText}
+        cardName={form.name}
+      />
     </div>
   )
 
@@ -528,21 +563,24 @@ export default function Karten() {
           <button style={s.btnSecondary} onClick={()=>setMode('list')}>← Zurück</button>
         </div>
       </div>
-      <div style={s.editGrid}>
-        <div style={{...s.panel,maxHeight:'80vh',overflowY:'auto'}}>
-          <div style={s.panelTitle}>Design</div>
-          <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id}/>
-          <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
-            {saved?'✓ Gespeichert!':loading?'Speichere…':'Speichern'}
-          </button>
-        </div>
-        <div>
-          <div style={s.previewLabel}>Apple Wallet</div>
-          <ApplePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name}/>
-          <div style={{...s.previewLabel,marginTop:20}}>Google Wallet</div>
-          <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name}/>
-        </div>
+
+      {/* Design Panel */}
+      <div style={{...s.panel, maxHeight: isMobile ? 'none' : '80vh', overflowY: isMobile ? 'visible' : 'auto', marginBottom:20}}>
+        <div style={s.panelTitle}>Design</div>
+        <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id}/>
+        <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
+          {saved?'✓ Gespeichert!':loading?'Speichere…':'Speichern'}
+        </button>
       </div>
+
+      {/* Vorschau — immer volle Breite unten */}
+      <PreviewSection
+        design={editDesign}
+        stamps={Math.floor(editThreshold/2)}
+        thr={editThreshold}
+        rewardText={editCard.rewardText}
+        cardName={editCard.name}
+      />
     </div>
   )
 }
@@ -556,8 +594,6 @@ const s = {
   btnDelete2: {background:'#fce8e6',color:'#c00',border:'none',borderRadius:10,padding:'10px 18px',fontSize:14,fontWeight:600,cursor:'pointer'},
   panel: {background:'white',borderRadius:12,padding:20,boxShadow:'0 2px 8px rgba(0,0,0,0.06)'},
   panelTitle: {fontSize:14,fontWeight:700,color:'#1a1a1a',marginBottom:16},
-  createGrid: {display:'grid',gridTemplateColumns:'1fr 1fr 210px',gap:20,alignItems:'start'},
-  editGrid: {display:'grid',gridTemplateColumns:'1fr 210px',gap:20,alignItems:'start'},
   field: {display:'flex',flexDirection:'column',marginBottom:12},
   label: {fontSize:13,fontWeight:500,color:'#444',marginBottom:5},
   input: {padding:'9px 13px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:14,outline:'none',boxSizing:'border-box'},
