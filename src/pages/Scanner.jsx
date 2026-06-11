@@ -18,6 +18,10 @@ export default function Scanner() {
   const scanningRef = useRef(false)
   const navigate = useNavigate()
 
+  // Zurück-Pfeil führt zum Dashboard — das gibt es nur für eingeloggte Besitzer.
+  // Ohne Besitzer-Login (token) ist es ein Scanner-Gerät → kein Zurück-Pfeil.
+  const isScannerDevice = !localStorage.getItem('token')
+
   useEffect(() => {
     inputRef.current?.focus()
     return () => stopCamera()
@@ -71,15 +75,15 @@ export default function Scanner() {
     try {
       html5QrRef.current = new Html5Qrcode('qr-reader')
       await html5QrRef.current.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => {
-          if (!scanningRef.current) {
-            scanningRef.current = true
-            handleQrScanned(decodedText)
-          }
-        },
-        () => {}
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            if (!scanningRef.current) {
+              scanningRef.current = true
+              handleQrScanned(decodedText)
+            }
+          },
+          () => {}
       )
     } catch (e) {
       console.error(e)
@@ -113,78 +117,81 @@ export default function Scanner() {
   }
 
   return (
-    <div>
-      <div style={styles.header}>
-        <button style={styles.backBtn} onClick={() => navigate('/')}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-        </button>
-        <h1 style={styles.title}>{t('scan_title')}</h1>
-      </div>
-
-      <div id="qr-reader" style={{ display: cameraActive ? 'block' : 'none', width: '100%', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px' }} />
-
-      {cameraActive && (
-        <button style={styles.btnStop} onClick={stopCamera}>{t('scan_stop_camera')}</button>
-      )}
-
-      {result && (
-        <div style={{
-          ...styles.resultBox,
-          background: result.success ? result.data.action === 'redeemed' ? '#FFF8E1' : '#F0FFF4' : '#FFF0F0',
-          borderColor: result.success ? result.data.action === 'redeemed' ? '#FFB300' : '#2C5F2E' : '#D00',
-        }}>
-          <div style={styles.resultIcon}>
-            {result.success ? result.data.action === 'redeemed' ? '🎉' : result.data.action === 'full' ? '🎊' : '✓' : '✗'}
-          </div>
-          <div style={styles.resultMessage}>{result.success ? result.data.message : result.message}</div>
-          {result.success && (
-            <div style={styles.resultStamps}>
-              {result.data.stamps}/{result.data.rewardThreshold} {t('scan_title')}
-              {result.data.stampsAdded > 1 && <span style={styles.badge}>+{result.data.stampsAdded}</span>}
-            </div>
+      <div>
+        <div style={styles.header}>
+          {/* Zurück-Pfeil nur für eingeloggte Besitzer — auf reinen Scanner-Geräten ausgeblendet */}
+          {!isScannerDevice && (
+              <button style={styles.backBtn} onClick={() => navigate('/')}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 12H5M12 5l-7 7 7 7"/>
+                </svg>
+              </button>
           )}
-          <button style={styles.btnNext} onClick={nextCustomer}>{t('scan_next')}</button>
+          <h1 style={styles.title}>{t('scan_title')}</h1>
         </div>
-      )}
 
-      {pendingScan && !result && (
-        <div style={styles.popup}>
-          <div style={styles.popupIcon}>✅</div>
-          <h2 style={styles.popupTitle}>{t('scan_detected')}</h2>
-          <p style={styles.popupSubtitle}>{t('scan_how_many')}</p>
-          <div style={styles.countButtons}>
-            {[1,2,3,4,5,6,7,8,9,10].map(n => (
-              <button key={n} style={{ ...styles.countBtn, background: selectedCount === n ? '#3C3489' : '#f0f0f0', color: selectedCount === n ? 'white' : '#333' }} onClick={() => setSelectedCount(n)}>{n}</button>
-            ))}
-          </div>
-          <button style={styles.confirmBtn} onClick={confirmScan} disabled={loading}>
-            {loading ? t('scan_processing') : `${selectedCount} ${t('scan_confirm')}`}
-          </button>
-          <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
-        </div>
-      )}
+        <div id="qr-reader" style={{ display: cameraActive ? 'block' : 'none', width: '100%', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px' }} />
 
-      {!pendingScan && !result && !cameraActive && (
-        <>
-          <p style={styles.subtitle}>{t('scan_ready')}</p>
-          <input ref={inputRef} style={styles.hiddenInput} type="text" value={qrInput} onChange={e => setQrInput(e.target.value)} disabled={loading} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
-          <div style={styles.scanArea} onClick={() => inputRef.current?.focus()}>
-            <div style={styles.scanIcon}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3C3489" strokeWidth="1.5">
-                <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/>
-                <rect x="3" y="16" width="5" height="5"/><path d="M16 16h2v2h-2z"/>
-                <path d="M18 16h2v2h-2z"/><path d="M16 18h2v2h-2z"/><path d="M18 18h2v2h-2z"/>
-              </svg>
+        {cameraActive && (
+            <button style={styles.btnStop} onClick={stopCamera}>{t('scan_stop_camera')}</button>
+        )}
+
+        {result && (
+            <div style={{
+              ...styles.resultBox,
+              background: result.success ? result.data.action === 'redeemed' ? '#FFF8E1' : '#F0FFF4' : '#FFF0F0',
+              borderColor: result.success ? result.data.action === 'redeemed' ? '#FFB300' : '#2C5F2E' : '#D00',
+            }}>
+              <div style={styles.resultIcon}>
+                {result.success ? result.data.action === 'redeemed' ? '🎉' : result.data.action === 'full' ? '🎊' : '✓' : '✗'}
+              </div>
+              <div style={styles.resultMessage}>{result.success ? result.data.message : result.message}</div>
+              {result.success && (
+                  <div style={styles.resultStamps}>
+                    {result.data.stamps}/{result.data.rewardThreshold} {t('scan_title')}
+                    {result.data.stampsAdded > 1 && <span style={styles.badge}>+{result.data.stampsAdded}</span>}
+                  </div>
+              )}
+              <button style={styles.btnNext} onClick={nextCustomer}>{t('scan_next')}</button>
             </div>
-            <div style={styles.scanText}>{t('scan_ready')}</div>
-            <div style={styles.scanHint}>{t('scan_hint')}</div>
-          </div>
-          <button style={styles.btnCamera} onClick={startCamera}>{t('scan_camera')}</button>
-        </>
-      )}
-    </div>
+        )}
+
+        {pendingScan && !result && (
+            <div style={styles.popup}>
+              <div style={styles.popupIcon}>✅</div>
+              <h2 style={styles.popupTitle}>{t('scan_detected')}</h2>
+              <p style={styles.popupSubtitle}>{t('scan_how_many')}</p>
+              <div style={styles.countButtons}>
+                {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                    <button key={n} style={{ ...styles.countBtn, background: selectedCount === n ? '#3C3489' : '#f0f0f0', color: selectedCount === n ? 'white' : '#333' }} onClick={() => setSelectedCount(n)}>{n}</button>
+                ))}
+              </div>
+              <button style={styles.confirmBtn} onClick={confirmScan} disabled={loading}>
+                {loading ? t('scan_processing') : `${selectedCount} ${t('scan_confirm')}`}
+              </button>
+              <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
+            </div>
+        )}
+
+        {!pendingScan && !result && !cameraActive && (
+            <>
+              <p style={styles.subtitle}>{t('scan_ready')}</p>
+              <input ref={inputRef} style={styles.hiddenInput} type="text" value={qrInput} onChange={e => setQrInput(e.target.value)} disabled={loading} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false" />
+              <div style={styles.scanArea} onClick={() => inputRef.current?.focus()}>
+                <div style={styles.scanIcon}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3C3489" strokeWidth="1.5">
+                    <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/>
+                    <rect x="3" y="16" width="5" height="5"/><path d="M16 16h2v2h-2z"/>
+                    <path d="M18 16h2v2h-2z"/><path d="M16 18h2v2h-2z"/><path d="M18 18h2v2h-2z"/>
+                  </svg>
+                </div>
+                <div style={styles.scanText}>{t('scan_ready')}</div>
+                <div style={styles.scanHint}>{t('scan_hint')}</div>
+              </div>
+              <button style={styles.btnCamera} onClick={startCamera}>{t('scan_camera')}</button>
+            </>
+        )}
+      </div>
   )
 }
 

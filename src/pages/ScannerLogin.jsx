@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import { useLang } from '../LangContext'
@@ -9,6 +9,13 @@ export default function ScannerLogin() {
   const [cameraActive, setCameraActive] = useState(false)
   const html5QrRef = useRef(null)
   const navigate = useNavigate()
+  // Schon eingerichtet? Dann direkt zum Scanner (PWA startet hier via start_url)
+  useEffect(() => {
+    const saved = localStorage.getItem('staffToken')
+    if (saved && saved !== 'undefined' && saved !== 'null' && saved.length >= 8) {
+      navigate('/scanner', { replace: true })
+    }
+  }, [navigate])
   // Token aus Setup-Link (?token=...) oder rohem Token extrahieren
   function extractToken(raw) {
     const text = raw.trim()

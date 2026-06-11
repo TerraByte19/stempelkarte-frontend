@@ -2,7 +2,7 @@
   "name": "StampIT",
   "short_name": "StampIT",
   "description": "Digitale Stempelkarten für deinen Laden",
-  "start_url": "/",
+  "start_url": "/scanner-login",
   "display": "standalone",
   "background_color": "#f5f5f7",
   "theme_color": "#3C3489",
