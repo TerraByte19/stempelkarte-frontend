@@ -18,9 +18,15 @@ export default function Scanner() {
   const scanningRef = useRef(false)
   const navigate = useNavigate()
 
-  // Zurück-Pfeil führt zum Dashboard — das gibt es nur für eingeloggte Besitzer.
-  // Ohne Besitzer-Login (token) ist es ein Scanner-Gerät → kein Zurück-Pfeil.
+  // Besitzer (mit token) → Zurück-Pfeil zum Dashboard.
+  // Mitarbeiter (nur staffToken) → Abmelden-Button zurück zum Login.
   const isScannerDevice = !localStorage.getItem('token')
+
+  function logout() {
+    localStorage.removeItem('staffToken')
+    localStorage.removeItem('staffTokenLabel')
+    navigate('/login')
+  }
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -119,8 +125,10 @@ export default function Scanner() {
   return (
       <div>
         <div style={styles.header}>
-          {/* Zurück-Pfeil nur für eingeloggte Besitzer — auf reinen Scanner-Geräten ausgeblendet */}
-          {!isScannerDevice && (
+          {/* Besitzer: Pfeil zum Dashboard. Mitarbeiter: Abmelden zurück zum Login. */}
+          {isScannerDevice ? (
+              <button style={styles.backBtn} onClick={logout}>Abmelden</button>
+          ) : (
               <button style={styles.backBtn} onClick={() => navigate('/')}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M19 12H5M12 5l-7 7 7 7"/>

@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import { useLang } from '../LangContext'
+
+// wird nicht verwendet
 export default function ScannerLogin() {
   const { t } = useLang()
   const [token, setToken] = useState('')

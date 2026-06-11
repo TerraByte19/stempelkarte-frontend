@@ -6,7 +6,6 @@ import Karten from './pages/Karten'
 import Profil from './pages/Profil'
 import Layout from './components/Layout'
 import Scanner from './pages/Scanner'
-import ScannerLogin from './pages/ScannerLogin'
 import Admin from './pages/Admin'
 import InstallBanner from './components/InstallBanner'
 
@@ -14,8 +13,8 @@ function App() {
   const token = localStorage.getItem('token')
   const staffToken = localStorage.getItem('staffToken')
 
-  // Scanner-Gerät = hat staffToken, aber KEIN Shop-Login (token)
-  // → solche Geräte sollen NIE das Dashboard/Login sehen, nur den Scanner
+  // Scanner-Gerät = hat staffToken, aber KEIN Besitzer-Login (token)
+  // → solche Geräte sollen direkt den Scanner sehen
   const isScannerDevice = !token && staffToken && staffToken !== 'undefined' && staffToken !== 'null'
 
   // Root-Route abhängig vom Gerätetyp bestimmen
@@ -31,7 +30,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           {/* /register deaktiviert — Läden werden nur über Admin-Panel angelegt */}
           <Route path="/register" element={<Navigate to="/login" />} />
-          <Route path="/scanner-login" element={<ScannerLogin />} />
+          {/* /scanner-login entfällt — Mitarbeiter melden sich auf /login an */}
+          <Route path="/scanner-login" element={<Navigate to="/login" replace />} />
           <Route path="/scanner" element={<Scanner />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/" element={rootElement()}>
