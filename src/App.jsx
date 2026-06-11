@@ -26,23 +26,23 @@ function App() {
   }
 
   return (
-    <LangProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        {/* /register deaktiviert — Läden werden nur über Admin-Panel angelegt */}
-        <Route path="/register" element={<Navigate to="/login" />} />
-        <Route path="/scanner-login" element={<ScannerLogin />} />
-        <Route path="/scanner" element={<Scanner />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/" element={rootElement()}>
-          <Route index element={<Dashboard />} />
-          <Route path="karten" element={<Karten />} />
-          <Route path="profil" element={<Profil />} />
-        </Route>
-      </Routes>
+      <LangProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          {/* /register deaktiviert — Läden werden nur über Admin-Panel angelegt */}
+          <Route path="/register" element={<Navigate to="/login" />} />
+          <Route path="/scanner-login" element={<ScannerLogin />} />
+          <Route path="/scanner" element={<Scanner />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/" element={rootElement()}>
+            <Route index element={<Dashboard />} />
+            <Route path="karten" element={<Karten />} />
+            <Route path="profil" element={<Profil />} />
+          </Route>
+        </Routes>
 
-      <InstallBanner />
-    </LangProvider>
+        <InstallBanner />
+      </LangProvider>
   )
 }
 

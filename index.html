@@ -12,13 +12,20 @@
   <meta name="apple-mobile-web-app-title" content="StampIT" />
   <link rel="apple-touch-icon" href="/icon-192.png" />
 
-  <!-- PWA Android/Chrome -->
-  <link rel="manifest" href="/manifest.json" />
 
   <!-- Verhindert Zoomen auf Scanner-Seite -->
   <meta name="mobile-web-app-capable" content="yes" />
 
-  <title>StampIT</title>
+  <title>StampIT</title><script>
+  (function () {
+    var isScanner = location.pathname.startsWith('/scanner');
+    var link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = isScanner ? '/manifest-scanner.json' : '/manifest.json';
+    document.head.appendChild(link);
+  })();
+</script>
+
 </head>
 
 <body>
