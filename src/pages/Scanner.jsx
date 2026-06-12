@@ -147,12 +147,19 @@ export default function Scanner() {
         {result && (
             <div style={{
               ...styles.resultBox,
-              background: result.success ? result.data.action === 'redeemed' ? '#FFF8E1' : '#F0FFF4' : '#FFF0F0',
-              borderColor: result.success ? result.data.action === 'redeemed' ? '#FFB300' : '#2C5F2E' : '#D00',
+              background: result.success
+                  ? (result.data.action === 'redeemed' || result.data.rewardEarned) ? '#FFF8E1' : '#F0FFF4'
+                  : '#FFF0F0',
+              borderColor: result.success
+                  ? (result.data.action === 'redeemed' || result.data.rewardEarned) ? '#FFB300' : '#2C5F2E'
+                  : '#D00',
             }}>
               <div style={styles.resultIcon}>
-                {result.success ? result.data.action === 'redeemed' ? '🎉' : result.data.action === 'full' ? '🎊' : '✓' : '✗'}
+                {result.success ? result.data.action === 'redeemed' ? '🎉' : result.data.rewardEarned ? '🎊' : '✓' : '✗'}
               </div>
+              {result.success && result.data.rewardEarned && (
+                  <div style={styles.fullBanner}>🎉 Belohnung verdient: {result.data.rewardText}</div>
+              )}
               <div style={styles.resultMessage}>{result.success ? result.data.message : result.message}</div>
               {result.success && (
                   <div style={styles.resultStamps}>
@@ -219,6 +226,7 @@ const styles = {
   badge: { background: '#3C3489', color: 'white', borderRadius: '20px', padding: '2px 10px', fontSize: '12px', marginLeft: '8px' },
   resultBox: { borderRadius: '12px', padding: '24px', marginBottom: '20px', textAlign: 'center', border: '2px solid' },
   resultIcon: { fontSize: '36px', marginBottom: '8px' },
+  fullBanner: { fontSize: '20px', fontWeight: '800', color: '#B8860B', marginBottom: '4px' },
   resultMessage: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '4px' },
   resultStamps: { fontSize: '14px', color: '#666', marginBottom: '16px' },
   btnNext: { background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 24px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
