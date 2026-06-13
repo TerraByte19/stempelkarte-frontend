@@ -3,11 +3,10 @@ import api from '../api'
 
 /**
  * Newsletter-Bereich fürs Dashboard.
- * Besitzer gibt Betreff + Text ein und kann optional MEHRERE Bilder
- * hinzufügen (z.B. Menü, Aktionsfotos) → wird an alle Kunden gesendet,
- * die der Werbung zugestimmt UND ihre E-Mail bestätigt haben.
- * Logo + Hero-Bild des Ladens werden automatisch im Header jeder Mail
- * angezeigt (kein extra Schritt nötig).
+ * - Newsletter schreiben (Betreff + Text + mehrere Bilder), an alle Kunden
+ *   mit Einwilligung + bestätigter E-Mail senden.
+ * - Verlauf der zuletzt gesendeten Newsletter (5 pro Seite, blätterbar).
+ * Logo + Hero-Bild des Ladens werden automatisch im Mail-Header angezeigt.
  */
 export default function NewsletterSection() {
     const [recipients, setRecipients] = useState({ total: 0, confirmed: 0 })
@@ -20,11 +19,30 @@ export default function NewsletterSection() {
     const [open, setOpen] = useState(false)
     const fileInputRef = useRef(null)
 
+    // Verlauf
+    const [historyOpen, setHistoryOpen] = useState(false)
+    const [history, setHistory] = useState({ items: [], page: 0, totalPages: 0, totalItems: 0 })
+    const [historyLoading, setHistoryLoading] = useState(false)
+
     useEffect(() => {
         api.get('/api/shop/newsletter/recipients')
             .then(r => setRecipients(r.data || { total: 0, confirmed: 0 }))
             .catch(() => {})
     }, [])
+
+    function loadHistory(page = 0) {
+        setHistoryLoading(true)
+        api.get(`/api/shop/newsletter/history?page=${page}&size=5`)
+            .then(r => setHistory(r.data || { items: [], page: 0, totalPages: 0, totalItems: 0 }))
+            .catch(() => {})
+            .finally(() => setHistoryLoading(false))
+    }
+
+    function toggleHistory() {
+        const next = !historyOpen
+        setHistoryOpen(next)
+        if (next) loadHistory(0)
+    }
 
     function pickImages() {
         fileInputRef.current?.click()
@@ -77,11 +95,21 @@ export default function NewsletterSection() {
             setSubject('')
             setBody('')
             setImageUrls([])
+            // Verlauf aktualisieren, falls geöffnet
+            if (historyOpen) loadHistory(0)
         } catch (e) {
             setFeedback({ ok: false, text: 'Fehler beim Versand. Bitte später erneut versuchen.' })
         } finally {
             setSending(false)
         }
+    }
+
+    function formatDate(iso) {
+        try {
+            const d = new Date(iso)
+            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+        } catch { return iso }
     }
 
     return (
@@ -96,9 +124,14 @@ export default function NewsletterSection() {
                             : ' alle bestätigt'}
                     </p>
                 </div>
-                <button style={s.toggle} onClick={() => setOpen(o => !o)}>
-                    {open ? 'Schließen' : 'Newsletter schreiben'}
-                </button>
+                <div style={s.headerButtons}>
+                    <button style={s.toggleSecondary} onClick={toggleHistory}>
+                        {historyOpen ? 'Verlauf zu' : '🕓 Verlauf'}
+                    </button>
+                    <button style={s.toggle} onClick={() => setOpen(o => !o)}>
+                        {open ? 'Schließen' : 'Newsletter schreiben'}
+                    </button>
+                </div>
             </div>
 
             {open && (
@@ -169,6 +202,59 @@ export default function NewsletterSection() {
                     </button>
                 </div>
             )}
+
+            {historyOpen && (
+                <div style={s.body}>
+                    <h3 style={s.historyTitle}>Gesendete Newsletter</h3>
+                    {historyLoading ? (
+                        <p style={s.muted}>Lädt…</p>
+                    ) : history.items.length === 0 ? (
+                        <p style={s.muted}>Noch keine Newsletter gesendet.</p>
+                    ) : (
+                        <>
+                            {history.items.map(item => (
+                                <div key={item.id} style={s.historyItem}>
+                                    <div style={s.historyHead}>
+                                        <span style={s.historySubject}>{item.subject}</span>
+                                        <span style={s.historyMeta}>{formatDate(item.sentAt)}</span>
+                                    </div>
+                                    <div style={s.historyRecipients}>An {item.recipientCount} Kunde(n)</div>
+                                    <div style={s.historyBody}>{item.body}</div>
+                                    {item.imageUrls && item.imageUrls.length > 0 && (
+                                        <div style={s.historyImages}>
+                                            {item.imageUrls.map((url, i) => (
+                                                <img key={i} src={url} alt={`Bild ${i + 1}`} style={s.historyImg} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+
+                            {history.totalPages > 1 && (
+                                <div style={s.pagination}>
+                                    <button
+                                        style={{ ...s.pageBtn, opacity: history.page <= 0 ? 0.4 : 1 }}
+                                        onClick={() => loadHistory(history.page - 1)}
+                                        disabled={history.page <= 0}
+                                    >
+                                        ← Zurück
+                                    </button>
+                                    <span style={s.pageInfo}>
+                    Seite {history.page + 1} von {history.totalPages}
+                  </span>
+                                    <button
+                                        style={{ ...s.pageBtn, opacity: history.page >= history.totalPages - 1 ? 0.4 : 1 }}
+                                        onClick={() => loadHistory(history.page + 1)}
+                                        disabled={history.page >= history.totalPages - 1}
+                                    >
+                                        Weiter →
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
@@ -178,7 +264,9 @@ const s = {
     header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
     title: { fontSize: 16, fontWeight: 600, margin: '0 0 4px', color: '#1a1a1a' },
     hint: { fontSize: 13, color: '#888', margin: 0 },
-    toggle: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0 },
+    headerButtons: { display: 'flex', gap: 8, flexShrink: 0 },
+    toggle: { background: '#3C3489', color: 'white', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
+    toggleSecondary: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
     body: { marginTop: 20, paddingTop: 20, borderTop: '1px solid #f0f0f0' },
     brandingHint: { fontSize: 12, color: '#888', background: '#f7f7fb', borderRadius: 8, padding: '8px 12px', margin: '0 0 12px', lineHeight: 1.5 },
     label: { display: 'block', fontSize: 13, fontWeight: 500, color: '#444', marginBottom: 6, marginTop: 12 },
@@ -192,4 +280,18 @@ const s = {
     legal: { fontSize: 12, color: '#888', margin: '14px 0 16px', lineHeight: 1.5 },
     send: { width: '100%', padding: 14, background: '#3C3489', color: 'white', border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 700, cursor: 'pointer' },
     feedback: { padding: '10px 14px', borderRadius: 8, fontSize: 14, marginBottom: 12 },
+    // Verlauf
+    historyTitle: { fontSize: 14, fontWeight: 600, color: '#1a1a1a', margin: '0 0 12px' },
+    muted: { fontSize: 13, color: '#888', margin: 0 },
+    historyItem: { border: '1px solid #eee', borderRadius: 10, padding: 14, marginBottom: 12 },
+    historyHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' },
+    historySubject: { fontSize: 14, fontWeight: 600, color: '#1a1a1a' },
+    historyMeta: { fontSize: 12, color: '#999', flexShrink: 0 },
+    historyRecipients: { fontSize: 12, color: '#3C3489', marginTop: 2, marginBottom: 8 },
+    historyBody: { fontSize: 13, color: '#444', whiteSpace: 'pre-line', lineHeight: 1.5 },
+    historyImages: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+    historyImg: { width: 80, height: 80, objectFit: 'cover', borderRadius: 6 },
+    pagination: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
+    pageBtn: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
+    pageInfo: { fontSize: 13, color: '#888' },
 }
