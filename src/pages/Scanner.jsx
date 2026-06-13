@@ -158,12 +158,12 @@ export default function Scanner() {
                 {result.success ? result.data.action === 'redeemed' ? '🎉' : result.data.rewardEarned ? '🎊' : '✓' : '✗'}
               </div>
               {result.success && result.data.rewardEarned && (
-                  <div style={styles.fullBanner}>🎉 Belohnung verdient: {result.data.rewardText}</div>
+                  <div style={styles.fullBanner}>🎉 Karte voll! {result.data.rewardText} verdient</div>
               )}
               <div style={styles.resultMessage}>{result.success ? result.data.message : result.message}</div>
               {result.success && (
                   <div style={styles.resultStamps}>
-                    {result.data.stamps}/{result.data.rewardThreshold} {t('scan_title')}
+                    Neuer Stand: {result.data.stamps}/{result.data.rewardThreshold}
                     {result.data.stampsAdded > 1 && <span style={styles.badge}>+{result.data.stampsAdded}</span>}
                   </div>
               )}
