@@ -3,6 +3,7 @@ import { LangProvider } from './LangContext'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Karten from './pages/Karten'
+import Statistik from './pages/Statistik'
 import Profil from './pages/Profil'
 import Layout from './components/Layout'
 import Scanner from './pages/Scanner'
@@ -25,24 +26,25 @@ function App() {
   }
 
   return (
-      <LangProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          {/* /register deaktiviert — Läden werden nur über Admin-Panel angelegt */}
-          <Route path="/register" element={<Navigate to="/login" />} />
-          {/* /scanner-login entfällt — Mitarbeiter melden sich auf /login an */}
-          <Route path="/scanner-login" element={<Navigate to="/login" replace />} />
-          <Route path="/scanner" element={<Scanner />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/" element={rootElement()}>
-            <Route index element={<Dashboard />} />
-            <Route path="karten" element={<Karten />} />
-            <Route path="profil" element={<Profil />} />
-          </Route>
-        </Routes>
+    <LangProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        {/* /register deaktiviert — Läden werden nur über Admin-Panel angelegt */}
+        <Route path="/register" element={<Navigate to="/login" />} />
+        {/* /scanner-login entfällt — Mitarbeiter melden sich auf /login an */}
+        <Route path="/scanner-login" element={<Navigate to="/login" replace />} />
+        <Route path="/scanner" element={<Scanner />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/" element={rootElement()}>
+          <Route index element={<Dashboard />} />
+          <Route path="karten" element={<Karten />} />
+          <Route path="statistik" element={<Statistik />} />
+          <Route path="profil" element={<Profil />} />
+        </Route>
+      </Routes>
 
-        <InstallBanner />
-      </LangProvider>
+      <InstallBanner />
+    </LangProvider>
   )
 }
 
