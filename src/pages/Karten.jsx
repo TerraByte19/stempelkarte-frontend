@@ -76,17 +76,38 @@ function StempelRaster({ stamps, threshold, stampColor, emptyStyle, preset, useU
 }
 
 function MockQR({ size=64 }) {
+  // Realistischeres QR-Muster: 21x21 Module mit Finder-Patterns + Streuung
+  const N = 21
+  const finder = (ox, oy, x, y) => {
+    const dx = x - ox, dy = y - oy
+    if (dx < 0 || dx > 6 || dy < 0 || dy > 6) return null
+    const ring = dx === 0 || dx === 6 || dy === 0 || dy === 6
+    const core = dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4
+    return ring || core
+  }
+  const cells = []
+  // Pseudo-zufälliges, aber stabiles Muster
+  let seed = 7
+  const rnd = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff }
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      let on
+      const f1 = finder(0, 0, x, y)
+      const f2 = finder(N-7, 0, x, y)
+      const f3 = finder(0, N-7, x, y)
+      if (f1 !== null) on = f1
+      else if (f2 !== null) on = f2
+      else if (f3 !== null) on = f3
+      else if ((x===7&&y<8)||(y===7&&x<8)||(x===N-8&&y<8)||(y===7&&x>=N-8)||(x===7&&y>=N-8)) on = false
+      else on = rnd() > 0.52
+      if (on) cells.push(<rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="black"/>)
+    }
+  }
   return (
-    <div style={{background:'white',padding:4,borderRadius:6,display:'inline-block'}}>
-      <svg width={size} height={size} viewBox="0 0 80 80">
-        <rect width="80" height="80" fill="white"/>
-        <rect x="8" y="8" width="20" height="20" fill="black"/><rect x="14" y="14" width="8" height="8" fill="white"/>
-        <rect x="52" y="8" width="20" height="20" fill="black"/><rect x="58" y="14" width="8" height="8" fill="white"/>
-        <rect x="8" y="52" width="20" height="20" fill="black"/><rect x="14" y="58" width="8" height="8" fill="white"/>
-        <rect x="36" y="8" width="6" height="6" fill="black"/><rect x="36" y="20" width="6" height="6" fill="black"/>
-        <rect x="36" y="36" width="6" height="6" fill="black"/><rect x="48" y="48" width="6" height="6" fill="black"/>
-        <rect x="60" y="60" width="6" height="6" fill="black"/><rect x="48" y="60" width="6" height="6" fill="black"/>
-        <rect x="60" y="48" width="6" height="6" fill="black"/>
+    <div style={{background:'white',padding:5,borderRadius:7,display:'inline-block',lineHeight:0}}>
+      <svg width={size} height={size} viewBox={`0 0 ${N} ${N}`} shapeRendering="crispEdges">
+        <rect width={N} height={N} fill="white"/>
+        {cells}
       </svg>
     </div>
   )
@@ -97,33 +118,66 @@ function MockQR({ size=64 }) {
 function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
   const d = {...DEFAULT_DESIGN, ...design}
   const useUpload = d.stampIconType==='upload' && d.stampIconUrl
-  const cols = threshold<=5 ? threshold : Math.ceil(threshold/2)
   return (
-    <div style={{width:210,background:'#1c1c1e',borderRadius:30,padding:'10px 8px 14px',boxShadow:'0 16px 48px rgba(0,0,0,0.45)',margin:'0 auto'}}>
-      <div style={{width:65,height:8,background:'#333',borderRadius:4,margin:'0 auto 7px'}}/>
-      <div style={{background:'#f2f2f7',borderRadius:20,overflow:'hidden',padding:8}}>
-        <div style={{borderRadius:11,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 4px 14px rgba(0,0,0,0.2)'}}>
-          <div style={{display:'flex',alignItems:'center',gap:5,padding:'8px 8px 5px'}}>
-            <div style={{width:20,height:20,borderRadius:'50%',background:'rgba(255,255,255,0.95)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
-              {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:8,fontWeight:700,color:d.colorBackground}}>SK</span>}
-            </div>
-            <span style={{fontSize:10,fontWeight:700,flex:1}}>{cardName||'Karte'}</span>
-            <span style={{fontSize:10,fontWeight:800,color:d.colorLabel}}>{stamps}/{threshold}</span>
-          </div>
-          {d.walletStyle==='grid' ? (
-            <div style={{padding:'5px 7px',minHeight:60,display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={useUpload} stampIconUrl={d.stampIconUrl}/>
-            </div>
-          ) : (
-            <>
-              <div style={{display:'flex',gap:10,padding:'3px 8px 7px'}}>
-                <div><div style={{fontSize:7,fontWeight:700,letterSpacing:0.4,color:d.colorLabel,marginBottom:1}}>BELOHNUNG</div><div style={{fontSize:9,fontWeight:600}}>{rewardText||'—'}</div></div>
-                <div><div style={{fontSize:7,fontWeight:700,letterSpacing:0.4,color:d.colorLabel,marginBottom:1}}>KARTE</div><div style={{fontSize:9,fontWeight:600}}>{cardName||'—'}</div></div>
+    <div style={{width:236,background:'linear-gradient(160deg,#3a3a3c,#1c1c1e)',borderRadius:42,padding:11,boxShadow:'0 22px 60px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.06)',margin:'0 auto'}}>
+      {/* Bildschirm */}
+      <div style={{background:'#000',borderRadius:32,overflow:'hidden',position:'relative',paddingTop:0}}>
+        {/* Dynamic Island */}
+        <div style={{position:'absolute',top:9,left:'50%',transform:'translateX(-50%)',width:72,height:21,background:'#000',borderRadius:14,zIndex:5}}/>
+        {/* Statusleiste */}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 18px 6px',fontSize:11,color:'white',fontWeight:600,fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif'}}>
+          <span>9:41</span>
+          <span style={{display:'flex',gap:4,alignItems:'center',fontSize:10}}>
+            <span>􀙇</span><span>􀋨</span><span>􀛨</span>
+          </span>
+        </div>
+        {/* Wallet-Hintergrund */}
+        <div style={{background:'#f2f2f7',padding:'8px 10px 16px',minHeight:200}}>
+          {/* Die Karte */}
+          <div style={{borderRadius:13,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 6px 18px rgba(0,0,0,0.28)',fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif'}}>
+            {/* Header: Logo + Name links, Stempelzahl rechts */}
+            <div style={{display:'flex',alignItems:'center',gap:7,padding:'11px 12px 8px'}}>
+              <div style={{width:24,height:24,borderRadius:'50%',background:'rgba(255,255,255,0.97)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
+                {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:9,fontWeight:700,color:d.colorBackground}}>SK</span>}
               </div>
+              <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2}}>{cardName||'Stempelkarte'}</span>
+              <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>{stamps}/{threshold}</span>
+            </div>
 
-            </>
-          )}
-          <div style={{display:'flex',justifyContent:'center',padding:7,background:'rgba(255,255,255,0.1)'}}><MockQR size={52}/></div>
+            {/* Hero-Strip (Apple zeigt das Bild als breiten Strip) */}
+            {d.heroImageUrl && (
+              <img src={d.heroImageUrl} alt="" style={{width:'100%',height:84,objectFit:'cover',display:'block'}}/>
+            )}
+
+            {/* Inhalt je nach Stil */}
+            {d.walletStyle==='grid' ? (
+              <div style={{padding:'10px 10px',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={useUpload} stampIconUrl={d.stampIconUrl}/>
+              </div>
+            ) : (
+              <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>BELOHNUNG</div>
+                  <div style={{fontSize:11,fontWeight:500}}>{rewardText||'—'}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>STEMPEL</div>
+                  <div style={{fontSize:11,fontWeight:500}}>{stamps} von {threshold}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Barcode-Bereich (Apple: heller Block unten mit Seriennummer) */}
+            <div style={{background:'white',padding:'12px 12px 9px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
+              <MockQR size={92}/>
+              <span style={{fontSize:9,color:'#8e8e93',fontFamily:'"SF Mono",monospace',letterSpacing:1}}>CC-7F3A···902B</span>
+            </div>
+          </div>
+
+          {/* Detail-Hinweis unter der Karte (wie echtes Wallet) */}
+          <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:5,marginTop:11,fontSize:11,color:'#8e8e93'}}>
+            <span>􀅴</span><span>Zum Aktualisieren tippen</span>
+          </div>
         </div>
       </div>
     </div>
@@ -133,19 +187,60 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
 function GooglePreview({ design, stamps, threshold, rewardText, cardName }) {
   const d = {...DEFAULT_DESIGN, ...design}
   return (
-    <div style={{borderRadius:14,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 6px 20px rgba(0,0,0,0.15)'}}>
-      <div style={{display:'flex',alignItems:'center',gap:9,padding:'12px 12px 7px'}}>
-        <div style={{width:30,height:30,borderRadius:'50%',background:'white',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'3px solid white':'none',boxSizing:'border-box'}}>
-          {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{color:'#3C3489',fontWeight:700,fontSize:11}}>SK</span>}
+    <div style={{width:236,background:'#fff',borderRadius:24,padding:11,boxShadow:'0 22px 60px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.04)',margin:'0 auto'}}>
+      {/* Android-Bildschirm */}
+      <div style={{background:'#f5f5f7',borderRadius:18,overflow:'hidden'}}>
+        {/* Statusleiste */}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 16px 6px',fontSize:11,color:'#202124',fontWeight:500,fontFamily:'Roboto,"Segoe UI",sans-serif'}}>
+          <span>9:41</span>
+          <span style={{display:'flex',gap:5,fontSize:10}}><span>􀙇</span><span>􀋨</span><span>100%</span></span>
         </div>
-        <div style={{fontSize:13,fontWeight:600}}>{cardName||'Karte'}</div>
+
+        {/* Google Wallet App-Titelzeile */}
+        <div style={{display:'flex',alignItems:'center',gap:8,padding:'4px 14px 10px',fontFamily:'Roboto,sans-serif'}}>
+          <span style={{fontSize:13,color:'#5f6368'}}>←</span>
+          <span style={{fontSize:13,fontWeight:500,color:'#202124',flex:1}}>Wallet</span>
+          <span style={{fontSize:14,color:'#5f6368'}}>⋮</span>
+        </div>
+
+        {/* Die Karte (Google: abgerundet, Hero unten) */}
+        <div style={{margin:'0 12px 14px',borderRadius:16,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 3px 10px rgba(0,0,0,0.2)',fontFamily:'Roboto,"Segoe UI",sans-serif'}}>
+          {/* Kopf: Logo + Name */}
+          <div style={{display:'flex',alignItems:'center',gap:10,padding:'14px 14px 10px'}}>
+            <div style={{width:32,height:32,borderRadius:'50%',background:'white',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
+              {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{color:'#3C3489',fontWeight:700,fontSize:12}}>SK</span>}
+            </div>
+            <div style={{fontSize:14,fontWeight:500,letterSpacing:0.2}}>{cardName||'Stempelkarte'}</div>
+          </div>
+
+          {/* Felder */}
+          <div style={{display:'flex',gap:20,padding:'0 14px 14px'}}>
+            <div>
+              <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>Stempel</div>
+              <div style={{fontSize:14,fontWeight:500}}>{stamps}/{threshold}</div>
+            </div>
+            <div>
+              <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>Belohnung</div>
+              <div style={{fontSize:14,fontWeight:500}}>{rewardText||'—'}</div>
+            </div>
+          </div>
+
+          {/* Stempel-Raster, falls gewählt */}
+          {d.walletStyle==='grid' && (
+            <div style={{padding:'0 14px 12px',display:'flex',justifyContent:'center'}}>
+              <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={d.stampIconType==='upload'&&d.stampIconUrl} stampIconUrl={d.stampIconUrl}/>
+            </div>
+          )}
+
+          {/* QR-Bereich (Google: weißer Block) */}
+          <div style={{background:'white',padding:'14px',display:'flex',justifyContent:'center'}}>
+            <MockQR size={104}/>
+          </div>
+
+          {/* Hero-Image unten (Android-typisch) */}
+          {d.heroImageUrl && <img src={d.heroImageUrl} alt="" style={{width:'100%',height:80,objectFit:'cover',display:'block'}}/>}
+        </div>
       </div>
-      <div style={{display:'flex',gap:14,padding:'0 12px 10px'}}>
-        <div><div style={{fontSize:9,fontWeight:700,letterSpacing:0.5,color:d.colorLabel,marginBottom:2}}>STEMPEL</div><div style={{fontSize:12,fontWeight:600}}>{stamps}/{threshold}</div></div>
-        <div><div style={{fontSize:9,fontWeight:700,letterSpacing:0.5,color:d.colorLabel,marginBottom:2}}>BELOHNUNG</div><div style={{fontSize:12,fontWeight:600}}>{rewardText||'—'}</div></div>
-      </div>
-      {d.heroImageUrl && <img src={d.heroImageUrl} alt="" style={{width:'100%',height:75,objectFit:'cover',display:'block'}}/>}
-      <div style={{display:'flex',justifyContent:'center',padding:10,background:'rgba(255,255,255,0.08)'}}><MockQR size={60}/></div>
     </div>
   )
 }
