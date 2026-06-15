@@ -1,6 +1,7 @@
 export const translations = {
   de: {
     nav_scanner: 'Scanner', nav_dashboard: 'Dashboard', nav_cards: 'Karten',
+    nav_stats: 'Statistik',
     nav_profile: 'Profil', nav_logout: 'Ausloggen',
     dash_welcome: 'Willkommen', dash_subtitle: 'Hier ist deine Übersicht',
     dash_no_cards: 'Noch keine Karten —', dash_create_now: 'Jetzt erstellen',
@@ -65,6 +66,7 @@ export const translations = {
   },
   en: {
     nav_scanner: 'Scanner', nav_dashboard: 'Dashboard', nav_cards: 'Cards',
+    nav_stats: 'Statistics',
     nav_profile: 'Profile', nav_logout: 'Logout',
     dash_welcome: 'Welcome', dash_subtitle: 'Here is your overview',
     dash_no_cards: 'No cards yet —', dash_create_now: 'Create now',

@@ -3,7 +3,6 @@ import api from '../api'
 
 export default function Profil() {
   const [shop, setShop] = useState(null)
-  const [stats, setStats] = useState([])
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [name, setName] = useState('')
@@ -15,10 +14,6 @@ export default function Profil() {
           setName(res.data.name)
         })
         .catch(() => {})
-
-    api.get('/api/shop/stats')
-        .then(res => setStats(Array.isArray(res.data) ? res.data : []))
-        .catch(() => setStats([]))
   }, [])
 
   async function saveName(e) {
@@ -39,55 +34,10 @@ export default function Profil() {
 
   if (!shop) return <div style={s.loading}>Lädt…</div>
 
-  const totalCustomers = stats.reduce((sum, x) => sum + (x.customerCount || 0), 0)
-  const totalStamps = stats.reduce((sum, x) => sum + (x.totalStamps || 0), 0)
-  const totalRewards = stats.reduce((sum, x) => sum + (x.totalRewards || 0), 0)
-
   return (
       <div style={s.page}>
-        <h1 style={s.title}>Profil & Statistiken</h1>
+        <h1 style={s.title}>Profil</h1>
         <p style={s.subtitle}>{shop.name}</p>
-
-        <div style={s.statGrid}>
-          <div style={s.statCard}>
-            <div style={s.statNum}>{stats.length}</div>
-            <div style={s.statLabel}>Karten</div>
-          </div>
-          <div style={s.statCard}>
-            <div style={s.statNum}>{totalCustomers}</div>
-            <div style={s.statLabel}>Kunden</div>
-          </div>
-          <div style={s.statCard}>
-            <div style={s.statNum}>{totalStamps}</div>
-            <div style={s.statLabel}>Stempel vergeben</div>
-          </div>
-          <div style={s.statCard}>
-            <div style={s.statNum}>{totalRewards}</div>
-            <div style={s.statLabel}>Belohnungen eingelöst</div>
-          </div>
-        </div>
-
-        {stats.length > 0 && (
-            <div style={s.card}>
-              <h2 style={s.cardTitle}>Statistik pro Karte</h2>
-              <div style={s.table}>
-                <div style={s.tableHead}>
-                  <span>Karte</span>
-                  <span style={s.center}>Kunden</span>
-                  <span style={s.center}>Stempel</span>
-                  <span style={s.center}>Belohnungen</span>
-                </div>
-                {stats.map(x => (
-                    <div key={x.cardId} style={s.tableRow}>
-                      <span style={s.cardNameCell}>{x.cardName}</span>
-                      <span style={s.center}>{x.customerCount}</span>
-                      <span style={s.center}>{x.totalStamps}</span>
-                      <span style={s.center}>{x.totalRewards}</span>
-                    </div>
-                ))}
-              </div>
-            </div>
-        )}
 
         <div style={s.card}>
           <h2 style={s.cardTitle}>Laden-Name</h2>
@@ -174,17 +124,8 @@ const s = {
   loading: { color: '#888', padding: 40 },
   title: { fontSize: 24, fontWeight: 700, margin: '0 0 4px', color: '#1a1a1a' },
   subtitle: { fontSize: 14, color: '#888', margin: '0 0 24px' },
-  statGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 },
-  statCard: { background: 'white', borderRadius: 12, padding: 18, textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
-  statNum: { fontSize: 30, fontWeight: 700, color: '#3C3489' },
-  statLabel: { fontSize: 12, color: '#888', marginTop: 4 },
   card: { background: 'white', borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   cardTitle: { fontSize: 16, fontWeight: 600, margin: '0 0 16px', color: '#1a1a1a' },
-  table: {},
-  tableHead: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '8px 0', fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '2px solid #f0f0f0' },
-  tableRow: { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '12px 0', borderBottom: '1px solid #f5f5f5', alignItems: 'center' },
-  cardNameCell: { fontSize: 14, fontWeight: 600, color: '#1a1a1a' },
-  center: { textAlign: 'center', fontSize: 14, color: '#666' },
   success: { background: '#f0fff4', color: '#2C5F2E', padding: '10px 14px', borderRadius: 8, fontSize: 14, marginBottom: 14 },
   errorBox: { background: '#fff0f0', color: '#c00', padding: 10, borderRadius: 8, fontSize: 14, marginBottom: 12 },
   input: { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontSize: 14, outline: 'none', boxSizing: 'border-box', marginBottom: 12 },
