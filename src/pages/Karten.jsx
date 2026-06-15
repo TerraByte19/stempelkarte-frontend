@@ -144,11 +144,6 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
               <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>{stamps}/{threshold}</span>
             </div>
 
-            {/* Hero-Strip (Apple zeigt das Bild als breiten Strip) */}
-            {d.heroImageUrl && (
-              <img src={d.heroImageUrl} alt="" style={{width:'100%',height:84,objectFit:'cover',display:'block'}}/>
-            )}
-
             {/* Inhalt je nach Stil */}
             {d.walletStyle==='grid' ? (
               <div style={{padding:'10px 10px',display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -167,10 +162,10 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
               </div>
             )}
 
-            {/* Barcode-Bereich (Apple: heller Block unten mit Seriennummer) */}
-            <div style={{background:'white',padding:'12px 12px 9px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
+            {/* Barcode-Bereich: Hintergrund = Kartenfarbe, nur hinter dem QR weiß */}
+            <div style={{padding:'12px 12px 11px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
               <MockQR size={92}/>
-              <span style={{fontSize:9,color:'#8e8e93',fontFamily:'"SF Mono",monospace',letterSpacing:1}}>CC-7F3A···902B</span>
+              <span style={{fontSize:9,color:d.colorForeground,opacity:0.55,fontFamily:'"SF Mono",monospace',letterSpacing:1}}>CC-7F3A···902B</span>
             </div>
           </div>
 
@@ -232,8 +227,8 @@ function GooglePreview({ design, stamps, threshold, rewardText, cardName }) {
             </div>
           )}
 
-          {/* QR-Bereich (Google: weißer Block) */}
-          <div style={{background:'white',padding:'14px',display:'flex',justifyContent:'center'}}>
+          {/* QR-Bereich: Hintergrund = Kartenfarbe, nur hinter dem QR weiß */}
+          <div style={{padding:'14px',display:'flex',justifyContent:'center'}}>
             <MockQR size={104}/>
           </div>
 
