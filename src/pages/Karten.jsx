@@ -165,13 +165,13 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
             {/* Barcode-Bereich: Hintergrund = Kartenfarbe, nur hinter dem QR weiß */}
             <div style={{padding:'12px 12px 11px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
               <MockQR size={92}/>
-              <span style={{fontSize:9,color:d.colorForeground,opacity:0.55,fontFamily:'"SF Mono",monospace',letterSpacing:1}}>CC-7F3A···902B</span>
+              <span style={{fontSize:9,color:d.colorForeground,opacity:0.55,fontFamily:'"SF Mono",monospace',letterSpacing:1}}></span>
             </div>
           </div>
 
           {/* Detail-Hinweis unter der Karte (wie echtes Wallet) */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:5,marginTop:11,fontSize:11,color:'#8e8e93'}}>
-            <span>􀅴</span><span>Zum Aktualisieren tippen</span>
+            <span></span><span></span>
           </div>
         </div>
       </div>
