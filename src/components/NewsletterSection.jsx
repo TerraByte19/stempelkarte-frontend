@@ -114,7 +114,25 @@ export default function NewsletterSection() {
 
     return (
         <div style={s.card}>
-            <div style={s.header}>
+            <style>{`
+                .sk-nl-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 12px;
+                }
+                .sk-nl-buttons {
+                    display: flex;
+                    gap: 8px;
+                    flex-shrink: 0;
+                }
+                @media (max-width: 600px) {
+                    .sk-nl-header { flex-direction: column; align-items: stretch; }
+                    .sk-nl-buttons { width: 100%; }
+                    .sk-nl-buttons > button { flex: 1; }
+                }
+            `}</style>
+            <div className="sk-nl-header">
                 <div>
                     <h2 style={s.title}>📣 Newsletter</h2>
                     <p style={s.hint}>
@@ -124,7 +142,7 @@ export default function NewsletterSection() {
                             : ' alle bestätigt'}
                     </p>
                 </div>
-                <div style={s.headerButtons}>
+                <div className="sk-nl-buttons">
                     <button style={s.toggleSecondary} onClick={toggleHistory}>
                         {historyOpen ? 'Verlauf zu' : '🕓 Verlauf'}
                     </button>
@@ -261,10 +279,8 @@ export default function NewsletterSection() {
 
 const s = {
     card: { background: 'white', borderRadius: 12, padding: 24, marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
-    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
     title: { fontSize: 16, fontWeight: 600, margin: '0 0 4px', color: '#1a1a1a' },
     hint: { fontSize: 13, color: '#888', margin: 0 },
-    headerButtons: { display: 'flex', gap: 8, flexShrink: 0 },
     toggle: { background: '#3C3489', color: 'white', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
     toggleSecondary: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
     body: { marginTop: 20, paddingTop: 20, borderTop: '1px solid #f0f0f0' },
