@@ -242,7 +242,7 @@ function GooglePreview({ design, stamps, threshold, rewardText, cardName }) {
 
 // ─── Komplettes Design Panel ─────────────────────────────────────────────────
 
-function DesignPanel({ design, onChange, cardId=null }) {
+function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
   const logoRef = useRef()
   const heroRef = useRef()
   const stampRef = useRef()
@@ -265,9 +265,26 @@ function DesignPanel({ design, onChange, cardId=null }) {
     reader.readAsDataURL(file)
   }
 
+  // Stempel-Bild: Im Erstell-Modus (keine cardId) NICHT sofort hochladen —
+  // sonst landet es am Shop und färbt auf andere Karten ab. Stattdessen lokal
+  // als Vorschau zeigen und die Datei nach oben geben; createCard lädt sie
+  // nach dem Anlegen an die frische Karte hoch.
+  function handleStampFile(file) {
+    if (!file) return
+    if (cardId) {
+      upload(file, `/api/shop/cards/${cardId}/stamp-icon`, 'stamp')
+    } else {
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        onChange({...d, stampIconUrl: ev.target.result})  // lokale Data-URL als Vorschau
+        if (onStampFile) onStampFile(file)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const logoEndpoint = cardId ? `/api/shop/cards/${cardId}/logo` : '/api/shop/logo'
   const heroEndpoint = cardId ? `/api/shop/cards/${cardId}/hero` : '/api/shop/hero'
-  const stampEndpoint = cardId ? `/api/shop/cards/${cardId}/stamp-icon` : '/api/shop/stamp-icon'
 
   return (
       <div>
@@ -381,7 +398,7 @@ function DesignPanel({ design, onChange, cardId=null }) {
                   {uploading==='stamp'?'Lädt…':d.stampIconUrl?'Ändern':'Hochladen'}
                 </button>
                 <input ref={stampRef} type="file" accept="image/*" style={{display:'none'}}
-                       onChange={e=>upload(e.target.files[0], stampEndpoint, 'stamp')}/>
+                       onChange={e=>handleStampFile(e.target.files[0])}/>
               </div>
           )}
         </div>
@@ -445,6 +462,7 @@ export default function Karten() {
 
   const [form, setForm] = useState({name:'',description:'',rewardThreshold:10,rewardText:''})
   const [design, setDesign] = useState({...DEFAULT_DESIGN})
+  const [pendingStampFile, setPendingStampFile] = useState(null)
   const [editCard, setEditCard] = useState(null)
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
 
@@ -472,14 +490,37 @@ export default function Karten() {
     if (!form.name||!form.rewardText) return alert('Bitte Name und Belohnung ausfüllen')
     setLoading(true)
     try {
-      await api.post('/api/shop/cards', {
+      // Falls ein eigenes Stempel-Bild ausgewählt wurde, ist stampIconUrl aktuell
+      // eine lokale Data-URL (Vorschau) — die NICHT speichern. Wird nach dem
+      // Anlegen separat an die neue Karte hochgeladen.
+      const { stampIconUrl, ...designToSave } = design
+      const res = await api.post('/api/shop/cards', {
         ...form,
         description: form.description,
         rewardThreshold: parseInt(form.rewardThreshold),
-        ...design,
+        ...designToSave,
       })
+
+      // Stempel-Bild jetzt an die frisch erstellte Karte hochladen
+      if (pendingStampFile && res.data?.id) {
+        try {
+          const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result.split(',')[1])
+            reader.onerror = reject
+            reader.readAsDataURL(pendingStampFile)
+          })
+          const ext = pendingStampFile.name.split('.').pop()
+          await api.post(`/api/shop/cards/${res.data.id}/stamp-icon`, { base64, extension: ext })
+        } catch {
+          alert('Karte wurde erstellt, aber das Stempel-Bild konnte nicht hochgeladen werden. Du kannst es im Bearbeiten-Modus erneut versuchen.')
+        }
+      }
+
       setMode('list')
       setForm({name:'',description:'',rewardThreshold:10,rewardText:''})
+      setDesign({...DEFAULT_DESIGN})
+      setPendingStampFile(null)
       loadCards()
     } catch { alert('Fehler beim Erstellen') }
     finally { setLoading(false) }
@@ -615,7 +656,7 @@ export default function Karten() {
           {/* Spalte 2: Design */}
           <div className="sk-design-col" style={s.panel}>
             <div style={s.panelTitle}>Design</div>
-            <DesignPanel design={design} onChange={setDesign}/>
+            <DesignPanel design={design} onChange={setDesign} onStampFile={setPendingStampFile}/>
           </div>
 
           {/* Vorschau — volle Breite, nebeneinander */}
