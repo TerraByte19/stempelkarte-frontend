@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
 import api from '../api'
+import { useLang } from '../LangContext'
 
 // Basis-URL des Frontends (für den Setup-Link im QR)
 const FRONTEND_URL = window.location.origin
 
 export default function ScannerSetupSection() {
+  const { t } = useLang()
   const [tokens, setTokens] = useState([])
   const [loading, setLoading] = useState(true)
   const [openToken, setOpenToken] = useState(null)
@@ -29,7 +31,7 @@ export default function ScannerSetupSection() {
       setCopied(tokenId)
       setTimeout(() => setCopied(''), 2000)
     } catch {
-      alert('Link: ' + url)
+      alert(`${t('scanner_setup_link_prefix')} ${url}`)
     }
   }
 
@@ -37,30 +39,29 @@ export default function ScannerSetupSection() {
 
   return (
     <div style={s.card}>
-      <h2 style={s.title}>📱 Scanner einrichten</h2>
+      <h2 style={s.title}>{t('scanner_setup_title')}</h2>
       <p style={s.hint}>
-        Lass deine Mitarbeiter den QR-Code mit der Tablet-/Handy-Kamera scannen.
-        Danach ist der Scanner dauerhaft eingerichtet — kein Token-Tippen mehr.
+        {t('scanner_setup_hint')}
       </p>
 
       {tokens.length === 0 ? (
         <div style={s.empty}>
-          Noch keine Staff-Tokens vorhanden. Erstelle einen im Profil-Bereich.
+          {t('scanner_setup_empty')}
         </div>
       ) : (
         <div style={s.tokenGrid}>
-          {tokens.map((t, i) => {
-            const url = setupUrl(t.token, t.label)
-            const isOpen = openToken === t.token
+          {tokens.map((tok, i) => {
+            const url = setupUrl(tok.token, tok.label)
+            const isOpen = openToken === tok.token
             return (
               <div key={i} style={s.tokenCard}>
                 <div style={s.tokenHeader}>
-                  <span style={s.tokenLabel}>{t.label || `Scanner ${i + 1}`}</span>
+                  <span style={s.tokenLabel}>{tok.label || t('scanner_setup_default_label', { n: i + 1 })}</span>
                   <button
                     style={s.toggleBtn}
-                    onClick={() => setOpenToken(isOpen ? null : t.token)}
+                    onClick={() => setOpenToken(isOpen ? null : tok.token)}
                   >
-                    {isOpen ? 'Schließen' : 'QR anzeigen'}
+                    {isOpen ? t('common_close') : t('scanner_setup_show_qr')}
                   </button>
                 </div>
 
@@ -69,12 +70,12 @@ export default function ScannerSetupSection() {
                     <div style={s.qrBox}>
                       <QRCodeCanvas value={url} size={200} level="M" includeMargin={true} />
                     </div>
-                    <p style={s.scanHint}>Mit der Kamera scannen</p>
+                    <p style={s.scanHint}>{t('scanner_setup_scan_hint')}</p>
                     <button
                       style={s.copyBtn}
-                      onClick={() => copyLink(url, t.token)}
+                      onClick={() => copyLink(url, tok.token)}
                     >
-                      {copied === t.token ? '✓ Link kopiert!' : 'Link kopieren'}
+                      {copied === tok.token ? t('scanner_setup_copied') : t('scanner_setup_copy_link')}
                     </button>
                   </div>
                 )}

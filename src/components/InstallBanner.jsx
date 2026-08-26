@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
+import { useLang } from '../LangContext'
 
 export default function InstallBanner() {
+    const { t } = useLang()
     const { prompt, install, isInstalled, isIOS } = useInstallPrompt()
     const [dismissed, setDismissed] = useState(
         () => localStorage.getItem('installDismissed') === 'true'
@@ -21,18 +23,18 @@ export default function InstallBanner() {
             <div style={styles.left}>
                 <div style={styles.icon}>📲</div>
                 <div>
-                    <div style={styles.title}>App installieren</div>
+                    <div style={styles.title}>{t('install_title')}</div>
                     <div style={styles.subtitle}>
                         {isIOS
-                            ? 'Tippe auf Teilen → „Zum Home-Bildschirm"'
-                            : 'Für schnelleren Zugriff auf dem Homescreen'}
+                            ? t('install_ios_hint')
+                            : t('install_hint')}
                     </div>
                 </div>
             </div>
             <div style={styles.right}>
                 {!isIOS && (
                     <button style={styles.btnInstall} onClick={install}>
-                        Installieren
+                        {t('install_btn')}
                     </button>
                 )}
                 <button style={styles.btnDismiss} onClick={dismiss}>✕</button>

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import api from '../api'
+import { useLang } from '../LangContext'
 
 export default function Profil() {
+  const { t } = useLang()
   const [shop, setShop] = useState(null)
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -26,37 +28,37 @@ export default function Profil() {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch {
-      alert('Fehler beim Speichern')
+      alert(t('profil_save_error'))
     } finally {
       setLoading(false)
     }
   }
 
-  if (!shop) return <div style={s.loading}>Lädt…</div>
+  if (!shop) return <div style={s.loading}>{t('common_loading')}</div>
 
   return (
       <div style={s.page}>
-        <h1 style={s.title}>Profil</h1>
+        <h1 style={s.title}>{t('profil_title')}</h1>
         <p style={s.subtitle}>{shop.name}</p>
 
         <div style={s.card}>
-          <h2 style={s.cardTitle}>Laden-Name</h2>
-          {saved && <div style={s.success}>✓ Gespeichert!</div>}
+          <h2 style={s.cardTitle}>{t('profil_shop_name')}</h2>
+          {saved && <div style={s.success}>✓ {t('profil_saved')}</div>}
           <form onSubmit={saveName}>
             <input style={s.input} value={name} onChange={e => setName(e.target.value)} required />
             <button style={s.btnPrimary} type="submit" disabled={loading}>
-              {loading ? 'Speichert…' : 'Speichern'}
+              {loading ? t('profil_saving') : t('profil_save')}
             </button>
           </form>
-          <p style={s.hint}>💡 Logo, Farben & Banner stellst du jetzt direkt bei jeder Karte ein.</p>
+          <p style={s.hint}>{t('profil_design_moved_hint')}</p>
         </div>
 
-        <StaffTokens />
+        <StaffTokens t={t} />
       </div>
   )
 }
 
-function StaffTokens() {
+function StaffTokens({ t }) {
   const [tokens, setTokens] = useState([])
   const [label, setLabel] = useState('')
   const [newToken, setNewToken] = useState(null)
@@ -79,41 +81,41 @@ function StaffTokens() {
           .then(res => setTokens(Array.isArray(res.data) ? res.data : []))
           .catch(() => {})
     } catch (err) {
-      setError(err.response?.data?.error || 'Fehler beim Erstellen')
+      setError(err.response?.data?.error || t('profil_staff_error'))
     }
   }
 
   return (
       <div style={s.card}>
-        <h2 style={s.cardTitle}>Staff-Tokens</h2>
-        <p style={s.hint}>Mitarbeiter brauchen einen Token um Stempel zu vergeben.</p>
+        <h2 style={s.cardTitle}>{t('profil_staff_title')}</h2>
+        <p style={s.hint}>{t('profil_staff_hint')}</p>
 
         {newToken && (
             <div style={s.tokenBox}>
-              <div style={s.tokenLabel}>Neuer Token (kopiere ihn jetzt!):</div>
+              <div style={s.tokenLabel}>{t('profil_staff_new_token')}</div>
               <div style={s.tokenValue}>{newToken}</div>
               <button style={s.btnSecondary} onClick={() => {
                 navigator.clipboard.writeText(newToken)
-                alert('Kopiert!')
-              }}>Kopieren</button>
+                alert(t('profil_staff_copied'))
+              }}>{t('profil_staff_copy')}</button>
             </div>
         )}
 
         {error && <div style={s.errorBox}>{error}</div>}
 
         <div style={s.tokenList}>
-          {tokens.map((t, i) => (
+          {tokens.map((tok, i) => (
               <div key={i} style={s.tokenItem}>
-                <span style={s.tokenItemLabel}>{t.label}</span>
-                <span style={s.tokenFull}>{t.token}</span>
+                <span style={s.tokenItemLabel}>{tok.label}</span>
+                <span style={s.tokenFull}>{tok.token}</span>
               </div>
           ))}
         </div>
 
         <form onSubmit={createToken}>
           <input style={{ ...s.input, marginBottom: 10 }} value={label}
-                 onChange={e => setLabel(e.target.value)} placeholder="z.B. Kasse 1" required />
-          <button style={s.btnPrimary} type="submit">Erstellen</button>
+                 onChange={e => setLabel(e.target.value)} placeholder={t('profil_staff_placeholder')} required />
+          <button style={s.btnPrimary} type="submit">{t('profil_staff_create')}</button>
         </form>
       </div>
   )

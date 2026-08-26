@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import api from '../api'
+import { useLang, dirArrow } from '../LangContext'
 
-const PRESETS = [
-  { key: 'coffee', label: 'Kaffee' },
-  { key: 'star',   label: 'Stern'  },
-  { key: 'heart',  label: 'Herz'  },
-  { key: 'dot',    label: '● Punkt'  },
-  { key: 'square', label: '■ Eckig'  },
-]
+const PRESET_KEYS = ['coffee', 'star', 'heart', 'dot', 'square']
 
 const DEFAULT_DESIGN = {
   colorBackground: '#3C3489',
@@ -115,7 +110,7 @@ function MockQR({ size=64 }) {
 
 // ─── Wallet Vorschauen ───────────────────────────────────────────────────────
 
-function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
+function ApplePreview({ design, stamps, threshold, rewardText, cardName, t }) {
   const d = {...DEFAULT_DESIGN, ...design}
   const useUpload = d.stampIconType==='upload' && d.stampIconUrl
   return (
@@ -140,7 +135,7 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
                 <div style={{width:24,height:24,borderRadius:'50%',background:'rgba(255,255,255,0.97)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
                   {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:9,fontWeight:700,color:d.colorBackground}}>SK</span>}
                 </div>
-                <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2}}>{cardName||'Stempelkarte'}</span>
+                <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2}}>{cardName||t('preview_default_name')}</span>
                 <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>{stamps}/{threshold}</span>
               </div>
 
@@ -152,12 +147,12 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
               ) : (
                   <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>BELOHNUNG</div>
+                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_reward_label')}</div>
                       <div style={{fontSize:11,fontWeight:500}}>{rewardText||'—'}</div>
                     </div>
                     <div>
-                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>STEMPEL</div>
-                      <div style={{fontSize:11,fontWeight:500}}>{stamps} von {threshold}</div>
+                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_stamps_label')}</div>
+                      <div style={{fontSize:11,fontWeight:500}}>{t('preview_stamps_of', { stamps, threshold })}</div>
                     </div>
                   </div>
               )}
@@ -171,7 +166,7 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
 
             {/* Detail-Hinweis unter der Karte (wie echtes Wallet) */}
             <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:5,marginTop:11,fontSize:11,color:'#8e8e93'}}>
-              <span>􀅴</span><span>Zum Aktualisieren tippen</span>
+              <span>􀅴</span><span>{t('preview_tap_update')}</span>
             </div>
           </div>
         </div>
@@ -179,7 +174,7 @@ function ApplePreview({ design, stamps, threshold, rewardText, cardName }) {
   )
 }
 
-function GooglePreview({ design, stamps, threshold, rewardText, cardName }) {
+function GooglePreview({ design, stamps, threshold, rewardText, cardName, t }) {
   const d = {...DEFAULT_DESIGN, ...design}
   return (
       <div style={{width:236,background:'#fff',borderRadius:24,padding:11,boxShadow:'0 22px 60px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.04)',margin:'0 auto'}}>
@@ -205,17 +200,17 @@ function GooglePreview({ design, stamps, threshold, rewardText, cardName }) {
               <div style={{width:32,height:32,borderRadius:'50%',background:'white',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
                 {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{color:'#3C3489',fontWeight:700,fontSize:12}}>SK</span>}
               </div>
-              <div style={{fontSize:14,fontWeight:500,letterSpacing:0.2}}>{cardName||'Stempelkarte'}</div>
+              <div style={{fontSize:14,fontWeight:500,letterSpacing:0.2}}>{cardName||t('preview_default_name')}</div>
             </div>
 
             {/* Felder */}
             <div style={{display:'flex',gap:20,padding:'0 14px 14px'}}>
               <div>
-                <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>Stempel</div>
+                <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>{t('preview_stamps_field')}</div>
                 <div style={{fontSize:14,fontWeight:500}}>{stamps}/{threshold}</div>
               </div>
               <div>
-                <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>Belohnung</div>
+                <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>{t('cards_reward')}</div>
                 <div style={{fontSize:14,fontWeight:500}}>{rewardText||'—'}</div>
               </div>
             </div>
@@ -242,7 +237,7 @@ function GooglePreview({ design, stamps, threshold, rewardText, cardName }) {
 
 // ─── Komplettes Design Panel ─────────────────────────────────────────────────
 
-function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
+function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
   const logoRef = useRef()
   const heroRef = useRef()
   const stampRef = useRef()
@@ -259,7 +254,7 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
         const ext = file.name.split('.').pop()
         const res = await api.post(endpoint, {base64, extension:ext})
         onChange({...d, ...res.data})
-      } catch { alert('Upload fehlgeschlagen') }
+      } catch { alert(t('common_upload_failed')) }
       setUploading('')
     }
     reader.readAsDataURL(file)
@@ -290,11 +285,11 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
       <div>
         {/* ── Farben ── */}
         <div style={dp.section}>
-          <div style={dp.sectionTitle}>Farben</div>
+          <div style={dp.sectionTitle}>{t('design_colors')}</div>
           {[
-            {label:'Hintergrund', key:'colorBackground'},
-            {label:'Textfarbe',   key:'colorForeground'},
-            {label:'Label-Farbe', key:'colorLabel'},
+            {label:t('design_color_bg'), key:'colorBackground'},
+            {label:t('design_color_fg'),   key:'colorForeground'},
+            {label:t('design_color_label'), key:'colorLabel'},
           ].map(({label,key})=>(
               <div key={key} style={dp.field}>
                 <label style={dp.label}>{label}</label>
@@ -309,16 +304,16 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
 
         {/* ── Logo ── */}
         <div style={dp.section}>
-          <div style={dp.sectionTitle}>Logo</div>
+          <div style={dp.sectionTitle}>{t('design_logo')}</div>
           <div style={{display:'flex',alignItems:'center',gap:12}}>
             <div style={{width:52,height:52,borderRadius:10,background:'#f0f0f0',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0}}>
               {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : <span style={{fontSize:11,color:'#aaa'}}>SK</span>}
             </div>
             <div>
               <button style={dp.uploadBtn} onClick={()=>logoRef.current?.click()} disabled={uploading==='logo'}>
-                {uploading==='logo'?'Lädt…':'Logo hochladen'}
+                {uploading==='logo'?t('common_loading'):t('profil_logo_upload')}
               </button>
-              <div style={{fontSize:11,color:'#aaa',marginTop:4}}>PNG, empfohlen 480×150px</div>
+              <div style={{fontSize:11,color:'#aaa',marginTop:4}}>{t('design_logo_hint')}</div>
             </div>
             <input ref={logoRef} type="file" accept="image/*" style={{display:'none'}}
                    onChange={e=>upload(e.target.files[0], logoEndpoint, 'logo')}/>
@@ -327,9 +322,9 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
 
         {/* ── Logo Ring ── */}
         <div style={dp.section}>
-          <div style={dp.sectionTitle}>Weisser Ring um Logo</div>
+          <div style={dp.sectionTitle}>{t('design_logo_ring')}</div>
           <div style={dp.row2}>
-            {[{val:false,label:'Aus'},{val:true,label:'An'}].map(({val,label})=>(
+            {[{val:false,label:t('common_off')},{val:true,label:t('common_on')}].map(({val,label})=>(
                 <div key={String(val)} style={{...dp.card,...(!!d.logoRing===val?dp.active:{})}} onClick={()=>onChange({...d,logoRing:val})}>
                   <div style={dp.cardLabel}>{label}</div>
                 </div>
@@ -339,34 +334,34 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
 
         {/* ── Banner ── */}
         <div style={dp.section}>
-          <div style={dp.sectionTitle}>Banner</div>
+          <div style={dp.sectionTitle}>{t('design_banner')}</div>
           {d.heroImageUrl ? (
               <img src={d.heroImageUrl} alt="" style={{width:'100%',height:70,objectFit:'cover',borderRadius:8,marginBottom:8}}/>
           ) : (
               <div style={{width:'100%',height:50,background:'#f5f5f7',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:8}}>
-                <span style={{fontSize:12,color:'#bbb'}}>Kein Banner</span>
+                <span style={{fontSize:12,color:'#bbb'}}>{t('profil_hero_none')}</span>
               </div>
           )}
           <div style={{display:'flex',gap:8,alignItems:'center'}}>
             <button style={dp.uploadBtn} onClick={()=>heroRef.current?.click()} disabled={uploading==='hero'}>
-              {uploading==='hero'?'Lädt…':d.heroImageUrl?'Banner ändern':'Banner hochladen'}
+              {uploading==='hero'?t('common_loading'):d.heroImageUrl?t('design_banner_change'):t('profil_hero_upload')}
             </button>
             {d.heroImageUrl && (
                 <button style={dp.removeBtn} onClick={()=>onChange({...d, heroImageUrl:''})} disabled={uploading==='hero'}>
-                  Entfernen
+                  {t('common_remove')}
                 </button>
             )}
           </div>
-          <div style={{fontSize:11,color:'#aaa',marginTop:4}}>PNG/JPG, empfohlen 1125×369px</div>
+          <div style={{fontSize:11,color:'#aaa',marginTop:4}}>{t('design_banner_hint')}</div>
           <input ref={heroRef} type="file" accept="image/*" style={{display:'none'}}
                  onChange={e=>upload(e.target.files[0], heroEndpoint, 'hero')}/>
         </div>
 
         {/* ── Wallet-Stil ── */}
         <div style={dp.section}>
-          <div style={dp.sectionTitle}>Wallet-Stil</div>
+          <div style={dp.sectionTitle}>{t('design_wallet_style')}</div>
           <div style={dp.row2}>
-            {[{val:'number',label:'Zahlen',desc:'Klassisch'},{val:'grid',label:'Raster',desc:'Stempel-Grid'}].map(({val,label,desc})=>(
+            {[{val:'number',label:t('design_style_numbers'),desc:t('design_style_numbers_desc')},{val:'grid',label:t('design_style_grid'),desc:t('design_style_grid_desc')}].map(({val,label,desc})=>(
                 <div key={val} style={{...dp.card,...(d.walletStyle===val?dp.active:{})}} onClick={()=>onChange({...d,walletStyle:val})}>
                   <div style={dp.cardLabel}>{label}</div><div style={dp.cardDesc}>{desc}</div>
                 </div>
@@ -376,9 +371,9 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
 
         {/* ── Stempel-Icon ── */}
         <div style={dp.section}>
-          <div style={dp.sectionTitle}>Stempel-Icon</div>
+          <div style={dp.sectionTitle}>{t('design_stamp_icon')}</div>
           <div style={dp.row2}>
-            {[{val:'preset',label:'Vorlage'},{val:'upload',label:'Eigenes'}].map(({val,label})=>(
+            {[{val:'preset',label:t('design_icon_preset')},{val:'upload',label:t('design_icon_upload')}].map(({val,label})=>(
                 <div key={val} style={{...dp.card,...(d.stampIconType===val?dp.active:{})}} onClick={()=>onChange({...d,stampIconType:val})}>
                   <div style={dp.cardLabel}>{label}</div>
                 </div>
@@ -386,8 +381,8 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
           </div>
           {d.stampIconType==='preset' && (
               <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:8}}>
-                {PRESETS.map(({key,label})=>(
-                    <div key={key} style={{...dp.preset,...(d.stampPreset===key?dp.presetActive:{})}} onClick={()=>onChange({...d,stampPreset:key})}>{label}</div>
+                {PRESET_KEYS.map(key=>(
+                    <div key={key} style={{...dp.preset,...(d.stampPreset===key?dp.presetActive:{})}} onClick={()=>onChange({...d,stampPreset:key})}>{t(`preset_${key}`)}</div>
                 ))}
               </div>
           )}
@@ -395,7 +390,7 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
               <div style={{display:'flex',alignItems:'center',gap:10,marginTop:8}}>
                 {d.stampIconUrl && <img src={d.stampIconUrl} alt="" style={{width:36,height:36,borderRadius:8,objectFit:'cover',border:'2px solid #e0e0e0'}}/>}
                 <button style={dp.uploadBtn} onClick={()=>stampRef.current?.click()} disabled={uploading==='stamp'}>
-                  {uploading==='stamp'?'Lädt…':d.stampIconUrl?'Ändern':'Hochladen'}
+                  {uploading==='stamp'?t('common_loading'):d.stampIconUrl?t('common_change'):t('common_upload')}
                 </button>
                 <input ref={stampRef} type="file" accept="image/*" style={{display:'none'}}
                        onChange={e=>handleStampFile(e.target.files[0])}/>
@@ -405,7 +400,7 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
 
         {/* ── Stempel-Farbe ── */}
         <div style={dp.section}>
-          <div style={dp.sectionTitle}>Stempel-Farbe</div>
+          <div style={dp.sectionTitle}>{t('design_stamp_color')}</div>
           <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
             {['#6F4E37','#FFD700','#E74C3C','#2ECC71','#3498DB','#9B59B6','#1A1A1A','#FFFFFF'].map(c=>(
                 <div key={c} style={{width:26,height:26,borderRadius:'50%',background:c,cursor:'pointer',flexShrink:0,
@@ -420,9 +415,9 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null }) {
 
         {/* ── Leere Stempel ── */}
         <div style={dp.section}>
-          <div style={dp.sectionTitle}>Leere Stempel</div>
+          <div style={dp.sectionTitle}>{t('design_empty_stamps')}</div>
           <div style={dp.row2}>
-            {[{val:'number',label:'Nummer'},{val:'faded',label:'Verblasst'}].map(({val,label})=>(
+            {[{val:'number',label:t('design_empty_number')},{val:'faded',label:t('design_empty_faded')}].map(({val,label})=>(
                 <div key={val} style={{...dp.card,...(d.emptyStampStyle===val?dp.active:{})}} onClick={()=>onChange({...d,emptyStampStyle:val})}>
                   <div style={dp.cardLabel}>{label}</div>
                 </div>
@@ -453,6 +448,7 @@ const dp = {
 // ─── Haupt-Komponente ────────────────────────────────────────────────────────
 
 export default function Karten() {
+  const { t, dir } = useLang()
   const [cards, setCards] = useState([])
   const [shop, setShop] = useState(null)
   const [mode, setMode] = useState('list')
@@ -487,7 +483,7 @@ export default function Karten() {
   }
 
   async function createCard() {
-    if (!form.name||!form.rewardText) return alert('Bitte Name und Belohnung ausfüllen')
+    if (!form.name||!form.rewardText) return alert(t('cards_err_required'))
     setLoading(true)
     try {
       // Falls ein eigenes Stempel-Bild ausgewählt wurde, ist stampIconUrl aktuell
@@ -513,7 +509,7 @@ export default function Karten() {
           const ext = pendingStampFile.name.split('.').pop()
           await api.post(`/api/shop/cards/${res.data.id}/stamp-icon`, { base64, extension: ext })
         } catch {
-          alert('Karte wurde erstellt, aber das Stempel-Bild konnte nicht hochgeladen werden. Du kannst es im Bearbeiten-Modus erneut versuchen.')
+          alert(t('cards_err_stamp_upload'))
         }
       }
 
@@ -522,7 +518,7 @@ export default function Karten() {
       setDesign({...DEFAULT_DESIGN})
       setPendingStampFile(null)
       loadCards()
-    } catch { alert('Fehler beim Erstellen') }
+    } catch { alert(t('cards_err_create')) }
     finally { setLoading(false) }
   }
 
@@ -532,17 +528,17 @@ export default function Karten() {
       await api.put(`/api/shop/cards/${editCard.id}/design`, editDesign)
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       loadCards()
-    } catch { alert('Fehler beim Speichern') }
+    } catch { alert(t('profil_save_error')) }
     finally { setLoading(false) }
   }
 
   async function deleteCard(cardId, cardName) {
-    if (!confirm(`Karte "${cardName}" wirklich löschen?`)) return
+    if (!confirm(t('cards_confirm_delete', { name: cardName }))) return
     try {
       await api.delete(`/api/shop/cards/${cardId}`)
       if (editCard?.id===cardId) setMode('list')
       loadCards()
-    } catch { alert('Fehler') }
+    } catch { alert(t('common_error_generic')) }
   }
 
   function openEdit(card) {
@@ -571,27 +567,27 @@ export default function Karten() {
   if (mode==='list') return (
       <div>
         <div style={s.header}>
-          <div><h1 style={s.title}>Karten</h1><p style={s.subtitle}>Deine Stempelkarten</p></div>
-          <button style={s.btnPrimary} onClick={()=>setMode('create')}>+ Neue Karte</button>
+          <div><h1 style={s.title}>{t('cards_title')}</h1><p style={s.subtitle}>{t('cards_subtitle')}</p></div>
+          <button style={s.btnPrimary} onClick={()=>setMode('create')}>{t('cards_new')}</button>
         </div>
         {cards.length===0 ? (
-            <div style={s.empty}>Noch keine Karten — klick auf "+ Neue Karte"!</div>
+            <div style={s.empty}>{t('cards_empty')}</div>
         ) : (
             <div style={s.cardGrid}>
               {cards.map(card=>(
                   <div key={card.id} style={{...s.card, borderTop:`4px solid ${card.colorBackground||'#3C3489'}`}}>
                     <div style={s.cardTop}>
                       <div style={s.cardName}>{card.name}</div>
-                      <div style={{...s.badge,background:card.colorBackground||'#3C3489',color:card.colorForeground||'#fff'}}>{card.rewardThreshold} Stempel</div>
+                      <div style={{...s.badge,background:card.colorBackground||'#3C3489',color:card.colorForeground||'#fff'}}>{t('cards_stamp_count', { n: card.rewardThreshold })}</div>
                     </div>
                     <div style={s.cardReward}>{card.rewardText}</div>
                     <div style={s.designBadge}>
-                      {card.walletStyle==='grid'?'Raster':'Zahlen'} · {PRESETS.find(p=>p.key===card.stampPreset)?.label||'Kaffee'}
+                      {card.walletStyle==='grid'?t('design_style_grid'):t('design_style_numbers')} · {t(`preset_${card.stampPreset||'coffee'}`)}
                     </div>
-                    <div style={s.cardId}>ID: {card.id}</div>
+                    <div style={s.cardId}>{t('cards_id_label')} {card.id}</div>
                     <div style={s.btnRow}>
-                      <button style={s.btnEdit} onClick={()=>openEdit(card)}>Bearbeiten</button>
-                      <button style={s.btnDelete} onClick={()=>deleteCard(card.id,card.name)}>Löschen</button>
+                      <button style={s.btnEdit} onClick={()=>openEdit(card)}>{t('common_edit')}</button>
+                      <button style={s.btnDelete} onClick={()=>deleteCard(card.id,card.name)}>{t('common_delete')}</button>
                     </div>
                   </div>
               ))}
@@ -617,17 +613,17 @@ export default function Karten() {
         }
       `}</style>
         <div style={s.header}>
-          <div><h1 style={s.title}>Neue Karte</h1><p style={s.subtitle}>Infos + vollständiges Design</p></div>
-          <button style={s.btnSecondary} onClick={()=>setMode('list')}>← Zurück</button>
+          <div><h1 style={s.title}>{t('cards_form_title')}</h1><p style={s.subtitle}>{t('cards_create_subtitle')}</p></div>
+          <button style={s.btnSecondary} onClick={()=>setMode('list')}>{dirArrow(dir)} {t('common_back')}</button>
         </div>
         <div className="sk-create-grid">
           {/* Spalte 1: Infos */}
           <div style={s.panel}>
-            <div style={s.panelTitle}>Karten-Infos</div>
+            <div style={s.panelTitle}>{t('cards_info_panel')}</div>
             {[
-              {label:'Kartenname',key:'name',placeholder:'z.B. Kaffee-Karte',max:18},
-              {label:'Beschreibung',key:'description',placeholder:'z.B. 10 Stempel = 1 Gratis-Kaffee',max:40},
-              {label:'Belohnung',key:'rewardText',placeholder:'z.B. Gratis-Kaffee',max:25},
+              {label:t('cards_name'),key:'name',placeholder:t('cards_name_ph'),max:18},
+              {label:t('cards_desc'),key:'description',placeholder:t('cards_desc_ph'),max:40},
+              {label:t('cards_reward'),key:'rewardText',placeholder:t('cards_reward_ph'),max:25},
             ].map(({label,key,placeholder,max})=>(
                 <div key={key} style={s.field}>
                   <label style={s.label}>
@@ -641,33 +637,33 @@ export default function Karten() {
                 </div>
             ))}
             <div style={s.field}>
-              <label style={s.label}>Stempel bis Belohnung</label>
+              <label style={s.label}>{t('cards_threshold')}</label>
               <input style={s.input} type="number" min="1" max="100" value={form.rewardThreshold} onChange={e=>setForm({...form,rewardThreshold:e.target.value})}/>
             </div>
             <div style={{margin:'16px 0'}}>
-              <div style={{fontSize:12,fontWeight:600,color:'#3C3489',marginBottom:6}}>Vorschau: {previewStamps}/{threshold} Stempel</div>
+              <div style={{fontSize:12,fontWeight:600,color:'#3C3489',marginBottom:6}}>{t('cards_preview_count', { n: previewStamps, threshold })}</div>
               <input type="range" min={0} max={threshold} value={previewStamps} onChange={e=>setPreviewStamps(Number(e.target.value))} style={{width:'100%',accentColor:'#3C3489'}}/>
             </div>
             <button style={s.btnCreate} onClick={createCard} disabled={loading}>
-              {loading?'Erstelle…':'✓ Karte erstellen'}
+              {loading?t('cards_creating'):`✓ ${t('cards_create')}`}
             </button>
           </div>
 
           {/* Spalte 2: Design */}
           <div className="sk-design-col" style={s.panel}>
-            <div style={s.panelTitle}>Design</div>
-            <DesignPanel design={design} onChange={setDesign} onStampFile={setPendingStampFile}/>
+            <div style={s.panelTitle}>{t('cards_design_panel')}</div>
+            <DesignPanel design={design} onChange={setDesign} onStampFile={setPendingStampFile} t={t}/>
           </div>
 
           {/* Vorschau — volle Breite, nebeneinander */}
           <div style={{gridColumn:'1 / -1', display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
             <div>
               <div style={s.previewLabel}>Apple Wallet</div>
-              <ApplePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name}/>
+              <ApplePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name} t={t}/>
             </div>
             <div>
               <div style={s.previewLabel}>Google Wallet</div>
-              <GooglePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name}/>
+              <GooglePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name} t={t}/>
             </div>
           </div>
         </div>
@@ -678,29 +674,29 @@ export default function Karten() {
   if (mode==='edit') return (
       <div>
         <div style={s.header}>
-          <div><h1 style={s.title}>{editCard.name}</h1><p style={s.subtitle}>Design bearbeiten</p></div>
+          <div><h1 style={s.title}>{editCard.name}</h1><p style={s.subtitle}>{t('cards_edit_subtitle')}</p></div>
           <div style={{display:'flex',gap:8}}>
-            <button style={s.btnDelete2} onClick={()=>deleteCard(editCard.id,editCard.name)}>Löschen</button>
-            <button style={s.btnSecondary} onClick={()=>setMode('list')}>← Zurück</button>
+            <button style={s.btnDelete2} onClick={()=>deleteCard(editCard.id,editCard.name)}>{t('common_delete')}</button>
+            <button style={s.btnSecondary} onClick={()=>setMode('list')}>{dirArrow(dir)} {t('common_back')}</button>
           </div>
         </div>
         <div style={s.editGrid}>
           <div style={{...s.panel,maxHeight:'80vh',overflowY:'auto'}}>
-            <div style={s.panelTitle}>Design</div>
-            <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id}/>
+            <div style={s.panelTitle}>{t('cards_design_panel')}</div>
+            <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t}/>
             <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
-              {saved?'✓ Gespeichert!':loading?'Speichere…':'Speichern'}
+              {saved?`✓ ${t('profil_saved')}`:loading?t('profil_saving'):t('profil_save')}
             </button>
           </div>
           {/* Vorschau — volle Breite, nebeneinander */}
           <div style={{display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
             <div>
               <div style={s.previewLabel}>Apple Wallet</div>
-              <ApplePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name}/>
+              <ApplePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}/>
             </div>
             <div>
               <div style={s.previewLabel}>Google Wallet</div>
-              <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name}/>
+              <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}/>
             </div>
           </div>
         </div>

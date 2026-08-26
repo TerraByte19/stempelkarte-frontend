@@ -92,7 +92,7 @@ export default function Login() {
       )
     } catch (e) {
       console.error(e)
-      setError('Kamera konnte nicht gestartet werden')
+      setError(t('common_camera_error'))
       setCameraActive(false)
     }
   }
@@ -129,26 +129,26 @@ export default function Login() {
           </form>
 
           {/* --- Mitarbeiter-Login --- */}
-          <div style={styles.divider}>Mitarbeiter</div>
+          <div style={styles.divider}>{t('login_staff_divider')}</div>
 
           {cameraActive ? (
               <>
                 <div id="qr-login-reader" style={styles.qrReader} />
-                <button style={styles.btnStop} onClick={stopQr}>Kamera stoppen</button>
+                <button style={styles.btnStop} onClick={stopQr}>{t('scan_stop_camera')}</button>
               </>
           ) : (
               <>
-                <button style={styles.btnQr} onClick={startQrSetup}>📷 Per QR-Code anmelden</button>
+                <button style={styles.btnQr} onClick={startQrSetup}>{t('login_qr_btn')}</button>
                 <form onSubmit={handleStaffSubmit}>
                   <input
                       style={{ ...styles.input, textAlign: 'center', fontFamily: 'monospace', marginTop: '10px' }}
                       type="text"
-                      placeholder="Token eingeben"
+                      placeholder={t('login_token_placeholder')}
                       value={staffTokenInput}
                       onChange={e => setStaffTokenInput(e.target.value)}
                       autoComplete="off" autoCorrect="off" autoCapitalize="off"
                   />
-                  <button style={styles.btnStaff} type="submit">Als Mitarbeiter anmelden</button>
+                  <button style={styles.btnStaff} type="submit">{t('login_staff_submit')}</button>
                 </form>
               </>
           )}

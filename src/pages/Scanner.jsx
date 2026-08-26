@@ -152,7 +152,7 @@ export default function Scanner() {
         <div style={styles.header}>
           {/* Besitzer: Pfeil zum Dashboard. Mitarbeiter: Abmelden zurück zum Login. */}
           {isScannerDevice ? (
-              <button style={styles.backBtn} onClick={logout}>Abmelden</button>
+              <button style={styles.backBtn} onClick={logout}>{t('nav_logout')}</button>
           ) : (
               <button style={styles.backBtn} onClick={() => navigate('/')}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -15,7 +15,7 @@ body {
     display: none !important;
   }
   .main-content {
-    margin-left: 0 !important;
+    margin-inline-start: 0 !important;
     padding: 16px !important;
     padding-bottom: 80px !important;
   }

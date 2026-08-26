@@ -1,10 +1,11 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
+import { languages } from '../i18n'
 import './Layout.css'
 
 export default function Layout() {
   const navigate = useNavigate()
-  const { lang, toggleLang, t } = useLang()
+  const { lang, setLang, t } = useLang()
   const shop = JSON.parse(localStorage.getItem('shop') || '{}')
 
   function logout() {
@@ -41,9 +42,11 @@ export default function Layout() {
           <NavLink to="/statistik" style={navStyle}>{t('nav_stats')}</NavLink>
           <NavLink to="/profil" style={navStyle}>{t('nav_profile')}</NavLink>
         </nav>
-        <button onClick={toggleLang} style={styles.langBtn}>
-          {lang === 'de' ? '🇬🇧 EN' : '🇩🇪 DE'}
-        </button>
+        <select value={lang} onChange={e => setLang(e.target.value)} style={styles.langSelect}>
+          {languages.map(l => (
+            <option key={l.code} value={l.code}>{l.flag} {l.label}</option>
+          ))}
+        </select>
         <button onClick={logout} style={styles.logout}>{t('nav_logout')}</button>
       </aside>
 
@@ -89,10 +92,11 @@ export default function Layout() {
           </svg>
           {t('nav_profile')}
         </NavLink>
-        <button onClick={toggleLang} style={styles.mobileBottomBtn}>
-          <span style={{ fontSize: '16px' }}>{lang === 'de' ? '🇬🇧' : '🇩🇪'}</span>
-          <span style={{ fontSize: '11px', color: '#888' }}>{lang === 'de' ? 'EN' : 'DE'}</span>
-        </button>
+        <select value={lang} onChange={e => setLang(e.target.value)} style={styles.mobileLangSelect}>
+          {languages.map(l => (
+            <option key={l.code} value={l.code}>{l.flag} {l.code.toUpperCase()}</option>
+          ))}
+        </select>
         <button onClick={logout} style={styles.mobileBottomBtn}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -109,7 +113,8 @@ export default function Layout() {
 const styles = {
   sidebarLogo: { width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '700', margin: '0 auto 8px', color: 'white' },
   shopName: { fontSize: '14px', fontWeight: '600', textAlign: 'center', marginBottom: '32px', opacity: 0.9, color: 'white' },
-  langBtn: { background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', fontSize: '13px', width: '100%', marginBottom: '8px' },
+  langSelect: { background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', fontSize: '13px', width: '100%', marginBottom: '8px' },
   logout: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', fontSize: '14px', width: '100%' },
   mobileBottomBtn: { color: '#888', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', flex: 1, padding: '8px 0' },
+  mobileLangSelect: { color: '#888', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', flex: 1, padding: '8px 0', textAlign: 'center' },
 }

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import api from '../api'
+import { useLang, localeTag } from '../LangContext'
 
 export default function Statistik() {
+  const { t, lang } = useLang()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -13,22 +15,22 @@ export default function Statistik() {
         .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <div style={s.info}>Lade Statistik…</div>
-  if (error || !data) return <div style={s.info}>Statistik konnte nicht geladen werden.</div>
+  if (loading) return <div style={s.info}>{t('stat_loading')}</div>
+  if (error || !data) return <div style={s.info}>{t('stat_load_error')}</div>
 
   const history = Array.isArray(data.history) ? data.history : []
 
   const kpis = [
-    { label: 'Kunden gesamt', value: data.totalCustomers, icon: '👥', color: '#3C3489' },
-    { label: 'Belohnungen eingelöst', value: data.totalRewards, icon: '🎁', color: '#2C5F2E' },
-    { label: 'Aktiv (30 Tage)', value: data.activeCustomers30d, icon: '🔥', color: '#E07A3C' },
+    { label: t('stat_kpi_customers'), value: data.totalCustomers, icon: '👥', color: '#3C3489' },
+    { label: t('stat_kpi_rewards'), value: data.totalRewards, icon: '🎁', color: '#2C5F2E' },
+    { label: t('stat_kpi_active30'), value: data.activeCustomers30d, icon: '🔥', color: '#E07A3C' },
   ]
 
   return (
       <div>
         <div style={s.header}>
-          <h1 style={s.title}>Statistik</h1>
-          <p style={s.subtitle}>Überblick für {data.shopName}</p>
+          <h1 style={s.title}>{t('stat_title')}</h1>
+          <p style={s.subtitle}>{t('stat_overview_for', { name: data.shopName })}</p>
         </div>
 
         <div style={s.kpiGrid}>
@@ -45,73 +47,73 @@ export default function Statistik() {
 
         <div style={s.derivedGrid}>
           <div style={s.derivedCard}>
-            <CountUp target={data.totalStamps} />
-            <div style={s.derivedLabel}>Stempel gesamt</div>
+            <CountUp target={data.totalStamps} lang={lang} />
+            <div style={s.derivedLabel}>{t('stat_stamps_total')}</div>
             <div style={s.counterSub}>
-              <span><b>{data.stampsThisWeek ?? 0}</b> diese Woche</span>
-              <span><b>{data.stampsThisMonth ?? 0}</b> diesen Monat</span>
+              <span><b>{data.stampsThisWeek ?? 0}</b> {t('stat_this_week')}</span>
+              <span><b>{data.stampsThisMonth ?? 0}</b> {t('stat_this_month')}</span>
             </div>
           </div>
           <div style={s.derivedCard}>
-            <CountUp target={data.totalRewards} />
-            <div style={s.derivedLabel}>Belohnungen</div>
+            <CountUp target={data.totalRewards} lang={lang} />
+            <div style={s.derivedLabel}>{t('stat_rewards')}</div>
             <div style={s.counterSub}>
-              <span><b>{data.rewardsThisWeek ?? 0}</b> diese Woche</span>
-              <span><b>{data.rewardsThisMonth ?? 0}</b> diesen Monat</span>
+              <span><b>{data.rewardsThisWeek ?? 0}</b> {t('stat_this_week')}</span>
+              <span><b>{data.rewardsThisMonth ?? 0}</b> {t('stat_this_month')}</span>
             </div>
           </div>
           <div style={s.derivedCard}>
-            <GrowthValue now={data.newCustomersThisWeek ?? 0} prev={data.newCustomersLastWeek ?? 0} />
-            <div style={s.derivedLabel}>Neue Kunden</div>
-            <div style={s.derivedHint}>diese Woche (vs. letzte)</div>
+            <GrowthValue now={data.newCustomersThisWeek ?? 0} prev={data.newCustomersLastWeek ?? 0} t={t} />
+            <div style={s.derivedLabel}>{t('stat_new_customers')}</div>
+            <div style={s.derivedHint}>{t('stat_vs_last_week')}</div>
           </div>
           <div style={s.derivedCard}>
             <div style={s.derivedValue}>{data.customersWithConsent}</div>
-            <div style={s.derivedLabel}>Newsletter-Reichweite</div>
-            <div style={s.derivedHint}>Kunden mit Marketing-Einwilligung</div>
+            <div style={s.derivedLabel}>{t('stat_newsletter_reach')}</div>
+            <div style={s.derivedHint}>{t('stat_newsletter_hint')}</div>
           </div>
         </div>
 
         <div style={s.panel}>
-          <div style={s.panelTitle}>Stoßzeiten</div>
+          <div style={s.panelTitle}>{t('stat_peak_times')}</div>
           {data.bestDay && data.bestHour >= 0 ? (
               <div style={s.peakRow}>
                 <div style={s.peakItem}>
                   <div style={s.peakIcon}>📅</div>
                   <div>
                     <div style={s.peakValue}>{data.bestDay}</div>
-                    <div style={s.peakLabel}>Stärkster Tag</div>
+                    <div style={s.peakLabel}>{t('stat_peak_day')}</div>
                   </div>
                 </div>
                 <div style={s.peakItem}>
                   <div style={s.peakIcon}>🕐</div>
                   <div>
-                    <div style={s.peakValue}>{formatHour(data.bestHour)}</div>
-                    <div style={s.peakLabel}>Stärkste Uhrzeit</div>
+                    <div style={s.peakValue}>{formatHour(data.bestHour, t)}</div>
+                    <div style={s.peakLabel}>{t('stat_peak_hour')}</div>
                   </div>
                 </div>
               </div>
           ) : (
               <div style={s.empty}>
-                Noch zu wenig Daten. Nach ein paar Wochen siehst du hier, wann am meisten los ist.
+                {t('stat_not_enough_data')}
               </div>
           )}
         </div>
 
         <div style={s.panel}>
-          <div style={s.panelTitle}>Verlauf — letzte 30 Tage</div>
-          <HistoryChart history={history} />
+          <div style={s.panelTitle}>{t('stat_history_title')}</div>
+          <HistoryChart history={history} t={t} />
         </div>
       </div>
   )
 }
 
-function formatHour(h) {
-  return `${String(h).padStart(2, '0')}–${String((h + 1) % 24).padStart(2, '0')} Uhr`
+function formatHour(h, t) {
+  return t('stat_hour_range', { from: String(h).padStart(2, '0'), to: String((h + 1) % 24).padStart(2, '0') })
 }
 
 // Wachstums-Anzeige: Zahl diese Woche + Vergleich zur Vorwoche
-function GrowthValue({ now, prev }) {
+function GrowthValue({ now, prev, t }) {
   let trend = null
   if (prev > 0) {
     const pct = Math.round((now - prev) / prev * 100)
@@ -123,14 +125,14 @@ function GrowthValue({ now, prev }) {
         <div style={{ fontSize: 30, fontWeight: 800, color, lineHeight: 1 }}>+{now}</div>
         {trend !== null && (
             <div style={{ fontSize: 12, fontWeight: 600, color, marginTop: 3 }}>
-              {trend >= 0 ? '▲' : '▼'} {Math.abs(trend)}% vs. letzte Woche
+              {trend >= 0 ? '▲' : '▼'} {t('stat_vs_last_week_pct', { pct: Math.abs(trend) })}
             </div>
         )}
       </div>
   )
 }
 
-function CountUp({ target = 0, duration = 1200 }) {
+function CountUp({ target = 0, duration = 1200, lang = 'de' }) {
   const [value, setValue] = useState(0)
   useEffect(() => {
     if (target <= 0) { setValue(0); return }
@@ -145,15 +147,14 @@ function CountUp({ target = 0, duration = 1200 }) {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [target, duration])
-  return <div style={{ fontSize: 30, fontWeight: 800, color: '#3C3489', lineHeight: 1 }}>{value.toLocaleString('de-DE')}</div>
+  return <div style={{ fontSize: 30, fontWeight: 800, color: '#3C3489', lineHeight: 1 }}>{value.toLocaleString(localeTag(lang))}</div>
 }
 
-function HistoryChart({ history }) {
+function HistoryChart({ history, t }) {
   if (!history || history.length === 0) {
     return (
         <div style={s.empty}>
-          Noch keine Verlaufsdaten. Ab jetzt wird jeder Scan erfasst — in den
-          nächsten Tagen füllt sich diese Kurve.
+          {t('stat_no_history')}
         </div>
     )
   }
@@ -176,9 +177,9 @@ function HistoryChart({ history }) {
   return (
       <div>
         <div style={s.chartSummary}>
-          <span><b>{totalStamps}</b> Stempel</span>
-          <span><b>{totalRewards}</b> Belohnungen</span>
-          <span style={{ color: '#aaa' }}>in {history.length} aktiven Tagen</span>
+          <span><b>{totalStamps}</b> {t('dash_stat_stamps')}</span>
+          <span><b>{totalRewards}</b> {t('stat_rewards')}</span>
+          <span style={{ color: '#aaa' }}>{t('stat_active_days', { n: history.length })}</span>
         </div>
         <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto' }}>
           <defs>

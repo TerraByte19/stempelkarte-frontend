@@ -1,23 +1,50 @@
-import { createContext, useContext, useState } from 'react'
-import { translations } from './i18n'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { translations, languages } from './i18n'
 
 const LangContext = createContext()
 
-export function LangProvider({ children }) {
-  const [lang, setLang] = useState(localStorage.getItem('lang') || 'de')
+const LOCALE_TAGS = { de: 'de-DE', en: 'en-US', ar: 'ar-u-nu-latn' }
 
-  function toggleLang() {
-    const next = lang === 'de' ? 'en' : 'de'
-    setLang(next)
+export function localeTag(lang) {
+  return LOCALE_TAGS[lang] || LOCALE_TAGS.de
+}
+
+export function dirArrow(dir, direction = 'back') {
+  const back = dir === 'rtl' ? '→' : '←'
+  const forward = dir === 'rtl' ? '←' : '→'
+  return direction === 'back' ? back : forward
+}
+
+export function LangProvider({ children }) {
+  const [lang, setLangState] = useState(() => {
+    const saved = localStorage.getItem('lang')
+    return languages.some(l => l.code === saved) ? saved : 'de'
+  })
+
+  const dir = (languages.find(l => l.code === lang) || languages[0]).dir
+
+  useEffect(() => {
+    document.documentElement.lang = lang
+    document.documentElement.dir = dir
+  }, [lang, dir])
+
+  function setLang(next) {
+    setLangState(next)
     localStorage.setItem('lang', next)
   }
 
-  function t(key) {
-    return translations[lang]?.[key] || translations.de[key] || key
+  function t(key, vars) {
+    let str = translations[lang]?.[key] ?? translations.de[key] ?? key
+    if (vars) {
+      for (const [k, v] of Object.entries(vars)) {
+        str = str.replaceAll(`{${k}}`, v)
+      }
+    }
+    return str
   }
 
   return (
-    <LangContext.Provider value={{ lang, toggleLang, t }}>
+    <LangContext.Provider value={{ lang, setLang, t, dir }}>
       {children}
     </LangContext.Provider>
   )

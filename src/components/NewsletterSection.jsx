@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import api from '../api'
+import { useLang, localeTag, dirArrow } from '../LangContext'
 
 /**
  * Newsletter-Bereich fürs Dashboard.
@@ -9,6 +10,7 @@ import api from '../api'
  * Logo + Hero-Bild des Ladens werden automatisch im Mail-Header angezeigt.
  */
 export default function NewsletterSection() {
+    const { t, lang, dir } = useLang()
     const [recipients, setRecipients] = useState({ total: 0, confirmed: 0 })
     const [subject, setSubject] = useState('')
     const [body, setBody] = useState('')
@@ -66,7 +68,7 @@ export default function NewsletterSection() {
                 setImageUrls(prev => [...prev, res.data.url])
             }
         } catch (e) {
-            setFeedback({ ok: false, text: 'Mindestens ein Bild-Upload ist fehlgeschlagen. Bitte erneut versuchen.' })
+            setFeedback({ ok: false, text: t('newsletter_err_upload') })
         } finally {
             setUploading(false)
             if (fileInputRef.current) fileInputRef.current.value = ''
@@ -79,10 +81,10 @@ export default function NewsletterSection() {
 
     async function send() {
         if (!subject.trim() || !body.trim()) {
-            setFeedback({ ok: false, text: 'Betreff und Text dürfen nicht leer sein.' })
+            setFeedback({ ok: false, text: t('newsletter_err_empty') })
             return
         }
-        if (!confirm(`Newsletter an ${recipients.confirmed} Kunden senden?`)) return
+        if (!confirm(t('newsletter_confirm_send', { n: recipients.confirmed }))) return
 
         setSending(true)
         setFeedback(null)
@@ -90,7 +92,7 @@ export default function NewsletterSection() {
             const res = await api.post('/api/shop/newsletter', { subject, body, imageUrls })
             setFeedback({
                 ok: true,
-                text: `Versendet: ${res.data.sent} · Übersprungen (noch nicht bestätigt): ${res.data.skippedUnconfirmed}`,
+                text: t('newsletter_sent_result', { sent: res.data.sent, skipped: res.data.skippedUnconfirmed }),
             })
             setSubject('')
             setBody('')
@@ -98,7 +100,7 @@ export default function NewsletterSection() {
             // Verlauf aktualisieren, falls geöffnet
             if (historyOpen) loadHistory(0)
         } catch (e) {
-            setFeedback({ ok: false, text: 'Fehler beim Versand. Bitte später erneut versuchen.' })
+            setFeedback({ ok: false, text: t('newsletter_err_send') })
         } finally {
             setSending(false)
         }
@@ -107,8 +109,9 @@ export default function NewsletterSection() {
     function formatDate(iso) {
         try {
             const d = new Date(iso)
-            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+            const tag = localeTag(lang)
+            return d.toLocaleDateString(tag, { day: '2-digit', month: '2-digit', year: 'numeric' })
+                + ' ' + d.toLocaleTimeString(tag, { hour: '2-digit', minute: '2-digit' })
         } catch { return iso }
     }
 
@@ -134,20 +137,20 @@ export default function NewsletterSection() {
             `}</style>
             <div className="sk-nl-header">
                 <div>
-                    <h2 style={s.title}>📣 Newsletter</h2>
+                    <h2 style={s.title}>{t('newsletter_title')}</h2>
                     <p style={s.hint}>
-                        {recipients.confirmed} Kunde(n) erhalten Mails ·
+                        {t('newsletter_recipients_confirmed', { n: recipients.confirmed })} ·
                         {recipients.total - recipients.confirmed > 0
-                            ? ` ${recipients.total - recipients.confirmed} noch unbestätigt`
-                            : ' alle bestätigt'}
+                            ? ` ${t('newsletter_recipients_unconfirmed', { n: recipients.total - recipients.confirmed })}`
+                            : ` ${t('newsletter_recipients_all_confirmed')}`}
                     </p>
                 </div>
                 <div className="sk-nl-buttons">
                     <button style={s.toggleSecondary} onClick={toggleHistory}>
-                        {historyOpen ? 'Verlauf zu' : '🕓 Verlauf'}
+                        {historyOpen ? t('newsletter_history_close') : t('newsletter_history_open')}
                     </button>
                     <button style={s.toggle} onClick={() => setOpen(o => !o)}>
-                        {open ? 'Schließen' : 'Newsletter schreiben'}
+                        {open ? t('common_close') : t('newsletter_compose')}
                     </button>
                 </div>
             </div>
@@ -161,41 +164,40 @@ export default function NewsletterSection() {
                     )}
 
                     <p style={s.brandingHint}>
-                        ℹ️ Logo und Banner-Bild deines Shops werden automatisch oben in
-                        jeder Mail angezeigt — basierend auf deinen Einstellungen unter „Karten“.
+                        {t('newsletter_branding_hint')}
                     </p>
 
-                    <label style={s.label}>Betreff</label>
+                    <label style={s.label}>{t('newsletter_subject_label')}</label>
                     <input
                         style={s.input}
                         value={subject}
                         onChange={e => setSubject(e.target.value)}
-                        placeholder="z.B. Diese Woche: 20% auf alle Kuchen"
+                        placeholder={t('newsletter_subject_ph')}
                         maxLength={120}
                     />
 
-                    <label style={s.label}>Nachricht</label>
+                    <label style={s.label}>{t('newsletter_body_label')}</label>
                     <textarea
                         style={s.textarea}
                         value={body}
                         onChange={e => setBody(e.target.value)}
-                        placeholder={'Hallo!\n\nDiese Woche haben wir...'}
+                        placeholder={t('newsletter_body_ph')}
                         rows={8}
                     />
 
-                    <label style={s.label}>Bilder (optional, z.B. Menü oder Aktionsfotos)</label>
+                    <label style={s.label}>{t('newsletter_images_label')}</label>
                     {imageUrls.length > 0 && (
                         <div style={s.imageGrid}>
                             {imageUrls.map((url, i) => (
                                 <div key={i} style={s.imageThumbWrap}>
-                                    <img src={url} alt={`Bild ${i + 1}`} style={s.imageThumb} />
+                                    <img src={url} alt={t('newsletter_image_alt', { n: i + 1 })} style={s.imageThumb} />
                                     <button style={s.removeImageBtn} onClick={() => removeImage(i)}>✕</button>
                                 </div>
                             ))}
                         </div>
                     )}
                     <button style={s.uploadBtn} onClick={pickImages} disabled={uploading}>
-                        {uploading ? 'Lädt…' : imageUrls.length > 0 ? '🖼️ Weitere Bilder hinzufügen' : '🖼️ Bilder hinzufügen'}
+                        {uploading ? t('common_loading') : imageUrls.length > 0 ? t('newsletter_add_more_images') : t('newsletter_add_images')}
                     </button>
                     <input
                         ref={fileInputRef}
@@ -207,8 +209,7 @@ export default function NewsletterSection() {
                     />
 
                     <p style={s.legal}>
-                        Jede Mail enthält automatisch einen Abmelde-Link (Pflicht) und einen Link zur Datenlöschung.
-                        Es werden nur Kunden angeschrieben, die ausdrücklich zugestimmt und ihre E-Mail bestätigt haben.
+                        {t('newsletter_legal')}
                     </p>
 
                     <button
@@ -216,18 +217,18 @@ export default function NewsletterSection() {
                         onClick={send}
                         disabled={sending || recipients.confirmed === 0}
                     >
-                        {sending ? 'Wird versendet…' : `An ${recipients.confirmed} Kunden senden`}
+                        {sending ? t('newsletter_sending') : t('newsletter_send_btn', { n: recipients.confirmed })}
                     </button>
                 </div>
             )}
 
             {historyOpen && (
                 <div style={s.body}>
-                    <h3 style={s.historyTitle}>Gesendete Newsletter</h3>
+                    <h3 style={s.historyTitle}>{t('newsletter_history_title')}</h3>
                     {historyLoading ? (
-                        <p style={s.muted}>Lädt…</p>
+                        <p style={s.muted}>{t('common_loading')}</p>
                     ) : history.items.length === 0 ? (
-                        <p style={s.muted}>Noch keine Newsletter gesendet.</p>
+                        <p style={s.muted}>{t('newsletter_history_empty')}</p>
                     ) : (
                         <>
                             {history.items.map(item => (
@@ -236,12 +237,12 @@ export default function NewsletterSection() {
                                         <span style={s.historySubject}>{item.subject}</span>
                                         <span style={s.historyMeta}>{formatDate(item.sentAt)}</span>
                                     </div>
-                                    <div style={s.historyRecipients}>An {item.recipientCount} Kunde(n)</div>
+                                    <div style={s.historyRecipients}>{t('newsletter_history_recipients', { n: item.recipientCount })}</div>
                                     <div style={s.historyBody}>{item.body}</div>
                                     {item.imageUrls && item.imageUrls.length > 0 && (
                                         <div style={s.historyImages}>
                                             {item.imageUrls.map((url, i) => (
-                                                <img key={i} src={url} alt={`Bild ${i + 1}`} style={s.historyImg} />
+                                                <img key={i} src={url} alt={t('newsletter_image_alt', { n: i + 1 })} style={s.historyImg} />
                                             ))}
                                         </div>
                                     )}
@@ -255,17 +256,17 @@ export default function NewsletterSection() {
                                         onClick={() => loadHistory(history.page - 1)}
                                         disabled={history.page <= 0}
                                     >
-                                        ← Zurück
+                                        {dirArrow(dir)} {t('common_back')}
                                     </button>
                                     <span style={s.pageInfo}>
-                    Seite {history.page + 1} von {history.totalPages}
+                    {t('newsletter_page_info', { page: history.page + 1, totalPages: history.totalPages })}
                   </span>
                                     <button
                                         style={{ ...s.pageBtn, opacity: history.page >= history.totalPages - 1 ? 0.4 : 1 }}
                                         onClick={() => loadHistory(history.page + 1)}
                                         disabled={history.page >= history.totalPages - 1}
                                     >
-                                        Weiter →
+                                        {t('newsletter_next')} {dirArrow(dir, 'forward')}
                                     </button>
                                 </div>
                             )}
