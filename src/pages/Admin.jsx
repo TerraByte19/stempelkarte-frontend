@@ -205,17 +205,6 @@ export default function Admin() {
               {shop.active ? 'Aktiv' : 'Gesperrt'}
             </span>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  <span
-                      style={{
-                        ...styles.btnToggle,
-                        background: (shop.language || 'de') === 'ar' ? '#e8f0fe' : '#f2f2f2',
-                        color: (shop.language || 'de') === 'ar' ? '#1a4fa0' : '#666',
-                        cursor: 'default',
-                      }}
-                      title="Sprache steht beim Erstellen fest"
-                  >
-                    {(shop.language || 'de') === 'ar' ? '🇸🇦 AR' : '🇩🇪 DE'}
-                  </span>
                   <button
                       style={{
                         ...styles.btnToggle,
