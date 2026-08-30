@@ -29,3 +29,11 @@ body {
     display: none !important;
   }
 }
+/* Scanner: Kamerafenster hat feste Hoehe (Scanner.jsx) - das von html5-qrcode
+   eingefuegte <video> soll den Kasten fuellen und oben/unten beschnitten
+   werden statt gestaucht. Betrifft nur die Anzeige, nicht die QR-Erkennung. */
+#qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
