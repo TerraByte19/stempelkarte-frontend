@@ -107,7 +107,7 @@ export default function Scanner() {
       html5QrRef.current = new Html5Qrcode('qr-reader')
       await html5QrRef.current.start(
           { facingMode: 'environment' },
-          { fps: 10, qrbox: { width: 250, height: 250 } },
+          { fps: 20, qrbox: { width: 250, height: 250 } },
           (decodedText) => {
             if (!scanningRef.current) {
               scanningRef.current = true
