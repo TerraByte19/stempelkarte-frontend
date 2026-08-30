@@ -191,18 +191,7 @@ export default function Scanner() {
           <h1 style={styles.title}>{t('scan_title')}</h1>
         </div>
 
-        {/* Wrapper: das Video liegt in #qr-reader, die Ecken-Markierung liegt
-            NUR optisch darueber (pointer-events:none) - sie schraenkt den
-            Scan-Bereich NICHT ein, gescannt wird weiterhin das ganze Bild. */}
-        <div onClick={fokusAntippen} title="Zum Scharfstellen tippen" style={{ position: 'relative', display: cameraActive ? 'block' : 'none', width: '100%', borderRadius: '16px', overflow: 'hidden', marginBottom: '8px', cursor: 'pointer' }}>
-          <div id="qr-reader" style={{ width: '100%' }} />
-          <div style={styles.camGuide}>
-            <span style={{ ...styles.camCorner, top: 0, left: 0, borderRight: 'none', borderBottom: 'none' }} />
-            <span style={{ ...styles.camCorner, top: 0, right: 0, borderLeft: 'none', borderBottom: 'none' }} />
-            <span style={{ ...styles.camCorner, bottom: 0, left: 0, borderRight: 'none', borderTop: 'none' }} />
-            <span style={{ ...styles.camCorner, bottom: 0, right: 0, borderLeft: 'none', borderTop: 'none' }} />
-          </div>
-        </div>
+        <div id="qr-reader" onClick={fokusAntippen} title="Zum Scharfstellen tippen" style={{ display: cameraActive ? 'block' : 'none', width: '100%', maxWidth: '320px', margin: '0 auto 8px', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }} />
 
         {cameraActive && (
             <>
@@ -307,9 +296,6 @@ const styles = {
   scanText: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' },
   scanHint: { fontSize: '13px', color: '#aaa' },
   camHint: { fontSize: '12px', color: '#999', textAlign: 'center', margin: '0 0 12px' },
-  // Grosser Ecken-Rahmen als reine Zielhilfe (78% des Bildes, quadratisch).
-  camGuide: { position: 'absolute', top: '50%', left: '50%', width: '78%', aspectRatio: '1 / 1', transform: 'translate(-50%, -50%)', pointerEvents: 'none' },
-  camCorner: { position: 'absolute', width: '34px', height: '34px', border: '4px solid rgba(255,255,255,0.9)', borderRadius: '4px', filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.4))' },
   btnStop: { width: '100%', padding: '12px', background: '#ff4444', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '16px' },
   btnCamera: { width: '100%', padding: '14px', background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
 }
