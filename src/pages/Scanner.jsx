@@ -191,10 +191,10 @@ export default function Scanner() {
           <h1 style={styles.title}>{t('scan_title')}</h1>
         </div>
 
-        {/* Breite bleibt (max 320px), Hoehe fest gekuerzt -> das Video wird
-            oben/unten beschnitten (object-fit:cover, siehe index.css).
+        {/* Volle Breite wie am Anfang, nur die Hoehe etwas gekuerzt -> das Video
+            wird oben/unten leicht beschnitten (object-fit:cover, siehe index.css).
             Gescannt wird trotzdem das volle Kamerabild, nicht nur der Ausschnitt. */}
-        <div id="qr-reader" onClick={fokusAntippen} title="Zum Scharfstellen tippen" style={{ display: cameraActive ? 'block' : 'none', width: '100%', maxWidth: '320px', height: '200px', margin: '0 auto 8px', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }} />
+        <div id="qr-reader" onClick={fokusAntippen} title="Zum Scharfstellen tippen" style={{ display: cameraActive ? 'block' : 'none', width: '100%', height: '260px', marginBottom: '8px', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }} />
 
         {cameraActive && (
             <>
