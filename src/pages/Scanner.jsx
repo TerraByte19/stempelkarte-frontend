@@ -100,6 +100,16 @@ export default function Scanner() {
     }
   }
 
+  // Dauer-Autofokus/-Belichtung/-Weissabgleich: hilft vor allem iPhone-Safari,
+  // das die Kamera im Web-Scanner sonst auf einem Wert "einfriert" -> heller
+  // QR (z.B. auf einem Kunden-Display) wird ueberbelichtet und verschwindet.
+  // Nicht unterstuetzte Felder ignoriert der Browser still - kein Risiko.
+  const KAMERA_FEINSCHLIFF = [
+    { focusMode: 'continuous' },
+    { exposureMode: 'continuous' },
+    { whiteBalanceMode: 'continuous' },
+  ]
+
   async function startCamera() {
     setCameraActive(true)
     await new Promise(resolve => setTimeout(resolve, 300))
@@ -107,7 +117,17 @@ export default function Scanner() {
       html5QrRef.current = new Html5Qrcode('qr-reader')
       await html5QrRef.current.start(
           { facingMode: 'environment' },
-          { fps: 20, qrbox: { width: 250, height: 250 } },
+          {
+            fps: 20,
+            // Kein qrbox mehr: das GANZE Kamerabild wird gescannt (wie die
+            // iPhone-Kamera-App) - kein enger Rahmen, in den man treffen muss.
+            videoConstraints: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              advanced: KAMERA_FEINSCHLIFF,
+            },
+          },
           (decodedText) => {
             if (!scanningRef.current) {
               scanningRef.current = true
@@ -120,6 +140,14 @@ export default function Scanner() {
       console.error(e)
       setCameraActive(false)
     }
+  }
+
+  // Aufs Kamerabild tippen -> Fokus/Belichtung neu einpendeln lassen.
+  // Rettungsanker, wenn die iPhone-Kamera bei starker Helligkeit haengt.
+  async function fokusAntippen() {
+    try {
+      await html5QrRef.current?.applyVideoConstraints({ advanced: KAMERA_FEINSCHLIFF })
+    } catch { /* Geraet unterstuetzt das nicht - egal */ }
   }
 
   async function stopCamera() {
@@ -163,10 +191,16 @@ export default function Scanner() {
           <h1 style={styles.title}>{t('scan_title')}</h1>
         </div>
 
-        <div id="qr-reader" style={{ display: cameraActive ? 'block' : 'none', width: '100%', borderRadius: '16px', overflow: 'hidden', marginBottom: '16px' }} />
+        {/* Volle Breite wie am Anfang, nur die Hoehe etwas gekuerzt -> das Video
+            wird oben/unten leicht beschnitten (object-fit:cover, siehe index.css).
+            Gescannt wird trotzdem das volle Kamerabild, nicht nur der Ausschnitt. */}
+        <div id="qr-reader" onClick={fokusAntippen} title="Zum Scharfstellen tippen" style={{ display: cameraActive ? 'block' : 'none', width: '100%', height: '520px', maxHeight: '70vh', marginBottom: '8px', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }} />
 
         {cameraActive && (
-            <button style={styles.btnStop} onClick={stopCamera}>{t('scan_stop_camera')}</button>
+            <>
+              <p style={styles.camHint}>Auf den QR-Code halten &middot; bei Unschaerfe aufs Bild tippen</p>
+              <button style={styles.btnStop} onClick={stopCamera}>{t('scan_stop_camera')}</button>
+            </>
         )}
 
         {result && (
@@ -264,6 +298,7 @@ const styles = {
   scanIcon: { marginBottom: '16px', display: 'flex', justifyContent: 'center' },
   scanText: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '8px' },
   scanHint: { fontSize: '13px', color: '#aaa' },
+  camHint: { fontSize: '12px', color: '#999', textAlign: 'center', margin: '0 0 12px' },
   btnStop: { width: '100%', padding: '12px', background: '#ff4444', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '16px' },
   btnCamera: { width: '100%', padding: '14px', background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
 }
