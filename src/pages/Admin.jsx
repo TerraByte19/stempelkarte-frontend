@@ -72,6 +72,23 @@ export default function Admin() {
     }
   }
 
+  // Sprache eines Ladens umstellen (de <-> ar). ar = arabische Kundenkarte,
+  // Anmeldeseite, Bestaetigungsseiten und Mails, alles rechts-nach-links.
+  async function setLanguage(shopId, next) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shopId}/language`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: next })
+      })
+      if (!res.ok) throw new Error()
+      loadShops()
+    } catch (e) {
+      alert('Fehler beim Umstellen der Sprache')
+    }
+  }
+
   async function deleteShop(shopId, shopName) {
     if (!confirm(`⚠️ Shop "${shopName}" wirklich KOMPLETT löschen?\n\nDas löscht:\n- Den Shop-Account\n- Alle Stempelkarten\n- Alle Kundendaten\n- Alle Staff-Tokens\n\nDas kann NICHT rückgängig gemacht werden!`)) return
     if (!confirm(`Letzter Check: "${shopName}" endgültig löschen?`)) return
@@ -165,6 +182,19 @@ export default function Admin() {
             />
         )}
 
+        {renderShopTable(shops.filter(s => (s.language || 'de') !== 'ar'))}
+
+        {shops.some(s => (s.language || 'de') === 'ar') && (
+            <>
+              <h2 style={styles.sectionTitle}>🇸🇦 Arabische Läden (RTL)</h2>
+              {renderShopTable(shops.filter(s => (s.language || 'de') === 'ar'))}
+            </>
+        )}
+      </div>
+  )
+
+  function renderShopTable(list) {
+    return (
         <div style={styles.table}>
           <div style={styles.tableHeader}>
             <span>Laden</span>
@@ -175,7 +205,7 @@ export default function Admin() {
             <span>Status</span>
             <span>Aktionen</span>
           </div>
-          {shops.map(shop => (
+          {list.map(shop => (
               <div key={shop.id} style={{ ...styles.tableRow, opacity: shop.active ? 1 : 0.5 }}>
                 <span style={styles.shopName}>{shop.name}</span>
                 <span style={styles.shopEmail}>{shop.email}</span>
@@ -189,7 +219,18 @@ export default function Admin() {
                 }}>
               {shop.active ? 'Aktiv' : 'Gesperrt'}
             </span>
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <button
+                      style={{
+                        ...styles.btnToggle,
+                        background: (shop.language || 'de') === 'ar' ? '#e8f0fe' : '#fff6e6',
+                        color: (shop.language || 'de') === 'ar' ? '#1a4fa0' : '#8a5a00',
+                      }}
+                      onClick={() => setLanguage(shop.id, (shop.language || 'de') === 'ar' ? 'de' : 'ar')}
+                      title="Sprache umstellen (Kundenkarte, Mails, Anmeldeseite)"
+                  >
+                    {(shop.language || 'de') === 'ar' ? '🇸🇦 AR' : '🇩🇪 DE'}
+                  </button>
                   <button
                       style={{
                         ...styles.btnToggle,
@@ -216,8 +257,8 @@ export default function Admin() {
               </div>
           ))}
         </div>
-      </div>
-  )
+    )
+  }
 }
 
 function CreateShop({ onCreated }) {
@@ -347,6 +388,7 @@ const styles = {
   input: { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '15px', outline: 'none', boxSizing: 'border-box' },
   btnLogin: { width: '100%', padding: '12px', background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
   container: { padding: '24px', maxWidth: '1200px', margin: '0 auto' },
+  sectionTitle: { fontSize: '16px', fontWeight: '700', color: '#1a4fa0', margin: '28px 0 10px' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
   title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
   subtitle: { fontSize: '14px', color: '#888', margin: 0 },
