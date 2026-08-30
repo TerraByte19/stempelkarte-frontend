@@ -72,22 +72,7 @@ export default function Admin() {
     }
   }
 
-  // Sprache eines Ladens umstellen (de <-> ar). ar = arabische Kundenkarte,
-  // Anmeldeseite, Bestaetigungsseiten und Mails, alles rechts-nach-links.
-  async function setLanguage(shopId, next) {
-    const t = sessionStorage.getItem('adminToken')
-    try {
-      const res = await fetch(`${BASE_URL}/api/admin/shops/${shopId}/language`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language: next })
-      })
-      if (!res.ok) throw new Error()
-      loadShops()
-    } catch (e) {
-      alert('Fehler beim Umstellen der Sprache')
-    }
-  }
+  // Sprache wird beim Erstellen festgelegt und ist danach fix - kein Umschalten.
 
   async function deleteShop(shopId, shopName) {
     if (!confirm(`⚠️ Shop "${shopName}" wirklich KOMPLETT löschen?\n\nDas löscht:\n- Den Shop-Account\n- Alle Stempelkarten\n- Alle Kundendaten\n- Alle Staff-Tokens\n\nDas kann NICHT rückgängig gemacht werden!`)) return
@@ -220,17 +205,17 @@ export default function Admin() {
               {shop.active ? 'Aktiv' : 'Gesperrt'}
             </span>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  <button
+                  <span
                       style={{
                         ...styles.btnToggle,
-                        background: (shop.language || 'de') === 'ar' ? '#e8f0fe' : '#fff6e6',
-                        color: (shop.language || 'de') === 'ar' ? '#1a4fa0' : '#8a5a00',
+                        background: (shop.language || 'de') === 'ar' ? '#e8f0fe' : '#f2f2f2',
+                        color: (shop.language || 'de') === 'ar' ? '#1a4fa0' : '#666',
+                        cursor: 'default',
                       }}
-                      onClick={() => setLanguage(shop.id, (shop.language || 'de') === 'ar' ? 'de' : 'ar')}
-                      title="Sprache umstellen (Kundenkarte, Mails, Anmeldeseite)"
+                      title="Sprache steht beim Erstellen fest"
                   >
                     {(shop.language || 'de') === 'ar' ? '🇸🇦 AR' : '🇩🇪 DE'}
-                  </button>
+                  </span>
                   <button
                       style={{
                         ...styles.btnToggle,
@@ -262,7 +247,7 @@ export default function Admin() {
 }
 
 function CreateShop({ onCreated }) {
-  const [form, setForm] = useState({ name: '', email: '', password: '', maxTokens: 3 })
+  const [form, setForm] = useState({ name: '', email: '', password: '', maxTokens: 3, language: 'de' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -282,7 +267,7 @@ function CreateShop({ onCreated }) {
       const data = await res.json()
       if (res.ok) {
         setSuccess(`Laden "${data.name}" erstellt! Max Tokens: ${data.maxTokens}`)
-        setForm({ name: '', email: '', password: '', maxTokens: 3 })
+        setForm({ name: '', email: '', password: '', maxTokens: 3, language: 'de' })
         onCreated()
       } else {
         setError(data.error || 'Fehler beim Erstellen')
@@ -306,6 +291,15 @@ function CreateShop({ onCreated }) {
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '13px', color: '#444', marginBottom: '6px' }}>Max. Staff-Tokens</label>
             <input style={createStyles.input} type="number" min="1" max="20" value={form.maxTokens} onChange={e => setForm({ ...form, maxTokens: e.target.value })} required />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={{ fontSize: '13px', color: '#444', marginBottom: '6px' }}>
+              Sprache <span style={{ color: '#999' }}>(fest, danach nicht mehr änderbar)</span>
+            </label>
+            <select style={createStyles.input} value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="ar">🇸🇦 العربية (RTL)</option>
+            </select>
           </div>
           <button style={createStyles.btn} type="submit" disabled={loading}>
             {loading ? 'Erstelle...' : 'Laden erstellen'}
