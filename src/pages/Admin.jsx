@@ -204,7 +204,7 @@ export default function Admin() {
                 }}>
               {shop.active ? 'Aktiv' : 'Gesperrt'}
             </span>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap' }}>
                   <button
                       style={{
                         ...styles.btnToggle,
@@ -225,7 +225,7 @@ export default function Admin() {
                       style={{ ...styles.btnToggle, background: '#1a1a1a', color: 'white' }}
                       onClick={() => deleteShop(shop.id, shop.name)}
                   >
-                    🗑 Löschen
+                    Löschen
                   </button>
                 </div>
               </div>
@@ -381,11 +381,11 @@ const styles = {
   statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
   statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
   table: { background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'auto' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1.5fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '800px' },
-  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1.5fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '800px' },
+  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 2.6fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '900px' },
+  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 2.6fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '900px' },
   shopName: { fontSize: '14px', fontWeight: '600', color: '#1a1a1a' },
   shopEmail: { fontSize: '12px', color: '#666' },
   cell: { fontSize: '13px', color: '#666' },
   status: { fontSize: '12px', fontWeight: '600', padding: '3px 8px', borderRadius: '20px', display: 'inline-block' },
-  btnToggle: { border: 'none', borderRadius: '8px', padding: '5px 10px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' },
+  btnToggle: { flex: 1, border: 'none', borderRadius: '8px', padding: '7px 8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', textAlign: 'center' },
 }
