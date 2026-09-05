@@ -203,32 +203,77 @@ export default function Scanner() {
             </>
         )}
 
-        {result && (
-            <div style={{
-              ...styles.resultBox,
-              background: result.success
-                  ? (result.data.action === 'redeemed' || result.data.rewardEarned) ? '#FFF8E1' : '#F0FFF4'
-                  : '#FFF0F0',
-              borderColor: result.success
-                  ? (result.data.action === 'redeemed' || result.data.rewardEarned) ? '#FFB300' : '#2C5F2E'
-                  : '#D00',
-            }}>
-              <div style={styles.resultIcon}>
-                {result.success ? result.data.action === 'redeemed' ? '🎉' : result.data.rewardEarned ? '🎊' : '✓' : '✗'}
-              </div>
-              {result.success && result.data.rewardEarned && (
-                  <div style={styles.fullBanner}>🎉 Karte voll! {result.data.rewardText} verdient</div>
-              )}
-              <div style={styles.resultMessage}>{result.success ? result.data.message : result.message}</div>
-              {result.success && (
-                  <div style={styles.resultStamps}>
-                    Neuer Stand: {result.data.stamps}/{result.data.rewardThreshold}
-                    {result.data.stampsAdded > 1 && <span style={styles.badge}>+{result.data.stampsAdded}</span>}
+        {result && (() => {
+          const d = result.success ? result.data : null
+          const isRedeemed = !!d && d.action === 'redeemed'
+          const isFull = !!d && !isRedeemed && (
+              d.action === 'full' || d.rewardEarned ||
+              (d.rewardThreshold > 0 && d.stamps >= d.rewardThreshold)
+          )
+          const left = d ? (d.rewardThreshold - d.stamps) : 0
+          const isAlmost = !!d && !isFull && !isRedeemed && d.rewardThreshold > 0 && left > 0 && left <= 2
+
+          const box = !result.success
+              ? { bg: '#FFF0F0', border: '#D00' }
+              : isRedeemed ? { bg: '#0B7A34', border: '#0B7A34' }
+              : isFull ? { bg: '#F4B400', border: '#F4B400' }
+              : { bg: '#F0FFF4', border: '#2C5F2E' }
+
+          return (
+            <div style={{ ...styles.resultBox, background: box.bg, borderColor: box.border }}>
+              {isRedeemed && (
+                  <div style={styles.hero}>
+                    <div style={styles.heroIcon}>🎁</div>
+                    <div style={{ ...styles.heroTitle, color: '#fff' }}>{t('scan_redeemed_title')}</div>
+                    <div style={{ ...styles.heroSub, color: 'rgba(255,255,255,0.92)' }}>
+                      {t('scan_redeemed_sub', { reward: d.rewardText || '' })}
+                    </div>
                   </div>
               )}
-              <button style={styles.btnNext} onClick={nextCustomer}>{t('scan_next')}</button>
+
+              {isFull && (
+                  <div style={styles.hero}>
+                    <div style={styles.heroIcon}>🎉</div>
+                    <div style={{ ...styles.heroTitle, color: '#1a1a1a' }}>{t('scan_full_title')}</div>
+                    <div style={{ ...styles.heroSub, color: '#5a4600' }}>
+                      {t('scan_full_sub', { reward: d.rewardText || '' })}
+                    </div>
+                  </div>
+              )}
+
+              {!isRedeemed && !isFull && (
+                  <>
+                    <div style={styles.resultIcon}>{result.success ? '✓' : '✗'}</div>
+                    <div style={styles.resultMessage}>
+                      {result.success ? result.data.message : result.message}
+                    </div>
+                  </>
+              )}
+
+              {result.success && (
+                  <div style={{
+                    ...styles.resultStamps,
+                    color: isRedeemed ? 'rgba(255,255,255,0.92)' : isFull ? '#5a4600' : '#666',
+                  }}>
+                    Neuer Stand: {d.stamps}/{d.rewardThreshold}
+                    {d.stampsAdded > 1 && <span style={styles.badge}>+{d.stampsAdded}</span>}
+                  </div>
+              )}
+
+              {isAlmost && (
+                  <div style={styles.almostHint}>
+                    ⚡ {t('scan_almost', { left, reward: d.rewardText || '' })}
+                  </div>
+              )}
+
+              <button style={{
+                ...styles.btnNext,
+                background: isFull ? '#1a1a1a' : isRedeemed ? '#fff' : '#3C3489',
+                color: isRedeemed ? '#0B7A34' : '#fff',
+              }} onClick={nextCustomer}>{t('scan_next')}</button>
             </div>
-        )}
+          )
+        })()}
 
         {pendingScan && !result && (
             <div style={styles.popup}>
@@ -287,12 +332,17 @@ const styles = {
   resetBtn: { width: '100%', padding: '12px', background: '#fff0f0', color: '#c0392b', border: '1.5px solid #f5c6cb', borderRadius: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '10px' },
   cancelBtn: { width: '100%', padding: '12px', background: 'transparent', color: '#999', border: 'none', borderRadius: '12px', fontSize: '14px', cursor: 'pointer' },
   badge: { background: '#3C3489', color: 'white', borderRadius: '20px', padding: '2px 10px', fontSize: '12px', marginLeft: '8px' },
-  resultBox: { borderRadius: '12px', padding: '24px', marginBottom: '20px', textAlign: 'center', border: '2px solid' },
+  resultBox: { borderRadius: '16px', padding: '24px', marginBottom: '20px', textAlign: 'center', border: '3px solid' },
   resultIcon: { fontSize: '36px', marginBottom: '8px' },
-  fullBanner: { fontSize: '20px', fontWeight: '800', color: '#B8860B', marginBottom: '4px' },
   resultMessage: { fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '4px' },
-  resultStamps: { fontSize: '14px', color: '#666', marginBottom: '16px' },
-  btnNext: { background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 24px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
+  resultStamps: { fontSize: '15px', fontWeight: '600', color: '#666', marginBottom: '16px' },
+  // Grosser, unuebersehbarer Hinweis bei "Karte voll" / "Belohnung eingeloest"
+  hero: { padding: '8px 0 14px' },
+  heroIcon: { fontSize: '64px', lineHeight: 1, marginBottom: '10px' },
+  heroTitle: { fontSize: '30px', fontWeight: '900', letterSpacing: '0.5px', lineHeight: 1.1, marginBottom: '8px' },
+  heroSub: { fontSize: '16px', fontWeight: '600', marginBottom: '14px' },
+  almostHint: { fontSize: '14px', fontWeight: '700', color: '#B8860B', background: '#FFF8E1', borderRadius: '10px', padding: '8px 12px', marginBottom: '14px' },
+  btnNext: { border: 'none', borderRadius: '12px', padding: '14px 24px', fontSize: '16px', fontWeight: '800', cursor: 'pointer', width: '100%' },
   hiddenInput: { position: 'fixed', top: '-1000px', left: '-1000px', opacity: 0, width: '1px', height: '1px' },
   scanArea: { borderRadius: '16px', padding: '60px 24px', textAlign: 'center', cursor: 'pointer', border: '2px dashed #e0e0e0', background: '#f8f8f8', transition: 'all 0.2s', marginBottom: '16px' },
   scanIcon: { marginBottom: '16px', display: 'flex', justifyContent: 'center' },

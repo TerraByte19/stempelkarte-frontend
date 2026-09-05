@@ -95,6 +95,11 @@ export const translations = {
     scan_cancel: 'Abbrechen', scan_next: 'Nächster Kunde',
     scan_camera: 'Kamera verwenden', scan_stop_camera: 'Kamera stoppen',
     scan_invalid_qr: 'Ungültiger QR-Code', scan_server_error: 'Server nicht erreichbar',
+    scan_full_title: 'KARTE IST VOLL',
+    scan_full_sub: 'Nächster Besuch: {reward} gratis',
+    scan_redeemed_title: 'BELOHNUNG EINGELÖST',
+    scan_redeemed_sub: '{reward} — Karte startet wieder bei 0',
+    scan_almost: 'Fast voll — noch {left} bis {reward}',
 
     // Login
     login_subtitle: 'Laden-Login', login_email: 'E-Mail', login_password: 'Passwort',
@@ -267,6 +272,11 @@ export const translations = {
     scan_cancel: 'Cancel', scan_next: 'Next customer',
     scan_camera: 'Use camera', scan_stop_camera: 'Stop camera',
     scan_invalid_qr: 'Invalid QR code', scan_server_error: 'Server not reachable',
+    scan_full_title: 'CARD IS FULL',
+    scan_full_sub: 'Next visit: {reward} free',
+    scan_redeemed_title: 'REWARD REDEEMED',
+    scan_redeemed_sub: '{reward} — card starts again at 0',
+    scan_almost: 'Almost full — {left} more until {reward}',
 
     // Login
     login_subtitle: 'Shop login', login_email: 'Email', login_password: 'Password',
@@ -439,6 +449,11 @@ export const translations = {
     scan_cancel: 'إلغاء', scan_next: 'العميل التالي',
     scan_camera: 'استخدام الكاميرا', scan_stop_camera: 'إيقاف الكاميرا',
     scan_invalid_qr: 'رمز QR غير صالح', scan_server_error: 'الخادم غير متاح',
+    scan_full_title: 'البطاقة ممتلئة',
+    scan_full_sub: 'الزيارة القادمة: {reward} مجانًا',
+    scan_redeemed_title: 'تم استبدال المكافأة',
+    scan_redeemed_sub: '{reward} — تبدأ البطاقة من جديد من 0',
+    scan_almost: 'شبه ممتلئة — تبقّى {left} حتى {reward}',
 
     // تسجيل الدخول
     login_subtitle: 'تسجيل دخول المتجر', login_email: 'البريد الإلكتروني', login_password: 'كلمة المرور',
