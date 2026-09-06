@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import api from '../api'
 import { useLang, dirArrow } from '../LangContext'
+import BildCropper from '../components/BildCropper'
+import { blobZuBase64 } from '../lib/bild'
 
 const PRESET_KEYS = ['coffee', 'star', 'heart', 'dot', 'square']
 
@@ -242,22 +244,27 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
   const heroRef = useRef()
   const stampRef = useRef()
   const [uploading, setUploading] = useState('')
+  // Bild-Zuschnitt-Dialog: {datei, form, ratio, ausgabe, aufFertig}
+  const [cropper, setCropper] = useState(null)
   const d = design
 
-  async function upload(file, endpoint, field) {
-    if (!file) return
+  // Datei ausgewaehlt -> erst zuschneiden lassen, dann hochladen
+  function waehleBild(e, config) {
+    const f = e.target.files && e.target.files[0]
+    e.target.value = ''            // gleiche Datei erneut waehlbar
+    if (f) setCropper({ ...config, datei: f })
+  }
+
+  async function upload(fileOrBlob, endpoint, field) {
+    if (!fileOrBlob) return
     setUploading(field)
-    const reader = new FileReader()
-    reader.onload = async (ev) => {
-      try {
-        const base64 = ev.target.result.split(',')[1]
-        const ext = file.name.split('.').pop()
-        const res = await api.post(endpoint, {base64, extension:ext})
-        onChange({...d, ...res.data})
-      } catch { alert(t('common_upload_failed')) }
-      setUploading('')
-    }
-    reader.readAsDataURL(file)
+    try {
+      const base64 = await blobZuBase64(fileOrBlob)
+      const ext = fileOrBlob.name ? fileOrBlob.name.split('.').pop() : 'png'
+      const res = await api.post(endpoint, { base64, extension: ext })
+      onChange({ ...d, ...res.data })
+    } catch { alert(t('common_upload_failed')) }
+    setUploading('')
   }
 
   // Stempel-Bild: Im Erstell-Modus (keine cardId) NICHT sofort hochladen —
@@ -278,11 +285,23 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
     }
   }
 
+  const cropDialog = cropper && (
+    <BildCropper
+      datei={cropper.datei}
+      form={cropper.form}
+      ratio={cropper.ratio}
+      ausgabe={cropper.ausgabe}
+      onFertig={(blob) => { const cb = cropper.aufFertig; setCropper(null); if (blob) cb(blob) }}
+      onAbbrechen={() => setCropper(null)}
+    />
+  )
+
   const logoEndpoint = cardId ? `/api/shop/cards/${cardId}/logo` : '/api/shop/logo'
   const heroEndpoint = cardId ? `/api/shop/cards/${cardId}/hero` : '/api/shop/hero'
 
   return (
       <div>
+        {cropDialog}
         {/* ── Farben ── */}
         <div style={dp.section}>
           <div style={dp.sectionTitle}>{t('design_colors')}</div>
@@ -316,7 +335,8 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
               <div style={{fontSize:11,color:'#aaa',marginTop:4}}>{t('design_logo_hint')}</div>
             </div>
             <input ref={logoRef} type="file" accept="image/*" style={{display:'none'}}
-                   onChange={e=>upload(e.target.files[0], logoEndpoint, 'logo')}/>
+                   onChange={e=>waehleBild(e, { form:'kreis', ausgabe:600,
+                     aufFertig:(b)=>upload(b, logoEndpoint, 'logo') })}/>
           </div>
         </div>
 
@@ -354,7 +374,8 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
           </div>
           <div style={{fontSize:11,color:'#aaa',marginTop:4}}>{t('design_banner_hint')}</div>
           <input ref={heroRef} type="file" accept="image/*" style={{display:'none'}}
-                 onChange={e=>upload(e.target.files[0], heroEndpoint, 'hero')}/>
+                 onChange={e=>waehleBild(e, { form:'breit', ratio:3, ausgabe:1200,
+                   aufFertig:(b)=>upload(b, heroEndpoint, 'hero') })}/>
         </div>
 
         {/* ── Wallet-Stil ── */}
@@ -393,7 +414,8 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
                   {uploading==='stamp'?t('common_loading'):d.stampIconUrl?t('common_change'):t('common_upload')}
                 </button>
                 <input ref={stampRef} type="file" accept="image/*" style={{display:'none'}}
-                       onChange={e=>handleStampFile(e.target.files[0])}/>
+                       onChange={e=>waehleBild(e, { form:'quadrat', ausgabe:600,
+                         aufFertig:(b)=>handleStampFile(b) })}/>
               </div>
           )}
         </div>
@@ -506,7 +528,7 @@ export default function Karten() {
             reader.onerror = reject
             reader.readAsDataURL(pendingStampFile)
           })
-          const ext = pendingStampFile.name.split('.').pop()
+          const ext = pendingStampFile.name ? pendingStampFile.name.split('.').pop() : 'png'
           await api.post(`/api/shop/cards/${res.data.id}/stamp-icon`, { base64, extension: ext })
         } catch {
           alert(t('cards_err_stamp_upload'))

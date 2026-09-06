@@ -11,6 +11,9 @@ export const translations = {
     common_upload: 'Hochladen', common_change: 'Ändern', common_off: 'Aus', common_on: 'An',
     common_error_generic: 'Fehler', common_camera_error: 'Kamera konnte nicht gestartet werden',
     common_upload_failed: 'Upload fehlgeschlagen',
+    crop_title: 'Bildausschnitt wählen',
+    crop_hint: 'Ziehen zum Verschieben · Regler / Zwei-Finger zum Zoomen',
+    crop_apply: 'Übernehmen', crop_cancel: 'Abbrechen',
 
     // Dashboard
     dash_welcome: 'Willkommen', dash_subtitle: 'Hier ist deine Übersicht',
@@ -188,6 +191,9 @@ export const translations = {
     common_upload: 'Upload', common_change: 'Change', common_off: 'Off', common_on: 'On',
     common_error_generic: 'Error', common_camera_error: 'Camera could not be started',
     common_upload_failed: 'Upload failed',
+    crop_title: 'Choose image crop',
+    crop_hint: 'Drag to move · slider / two fingers to zoom',
+    crop_apply: 'Apply', crop_cancel: 'Cancel',
 
     // Dashboard
     dash_welcome: 'Welcome', dash_subtitle: 'Here is your overview',
@@ -365,6 +371,9 @@ export const translations = {
     common_upload: 'رفع', common_change: 'تغيير', common_off: 'إيقاف', common_on: 'تشغيل',
     common_error_generic: 'خطأ', common_camera_error: 'تعذّر تشغيل الكاميرا',
     common_upload_failed: 'فشل الرفع',
+    crop_title: 'اختر قصّ الصورة',
+    crop_hint: 'اسحب للتحريك · المنزلق / إصبعان للتكبير',
+    crop_apply: 'تطبيق', crop_cancel: 'إلغاء',
 
     // لوحة التحكم
     dash_welcome: 'مرحبًا', dash_subtitle: 'إليك نظرة عامة',
