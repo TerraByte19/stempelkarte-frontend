@@ -414,7 +414,7 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
                   {uploading==='stamp'?t('common_loading'):d.stampIconUrl?t('common_change'):t('common_upload')}
                 </button>
                 <input ref={stampRef} type="file" accept="image/*" style={{display:'none'}}
-                       onChange={e=>waehleBild(e, { form:'quadrat', ausgabe:600,
+                       onChange={e=>waehleBild(e, { form:'kreis', ausgabe:600,
                          aufFertig:(b)=>handleStampFile(b) })}/>
               </div>
           )}
