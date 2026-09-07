@@ -52,6 +52,9 @@ export default function Statistik() {
             <div style={s.counterSub}>
               <span><b>{data.stampsThisWeek ?? 0}</b> {t('stat_this_week')}</span>
               <span><b>{data.stampsThisMonth ?? 0}</b> {t('stat_this_month')}</span>
+              {data.openStamps != null && (
+                <span><b>{data.openStamps}</b> {t('stat_stamps_open')}</span>
+              )}
             </div>
           </div>
           <div style={s.derivedCard}>
@@ -173,13 +176,16 @@ function HistoryChart({ history, t }) {
 
   const totalStamps = history.reduce((sum, d) => sum + d.stamps, 0)
   const totalRewards = history.reduce((sum, d) => sum + d.rewards, 0)
+  // Verlauf ist jetzt lueckenlos (jeder Tag der letzten 30) -> "aktive Tage"
+  // sind die mit mindestens einem Stempel, nicht einfach history.length.
+  const activeDays = history.filter(d => d.stamps > 0).length
 
   return (
       <div>
         <div style={s.chartSummary}>
           <span><b>{totalStamps}</b> {t('dash_stat_stamps')}</span>
           <span><b>{totalRewards}</b> {t('stat_rewards')}</span>
-          <span style={{ color: '#aaa' }}>{t('stat_active_days', { n: history.length })}</span>
+          <span style={{ color: '#aaa' }}>{t('stat_active_days', { n: activeDays })}</span>
         </div>
         <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto' }}>
           <defs>
