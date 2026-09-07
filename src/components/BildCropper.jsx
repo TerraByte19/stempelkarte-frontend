@@ -197,6 +197,17 @@ export default function BildCropper({ datei, form = 'kreis', ratio = 3, ausgabe 
             left: `calc(50% - ${mw / 2}px)`, top: `calc(50% - ${mh / 2}px)`,
             borderRadius: rund ? '50%' : '10px',
           }} />
+          {bereit && mw > 0 && (
+            <div style={{
+              position: 'absolute', pointerEvents: 'none',
+              width: mw, height: mh,
+              left: `calc(50% - ${mw / 2}px)`, top: `calc(50% - ${mh / 2}px)`,
+              borderRadius: rund ? '50%' : '10px', overflow: 'hidden',
+            }}>
+              <div style={s.gridV} /><div style={{ ...s.gridV, left: '66.666%' }} />
+              <div style={s.gridH} /><div style={{ ...s.gridH, top: '66.666%' }} />
+            </div>
+          )}
         </div>
 
         <div style={s.reglerReihe}>
@@ -247,6 +258,14 @@ const s = {
     position: 'absolute', pointerEvents: 'none',
     boxShadow: '0 0 0 2000px rgba(0,0,0,0.55)',
     outline: '2px solid rgba(255,255,255,0.9)',
+  },
+  gridV: {
+    position: 'absolute', top: 0, bottom: 0, left: '33.333%',
+    width: 1, background: 'rgba(255,255,255,0.4)',
+  },
+  gridH: {
+    position: 'absolute', left: 0, right: 0, top: '33.333%',
+    height: 1, background: 'rgba(255,255,255,0.4)',
   },
   reglerReihe: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 },
   zoomBtn: {
