@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { useLang } from '../LangContext'
+import Icon from './Icon'
 
 export default function InstallBanner() {
     const { t } = useLang()
@@ -21,7 +22,7 @@ export default function InstallBanner() {
     return (
         <div style={styles.banner}>
             <div style={styles.left}>
-                <div style={styles.icon}>📲</div>
+                <div style={{ ...styles.icon, display: 'flex', color: '#3C3489' }}><Icon name="download" size={26} strokeWidth={1.8} /></div>
                 <div>
                     <div style={styles.title}>{t('install_title')}</div>
                     <div style={styles.subtitle}>

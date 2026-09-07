@@ -44,7 +44,7 @@ export default function Layout() {
         </nav>
         <select value={lang} onChange={e => setLang(e.target.value)} style={styles.langSelect}>
           {languages.map(l => (
-            <option key={l.code} value={l.code}>{l.flag} {l.label}</option>
+            <option key={l.code} value={l.code}>{l.label}</option>
           ))}
         </select>
         <button onClick={logout} style={styles.logout}>{t('nav_logout')}</button>
@@ -94,7 +94,7 @@ export default function Layout() {
         </NavLink>
         <select value={lang} onChange={e => setLang(e.target.value)} style={styles.mobileLangSelect}>
           {languages.map(l => (
-            <option key={l.code} value={l.code}>{l.flag} {l.code.toUpperCase()}</option>
+            <option key={l.code} value={l.code}>{l.code.toUpperCase()}</option>
           ))}
         </select>
         <button onClick={logout} style={styles.mobileBottomBtn}>

@@ -8,6 +8,8 @@ const PATHS = {
   bolt: <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />,
   camera: <><path d="M3.5 8.5A1.5 1.5 0 0 1 5 7h1.5l1-2h5l1 2H20a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 18H5a1.5 1.5 0 0 1-1.5-1.5Z" /><circle cx="12" cy="12" r="3.4" /></>,
   warning: <><path d="M12 3.5 21 19.5H3Z" /><path d="M12 10v4.5M12 17.2v.1" /></>,
+  download: <><path d="M12 3v12M7 10.5l5 5 5-5" /><path d="M4.5 20h15" /></>,
+  info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 7.6v.1" /></>,
 }
 
 export default function Icon({ name, size = 22, strokeWidth = 1.7, style }) {
