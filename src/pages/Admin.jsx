@@ -75,7 +75,7 @@ export default function Admin() {
   // Sprache wird beim Erstellen festgelegt und ist danach fix - kein Umschalten.
 
   async function deleteShop(shopId, shopName) {
-    if (!confirm(`⚠️ Shop "${shopName}" wirklich KOMPLETT löschen?\n\nDas löscht:\n- Den Shop-Account\n- Alle Stempelkarten\n- Alle Kundendaten\n- Alle Staff-Tokens\n\nDas kann NICHT rückgängig gemacht werden!`)) return
+    if (!confirm(`ACHTUNG - Shop "${shopName}" wirklich KOMPLETT löschen?\n\nDas löscht:\n- Den Shop-Account\n- Alle Stempelkarten\n- Alle Kundendaten\n- Alle Staff-Tokens\n\nDas kann NICHT rückgängig gemacht werden!`)) return
     if (!confirm(`Letzter Check: "${shopName}" endgültig löschen?`)) return
 
     const t = sessionStorage.getItem('adminToken')
@@ -171,7 +171,7 @@ export default function Admin() {
 
         {shops.some(s => (s.language || 'de') === 'ar') && (
             <>
-              <h2 style={styles.sectionTitle}>🇸🇦 Arabische Läden (RTL)</h2>
+              <h2 style={styles.sectionTitle}>Arabische Läden (RTL)</h2>
               {renderShopTable(shops.filter(s => (s.language || 'de') === 'ar'))}
             </>
         )}
@@ -286,8 +286,8 @@ function CreateShop({ onCreated }) {
               Sprache <span style={{ color: '#999' }}>(fest, danach nicht mehr änderbar)</span>
             </label>
             <select style={createStyles.input} value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}>
-              <option value="de">🇩🇪 Deutsch</option>
-              <option value="ar">🇸🇦 العربية (RTL)</option>
+              <option value="de">Deutsch</option>
+              <option value="ar">العربية (RTL)</option>
             </select>
           </div>
           <button style={createStyles.btn} type="submit" disabled={loading}>

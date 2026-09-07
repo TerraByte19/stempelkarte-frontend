@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import { useLang } from '../LangContext'
+import Icon from '../components/Icon'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -223,7 +224,7 @@ export default function Scanner() {
             <div style={{ ...styles.resultBox, background: box.bg, borderColor: box.border }}>
               {isRedeemed && (
                   <div style={styles.hero}>
-                    <div style={styles.heroIcon}>🎁</div>
+                    <div style={{ ...styles.heroIcon, color: '#fff', display: 'flex', justifyContent: 'center' }}><Icon name="gift" size={56} strokeWidth={1.5} /></div>
                     <div style={{ ...styles.heroTitle, color: '#fff' }}>{t('scan_redeemed_title')}</div>
                     <div style={{ ...styles.heroSub, color: 'rgba(255,255,255,0.92)' }}>
                       {t('scan_redeemed_sub', { reward: d.rewardText || '' })}
@@ -233,7 +234,7 @@ export default function Scanner() {
 
               {isFull && (
                   <div style={styles.hero}>
-                    <div style={styles.heroIcon}>🎉</div>
+                    <div style={{ ...styles.heroIcon, color: '#1a1a1a', display: 'flex', justifyContent: 'center' }}><Icon name="award" size={56} strokeWidth={1.5} /></div>
                     <div style={{ ...styles.heroTitle, color: '#1a1a1a' }}>{t('scan_full_title')}</div>
                     <div style={{ ...styles.heroSub, color: '#5a4600' }}>
                       {t('scan_full_sub', { reward: d.rewardText || '' })}
@@ -243,7 +244,9 @@ export default function Scanner() {
 
               {!isRedeemed && !isFull && (
                   <>
-                    <div style={styles.resultIcon}>{result.success ? '✓' : '✗'}</div>
+                    <div style={{ ...styles.resultIcon, display: 'flex', justifyContent: 'center', color: result.success ? '#2C5F2E' : '#D00' }}>
+                      <Icon name={result.success ? 'check' : 'x'} size={34} strokeWidth={2.4} />
+                    </div>
                     <div style={styles.resultMessage}>
                       {result.success ? result.data.message : result.message}
                     </div>
@@ -261,8 +264,9 @@ export default function Scanner() {
               )}
 
               {isAlmost && (
-                  <div style={styles.almostHint}>
-                    ⚡ {t('scan_almost', { left, reward: d.rewardText || '' })}
+                  <div style={{ ...styles.almostHint, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <Icon name="bolt" size={15} strokeWidth={2} />
+                    {t('scan_almost', { left, reward: d.rewardText || '' })}
                   </div>
               )}
 
@@ -277,7 +281,7 @@ export default function Scanner() {
 
         {pendingScan && !result && (
             <div style={styles.popup}>
-              <div style={styles.popupIcon}>✅</div>
+              <div style={{ ...styles.popupIcon, display: 'flex', justifyContent: 'center', color: '#3C3489' }}><Icon name="check-circle" size={44} strokeWidth={1.8} /></div>
               <h2 style={styles.popupTitle}>{t('scan_detected')}</h2>
               <p style={styles.popupSubtitle}>{t('scan_how_many')}</p>
               <div style={styles.countButtons}>

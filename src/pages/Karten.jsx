@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import api from '../api'
 import { useLang, dirArrow } from '../LangContext'
 import BildCropper from '../components/BildCropper'
+import Icon from '../components/Icon'
 import { blobZuBase64 } from '../lib/bild'
 
 const PRESET_KEYS = ['coffee', 'star', 'heart', 'dot', 'square']
@@ -720,7 +721,11 @@ export default function Karten() {
               <input type="range" min={0} max={threshold} value={previewStamps} onChange={e=>setPreviewStamps(Number(e.target.value))} style={{width:'100%',accentColor:'#3C3489'}}/>
             </div>
             <button style={s.btnCreate} onClick={createCard} disabled={loading}>
-              {loading?t('cards_creating'):`✓ ${t('cards_create')}`}
+              {loading ? t('cards_creating') : (
+                  <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
+                    <Icon name="check" size={16} strokeWidth={2.4}/>{t('cards_create')}
+                  </span>
+              )}
             </button>
           </div>
 
@@ -760,7 +765,11 @@ export default function Karten() {
             <div style={s.panelTitle}>{t('cards_design_panel')}</div>
             <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t}/>
             <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
-              {saved?`✓ ${t('profil_saved')}`:loading?t('profil_saving'):t('profil_save')}
+              {saved ? (
+                  <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
+                    <Icon name="check" size={16} strokeWidth={2.4}/>{t('profil_saved')}
+                  </span>
+              ) : loading ? t('profil_saving') : t('profil_save')}
             </button>
           </div>
           {/* Vorschau — volle Breite, nebeneinander */}

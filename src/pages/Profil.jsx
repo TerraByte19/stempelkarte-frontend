@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../api'
 import { useLang } from '../LangContext'
+import Icon from '../components/Icon'
 
 export default function Profil() {
   const { t } = useLang()
@@ -43,7 +44,7 @@ export default function Profil() {
 
         <div style={s.card}>
           <h2 style={s.cardTitle}>{t('profil_shop_name')}</h2>
-          {saved && <div style={s.success}>✓ {t('profil_saved')}</div>}
+          {saved && <div style={{...s.success, display:'inline-flex', alignItems:'center', gap:6}}><Icon name="check" size={15} strokeWidth={2.4}/>{t('profil_saved')}</div>}
           <form onSubmit={saveName}>
             <input style={s.input} value={name} onChange={e => setName(e.target.value)} required />
             <button style={s.btnPrimary} type="submit" disabled={loading}>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import { useLang } from '../LangContext'
+import Icon from '../components/Icon'
 
 // wird nicht verwendet
 export default function ScannerLogin() {
@@ -80,7 +81,9 @@ export default function ScannerLogin() {
               </>
           ) : (
               <>
-                <button style={styles.btnQr} onClick={startQrSetup}>📷 Per QR-Code einrichten</button>
+                <button style={{ ...styles.btnQr, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} onClick={startQrSetup}>
+                  <Icon name="camera" size={18} strokeWidth={1.8} /> Per QR-Code einrichten
+                </button>
                 <div style={styles.divider}>oder Token manuell</div>
                 <form onSubmit={handleLogin}>
                   <input style={styles.input} type="text" placeholder={t('scan_login_placeholder')} value={token} onChange={e => setToken(e.target.value)} autoComplete="off" autoCorrect="off" autoCapitalize="off" required />

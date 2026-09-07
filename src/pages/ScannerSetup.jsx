@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import Icon from '../components/Icon'
 
 export default function ScannerSetup() {
   const [params] = useSearchParams()
@@ -35,7 +36,7 @@ export default function ScannerSetup() {
         )}
         {status === 'ok' && (
           <>
-            <div style={styles.icon}>✅</div>
+            <div style={{ ...styles.icon, display: 'flex', justifyContent: 'center', color: '#2C5F2E' }}><Icon name="check-circle" size={44} strokeWidth={1.8} /></div>
             <h1 style={styles.title}>Scanner bereit!</h1>
             <p style={styles.subtitle}>{label} ist jetzt eingerichtet.</p>
             <p style={styles.hint}>Du wirst zum Scanner weitergeleitet…</p>
@@ -43,7 +44,7 @@ export default function ScannerSetup() {
         )}
         {status === 'error' && (
           <>
-            <div style={styles.icon}>⚠️</div>
+            <div style={{ ...styles.icon, display: 'flex', justifyContent: 'center', color: '#B8860B' }}><Icon name="warning" size={42} strokeWidth={1.8} /></div>
             <h1 style={styles.title}>Ungültiger Link</h1>
             <p style={styles.subtitle}>Dieser Einrichtungs-Link ist nicht gültig.</p>
             <button style={styles.btn} onClick={() => navigate('/scanner-login')}>

@@ -80,7 +80,7 @@ export const translations = {
     profil_save_error: 'Fehler beim Speichern',
     profil_preview: 'Google Wallet Vorschau',
     profil_preview_hint: 'So sieht die Karte ungefähr in Google Wallet aus.',
-    profil_design_moved_hint: '💡 Logo, Farben & Banner stellst du jetzt direkt bei jeder Karte ein.',
+    profil_design_moved_hint: 'Logo, Farben & Banner stellst du jetzt direkt bei jeder Karte ein.',
     profil_staff_title: 'Staff-Tokens',
     profil_staff_hint: 'Mitarbeiter brauchen einen Token um Stempel zu vergeben.',
     profil_staff_new_token: 'Neuer Token (kopiere ihn jetzt!):',
@@ -107,7 +107,7 @@ export const translations = {
     // Login
     login_subtitle: 'Laden-Login', login_email: 'E-Mail', login_password: 'Passwort',
     login_btn: 'Anmelden', login_loading: 'Anmelden...', login_error: 'E-Mail oder Passwort falsch',
-    login_staff_divider: 'Mitarbeiter', login_qr_btn: '📷 Per QR-Code anmelden',
+    login_staff_divider: 'Mitarbeiter', login_qr_btn: 'Per QR-Code anmelden',
     login_token_placeholder: 'Token eingeben', login_staff_submit: 'Als Mitarbeiter anmelden',
     scan_login_title: 'Scanner-Login', scan_login_subtitle: 'Gib deinen Staff-Token ein',
     scan_login_placeholder: 'Staff-Token eingeben', scan_login_btn: 'Scanner starten',
@@ -143,7 +143,7 @@ export const translations = {
     stat_active_days: 'in {n} aktiven Tagen',
 
     // ScannerSetupSection (Dashboard)
-    scanner_setup_title: '📱 Scanner einrichten',
+    scanner_setup_title: 'Scanner einrichten',
     scanner_setup_hint: 'Lass deine Mitarbeiter den QR-Code mit der Tablet-/Handy-Kamera scannen. Danach ist der Scanner dauerhaft eingerichtet — kein Token-Tippen mehr.',
     scanner_setup_empty: 'Noch keine Staff-Tokens vorhanden. Erstelle einen im Profil-Bereich.',
     scanner_setup_default_label: 'Scanner {n}',
@@ -262,7 +262,7 @@ export const translations = {
     profil_save_error: 'Error saving',
     profil_preview: 'Google Wallet preview',
     profil_preview_hint: 'This is approximately how the card looks in Google Wallet.',
-    profil_design_moved_hint: '💡 Logo, colors & banner are now set directly on each card.',
+    profil_design_moved_hint: 'Logo, colors & banner are now set directly on each card.',
     profil_staff_title: 'Staff tokens',
     profil_staff_hint: 'Staff need a token to give stamps.',
     profil_staff_new_token: 'New token (copy it now!):',
@@ -289,7 +289,7 @@ export const translations = {
     // Login
     login_subtitle: 'Shop login', login_email: 'Email', login_password: 'Password',
     login_btn: 'Sign in', login_loading: 'Signing in...', login_error: 'Email or password incorrect',
-    login_staff_divider: 'Staff', login_qr_btn: '📷 Sign in via QR code',
+    login_staff_divider: 'Staff', login_qr_btn: 'Sign in via QR code',
     login_token_placeholder: 'Enter token', login_staff_submit: 'Sign in as staff',
     scan_login_title: 'Scanner login', scan_login_subtitle: 'Enter your staff token',
     scan_login_placeholder: 'Enter staff token', scan_login_btn: 'Start scanner',
@@ -325,7 +325,7 @@ export const translations = {
     stat_active_days: 'across {n} active days',
 
     // ScannerSetupSection (Dashboard)
-    scanner_setup_title: '📱 Set up scanner',
+    scanner_setup_title: 'Set up scanner',
     scanner_setup_hint: 'Have your staff scan the QR code with a tablet/phone camera. The scanner will then be set up permanently — no more typing tokens.',
     scanner_setup_empty: 'No staff tokens yet. Create one in the profile section.',
     scanner_setup_default_label: 'Scanner {n}',
@@ -444,7 +444,7 @@ export const translations = {
     profil_save_error: 'خطأ أثناء الحفظ',
     profil_preview: 'معاينة Google Wallet',
     profil_preview_hint: 'هكذا تبدو البطاقة تقريبًا في Google Wallet.',
-    profil_design_moved_hint: '💡 يمكنك الآن ضبط الشعار والألوان والبانر مباشرةً لكل بطاقة.',
+    profil_design_moved_hint: 'يمكنك الآن ضبط الشعار والألوان والبانر مباشرةً لكل بطاقة.',
     profil_staff_title: 'رموز الموظفين',
     profil_staff_hint: 'يحتاج الموظفون إلى رمز لمنح الأختام.',
     profil_staff_new_token: 'رمز جديد (انسخه الآن!):',
@@ -471,7 +471,7 @@ export const translations = {
     // تسجيل الدخول
     login_subtitle: 'تسجيل دخول المتجر', login_email: 'البريد الإلكتروني', login_password: 'كلمة المرور',
     login_btn: 'تسجيل الدخول', login_loading: 'جارٍ تسجيل الدخول...', login_error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
-    login_staff_divider: 'الموظفون', login_qr_btn: '📷 تسجيل الدخول عبر رمز QR',
+    login_staff_divider: 'الموظفون', login_qr_btn: 'تسجيل الدخول عبر رمز QR',
     login_token_placeholder: 'أدخل الرمز', login_staff_submit: 'تسجيل الدخول كموظف',
     scan_login_title: 'تسجيل دخول الماسح الضوئي', scan_login_subtitle: 'أدخل رمز الموظف الخاص بك',
     scan_login_placeholder: 'أدخل رمز الموظف', scan_login_btn: 'بدء تشغيل الماسح',
@@ -507,7 +507,7 @@ export const translations = {
     stat_active_days: 'خلال {n} يومًا نشطًا',
 
     // قسم إعداد الماسح الضوئي (لوحة التحكم)
-    scanner_setup_title: '📱 إعداد الماسح الضوئي',
+    scanner_setup_title: 'إعداد الماسح الضوئي',
     scanner_setup_hint: 'اطلب من موظفيك مسح رمز QR بكاميرا الجهاز اللوحي أو الهاتف. بعدها يصبح الماسح مُعدًّا بشكل دائم — دون الحاجة لكتابة الرمز مرة أخرى.',
     scanner_setup_empty: 'لا توجد رموز موظفين بعد. أنشئ واحدًا في قسم الملف الشخصي.',
     scanner_setup_default_label: 'الماسح {n}',
