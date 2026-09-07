@@ -604,7 +604,7 @@ export default function Karten() {
     } catch { alert(t('common_error_generic')) }
   }
 
-  function openEdit(card) {
+  async function openEdit(card) {
     setEditCard(card)
     setEditDesign({
       colorBackground: card.colorBackground||'#3C3489',
@@ -621,6 +621,18 @@ export default function Karten() {
       stampIconUrl: card.stampIconUrl||'',
     })
     setMode('edit')
+    // Die Karten-Liste enthaelt die *OriginalUrl-Felder nicht - ohne die
+    // erscheint kein "Bearbeiten"-Knopf (v.a. von einem anderen Geraet).
+    // Nur diese Felder nachladen, Rest der Liste-Werte unangetastet lassen.
+    try {
+      const r = await api.get(`/api/shop/cards/${card.id}/design`)
+      setEditDesign(cur => ({
+        ...cur,
+        logoOriginalUrl: r.data.logoOriginalUrl || '',
+        heroOriginalUrl: r.data.heroOriginalUrl || '',
+        stampIconOriginalUrl: r.data.stampIconOriginalUrl || '',
+      }))
+    } catch { /* Liste-Werte reichen als Fallback */ }
   }
 
   const threshold = parseInt(form.rewardThreshold)||10

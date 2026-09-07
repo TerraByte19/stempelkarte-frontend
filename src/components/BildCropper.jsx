@@ -48,7 +48,23 @@ export default function BildCropper({ datei, form = 'kreis', ratio = 3, ausgabe 
   }, [datei])
 
   useEffect(() => {
-    const ro = new ResizeObserver(() => { passeAn(); begrenze(); zeichne() })
+    const ro = new ResizeObserver(() => {
+      passeAn()
+      // Bei Groessenaenderung (Handy: Adressleiste ein/aus) die Grenzen der
+      // Zoomstufe an die neue Maskengroesse anpassen - sonst driftet der
+      // gespeicherte Ausschnitt gegenueber dem, was auf dem Schirm stand.
+      const img = bildRef.current
+      if (img) {
+        const { w: mw, h: mh } = maskCss()
+        const z = zustand.current
+        z.minSkala = Math.max(mw / img.width, mh / img.height)
+        z.maxSkala = z.minSkala * 4
+        if (z.skala < z.minSkala) z.skala = z.minSkala
+        setZoom(z.skala)
+      }
+      begrenze()
+      zeichne()
+    })
     if (buehneRef.current) ro.observe(buehneRef.current)
     return () => ro.disconnect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,6 +168,10 @@ export default function BildCropper({ datei, form = 'kreis', ratio = 3, ausgabe 
     const img = bildRef.current
     if (!img) return
     const z = zustand.current
+    // Vor dem Export gegen die AKTUELLE Maskengroesse begrenzen, damit der
+    // Zuschnitt exakt dem entspricht, was zuletzt sichtbar war.
+    begrenze()
+    zeichne()
     const { w: mwCss } = maskCss()
     const faktor = ausgabe / mwCss
     const outW = ausgabe
