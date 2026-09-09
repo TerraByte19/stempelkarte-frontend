@@ -520,6 +520,7 @@ export default function Karten() {
   const [pendingStampFile, setPendingStampFile] = useState(null)
   const [editCard, setEditCard] = useState(null)
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
+  const [editReward, setEditReward] = useState('')
 
   useEffect(()=>{
     loadCards()
@@ -590,6 +591,11 @@ export default function Karten() {
     setLoading(true)
     try {
       await api.put(`/api/shop/cards/${editCard.id}/design`, editDesign)
+      const rw = editReward.trim()
+      if (rw && rw !== (editCard.rewardText || '')) {
+        await api.put(`/api/shop/cards/${editCard.id}/info`, { rewardText: rw })
+        setEditCard(c => ({ ...c, rewardText: rw }))
+      }
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       loadCards()
     } catch { alert(t('profil_save_error')) }
@@ -607,6 +613,7 @@ export default function Karten() {
 
   async function openEdit(card) {
     setEditCard(card)
+    setEditReward(card.rewardText || '')
     setEditDesign({
       colorBackground: card.colorBackground||'#3C3489',
       colorForeground: card.colorForeground||'#FFFFFF',
@@ -763,6 +770,13 @@ export default function Karten() {
         <div style={s.editGrid}>
           <div style={{...s.panel,maxHeight:'80vh',overflowY:'auto'}}>
             <div style={s.panelTitle}>{t('cards_design_panel')}</div>
+            <div style={{marginBottom:16}}>
+              <label style={{fontSize:11,fontWeight:800,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:0.8,display:'block'}}>
+                {t('cards_reward')}
+              </label>
+              <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
+                     value={editReward} onChange={e=>setEditReward(e.target.value)} placeholder={t('cards_reward_ph')}/>
+            </div>
             <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t}/>
             <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
               {saved ? (
