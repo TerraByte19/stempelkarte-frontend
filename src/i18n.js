@@ -180,6 +180,11 @@ export const translations = {
     newsletter_history_title: 'Gesendete Newsletter', newsletter_history_empty: 'Noch keine Newsletter gesendet.',
     newsletter_history_recipients: 'An {n} Kunde(n)',
     newsletter_next: 'Weiter', newsletter_page_info: 'Seite {page} von {totalPages}',
+    // Landing — Kopf und Fuss
+    lp_nav_how: 'So funktioniert\'s', lp_nav_features: 'Funktionen',
+    lp_nav_pricing: 'Preise', lp_nav_contact: 'Kontakt', lp_nav_login: 'Anmelden',
+    lp_foot_imprint: 'Impressum', lp_foot_privacy: 'Datenschutz',
+    lp_foot_made: 'In Deutschland entwickelt', lp_foot_copy: '© 2026 Stampit',
   },
   en: {
     // Navigation
@@ -362,6 +367,11 @@ export const translations = {
     newsletter_history_title: 'Sent newsletters', newsletter_history_empty: 'No newsletters sent yet.',
     newsletter_history_recipients: 'To {n} customer(s)',
     newsletter_next: 'Next', newsletter_page_info: 'Page {page} of {totalPages}',
+    // Landing — header and footer
+    lp_nav_how: 'How it works', lp_nav_features: 'Features',
+    lp_nav_pricing: 'Pricing', lp_nav_contact: 'Contact', lp_nav_login: 'Sign in',
+    lp_foot_imprint: 'Imprint', lp_foot_privacy: 'Privacy',
+    lp_foot_made: 'Made in Germany', lp_foot_copy: '© 2026 Stampit',
   },
   ar: {
     // التنقل
@@ -544,6 +554,11 @@ export const translations = {
     newsletter_history_title: 'النشرات المُرسَلة', newsletter_history_empty: 'لم يتم إرسال أي نشرة بريدية بعد.',
     newsletter_history_recipients: 'إلى {n} عميل',
     newsletter_next: 'التالي', newsletter_page_info: 'صفحة {page} من {totalPages}',
+    // صفحة التعريف — الرأس والتذييل
+    lp_nav_how: 'كيف يعمل', lp_nav_features: 'المزايا',
+    lp_nav_pricing: 'الأسعار', lp_nav_contact: 'تواصل', lp_nav_login: 'تسجيل الدخول',
+    lp_foot_imprint: 'بيانات الناشر', lp_foot_privacy: 'الخصوصية',
+    lp_foot_made: 'طُوِّر في ألمانيا', lp_foot_copy: '© 2026 Stampit',
   },
 }
 
