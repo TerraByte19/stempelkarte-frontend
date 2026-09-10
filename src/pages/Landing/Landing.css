@@ -83,3 +83,108 @@
     transition-duration: .001ms !important;
   }
 }
+
+/* ---------- Stempelkarte ---------- */
+.lp-card {
+  width: min(304px, 80vw);
+  aspect-ratio: 1 / 1.42;
+  background: linear-gradient(163deg, var(--lp-card-from), var(--lp-card-to));
+  border-radius: 20px;
+  color: #fff;
+  padding: 20px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -20px rgba(44, 37, 112, .55);
+}
+.lp-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  border: 2px solid var(--lp-gold);
+  opacity: 0;
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
+.lp-card.is-done::after { opacity: 1; }
+
+.lp-card-head { display: flex; align-items: center; gap: 9px; }
+.lp-card-mark {
+  width: 22px; height: 22px; border-radius: 6px; flex: none;
+  background: rgba(255, 255, 255, .92);
+  display: grid; place-items: center;
+}
+.lp-card-mark svg {
+  width: 13px; height: 13px;
+  stroke: var(--lp-card-to); fill: none; stroke-width: 1.9;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.lp-card-shop { font-family: var(--lp-display); font-weight: 600; font-size: 15.5px; }
+.lp-card-loc {
+  margin-inline-start: auto;
+  font-size: 9.5px; letter-spacing: .06em;
+  color: #B7B0E8;
+}
+
+.lp-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 11px;
+  flex: 1;
+  align-content: center;
+}
+.lp-slot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, .22);
+  display: grid;
+  place-items: center;
+  transition: background .32s cubic-bezier(.2, .9, .3, 1.4),
+              border-color .32s ease,
+              transform .32s cubic-bezier(.2, .9, .3, 1.4);
+}
+.lp-slot svg {
+  width: 52%; height: 52%;
+  stroke: var(--lp-card-to); fill: none; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  opacity: 0; transition: opacity .25s ease;
+}
+.lp-slot.is-on { background: #fff; border-color: #fff; border-style: solid; transform: scale(1.06); }
+.lp-slot.is-on svg { opacity: 1; }
+.lp-card.is-done .lp-slot.is-on { background: var(--lp-gold); border-color: var(--lp-gold); }
+.lp-card.is-done .lp-slot.is-on svg { stroke: #2A1B02; }
+
+.lp-card-foot { display: flex; flex-direction: column; gap: 9px; }
+.lp-card-reward {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  font-size: 13px; color: #B7B0E8;
+}
+.lp-card-chip {
+  font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--lp-gold); color: #2A1B02;
+  padding: 3px 7px; border-radius: 5px;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+.lp-card.is-done .lp-card-chip { opacity: 1; transform: none; }
+
+.lp-card-pass { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.lp-qr {
+  width: 74px; aspect-ratio: 1; flex: none;
+  background: #fff; border-radius: 7px; padding: 4px;
+}
+.lp-qr svg { width: 100%; height: 100%; display: block; }
+.lp-card-serial { font-size: 8.5px; letter-spacing: .14em; color: #B7B0E8; }
+
+.lp-card--compact { width: 132px; border-radius: 12px; padding: 10px 10px 8px; gap: 7px; }
+.lp-card--compact::after { border-radius: 12px; border-width: 1.5px; }
+.lp-card--compact .lp-card-grid { gap: 6px; }
+.lp-card--compact .lp-card-shop { font-size: 9.5px; }
+.lp-card--compact .lp-card-loc,
+.lp-card--compact .lp-card-chip,
+.lp-card--compact .lp-card-serial { display: none; }
+.lp-card--compact .lp-card-reward { font-size: 7.5px; }
+.lp-card--compact .lp-qr { width: 34px; border-radius: 4px; padding: 2px; }
