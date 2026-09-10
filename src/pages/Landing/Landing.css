@@ -289,3 +289,36 @@
 .lp-footer-links { display: flex; gap: 18px; }
 .lp-footer a { color: var(--lp-muted); text-decoration: none; }
 .lp-footer a:hover { color: var(--lp-brand); }
+
+/* ---------- Hero ---------- */
+.lp-hero { padding-block: 72px 84px; }
+.lp-hero-in {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 56px;
+  align-items: center;
+}
+.lp-hero-copy { display: flex; flex-direction: column; gap: 20px; }
+.lp-hero h1 { font-size: clamp(34px, 6vw, 54px); font-weight: 700; letter-spacing: -.025em; }
+.lp-lede { font-size: 18px; color: var(--lp-muted); max-width: 30em; }
+.lp-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.lp-hero-note { font-size: 13.5px; color: var(--lp-muted); }
+.lp-hero-card { display: grid; place-items: center; }
+.lp-bob { animation: lp-bob 5.5s ease-in-out infinite; }
+@keyframes lp-bob {
+  0%, 100% { transform: translateY(0) rotate(-1.2deg); }
+  50%      { transform: translateY(-11px) rotate(1.2deg); }
+}
+@media (max-width: 860px) {
+  .lp-hero-in { grid-template-columns: 1fr; gap: 40px; }
+  .lp-hero-card { order: -1; }
+}
+
+/* ---------- Value-Band ---------- */
+.lp-value { background: var(--lp-brand); color: #fff; }
+.lp-value-in {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 20px 40px; padding-block: 54px;
+}
+.lp-value h2 { color: #fff; font-size: clamp(22px, 3.4vw, 30px); font-weight: 600; max-width: 18em; }
+.lp-value p { color: #CFCAF2; font-size: 16px; max-width: 22em; }

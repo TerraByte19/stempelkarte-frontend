@@ -52,7 +52,10 @@ function App() {
         </Route>
       </Routes>
 
-      <InstallBanner />
+      {/* Nur fuer Besitzer und Scanner-Geraete. Ein Besucher auf der
+          Landing-Page kennt die Firma noch nicht — "App installieren" waere
+          dort sinnlos, und das Banner legt sich ueber den Inhalt. */}
+      {(token || staffToken) && <InstallBanner />}
     </LangProvider>
   )
 }

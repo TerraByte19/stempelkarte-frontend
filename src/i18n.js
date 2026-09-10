@@ -185,6 +185,16 @@ export const translations = {
     lp_nav_pricing: 'Preise', lp_nav_contact: 'Kontakt', lp_nav_login: 'Anmelden',
     lp_foot_imprint: 'Impressum', lp_foot_privacy: 'Datenschutz',
     lp_foot_made: 'In Deutschland entwickelt', lp_foot_copy: '© 2026 Stampit',
+    // Landing — Hero und Value
+    lp_hero_title: 'Aus Laufkundschaft werden Stammkunden.',
+    lp_hero_body: 'Die digitale Stempelkarte liegt in Apple und Google Wallet. Kein App-Store, kein Plastik, kein Papier, das im Portemonnaie zerfällt.',
+    lp_hero_cta: 'Kostenlos anfragen', lp_hero_cta2: 'So funktioniert\'s',
+    lp_hero_note: 'DSGVO-konform · In Deutschland entwickelt',
+    lp_card_shop: 'Café Nordwind',
+    lp_card_reward: '6 Stempel = 1 Kaffee gratis',
+    lp_card_chip: 'frei',
+    lp_value_title: 'Keine App im Store. Kein Plastik. Kein Papier, das verloren geht.',
+    lp_value_body: 'Der Kunde scannt einmal und hat die Karte für immer auf dem Handy.',
   },
   en: {
     // Navigation
@@ -372,6 +382,16 @@ export const translations = {
     lp_nav_pricing: 'Pricing', lp_nav_contact: 'Contact', lp_nav_login: 'Sign in',
     lp_foot_imprint: 'Imprint', lp_foot_privacy: 'Privacy',
     lp_foot_made: 'Made in Germany', lp_foot_copy: '© 2026 Stampit',
+    // Landing — hero and value band
+    lp_hero_title: 'Turn passers-by into regulars.',
+    lp_hero_body: 'The digital stamp card lives in Apple and Google Wallet. No app store, no plastic, no paper falling apart in a wallet.',
+    lp_hero_cta: 'Request a demo', lp_hero_cta2: 'How it works',
+    lp_hero_note: 'GDPR-compliant · Made in Germany',
+    lp_card_shop: 'Café Nordwind',
+    lp_card_reward: '6 stamps = 1 free coffee',
+    lp_card_chip: 'ready',
+    lp_value_title: 'No app store. No plastic. No paper to lose.',
+    lp_value_body: 'Your customer scans once and keeps the card on their phone.',
   },
   ar: {
     // التنقل
@@ -559,6 +579,16 @@ export const translations = {
     lp_nav_pricing: 'الأسعار', lp_nav_contact: 'تواصل', lp_nav_login: 'تسجيل الدخول',
     lp_foot_imprint: 'بيانات الناشر', lp_foot_privacy: 'الخصوصية',
     lp_foot_made: 'طُوِّر في ألمانيا', lp_foot_copy: '© 2026 Stampit',
+    // صفحة التعريف — الواجهة والشريط
+    lp_hero_title: 'حوّل الزبائن العابرين إلى زبائن دائمين.',
+    lp_hero_body: 'بطاقة الختم الرقمية داخل Apple و Google Wallet. بلا متجر تطبيقات، بلا بلاستيك، بلا ورق يتمزّق في المحفظة.',
+    lp_hero_cta: 'اطلب عرضاً', lp_hero_cta2: 'كيف يعمل',
+    lp_hero_note: 'متوافق مع حماية البيانات · طُوِّر في ألمانيا',
+    lp_card_shop: 'مقهى نوردفيند',
+    lp_card_reward: '٦ أختام = قهوة مجاناً',
+    lp_card_chip: 'جاهز',
+    lp_value_title: 'لا تطبيق في المتجر. لا بلاستيك. لا ورق يضيع.',
+    lp_value_body: 'يمسح الزبون مرة واحدة وتبقى البطاقة على هاتفه.',
   },
 }
 
