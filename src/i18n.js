@@ -246,6 +246,15 @@ export const translations = {
     lp_trust_1_t: 'Double-Opt-In', lp_trust_1_b: 'Jeder Kunde bestätigt seine E-Mail-Adresse, bevor eine Karte aktiv wird.',
     lp_trust_2_t: 'Löschen mit einem Klick', lp_trust_2_b: 'Jede Mail trägt einen Lösch-Link. Nach Bestätigung sind alle Daten weg — unwiderruflich.',
     lp_trust_3_t: 'Newsletter nur mit Einwilligung', lp_trust_3_b: 'Werbung geht ausschließlich an Kunden, die ausdrücklich zugestimmt haben.',
+    // Landing — Wallet-Finale und Kontakt
+    lp_wallet_title: 'Die Karte erinnert sich von selbst',
+    lp_wallet_body: 'Ist die Karte voll, meldet sie sich auf dem Sperrbildschirm — in der Nähe deines Ladens, ohne dass du etwas tust.',
+    lp_contact_title: 'Bereit für digitale Stempelkarten?',
+    lp_contact_body: 'Schreib uns kurz, was für einen Laden du hast. Wir melden uns am selben Werktag.',
+    lp_contact_name: 'Name', lp_contact_shop: 'Laden', lp_contact_email: 'E-Mail', lp_contact_msg: 'Nachricht',
+    lp_contact_send: 'Anfrage senden', lp_contact_sending: 'Wird gesendet…',
+    lp_contact_ok: 'Angekommen. Wir melden uns am selben Werktag.',
+    lp_contact_err: 'Die Anfrage kam nicht durch. Versuch es gleich noch einmal oder schreib direkt an hallo@stampit.de.',
   },
   en: {
     // Navigation
@@ -494,6 +503,15 @@ export const translations = {
     lp_trust_1_t: 'Double opt-in', lp_trust_1_b: 'Every customer confirms their email address before a card goes live.',
     lp_trust_2_t: 'Delete in one click', lp_trust_2_b: 'Every email carries a deletion link. Once confirmed, all data is gone — for good.',
     lp_trust_3_t: 'Newsletter only with consent', lp_trust_3_b: 'Marketing reaches only customers who explicitly agreed.',
+    // Landing — wallet finale and contact
+    lp_wallet_title: 'The card reminds them on its own',
+    lp_wallet_body: 'Once the card is full it shows up on the lock screen — near your shop, with nothing to do on your side.',
+    lp_contact_title: 'Ready for digital stamp cards?',
+    lp_contact_body: 'Tell us briefly what kind of shop you run. We reply the same business day.',
+    lp_contact_name: 'Name', lp_contact_shop: 'Shop', lp_contact_email: 'Email', lp_contact_msg: 'Message',
+    lp_contact_send: 'Send request', lp_contact_sending: 'Sending…',
+    lp_contact_ok: 'Received. We will reply the same business day.',
+    lp_contact_err: 'The request did not go through. Try again in a moment or write to hallo@stampit.de.',
   },
   ar: {
     // التنقل
@@ -742,6 +760,15 @@ export const translations = {
     lp_trust_1_t: 'تأكيد مزدوج', lp_trust_1_b: 'يؤكّد كل زبون بريده قبل تفعيل البطاقة.',
     lp_trust_2_t: 'حذف بنقرة واحدة', lp_trust_2_b: 'كل رسالة تحمل رابط حذف. بعد التأكيد تختفي كل البيانات — نهائياً.',
     lp_trust_3_t: 'نشرة بموافقة فقط', lp_trust_3_b: 'لا تصل الإعلانات إلا لمن وافق صراحةً.',
+    // صفحة التعريف — الختام والتواصل
+    lp_wallet_title: 'البطاقة تُذكّر بنفسها',
+    lp_wallet_body: 'حين تمتلئ البطاقة تظهر على شاشة القفل — بالقرب من متجرك، دون أي جهد منك.',
+    lp_contact_title: 'جاهز لبطاقات الختم الرقمية؟',
+    lp_contact_body: 'اكتب لنا باختصار عن نوع متجرك. نردّ في نفس يوم العمل.',
+    lp_contact_name: 'الاسم', lp_contact_shop: 'المتجر', lp_contact_email: 'البريد الإلكتروني', lp_contact_msg: 'الرسالة',
+    lp_contact_send: 'أرسل الطلب', lp_contact_sending: 'جارٍ الإرسال…',
+    lp_contact_ok: 'وصلت رسالتك. نردّ في نفس يوم العمل.',
+    lp_contact_err: 'لم يصل الطلب. أعد المحاولة بعد قليل أو راسلنا على hallo@stampit.de.',
   },
 }
 

@@ -6,6 +6,8 @@ import HowItWorks from './sections/HowItWorks'
 import Features from './sections/Features'
 import Pricing from './sections/Pricing'
 import Trust from './sections/Trust'
+import WalletFinale from './sections/WalletFinale'
+import Contact from './sections/Contact'
 import Footer from './sections/Footer'
 
 export default function Landing() {
@@ -19,8 +21,8 @@ export default function Landing() {
         <Features />
         <Pricing />
         <Trust />
-        <section id="wallet" />
-        <section id="contact" />
+        <WalletFinale />
+        <Contact />
       </main>
       <Footer />
     </div>
