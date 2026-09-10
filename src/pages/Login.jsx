@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Html5Qrcode } from 'html5-qrcode'
 import { useLang } from '../LangContext'
 import api from '../api'
 
@@ -80,6 +79,9 @@ export default function Login() {
     setCameraActive(true)
     await new Promise(r => setTimeout(r, 300))
     try {
+      // html5-qrcode ist ~3 MB und wird nur hier gebraucht. Als statischer
+      // Import laege es im Erst-Bundle jeder Seite — auch der Landing-Page.
+      const { Html5Qrcode } = await import('html5-qrcode')
       html5QrRef.current = new Html5Qrcode('qr-login-reader')
       await html5QrRef.current.start(
           { facingMode: 'environment' },

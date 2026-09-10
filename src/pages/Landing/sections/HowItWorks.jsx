@@ -30,10 +30,20 @@ export default function HowItWorks() {
   const out = segment(p, 0.84, 1)
 
   return (
-    <section id="how" className="lp-stage" ref={ref}>
-      <div className="lp-pin">
-        <span className="lp-stage-label">{t('lp_how_eyebrow')}</span>
+    <>
+      {/* Ueberschrift steht ausserhalb der Buehne. Innerhalb wuerde sie die
+          Hoehe des Abschnitts vergroessern und damit alle Scroll-Schwellen
+          verschieben — und eine Eckmarke im Pin liegt unter der klebenden
+          Kopfzeile. */}
+      <div id="how" className="lp-how-head">
+        <div className="lp-wrap lp-sec-head">
+          <span className="lp-eyebrow">{t('lp_how_eyebrow')}</span>
+          <h2>{t('lp_how_title')}</h2>
+        </div>
+      </div>
 
+    <section className="lp-stage" ref={ref}>
+      <div className="lp-pin">
         <div className="lp-pin-in">
           <div className="lp-step" key={step}>
             <span className="lp-step-n">
@@ -72,5 +82,6 @@ export default function HowItWorks() {
         <span className="lp-stage-hint">{t('lp_how_scroll')}</span>
       </div>
     </section>
+    </>
   )
 }

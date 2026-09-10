@@ -335,11 +335,8 @@
   display: flex; flex-direction: column; align-items: center; gap: 22px;
   width: 100%; padding-inline: var(--lp-gutter);
 }
-.lp-stage-label {
-  position: absolute; top: 18px; inset-inline-start: var(--lp-gutter);
-  font-family: var(--lp-display); font-size: 12px; font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase; color: var(--lp-muted);
-}
+.lp-how-head { background: var(--lp-surface); padding-block: 84px 0; }
+.lp-how-head .lp-sec-head { margin-bottom: 0; }
 .lp-stage-hint {
   position: absolute; bottom: 18px; inset-inline: 0; text-align: center;
   font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lp-muted);
