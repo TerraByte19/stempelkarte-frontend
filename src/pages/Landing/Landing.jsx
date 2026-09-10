@@ -4,7 +4,6 @@ import Hero from './sections/Hero'
 import ValueBand from './sections/ValueBand'
 import HowItWorks from './sections/HowItWorks'
 import Features from './sections/Features'
-import Pricing from './sections/Pricing'
 import Trust from './sections/Trust'
 import WalletFinale from './sections/WalletFinale'
 import Contact from './sections/Contact'
@@ -19,7 +18,6 @@ export default function Landing() {
         <ValueBand />
         <HowItWorks />
         <Features />
-        <Pricing />
         <Trust />
         <WalletFinale />
         <Contact />

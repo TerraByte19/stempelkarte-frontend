@@ -388,44 +388,10 @@
 .lp-feat h3 { font-size: 17px; font-weight: 600; }
 .lp-feat p { font-size: 14.5px; color: var(--lp-muted); }
 
-/* ---------- Preise ---------- */
-.lp-pricing { padding-block: 90px; }
-.lp-price-note { font-size: 14.5px; color: var(--lp-muted); }
-.lp-price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; align-items: stretch; }
-.lp-price-grid > .lp-reveal { display: flex; }
-.lp-tier {
-  position: relative;
-  background: var(--lp-surface);
-  border: 1px solid var(--lp-line);
-  border-radius: 14px;
-  padding: 26px 22px;
-  width: 100%;
-  display: flex; flex-direction: column; gap: 12px;
-}
-.lp-tier.is-popular { border-color: var(--lp-brand); box-shadow: 0 18px 44px -22px rgba(60, 52, 137, .45); }
-.lp-tier-flag {
-  position: absolute; top: -11px; inset-inline-start: 22px;
-  background: var(--lp-brand); color: #fff;
-  font-family: var(--lp-display); font-size: 11px; font-weight: 600;
-  letter-spacing: .08em; text-transform: uppercase;
-  padding: 4px 10px; border-radius: 6px;
-}
-.lp-tier h3 { font-size: 22px; font-weight: 600; }
-.lp-tier-sub { font-size: 14.5px; color: var(--lp-muted); }
-.lp-tier-amount { display: flex; align-items: baseline; gap: 7px; }
-.lp-tier-amount span { font-family: var(--lp-display); font-size: 30px; font-weight: 700; }
-.lp-tier-amount small { font-size: 14px; color: var(--lp-muted); }
-.lp-tier-list { list-style: none; padding: 0; margin: 4px 0 0; display: flex; flex-direction: column; gap: 8px; }
-.lp-tier-list li { font-size: 14.5px; color: var(--lp-muted); padding-inline-start: 20px; position: relative; }
-.lp-tier-list li::before {
-  content: '';
-  position: absolute; inset-inline-start: 0; top: .55em;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--lp-brand);
-}
-
 /* ---------- DSGVO ---------- */
-.lp-trust { background: var(--lp-surface-2); padding-block: 90px; }
+/* Weiss, nicht grau: seit der Preis-Abschnitt raus ist, grenzt DSGVO direkt
+   an die Funktionen — zwei graue Flaechen ohne Trennung waeren ein Block. */
+.lp-trust { background: var(--lp-surface); padding-block: 90px; }
 .lp-trust-in { display: grid; grid-template-columns: 1fr 1.15fr; gap: 48px; align-items: start; }
 .lp-trust-in .lp-sec-head { margin-bottom: 0; }
 .lp-trust-list { display: flex; flex-direction: column; gap: 22px; }
