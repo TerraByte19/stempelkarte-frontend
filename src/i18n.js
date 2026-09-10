@@ -182,7 +182,7 @@ export const translations = {
     newsletter_next: 'Weiter', newsletter_page_info: 'Seite {page} von {totalPages}',
     // Landing — Kopf und Fuss
     lp_nav_how: 'So funktioniert\'s', lp_nav_features: 'Funktionen',
-    lp_nav_pricing: 'Preise', lp_nav_contact: 'Kontakt', lp_nav_login: 'Anmelden',
+    lp_nav_contact: 'Kontakt', lp_nav_login: 'Anmelden',
     lp_foot_imprint: 'Impressum', lp_foot_privacy: 'Datenschutz',
     lp_foot_made: 'In Deutschland entwickelt', lp_foot_copy: '© 2026 Stampit',
     // Landing — Hero und Value
@@ -223,21 +223,6 @@ export const translations = {
     lp_feat_6_t: 'Mehrsprachig', lp_feat_6_b: 'Deutsch, Englisch, Arabisch — inklusive Schreibrichtung.',
     lp_feat_7_t: 'Drei Scan-Wege', lp_feat_7_b: 'Handy-Kamera, USB- oder Bluetooth-Scanner, Tablet als Scan-Gerät.',
     lp_feat_8_t: 'Installierbare PWA', lp_feat_8_b: 'Auf dem Startbildschirm wie eine App — ohne App-Store.',
-
-    // Landing — Preise
-    lp_price_eyebrow: 'Preise',
-    lp_price_title: 'Ein Preis pro Laden, keine Provision pro Stempel',
-    lp_price_note: 'Tarife stehen noch nicht endgültig fest. Schreib uns, wir nennen dir den Preis für deinen Laden.',
-    lp_price_amount: '[Preis]', lp_price_permonth: '/ Monat', lp_price_persite: '/ Standort',
-    lp_price_popular: 'Beliebt', lp_price_cta: 'Anfragen',
-    lp_price_1_t: 'Start', lp_price_1_b: 'Ein Standort, eine Karte, zum Ausprobieren.',
-    lp_price_1_f1: '1 Standort, 1 Stempelkarte', lp_price_1_f2: 'Scan per Handy-Kamera', lp_price_1_f3: 'E-Mail-Support',
-    lp_price_2_t: 'Laden', lp_price_2_b: 'Für den einen Laden, der es ernst meint.',
-    lp_price_2_f1: '1 Standort, unbegrenzt Karten', lp_price_2_f2: 'Alle Scan-Wege inkl. USB-Scanner',
-    lp_price_2_f3: 'Statistik & Newsletter', lp_price_2_f4: 'Support am selben Werktag',
-    lp_price_3_t: 'Kette', lp_price_3_b: 'Mehrere Standorte unter einem Dach.',
-    lp_price_3_f1: 'Alles aus „Laden“, pro Standort', lp_price_3_f2: 'Zentrales Admin-Panel',
-    lp_price_3_f3: 'Sprache pro Laden', lp_price_3_f4: 'Fester Ansprechpartner',
 
     // Landing — DSGVO
     lp_trust_eyebrow: 'Datenschutz',
@@ -439,7 +424,7 @@ export const translations = {
     newsletter_next: 'Next', newsletter_page_info: 'Page {page} of {totalPages}',
     // Landing — header and footer
     lp_nav_how: 'How it works', lp_nav_features: 'Features',
-    lp_nav_pricing: 'Pricing', lp_nav_contact: 'Contact', lp_nav_login: 'Sign in',
+    lp_nav_contact: 'Contact', lp_nav_login: 'Sign in',
     lp_foot_imprint: 'Imprint', lp_foot_privacy: 'Privacy',
     lp_foot_made: 'Made in Germany', lp_foot_copy: '© 2026 Stampit',
     // Landing — hero and value band
@@ -480,21 +465,6 @@ export const translations = {
     lp_feat_6_t: 'Multilingual', lp_feat_6_b: 'German, English, Arabic — writing direction included.',
     lp_feat_7_t: 'Three ways to scan', lp_feat_7_b: 'Phone camera, USB or Bluetooth scanner, tablet as a scan station.',
     lp_feat_8_t: 'Installable PWA', lp_feat_8_b: 'On the home screen like an app — without an app store.',
-
-    // Landing — pricing
-    lp_price_eyebrow: 'Pricing',
-    lp_price_title: 'One price per shop, no cut per stamp',
-    lp_price_note: 'Plans are not final yet. Write to us and we will quote a price for your shop.',
-    lp_price_amount: '[Price]', lp_price_permonth: '/ month', lp_price_persite: '/ location',
-    lp_price_popular: 'Popular', lp_price_cta: 'Get in touch',
-    lp_price_1_t: 'Start', lp_price_1_b: 'One location, one card, to try it out.',
-    lp_price_1_f1: '1 location, 1 stamp card', lp_price_1_f2: 'Scanning by phone camera', lp_price_1_f3: 'Email support',
-    lp_price_2_t: 'Shop', lp_price_2_b: 'For the one shop that means it.',
-    lp_price_2_f1: '1 location, unlimited cards', lp_price_2_f2: 'All scan methods incl. USB scanner',
-    lp_price_2_f3: 'Statistics & newsletter', lp_price_2_f4: 'Same business day support',
-    lp_price_3_t: 'Chain', lp_price_3_b: 'Several locations under one roof.',
-    lp_price_3_f1: 'Everything in “Shop”, per location', lp_price_3_f2: 'Central admin panel',
-    lp_price_3_f3: 'Language per shop', lp_price_3_f4: 'A named contact',
 
     // Landing — privacy
     lp_trust_eyebrow: 'Privacy',
@@ -696,7 +666,7 @@ export const translations = {
     newsletter_next: 'التالي', newsletter_page_info: 'صفحة {page} من {totalPages}',
     // صفحة التعريف — الرأس والتذييل
     lp_nav_how: 'كيف يعمل', lp_nav_features: 'المزايا',
-    lp_nav_pricing: 'الأسعار', lp_nav_contact: 'تواصل', lp_nav_login: 'تسجيل الدخول',
+    lp_nav_contact: 'تواصل', lp_nav_login: 'تسجيل الدخول',
     lp_foot_imprint: 'بيانات الناشر', lp_foot_privacy: 'الخصوصية',
     lp_foot_made: 'طُوِّر في ألمانيا', lp_foot_copy: '© 2026 Stampit',
     // صفحة التعريف — الواجهة والشريط
@@ -737,21 +707,6 @@ export const translations = {
     lp_feat_6_t: 'متعدّد اللغات', lp_feat_6_b: 'الألمانية والإنجليزية والعربية — مع اتجاه الكتابة.',
     lp_feat_7_t: 'ثلاث طرق للمسح', lp_feat_7_b: 'كاميرا الهاتف، ماسح USB أو بلوتوث، جهاز لوحي كمحطة مسح.',
     lp_feat_8_t: 'تطبيق ويب قابل للتثبيت', lp_feat_8_b: 'على الشاشة الرئيسية كتطبيق — بلا متجر.',
-
-    // صفحة التعريف — الأسعار
-    lp_price_eyebrow: 'الأسعار',
-    lp_price_title: 'سعر واحد للمتجر، بلا عمولة على كل ختم',
-    lp_price_note: 'الباقات لم تُحدَّد نهائياً بعد. راسلنا ونعطيك سعر متجرك.',
-    lp_price_amount: '[السعر]', lp_price_permonth: '/ شهرياً', lp_price_persite: '/ لكل فرع',
-    lp_price_popular: 'الأكثر طلباً', lp_price_cta: 'تواصل معنا',
-    lp_price_1_t: 'البداية', lp_price_1_b: 'فرع واحد وبطاقة واحدة للتجربة.',
-    lp_price_1_f1: 'فرع واحد، بطاقة واحدة', lp_price_1_f2: 'المسح بكاميرا الهاتف', lp_price_1_f3: 'دعم بالبريد',
-    lp_price_2_t: 'المتجر', lp_price_2_b: 'للمتجر الذي يريدها بجدّية.',
-    lp_price_2_f1: 'فرع واحد، بطاقات بلا حدّ', lp_price_2_f2: 'كل طرق المسح مع ماسح USB',
-    lp_price_2_f3: 'إحصاءات ونشرة بريدية', lp_price_2_f4: 'دعم في نفس يوم العمل',
-    lp_price_3_t: 'السلسلة', lp_price_3_b: 'عدّة فروع تحت مظلّة واحدة.',
-    lp_price_3_f1: 'كل ما في «المتجر»، لكل فرع', lp_price_3_f2: 'لوحة إدارة مركزية',
-    lp_price_3_f3: 'لغة خاصة لكل فرع', lp_price_3_f4: 'مسؤول تواصل ثابت',
 
     // صفحة التعريف — حماية البيانات
     lp_trust_eyebrow: 'حماية البيانات',

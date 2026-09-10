@@ -25,7 +25,7 @@ Vorwissen über Wallet-Pässe.
 | Wo lebt die Seite | Im App-Repo, Route `/` für Ausgeloggte | Minimaler Eingriff, kein Risiko für die laufende PWA |
 | Animations-Bibliothek | Keine | `position: sticky` + ~40 Zeilen Scroll-Mathe reichen; framer-motion wären ~50 KB in einem Bundle, das Läden täglich laden |
 | Stempel pro Karte | 6 (3×2-Raster) | Liest sich am Handy klarer als 8, Bühne wird kürzer |
-| Preise | Platzhalter `[Preis]` | Echte Tarife stehen noch nicht fest |
+| Preise | ~~Platzhalter~~ **Abschnitt entfernt (10.09.)** | Es gibt nur einen Preis, kein Tarif-Raster. Kommt spaeter zurueck, wenn die Tarife stehen |
 | Haupt-CTA | Kontaktformular | `/register` ist deaktiviert, Läden werden über das Admin-Panel angelegt |
 
 ### Verworfen: die mitwandernde Karte
@@ -215,11 +215,10 @@ Reihenfolge (aus dem abgestimmten Aufbau):
 4. **So funktioniert’s** — 3 Schritte: Karte gestalten · Kunde scannt QR · Personal stempelt
 5. **Funktionen** — 8 Kacheln: Apple & Google Wallet, Design-Editor, Statistik,
    Newsletter, mehrere Standorte, mehrsprachig, drei Scan-Wege, installierbare PWA
-6. **Preise** — 3 Tarife (Start / Laden / Kette), Beträge als `[Preis]`
-7. **DSGVO** — Double-Opt-In, Löschen mit einem Klick, Newsletter nur mit Einwilligung
-8. **Wallet-Finale** — Sperrbildschirm-Auftritt
-9. **Kontakt** — Formular
-10. **Footer** — Impressum, Datenschutz, „In Deutschland entwickelt“
+6. **DSGVO** — Double-Opt-In, Löschen mit einem Klick, Newsletter nur mit Einwilligung
+7. **Wallet-Finale** — Sperrbildschirm-Auftritt
+8. **Kontakt** — Formular
+9. **Footer** — Impressum, Datenschutz, „In Deutschland entwickelt“
 
 ## Sprachen und RTL
 
@@ -318,6 +317,9 @@ Geprüft im Produktions-Build (`npm run build` + `preview`), Chrome:
 
 ## Offene Punkte
 
-- **Preise.** Bleiben `[Preis]`, bis echte Tarife feststehen. Ein Platzhalter-Hinweis
-  steht sichtbar über dem Raster.
+- **Preise.** Der Abschnitt ist am 10.09. wieder rausgeflogen — es gibt nur einen
+  Preis, ein Tarif-Raster mit Platzhaltern hilft niemandem. Wenn die Tarife
+  stehen, kommt er zurueck: Komponente, CSS und die `lp_price_*`-Keys stehen in
+  Commit `bfba9a5` und lassen sich von dort holen. Der Navigationspunkt
+  "Preise" ist mit entfernt.
 - **Betreiber-Adresse** für das Kontaktformular ist noch nicht festgelegt.
