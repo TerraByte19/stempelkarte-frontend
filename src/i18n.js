@@ -212,6 +212,40 @@ export const translations = {
     lp_lock_date: 'Donnerstag, 10. September',
     lp_lock_title: 'Café Nordwind',
     lp_lock_body: '6 von 6 — dein Kaffee wartet',
+    // Landing — Funktionen
+    lp_feat_eyebrow: 'Funktionen',
+    lp_feat_title: 'Alles für den kleinen Laden — nichts, was ihn erschlägt',
+    lp_feat_1_t: 'Apple & Google Wallet', lp_feat_1_b: 'Die Karte liegt dort, wo das Handy sie ohnehin sucht.',
+    lp_feat_2_t: 'Design-Editor', lp_feat_2_b: 'Farben, Banner, eigenes Stempel-Symbol, Zuschnitt mit Live-Vorschau.',
+    lp_feat_3_t: 'Tiefe Statistik', lp_feat_3_b: 'Stoßzeiten, Bestseller, 30-Tage-Verlauf, Tagesdetail per Klick.',
+    lp_feat_4_t: 'Newsletter', lp_feat_4_b: 'Mit Bildern, Versand-Verlauf, nur an Kunden mit Einwilligung.',
+    lp_feat_5_t: 'Mehrere Standorte', lp_feat_5_b: 'Eine Kette, ein Panel, pro Laden eigene Karten.',
+    lp_feat_6_t: 'Mehrsprachig', lp_feat_6_b: 'Deutsch, Englisch, Arabisch — inklusive Schreibrichtung.',
+    lp_feat_7_t: 'Drei Scan-Wege', lp_feat_7_b: 'Handy-Kamera, USB- oder Bluetooth-Scanner, Tablet als Scan-Gerät.',
+    lp_feat_8_t: 'Installierbare PWA', lp_feat_8_b: 'Auf dem Startbildschirm wie eine App — ohne App-Store.',
+
+    // Landing — Preise
+    lp_price_eyebrow: 'Preise',
+    lp_price_title: 'Ein Preis pro Laden, keine Provision pro Stempel',
+    lp_price_note: 'Tarife stehen noch nicht endgültig fest. Schreib uns, wir nennen dir den Preis für deinen Laden.',
+    lp_price_amount: '[Preis]', lp_price_permonth: '/ Monat', lp_price_persite: '/ Standort',
+    lp_price_popular: 'Beliebt', lp_price_cta: 'Anfragen',
+    lp_price_1_t: 'Start', lp_price_1_b: 'Ein Standort, eine Karte, zum Ausprobieren.',
+    lp_price_1_f1: '1 Standort, 1 Stempelkarte', lp_price_1_f2: 'Scan per Handy-Kamera', lp_price_1_f3: 'E-Mail-Support',
+    lp_price_2_t: 'Laden', lp_price_2_b: 'Für den einen Laden, der es ernst meint.',
+    lp_price_2_f1: '1 Standort, unbegrenzt Karten', lp_price_2_f2: 'Alle Scan-Wege inkl. USB-Scanner',
+    lp_price_2_f3: 'Statistik & Newsletter', lp_price_2_f4: 'Support am selben Werktag',
+    lp_price_3_t: 'Kette', lp_price_3_b: 'Mehrere Standorte unter einem Dach.',
+    lp_price_3_f1: 'Alles aus „Laden“, pro Standort', lp_price_3_f2: 'Zentrales Admin-Panel',
+    lp_price_3_f3: 'Sprache pro Laden', lp_price_3_f4: 'Fester Ansprechpartner',
+
+    // Landing — DSGVO
+    lp_trust_eyebrow: 'Datenschutz',
+    lp_trust_title: 'DSGVO-konform von Anfang an',
+    lp_trust_body: 'Kundendaten gehören dem Kunden. Deshalb ist das kein Nachrüst-Thema, sondern von Beginn an eingebaut.',
+    lp_trust_1_t: 'Double-Opt-In', lp_trust_1_b: 'Jeder Kunde bestätigt seine E-Mail-Adresse, bevor eine Karte aktiv wird.',
+    lp_trust_2_t: 'Löschen mit einem Klick', lp_trust_2_b: 'Jede Mail trägt einen Lösch-Link. Nach Bestätigung sind alle Daten weg — unwiderruflich.',
+    lp_trust_3_t: 'Newsletter nur mit Einwilligung', lp_trust_3_b: 'Werbung geht ausschließlich an Kunden, die ausdrücklich zugestimmt haben.',
   },
   en: {
     // Navigation
@@ -426,6 +460,40 @@ export const translations = {
     lp_lock_date: 'Thursday, 10 September',
     lp_lock_title: 'Café Nordwind',
     lp_lock_body: '6 of 6 — your coffee is waiting',
+    // Landing — features
+    lp_feat_eyebrow: 'Features',
+    lp_feat_title: 'Everything a small shop needs — nothing that buries it',
+    lp_feat_1_t: 'Apple & Google Wallet', lp_feat_1_b: 'The card sits where the phone already looks for it.',
+    lp_feat_2_t: 'Design editor', lp_feat_2_b: 'Colours, banner, your own stamp icon, cropping with live preview.',
+    lp_feat_3_t: 'Deep statistics', lp_feat_3_b: 'Peak hours, best sellers, 30-day trend, daily detail on click.',
+    lp_feat_4_t: 'Newsletter', lp_feat_4_b: 'With images, send history, only to customers who opted in.',
+    lp_feat_5_t: 'Multiple locations', lp_feat_5_b: 'One chain, one panel, separate cards per shop.',
+    lp_feat_6_t: 'Multilingual', lp_feat_6_b: 'German, English, Arabic — writing direction included.',
+    lp_feat_7_t: 'Three ways to scan', lp_feat_7_b: 'Phone camera, USB or Bluetooth scanner, tablet as a scan station.',
+    lp_feat_8_t: 'Installable PWA', lp_feat_8_b: 'On the home screen like an app — without an app store.',
+
+    // Landing — pricing
+    lp_price_eyebrow: 'Pricing',
+    lp_price_title: 'One price per shop, no cut per stamp',
+    lp_price_note: 'Plans are not final yet. Write to us and we will quote a price for your shop.',
+    lp_price_amount: '[Price]', lp_price_permonth: '/ month', lp_price_persite: '/ location',
+    lp_price_popular: 'Popular', lp_price_cta: 'Get in touch',
+    lp_price_1_t: 'Start', lp_price_1_b: 'One location, one card, to try it out.',
+    lp_price_1_f1: '1 location, 1 stamp card', lp_price_1_f2: 'Scanning by phone camera', lp_price_1_f3: 'Email support',
+    lp_price_2_t: 'Shop', lp_price_2_b: 'For the one shop that means it.',
+    lp_price_2_f1: '1 location, unlimited cards', lp_price_2_f2: 'All scan methods incl. USB scanner',
+    lp_price_2_f3: 'Statistics & newsletter', lp_price_2_f4: 'Same business day support',
+    lp_price_3_t: 'Chain', lp_price_3_b: 'Several locations under one roof.',
+    lp_price_3_f1: 'Everything in “Shop”, per location', lp_price_3_f2: 'Central admin panel',
+    lp_price_3_f3: 'Language per shop', lp_price_3_f4: 'A named contact',
+
+    // Landing — privacy
+    lp_trust_eyebrow: 'Privacy',
+    lp_trust_title: 'GDPR-compliant from day one',
+    lp_trust_body: 'Customer data belongs to the customer. So this was built in from the start, not bolted on later.',
+    lp_trust_1_t: 'Double opt-in', lp_trust_1_b: 'Every customer confirms their email address before a card goes live.',
+    lp_trust_2_t: 'Delete in one click', lp_trust_2_b: 'Every email carries a deletion link. Once confirmed, all data is gone — for good.',
+    lp_trust_3_t: 'Newsletter only with consent', lp_trust_3_b: 'Marketing reaches only customers who explicitly agreed.',
   },
   ar: {
     // التنقل
@@ -640,6 +708,40 @@ export const translations = {
     lp_lock_date: 'الخميس، ١٠ سبتمبر',
     lp_lock_title: 'مقهى نوردفيند',
     lp_lock_body: '٦ من ٦ — قهوتك بانتظارك',
+    // صفحة التعريف — المزايا
+    lp_feat_eyebrow: 'المزايا',
+    lp_feat_title: 'كل ما يحتاجه متجرك الصغير — دون تعقيد',
+    lp_feat_1_t: 'Apple و Google Wallet', lp_feat_1_b: 'البطاقة حيث يبحث عنها الهاتف أصلاً.',
+    lp_feat_2_t: 'محرّر التصميم', lp_feat_2_b: 'ألوان ولافتة ورمز ختم خاص وقصّ مع معاينة حيّة.',
+    lp_feat_3_t: 'إحصاءات معمّقة', lp_feat_3_b: 'ساعات الذروة والأكثر مبيعاً ومنحنى ٣٠ يوماً وتفاصيل اليوم بنقرة.',
+    lp_feat_4_t: 'النشرة البريدية', lp_feat_4_b: 'بالصور وسجلّ الإرسال، وفقط لمن وافق.',
+    lp_feat_5_t: 'عدّة فروع', lp_feat_5_b: 'سلسلة واحدة، لوحة واحدة، بطاقات خاصة لكل فرع.',
+    lp_feat_6_t: 'متعدّد اللغات', lp_feat_6_b: 'الألمانية والإنجليزية والعربية — مع اتجاه الكتابة.',
+    lp_feat_7_t: 'ثلاث طرق للمسح', lp_feat_7_b: 'كاميرا الهاتف، ماسح USB أو بلوتوث، جهاز لوحي كمحطة مسح.',
+    lp_feat_8_t: 'تطبيق ويب قابل للتثبيت', lp_feat_8_b: 'على الشاشة الرئيسية كتطبيق — بلا متجر.',
+
+    // صفحة التعريف — الأسعار
+    lp_price_eyebrow: 'الأسعار',
+    lp_price_title: 'سعر واحد للمتجر، بلا عمولة على كل ختم',
+    lp_price_note: 'الباقات لم تُحدَّد نهائياً بعد. راسلنا ونعطيك سعر متجرك.',
+    lp_price_amount: '[السعر]', lp_price_permonth: '/ شهرياً', lp_price_persite: '/ لكل فرع',
+    lp_price_popular: 'الأكثر طلباً', lp_price_cta: 'تواصل معنا',
+    lp_price_1_t: 'البداية', lp_price_1_b: 'فرع واحد وبطاقة واحدة للتجربة.',
+    lp_price_1_f1: 'فرع واحد، بطاقة واحدة', lp_price_1_f2: 'المسح بكاميرا الهاتف', lp_price_1_f3: 'دعم بالبريد',
+    lp_price_2_t: 'المتجر', lp_price_2_b: 'للمتجر الذي يريدها بجدّية.',
+    lp_price_2_f1: 'فرع واحد، بطاقات بلا حدّ', lp_price_2_f2: 'كل طرق المسح مع ماسح USB',
+    lp_price_2_f3: 'إحصاءات ونشرة بريدية', lp_price_2_f4: 'دعم في نفس يوم العمل',
+    lp_price_3_t: 'السلسلة', lp_price_3_b: 'عدّة فروع تحت مظلّة واحدة.',
+    lp_price_3_f1: 'كل ما في «المتجر»، لكل فرع', lp_price_3_f2: 'لوحة إدارة مركزية',
+    lp_price_3_f3: 'لغة خاصة لكل فرع', lp_price_3_f4: 'مسؤول تواصل ثابت',
+
+    // صفحة التعريف — حماية البيانات
+    lp_trust_eyebrow: 'حماية البيانات',
+    lp_trust_title: 'متوافق مع حماية البيانات منذ البداية',
+    lp_trust_body: 'بيانات الزبون ملك للزبون. لذلك بُني هذا من البداية، لا كإضافة لاحقة.',
+    lp_trust_1_t: 'تأكيد مزدوج', lp_trust_1_b: 'يؤكّد كل زبون بريده قبل تفعيل البطاقة.',
+    lp_trust_2_t: 'حذف بنقرة واحدة', lp_trust_2_b: 'كل رسالة تحمل رابط حذف. بعد التأكيد تختفي كل البيانات — نهائياً.',
+    lp_trust_3_t: 'نشرة بموافقة فقط', lp_trust_3_b: 'لا تصل الإعلانات إلا لمن وافق صراحةً.',
   },
 }
 
