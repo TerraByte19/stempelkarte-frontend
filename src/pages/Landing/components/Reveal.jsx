@@ -9,12 +9,14 @@ import { useEffect, useRef, useState } from 'react'
  */
 export default function Reveal({ children, delay = 0 }) {
   const ref = useRef(null)
-  const [shown, setShown] = useState(false)
+  // Fehlt IntersectionObserver, ist der Endzustand schon der Startzustand —
+  // als Lazy-Init statt setState im Effekt, sonst Render-Kaskade.
+  const [shown, setShown] = useState(() => typeof IntersectionObserver === 'undefined')
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    if (!('IntersectionObserver' in window)) { setShown(true); return }
+    if (typeof IntersectionObserver === 'undefined') return
 
     const io = new IntersectionObserver(
       entries => {

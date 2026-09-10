@@ -9,6 +9,7 @@ import Layout from './components/Layout'
 import Scanner from './pages/Scanner'
 import Admin from './pages/Admin'
 import InstallBanner from './components/InstallBanner'
+import Landing from './pages/Landing/Landing'
 
 function App() {
   const token = localStorage.getItem('token')
@@ -18,11 +19,19 @@ function App() {
   // → solche Geräte sollen direkt den Scanner sehen
   const isScannerDevice = !token && staffToken && staffToken !== 'undefined' && staffToken !== 'null'
 
+  // Installierte PWA: wer ausgeloggt die App oeffnet, will sich anmelden —
+  // nicht die Werbeseite sehen.
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true
+  }
+
   // Root-Route abhängig vom Gerätetyp bestimmen
   function rootElement() {
     if (isScannerDevice) return <Navigate to="/scanner" replace />   // Scanner-Gerät
     if (token) return <Layout />                                      // Besitzer eingeloggt
-    return <Navigate to="/login" replace />                          // sonst Login
+    if (isStandalone()) return <Navigate to="/login" replace />       // installierte PWA
+    return <Landing />                                                // Besucher
   }
 
   return (
