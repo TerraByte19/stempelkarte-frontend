@@ -322,3 +322,52 @@
 }
 .lp-value h2 { color: #fff; font-size: clamp(22px, 3.4vw, 30px); font-weight: 600; max-width: 18em; }
 .lp-value p { color: #CFCAF2; font-size: 16px; max-width: 22em; }
+
+/* ---------- Buehne ---------- */
+.lp-stage { position: relative; height: 240svh; background: var(--lp-surface); }
+.lp-pin {
+  position: sticky; top: 0;
+  height: 100vh; height: 100svh;
+  display: grid; place-items: center;
+  overflow: hidden;
+}
+.lp-pin-in {
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  width: 100%; padding-inline: var(--lp-gutter);
+}
+.lp-stage-label {
+  position: absolute; top: 18px; inset-inline-start: var(--lp-gutter);
+  font-family: var(--lp-display); font-size: 12px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--lp-muted);
+}
+.lp-stage-hint {
+  position: absolute; bottom: 18px; inset-inline: 0; text-align: center;
+  font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lp-muted);
+}
+.lp-step {
+  text-align: center; max-width: 22em; min-height: 96px;
+  display: flex; flex-direction: column; gap: 6px;
+  animation: lp-step-in .3s ease both;
+}
+@keyframes lp-step-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+.lp-step-n {
+  font-family: var(--lp-display); font-size: 12px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--lp-brand);
+}
+.lp-step h3 { font-size: clamp(20px, 4.4vw, 26px); font-weight: 700; }
+.lp-step p { font-size: 15px; color: var(--lp-muted); }
+
+.lp-scene { position: relative; display: grid; place-items: center; }
+.lp-scene-layer { grid-area: 1 / 1; }
+
+/* Bei reduzierter Bewegung klebt nichts fest: der Abschnitt wird normal hoch,
+   die Karte steht voll da. */
+@media (prefers-reduced-motion: reduce) {
+  .lp-stage { height: auto; }
+  .lp-pin { position: static; height: auto; padding-block: 56px; }
+  .lp-step { animation: none; }
+  .lp-stage-hint { display: none; }
+}
