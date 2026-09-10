@@ -265,15 +265,56 @@ Zwei Repos, zwei Deploys. Backend zuerst, sonst läuft das Formular ins Leere.
 
 - [ ] iPhone Safari — Bühne klebt sauber, keine Sprünge durch die Adressleiste
 - [ ] Android Chrome — dasselbe
-- [ ] Desktop — Bühne wirkt nicht zu lang
-- [ ] Arabisch — Spiegelung stimmt in Hero und Preisen
-- [ ] `prefers-reduced-motion` aktiv — keine Bewegung, alles lesbar
+- [x] Desktop — Bühne wirkt nicht zu lang
+- [x] Arabisch — Spiegelung stimmt in Hero und Preisen
+- [x] `prefers-reduced-motion` aktiv — keine Bewegung, alles lesbar
 - [ ] JavaScript aus — alle Texte sichtbar
-- [ ] Eingeloggt auf `/` — weiterhin sofort das Dashboard
+- [x] Eingeloggt auf `/` — weiterhin sofort das Dashboard
 - [ ] Installierte PWA, ausgeloggt — landet auf `/login`, nicht auf der Landing-Page
 - [ ] Kontaktformular — Mail kommt an, `Reply-To` stimmt
 - [ ] Lighthouse Performance ≥ 90 am Handy
-- [ ] Netzwerk-Tab — keine Anfrage an eine fremde Domain
+- [x] Netzwerk-Tab — keine Anfrage an eine fremde Domain
+
+## Abnahme-Ergebnis (2026-09-10)
+
+Geprüft im Produktions-Build (`npm run build` + `preview`), Chrome:
+
+- **Keine fremde Anfrage.** Alle Ressourcen kommen vom eigenen Host, Schriften
+  eingeschlossen. Die DSGVO-Aussage der Seite hält.
+- **Bühne.** Bei 60 % Fortschritt: Schritt 3, vier von sechs Stempeln, Karte
+  klebt (`top: 0`). Am Ende: sechs Stempel, Goldzustand, Übergabe an den
+  Sperrbildschirm.
+- **Reduzierte Bewegung.** Fortschritt steht ohne Scrollen auf 1, Karte sofort
+  voll, kein Element bei `opacity: 0`, alle Abschnitte sichtbar.
+- **Handy 390 px.** Kein waagerechter Überlauf, kein Element ragt über den Rand.
+- **Arabisch.** `dir="rtl"`, IBM Plex Sans Arabic greift für Überschrift und
+  Fließtext, „Beliebt“-Fähnchen rechts, Aufzählungspunkte rechts.
+- **Route.** Eingeloggt auf `/` erscheint weiter das Dashboard, nicht die
+  Landing-Page.
+- **Bundle.** 812 kB → 423 kB (gzip 244 → 131 kB), siehe unten.
+
+### Zwei Abweichungen von der Spec
+
+1. **Code-Splitting kam dazu.** Ein Besucher lud den kompletten App-Code
+   inklusive `html5-qrcode` (~3 MB Quelltext). `Scanner`, `Statistik` und
+   `Admin` werden jetzt per `lazy()` nachgeladen, und `Login` holt
+   `html5-qrcode` erst beim Klick auf die Kamera. Betrifft Produktionscode,
+   den echte Läden täglich nutzen — mit `Suspense`-Platzhalter abgesichert.
+2. **PWA-Banner eingeschränkt.** Es erschien auch auf der Landing-Page und
+   legte sich über das Value-Band. Zeigt sich jetzt nur noch für eingeloggte
+   Besitzer und Scanner-Geräte.
+
+### Noch nicht geprüft
+
+- **Echte Geräte** (iPhone Safari, Android Chrome). Nur Emulation gelaufen. Am
+  wichtigsten: ob die Bühne auf iOS beim Ein- und Ausblenden der Adressleiste
+  springt — dafür ist `100svh` gesetzt, bestätigt ist es nicht.
+- **Lighthouse.** Nicht ausgeführt. Stattdessen die Ursache behoben, die den
+  Wert gedrückt hätte (siehe Bundle oben).
+- **Kontaktformular gegen das laufende Backend.** Der Endpunkt ist gebaut und
+  kompiliert, aber Frontend und Backend liefen nicht gemeinsam.
+- **Installierte PWA ausgeloggt.** Der `display-mode: standalone`-Zweig ist im
+  Code, aber nicht auf einem installierten Gerät nachgestellt.
 
 ## Offene Punkte
 
