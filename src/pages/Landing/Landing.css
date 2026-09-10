@@ -1,0 +1,85 @@
+/* Schriften — selbst gehostet. Keine Anfrage an fonts.googleapis.com:
+   die Seite wirbt mit DSGVO-Konformitaet, ein Google-Font-Link waere ein
+   Widerspruch mitten auf der eigenen Vertrauens-Sektion.
+   Nur die tatsaechlich gebrauchten Subsets — kein Vietnamesisch, kein Kyrillisch. */
+@import '@fontsource/space-grotesk/latin-500.css';
+@import '@fontsource/space-grotesk/latin-600.css';
+@import '@fontsource/space-grotesk/latin-700.css';
+@import '@fontsource/hanken-grotesk/latin-400.css';
+@import '@fontsource/hanken-grotesk/latin-500.css';
+@import '@fontsource/hanken-grotesk/latin-600.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-400.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-600.css';
+
+.lp {
+  --lp-brand: #3C3489;
+  --lp-card-from: #463DA0;
+  --lp-card-to: #2C2570;
+  --lp-ink: #1A1A2E;
+  --lp-muted: #5B5B73;
+  --lp-surface: #FFFFFF;
+  --lp-surface-2: #F6F5FB;
+  --lp-line: #ECEBF5;
+  --lp-gold: #B8801F;
+
+  --lp-display: 'Space Grotesk', system-ui, 'Segoe UI', sans-serif;
+  --lp-body: 'Hanken Grotesk', system-ui, 'Segoe UI', sans-serif;
+
+  --lp-gutter: 20px;
+  --lp-max: 1120px;
+
+  background: var(--lp-surface);
+  color: var(--lp-ink);
+  font-family: var(--lp-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Arabisch bekommt eine eigene Familie — Space Grotesk und Hanken Grotesk
+   haben keine arabischen Schnitte, sonst faellt die Seite auf eine
+   Systemschrift zurueck und sieht in ar kaputt aus. */
+[dir='rtl'] .lp,
+.lp[dir='rtl'] {
+  --lp-display: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --lp-body: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+}
+
+.lp h1, .lp h2, .lp h3 {
+  font-family: var(--lp-display);
+  line-height: 1.08;
+  margin: 0;
+  text-wrap: balance;
+}
+.lp p { margin: 0; }
+
+.lp-wrap {
+  max-width: var(--lp-max);
+  margin-inline: auto;
+  padding-inline: var(--lp-gutter);
+}
+
+.lp-eyebrow {
+  font-family: var(--lp-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-brand);
+}
+
+.lp :focus-visible {
+  outline: 2px solid var(--lp-brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp *,
+  .lp *::before,
+  .lp *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
