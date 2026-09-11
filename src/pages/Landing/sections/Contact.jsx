@@ -18,9 +18,18 @@ export default function Contact() {
 
   const set = field => event => setForm(f => ({ ...f, [field]: event.target.value }))
 
+  // In der verschickbaren Einzeldatei-Fassung gibt es kein Backend. Statt
+  // eine rote Fehlermeldung zu zeigen, sagt das Formular offen, dass es eine
+  // Vorschau ist. Die Variable wird nur beim Share-Build gesetzt.
+  const preview = import.meta.env.VITE_SHARE_PREVIEW === '1'
+
   async function submit(event) {
     event.preventDefault()
     if (state === 'sending') return
+    if (preview) {
+      setState('preview')
+      return
+    }
     setState('sending')
     try {
       await publicApi.post('/api/public/contact', form)
@@ -71,6 +80,7 @@ export default function Contact() {
 
           {state === 'ok' && <p className="lp-form-msg is-ok" role="status">{t('lp_contact_ok')}</p>}
           {state === 'error' && <p className="lp-form-msg is-err" role="alert">{t('lp_contact_err')}</p>}
+          {state === 'preview' && <p className="lp-form-msg" role="status">{t('lp_contact_preview')}</p>}
         </form>
       </div>
     </section>

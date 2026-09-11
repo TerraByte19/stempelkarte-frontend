@@ -264,7 +264,9 @@
 .lp-nav a:hover { color: var(--lp-ink); }
 @media (max-width: 760px) {
   .lp-nav { display: none; }
-  .lp-header-in > .lp-btn { margin-inline-start: auto; }
+  .lp-header-in { height: 54px; gap: 12px; }
+  .lp-header-in > .lp-btn { margin-inline-start: auto; padding: 8px 14px; font-size: 14px; }
+  .lp-logo { font-size: 18px; }
 }
 
 .lp-btn {
@@ -310,8 +312,18 @@
   50%      { transform: translateY(-11px) rotate(1.2deg); }
 }
 @media (max-width: 860px) {
-  .lp-hero-in { grid-template-columns: 1fr; gap: 40px; }
-  .lp-hero-card { order: -1; }
+  .lp-hero { padding-block: 40px 64px; }
+  .lp-hero-in { grid-template-columns: 1fr; gap: 32px; }
+  /* Text zuerst, Karte danach. Vorher stand die Karte oben (order: -1) —
+     bei 432 px Hoehe schob sie die Ueberschrift komplett unter die Falz,
+     der Besucher sah zuerst ein Mockup statt der Aussage. */
+  .lp-hero-card .lp-card { width: min(272px, 66vw); }
+  /* Knoepfe auf volle Breite: nebeneinander passen sie bei 390 px nicht,
+     nebeneinander-umgebrochen sehen sie ausgefranst aus. */
+  .lp-hero-actions { flex-direction: column; align-items: stretch; }
+  /* Der Ladenname brach in der schmaleren Karte um. */
+  .lp-hero-card .lp-card-shop { font-size: 14px; }
+  .lp-hero-card .lp-card-loc { font-size: 8.5px; }
 }
 
 /* ---------- Value-Band ---------- */
