@@ -519,8 +519,14 @@
 .lp-wallet-copy { display: flex; flex-direction: column; gap: 12px; }
 .lp-wallet h2 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 700; letter-spacing: -.02em; }
 @media (max-width: 860px) {
-  .lp-wallet-in { grid-template-columns: 1fr; gap: 36px; justify-items: center; text-align: center; }
+  .lp-wallet { padding-block: 64px; }
+  .lp-wallet-in { grid-template-columns: 1fr; gap: 28px; justify-items: center; text-align: center; }
   .lp-wallet-copy { align-items: center; }
+  /* Kuerzeres Gehaeuse statt schmaleres: bei voller Hoehe (529 px) lag die
+     Meldung 128 px unter dem Rand, sobald die Ueberschrift im Bild war.
+     Schmaler machen ginge nicht — die Schriftgroessen haengen an der Breite
+     und waeren wieder unlesbar. Also ein Ausschnitt des Sperrbildschirms. */
+  .lp-wallet .lp-phone { aspect-ratio: 1 / 1.45; }
 }
 
 /* ---------- Kontakt ---------- */
