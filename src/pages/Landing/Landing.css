@@ -27,6 +27,9 @@
 
   --lp-gutter: 20px;
   --lp-max: 1120px;
+  /* Aussenhoehe der Kopfzeile inklusive Trennlinie. Die Buehne rechnet sie
+     mit, damit ihr Inhalt nicht unter der klebenden Leiste klemmt. */
+  --lp-header-h: 53px;
 
   background: var(--lp-surface);
   color: var(--lp-ink);
@@ -265,14 +268,15 @@
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--lp-line);
 }
-.lp-header-in { display: flex; align-items: center; gap: 20px; height: 52px; }
+.lp-header-in { display: flex; align-items: center; gap: 20px; height: calc(var(--lp-header-h) - 1px); }
 .lp-logo { font-family: var(--lp-display); font-weight: 700; font-size: 18px; color: var(--lp-brand); }
 .lp-nav { display: flex; gap: 22px; margin-inline-start: auto; }
 .lp-nav a { color: var(--lp-muted); text-decoration: none; font-size: 14.5px; }
 .lp-nav a:hover { color: var(--lp-ink); }
 @media (max-width: 760px) {
+  .lp { --lp-header-h: 51px; }
   .lp-nav { display: none; }
-  .lp-header-in { height: 50px; gap: 12px; }
+  .lp-header-in { gap: 12px; }
   .lp-header-in > .lp-btn { margin-inline-start: auto; padding: 7px 13px; font-size: 13.5px; }
   .lp-logo { font-size: 17px; }
 }
@@ -352,6 +356,10 @@
 .lp-pin {
   position: sticky; top: 0;
   height: 100vh; height: 100svh;
+  /* Ohne diesen Abstand zentriert sich der Inhalt auf die volle
+     Bildschirmhoehe — die klebende Kopfzeile verdeckt aber die oberen
+     Pixel, und der Schritt-Text klemmte direkt darunter. */
+  padding-top: var(--lp-header-h);
   display: grid; place-items: center;
   overflow: hidden;
 }
