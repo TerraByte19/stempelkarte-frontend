@@ -265,6 +265,7 @@ export const translations = {
     lp_proof_app_t: 'öffnen ihre Bonus-App nur einmal im Monat oder seltener',
     lp_proof_app_b: 'Eine App muss gefunden, geladen, erlaubt und geöffnet werden. Eine Wallet-Karte liegt da, wo das Handy beim Bezahlen ohnehin hinschaut — und meldet sich von selbst, wenn sie voll ist.',
     lp_proof_app_src: 'workinghead mit YouGov, 2.048 Befragte, April 2025 — Wert für die Kaufland-App',
+    lp_contact_preview: 'Das ist eine Vorschau — hier ist noch kein Versand angeschlossen.',
   },
   en: {
     // Navigation
@@ -532,6 +533,7 @@ export const translations = {
     lp_proof_app_t: 'open their loyalty app once a month or less',
     lp_proof_app_b: 'An app has to be found, downloaded, permitted and opened. A wallet card sits where the phone already looks when paying — and speaks up on its own once it is full.',
     lp_proof_app_src: 'workinghead with YouGov, 2,048 respondents, April 2025 — figure for the Kaufland app',
+    lp_contact_preview: 'This is a preview — sending is not connected here yet.',
   },
   ar: {
     // التنقل
@@ -799,6 +801,7 @@ export const translations = {
     lp_proof_app_t: 'يفتحون تطبيق المكافآت مرة شهرياً أو أقل',
     lp_proof_app_b: 'التطبيق يحتاج بحثاً وتنزيلاً وأذونات وفتحاً. بطاقة المحفظة موجودة حيث ينظر الهاتف عند الدفع أصلاً — وتُنبّه بنفسها حين تمتلئ.',
     lp_proof_app_src: 'workinghead مع YouGov، ٢٠٤٨ مشاركاً، أبريل ٢٠٢٥ — الرقم يخصّ تطبيق Kaufland',
+    lp_contact_preview: 'هذه معاينة — الإرسال غير مُفعَّل هنا بعد.',
   },
 }
 
