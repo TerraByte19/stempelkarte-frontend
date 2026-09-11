@@ -168,6 +168,31 @@ Illustration; die echten QR-Codes erzeugt weiterhin `qrcode.react` in der App.
 Beispieldaten auf der Seite: „Café Nordwind“, `HH-OTTENSEN`, `STMP-4471-NW`.
 Erkennbar ein Beispiel, kein echter Laden.
 
+## Zahlen-Abschnitt: Quellen
+
+Ergänzt am 11.09.2026. Jede Zahl steht mit Quelle sichtbar auf der Seite —
+unbelegte Werbeaussagen sind in Deutschland nach UWG abmahnfähig, und eine
+genannte Quelle überzeugt ohnehin mehr als eine nackte Zahl.
+
+| Zahl | Aussage | Quelle | Geprüft |
+|---|---|---|---|
+| 90 % | der Deutschen nutzen Bonusprogramme (2018: 37 %); 66 % davon mehrmals pro Woche | GfK im Auftrag von Mastercard, repräsentativ, 2023 | ja, über Mastercard Newsroom |
+| +25 bis +95 % | Gewinn bei 5 % höherer Kundenbindung | Frederick Reichheld, Bain & Company, zitiert in Harvard Business Review, „The Value of Keeping the Right Customers", 10/2014 | ja, HBR direkt |
+| 5- bis 25-mal | teurer ist Neukundengewinnung als Kundenbindung | dieselbe HBR-Quelle | ja, HBR direkt |
+| 82 % / 83 % | der Gastronomen sehen mehr Wiederbesuche / größere Bons | Square „Future of Commerce 2025", erhoben von Bredin, 18.09.–08.10.2024, 6.000 Unternehmen in USA, Kanada, UK, Australien | ja, Square-Pressemitteilung mit Methodik |
+| 42 % | öffnen die Kaufland-Bonus-App nur monatlich oder seltener | workinghead GmbH & Co. KG mit YouGov, Online-Befragung n = 2.048, 25.–28.04.2025 | ja |
+
+**Bewusst nicht verwendet:**
+
+- Zahlen von Wettbewerbern und Treue-App-Anbietern (stampme, favecard, loyaltypass,
+  perkstar). Eigeninteresse, keine nachvollziehbare Methodik.
+- GfK Consumer Scan zu Stamm- und Neukunden (32 % der Käufer, 66 % des Umsatzes).
+  Klang gut, aber: hinter Statista-Paywall, aus dem 1. Halbjahr 2018, und es geht um
+  Konsumgütermarken, nicht um Gastronomie. Nicht prüfbar, nicht übertragbar.
+
+**Wichtig bei Änderungen:** Die Square-Zahl stammt *nicht* aus Deutschland. Das steht
+so im Text und muss dort stehen bleiben.
+
 ## Gestaltung
 
 ### Farben
@@ -212,13 +237,14 @@ Reihenfolge (aus dem abgestimmten Aufbau):
 1. **Header** — Logo, Anker auf Funktionen / Preise / Kontakt, Sprachwahl, „Anmelden“
 2. **Hero** — „Aus Laufkundschaft werden Stammkunden.“ + Karte
 3. **Value-Band** — „Keine App im Store. Kein Plastik. Kein Papier, das verloren geht.“
-4. **So funktioniert’s** — 3 Schritte: Karte gestalten · Kunde scannt QR · Personal stempelt
-5. **Funktionen** — 8 Kacheln: Apple & Google Wallet, Design-Editor, Statistik,
+4. **Zahlen** — vier belegte Kennzahlen zur Kundenbindung plus der Einwand „warum keine App?"
+5. **So funktioniert’s** — 3 Schritte: Karte gestalten · Kunde scannt QR · Personal stempelt
+6. **Funktionen** — 8 Kacheln: Apple & Google Wallet, Design-Editor, Statistik,
    Newsletter, mehrere Standorte, mehrsprachig, drei Scan-Wege, installierbare PWA
-6. **DSGVO** — Double-Opt-In, Löschen mit einem Klick, Newsletter nur mit Einwilligung
-7. **Wallet-Finale** — Sperrbildschirm-Auftritt
-8. **Kontakt** — Formular
-9. **Footer** — Impressum, Datenschutz, „In Deutschland entwickelt“
+7. **DSGVO** — Double-Opt-In, Löschen mit einem Klick, Newsletter nur mit Einwilligung
+8. **Wallet-Finale** — Sperrbildschirm-Auftritt
+9. **Kontakt** — Formular
+10. **Footer** — Impressum, Datenschutz, „In Deutschland entwickelt“
 
 ## Sprachen und RTL
 

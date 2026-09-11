@@ -2,6 +2,7 @@ import './Landing.css'
 import Header from './sections/Header'
 import Hero from './sections/Hero'
 import ValueBand from './sections/ValueBand'
+import Proof from './sections/Proof'
 import HowItWorks from './sections/HowItWorks'
 import Features from './sections/Features'
 import Trust from './sections/Trust'
@@ -16,6 +17,7 @@ export default function Landing() {
       <main>
         <Hero />
         <ValueBand />
+        <Proof />
         <HowItWorks />
         <Features />
         <Trust />
