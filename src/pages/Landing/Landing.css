@@ -190,15 +190,13 @@
   background: #fff; border-radius: 2.65cqw; padding: 1.52cqw;
 }
 .lp-qr svg { width: 100%; height: 100%; display: block; }
-.lp-card-serial { font-size: 3.22cqw; letter-spacing: .14em; color: #B7B0E8; }
 
 .lp-card--compact { width: 132px; border-radius: 12px; padding: 10px 10px 8px; gap: 7px; }
 .lp-card--compact::after { border-radius: 12px; border-width: 1.5px; }
 .lp-card--compact .lp-card-grid { gap: 6px; }
 .lp-card--compact .lp-card-shop { font-size: 9.5px; }
 .lp-card--compact .lp-card-loc,
-.lp-card--compact .lp-card-chip,
-.lp-card--compact .lp-card-serial { display: none; }
+.lp-card--compact .lp-card-chip { display: none; }
 .lp-card--compact .lp-card-reward { font-size: 7.5px; }
 .lp-card--compact .lp-qr { width: 34px; border-radius: 4px; padding: 2px; }
 

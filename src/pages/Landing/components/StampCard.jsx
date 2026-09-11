@@ -45,7 +45,6 @@ export default function StampCard({
   shop,
   reward,
   chip,
-  serial = 'STMP-4471-NW',
   location = 'HH-OTTENSEN',
 }) {
   const done = stamps >= TOTAL
@@ -72,7 +71,6 @@ export default function StampCard({
         </div>
         <div className="lp-card-pass">
           <QrPlate />
-          <span className="lp-card-serial">{serial}</span>
         </div>
       </div>
     </div>
