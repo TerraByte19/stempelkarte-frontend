@@ -442,3 +442,77 @@
   .lp-contact-in { grid-template-columns: 1fr; gap: 32px; }
   .lp-form { grid-template-columns: 1fr; }
 }
+
+/* ---------- Zahlen ---------- */
+.lp-proof { background: var(--lp-surface-2); padding-block: 90px; }
+.lp-proof-grid {
+  display: grid;
+  /* Feste Spaltenzahl statt auto-fit: bei vier Kacheln liesse ein
+     Drei-Spalten-Raster eine allein in der zweiten Reihe stehen, daneben
+     zwei Loecher. 1 oder 2 Spalten gehen immer glatt auf. */
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--lp-line);
+  border: 1px solid var(--lp-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.lp-proof-grid > .lp-reveal { display: flex; background: var(--lp-surface); }
+.lp-fact {
+  margin: 0;
+  padding: 26px 22px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lp-fact-n {
+  font-family: var(--lp-display);
+  font-size: clamp(30px, 4vw, 38px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--lp-brand);
+  font-variant-numeric: tabular-nums;
+}
+.lp-fact h3 { font-size: 16px; font-weight: 600; }
+.lp-fact p { font-size: 14.5px; color: var(--lp-muted); }
+.lp-fact figcaption,
+.lp-fact-src {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--lp-muted);
+  opacity: .8;
+}
+
+/* Der Wallet-statt-App-Einwand. Eigene Form, weil es kein weiterer
+   Beleg ist, sondern die Antwort auf die naechste Frage im Kopf. */
+@media (min-width: 620px) {
+  .lp-proof-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.lp-appnote {
+  margin-top: 22px;
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line);
+  border-radius: 14px;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lp-appnote-label {
+  font-family: var(--lp-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-brand);
+}
+.lp-appnote-body { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+.lp-appnote-body > div { display: flex; flex-direction: column; gap: 6px; flex: 1 1 260px; }
+.lp-appnote h3 { font-size: 17px; font-weight: 600; max-width: 22em; }
+.lp-appnote p { font-size: 14.5px; color: var(--lp-muted); max-width: 40em; }
+.lp-appnote .lp-fact-src { margin-top: 6px; padding-top: 0; }
