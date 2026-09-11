@@ -224,13 +224,21 @@
 .lp-phone-date { font-size: 11.5px; color: rgba(255, 255, 255, .62); text-align: center; margin-top: 5px; }
 .lp-notif {
   margin-top: auto;
-  background: rgba(255, 255, 255, .14);
+  /* Deckkraft bewusst hoch: backdrop-filter faellt auf Handys oefter aus
+     (iOS-Stromsparmodus, "Transparenz reduzieren", aeltere Android-Browser).
+     Mit den vorherigen 14 % Weiss blieb dann ein kaum sichtbarer Fleck —
+     die Meldung war am hellen Bildschirm praktisch verschwunden.
+     Der Blur ist jetzt nur noch Zugabe, nicht Voraussetzung. */
+  background: rgba(255, 255, 255, .24);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .30);
   border-radius: 14px;
   padding: 10px 11px;
   display: flex; gap: 9px; align-items: center;
+  /* Nicht die Zentrierung des Wallet-Abschnitts erben — eine echte
+     Benachrichtigung ist linksbuendig. */
+  text-align: start;
 }
 .lp-notif-swatch {
   width: 34px; height: 34px; border-radius: 8px; flex: none;
@@ -245,7 +253,7 @@
 .lp-notif-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .lp-notif-title { font-size: 12.5px; font-weight: 700; color: #fff; }
 .lp-notif-body {
-  font-size: 11px; color: rgba(255, 255, 255, .72);
+  font-size: 11px; color: rgba(255, 255, 255, .85);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -257,16 +265,16 @@
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--lp-line);
 }
-.lp-header-in { display: flex; align-items: center; gap: 20px; height: 62px; }
-.lp-logo { font-family: var(--lp-display); font-weight: 700; font-size: 20px; color: var(--lp-brand); }
+.lp-header-in { display: flex; align-items: center; gap: 20px; height: 52px; }
+.lp-logo { font-family: var(--lp-display); font-weight: 700; font-size: 18px; color: var(--lp-brand); }
 .lp-nav { display: flex; gap: 22px; margin-inline-start: auto; }
-.lp-nav a { color: var(--lp-muted); text-decoration: none; font-size: 15px; }
+.lp-nav a { color: var(--lp-muted); text-decoration: none; font-size: 14.5px; }
 .lp-nav a:hover { color: var(--lp-ink); }
 @media (max-width: 760px) {
   .lp-nav { display: none; }
-  .lp-header-in { height: 54px; gap: 12px; }
-  .lp-header-in > .lp-btn { margin-inline-start: auto; padding: 8px 14px; font-size: 14px; }
-  .lp-logo { font-size: 18px; }
+  .lp-header-in { height: 50px; gap: 12px; }
+  .lp-header-in > .lp-btn { margin-inline-start: auto; padding: 7px 13px; font-size: 13.5px; }
+  .lp-logo { font-size: 17px; }
 }
 
 .lp-btn {
@@ -280,6 +288,10 @@
 .lp-btn--primary:hover { background: #322A75; }
 .lp-btn--ghost { border-color: var(--lp-line); color: var(--lp-ink); background: var(--lp-surface); }
 .lp-btn--ghost:hover { border-color: var(--lp-brand); color: var(--lp-brand); }
+
+/* Nur der Knopf in der Leiste. Mit 45 px war er das hoechste Element und
+   bestimmte allein die Hoehe der Kopfzeile. Die Hero-Knoepfe bleiben gross. */
+.lp-header .lp-btn { padding: 7px 15px; font-size: 14px; line-height: 1.3; }
 
 /* ---------- Fuss ---------- */
 .lp-footer { border-top: 1px solid var(--lp-line); background: var(--lp-surface-2); }
