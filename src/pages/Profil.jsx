@@ -54,7 +54,114 @@ export default function Profil() {
           <p style={s.hint}>{t('profil_design_moved_hint')}</p>
         </div>
 
+        <Sperrbildschirm t={t} shop={shop} />
         <StaffTokens t={t} />
+      </div>
+  )
+}
+
+/**
+ * Sperrbildschirm-Erinnerung: ist die Karte voll, bietet iOS sie in Ladennaehe
+ * von selbst auf dem Sperrbildschirm an.
+ *
+ * Die Koordinaten holt der Browser (navigator.geolocation) - der Ladenbesitzer
+ * steht beim Einrichten ohnehin in seinem Laden. Kein Karten-Dienst, kein
+ * API-Schluessel, keine Adresseingabe. Manuelle Eingabe bleibt als Ausweg,
+ * falls er das Panel vom Schreibtisch aus bedient.
+ */
+function Sperrbildschirm({ t, shop }) {
+  const [enabled, setEnabled] = useState(!!shop.lockScreenEnabled)
+  const [lat, setLat] = useState(shop.latitude ?? '')
+  const [lng, setLng] = useState(shop.longitude ?? '')
+  const [locating, setLocating] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  const hatKoordinaten = lat !== '' && lng !== ''
+
+  function standortHolen() {
+    if (!navigator.geolocation) {
+      setError(t('profil_lock_geo_unsupported'))
+      return
+    }
+    setError('')
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+          setLat(Number(pos.coords.latitude.toFixed(6)))
+          setLng(Number(pos.coords.longitude.toFixed(6)))
+          setLocating(false)
+        },
+        () => {
+          setError(t('profil_lock_geo_denied'))
+          setLocating(false)
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
+
+  async function speichern(e) {
+    e.preventDefault()
+    setError('')
+    setSaving(true)
+    try {
+      await api.put('/api/shop/me/lockscreen', {
+        enabled,
+        latitude: lat === '' ? null : Number(lat),
+        longitude: lng === '' ? null : Number(lng),
+      })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>{t('profil_lock_title')}</h2>
+        <p style={{ ...s.hint, margin: '0 0 16px' }}>{t('profil_lock_hint')}</p>
+
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <form onSubmit={speichern}>
+          <label style={s.switchRow}>
+            <input type="checkbox" checked={enabled}
+                   onChange={e => setEnabled(e.target.checked)}
+                   disabled={!hatKoordinaten} />
+            <span style={s.switchLabel}>{t('profil_lock_switch')}</span>
+          </label>
+
+          {!hatKoordinaten && (
+              <p style={s.hint}>{t('profil_lock_needs_location')}</p>
+          )}
+
+          <button type="button" style={{ ...s.btnSecondary, width: '100%', margin: '14px 0 12px' }}
+                  onClick={standortHolen} disabled={locating}>
+            {locating ? t('profil_lock_locating') : t('profil_lock_use_location')}
+          </button>
+
+          <div style={s.coordRow}>
+            <input style={{ ...s.input, marginBottom: 0 }} value={lat} inputMode="decimal"
+                   onChange={e => setLat(e.target.value)} placeholder={t('profil_lock_lat')} />
+            <input style={{ ...s.input, marginBottom: 0 }} value={lng} inputMode="decimal"
+                   onChange={e => setLng(e.target.value)} placeholder={t('profil_lock_lng')} />
+          </div>
+
+          <button style={{ ...s.btnPrimary, marginTop: 14 }} type="submit" disabled={saving}>
+            {saving ? t('profil_saving') : t('profil_save')}
+          </button>
+        </form>
+
+        <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
       </div>
   )
 }
@@ -135,6 +242,9 @@ const s = {
   btnPrimary: { background: '#3C3489', color: 'white', border: 'none', borderRadius: 10, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', width: '100%' },
   btnSecondary: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: 10, padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
   hint: { fontSize: 13, color: '#888', margin: '12px 0 0' },
+  switchRow: { display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' },
+  switchLabel: { fontSize: 14, color: '#1a1a1a', fontWeight: 500 },
+  coordRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 },
   tokenBox: { background: '#f0fff4', borderRadius: 10, padding: 16, marginBottom: 16 },
   tokenLabel: { fontSize: 13, fontWeight: 600, color: '#2C5F2E', marginBottom: 8 },
   tokenValue: { fontFamily: 'monospace', fontSize: 12, color: '#1a1a1a', marginBottom: 10, wordBreak: 'break-all' },
