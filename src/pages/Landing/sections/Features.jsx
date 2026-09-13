@@ -1,7 +1,7 @@
 import { useLang } from '../../../LangContext'
 import Reveal from '../components/Reveal'
 
-const IDS = [1, 2, 3, 4, 5, 6, 7, 8]
+const IDS = [1, 2, 3, 4, 5]
 
 export default function Features() {
   const { t } = useLang()

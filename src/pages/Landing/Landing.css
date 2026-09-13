@@ -475,8 +475,32 @@
 
 /* ---------- Funktionen ---------- */
 .lp-features { background: var(--lp-surface-2); padding-block: 90px; }
-.lp-feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+/* Fuenf Kacheln in einem 3er-Raster ergaeben eine angebrochene Zeile mit zwei
+   Kacheln und einer Luecke. Darum ein 6-Spalten-Raster: jede Kachel nimmt zwei
+   Spalten (= 3 pro Zeile), die letzten beiden je drei (= 2 nebeneinander, volle
+   Breite). Beide Zeilen schliessen buendig ab, egal wie breit das Fenster ist. */
+.lp-feat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.lp-feat-grid > * { grid-column: span 2; }
+.lp-feat-grid > *:nth-last-child(2),
+.lp-feat-grid > *:last-child { grid-column: span 3; }
 .lp-feat-grid > .lp-reveal { display: flex; }
+
+/* Mittel: zwei pro Zeile, die letzte ueber die volle Breite. */
+@media (max-width: 900px) {
+  .lp-feat-grid { grid-template-columns: repeat(2, 1fr); }
+  .lp-feat-grid > *,
+  .lp-feat-grid > *:nth-last-child(2),
+  .lp-feat-grid > *:last-child { grid-column: span 1; }
+  .lp-feat-grid > *:last-child { grid-column: span 2; }
+}
+
+/* Handy: eine Spalte. */
+@media (max-width: 560px) {
+  .lp-feat-grid { grid-template-columns: 1fr; }
+  .lp-feat-grid > *,
+  .lp-feat-grid > *:nth-last-child(2),
+  .lp-feat-grid > *:last-child { grid-column: span 1; }
+}
 .lp-feat {
   background: var(--lp-surface);
   border: 1px solid var(--lp-line);
