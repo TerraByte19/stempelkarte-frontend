@@ -64,57 +64,62 @@ export default function Profil() {
  * Sperrbildschirm-Erinnerung: ist die Karte voll, bietet iOS sie in Ladennaehe
  * von selbst auf dem Sperrbildschirm an.
  *
- * Ein einziger Schalter, sonst nichts. Beim Einschalten fragt der Browser nach
- * dem Standort - der Ladenbesitzer steht beim Einrichten ohnehin in seinem
- * Laden - und das Ergebnis wird direkt gespeichert. Keine Adresse, keine
- * Koordinaten zum Abtippen, kein Karten-Dienst, kein API-Schluessel.
+ * Der Standort kommt ueber einen Knopf aus dem Browser (navigator.geolocation)
+ * - der Ladenbesitzer steht beim Einrichten ohnehin in seinem Laden. Keine
+ * Adresse, keine Koordinaten zum Abtippen, kein Karten-Dienst, kein
+ * API-Schluessel.
  *
- * Bewusst ohne Speichern-Knopf: der Schalter IST die Aktion. Ein Knopf daneben
- * wuerde nur die Frage aufwerfen, ob der Schalter allein schon zaehlt.
+ * Da die Koordinaten nirgends sichtbar sind, muss die Oberflaeche sagen, DASS
+ * ein Standort hinterlegt ist - sonst weiss niemand, ob der Knopf etwas getan
+ * hat.
  */
 function Sperrbildschirm({ t, shop }) {
   const [enabled, setEnabled] = useState(!!shop.lockScreenEnabled)
-  const [hatStandort, setHatStandort] = useState(
-      shop.latitude != null && shop.longitude != null)
-  const [busy, setBusy] = useState(false)
+  // Koordinaten werden bewusst nicht angezeigt, nur gehalten.
+  const [koordinaten, setKoordinaten] = useState(
+      shop.latitude != null && shop.longitude != null
+          ? { latitude: shop.latitude, longitude: shop.longitude }
+          : null)
+  const [locating, setLocating] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
 
   function standortHolen() {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error(t('profil_lock_geo_unsupported')))
-        return
-      }
-      navigator.geolocation.getCurrentPosition(
-          pos => resolve({
+    if (!navigator.geolocation) {
+      setError(t('profil_lock_geo_unsupported'))
+      return
+    }
+    setError('')
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+          setKoordinaten({
             latitude: Number(pos.coords.latitude.toFixed(6)),
             longitude: Number(pos.coords.longitude.toFixed(6)),
-          }),
-          () => reject(new Error(t('profil_lock_geo_denied'))),
-          { enableHighAccuracy: true, timeout: 10000 }
-      )
-    })
+          })
+          setLocating(false)
+        },
+        () => {
+          setError(t('profil_lock_geo_denied'))
+          setLocating(false)
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    )
   }
 
-  async function sichern(neuerStand, mitStandort) {
+  async function speichern(e) {
+    e.preventDefault()
     setError('')
-    setBusy(true)
+    setSaving(true)
     try {
-      // Beim Einschalten immer frisch messen: so ist der Standort aktuell,
-      // auch wenn der Laden inzwischen umgezogen ist.
-      const koordinaten = mitStandort ? await standortHolen() : {}
-      await api.put('/api/shop/me/lockscreen', { enabled: neuerStand, ...koordinaten })
-      setEnabled(neuerStand)
-      if (mitStandort) setHatStandort(true)
+      await api.put('/api/shop/me/lockscreen', { enabled, ...(koordinaten || {}) })
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
-      // Schalter bleibt stehen, wo er war - sonst behauptet die Oberflaeche
-      // etwas, das der Server nie bestaetigt hat.
-      setError(err.response?.data?.error || err.message || t('profil_save_error'))
+      setError(err.response?.data?.error || t('profil_save_error'))
     } finally {
-      setBusy(false)
+      setSaving(false)
     }
   }
 
@@ -130,20 +135,32 @@ function Sperrbildschirm({ t, shop }) {
         )}
         {error && <div style={s.errorBox}>{error}</div>}
 
-        <label style={{ ...s.switchRow, opacity: busy ? 0.5 : 1 }}>
-          <input type="checkbox" checked={enabled} disabled={busy}
-                 onChange={e => sichern(e.target.checked, e.target.checked)} />
-          <span style={s.switchLabel}>
-            {busy ? t('profil_lock_locating') : t('profil_lock_switch')}
-          </span>
-        </label>
+        <form onSubmit={speichern}>
+          <label style={s.switchRow}>
+            <input type="checkbox" checked={enabled}
+                   onChange={e => setEnabled(e.target.checked)}
+                   disabled={!koordinaten} />
+            <span style={s.switchLabel}>{t('profil_lock_switch')}</span>
+          </label>
 
-        {enabled && hatStandort && (
-            <button type="button" style={{ ...s.btnSecondary, width: '100%', marginTop: 14 }}
-                    onClick={() => sichern(true, true)} disabled={busy}>
-              {t('profil_lock_refresh')}
-            </button>
-        )}
+          {!koordinaten && <p style={s.hint}>{t('profil_lock_needs_location')}</p>}
+
+          <button type="button" style={{ ...s.btnSecondary, width: '100%', margin: '14px 0 0' }}
+                  onClick={standortHolen} disabled={locating}>
+            {locating ? t('profil_lock_locating')
+                : koordinaten ? t('profil_lock_refresh') : t('profil_lock_use_location')}
+          </button>
+
+          {koordinaten && (
+              <p style={{ ...s.hint, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Icon name="check" size={14} strokeWidth={2.4} />{t('profil_lock_captured')}
+              </p>
+          )}
+
+          <button style={{ ...s.btnPrimary, marginTop: 14 }} type="submit" disabled={saving}>
+            {saving ? t('profil_saving') : t('profil_save')}
+          </button>
+        </form>
 
         <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
       </div>
