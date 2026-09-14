@@ -62,11 +62,15 @@ export default function Scanner() {
         headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
         body: JSON.stringify({ qrPayload: pendingScan, count: selectedCount }),
       })
-      const data = await res.json()
+      // Antwort darf auch kein JSON sein (Proxy-Fehlerseite) - dann leeres Objekt.
+      const data = await res.json().catch(() => ({}))
       if (res.ok) {
         setResult({ success: true, data })
       } else {
-        setResult({ success: false, message: t('scan_invalid_qr') })
+        // Meldung vom Server zeigen. Vorher stand hier immer "Ungueltiger
+        // QR-Code" - abgelaufenes Token, unbekannte Karte und Serverfehler
+        // sahen damit alle gleich aus und waren im Laden nicht zu unterscheiden.
+        setResult({ success: false, message: data.error || t('scan_invalid_qr') })
       }
     } catch {
       setResult({ success: false, message: t('scan_server_error') })
@@ -87,11 +91,11 @@ export default function Scanner() {
         headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
         body: JSON.stringify({ qrPayload: pendingScan }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (res.ok) {
         setResult({ success: true, data })
       } else {
-        setResult({ success: false, message: t('scan_invalid_qr') })
+        setResult({ success: false, message: data.error || t('scan_invalid_qr') })
       }
     } catch {
       setResult({ success: false, message: t('scan_server_error') })
