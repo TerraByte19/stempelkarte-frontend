@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, Fragment } from 'react'
+import StatsView from '../components/StatsView'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -259,8 +260,6 @@ function ShopStatsExpanded({ shop }) {
 
   useEffect(() => {
     let ok = true
-    setLoading(true)
-    setError(false)
     const t = sessionStorage.getItem('adminToken')
     fetch(`${BASE_URL}/api/admin/shops/${shop.id}/stats/summary`, {
       headers: { 'Authorization': `Bearer ${t}` }
@@ -275,81 +274,23 @@ function ShopStatsExpanded({ shop }) {
   if (loading) return <div style={expandStyles.panel}>Lade Statistik...</div>
   if (error || !data) return <div style={expandStyles.panel}>Statistik konnte nicht geladen werden.</div>
 
-  const history = Array.isArray(data.history) ? data.history : []
-  const newCustomerHistory = Array.isArray(data.newCustomerHistory) ? data.newCustomerHistory : []
-
-  const kpis = [
-    { label: 'Kunden gesamt', value: data.totalCustomers },
-    { label: 'Stempel gesamt', value: data.totalStamps },
-    { label: 'Belohnungen', value: data.totalRewards },
-    { label: 'Aktiv (30 Tage)', value: data.activeCustomers30d },
-    { label: 'Neue Kunden (14 Tage)', value: data.newCustomersInHistory ?? 0 },
-  ]
-
   return (
       <div style={expandStyles.panel}>
-        <div style={expandStyles.kpiRow}>
-          {kpis.map(k => (
-              <div key={k.label} style={expandStyles.kpi}>
-                <div style={expandStyles.kpiValue}>{k.value}</div>
-                <div style={expandStyles.kpiLabel}>{k.label}</div>
-              </div>
-          ))}
-        </div>
-        <div style={expandStyles.chartsRow}>
-          <div style={expandStyles.chartCol}>
-            <div style={expandStyles.chartTitle}>Stempel-Verlauf (2 Wochen)</div>
-            <MiniBarChart days={history} valueKey="stamps" color="#3C3489" unitLabel="Stempel" />
-          </div>
-          <div style={expandStyles.chartCol}>
-            <div style={expandStyles.chartTitle}>Neue Kunden (2 Wochen)</div>
-            <MiniBarChart days={newCustomerHistory} valueKey="count" color="#2C5F2E" unitLabel="neue Kunden" />
-          </div>
-        </div>
+        <StatsView
+            data={data}
+            fetchDay={date => {
+              const t = sessionStorage.getItem('adminToken')
+              return fetch(`${BASE_URL}/api/admin/shops/${shop.id}/stats/day?date=${date}`, {
+                headers: { 'Authorization': `Bearer ${t}` }
+              }).then(res => { if (!res.ok) throw new Error('Ladefehler'); return res.json() })
+            }}
+        />
       </div>
-  )
-}
-
-// Kompaktes Balkendiagramm ohne Achsen - reicht fuer den schnellen Ueberblick
-// im Admin-Panel. viewBox-Prozentwerte + preserveAspectRatio="none" fuellen
-// die volle Kartenbreite unabhaengig von der Tage-Anzahl.
-function MiniBarChart({ days, valueKey, color, unitLabel }) {
-  if (!days || days.length === 0) return <div style={expandStyles.chartEmpty}>Noch keine Daten</div>
-
-  const values = days.map(d => d[valueKey])
-  const max = Math.max(1, ...values)
-  const W = 100, H = 44
-  const n = days.length
-  const gap = 0.6
-  const barW = (W - gap * (n - 1)) / n
-
-  return (
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: 70, display: 'block' }}>
-        {days.map((d, i) => {
-          const v = d[valueKey]
-          const h = v > 0 ? Math.max((v / max) * H, 2) : 0
-          const x = i * (barW + gap)
-          const y = H - h
-          return (
-              <rect key={i} x={x} y={y} width={barW} height={h} fill={color} rx="0.6">
-                <title>{d.date}: {v} {unitLabel}</title>
-              </rect>
-          )
-        })}
-      </svg>
   )
 }
 
 const expandStyles = {
   panel: { background: '#faf9ff', borderTop: '1px solid #efecfb', padding: '18px 20px', minWidth: '900px' },
-  kpiRow: { display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '16px' },
-  kpi: { minWidth: '110px' },
-  kpiValue: { fontSize: '20px', fontWeight: '700', color: '#3C3489' },
-  kpiLabel: { fontSize: '12px', color: '#888', marginTop: '2px' },
-  chartsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' },
-  chartCol: { background: 'white', borderRadius: '10px', padding: '12px 14px' },
-  chartTitle: { fontSize: '11px', fontWeight: '700', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' },
-  chartEmpty: { fontSize: '12px', color: '#aaa', padding: '10px 0' },
 }
 
 function CreateShop({ onCreated }) {
