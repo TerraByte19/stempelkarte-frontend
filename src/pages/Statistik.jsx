@@ -8,6 +8,9 @@ export default function Statistik() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [selectedDate, setSelectedDate] = useState(null)
+  const [excludeSunday, setExcludeSunday] = useState(() => {
+    try { return localStorage.getItem('stampit_exclude_sunday') === '1' } catch { return false }
+  })
 
   useEffect(() => {
     api.get('/api/shop/stats/summary')
@@ -16,16 +19,28 @@ export default function Statistik() {
         .finally(() => setLoading(false))
   }, [])
 
+  function toggleExcludeSunday() {
+    setExcludeSunday(v => {
+      const next = !v
+      try { localStorage.setItem('stampit_exclude_sunday', next ? '1' : '0') } catch { /* ignore */ }
+      return next
+    })
+  }
+
   if (loading) return <div style={s.info}>{t('stat_loading')}</div>
   if (error || !data) return <div style={s.info}>{t('stat_load_error')}</div>
 
   const history = Array.isArray(data.history) ? data.history : []
+  const historyForAvg = excludeSunday ? history.filter(d => !isSunday(d.date)) : history
   const byWeekday = Array.isArray(data.byWeekday) ? data.byWeekday : []
-  const hasWeekday = byWeekday.some(v => v > 0)
-  const bestIdx = hasWeekday ? byWeekday.indexOf(Math.max(...byWeekday)) : -1
-  const quietIdx = hasWeekday ? byWeekday.indexOf(Math.min(...byWeekday)) : -1
-  const histSum = history.reduce((a, d) => a + d.stamps, 0)
-  const avgPerDay = history.length ? Math.round((histSum / history.length) * 10) / 10 : 0
+  // idx 6 = Sonntag (idx 0 = Montag).
+  const weekdayIdx = byWeekday.map((_, i) => i).filter(i => !(excludeSunday && i === 6))
+  const weekdayVals = weekdayIdx.map(i => byWeekday[i])
+  const hasWeekday = weekdayVals.some(v => v > 0)
+  const bestIdx = hasWeekday ? weekdayIdx[weekdayVals.indexOf(Math.max(...weekdayVals))] : -1
+  const quietIdx = hasWeekday ? weekdayIdx[weekdayVals.indexOf(Math.min(...weekdayVals))] : -1
+  const histSum = historyForAvg.reduce((a, d) => a + d.stamps, 0)
+  const avgPerDay = historyForAvg.length ? Math.round((histSum / historyForAvg.length) * 10) / 10 : 0
 
   const kpis = [
     { label: t('stat_kpi_customers'), value: data.totalCustomers, icon: 'users', color: '#3C3489' },
@@ -44,8 +59,17 @@ export default function Statistik() {
   return (
       <div>
         <div style={s.header}>
-          <h1 style={s.title}>{t('stat_title')}</h1>
-          <p style={s.subtitle}>{t('stat_overview_for', { name: data.shopName })}</p>
+          <div>
+            <h1 style={s.title}>{t('stat_title')}</h1>
+            <p style={s.subtitle}>{t('stat_overview_for', { name: data.shopName })}</p>
+          </div>
+          <label style={s.switchRow}>
+            <span style={s.switchLabel}>{t('stat_exclude_sunday')}</span>
+            <span style={{ ...s.switchTrack, background: excludeSunday ? '#3C3489' : '#dcdcdc' }}
+                  onClick={toggleExcludeSunday} role="switch" aria-checked={excludeSunday}>
+              <span style={{ ...s.switchKnob, insetInlineStart: excludeSunday ? 20 : 2 }} />
+            </span>
+          </label>
         </div>
 
         <div style={s.kpiGrid}>
@@ -201,6 +225,11 @@ function isWeekend(iso) {
   const [y, m, d] = iso.split('-').map(Number)
   const wd = new Date(y, m - 1, d).getDay()
   return wd === 0 || wd === 6
+}
+
+function isSunday(iso) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d).getDay() === 0
 }
 
 // Einmalig die Balken-Einblend-Animation in den <head> haengen.
@@ -435,9 +464,13 @@ const CARD_SHADOW = '0 1px 2px rgba(16,24,40,0.04), 0 6px 20px rgba(16,24,40,0.0
 const CARD_RADIUS = 14
 
 const s = {
-  header: { marginBottom: 24 },
+  header: { marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' },
   title: { fontSize: 24, fontWeight: 700, margin: '0 0 4px', color: '#1a1a1a', letterSpacing: '-0.02em' },
   subtitle: { fontSize: 14, color: '#888', margin: 0 },
+  switchRow: { display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' },
+  switchLabel: { fontSize: 13, color: '#555', fontWeight: 600 },
+  switchTrack: { position: 'relative', width: 40, height: 22, borderRadius: 11, transition: 'background .15s', flexShrink: 0 },
+  switchKnob: { position: 'absolute', top: 2, width: 18, height: 18, borderRadius: '50%', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', transition: 'inset-inline-start .15s' },
   info: { background: 'white', borderRadius: CARD_RADIUS, padding: 40, textAlign: 'center', color: '#888', fontSize: 14, boxShadow: CARD_SHADOW },
 
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 16 },
