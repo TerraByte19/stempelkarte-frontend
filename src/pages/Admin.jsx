@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, Fragment } from 'react'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -9,6 +9,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [changingPasswordFor, setChangingPasswordFor] = useState(null)
+  const [expandedShopId, setExpandedShopId] = useState(null)
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken')
@@ -190,49 +191,165 @@ export default function Admin() {
             <span>Status</span>
             <span>Aktionen</span>
           </div>
-          {list.map(shop => (
-              <div key={shop.id} style={{ ...styles.tableRow, opacity: shop.active ? 1 : 0.5 }}>
-                <span style={styles.shopName}>{shop.name}</span>
-                <span style={styles.shopEmail}>{shop.email}</span>
-                <span style={styles.cell}>{shop.cardCount}</span>
-                <span style={styles.cell}>{shop.customerCount}</span>
-                <span style={styles.cell}>{shop.maxTokens}</span>
-                <span style={{
-                  ...styles.status,
-                  background: shop.active ? '#e6f4ea' : '#fce8e6',
-                  color: shop.active ? '#2C5F2E' : '#c00',
-                }}>
-              {shop.active ? 'Aktiv' : 'Gesperrt'}
-            </span>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap' }}>
-                  <button
-                      style={{
-                        ...styles.btnToggle,
-                        background: shop.active ? '#fce8e6' : '#e6f4ea',
-                        color: shop.active ? '#c00' : '#2C5F2E',
-                      }}
-                      onClick={() => toggleShop(shop.id)}
-                  >
-                    {shop.active ? 'Sperren' : 'Entsperren'}
-                  </button>
-                  <button
-                      style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
-                      onClick={() => setChangingPasswordFor(shop)}
-                  >
-                    PW
-                  </button>
-                  <button
-                      style={{ ...styles.btnToggle, background: '#1a1a1a', color: 'white' }}
-                      onClick={() => deleteShop(shop.id, shop.name)}
-                  >
-                    Löschen
-                  </button>
-                </div>
-              </div>
-          ))}
+          {list.map(shop => {
+            const expanded = expandedShopId === shop.id
+            return (
+                <Fragment key={shop.id}>
+                  <div style={{ ...styles.tableRow, opacity: shop.active ? 1 : 0.5 }}>
+                    <span style={styles.shopName}>{shop.name}</span>
+                    <span style={styles.shopEmail}>{shop.email}</span>
+                    <span style={styles.cell}>{shop.cardCount}</span>
+                    <span style={styles.cell}>{shop.customerCount}</span>
+                    <span style={styles.cell}>{shop.maxTokens}</span>
+                    <span style={{
+                      ...styles.status,
+                      background: shop.active ? '#e6f4ea' : '#fce8e6',
+                      color: shop.active ? '#2C5F2E' : '#c00',
+                    }}>
+                  {shop.active ? 'Aktiv' : 'Gesperrt'}
+                </span>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap' }}>
+                      <button
+                          style={{
+                            ...styles.btnToggle,
+                            background: expanded ? '#3C3489' : '#eef2ff',
+                            color: expanded ? 'white' : '#3C3489',
+                          }}
+                          onClick={() => setExpandedShopId(id => id === shop.id ? null : shop.id)}
+                      >
+                        {expanded ? 'Schließen' : 'Statistik'}
+                      </button>
+                      <button
+                          style={{
+                            ...styles.btnToggle,
+                            background: shop.active ? '#fce8e6' : '#e6f4ea',
+                            color: shop.active ? '#c00' : '#2C5F2E',
+                          }}
+                          onClick={() => toggleShop(shop.id)}
+                      >
+                        {shop.active ? 'Sperren' : 'Entsperren'}
+                      </button>
+                      <button
+                          style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
+                          onClick={() => setChangingPasswordFor(shop)}
+                      >
+                        PW
+                      </button>
+                      <button
+                          style={{ ...styles.btnToggle, background: '#1a1a1a', color: 'white' }}
+                          onClick={() => deleteShop(shop.id, shop.name)}
+                      >
+                        Löschen
+                      </button>
+                    </div>
+                  </div>
+                  {expanded && <ShopStatsExpanded shop={shop} />}
+                </Fragment>
+            )
+          })}
         </div>
     )
   }
+}
+
+function ShopStatsExpanded({ shop }) {
+  const [data, setData] = useState(null)
+  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let ok = true
+    setLoading(true)
+    setError(false)
+    const t = sessionStorage.getItem('adminToken')
+    fetch(`${BASE_URL}/api/admin/shops/${shop.id}/stats/summary`, {
+      headers: { 'Authorization': `Bearer ${t}` }
+    })
+        .then(res => { if (!res.ok) throw new Error('Ladefehler'); return res.json() })
+        .then(d => { if (ok) setData(d) })
+        .catch(() => { if (ok) setError(true) })
+        .finally(() => { if (ok) setLoading(false) })
+    return () => { ok = false }
+  }, [shop.id])
+
+  if (loading) return <div style={expandStyles.panel}>Lade Statistik...</div>
+  if (error || !data) return <div style={expandStyles.panel}>Statistik konnte nicht geladen werden.</div>
+
+  const history = Array.isArray(data.history) ? data.history : []
+  const newCustomerHistory = Array.isArray(data.newCustomerHistory) ? data.newCustomerHistory : []
+
+  const kpis = [
+    { label: 'Kunden gesamt', value: data.totalCustomers },
+    { label: 'Stempel gesamt', value: data.totalStamps },
+    { label: 'Belohnungen', value: data.totalRewards },
+    { label: 'Aktiv (30 Tage)', value: data.activeCustomers30d },
+    { label: 'Neue Kunden (14 Tage)', value: data.newCustomersInHistory ?? 0 },
+  ]
+
+  return (
+      <div style={expandStyles.panel}>
+        <div style={expandStyles.kpiRow}>
+          {kpis.map(k => (
+              <div key={k.label} style={expandStyles.kpi}>
+                <div style={expandStyles.kpiValue}>{k.value}</div>
+                <div style={expandStyles.kpiLabel}>{k.label}</div>
+              </div>
+          ))}
+        </div>
+        <div style={expandStyles.chartsRow}>
+          <div style={expandStyles.chartCol}>
+            <div style={expandStyles.chartTitle}>Stempel-Verlauf (2 Wochen)</div>
+            <MiniBarChart days={history} valueKey="stamps" color="#3C3489" unitLabel="Stempel" />
+          </div>
+          <div style={expandStyles.chartCol}>
+            <div style={expandStyles.chartTitle}>Neue Kunden (2 Wochen)</div>
+            <MiniBarChart days={newCustomerHistory} valueKey="count" color="#2C5F2E" unitLabel="neue Kunden" />
+          </div>
+        </div>
+      </div>
+  )
+}
+
+// Kompaktes Balkendiagramm ohne Achsen - reicht fuer den schnellen Ueberblick
+// im Admin-Panel. viewBox-Prozentwerte + preserveAspectRatio="none" fuellen
+// die volle Kartenbreite unabhaengig von der Tage-Anzahl.
+function MiniBarChart({ days, valueKey, color, unitLabel }) {
+  if (!days || days.length === 0) return <div style={expandStyles.chartEmpty}>Noch keine Daten</div>
+
+  const values = days.map(d => d[valueKey])
+  const max = Math.max(1, ...values)
+  const W = 100, H = 44
+  const n = days.length
+  const gap = 0.6
+  const barW = (W - gap * (n - 1)) / n
+
+  return (
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: 70, display: 'block' }}>
+        {days.map((d, i) => {
+          const v = d[valueKey]
+          const h = v > 0 ? Math.max((v / max) * H, 2) : 0
+          const x = i * (barW + gap)
+          const y = H - h
+          return (
+              <rect key={i} x={x} y={y} width={barW} height={h} fill={color} rx="0.6">
+                <title>{d.date}: {v} {unitLabel}</title>
+              </rect>
+          )
+        })}
+      </svg>
+  )
+}
+
+const expandStyles = {
+  panel: { background: '#faf9ff', borderTop: '1px solid #efecfb', padding: '18px 20px', minWidth: '900px' },
+  kpiRow: { display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '16px' },
+  kpi: { minWidth: '110px' },
+  kpiValue: { fontSize: '20px', fontWeight: '700', color: '#3C3489' },
+  kpiLabel: { fontSize: '12px', color: '#888', marginTop: '2px' },
+  chartsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' },
+  chartCol: { background: 'white', borderRadius: '10px', padding: '12px 14px' },
+  chartTitle: { fontSize: '11px', fontWeight: '700', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' },
+  chartEmpty: { fontSize: '12px', color: '#aaa', padding: '10px 0' },
 }
 
 function CreateShop({ onCreated }) {
@@ -381,8 +498,8 @@ const styles = {
   statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
   statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
   table: { background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'auto' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 2.6fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '900px' },
-  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 2.6fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '900px' },
+  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '980px' },
+  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '980px' },
   shopName: { fontSize: '14px', fontWeight: '600', color: '#1a1a1a' },
   shopEmail: { fontSize: '12px', color: '#666' },
   cell: { fontSize: '13px', color: '#666' },

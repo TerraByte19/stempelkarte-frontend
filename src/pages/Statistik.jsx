@@ -41,6 +41,7 @@ export default function Statistik() {
   const quietIdx = hasWeekday ? weekdayIdx[weekdayVals.indexOf(Math.min(...weekdayVals))] : -1
   const histSum = historyForAvg.reduce((a, d) => a + d.stamps, 0)
   const avgPerDay = historyForAvg.length ? Math.round((histSum / historyForAvg.length) * 10) / 10 : 0
+  const newCustomerHistory = Array.isArray(data.newCustomerHistory) ? data.newCustomerHistory : []
 
   const kpis = [
     { label: t('stat_kpi_customers'), value: data.totalCustomers, icon: 'users', color: '#3C3489' },
@@ -141,6 +142,11 @@ export default function Statistik() {
               <DayDetail key={selectedDate} date={selectedDate} lang={lang} t={t}
                          onClose={() => setSelectedDate(null)} />
           )}
+        </div>
+
+        <div style={s.panel}>
+          <div style={s.panelTitle}>{t('stat_new_customers_chart_title')}</div>
+          <NewCustomerChart history={newCustomerHistory} t={t} lang={lang} />
         </div>
       </div>
   )
@@ -359,6 +365,105 @@ function HistoryChart({ history, t, lang, selected, onSelect }) {
           <span><b>{totalStamps}</b> {t('dash_stat_stamps')}</span>
           <span><b>{totalRewards}</b> {t('stat_rewards')}</span>
           <span style={{ color: '#aaa', marginInlineStart: 'auto' }}>{t('stat_tap_hint')}</span>
+        </div>
+      </div>
+  )
+}
+
+// ── Neukunden-Balkendiagramm (2 Wochen) ─────────────────────────────────
+function NewCustomerChart({ history, t, lang }) {
+  const [hover, setHover] = useState(null)
+  ensureAnim()
+
+  if (!history || history.length === 0) {
+    return <div style={s.empty}>{t('stat_no_history')}</div>
+  }
+
+  const days = history
+  const n = days.length
+  const yMax = niceMax(Math.max(...days.map(d => d.count), 0))
+  const yTicks = niceTicks(yMax)
+  const total = days.reduce((a, d) => a + d.count, 0)
+
+  const W = 700, H = 200
+  const mL = 26, mR = 8, mT = 16, mB = 30
+  const plotH = H - mT - mB
+  const slot = (W - mL - mR) / n
+  const barW = Math.max(3, Math.min(slot * 0.6, 22))
+  const yOf = v => mT + plotH - (v / yMax) * plotH
+  const slotX = i => mL + slot * i
+  const slotCenter = i => mL + slot * i + slot / 2
+  const todayI = n - 1
+  const labelEvery = Math.max(1, Math.ceil(n / 6))
+  const tipLeft = Math.min(92, Math.max(8, (slotCenter(hover ?? 0) / W) * 100))
+
+  return (
+      <div>
+        <div style={s.legend}>
+          <span style={s.legendItem}><i style={{ ...s.legendDot, background: '#3C3489' }} />{t('stat_new_customers')}</span>
+          <span style={{ ...s.legendItem, color: '#9aa0a6', marginInlineStart: 'auto' }}>
+            {t('stat_new_customers_total', { n: total })}
+          </span>
+        </div>
+
+        <div style={{ position: 'relative' }}>
+          <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', display: 'block' }}
+               onMouseLeave={() => setHover(null)}>
+            {days.map((d, i) => isWeekend(d.date) && (
+                <rect key={'we' + i} x={slotX(i)} y={mT} width={slot} height={plotH} fill="#f6f5fb" />
+            ))}
+
+            {yTicks.map((tk, k) => (
+                <g key={'y' + k}>
+                  <line x1={mL} x2={W - mR} y1={yOf(tk)} y2={yOf(tk)} stroke="#ecedef" strokeWidth="1" />
+                  <text x={mL - 6} y={yOf(tk) + 3} fontSize="10" fill="#b4b8bd" textAnchor="end">{tk}</text>
+                </g>
+            ))}
+
+            {days.map((d, i) => {
+              const by = yOf(d.count)
+              const bh = Math.max(mT + plotH - by, d.count > 0 ? 1.5 : 0)
+              const isToday = i === todayI
+              const isHover = hover === i
+              const fill = isHover ? '#2a2570' : isToday ? '#5B4FC7' : '#3C3489'
+              return (
+                  <g key={i}>
+                    {d.count > 0 && (
+                        <rect className="ox-bar" style={{ animationDelay: Math.min(i * 12, 380) + 'ms' }}
+                              x={slotCenter(i) - barW / 2} y={by} width={barW} height={bh} rx="2" fill={fill} />
+                    )}
+                    <rect x={slotX(i)} y={mT} width={slot} height={plotH} fill="transparent" style={{ cursor: 'default' }}
+                          onMouseEnter={() => setHover(i)} onTouchStart={() => setHover(i)} />
+                  </g>
+              )
+            })}
+
+            {days.map((d, i) => {
+              if (i % labelEvery !== 0 && i !== todayI) return null
+              return (
+                  <text key={'x' + i} x={slotCenter(i)} y={H - 16} fontSize="9.5"
+                        fill={i === todayI ? '#5B4FC7' : '#b4b8bd'}
+                        fontWeight={i === todayI ? 700 : 400} textAnchor="middle">
+                    {weekdayShort(d.date, lang)}
+                  </text>
+              )
+            })}
+            {days.map((d, i) => {
+              if (i % labelEvery !== 0 && i !== todayI) return null
+              return (
+                  <text key={'xd' + i} x={slotCenter(i)} y={H - 5} fontSize="9.5" fill="#c9cdd1" textAnchor="middle">
+                    {fmtDate(d.date)}
+                  </text>
+              )
+            })}
+          </svg>
+
+          {hover !== null && (
+              <div style={{ ...s.tip, left: tipLeft + '%' }}>
+                <div style={s.tipHead}>{weekdayShort(days[hover].date, lang)} {fmtDate(days[hover].date)}</div>
+                <div><b>{days[hover].count}</b> {t('stat_new_customers')}</div>
+              </div>
+          )}
         </div>
       </div>
   )
