@@ -84,6 +84,9 @@ function Sperrbildschirm({ t, shop }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  // Eigener Text statt Standardtext. Leer lassen = Standard.
+  const [textFull, setTextFull] = useState(shop.lockScreenTextFull || '')
+  const [textProgress, setTextProgress] = useState(shop.lockScreenTextProgress || '')
 
   function standortHolen() {
     if (!navigator.geolocation) {
@@ -113,7 +116,11 @@ function Sperrbildschirm({ t, shop }) {
     setError('')
     setSaving(true)
     try {
-      await api.put('/api/shop/me/lockscreen', { enabled, ...(koordinaten || {}) })
+      await api.put('/api/shop/me/lockscreen', {
+        enabled, ...(koordinaten || {}),
+        textFull: textFull.trim(),
+        textProgress: textProgress.trim(),
+      })
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
@@ -156,6 +163,23 @@ function Sperrbildschirm({ t, shop }) {
                 <Icon name="check" size={14} strokeWidth={2.4} />{t('profil_lock_captured')}
               </p>
           )}
+
+          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
+              {t('profil_lock_text_title')}
+            </div>
+            <p style={{ ...s.hint, margin: '0 0 12px' }}>{t('profil_lock_text_hint')}</p>
+
+            <label style={s.label}>{t('profil_lock_text_progress')}</label>
+            <input style={s.input} maxLength={120} value={textProgress}
+                   onChange={e => setTextProgress(e.target.value)}
+                   placeholder={t('profil_lock_text_progress_ph')} />
+
+            <label style={{ ...s.label, marginTop: 12 }}>{t('profil_lock_text_full')}</label>
+            <input style={s.input} maxLength={120} value={textFull}
+                   onChange={e => setTextFull(e.target.value)}
+                   placeholder={t('profil_lock_text_full_ph')} />
+          </div>
 
           <button style={{ ...s.btnPrimary, marginTop: 14 }} type="submit" disabled={saving}>
             {saving ? t('profil_saving') : t('profil_save')}
@@ -240,6 +264,7 @@ const s = {
   success: { background: '#f0fff4', color: '#2C5F2E', padding: '10px 14px', borderRadius: 8, fontSize: 14, marginBottom: 14 },
   errorBox: { background: '#fff0f0', color: '#c00', padding: 10, borderRadius: 8, fontSize: 14, marginBottom: 12 },
   input: { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontSize: 14, outline: 'none', boxSizing: 'border-box', marginBottom: 12 },
+  label: { display: 'block', fontSize: 12, fontWeight: 600, color: '#555', marginBottom: 6 },
   btnPrimary: { background: '#3C3489', color: 'white', border: 'none', borderRadius: 10, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', width: '100%' },
   btnSecondary: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: 10, padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
   hint: { fontSize: 13, color: '#888', margin: '12px 0 0' },
