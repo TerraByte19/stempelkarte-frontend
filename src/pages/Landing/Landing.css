@@ -1,0 +1,648 @@
+/* Schriften — selbst gehostet. Keine Anfrage an fonts.googleapis.com:
+   die Seite wirbt mit DSGVO-Konformitaet, ein Google-Font-Link waere ein
+   Widerspruch mitten auf der eigenen Vertrauens-Sektion.
+   Nur die tatsaechlich gebrauchten Subsets — kein Vietnamesisch, kein Kyrillisch. */
+@import '@fontsource/space-grotesk/latin-500.css';
+@import '@fontsource/space-grotesk/latin-600.css';
+@import '@fontsource/space-grotesk/latin-700.css';
+@import '@fontsource/hanken-grotesk/latin-400.css';
+@import '@fontsource/hanken-grotesk/latin-500.css';
+@import '@fontsource/hanken-grotesk/latin-600.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-400.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-600.css';
+
+.lp {
+  --lp-brand: #3C3489;
+  --lp-card-from: #463DA0;
+  --lp-card-to: #2C2570;
+  --lp-ink: #1A1A2E;
+  --lp-muted: #5B5B73;
+  --lp-surface: #FFFFFF;
+  --lp-surface-2: #F6F5FB;
+  --lp-line: #ECEBF5;
+  --lp-gold: #B8801F;
+
+  --lp-display: 'Space Grotesk', system-ui, 'Segoe UI', sans-serif;
+  --lp-body: 'Hanken Grotesk', system-ui, 'Segoe UI', sans-serif;
+
+  --lp-gutter: 20px;
+  --lp-max: 1120px;
+  /* Aussenhoehe der Kopfzeile inklusive Trennlinie. Die Buehne rechnet sie
+     mit, damit ihr Inhalt nicht unter der klebenden Leiste klemmt. */
+  --lp-header-h: 53px;
+
+  background: var(--lp-surface);
+  color: var(--lp-ink);
+  font-family: var(--lp-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Arabisch bekommt eine eigene Familie — Space Grotesk und Hanken Grotesk
+   haben keine arabischen Schnitte, sonst faellt die Seite auf eine
+   Systemschrift zurueck und sieht in ar kaputt aus. */
+[dir='rtl'] .lp,
+.lp[dir='rtl'] {
+  --lp-display: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --lp-body: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+}
+
+.lp h1, .lp h2, .lp h3 {
+  font-family: var(--lp-display);
+  line-height: 1.08;
+  margin: 0;
+  text-wrap: balance;
+}
+.lp p { margin: 0; }
+
+.lp-wrap {
+  max-width: var(--lp-max);
+  margin-inline: auto;
+  padding-inline: var(--lp-gutter);
+}
+
+.lp-eyebrow {
+  font-family: var(--lp-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-brand);
+}
+
+.lp :focus-visible {
+  outline: 2px solid var(--lp-brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp *,
+  .lp *::before,
+  .lp *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+/* ---------- Stempelkarte ---------- */
+.lp-card {
+  /* Alles in der Karte rechnet in cqw — Prozent der Inhaltsbreite. Am Handy
+     wird die Karte schmaler; mit festen Pixeln blieb das QR-Feld bei 74 px
+     (33 % statt 24 % der Breite) und der Fuss lief 38 px ueber den Rand.
+     Bei natuerlichen 304 px kommen exakt die alten Werte heraus.
+     Der eigene Innenabstand bleibt in px: in cqw waere er eine
+     Rueckkopplung, weil er den Rahmen verkleinert, an dem er sich bemisst. */
+  container-type: inline-size;
+  width: min(304px, 80vw);
+  aspect-ratio: 1 / 1.42;
+  background: linear-gradient(163deg, var(--lp-card-from), var(--lp-card-to));
+  border-radius: 20px;
+  color: #fff;
+  /* padding und gap in px: beides sind Eigenschaften des Containers selbst.
+     cqw darin findet keinen Container und faellt auf die Fensterbreite
+     zurueck — aus 14 px wurden so 76 px. Nur Kind-Elemente duerfen cqw. */
+  padding: 20px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -20px rgba(44, 37, 112, .55);
+}
+.lp-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  border: 2px solid var(--lp-gold);
+  opacity: 0;
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
+.lp-card.is-done::after { opacity: 1; }
+
+.lp-card-head { display: flex; align-items: center; gap: 3.41cqw; }
+.lp-card-mark {
+  width: 8.33cqw; height: 8.33cqw; border-radius: 2.27cqw; flex: none;
+  background: rgba(255, 255, 255, .92);
+  display: grid; place-items: center;
+}
+.lp-card-mark svg {
+  width: 4.92cqw; height: 4.92cqw;
+  stroke: var(--lp-card-to); fill: none; stroke-width: 1.9;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.lp-card-shop { font-family: var(--lp-display); font-weight: 600; font-size: 5.87cqw; }
+.lp-card-loc {
+  margin-inline-start: auto;
+  font-size: 3.6cqw; letter-spacing: .06em;
+  color: #B7B0E8;
+}
+
+.lp-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4.17cqw;
+  flex: 1;
+  align-content: center;
+}
+.lp-slot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, .22);
+  display: grid;
+  place-items: center;
+  transition: background .32s cubic-bezier(.2, .9, .3, 1.4),
+              border-color .32s ease,
+              transform .32s cubic-bezier(.2, .9, .3, 1.4);
+}
+.lp-slot svg {
+  width: 52%; height: 52%;
+  stroke: var(--lp-card-to); fill: none; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  opacity: 0; transition: opacity .25s ease;
+}
+.lp-slot.is-on { background: #fff; border-color: #fff; border-style: solid; transform: scale(1.06); }
+.lp-slot.is-on svg { opacity: 1; }
+.lp-card.is-done .lp-slot.is-on { background: var(--lp-gold); border-color: var(--lp-gold); }
+.lp-card.is-done .lp-slot.is-on svg { stroke: #2A1B02; }
+
+.lp-card-foot { display: flex; flex-direction: column; gap: 3.41cqw; }
+.lp-card-reward {
+  display: flex; justify-content: space-between; align-items: center; gap: 3.03cqw;
+  font-size: 4.92cqw; color: #B7B0E8;
+}
+.lp-card-chip {
+  font-size: 3.6cqw; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--lp-gold); color: #2A1B02;
+  padding: 1.14cqw 2.65cqw; border-radius: 1.89cqw;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+.lp-card.is-done .lp-card-chip { opacity: 1; transform: none; }
+
+.lp-card-pass { display: flex; flex-direction: column; align-items: center; gap: 1.89cqw; }
+.lp-qr {
+  width: 28.03cqw; aspect-ratio: 1; flex: none;
+  background: #fff; border-radius: 2.65cqw; padding: 1.52cqw;
+}
+.lp-qr svg { width: 100%; height: 100%; display: block; }
+
+.lp-card--compact { width: 132px; border-radius: 12px; padding: 10px 10px 8px; gap: 7px; }
+.lp-card--compact::after { border-radius: 12px; border-width: 1.5px; }
+.lp-card--compact .lp-card-grid { gap: 6px; }
+.lp-card--compact .lp-card-shop { font-size: 9.5px; }
+.lp-card--compact .lp-card-loc,
+.lp-card--compact .lp-card-chip { display: none; }
+.lp-card--compact .lp-card-reward { font-size: 7.5px; }
+.lp-card--compact .lp-qr { width: 34px; border-radius: 4px; padding: 2px; }
+
+/* ---------- Reveal ---------- */
+.lp-reveal {
+  transform: translateY(10px);
+  transition: transform .7s cubic-bezier(.22, .8, .3, 1);
+}
+.lp-reveal.is-in { transform: none; }
+
+/* ---------- Sperrbildschirm ---------- */
+.lp-phone {
+  /* Alle Groessen im Telefon rechnen in cqw — Prozent der Telefonbreite.
+     Am Handy schrumpft das Gehaeuse mit der Bildschirmhoehe; mit festen
+     Pixeln brach der Ladenname um und die Meldung wurde abgeschnitten.
+     Bei der natuerlichen Breite von 258 px kommen exakt die alten Werte
+     heraus. Die px-Angaben davor greifen in Browsern ohne Container-Query. */
+  container-type: inline-size;
+  width: min(258px, 68vw);
+  aspect-ratio: 1 / 2.05;
+  background: #0E0D1E;
+  border: 1px solid rgba(255, 255, 255, .10);
+  border-radius: 34px;
+  /* Bewusst in px, nicht cqw: cqw bemisst sich am Inhaltsrahmen des
+     Containers — ein Innenabstand in cqw verkleinert diesen Rahmen und
+     damit sich selbst. Das lief auf 67 px Abstand und 120 px Inhalt hinaus. */
+  padding: 14px 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -20px rgba(44, 37, 112, .55);
+}
+.lp-phone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 70% at 50% 0%, #3B3475 0%, #16142E 55%, #0B0A1B 100%);
+}
+.lp-phone-screen { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
+.lp-phone-notch {
+  width: 32.05cqw; height: 8.26cqw; border-radius: 4.80cqw;
+  background: #000; margin: 0 auto 8.71cqw;
+}
+.lp-phone-clock {
+  font-family: var(--lp-display); font-weight: 600;
+  font-size: 46px; font-size: 19.88cqw;
+  color: #fff; text-align: center; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.lp-phone-date {
+  font-size: 11.5px; font-size: 5.03cqw;
+  color: rgba(255, 255, 255, .62); text-align: center; margin-top: 2.12cqw;
+}
+.lp-notif {
+  margin-top: auto;
+  /* Deckkraft bewusst hoch: backdrop-filter faellt auf Handys oefter aus
+     (iOS-Stromsparmodus, "Transparenz reduzieren", aeltere Android-Browser).
+     Mit den vorherigen 14 % Weiss blieb dann ein kaum sichtbarer Fleck —
+     die Meldung war am hellen Bildschirm praktisch verschwunden.
+     Der Blur ist jetzt nur noch Zugabe, nicht Voraussetzung. */
+  background: rgba(255, 255, 255, .24);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, .30);
+  border-radius: 14px; border-radius: 6.03cqw;
+  padding: 10px 11px; padding: 4.36cqw 4.80cqw;
+  display: flex; gap: 9px; gap: 3.91cqw; align-items: center;
+  /* Nicht die Zentrierung des Wallet-Abschnitts erben — eine echte
+     Benachrichtigung ist linksbuendig. */
+  text-align: start;
+}
+.lp-notif-swatch {
+  width: 34px; height: 34px; border-radius: 8px;
+  width: 14.74cqw; height: 14.74cqw; border-radius: 3.46cqw; flex: none;
+  background: linear-gradient(160deg, var(--lp-card-from), var(--lp-card-to));
+  display: grid; place-items: center;
+}
+.lp-notif-swatch svg {
+  width: 7.37cqw; height: 7.37cqw;
+  stroke: #fff; fill: none; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.lp-notif-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.lp-notif-title { font-size: 12.5px; font-size: 5.42cqw; font-weight: 700; color: #fff; }
+.lp-notif-body {
+  font-size: 11px; font-size: 4.80cqw; color: rgba(255, 255, 255, .85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ---------- Kopf ---------- */
+.lp-header {
+  position: sticky; top: 0; z-index: 40;
+  background: rgba(255, 255, 255, .88);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--lp-line);
+}
+.lp-header-in { display: flex; align-items: center; gap: 20px; height: calc(var(--lp-header-h) - 1px); }
+.lp-logo { font-family: var(--lp-display); font-weight: 700; font-size: 18px; color: var(--lp-brand); }
+.lp-nav { display: flex; gap: 22px; margin-inline-start: auto; }
+.lp-nav a { color: var(--lp-muted); text-decoration: none; font-size: 14.5px; }
+.lp-nav a:hover { color: var(--lp-ink); }
+@media (max-width: 760px) {
+  .lp { --lp-header-h: 51px; }
+  .lp-nav { display: none; }
+  .lp-header-in { gap: 12px; }
+  .lp-header-in > .lp-btn { margin-inline-start: auto; padding: 7px 13px; font-size: 13.5px; }
+  .lp-logo { font-size: 17px; }
+}
+
+.lp-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--lp-display); font-weight: 600; font-size: 15px;
+  padding: 10px 18px; border-radius: 10px; text-decoration: none;
+  border: 1px solid transparent; cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+.lp-btn--primary { background: var(--lp-brand); color: #fff; }
+.lp-btn--primary:hover { background: #322A75; }
+.lp-btn--ghost { border-color: var(--lp-line); color: var(--lp-ink); background: var(--lp-surface); }
+.lp-btn--ghost:hover { border-color: var(--lp-brand); color: var(--lp-brand); }
+
+/* Nur der Knopf in der Leiste. Mit 45 px war er das hoechste Element und
+   bestimmte allein die Hoehe der Kopfzeile. Die Hero-Knoepfe bleiben gross. */
+.lp-header .lp-btn { padding: 7px 15px; font-size: 14px; line-height: 1.3; }
+
+/* ---------- Fuss ---------- */
+.lp-footer { border-top: 1px solid var(--lp-line); background: var(--lp-surface-2); }
+.lp-footer-in {
+  display: flex; flex-wrap: wrap; gap: 12px 24px;
+  align-items: center; justify-content: space-between;
+  padding-block: 26px; font-size: 14px; color: var(--lp-muted);
+}
+.lp-footer-links { display: flex; gap: 18px; }
+.lp-footer a { color: var(--lp-muted); text-decoration: none; }
+.lp-footer a:hover { color: var(--lp-brand); }
+
+/* ---------- Hero ---------- */
+.lp-hero { padding-block: 72px 84px; }
+.lp-hero-in {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 56px;
+  align-items: center;
+}
+.lp-hero-copy { display: flex; flex-direction: column; gap: 20px; }
+.lp-hero h1 { font-size: clamp(34px, 6vw, 54px); font-weight: 700; letter-spacing: -.025em; }
+.lp-lede { font-size: 18px; color: var(--lp-muted); max-width: 30em; }
+.lp-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.lp-hero-note { font-size: 13.5px; color: var(--lp-muted); }
+.lp-hero-card { display: grid; place-items: center; }
+.lp-bob { animation: lp-bob 5.5s ease-in-out infinite; }
+@keyframes lp-bob {
+  0%, 100% { transform: translateY(0) rotate(-1.2deg); }
+  50%      { transform: translateY(-11px) rotate(1.2deg); }
+}
+@media (max-width: 860px) {
+  .lp-hero { padding-block: 40px 64px; }
+  .lp-hero-in { grid-template-columns: 1fr; gap: 32px; }
+  /* Text zuerst, Karte danach. Vorher stand die Karte oben (order: -1) —
+     bei 432 px Hoehe schob sie die Ueberschrift komplett unter die Falz,
+     der Besucher sah zuerst ein Mockup statt der Aussage. */
+  .lp-hero-card .lp-card { width: min(272px, 66vw); padding: 17px 17px 14px; gap: 12px; }
+  /* Knoepfe auf volle Breite: nebeneinander passen sie bei 390 px nicht,
+     nebeneinander-umgebrochen sehen sie ausgefranst aus. */
+  .lp-hero-actions { flex-direction: column; align-items: stretch; }
+  /* Der Ladenname brach in der schmaleren Karte um. */
+  .lp-hero-card .lp-card-shop { font-size: 14px; }
+  .lp-hero-card .lp-card-loc { font-size: 8.5px; }
+}
+
+/* ---------- Value-Band ---------- */
+.lp-value { background: var(--lp-brand); color: #fff; }
+.lp-value-in {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 20px 40px; padding-block: 54px;
+}
+.lp-value h2 { color: #fff; font-size: clamp(22px, 3.4vw, 30px); font-weight: 600; max-width: 18em; }
+.lp-value p { color: #CFCAF2; font-size: 16px; max-width: 22em; }
+
+/* ---------- Buehne ---------- */
+.lp-stage { position: relative; height: 240svh; background: var(--lp-surface); }
+.lp-pin {
+  position: sticky; top: 0;
+  height: 100vh; height: 100svh;
+  /* Ohne diesen Abstand zentriert sich der Inhalt auf die volle
+     Bildschirmhoehe — die klebende Kopfzeile verdeckt aber die oberen
+     Pixel, und der Schritt-Text klemmte direkt darunter. */
+  padding-top: var(--lp-header-h);
+  display: grid; place-items: center;
+  overflow: hidden;
+}
+.lp-pin-in {
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  width: 100%; padding-inline: var(--lp-gutter);
+}
+.lp-how-head { background: var(--lp-surface); padding-block: 84px 0; }
+.lp-how-head .lp-sec-head { margin-bottom: 0; }
+.lp-stage-hint {
+  position: absolute; bottom: 18px; inset-inline: 0; text-align: center;
+  font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lp-muted);
+}
+.lp-step {
+  text-align: center; max-width: 22em; min-height: 96px;
+  display: flex; flex-direction: column; gap: 6px;
+  animation: lp-step-in .3s ease both;
+}
+@keyframes lp-step-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+.lp-step-n {
+  font-family: var(--lp-display); font-size: 12px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--lp-brand);
+}
+.lp-step h3 { font-size: clamp(20px, 4.4vw, 26px); font-weight: 700; }
+.lp-step p { font-size: 15px; color: var(--lp-muted); }
+
+.lp-scene { position: relative; display: grid; place-items: center; }
+.lp-scene-layer { grid-area: 1 / 1; }
+
+/* Am Handy richten sich Karte und Telefon nach der Bildschirmhoehe statt
+   nach festen Pixeln. Ein echtes Safari zeigt wegen der Adressleiste eher
+   550-660 px statt der 844 des Geraets — mit fester Hoehe ragte die Karte
+   weit unter den Rand und die Zeile "weiter scrollen" lag mitten im
+   Telefon. Der Innenabstand unten haelt ihr Platz frei. */
+@media (max-width: 860px) {
+  .lp-pin { padding-bottom: 46px; }
+  .lp-pin-in { gap: 16px; }
+  /* Nur in der Buehne: dort muss alles gleichzeitig auf einen Bildschirm.
+     Das Wallet-Finale scrollt und behaelt seine natuerliche Groesse —
+     dort soll die Meldung lesbar bleiben. */
+  .lp-stage .lp-card {
+    width: auto;
+    max-width: 78vw;
+    padding: 14px 14px 11px;
+    gap: 10px;
+    height: min(431px, 42svh);
+  }
+  /* Ganzes Telefon, aber gekuerzt statt geschrumpft — wie im Wallet-Finale.
+     Bei vollen 2,05 Seitenverhaeltnis muesste es so schmal werden, dass der
+     Meldungstext bei 6 px landet. Mit 1,45 bleibt die Breite gross genug
+     fuer lesbare Schrift und die Hoehe passt trotzdem in die Buehne. */
+  .lp-stage .lp-phone {
+    width: auto;
+    max-width: 84vw;
+    aspect-ratio: 1 / 1.45;
+    height: min(374px, 52svh);
+  }
+}
+
+/* Kurze Bildschirme (iPhone SE, jedes Handy mit eingeblendeter Adressleiste):
+   Hinweiszeile weg und Schritt-Text kleiner. Der gewonnene Platz geht an
+   Karte und Telefon — sonst faellt der Meldungstext unter 9 px. */
+@media (max-width: 860px) and (max-height: 700px) {
+  .lp-stage-hint { display: none; }
+  .lp-pin { padding-bottom: 16px; }
+  .lp-step { min-height: 0; }
+  .lp-step h3 { font-size: 19px; }
+  .lp-step p { font-size: 13.5px; }
+  .lp-stage .lp-card { height: min(431px, 48svh); }
+  .lp-stage .lp-phone { height: min(374px, 58svh); }
+}
+
+/* Bei reduzierter Bewegung klebt nichts fest: der Abschnitt wird normal hoch,
+   die Karte steht voll da. */
+@media (prefers-reduced-motion: reduce) {
+  .lp-stage { height: auto; }
+  .lp-pin { position: static; height: auto; padding-block: 56px; }
+  .lp-step { animation: none; }
+  .lp-stage-hint { display: none; }
+}
+
+/* ---------- gemeinsamer Abschnitts-Kopf ---------- */
+.lp-sec-head { display: flex; flex-direction: column; gap: 10px; max-width: 24em; margin-bottom: 40px; }
+.lp-sec-head h2 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 700; letter-spacing: -.02em; }
+
+/* ---------- Funktionen ---------- */
+.lp-features { background: var(--lp-surface-2); padding-block: 90px; }
+/* Fuenf Kacheln in einem 3er-Raster ergaeben eine angebrochene Zeile mit zwei
+   Kacheln und einer Luecke. Darum ein 6-Spalten-Raster: jede Kachel nimmt zwei
+   Spalten (= 3 pro Zeile), die letzten beiden je drei (= 2 nebeneinander, volle
+   Breite). Beide Zeilen schliessen buendig ab, egal wie breit das Fenster ist. */
+.lp-feat-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; }
+.lp-feat-grid > * { grid-column: span 2; }
+.lp-feat-grid > *:nth-last-child(2),
+.lp-feat-grid > *:last-child { grid-column: span 3; }
+.lp-feat-grid > .lp-reveal { display: flex; }
+
+/* Mittel: zwei pro Zeile, die letzte ueber die volle Breite. */
+@media (max-width: 900px) {
+  .lp-feat-grid { grid-template-columns: repeat(2, 1fr); }
+  .lp-feat-grid > *,
+  .lp-feat-grid > *:nth-last-child(2),
+  .lp-feat-grid > *:last-child { grid-column: span 1; }
+  .lp-feat-grid > *:last-child { grid-column: span 2; }
+}
+
+/* Handy: eine Spalte. */
+@media (max-width: 560px) {
+  .lp-feat-grid { grid-template-columns: 1fr; }
+  .lp-feat-grid > *,
+  .lp-feat-grid > *:nth-last-child(2),
+  .lp-feat-grid > *:last-child { grid-column: span 1; }
+}
+.lp-feat {
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line);
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.lp-feat h3 { font-size: 17px; font-weight: 600; }
+.lp-feat p { font-size: 14.5px; color: var(--lp-muted); }
+
+/* ---------- DSGVO ---------- */
+/* Weiss, nicht grau: seit der Preis-Abschnitt raus ist, grenzt DSGVO direkt
+   an die Funktionen — zwei graue Flaechen ohne Trennung waeren ein Block. */
+.lp-trust { background: var(--lp-surface); padding-block: 90px; }
+.lp-trust-in { display: grid; grid-template-columns: 1fr 1.15fr; gap: 48px; align-items: start; }
+.lp-trust-in .lp-sec-head { margin-bottom: 0; }
+.lp-trust-list { display: flex; flex-direction: column; gap: 22px; }
+.lp-trust-point { display: flex; flex-direction: column; gap: 4px; }
+.lp-trust-point h3 { font-size: 17px; font-weight: 600; }
+.lp-trust-point p { font-size: 14.5px; color: var(--lp-muted); }
+@media (max-width: 860px) { .lp-trust-in { grid-template-columns: 1fr; gap: 32px; } }
+
+/* ---------- Wallet-Finale ---------- */
+.lp-wallet { padding-block: 90px; background: var(--lp-surface); }
+.lp-wallet-in { display: grid; grid-template-columns: 1fr auto; gap: 56px; align-items: center; }
+.lp-wallet-copy { display: flex; flex-direction: column; gap: 12px; }
+.lp-wallet h2 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 700; letter-spacing: -.02em; }
+@media (max-width: 860px) {
+  .lp-wallet { padding-block: 64px; }
+  .lp-wallet-in { grid-template-columns: 1fr; gap: 28px; justify-items: center; text-align: center; }
+  .lp-wallet-copy { align-items: center; }
+  /* Kuerzeres Gehaeuse statt schmaleres: bei voller Hoehe (529 px) lag die
+     Meldung 128 px unter dem Rand, sobald die Ueberschrift im Bild war.
+     Schmaler machen ginge nicht — die Schriftgroessen haengen an der Breite
+     und waeren wieder unlesbar. Also ein Ausschnitt des Sperrbildschirms. */
+  .lp-wallet .lp-phone { aspect-ratio: 1 / 1.45; }
+}
+
+/* ---------- Kontakt ---------- */
+.lp-contact { padding-block: 90px; background: var(--lp-surface-2); }
+.lp-contact-in { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: start; }
+.lp-contact-copy { display: flex; flex-direction: column; gap: 12px; }
+.lp-contact h2 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 700; letter-spacing: -.02em; }
+.lp-form {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  background: var(--lp-surface); border: 1px solid var(--lp-line);
+  border-radius: 14px; padding: 22px;
+}
+.lp-field { display: flex; flex-direction: column; gap: 5px; }
+.lp-field--wide { grid-column: 1 / -1; }
+.lp-field span { font-size: 13px; font-weight: 600; color: var(--lp-muted); }
+.lp-field input, .lp-field textarea {
+  font: inherit; font-size: 15px; color: var(--lp-ink);
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line); border-radius: 9px;
+  padding: 10px 12px; width: 100%; resize: vertical;
+}
+.lp-field input:focus, .lp-field textarea:focus { border-color: var(--lp-brand); outline: none; }
+.lp-form > .lp-btn { grid-column: 1 / -1; }
+.lp-form-msg { grid-column: 1 / -1; font-size: 14.5px; }
+.lp-form-msg.is-ok { color: #2C5F2E; }
+.lp-form-msg.is-err { color: #A32015; }
+.lp-honeypot {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+@media (max-width: 860px) {
+  .lp-contact-in { grid-template-columns: 1fr; gap: 32px; }
+  .lp-form { grid-template-columns: 1fr; }
+}
+
+/* ---------- Zahlen ---------- */
+.lp-proof { background: var(--lp-surface-2); padding-block: 90px; }
+.lp-proof-grid {
+  display: grid;
+  /* Feste Spaltenzahl statt auto-fit: bei vier Kacheln liesse ein
+     Drei-Spalten-Raster eine allein in der zweiten Reihe stehen, daneben
+     zwei Loecher. 1 oder 2 Spalten gehen immer glatt auf. */
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--lp-line);
+  border: 1px solid var(--lp-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.lp-proof-grid > .lp-reveal { display: flex; background: var(--lp-surface); }
+.lp-fact {
+  margin: 0;
+  padding: 26px 22px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lp-fact-n {
+  font-family: var(--lp-display);
+  font-size: clamp(30px, 4vw, 38px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--lp-brand);
+  font-variant-numeric: tabular-nums;
+}
+.lp-fact h3 { font-size: 16px; font-weight: 600; }
+.lp-fact p { font-size: 14.5px; color: var(--lp-muted); }
+.lp-fact figcaption,
+.lp-fact-src {
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--lp-muted);
+  opacity: .8;
+}
+
+/* Der Wallet-statt-App-Einwand. Eigene Form, weil es kein weiterer
+   Beleg ist, sondern die Antwort auf die naechste Frage im Kopf. */
+@media (min-width: 620px) {
+  .lp-proof-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.lp-appnote {
+  margin-top: 22px;
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line);
+  border-radius: 14px;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lp-appnote-label {
+  font-family: var(--lp-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-brand);
+}
+.lp-appnote-body { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+.lp-appnote-body > div { display: flex; flex-direction: column; gap: 6px; flex: 1 1 260px; }
+.lp-appnote h3 { font-size: 17px; font-weight: 600; max-width: 22em; }
+.lp-appnote p { font-size: 14.5px; color: var(--lp-muted); max-width: 40em; }
+.lp-appnote .lp-fact-src { margin-top: 6px; padding-top: 0; }
