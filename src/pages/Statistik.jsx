@@ -28,6 +28,7 @@ export default function Statistik() {
       <StatsView
           data={data}
           fetchDay={date => api.get('/api/shop/stats/day', { params: { date } }).then(r => r.data)}
+          onToggleExcludeSunday={enabled => api.put('/api/shop/stats/exclude-sunday', { enabled })}
       />
   )
 }

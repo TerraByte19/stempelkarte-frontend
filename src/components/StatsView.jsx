@@ -6,19 +6,22 @@ import { useLang, localeTag } from '../LangContext'
 // Admin-Panel (Admin.jsx). Der Aufrufer liefert nur die Daten + eine
 // fetchDay-Funktion, damit beide Seiten ihre eigene Auth/Endpoint nutzen
 // koennen (Laden: /api/shop/stats/day, Admin: /api/admin/shops/{id}/stats/day).
-export default function StatsView({ data, fetchDay }) {
+//
+// excludeSunday ist eine Einstellung DES LADENS (kommt aus data.excludeSunday,
+// serverseitig gespeichert) - kein Browser-Zustand mehr. Nur wenn der Aufrufer
+// onToggleExcludeSunday mitgibt (Statistik.jsx, der Laden selbst), gibt es den
+// Schalter dafuer. Das Admin-Panel gibt die Funktion nicht mit und zeigt damit
+// nur an, was der Laden selbst eingestellt hat - kein eigener Schalter dort.
+export default function StatsView({ data, fetchDay, onToggleExcludeSunday }) {
   const { t, lang } = useLang()
   const [selectedDate, setSelectedDate] = useState(null)
-  const [excludeSunday, setExcludeSunday] = useState(() => {
-    try { return localStorage.getItem('stampit_exclude_sunday') === '1' } catch { return false }
-  })
+  const [excludeSunday, setExcludeSunday] = useState(!!data.excludeSunday)
 
   function toggleExcludeSunday() {
-    setExcludeSunday(v => {
-      const next = !v
-      try { localStorage.setItem('stampit_exclude_sunday', next ? '1' : '0') } catch { /* ignore */ }
-      return next
-    })
+    if (!onToggleExcludeSunday) return
+    const next = !excludeSunday
+    setExcludeSunday(next)
+    onToggleExcludeSunday(next).catch(() => setExcludeSunday(!next))
   }
 
   const history = Array.isArray(data.history) ? data.history : []
@@ -55,13 +58,17 @@ export default function StatsView({ data, fetchDay }) {
             <h1 style={s.title}>{t('stat_title')}</h1>
             <p style={s.subtitle}>{t('stat_overview_for', { name: data.shopName })}</p>
           </div>
-          <label style={s.switchRow}>
-            <span style={s.switchLabel}>{t('stat_exclude_sunday')}</span>
-            <span style={{ ...s.switchTrack, background: excludeSunday ? '#3C3489' : '#dcdcdc' }}
-                  onClick={toggleExcludeSunday} role="switch" aria-checked={excludeSunday}>
-              <span style={{ ...s.switchKnob, insetInlineStart: excludeSunday ? 20 : 2 }} />
-            </span>
-          </label>
+          {onToggleExcludeSunday ? (
+              <label style={s.switchRow}>
+                <span style={s.switchLabel}>{t('stat_exclude_sunday')}</span>
+                <span style={{ ...s.switchTrack, background: excludeSunday ? '#3C3489' : '#dcdcdc' }}
+                      onClick={toggleExcludeSunday} role="switch" aria-checked={excludeSunday}>
+                  <span style={{ ...s.switchKnob, insetInlineStart: excludeSunday ? 20 : 2 }} />
+                </span>
+              </label>
+          ) : excludeSunday && (
+              <span style={s.switchLabel}>{t('stat_exclude_sunday')}</span>
+          )}
         </div>
 
         <div style={s.kpiGrid}>
