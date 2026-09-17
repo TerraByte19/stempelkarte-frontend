@@ -521,6 +521,7 @@ export default function Karten() {
   const [editCard, setEditCard] = useState(null)
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
   const [editReward, setEditReward] = useState('')
+  const [editStamps, setEditStamps] = useState(10)
 
   useEffect(()=>{
     loadCards()
@@ -592,9 +593,19 @@ export default function Karten() {
     try {
       await api.put(`/api/shop/cards/${editCard.id}/design`, editDesign)
       const rw = editReward.trim()
-      if (rw && rw !== (editCard.rewardText || '')) {
-        await api.put(`/api/shop/cards/${editCard.id}/info`, { rewardText: rw })
-        setEditCard(c => ({ ...c, rewardText: rw }))
+      const st = parseInt(editStamps)
+      const rewardChanged = rw && rw !== (editCard.rewardText || '')
+      const stampsChanged = st >= 1 && st <= 100 && st !== editCard.rewardThreshold
+      if (rewardChanged || stampsChanged) {
+        await api.put(`/api/shop/cards/${editCard.id}/info`, {
+          rewardText: rewardChanged ? rw : null,
+          rewardThreshold: stampsChanged ? st : null,
+        })
+        setEditCard(c => ({
+          ...c,
+          rewardText: rewardChanged ? rw : c.rewardText,
+          rewardThreshold: stampsChanged ? st : c.rewardThreshold,
+        }))
       }
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       loadCards()
@@ -614,6 +625,7 @@ export default function Karten() {
   async function openEdit(card) {
     setEditCard(card)
     setEditReward(card.rewardText || '')
+    setEditStamps(card.rewardThreshold || 10)
     setEditDesign({
       colorBackground: card.colorBackground||'#3C3489',
       colorForeground: card.colorForeground||'#FFFFFF',
@@ -644,7 +656,9 @@ export default function Karten() {
   }
 
   const threshold = parseInt(form.rewardThreshold)||10
-  const editThreshold = editCard?.rewardThreshold||10
+  // Vorschau folgt direkt dem Eingabefeld, damit die Aenderung sichtbar wird,
+  // bevor gespeichert ist.
+  const editThreshold = Math.min(100, Math.max(1, parseInt(editStamps) || editCard?.rewardThreshold || 10))
 
   // ─── LIST ───────────────────────────────────────────────────────────────
   if (mode==='list') return (
@@ -776,6 +790,19 @@ export default function Karten() {
               </label>
               <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
                      value={editReward} onChange={e=>setEditReward(e.target.value)} placeholder={t('cards_reward_ph')}/>
+            </div>
+            <div style={{marginBottom:16}}>
+              <label style={{fontSize:11,fontWeight:800,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:0.8,display:'block'}}>
+                {t('cards_threshold')}
+              </label>
+              <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
+                     type="number" min="1" max="100" value={editStamps}
+                     onChange={e=>setEditStamps(e.target.value)}/>
+              {parseInt(editStamps) !== editCard.rewardThreshold && (
+                  <div style={{fontSize:11,color:'#B35309',marginTop:6,lineHeight:1.45}}>
+                    {t('cards_threshold_warn', { from: editCard.rewardThreshold, to: parseInt(editStamps) || '—' })}
+                  </div>
+              )}
             </div>
             <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t}/>
             <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
