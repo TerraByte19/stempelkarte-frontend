@@ -13,8 +13,12 @@ export default function NewsletterSection() {
     const { t, lang, dir } = useLang()
     const [recipients, setRecipients] = useState({ total: 0, confirmed: 0 })
     const [subject, setSubject] = useState('')
+    const [headline, setHeadline] = useState('')        // fette Zeile ueber dem Text
     const [body, setBody] = useState('')
     const [imageUrls, setImageUrls] = useState([])      // Liste hochgeladener Bild-URLs
+    const [imagesAbove, setImagesAbove] = useState(false)
+    const [buttonText, setButtonText] = useState('')    // beides leer = kein Knopf
+    const [buttonUrl, setButtonUrl] = useState('')
     const [uploading, setUploading] = useState(false)
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState(null)      // {ok, text}
@@ -101,19 +105,36 @@ export default function NewsletterSection() {
             setFeedback({ ok: false, text: t('newsletter_err_empty') })
             return
         }
+        // Ein Knopf braucht Text UND Ziel. Nur eins von beiden waere entweder
+        // ein toter Klick oder ein unsichtbarer Link.
+        if ((buttonText.trim() === '') !== (buttonUrl.trim() === '')) {
+            setFeedback({ ok: false, text: t('newsletter_err_button') })
+            return
+        }
+        if (buttonUrl.trim() !== '' && !/^https?:\/\//i.test(buttonUrl.trim())) {
+            setFeedback({ ok: false, text: t('newsletter_err_button_url') })
+            return
+        }
         if (!confirm(t('newsletter_confirm_send', { n: recipients.confirmed }))) return
 
         setSending(true)
         setFeedback(null)
         try {
-            const res = await api.post('/api/shop/newsletter', { subject, body, imageUrls })
+            const res = await api.post('/api/shop/newsletter', {
+                subject, headline, body, imageUrls, imagesAbove,
+                buttonText: buttonText.trim(), buttonUrl: buttonUrl.trim(),
+            })
             setFeedback({
                 ok: true,
                 text: t('newsletter_queued_result', { n: res.data.queued, skipped: res.data.skippedUnconfirmed }),
             })
             setSubject('')
+            setHeadline('')
             setBody('')
             setImageUrls([])
+            setImagesAbove(false)
+            setButtonText('')
+            setButtonUrl('')
             // Verlauf aufmachen: dort laeuft der Zaehler mit, bis der
             // Versand durch ist.
             setHistoryOpen(true)
@@ -195,6 +216,16 @@ export default function NewsletterSection() {
                         maxLength={120}
                     />
 
+                    <label style={s.label}>{t('newsletter_headline_label')}</label>
+                    <input
+                        style={s.input}
+                        value={headline}
+                        onChange={e => setHeadline(e.target.value)}
+                        placeholder={t('newsletter_headline_ph')}
+                        maxLength={120}
+                    />
+                    <p style={s.hint}>{t('newsletter_headline_hint')}</p>
+
                     <label style={s.label}>{t('newsletter_body_label')}</label>
                     <textarea
                         style={s.textarea}
@@ -226,6 +257,36 @@ export default function NewsletterSection() {
                         style={{ display: 'none' }}
                         onChange={onImagesSelected}
                     />
+
+                    {imageUrls.length > 0 && (
+                        <label style={s.checkboxRow}>
+                            <input
+                                type="checkbox"
+                                checked={imagesAbove}
+                                onChange={e => setImagesAbove(e.target.checked)}
+                            />
+                            <span>{t('newsletter_images_above')}</span>
+                        </label>
+                    )}
+
+                    <label style={s.label}>{t('newsletter_button_label')}</label>
+                    <div style={s.buttonRow}>
+                        <input
+                            style={s.buttonInput}
+                            value={buttonText}
+                            onChange={e => setButtonText(e.target.value)}
+                            placeholder={t('newsletter_button_text_ph')}
+                            maxLength={40}
+                        />
+                        <input
+                            style={s.buttonInput}
+                            value={buttonUrl}
+                            onChange={e => setButtonUrl(e.target.value)}
+                            placeholder="https://"
+                            maxLength={500}
+                        />
+                    </div>
+                    <p style={s.hint}>{t('newsletter_button_hint')}</p>
 
                     <p style={s.legal}>
                         {t('newsletter_legal')}
@@ -273,7 +334,14 @@ export default function NewsletterSection() {
                                             {t('newsletter_history_failed_who', { list: item.failedSample })}
                                         </div>
                                     )}
+                                    {item.headline && <div style={s.historyHeadline}>{item.headline}</div>}
                                     <div style={s.historyBody}>{item.body}</div>
+                                    {item.buttonText && item.buttonUrl && (
+                                        <div style={s.historyButton}>
+                                            {t('newsletter_history_button', { text: item.buttonText })}{' '}
+                                            <span style={s.historyButtonUrl}>{item.buttonUrl}</span>
+                                        </div>
+                                    )}
                                     {item.imageUrls && item.imageUrls.length > 0 && (
                                         <div style={s.historyImages}>
                                             {item.imageUrls.map((url, i) => (
@@ -340,6 +408,20 @@ const s = {
     historySubject: { fontSize: 14, fontWeight: 600, color: '#1a1a1a' },
     historyMeta: { fontSize: 12, color: '#999', flexShrink: 0 },
     historyRecipients: { fontSize: 12, color: '#3C3489', marginTop: 2, marginBottom: 8 },
+    hint: { fontSize: 12, color: '#888', margin: '-6px 0 14px' },
+    checkboxRow: {
+        display: 'flex', alignItems: 'center', gap: 8,
+        fontSize: 14, color: '#444', margin: '4px 0 16px', cursor: 'pointer',
+    },
+    buttonRow: { display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 },
+    // flex 1 1 180px: nebeneinander, wenn Platz ist, sonst untereinander
+    buttonInput: {
+        flex: '1 1 180px', minWidth: 0, padding: '10px 14px', borderRadius: 8,
+        border: '1.5px solid #e0e0e0', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+    },
+    historyHeadline: { fontSize: 14, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 },
+    historyButton: { fontSize: 12, color: '#666', marginTop: 8 },
+    historyButtonUrl: { color: '#3C3489', wordBreak: 'break-all' },
     historyFailed: { color: '#c0392b', fontWeight: 600 },
     historyFailedSample: { fontSize: 12, color: '#c0392b', marginTop: -4, marginBottom: 8 },
     historyBody: { fontSize: 13, color: '#444', whiteSpace: 'pre-line', lineHeight: 1.5 },
