@@ -78,7 +78,7 @@ export default function Dashboard() {
                       <style>{printStyle}</style>
                       <div id="print-qr" style={{ textAlign: 'center' }}>
                         <img src={`${baseUrl}/api/customer/card/${selectedCard.id}/qr-shop`} alt="QR Code" style={styles.qrImage} />
-                        <div style={{ marginTop: '12px', fontSize: '14px', color: '#333' }}>{selectedCard.name} — {shop.name}</div>
+                        <div style={{ marginTop: '12px', fontSize: '14px', color: '#333' }}>{selectedCard.name} · {shop.name}</div>
                       </div>
                     </div>
                     <div style={styles.btnRow}>
