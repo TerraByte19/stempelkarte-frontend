@@ -11,6 +11,8 @@ export default function Admin() {
   const [error, setError] = useState('')
   const [changingPasswordFor, setChangingPasswordFor] = useState(null)
   const [expandedShopId, setExpandedShopId] = useState(null)
+  const [draggedId, setDraggedId] = useState(null)   // Laden am Haken
+  const [dragOverId, setDragOverId] = useState(null) // Zeile unter dem Zeiger
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken')
@@ -58,6 +60,47 @@ export default function Admin() {
       setError('Fehler beim Laden')
     } finally {
       setLoading(false)
+    }
+  }
+
+  /**
+   * Verschiebt einen Laden vor die Zeile, auf der er fallen gelassen wurde.
+   *
+   * Sortiert wird die GESAMTE Liste, obwohl die Tabelle nach Sprache
+   * getrennt angezeigt wird: eine Zeile zu verschieben laesst die
+   * Reihenfolge aller anderen unberuehrt, also stimmt auch die Ansicht
+   * der jeweils anderen Tabelle weiterhin.
+   */
+  function verschiebeShop(vonId, aufId) {
+    if (!vonId || vonId === aufId) return
+    const von = shops.findIndex(s => s.id === vonId)
+    const auf = shops.findIndex(s => s.id === aufId)
+    if (von < 0 || auf < 0) return
+
+    const neu = [...shops]
+    const [bewegt] = neu.splice(von, 1)
+    neu.splice(auf, 0, bewegt)
+
+    const vorher = shops
+    setShops(neu)                       // sofort sichtbar
+    speichereReihenfolge(neu, vorher)   // danach sichern
+  }
+
+  async function speichereReihenfolge(neu, vorher) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/order`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
+        body: JSON.stringify({ shopIds: neu.map(s => s.id) })
+      })
+      if (res.status === 401) { logout(); return }
+      if (!res.ok) throw new Error('Serverfehler')
+    } catch (e) {
+      // Nicht gespeichert: alte Reihenfolge zuruecknehmen, sonst zeigt das
+      // Panel eine Sortierung, die nach dem naechsten Laden wieder weg ist.
+      setShops(vorher)
+      setError('Reihenfolge konnte nicht gespeichert werden')
     }
   }
 
@@ -184,6 +227,7 @@ export default function Admin() {
     return (
         <div style={styles.table}>
           <div style={styles.tableHeader}>
+            <span></span>
             <span>Laden</span>
             <span>E-Mail</span>
             <span>Karten</span>
@@ -196,7 +240,36 @@ export default function Admin() {
             const expanded = expandedShopId === shop.id
             return (
                 <Fragment key={shop.id}>
-                  <div style={{ ...styles.tableRow, opacity: shop.active ? 1 : 0.5 }}>
+                  <div
+                      style={{
+                        ...styles.tableRow,
+                        opacity: draggedId === shop.id ? 0.4 : (shop.active ? 1 : 0.5),
+                        // Linie zeigt, wo die Zeile landet
+                        borderTop: dragOverId === shop.id && draggedId !== shop.id
+                            ? '2px solid #3C3489' : styles.tableRow.borderTop,
+                      }}
+                      onDragOver={e => { e.preventDefault(); setDragOverId(shop.id) }}
+                      onDragLeave={() => setDragOverId(id => id === shop.id ? null : id)}
+                      onDrop={e => {
+                        e.preventDefault()
+                        verschiebeShop(draggedId, shop.id)
+                        setDraggedId(null)
+                        setDragOverId(null)
+                      }}
+                  >
+                    {/* Nur der Griff ist ziehbar - sonst startet jeder Klick
+                        auf Text oder Knopf einen Drag. */}
+                    <span
+                        style={styles.dragHandle}
+                        title="Zum Sortieren ziehen"
+                        draggable
+                        onDragStart={e => {
+                          e.dataTransfer.effectAllowed = 'move'
+                          e.dataTransfer.setData('text/plain', shop.id)
+                          setDraggedId(shop.id)
+                        }}
+                        onDragEnd={() => { setDraggedId(null); setDragOverId(null) }}
+                    >⠿</span>
                     <span style={styles.shopName}>{shop.name}</span>
                     <span style={styles.shopEmail}>{shop.email}</span>
                     <span style={styles.cell}>{shop.cardCount}</span>
@@ -439,8 +512,9 @@ const styles = {
   statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
   statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
   table: { background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'auto' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '980px' },
-  tableRow: { display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '980px' },
+  tableHeader: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '1010px' },
+  tableRow: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '1010px' },
+  dragHandle: { cursor: 'grab', color: '#bbb', fontSize: '16px', userSelect: 'none', lineHeight: 1 },
   shopName: { fontSize: '14px', fontWeight: '600', color: '#1a1a1a' },
   shopEmail: { fontSize: '12px', color: '#666' },
   cell: { fontSize: '13px', color: '#666' },
