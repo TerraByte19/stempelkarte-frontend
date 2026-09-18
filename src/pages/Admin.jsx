@@ -13,6 +13,10 @@ export default function Admin() {
   const [expandedShopId, setExpandedShopId] = useState(null)
   const [draggedId, setDraggedId] = useState(null)   // Laden am Haken
   const [dragOverId, setDragOverId] = useState(null) // Zeile unter dem Zeiger
+  // Eigener Zustand: das allgemeine `error` wird nur auf dem Login-Bildschirm
+  // gezeigt. Wer eingeloggt sortiert, saehe sonst nur die zurueckspringende
+  // Zeile und keinen Grund.
+  const [sortError, setSortError] = useState('')
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken')
@@ -88,6 +92,7 @@ export default function Admin() {
 
   async function speichereReihenfolge(neu, vorher) {
     const t = sessionStorage.getItem('adminToken')
+    setSortError('')
     try {
       const res = await fetch(`${BASE_URL}/api/admin/shops/order`, {
         method: 'PUT',
@@ -95,12 +100,20 @@ export default function Admin() {
         body: JSON.stringify({ shopIds: neu.map(s => s.id) })
       })
       if (res.status === 401) { logout(); return }
-      if (!res.ok) throw new Error('Serverfehler')
+      if (!res.ok) {
+        // 404 heisst fast immer: der Server laeuft noch mit einem aelteren
+        // Stand als dieses Panel. Das ist etwas anderes als ein echter
+        // Fehler und soll auch anders dastehen.
+        throw new Error(res.status === 404
+            ? 'Der Server kennt das Sortieren noch nicht (404). Das Backend-Deploy ist noch nicht durch.'
+            : `Server antwortet mit ${res.status}.`)
+      }
     } catch (e) {
       // Nicht gespeichert: alte Reihenfolge zuruecknehmen, sonst zeigt das
       // Panel eine Sortierung, die nach dem naechsten Laden wieder weg ist.
       setShops(vorher)
-      setError('Reihenfolge konnte nicht gespeichert werden')
+      setSortError('Reihenfolge nicht gespeichert, Liste zurueckgesetzt. '
+          + (e.message || 'Server nicht erreichbar.'))
     }
   }
 
@@ -210,6 +223,13 @@ export default function Admin() {
                 shop={changingPasswordFor}
                 onDone={() => setChangingPasswordFor(null)}
             />
+        )}
+
+        {sortError && (
+            <div style={styles.sortError}>
+              {sortError}
+              <button style={styles.sortErrorClose} onClick={() => setSortError('')}>✕</button>
+            </div>
         )}
 
         {renderShopTable(shops.filter(s => (s.language || 'de') !== 'ar'))}
@@ -515,6 +535,15 @@ const styles = {
   tableHeader: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '1010px' },
   tableRow: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '1010px' },
   dragHandle: { cursor: 'grab', color: '#bbb', fontSize: '16px', userSelect: 'none', lineHeight: 1 },
+  sortError: {
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+    background: '#fce8e6', color: '#c00', border: '1px solid #f5c6c2',
+    borderRadius: '10px', padding: '12px 14px', fontSize: '13px', marginBottom: '12px',
+  },
+  sortErrorClose: {
+    background: 'none', border: 'none', color: '#c00', cursor: 'pointer',
+    fontSize: '14px', lineHeight: 1, padding: '0 2px',
+  },
   shopName: { fontSize: '14px', fontWeight: '600', color: '#1a1a1a' },
   shopEmail: { fontSize: '12px', color: '#666' },
   cell: { fontSize: '13px', color: '#666' },
