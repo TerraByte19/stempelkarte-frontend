@@ -32,12 +32,29 @@ export default function NewsletterSection() {
             .catch(() => {})
     }, [])
 
-    function loadHistory(page = 0) {
-        setHistoryLoading(true)
+    // Der Versand laeuft im Hintergrund. Solange ein Eintrag auf RUNNING
+    // steht, wird der Verlauf leise nachgeladen, damit der Laden das echte
+    // Ergebnis sieht statt einer Zahl, die nur die Versuche zaehlt.
+    const pollRef = useRef(null)
+    useEffect(() => () => clearTimeout(pollRef.current), [])
+
+    function loadHistory(page = 0, versuch = 0) {
+        const leise = versuch > 0
+        if (!leise) setHistoryLoading(true)
         api.get(`/api/shop/newsletter/history?page=${page}&size=5`)
-            .then(r => setHistory(r.data || { items: [], page: 0, totalPages: 0, totalItems: 0 }))
+            .then(r => {
+                const daten = r.data || { items: [], page: 0, totalPages: 0, totalItems: 0 }
+                setHistory(daten)
+                clearTimeout(pollRef.current)
+                const laeuft = (daten.items || []).some(i => i.status === 'RUNNING')
+                // Deckel bei 40 Versuchen (2 Minuten), damit ein haengender
+                // Job den Browser nicht endlos pollen laesst.
+                if (laeuft && versuch < 40) {
+                    pollRef.current = setTimeout(() => loadHistory(page, versuch + 1), 3000)
+                }
+            })
             .catch(() => {})
-            .finally(() => setHistoryLoading(false))
+            .finally(() => { if (!leise) setHistoryLoading(false) })
     }
 
     function toggleHistory() {
@@ -92,13 +109,15 @@ export default function NewsletterSection() {
             const res = await api.post('/api/shop/newsletter', { subject, body, imageUrls })
             setFeedback({
                 ok: true,
-                text: t('newsletter_sent_result', { sent: res.data.sent, skipped: res.data.skippedUnconfirmed }),
+                text: t('newsletter_queued_result', { n: res.data.queued, skipped: res.data.skippedUnconfirmed }),
             })
             setSubject('')
             setBody('')
             setImageUrls([])
-            // Verlauf aktualisieren, falls geöffnet
-            if (historyOpen) loadHistory(0)
+            // Verlauf aufmachen: dort laeuft der Zaehler mit, bis der
+            // Versand durch ist.
+            setHistoryOpen(true)
+            loadHistory(0)
         } catch (e) {
             setFeedback({ ok: false, text: t('newsletter_err_send') })
         } finally {
@@ -237,7 +256,23 @@ export default function NewsletterSection() {
                                         <span style={s.historySubject}>{item.subject}</span>
                                         <span style={s.historyMeta}>{formatDate(item.sentAt)}</span>
                                     </div>
-                                    <div style={s.historyRecipients}>{t('newsletter_history_recipients', { n: item.recipientCount })}</div>
+                                    <div style={s.historyRecipients}>
+                                        {item.status === 'RUNNING'
+                                            ? t('newsletter_history_running')
+                                            : item.status === 'INTERRUPTED'
+                                                ? t('newsletter_history_interrupted')
+                                                : t('newsletter_history_recipients', { n: item.recipientCount })}
+                                        {item.failedCount > 0 && (
+                                            <span style={s.historyFailed}>
+                                                {' · ' + t('newsletter_history_failed', { n: item.failedCount })}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {item.failedCount > 0 && item.failedSample && (
+                                        <div style={s.historyFailedSample}>
+                                            {t('newsletter_history_failed_who', { list: item.failedSample })}
+                                        </div>
+                                    )}
                                     <div style={s.historyBody}>{item.body}</div>
                                     {item.imageUrls && item.imageUrls.length > 0 && (
                                         <div style={s.historyImages}>
@@ -305,6 +340,8 @@ const s = {
     historySubject: { fontSize: 14, fontWeight: 600, color: '#1a1a1a' },
     historyMeta: { fontSize: 12, color: '#999', flexShrink: 0 },
     historyRecipients: { fontSize: 12, color: '#3C3489', marginTop: 2, marginBottom: 8 },
+    historyFailed: { color: '#c0392b', fontWeight: 600 },
+    historyFailedSample: { fontSize: 12, color: '#c0392b', marginTop: -4, marginBottom: 8 },
     historyBody: { fontSize: 13, color: '#444', whiteSpace: 'pre-line', lineHeight: 1.5 },
     historyImages: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 },
     historyImg: { width: 80, height: 80, objectFit: 'cover', borderRadius: 6 },
