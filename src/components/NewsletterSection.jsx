@@ -21,6 +21,7 @@ export default function NewsletterSection() {
     const [buttonUrl, setButtonUrl] = useState('')
     const [uploading, setUploading] = useState(false)
     const [sending, setSending] = useState(false)
+    const [testing, setTesting] = useState(false)
     const [feedback, setFeedback] = useState(null)      // {ok, text}
     const [open, setOpen] = useState(false)
     const fileInputRef = useRef(null)
@@ -100,30 +101,68 @@ export default function NewsletterSection() {
         setImageUrls(prev => prev.filter((_, i) => i !== index))
     }
 
-    async function send() {
+    /** Gemeinsame Pruefung fuer Test und echten Versand. */
+    function entwurfGeprueft() {
         if (!subject.trim() || !body.trim()) {
             setFeedback({ ok: false, text: t('newsletter_err_empty') })
-            return
+            return null
         }
         // Ein Knopf braucht Text UND Ziel. Nur eins von beiden waere entweder
         // ein toter Klick oder ein unsichtbarer Link.
         if ((buttonText.trim() === '') !== (buttonUrl.trim() === '')) {
             setFeedback({ ok: false, text: t('newsletter_err_button') })
-            return
+            return null
         }
         if (buttonUrl.trim() !== '' && !/^https?:\/\//i.test(buttonUrl.trim())) {
             setFeedback({ ok: false, text: t('newsletter_err_button_url') })
-            return
+            return null
         }
+        return {
+            subject, headline, body, imageUrls, imagesAbove,
+            buttonText: buttonText.trim(), buttonUrl: buttonUrl.trim(),
+        }
+    }
+
+    /**
+     * Schickt den Entwurf nur an die eigene Shop-Adresse. Nicht im Verlauf,
+     * zaehlt nicht als Versand - damit man die Mail einmal im echten
+     * Postfach sieht, bevor sie an Kunden geht.
+     *
+     * Bewusst NICHT abhaengig von recipients.confirmed: den Entwurf pruefen
+     * will man gerade auch dann, wenn noch kein Kunde zugestimmt hat.
+     */
+    async function sendeTest() {
+        const entwurf = entwurfGeprueft()
+        if (!entwurf) return
+
+        setTesting(true)
+        setFeedback(null)
+        try {
+            const res = await api.post('/api/shop/newsletter/test', entwurf)
+            // ok fehlt bei aelteren Servern - dann gilt der Versuch als Erfolg.
+            const ok = res.data.ok !== false
+            setFeedback({
+                ok,
+                text: ok
+                    ? t('newsletter_test_ok', { email: res.data.sentTo })
+                    : t('newsletter_test_fail', { email: res.data.sentTo }),
+            })
+        } catch (e) {
+            setFeedback({ ok: false, text: t('newsletter_err_send') })
+        } finally {
+            setTesting(false)
+        }
+    }
+
+    async function send() {
+        const entwurf = entwurfGeprueft()
+        if (!entwurf) return
         if (!confirm(t('newsletter_confirm_send', { n: recipients.confirmed }))) return
 
         setSending(true)
         setFeedback(null)
         try {
-            const res = await api.post('/api/shop/newsletter', {
-                subject, headline, body, imageUrls, imagesAbove,
-                buttonText: buttonText.trim(), buttonUrl: buttonUrl.trim(),
-            })
+            const res = await api.post('/api/shop/newsletter', entwurf)
             setFeedback({
                 ok: true,
                 text: t('newsletter_queued_result', { n: res.data.queued, skipped: res.data.skippedUnconfirmed }),
@@ -292,10 +331,20 @@ export default function NewsletterSection() {
                         {t('newsletter_legal')}
                     </p>
 
+                    {/* Test zuerst: erst ansehen, dann rausschicken. */}
+                    <button
+                        style={{ ...s.testBtn, opacity: (testing || sending) ? 0.6 : 1 }}
+                        onClick={sendeTest}
+                        disabled={testing || sending}
+                    >
+                        {testing ? t('newsletter_test_sending') : t('newsletter_test_btn')}
+                    </button>
+                    <p style={s.hint}>{t('newsletter_test_hint')}</p>
+
                     <button
                         style={{ ...s.send, opacity: sending ? 0.6 : 1 }}
                         onClick={send}
-                        disabled={sending || recipients.confirmed === 0}
+                        disabled={sending || testing || recipients.confirmed === 0}
                     >
                         {sending ? t('newsletter_sending') : t('newsletter_send_btn', { n: recipients.confirmed })}
                     </button>
@@ -399,6 +448,9 @@ const s = {
     removeImageBtn: { position: 'absolute', top: -6, right: -6, background: '#c00', color: 'white', border: '2px solid white', borderRadius: '50%', width: 22, height: 22, fontSize: 11, cursor: 'pointer', lineHeight: 1, padding: 0 },
     legal: { fontSize: 12, color: '#888', margin: '14px 0 16px', lineHeight: 1.5 },
     send: { width: '100%', padding: 14, background: '#3C3489', color: 'white', border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 700, cursor: 'pointer' },
+    // Zurueckhaltender als der Versand-Knopf: Test ist der harmlose Weg,
+    // soll aber nicht mit dem echten Versand verwechselt werden.
+    testBtn: { width: '100%', padding: 13, background: '#f0eeff', color: '#3C3489', border: '1.5px solid #c9c4ee', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 8 },
     feedback: { padding: '10px 14px', borderRadius: 8, fontSize: 14, marginBottom: 12 },
     // Verlauf
     historyTitle: { fontSize: 14, fontWeight: 600, color: '#1a1a1a', margin: '0 0 12px' },
