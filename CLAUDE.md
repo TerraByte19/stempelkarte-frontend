@@ -64,7 +64,3 @@ anlegen (siehe `sortError`).
 ## Umgang
 
 Nicht pushen, ohne dass danach gefragt wurde. Vorher `npm run build`.
-
-Aus einer Cloud-Sitzung (Handy, Browser) geht der Push auf einen eigenen
-Branch, nie direkt auf `main`. Vercel und Render bauen aber nur `main` -
-live ist die Aenderung also erst, wenn der PR gemergt ist.
