@@ -4,6 +4,8 @@ import { useLang, dirArrow } from '../LangContext'
 import BildCropper from '../components/BildCropper'
 import Icon from '../components/Icon'
 import { ApplePreview, GooglePreview } from '../components/CardPreview'
+import PointsSettings from '../components/PointsSettings'
+import RewardCatalog from '../components/RewardCatalog'
 import { DEFAULT_DESIGN } from '../lib/cardDesign'
 import { blobZuBase64 } from '../lib/bild'
 
@@ -289,6 +291,15 @@ export default function Karten() {
   const [form, setForm] = useState({name:'',description:'',rewardThreshold:10,rewardText:''})
   const [design, setDesign] = useState({...DEFAULT_DESIGN})
   const [pendingStampFile, setPendingStampFile] = useState(null)
+
+  // Kartentyp: nur beim Anlegen waehlbar, danach fest. Ein Wechsel wuerde
+  // bestehende Staende bedeutungslos machen - 7 Stempel sind keine 7 Punkte.
+  const [cardType, setCardType] = useState('STAMP')
+  const [pointsForm, setPointsForm] = useState({
+    pointsPerEuroX100: 100, pointsRounding: 'GENAU',
+  })
+  const [pendingRewards, setPendingRewards] = useState([])
+  const [editRewards, setEditRewards] = useState([])
   const [editCard, setEditCard] = useState(null)
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
   const [editReward, setEditReward] = useState('')
@@ -317,13 +328,44 @@ export default function Karten() {
   }
 
   async function createCard() {
-    if (!form.name||!form.rewardText) return alert(t('cards_err_required'))
+    // Eine Punktekarte hat keinen Belohnungstext - der Katalog ersetzt ihn.
+    // Ohne diese Unterscheidung liesse sich gar keine anlegen.
+    const pflichtFehlt = cardType==='POINTS'
+      ? !form.name
+      : !form.name || !form.rewardText
+    if (pflichtFehlt) {
+      return alert(t(cardType==='POINTS' ? 'cards_err_required_points' : 'cards_err_required'))
+    }
     setLoading(true)
     try {
       // Falls ein eigenes Stempel-Bild ausgewählt wurde, ist stampIconUrl aktuell
       // eine lokale Data-URL (Vorschau) — die NICHT speichern. Wird nach dem
       // Anlegen separat an die neue Karte hochgeladen.
       const { stampIconUrl, ...designToSave } = design
+
+      if (cardType==='POINTS') {
+        const res = await api.post('/api/shop/cards/points', {
+          name: form.name,
+          description: form.description || form.name,
+          pointsPerEuroX100: pointsForm.pointsPerEuroX100,
+          pointsRounding: pointsForm.pointsRounding,
+          colorBackground: designToSave.colorBackground,
+          colorForeground: designToSave.colorForeground,
+          colorLabel: designToSave.colorLabel,
+          logoUrl: designToSave.logoUrl,
+          heroImageUrl: designToSave.heroImageUrl,
+        })
+        // Praemien der Reihe nach anhaengen - die Sortierung ergibt sich
+        // aus der Reihenfolge des Anlegens.
+        for (const r of pendingRewards) {
+          await api.post(`/api/shop/cards/${res.data.id}/rewards`, {
+            name: r.name, costPointsX100: r.costPointsX100,
+          })
+        }
+        zurueckZurListe()
+        return
+      }
+
       const res = await api.post('/api/shop/cards', {
         ...form,
         description: form.description,
@@ -350,13 +392,27 @@ export default function Karten() {
         }
       }
 
-      setMode('list')
-      setForm({name:'',description:'',rewardThreshold:10,rewardText:''})
-      setDesign({...DEFAULT_DESIGN})
-      setPendingStampFile(null)
-      loadCards()
-    } catch { alert(t('cards_err_create')) }
+      zurueckZurListe()
+    } catch (e) {
+      // 404 heisst hier fast immer: der Backend-Deploy laeuft noch. Das ist
+      // eine andere Auskunft als "Anlegen fehlgeschlagen" und erspart die
+      // Suche nach einem Fehler, den es nicht gibt.
+      alert(e.response?.status === 404
+        ? t('scan_points_backend_old')
+        : (e.response?.data?.error || t('cards_err_create')))
+    }
     finally { setLoading(false) }
+  }
+
+  function zurueckZurListe() {
+    setMode('list')
+    setForm({name:'',description:'',rewardThreshold:10,rewardText:''})
+    setDesign({...DEFAULT_DESIGN})
+    setPendingStampFile(null)
+    setPendingRewards([])
+    setPointsForm({pointsPerEuroX100:100, pointsRounding:'GENAU'})
+    setCardType('STAMP')
+    loadCards()
   }
 
   async function saveEditDesign() {
@@ -393,10 +449,33 @@ export default function Karten() {
     } catch { alert(t('common_error_generic')) }
   }
 
+  async function ladeRewards(cardId) {
+    try {
+      const r = await api.get(`/api/shop/cards/${cardId}/rewards`)
+      setEditRewards(r.data)
+    } catch {
+      // Aelteres Backend kennt die Route noch nicht. Leerer Katalog statt
+      // Fehlermeldung - das Bearbeiten der uebrigen Felder soll gehen.
+      setEditRewards([])
+    }
+  }
+
+  async function rewardHinzufuegen(name, costPointsX100) {
+    await api.post(`/api/shop/cards/${editCard.id}/rewards`, { name, costPointsX100 })
+    ladeRewards(editCard.id)
+  }
+
+  async function rewardEntfernen(reward) {
+    await api.delete(`/api/shop/cards/${editCard.id}/rewards/${reward.id}`)
+    ladeRewards(editCard.id)
+  }
+
   async function openEdit(card) {
     setEditCard(card)
     setEditReward(card.rewardText || '')
     setEditStamps(card.rewardThreshold || 10)
+    setEditRewards([])
+    if ((card.type ?? 'STAMP') === 'POINTS') ladeRewards(card.id)
     setEditDesign({
       colorBackground: card.colorBackground||'#3C3489',
       colorForeground: card.colorForeground||'#FFFFFF',
@@ -431,6 +510,17 @@ export default function Karten() {
   // bevor gespeichert ist.
   const editThreshold = Math.min(100, Math.max(1, parseInt(editStamps) || editCard?.rewardThreshold || 10))
 
+  // Beispiel-Punktestand fuer die Vorschau: die Haelfte der billigsten
+  // Praemie. Bei 0 stuende dort immer "noch der volle Preis", und der Laden
+  // saehe nie, wie die Karte mitten im Sammeln aussieht.
+  const halberPreis = (liste) => liste.length === 0 ? 0
+    : Math.round(Math.min(...liste.map(r => r.costPointsX100)) / 2)
+  const vorschauPunkteX100 = halberPreis(pendingRewards)
+  const editVorschauPunkteX100 = halberPreis(editRewards)
+
+  // ?? 'STAMP', weil ein aelteres Backend das Feld noch nicht mitliefert.
+  const istPunktekarte = (editCard?.type ?? 'STAMP') === 'POINTS'
+
   // ─── LIST ───────────────────────────────────────────────────────────────
   if (mode==='list') return (
       <div>
@@ -446,7 +536,13 @@ export default function Karten() {
                   <div key={card.id} style={{...s.card, borderTop:`4px solid ${card.colorBackground||'#3C3489'}`}}>
                     <div style={s.cardTop}>
                       <div style={s.cardName}>{card.name}</div>
-                      <div style={{...s.badge,background:card.colorBackground||'#3C3489',color:card.colorForeground||'#fff'}}>{t('cards_stamp_count', { n: card.rewardThreshold })}</div>
+                      {/* card.type ?? 'STAMP': ein aelteres Backend liefert
+                          das Feld noch nicht mit. */}
+                      <div style={{...s.badge,background:card.colorBackground||'#3C3489',color:card.colorForeground||'#fff'}}>
+                        {(card.type ?? 'STAMP')==='POINTS'
+                          ? t('cards_type_points')
+                          : t('cards_stamp_count', { n: card.rewardThreshold })}
+                      </div>
                     </div>
                     <div style={s.cardReward}>{card.rewardText}</div>
                     <div style={s.designBadge}>
@@ -488,10 +584,28 @@ export default function Karten() {
           {/* Spalte 1: Infos */}
           <div style={s.panel}>
             <div style={s.panelTitle}>{t('cards_info_panel')}</div>
+
+            {/* Typ zuerst: er entscheidet, welche Felder darunter stehen,
+                und ist nach dem Anlegen fest. */}
+            <div style={s.typeRow}>
+              {['STAMP','POINTS'].map(typ=>(
+                <button key={typ}
+                        style={{...s.typeBtn,
+                          background: cardType===typ ? '#3C3489' : '#f0f0f0',
+                          color: cardType===typ ? 'white' : '#333'}}
+                        onClick={()=>setCardType(typ)}>
+                  {t(typ==='STAMP' ? 'cards_type_stamp' : 'cards_type_points')}
+                </button>
+              ))}
+            </div>
+            <div style={s.typeHint}>{t('cards_type_hint')}</div>
+
             {[
               {label:t('cards_name'),key:'name',placeholder:t('cards_name_ph'),max:18},
               {label:t('cards_desc'),key:'description',placeholder:t('cards_desc_ph'),max:40},
-              {label:t('cards_reward'),key:'rewardText',placeholder:t('cards_reward_ph'),max:25},
+              ...(cardType==='STAMP'
+                ? [{label:t('cards_reward'),key:'rewardText',placeholder:t('cards_reward_ph'),max:25}]
+                : []),
             ].map(({label,key,placeholder,max})=>(
                 <div key={key} style={s.field}>
                   <label style={s.label}>
@@ -504,14 +618,30 @@ export default function Karten() {
                          onChange={e=>setForm({...form,[key]:e.target.value})}/>
                 </div>
             ))}
-            <div style={s.field}>
-              <label style={s.label}>{t('cards_threshold')}</label>
-              <input style={s.input} type="number" min="1" max="100" value={form.rewardThreshold} onChange={e=>setForm({...form,rewardThreshold:e.target.value})}/>
-            </div>
-            <div style={{margin:'16px 0'}}>
-              <div style={{fontSize:12,fontWeight:600,color:'#3C3489',marginBottom:6}}>{t('cards_preview_count', { n: previewStamps, threshold })}</div>
-              <input type="range" min={0} max={threshold} value={previewStamps} onChange={e=>setPreviewStamps(Number(e.target.value))} style={{width:'100%',accentColor:'#3C3489'}}/>
-            </div>
+            {cardType==='STAMP' ? (
+              <>
+                <div style={s.field}>
+                  <label style={s.label}>{t('cards_threshold')}</label>
+                  <input style={s.input} type="number" min="1" max="100" value={form.rewardThreshold} onChange={e=>setForm({...form,rewardThreshold:e.target.value})}/>
+                </div>
+                <div style={{margin:'16px 0'}}>
+                  <div style={{fontSize:12,fontWeight:600,color:'#3C3489',marginBottom:6}}>{t('cards_preview_count', { n: previewStamps, threshold })}</div>
+                  <input type="range" min={0} max={threshold} value={previewStamps} onChange={e=>setPreviewStamps(Number(e.target.value))} style={{width:'100%',accentColor:'#3C3489'}}/>
+                </div>
+              </>
+            ) : (
+              <>
+                <PointsSettings value={pointsForm} onChange={setPointsForm} t={t}/>
+                {/* Praemien werden lokal gesammelt und erst nach dem Anlegen
+                    hochgeladen - genau wie das Stempel-Bild, das auch erst
+                    eine Karten-ID braucht. */}
+                <RewardCatalog
+                  rewards={pendingRewards}
+                  onAdd={(name,costPointsX100)=>setPendingRewards(r=>[...r,{name,costPointsX100}])}
+                  onRemove={weg=>setPendingRewards(r=>r.filter(x=>x!==weg))}
+                  t={t}/>
+              </>
+            )}
             <button style={s.btnCreate} onClick={createCard} disabled={loading}>
               {loading ? t('cards_creating') : (
                   <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
@@ -531,11 +661,13 @@ export default function Karten() {
           <div style={{gridColumn:'1 / -1', display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
             <div>
               <div style={s.previewLabel}>Apple Wallet</div>
-              <ApplePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name} t={t}/>
+              <ApplePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name} t={t}
+                            cardType={cardType} rewards={pendingRewards} pointsX100={vorschauPunkteX100}/>
             </div>
             <div>
               <div style={s.previewLabel}>Google Wallet</div>
-              <GooglePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name} t={t}/>
+              <GooglePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name} t={t}
+                            cardType={cardType} rewards={pendingRewards} pointsX100={vorschauPunkteX100}/>
             </div>
           </div>
         </div>
@@ -555,26 +687,36 @@ export default function Karten() {
         <div style={s.editGrid}>
           <div style={{...s.panel,maxHeight:'80vh',overflowY:'auto'}}>
             <div style={s.panelTitle}>{t('cards_design_panel')}</div>
-            <div style={{marginBottom:16}}>
-              <label style={{fontSize:11,fontWeight:800,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:0.8,display:'block'}}>
-                {t('cards_reward')}
-              </label>
-              <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
-                     value={editReward} onChange={e=>setEditReward(e.target.value)} placeholder={t('cards_reward_ph')}/>
-            </div>
-            <div style={{marginBottom:16}}>
-              <label style={{fontSize:11,fontWeight:800,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:0.8,display:'block'}}>
-                {t('cards_threshold')}
-              </label>
-              <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
-                     type="number" min="1" max="100" value={editStamps}
-                     onChange={e=>setEditStamps(e.target.value)}/>
-              {parseInt(editStamps) !== editCard.rewardThreshold && (
-                  <div style={{fontSize:11,color:'#B35309',marginTop:6,lineHeight:1.45}}>
-                    {t('cards_threshold_warn', { from: editCard.rewardThreshold, to: parseInt(editStamps) || '—' })}
-                  </div>
-              )}
-            </div>
+
+            {/* Bei einer Punktekarte ersetzt der Katalog Belohnung und
+                Schwelle. Der Typ selbst wird nicht angeboten - er ist fest. */}
+            {istPunktekarte ? (
+              <RewardCatalog rewards={editRewards} onAdd={rewardHinzufuegen}
+                             onRemove={rewardEntfernen} t={t}/>
+            ) : (
+              <>
+                <div style={{marginBottom:16}}>
+                  <label style={{fontSize:11,fontWeight:800,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:0.8,display:'block'}}>
+                    {t('cards_reward')}
+                  </label>
+                  <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
+                         value={editReward} onChange={e=>setEditReward(e.target.value)} placeholder={t('cards_reward_ph')}/>
+                </div>
+                <div style={{marginBottom:16}}>
+                  <label style={{fontSize:11,fontWeight:800,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:0.8,display:'block'}}>
+                    {t('cards_threshold')}
+                  </label>
+                  <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
+                         type="number" min="1" max="100" value={editStamps}
+                         onChange={e=>setEditStamps(e.target.value)}/>
+                  {parseInt(editStamps) !== editCard.rewardThreshold && (
+                      <div style={{fontSize:11,color:'#B35309',marginTop:6,lineHeight:1.45}}>
+                        {t('cards_threshold_warn', { from: editCard.rewardThreshold, to: parseInt(editStamps) || '-' })}
+                      </div>
+                  )}
+                </div>
+              </>
+            )}
             <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t}/>
             <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
               {saved ? (
@@ -588,11 +730,13 @@ export default function Karten() {
           <div style={{display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
             <div>
               <div style={s.previewLabel}>Apple Wallet</div>
-              <ApplePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}/>
+              <ApplePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}
+                            cardType={istPunktekarte ? 'POINTS' : 'STAMP'} rewards={editRewards} pointsX100={editVorschauPunkteX100}/>
             </div>
             <div>
               <div style={s.previewLabel}>Google Wallet</div>
-              <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}/>
+              <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}
+                            cardType={istPunktekarte ? 'POINTS' : 'STAMP'} rewards={editRewards} pointsX100={editVorschauPunkteX100}/>
             </div>
           </div>
         </div>
@@ -601,6 +745,9 @@ export default function Karten() {
 }
 
 const s = {
+  typeRow: { display:'flex', gap:'8px', marginBottom:'6px' },
+  typeBtn: { flex:1, padding:'12px', borderRadius:'10px', border:'none', fontSize:'15px', fontWeight:'700', cursor:'pointer' },
+  typeHint: { fontSize:'12px', color:'#999', marginBottom:'16px', textAlign:'start' },
   header: {display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:28},
   title: {fontSize:24,fontWeight:700,margin:'0 0 4px',color:'#1a1a1a'},
   subtitle: {fontSize:14,color:'#888',margin:0},

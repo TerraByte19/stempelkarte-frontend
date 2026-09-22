@@ -13,6 +13,7 @@
  */
 
 import { DEFAULT_DESIGN } from '../lib/cardDesign'
+import { formatierePunkte } from '../lib/pointsOf'
 
 
 
@@ -106,11 +107,29 @@ function MockQR({ size=64 }) {
   )
 }
 
+/**
+ * Dieselbe Regel wie RewardService.naechstesZiel im Backend: die billigste
+ * Praemie, die der Kunde sich noch NICHT leisten kann. Kann er alle, ist es
+ * die teuerste - sonst stuende auf einer vollen Karte gar nichts.
+ */
+function naechstesZiel(rewards, pointsX100) {
+  if (!rewards || rewards.length === 0) return null
+  const offen = rewards.filter(r => r.costPointsX100 > pointsX100)
+  const pool = offen.length > 0 ? offen : rewards
+  return pool.reduce((a, b) =>
+    offen.length > 0
+      ? (b.costPointsX100 < a.costPointsX100 ? b : a)
+      : (b.costPointsX100 > a.costPointsX100 ? b : a))
+}
+
 // ─── Wallet Vorschauen ───────────────────────────────────────────────────────
 
-export function ApplePreview({ design, stamps, threshold, rewardText, cardName, t }) {
+export function ApplePreview({ design, stamps, threshold, rewardText, cardName, t,
+                              cardType='STAMP', rewards=[], pointsX100=0 }) {
   const d = {...DEFAULT_DESIGN, ...design}
   const useUpload = d.stampIconType==='upload' && d.stampIconUrl
+  const punkte = cardType==='POINTS'
+  const ziel = punkte ? naechstesZiel(rewards, pointsX100) : null
   return (
       <div style={{width:236,background:'linear-gradient(160deg,#3a3a3c,#1c1c1e)',borderRadius:42,padding:11,boxShadow:'0 22px 60px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.06)',margin:'0 auto'}}>
         {/* Bildschirm */}
@@ -134,11 +153,28 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
                   {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:9,fontWeight:700,color:d.colorBackground}}>SK</span>}
                 </div>
                 <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2}}>{cardName||t('preview_default_name')}</span>
-                <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>{stamps}/{threshold}</span>
+                <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>
+                  {punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
+                </span>
               </div>
 
-              {/* Inhalt je nach Stil */}
-              {d.walletStyle==='grid' ? (
+              {/* Inhalt je nach Kartentyp und Stil */}
+              {punkte ? (
+                  <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('scan_points_next_goal')}</div>
+                      <div style={{fontSize:11,fontWeight:500}}>{ziel ? ziel.name : t('scan_points_no_goal')}</div>
+                    </div>
+                    <div>
+                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('cards_catalog_cost')}</div>
+                      <div style={{fontSize:11,fontWeight:500}}>
+                        {ziel
+                          ? t('scan_points_missing', { n: formatierePunkte(Math.max(0, ziel.costPointsX100 - pointsX100)) })
+                          : formatierePunkte(pointsX100)}
+                      </div>
+                    </div>
+                  </div>
+              ) : d.walletStyle==='grid' ? (
                   <div style={{padding:'10px 10px',display:'flex',alignItems:'center',justifyContent:'center'}}>
                     <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={useUpload} stampIconUrl={d.stampIconUrl}/>
                   </div>
@@ -172,8 +208,11 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
   )
 }
 
-export function GooglePreview({ design, stamps, threshold, rewardText, cardName, t }) {
+export function GooglePreview({ design, stamps, threshold, rewardText, cardName, t,
+                               cardType='STAMP', rewards=[], pointsX100=0 }) {
   const d = {...DEFAULT_DESIGN, ...design}
+  const punkte = cardType==='POINTS'
+  const ziel = punkte ? naechstesZiel(rewards, pointsX100) : null
   return (
       <div style={{width:236,background:'#fff',borderRadius:24,padding:11,boxShadow:'0 22px 60px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.04)',margin:'0 auto'}}>
         {/* Android-Bildschirm */}
@@ -201,20 +240,31 @@ export function GooglePreview({ design, stamps, threshold, rewardText, cardName,
               <div style={{fontSize:14,fontWeight:500,letterSpacing:0.2}}>{cardName||t('preview_default_name')}</div>
             </div>
 
-            {/* Felder */}
+            {/* Felder. Google fuellt loyaltyPoints und secondaryLoyaltyPoints -
+                bei Punkten stehen dort Stand und naechste Praemie. */}
             <div style={{display:'flex',gap:20,padding:'0 14px 14px'}}>
               <div>
-                <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>{t('preview_stamps_field')}</div>
-                <div style={{fontSize:14,fontWeight:500}}>{stamps}/{threshold}</div>
+                <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>
+                  {punkte ? t('cards_catalog_cost') : t('preview_stamps_field')}
+                </div>
+                <div style={{fontSize:14,fontWeight:500}}>
+                  {punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
+                </div>
               </div>
               <div>
-                <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>{t('cards_reward')}</div>
-                <div style={{fontSize:14,fontWeight:500}}>{rewardText||'—'}</div>
+                <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>
+                  {punkte ? t('scan_points_next_goal') : t('cards_reward')}
+                </div>
+                <div style={{fontSize:14,fontWeight:500}}>
+                  {punkte
+                    ? (ziel ? `${ziel.name}, ${t('scan_points_missing', { n: formatierePunkte(Math.max(0, ziel.costPointsX100 - pointsX100)) })}` : t('scan_points_no_goal'))
+                    : (rewardText||'-')}
+                </div>
               </div>
             </div>
 
-            {/* Stempel-Raster, falls gewählt */}
-            {d.walletStyle==='grid' && (
+            {/* Stempel-Raster, falls gewählt. Bei Punkten gibt es nichts zu rastern. */}
+            {!punkte && d.walletStyle==='grid' && (
                 <div style={{padding:'0 14px 12px',display:'flex',justifyContent:'center'}}>
                   <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={d.stampIconType==='upload'&&d.stampIconUrl} stampIconUrl={d.stampIconUrl}/>
                 </div>
