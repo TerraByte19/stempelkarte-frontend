@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLang, localeTag } from '../LangContext'
+import { formatierePunkte } from '../lib/pointsOf'
 
 // Zeigt die komplette Statistik-Ansicht fuer EINEN Laden - identisch fuer
 // den Laden selbst (Statistik.jsx) und fuer die aufgeklappte Zeile im
@@ -36,6 +37,19 @@ export default function StatsView({ data, fetchDay, onToggleExcludeSunday }) {
   const histSum = historyForAvg.reduce((a, d) => a + d.stamps, 0)
   const avgPerDay = historyForAvg.length ? Math.round((histSum / historyForAvg.length) * 10) / 10 : 0
   const newCustomerHistory = Array.isArray(data.newCustomerHistory) ? data.newCustomerHistory : []
+
+  // Punkte-Kennzahlen: nur zeigen, wenn der Laden eine Punktekarte hat.
+
+  const hatPunktekarten = (data.perCard ?? []).some(c => c.type === 'POINTS')
+
+    || (data.pointsOutstandingX100 ?? 0) > 0 || (data.pointsGrantedX100 ?? 0) > 0
+
+  const topRewards = Object.entries(data.topRewards ?? {})
+
+    .sort((a, b) => b[1] - a[1]).slice(0, 5)
+
+  const euroText = (cents) => (cents / 100).toFixed(2).replace('.', ',') + ' Euro'
+
 
   const kpis = [
     { label: t('stat_kpi_customers'), value: data.totalCustomers, icon: 'users', color: '#3C3489' },
@@ -111,6 +125,47 @@ export default function StatsView({ data, fetchDay, onToggleExcludeSunday }) {
             <div style={s.derivedHint}>{t('stat_newsletter_hint')}</div>
           </div>
         </div>
+
+        {/* Punktekarten haben eigene Kennzahlen - Stempel und Punkte sind
+            verschiedene Einheiten und gehoeren nicht in dieselbe Saeule.
+            Der Block erscheint nur, wenn der Laden ueberhaupt eine
+            Punktekarte fuehrt. */}
+        {hatPunktekarten && (
+          <div style={s.panel}>
+            <div style={s.panelTitle}>{t('stat_points_title')}</div>
+            <div style={s.derivedGrid}>
+              <div style={s.derivedCard}>
+                <div style={s.derivedValue}>{euroText(data.pointsRevenueCents ?? 0)}</div>
+                <div style={s.derivedLabel}>{t('stat_points_revenue')}</div>
+              </div>
+              <div style={s.derivedCard}>
+                <div style={s.derivedValue}>{formatierePunkte(data.pointsGrantedX100 ?? 0)}</div>
+                <div style={s.derivedLabel}>{t('stat_points_granted')}</div>
+              </div>
+              <div style={s.derivedCard}>
+                <div style={s.derivedValue}>{formatierePunkte(data.pointsOutstandingX100 ?? 0)}</div>
+                <div style={s.derivedLabel}>{t('stat_points_outstanding')}</div>
+                {/* Ohne diesen Satz liest niemand die Zahl als das, was sie
+                    ist: eine Verpflichtung, keine Einnahme. */}
+                <div style={s.derivedHint}>{t('stat_points_outstanding_hint')}</div>
+              </div>
+              <div style={s.derivedCard}>
+                <div style={s.derivedLabel}>{t('stat_points_top_rewards')}</div>
+                {topRewards.length === 0 ? (
+                  <div style={s.derivedHint}>{t('stat_points_none_redeemed')}</div>
+                ) : (
+                  <div style={{marginTop:8}}>
+                    {topRewards.map(([name, anzahl]) => (
+                      <div key={name} style={{display:'flex',justifyContent:'space-between',gap:8,fontSize:13,marginBottom:4}}>
+                        <span>{name}</span><b>{anzahl}</b>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div style={s.panel}>
           <div style={s.panelTitle}>{t('stat_peak_times')}</div>

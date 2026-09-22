@@ -58,6 +58,14 @@ export const translations = {
     cards_catalog_empty: 'Noch keine Prämie. Ohne Prämie zeigt die Karte nur den Punktestand.',
     cards_catalog_max: 'Höchstens 20 Prämien je Karte',
     cards_points_count: '{n} Punkte',
+    // Statistik - Punktekarten
+    stat_points_title: 'Punktekarten',
+    stat_points_revenue: 'Umsatz (30 Tage)',
+    stat_points_granted: 'Vergebene Punkte (30 Tage)',
+    stat_points_outstanding: 'Offener Punktestand',
+    stat_points_outstanding_hint: 'Was deine Kunden noch einlösen dürfen',
+    stat_points_top_rewards: 'Beliebteste Prämien',
+    stat_points_none_redeemed: 'Noch keine Prämie eingelöst',
     cards_err_required_points: 'Bitte einen Namen eingeben',
 
     // Punktekarte - Scanner
@@ -398,6 +406,14 @@ export const translations = {
     cards_catalog_empty: 'No rewards yet. Without one the card shows only the balance.',
     cards_catalog_max: 'At most 20 rewards per card',
     cards_points_count: '{n} points',
+    // Statistics - points cards
+    stat_points_title: 'Points cards',
+    stat_points_revenue: 'Revenue (30 days)',
+    stat_points_granted: 'Points granted (30 days)',
+    stat_points_outstanding: 'Outstanding balance',
+    stat_points_outstanding_hint: 'What your customers may still redeem',
+    stat_points_top_rewards: 'Most popular rewards',
+    stat_points_none_redeemed: 'No reward redeemed yet',
     cards_err_required_points: 'Please enter a name',
 
     // Points card - scanner
@@ -739,6 +755,13 @@ export const translations = {
     cards_catalog_empty: 'لا توجد مكافآت بعد. بدونها تعرض البطاقة الرصيد فقط.',
     cards_catalog_max: 'حد أقصى 20 مكافأة لكل بطاقة',
     cards_points_count: '{n} نقطة',
+    stat_points_title: 'بطاقات النقاط',
+    stat_points_revenue: 'الإيرادات (30 يوماً)',
+    stat_points_granted: 'النقاط الممنوحة (30 يوماً)',
+    stat_points_outstanding: 'الرصيد المستحق',
+    stat_points_outstanding_hint: 'ما يمكن لعملائك استبداله',
+    stat_points_top_rewards: 'أكثر المكافآت طلباً',
+    stat_points_none_redeemed: 'لم تُستبدل أي مكافأة بعد',
     cards_err_required_points: 'يرجى إدخال اسم',
 
     scan_points_title: 'إضافة نقاط', scan_points_balance: 'الرصيد',
