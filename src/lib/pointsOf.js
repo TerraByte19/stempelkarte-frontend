@@ -55,6 +55,34 @@ export function formatierePunkte(pointsX100) {
 }
 
 /**
+ * Kurs-Umrechnung fuer das Anlege-Formular.
+ *
+ * Gespeichert wird immer pointsPerEuroX100 (Punkte pro Euro, mal 100). Der
+ * Laden darf aber waehlen, wie er es ausspricht:
+ *
+ *   proEuro=true   "X Punkte pro Euro"   ->  pointsPerEuroX100 = X * 100
+ *   proEuro=false  "N Euro pro Punkt"    ->  pointsPerEuroX100 = 100 / N
+ *
+ * Die zweite Zeile ist der Grund fuer diese Funktionen: sie stand zuerst
+ * falsch im Formular (10000/N statt 100/N), und weil Build, Lint und Tests
+ * davon nichts wissen, fiel es erst beim Klicken auf. Jetzt haengt die
+ * Rechnung an einem Test.
+ */
+export function kursAusAnzeige(zahl, proEuro) {
+  if (!Number.isFinite(zahl) || zahl <= 0) return null
+  const kurs = proEuro ? zahl * 100 : 100 / zahl
+  // Mindestens 1: darunter waere der Kurs auf null gerundet und jeder
+  // Einkauf braechte 0 Punkte.
+  return Math.max(1, Math.round(kurs))
+}
+
+export function anzeigeAusKurs(pointsPerEuroX100, proEuro) {
+  const zahl = proEuro ? pointsPerEuroX100 / 100 : 100 / pointsPerEuroX100
+  // Zwei Nachkommastellen reichen und halten das Feld lesbar.
+  return Math.round(zahl * 100) / 100
+}
+
+/**
  * Liest das Betragsfeld. Gibt null, wenn nichts Brauchbares drinsteht -
  * daran haengt, ob der Buchen-Knopf ueberhaupt gedrueckt werden kann.
  *

@@ -13,7 +13,8 @@ const PRESET_KEYS = ['coffee', 'star', 'heart', 'dot', 'square']
 
 // ─── Komplettes Design Panel ─────────────────────────────────────────────────
 
-function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
+function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t,
+                      zeigeStempelDesign=true }) {
   const logoRef = useRef()
   const heroRef = useRef()
   const stampRef = useRef()
@@ -181,6 +182,9 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
                    aufFertig:(b,orig)=>upload(b, heroEndpoint, 'hero', orig) })}/>
         </div>
 
+        {/* Wallet-Stil, Stempel-Icon, -Farbe und leere Stempel zeichnen
+           auf einer Punktekarte nichts - dort gibt es kein Raster. */}
+        {zeigeStempelDesign && (<>
         {/* ── Wallet-Stil ── */}
         <div style={dp.section}>
           <div style={dp.sectionTitle}>{t('design_wallet_style')}</div>
@@ -256,6 +260,7 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t }) {
             ))}
           </div>
         </div>
+        </>)}
       </div>
   )
 }
@@ -545,9 +550,13 @@ export default function Karten() {
                       </div>
                     </div>
                     <div style={s.cardReward}>{card.rewardText}</div>
-                    <div style={s.designBadge}>
-                      {card.walletStyle==='grid'?t('design_style_grid'):t('design_style_numbers')} · {t(`preset_${card.stampPreset||'coffee'}`)}
-                    </div>
+                    {/* Raster-Stil und Stempel-Symbol zeichnen auf einer
+                        Punktekarte nichts - dann auch nicht hier nennen. */}
+                    {(card.type ?? 'STAMP')!=='POINTS' && (
+                      <div style={s.designBadge}>
+                        {card.walletStyle==='grid'?t('design_style_grid'):t('design_style_numbers')} · {t(`preset_${card.stampPreset||'coffee'}`)}
+                      </div>
+                    )}
                     <div style={s.cardId}>{t('cards_id_label')} {card.id}</div>
                     <div style={s.btnRow}>
                       <button style={s.btnEdit} onClick={()=>openEdit(card)}>{t('common_edit')}</button>
@@ -654,7 +663,7 @@ export default function Karten() {
           {/* Spalte 2: Design */}
           <div className="sk-design-col" style={s.panel}>
             <div style={s.panelTitle}>{t('cards_design_panel')}</div>
-            <DesignPanel design={design} onChange={setDesign} onStampFile={setPendingStampFile} t={t}/>
+            <DesignPanel design={design} onChange={setDesign} onStampFile={setPendingStampFile} t={t} zeigeStempelDesign={cardType==='STAMP'}/>
           </div>
 
           {/* Vorschau — volle Breite, nebeneinander */}
@@ -717,7 +726,7 @@ export default function Karten() {
                 </div>
               </>
             )}
-            <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t}/>
+            <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t} zeigeStempelDesign={!istPunktekarte}/>
             <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
               {saved ? (
                   <span style={{display:'inline-flex',alignItems:'center',gap:6}}>

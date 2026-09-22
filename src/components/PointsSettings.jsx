@@ -1,4 +1,5 @@
-import { punkteFuer, formatierePunkte } from '../lib/pointsOf'
+import { useState } from 'react'
+import { punkteFuer, formatierePunkte, kursAusAnzeige, anzeigeAusKurs } from '../lib/pointsOf'
 
 /**
  * Kurs und Rundung einer Punktekarte.
@@ -12,39 +13,30 @@ import { punkteFuer, formatierePunkte } from '../lib/pointsOf'
 export default function PointsSettings({ value, onChange, t }) {
   const { pointsPerEuroX100, pointsRounding } = value
 
-  // Welche Sprechweise steht gerade im Feld? Ab einem Punkt pro Euro
-  // aufwaerts liest sich "X Punkte pro Euro" natuerlicher, darunter der
-  // Kehrwert.
-  const proEuro = pointsPerEuroX100 >= 100
-  const angezeigt = proEuro
-    ? runde2(pointsPerEuroX100 / 100)
-    : runde2(10000 / pointsPerEuroX100)
+  // Die Sprechweise ist ein eigener Zustand, KEINE Ableitung aus dem Wert.
+  // Abgeleitet war sie zuerst ("pointsPerEuroX100 >= 100"), und dann sprang
+  // die Auswahl nach dem Umschalten sofort zurueck: 1 Punkt pro Euro und
+  // 1 Euro pro Punkt ergeben denselben Kurs, also konnte der Wert die
+  // Richtung gar nicht tragen.
+  const [proEuro, setProEuro] = useState(() => pointsPerEuroX100 >= 100)
 
-  function runde2(n) {
-    return Math.round(n * 100) / 100
-  }
+  const angezeigt = anzeigeAusKurs(pointsPerEuroX100, proEuro)
 
   function setzeRichtung(neuProEuro) {
     if (neuProEuro === proEuro) return
-    // Beim Umschalten den Kehrwert bilden, damit die Zahl im Feld stehen
-    // bleibt und nicht ploetzlich etwas anderes bedeutet.
-    onChange({
-      ...value,
-      pointsPerEuroX100: neuProEuro
-        ? Math.max(1, Math.round(angezeigt * 100))
-        : Math.max(1, Math.round(10000 / angezeigt)),
-    })
+    setProEuro(neuProEuro)
+    // Die Zahl im Feld bleibt stehen und bedeutet jetzt das andere. Aus
+    // "5 Punkte pro Euro" wird "5 Euro pro Punkt" - der Laden sieht sofort
+    // am Beispielsatz, was er umgestellt hat.
+    const kurs = kursAusAnzeige(angezeigt, neuProEuro)
+    if (kurs !== null) onChange({ ...value, pointsPerEuroX100: kurs })
   }
 
   function setzeZahl(text) {
     const zahl = parseFloat(String(text).replace(',', '.'))
-    if (!Number.isFinite(zahl) || zahl <= 0) return
-    onChange({
-      ...value,
-      pointsPerEuroX100: proEuro
-        ? Math.max(1, Math.round(zahl * 100))
-        : Math.max(1, Math.round(10000 / zahl)),
-    })
+    const kurs = kursAusAnzeige(zahl, proEuro)
+    if (kurs === null) return
+    onChange({ ...value, pointsPerEuroX100: kurs })
   }
 
   // Beispielrechnung mit 10 Euro, damit der Laden sofort sieht, was er

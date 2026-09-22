@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { punkteFuer, formatierePunkte, centsAusEingabe } from './pointsOf.js'
+import { punkteFuer, formatierePunkte, centsAusEingabe,
+         kursAusAnzeige, anzeigeAusKurs } from './pointsOf.js'
 
 // Dieselben Faelle wie PunkteRechnungTest im Backend. Weicht eine der
 // beiden Seiten ab, zeigt der Scanner dem Personal eine andere Zahl an,
@@ -73,4 +74,50 @@ test('mehr als zwei Nachkommastellen werden abgeschnitten', () => {
   // 1,239 Euro sind 1,23 Euro, keine 1,24 - der Kassenbon rundet auch
   // nicht nach oben.
   assert.equal(centsAusEingabe('1,239'), 123)
+})
+
+// ── Kurs-Umrechnung im Anlege-Formular ──────────────────────────────────
+//
+// Diese Faelle gibt es, weil "N Euro pro Punkt" zuerst falsch gerechnet
+// wurde (10000/N statt 100/N). Build, Lint und die uebrigen Tests waren
+// gruen; aufgefallen ist es erst beim Klicken in der laufenden Oberflaeche.
+
+test('X Punkte pro Euro', () => {
+  assert.equal(kursAusAnzeige(1, true), 100)
+  assert.equal(kursAusAnzeige(5, true), 500)
+  assert.equal(kursAusAnzeige(1.5, true), 150)   // 3 Punkte pro 2 Euro
+})
+
+test('N Euro pro Punkt', () => {
+  assert.equal(kursAusAnzeige(1, false), 100)    // dasselbe wie 1 Punkt pro Euro
+  assert.equal(kursAusAnzeige(5, false), 20)     // 5 Euro = 1 Punkt
+  assert.equal(kursAusAnzeige(2, false), 50)
+})
+
+test('Anzeige ist der Rueckweg', () => {
+  assert.equal(anzeigeAusKurs(100, true), 1)
+  assert.equal(anzeigeAusKurs(500, true), 5)
+  assert.equal(anzeigeAusKurs(20, false), 5)
+  assert.equal(anzeigeAusKurs(50, false), 2)
+})
+
+test('hin und zurueck aendert den Kurs nicht', () => {
+  for (const [zahl, proEuro] of [[1, true], [5, true], [1.5, true], [5, false], [2, false]]) {
+    const kurs = kursAusAnzeige(zahl, proEuro)
+    assert.equal(anzeigeAusKurs(kurs, proEuro), zahl,
+      `${zahl} (${proEuro ? 'pro Euro' : 'pro Punkt'}) kam als ${anzeigeAusKurs(kurs, proEuro)} zurueck`)
+  }
+})
+
+test('der beworbene Fall stimmt: 5 Euro pro Punkt, 10 Euro Einkauf', () => {
+  // Der Fall, an dem der Fehler aufgefallen ist. 10 Euro muessen 2 Punkte
+  // ergeben, nicht 50.
+  const kurs = kursAusAnzeige(5, false)
+  assert.equal(formatierePunkte(punkteFuer(1000, kurs, 'GENAU')), '2')
+})
+
+test('unsinnige Eingabe gibt null statt eines kaputten Kurses', () => {
+  assert.equal(kursAusAnzeige(0, true), null)
+  assert.equal(kursAusAnzeige(-3, false), null)
+  assert.equal(kursAusAnzeige(NaN, true), null)
 })
