@@ -1,19 +1,32 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
-import { useLang } from '../LangContext'
+import { useLang, localeTag } from '../LangContext'
 import Icon from '../components/Icon'
+import { punkteFuer, formatierePunkte, centsAusEingabe } from '../lib/pointsOf'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
+// Ueber 500 Euro wird nachgefragt. Billigste Abwehr gegen den Vertipper,
+// wegen dem es die Korrektur ueberhaupt gibt: 1450 statt 145 ist schneller
+// getippt, als man denkt.
+const NACHFRAGE_AB_CENTS = 50_000
+
 export default function Scanner() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [qrInput, setQrInput] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [cameraActive, setCameraActive] = useState(false)
   const [pendingScan, setPendingScan] = useState(null)
   const [selectedCount, setSelectedCount] = useState(1)
+
+  // Punktekarten: was der Server nach dem Scan ueber die Karte sagt.
+  const [scanState, setScanState] = useState(null)
+  const [betrag, setBetrag] = useState('')
+  const [pointsError, setPointsError] = useState(null)
+  const [korrekturOffen, setKorrekturOffen] = useState(false)
+  const [korrekturBetrag, setKorrekturBetrag] = useState('')
   const inputRef = useRef()
   const html5QrRef = useRef(null)
   const scanningRef = useRef(false)
@@ -49,6 +62,96 @@ export default function Scanner() {
     await stopCamera()
     setPendingScan(payload)
     setSelectedCount(1)
+    punkteZustandZuruecksetzen()
+
+    // Welcher Kartentyp? Steht nicht im QR, sondern hinter der cardId.
+    try {
+      const token = localStorage.getItem('staffToken')
+      const res = await fetch(`${API_URL}/api/scan/state`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
+        body: JSON.stringify({ qrPayload: payload }),
+      })
+      if (res.ok) setScanState(await res.json())
+      // Kein ok: entweder kennt der Server die Route noch nicht (Deploy
+      // laeuft) oder die Karte ist unbekannt. Beides faellt auf die
+      // Stempelmaske zurueck; der eigentliche Fehler kommt dann beim Buchen
+      // mit einer brauchbaren Meldung.
+    } catch {
+      // Netzfehler: ebenfalls Stempelmaske. Kein Abbruch, das Personal
+      // steht am Kunden.
+    }
+  }
+
+  function punkteZustandZuruecksetzen() {
+    setScanState(null)
+    setBetrag('')
+    setPointsError(null)
+    setKorrekturOffen(false)
+    setKorrekturBetrag('')
+  }
+
+  /**
+   * Gemeinsamer Weg fuer buchen, einloesen, korrigieren und zuruecknehmen.
+   * Alle vier schicken denselben QR mit, bekommen dieselbe Antwort und enden
+   * im selben Ergebnisfenster.
+   */
+  async function punkteAufruf(pfad, rumpf) {
+    setLoading(true)
+    setPointsError(null)
+    try {
+      const token = localStorage.getItem('staffToken')
+      const res = await fetch(`${API_URL}${pfad}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
+        body: JSON.stringify({ qrPayload: pendingScan, ...rumpf }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setResult({ success: true, points: true, data })
+        setPendingScan(null)
+      } else if (res.status === 404) {
+        // Meistens kein Fehler im Panel, sondern ein laufender Deploy.
+        setPointsError(t('scan_points_backend_old'))
+      } else {
+        setPointsError(data.error || t('scan_server_error'))
+      }
+    } catch {
+      setPointsError(t('scan_server_error'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function buchen(cents) {
+    if (cents === null) return
+    if (cents >= NACHFRAGE_AB_CENTS) {
+      const text = t('scan_points_confirm_big', { betrag: euroText(cents) })
+      if (!confirm(text)) return
+    }
+    await punkteAufruf('/api/points/earn', { amountCents: cents })
+  }
+
+  async function korrigieren() {
+    // Vorzeichen selbst lesen: centsAusEingabe weist negative Eingaben ab,
+    // weil beim normalen Buchen nichts Negatives gemeint sein kann.
+    const text = korrekturBetrag.trim()
+    const negativ = text.startsWith('-')
+    const cents = centsAusEingabe(negativ ? text.slice(1) : text)
+    if (cents === null) return
+    await punkteAufruf('/api/points/correct', { amountCents: negativ ? -cents : cents })
+  }
+
+  function euroText(cents) {
+    return (cents / 100).toFixed(2).replace('.', ',')
+  }
+
+  /** Eine Buchung in einer Zeile, wie sie ueber dem Zuruecknehmen steht. */
+  function buchungText(b) {
+    const uhr = new Date(b.createdAt)
+      .toLocaleTimeString(localeTag(lang), { hour: '2-digit', minute: '2-digit' })
+    const praemie = b.rewardName ? ` (${b.rewardName})` : ''
+    return `${b.deltaText} ${t('cards_catalog_cost')}${praemie} - ${uhr}`
   }
 
   async function confirmScan() {
@@ -170,12 +273,14 @@ export default function Scanner() {
 
   function nextCustomer() {
     setResult(null)
+    punkteZustandZuruecksetzen()
     scanningRef.current = false
     startCamera()
   }
 
   function cancelScan() {
     setPendingScan(null)
+    punkteZustandZuruecksetzen()
     scanningRef.current = false
     startCamera()
   }
@@ -209,6 +314,26 @@ export default function Scanner() {
         )}
 
         {result && (() => {
+          if (result.points) {
+            const d = result.data
+            return (
+              <div style={{ ...styles.resultBox, background: '#F0FFF4', borderColor: '#2C5F2E' }}>
+                <div style={{ ...styles.resultIcon, display: 'flex', justifyContent: 'center', color: '#2C5F2E' }}>
+                  <Icon name="check" size={34} strokeWidth={2.4} />
+                </div>
+                <div style={styles.resultMessage}>
+                  {t('scan_points_balance')}: {d.pointsText}
+                </div>
+                <div style={styles.resultStamps}>
+                  {d.zielName
+                    ? `${t('scan_points_next_goal')}: ${d.zielName} - ${t('scan_points_missing', { n: d.fehlendText })}`
+                    : t('scan_points_no_goal')}
+                </div>
+                <button style={{ ...styles.btnNext, background: '#3C3489', color: '#fff' }}
+                        onClick={nextCustomer}>{t('scan_next')}</button>
+              </div>
+            )
+          }
           const d = result.success ? result.data : null
           const isRedeemed = !!d && d.action === 'redeemed'
           const isFull = !!d && !isRedeemed && (
@@ -283,7 +408,14 @@ export default function Scanner() {
           )
         })()}
 
-        {pendingScan && !result && (
+        {pendingScan && !result && (() => {
+          // Die Weiche. Ohne Antwort vom Server (alter Stand, Netzfehler)
+          // bleibt es bei der Stempelmaske - die ist der Weg, der in echten
+          // Laeden laeuft.
+          const istPunkte = (scanState?.type ?? 'STAMP') === 'POINTS'
+          const cents = centsAusEingabe(betrag)
+
+          if (!istPunkte) return (
             <div style={styles.popup}>
               <div style={{ ...styles.popupIcon, display: 'flex', justifyContent: 'center', color: '#3C3489' }}><Icon name="check-circle" size={44} strokeWidth={1.8} /></div>
               <h2 style={styles.popupTitle}>{t('scan_detected')}</h2>
@@ -301,7 +433,107 @@ export default function Scanner() {
               </button>
               <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
             </div>
-        )}
+          )
+
+          return (
+            <div style={styles.popup}>
+              <h2 style={styles.popupTitle}>{t('scan_points_title')}</h2>
+              <p style={styles.popupSubtitle}>{scanState.customerName}</p>
+
+              <div style={styles.standBox}>
+                <div style={styles.standLabel}>{t('scan_points_balance')}</div>
+                <div style={styles.standWert}>{scanState.pointsText}</div>
+                <div style={styles.zielZeile}>
+                  {scanState.ziel
+                    ? `${t('scan_points_next_goal')}: ${scanState.ziel.name} - ${t('scan_points_missing', { n: scanState.fehlendText })}`
+                    : t('scan_points_no_goal')}
+                </div>
+              </div>
+
+              <label style={styles.feldLabel}>{t('scan_points_amount')}</label>
+              <input style={styles.betragFeld} type="text" inputMode="decimal"
+                     placeholder={t('scan_points_amount_ph')} value={betrag}
+                     onChange={e => setBetrag(e.target.value)} autoFocus/>
+
+              {/* Live, was die Buchung ergibt. Der Grund, warum die Rechnung
+                  auch im Frontend liegt: das Personal soll das Ergebnis
+                  sehen, BEVOR es bestaetigt - nicht danach. */}
+              {cents !== null && (
+                <div style={styles.vorschau}>
+                  {t('scan_points_preview', {
+                    betrag: euroText(cents),
+                    punkte: formatierePunkte(punkteFuer(
+                      cents, scanState.pointsPerEuroX100, scanState.pointsRounding)),
+                  })}
+                </div>
+              )}
+
+              {pointsError && <div style={styles.fehlerBanner}>{pointsError}</div>}
+
+              <button style={{ ...styles.confirmBtn, opacity: cents === null ? 0.5 : 1 }}
+                      onClick={() => buchen(cents)} disabled={loading || cents === null}>
+                {loading ? t('scan_processing') : t('scan_points_book')}
+              </button>
+
+              {scanState.katalog?.length > 0 && (
+                <div style={styles.katalog}>
+                  <div style={styles.katalogTitel}>{t('scan_points_redeem')}</div>
+                  {scanState.katalog.map(r => (
+                    <button key={r.id}
+                            style={{ ...styles.praemie,
+                              opacity: r.bezahlbar ? 1 : 0.45,
+                              cursor: r.bezahlbar ? 'pointer' : 'default' }}
+                            disabled={!r.bezahlbar || loading}
+                            onClick={() => punkteAufruf('/api/points/redeem', { rewardId: r.id })}>
+                      <span style={styles.praemieName}>{r.name}</span>
+                      <span style={styles.praemieKosten}>
+                        {r.bezahlbar
+                          ? r.costText
+                          : t('scan_points_missing', { n: formatierePunkte(r.fehlendX100) })}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {!korrekturOffen ? (
+                <button style={styles.nebenKnopf} onClick={() => setKorrekturOffen(true)}>
+                  {t('scan_points_correct')}
+                </button>
+              ) : (
+                <div style={styles.korrekturBox}>
+                  <div style={styles.hinweis}>{t('scan_points_correct_hint')}</div>
+                  {/* inputMode text statt decimal: die Dezimaltastatur
+                      mancher Geraete hat kein Minus. */}
+                  <input style={styles.betragFeld} type="text" inputMode="text"
+                         value={korrekturBetrag}
+                         onChange={e => setKorrekturBetrag(e.target.value)} autoFocus/>
+                  <button style={styles.confirmBtn} onClick={korrigieren} disabled={loading}>
+                    {t('scan_points_correct')}
+                  </button>
+                </div>
+              )}
+
+              {/* Der Server liefert hier nur eine Buchung, die noch nicht
+                  zurueckgenommen ist und selbst keine Gegenbuchung ist -
+                  deshalb genuegt die Pruefung auf Vorhandensein. */}
+              {scanState.letzteBuchung && (
+                <div style={styles.letzteBox}>
+                  <div style={styles.hinweis}>
+                    {t('scan_points_last', { text: buchungText(scanState.letzteBuchung) })}
+                  </div>
+                  <button style={styles.nebenKnopf} disabled={loading}
+                          onClick={() => punkteAufruf('/api/points/undo',
+                            { bookingId: scanState.letzteBuchung.id })}>
+                    {t('scan_points_undo')}
+                  </button>
+                </div>
+              )}
+
+              <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
+            </div>
+          )
+        })()}
 
         {!pendingScan && !result && !cameraActive && (
             <>
@@ -326,6 +558,25 @@ export default function Scanner() {
 }
 
 const styles = {
+  standBox: { background: '#f8f8ff', borderRadius: '14px', padding: '16px', marginBottom: '16px' },
+  standLabel: { fontSize: '12px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' },
+  standWert: { fontSize: '36px', fontWeight: '900', color: '#3C3489', lineHeight: 1.1, margin: '4px 0' },
+  zielZeile: { fontSize: '13px', color: '#666' },
+  // textAlign 'start' statt 'left': auf Arabisch laeuft die Oberflaeche
+  // von rechts nach links.
+  feldLabel: { display: 'block', fontSize: '13px', fontWeight: '600', color: '#555', marginBottom: '6px', textAlign: 'start' },
+  betragFeld: { width: '100%', padding: '16px', fontSize: '22px', fontWeight: '700', textAlign: 'center', border: '1.5px solid #e0e0e0', borderRadius: '12px', marginBottom: '8px', boxSizing: 'border-box' },
+  vorschau: { fontSize: '14px', fontWeight: '600', color: '#2C5F2E', background: '#F0FFF4', borderRadius: '10px', padding: '10px', marginBottom: '14px' },
+  fehlerBanner: { fontSize: '13px', fontWeight: '600', color: '#c0392b', background: '#fff0f0', border: '1.5px solid #f5c6cb', borderRadius: '10px', padding: '10px', marginBottom: '12px' },
+  katalog: { marginTop: '8px', marginBottom: '12px' },
+  katalogTitel: { fontSize: '12px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', textAlign: 'start' },
+  praemie: { width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', padding: '14px', background: '#f8f8f8', border: '1.5px solid #e8e8e8', borderRadius: '12px', marginBottom: '6px', fontSize: '15px' },
+  praemieName: { fontWeight: '700', color: '#1a1a1a' },
+  praemieKosten: { fontSize: '13px', color: '#666' },
+  nebenKnopf: { width: '100%', padding: '12px', background: 'transparent', color: '#3C3489', border: '1.5px solid #ddd', borderRadius: '12px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginBottom: '10px' },
+  korrekturBox: { background: '#fffdf5', border: '1.5px solid #f0e0b0', borderRadius: '12px', padding: '12px', marginBottom: '10px' },
+  letzteBox: { borderTop: '1px solid #eee', paddingTop: '12px', marginTop: '4px' },
+  hinweis: { fontSize: '12px', color: '#888', marginBottom: '8px', textAlign: 'start' },
   header: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' },
   backBtn: { background: 'white', border: '1.5px solid #e0e0e0', borderRadius: '8px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: '24px', fontWeight: '700', color: '#1a1a1a' },
