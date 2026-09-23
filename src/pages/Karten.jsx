@@ -409,6 +409,21 @@ export default function Karten() {
     finally { setLoading(false) }
   }
 
+  /**
+   * Kartentyp umschalten.
+   *
+   * Eine Punktekarte gehoert meistens dem ganzen Laden, nicht einem
+   * Produkt - deshalb kommt der Ladenname als Vorschlag ins Namensfeld.
+   * Nur wenn dort noch nichts steht: eingetippte Namen werden nie
+   * ueberschrieben. Gekuerzt auf die 18 Zeichen des Feldes.
+   */
+  function waehleTyp(typ) {
+    setCardType(typ)
+    if (typ === 'POINTS' && !form.name.trim() && shop?.name) {
+      setForm(f => ({ ...f, name: shop.name.slice(0, 18) }))
+    }
+  }
+
   function zurueckZurListe() {
     setMode('list')
     setForm({name:'',description:'',rewardThreshold:10,rewardText:''})
@@ -602,18 +617,23 @@ export default function Karten() {
                         style={{...s.typeBtn,
                           background: cardType===typ ? '#3C3489' : '#f0f0f0',
                           color: cardType===typ ? 'white' : '#333'}}
-                        onClick={()=>setCardType(typ)}>
+                        onClick={()=>waehleTyp(typ)}>
                   {t(typ==='STAMP' ? 'cards_type_stamp' : 'cards_type_points')}
                 </button>
               ))}
             </div>
             <div style={s.typeHint}>{t('cards_type_hint')}</div>
 
+            {/* Beschreibung nur bei Stempelkarten. Das Feld wird nirgends
+                angezeigt - nicht auf der Kundenkarte, nicht im Wallet-Pass,
+                nicht in der Liste. Bei einer Punktekarte ist es reine
+                Reibung; createCard schickt dort den Kartennamen. */}
             {[
-              {label:t('cards_name'),key:'name',placeholder:t('cards_name_ph'),max:18},
-              {label:t('cards_desc'),key:'description',placeholder:t('cards_desc_ph'),max:40},
+              {label:t('cards_name'),key:'name',max:18,
+               placeholder:t(cardType==='POINTS' ? 'cards_name_ph_points' : 'cards_name_ph')},
               ...(cardType==='STAMP'
-                ? [{label:t('cards_reward'),key:'rewardText',placeholder:t('cards_reward_ph'),max:25}]
+                ? [{label:t('cards_desc'),key:'description',placeholder:t('cards_desc_ph'),max:40},
+                   {label:t('cards_reward'),key:'rewardText',placeholder:t('cards_reward_ph'),max:25}]
                 : []),
             ].map(({label,key,placeholder,max})=>(
                 <div key={key} style={s.field}>
