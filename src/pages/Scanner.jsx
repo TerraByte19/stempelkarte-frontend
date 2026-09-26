@@ -27,6 +27,8 @@ export default function Scanner() {
   const [pointsError, setPointsError] = useState(null)
   const [korrekturOffen, setKorrekturOffen] = useState(false)
   const [korrekturBetrag, setKorrekturBetrag] = useState('')
+  // Laeuft die Typ-Abfrage noch? Solange keine der beiden Masken zeigen.
+  const [typPruefung, setTypPruefung] = useState(false)
   const inputRef = useRef()
   const html5QrRef = useRef(null)
   const scanningRef = useRef(false)
@@ -64,6 +66,13 @@ export default function Scanner() {
     setSelectedCount(1)
     punkteZustandZuruecksetzen()
 
+    // Solange der Typ nicht feststeht, wird KEINE der beiden Masken
+    // gezeigt. Vorher rutschte hier immer erst die Stempelmaske ins Bild
+    // und sprang dann um - bei einem Render-Kaltstart sekundenlang. Das
+    // Personal haette in der Zeit schon auf "Stempel vergeben" tippen
+    // koennen.
+    setTypPruefung(true)
+
     // Welcher Kartentyp? Steht nicht im QR, sondern hinter der cardId.
     try {
       const token = localStorage.getItem('staffToken')
@@ -80,6 +89,8 @@ export default function Scanner() {
     } catch {
       // Netzfehler: ebenfalls Stempelmaske. Kein Abbruch, das Personal
       // steht am Kunden.
+    } finally {
+      setTypPruefung(false)
     }
   }
 
@@ -412,6 +423,19 @@ export default function Scanner() {
           // Die Weiche. Ohne Antwort vom Server (alter Stand, Netzfehler)
           // bleibt es bei der Stempelmaske - die ist der Weg, der in echten
           // Laeden laeuft.
+          // Erst warten, bis der Typ feststeht. Sonst blitzt die falsche
+          // Maske auf und das Personal tippt womoeglich schon darauf.
+          if (typPruefung) return (
+            <div style={styles.popup}>
+              <div style={{ ...styles.popupIcon, display: 'flex', justifyContent: 'center', color: '#3C3489' }}>
+                <Icon name="check-circle" size={44} strokeWidth={1.8} />
+              </div>
+              <h2 style={styles.popupTitle}>{t('scan_detected')}</h2>
+              <p style={styles.popupSubtitle}>{t('scan_checking_card')}</p>
+              <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
+            </div>
+          )
+
           const istPunkte = (scanState?.type ?? 'STAMP') === 'POINTS'
           const cents = centsAusEingabe(betrag)
 

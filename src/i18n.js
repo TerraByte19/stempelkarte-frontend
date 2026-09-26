@@ -70,6 +70,7 @@ export const translations = {
     cards_err_required_points: 'Bitte einen Namen eingeben',
 
     // Punktekarte - Scanner
+    scan_checking_card: 'Karte wird geprüft …',
     scan_points_title: 'Punkte buchen', scan_points_balance: 'Punktestand',
     scan_points_amount: 'Rechnungsbetrag', scan_points_amount_ph: 'z.B. 14,50',
     scan_points_preview: '{betrag} Euro ergibt {punkte} Punkte',
@@ -419,6 +420,7 @@ export const translations = {
     cards_err_required_points: 'Please enter a name',
 
     // Points card - scanner
+    scan_checking_card: 'Checking card …',
     scan_points_title: 'Add points', scan_points_balance: 'Balance',
     scan_points_amount: 'Bill amount', scan_points_amount_ph: 'e.g. 14.50',
     scan_points_preview: '{betrag} euro gives {punkte} points',
@@ -767,6 +769,7 @@ export const translations = {
     stat_points_none_redeemed: 'لم تُستبدل أي مكافأة بعد',
     cards_err_required_points: 'يرجى إدخال اسم',
 
+    scan_checking_card: 'جارٍ فحص البطاقة …',
     scan_points_title: 'إضافة نقاط', scan_points_balance: 'الرصيد',
     scan_points_amount: 'قيمة الفاتورة', scan_points_amount_ph: 'مثال: 14,50',
     scan_points_preview: '{betrag} يورو تمنح {punkte} نقطة',
