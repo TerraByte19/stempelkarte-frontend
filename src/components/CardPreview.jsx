@@ -122,6 +122,80 @@ function naechstesZiel(rewards, pointsX100) {
       : (b.costPointsX100 > a.costPointsX100 ? b : a))
 }
 
+/** Stile, die eine Grafik in den Streifen zeichnen (ohne das Stempelraster). */
+export const STREIFEN_STILE = ['balken', 'ring', 'fuellstand', 'foto']
+
+/** Gedeckelt auf 0..1 - dieselbe Regel wie PassTemplateGenerator.anteil. */
+function anteilVon(stand, ziel) {
+  if (!ziel || ziel <= 0) return 1
+  if (!stand || stand <= 0) return 0
+  return Math.min(1, stand / ziel)
+}
+
+/**
+ * Der Streifen, wie ihn der Pass zeichnet. Bewusst dieselben Verhaeltnisse
+ * wie im Backend (Balken im unteren Drittel, Ring rechts, Foto links
+ * abgedunkelt) - sonst verspricht die Vorschau etwas anderes als die Karte.
+ */
+function Streifen({ stil, anteil, akzent, fotoUrl, grund }) {
+  const rahmen = { position:'relative', width:'100%', aspectRatio:'375 / 144', overflow:'hidden' }
+  const prozent = Math.round(Math.max(0, Math.min(1, anteil)) * 100)
+
+  if (stil === 'foto') {
+    return (
+        <div style={rahmen}>
+          {fotoUrl
+            ? <img src={fotoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
+            : <div style={{width:'100%',height:'100%',background:'rgba(255,255,255,0.10)'}}/>}
+          <div style={{position:'absolute',inset:0,background:'linear-gradient(90deg, rgba(0,0,0,0.67) 0%, rgba(0,0,0,0) 70%)'}}/>
+        </div>
+    )
+  }
+
+  if (stil === 'ring') {
+    return (
+        <div style={{...rahmen, display:'flex', alignItems:'center', justifyContent:'flex-end', paddingRight:'7%'}}>
+          <div style={{width:'24%', aspectRatio:'1', borderRadius:'50%',
+            background:`conic-gradient(${akzent} 0% ${prozent}%, rgba(255,255,255,0.25) ${prozent}% 100%)`,
+            display:'grid', placeItems:'center'}}>
+            <div style={{width:'66%', aspectRatio:'1', borderRadius:'50%', background:grund}}/>
+          </div>
+        </div>
+    )
+  }
+
+  if (stil === 'fuellstand') {
+    const hoehe = 8 + prozent * 0.84
+    const pegel = 100 - hoehe
+    return (
+        <div style={rahmen}>
+          <svg viewBox="0 0 375 144" preserveAspectRatio="none" style={{width:'100%',height:'100%',display:'block'}}>
+            <path d={wellenPfad(pegel / 100 * 144)} fill={akzent}/>
+          </svg>
+        </div>
+    )
+  }
+
+  // Balken: unteres Drittel, damit oben Platz fuer Text bleibt.
+  return (
+      <div style={rahmen}>
+        <div style={{position:'absolute', left:'6%', right:'6%', top:'68%', height:'16%',
+          borderRadius:999, background:'rgba(255,255,255,0.25)', overflow:'hidden'}}>
+          <div style={{width:`${prozent}%`, height:'100%', borderRadius:999, background:akzent}}/>
+        </div>
+      </div>
+  )
+}
+
+/** Sinuswelle wie im Backend: drei halbe Wellen ueber die Breite. */
+function wellenPfad(pegel) {
+  let d = `M0 ${pegel}`
+  for (let x = 0; x <= 375; x += 15) {
+    d += ` L${x} ${(pegel + Math.sin((x / 375) * Math.PI * 3) * 10).toFixed(1)}`
+  }
+  return d + ' L375 144 L0 144 Z'
+}
+
 // ─── Wallet Vorschauen ───────────────────────────────────────────────────────
 
 export function ApplePreview({ design, stamps, threshold, rewardText, cardName, t,
@@ -130,6 +204,10 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
   const useUpload = d.stampIconType==='upload' && d.stampIconUrl
   const punkte = cardType==='POINTS'
   const ziel = punkte ? naechstesZiel(rewards, pointsX100) : null
+  const streifenStil = STREIFEN_STILE.includes(d.walletStyle) ? d.walletStyle : null
+  const anteil = punkte
+      ? anteilVon(pointsX100, ziel ? ziel.costPointsX100 : 0)
+      : anteilVon(stamps, threshold)
   return (
       <div style={{width:236,background:'linear-gradient(160deg,#3a3a3c,#1c1c1e)',borderRadius:42,padding:11,boxShadow:'0 22px 60px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.06)',margin:'0 auto'}}>
         {/* Bildschirm */}
@@ -157,6 +235,12 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
                   {punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
                 </span>
               </div>
+
+              {streifenStil && (
+                  <Streifen stil={streifenStil} anteil={anteil}
+                            akzent={d.stampColor || d.colorLabel} fotoUrl={d.stripImageUrl}
+                            grund={d.colorBackground}/>
+              )}
 
               {/* Inhalt je nach Kartentyp und Stil */}
               {punkte ? (

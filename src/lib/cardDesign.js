@@ -18,4 +18,6 @@ export const DEFAULT_DESIGN = {
   stampColor: '#6F4E37',
   emptyStampStyle: 'number',
   stampIconUrl: '',
+  stripImageUrl: '',
+  stripOriginalUrl: '',
 }

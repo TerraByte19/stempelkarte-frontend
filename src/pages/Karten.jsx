@@ -13,11 +13,12 @@ const PRESET_KEYS = ['coffee', 'star', 'heart', 'dot', 'square']
 
 // ─── Komplettes Design Panel ─────────────────────────────────────────────────
 
-function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t,
+function DesignPanel({ design, onChange, cardId=null, onStampFile=null, onStripFile=null, t,
                       zeigeStempelDesign=true }) {
   const logoRef = useRef()
   const heroRef = useRef()
   const stampRef = useRef()
+  const stripRef = useRef()
   const [uploading, setUploading] = useState('')
   // Bild-Zuschnitt-Dialog: {datei, form, ratio, ausgabe, aufFertig}
   const [cropper, setCropper] = useState(null)
@@ -83,6 +84,23 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t,
       onAbbrechen={() => setCropper(null)}
     />
   )
+
+  // Streifenbild gehoert immer zu EINER Karte - es gibt keinen Shop-Endpunkt.
+  // Beim Anlegen ist die Karte noch nicht da: Bild lokal zeigen und nach dem
+  // Anlegen hochladen, genau wie beim Stempel-Bild.
+  function handleStripFile(file, original) {
+    if (!file) return
+    if (cardId) {
+      upload(file, `/api/shop/cards/${cardId}/strip`, 'strip', original)
+    } else {
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        onChange({ ...d, stripImageUrl: ev.target.result })
+        if (onStripFile) onStripFile({ blob: file, original })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const logoEndpoint = cardId ? `/api/shop/cards/${cardId}/logo` : '/api/shop/logo'
   const heroEndpoint = cardId ? `/api/shop/cards/${cardId}/hero` : '/api/shop/hero'
@@ -182,20 +200,66 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, t,
                    aufFertig:(b,orig)=>upload(b, heroEndpoint, 'hero', orig) })}/>
         </div>
 
-        {/* Wallet-Stil, Stempel-Icon, -Farbe und leere Stempel zeichnen
-           auf einer Punktekarte nichts - dort gibt es kein Raster. */}
-        {zeigeStempelDesign && (<>
         {/* ── Wallet-Stil ── */}
+        {/* Das Raster zeichnet Stempel und ergibt auf einer Punktekarte
+           nichts - alle anderen Stile rechnen mit dem Fortschritt und
+           passen auf beide Kartenarten. */}
         <div style={dp.section}>
           <div style={dp.sectionTitle}>{t('design_wallet_style')}</div>
           <div style={dp.row2}>
-            {[{val:'number',label:t('design_style_numbers'),desc:t('design_style_numbers_desc')},{val:'grid',label:t('design_style_grid'),desc:t('design_style_grid_desc')}].map(({val,label,desc})=>(
+            {[
+              {val:'number',label:t('design_style_numbers'),desc:t('design_style_numbers_desc')},
+              ...(zeigeStempelDesign ? [{val:'grid',label:t('design_style_grid'),desc:t('design_style_grid_desc')}] : []),
+              {val:'balken',label:t('design_style_bar'),desc:t('design_style_bar_desc')},
+              {val:'ring',label:t('design_style_ring'),desc:t('design_style_ring_desc')},
+              {val:'fuellstand',label:t('design_style_fill'),desc:t('design_style_fill_desc')},
+              {val:'foto',label:t('design_style_photo'),desc:t('design_style_photo_desc')},
+            ].map(({val,label,desc})=>(
                 <div key={val} style={{...dp.card,...(d.walletStyle===val?dp.active:{})}} onClick={()=>onChange({...d,walletStyle:val})}>
                   <div style={dp.cardLabel}>{label}</div><div style={dp.cardDesc}>{desc}</div>
                 </div>
             ))}
           </div>
         </div>
+
+        {/* ── Streifenbild (nur beim Foto-Stil) ── */}
+        {d.walletStyle==='foto' && (
+        <div style={dp.section}>
+          <div style={dp.sectionTitle}>{t('design_strip')}</div>
+          {d.stripImageUrl ? (
+              <img src={d.stripImageUrl} alt="" style={{width:'100%',aspectRatio:'375 / 144',objectFit:'cover',borderRadius:8,marginBottom:8,display:'block'}}/>
+          ) : (
+              <div style={{width:'100%',height:50,background:'#f5f5f7',borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:8}}>
+                <span style={{fontSize:12,color:'#bbb'}}>{t('design_strip_none')}</span>
+              </div>
+          )}
+          <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+            <button style={dp.uploadBtn} onClick={()=>stripRef.current?.click()} disabled={uploading==='strip'}>
+              {uploading==='strip'?t('common_loading'):d.stripImageUrl?t('common_change'):t('common_upload')}
+            </button>
+            {d.stripOriginalUrl && (
+                <button style={dp.uploadBtn} disabled={uploading==='strip'}
+                        onClick={()=>bearbeite(d.stripOriginalUrl, { form:'breit', ratio:375/144, ausgabe:1125,
+                          aufFertig:(b,orig)=>handleStripFile(b,orig) })}>
+                  {t('common_edit')}
+                </button>
+            )}
+            {d.stripImageUrl && (
+                <button style={dp.removeBtn} onClick={()=>onChange({...d, stripImageUrl:''})} disabled={uploading==='strip'}>
+                  {t('common_remove')}
+                </button>
+            )}
+          </div>
+          <div style={{fontSize:11,color:'#aaa',marginTop:4}}>{t('design_strip_hint')}</div>
+          <input ref={stripRef} type="file" accept="image/*" style={{display:'none'}}
+                 onChange={e=>waehleBild(e, { form:'breit', ratio:375/144, ausgabe:1125,
+                   aufFertig:(b,orig)=>handleStripFile(b,orig) })}/>
+        </div>
+        )}
+
+        {/* Stempel-Icon, -Farbe und leere Stempel zeichnen auf einer
+           Punktekarte nichts - dort gibt es kein Raster. */}
+        {zeigeStempelDesign && (<>
 
         {/* ── Stempel-Icon ── */}
         <div style={dp.section}>
@@ -296,6 +360,7 @@ export default function Karten() {
   const [form, setForm] = useState({name:'',description:'',rewardThreshold:10,rewardText:''})
   const [design, setDesign] = useState({...DEFAULT_DESIGN})
   const [pendingStampFile, setPendingStampFile] = useState(null)
+  const [pendingStripFile, setPendingStripFile] = useState(null)
 
   // Kartentyp: nur beim Anlegen waehlbar, danach fest. Ein Wechsel wuerde
   // bestehende Staende bedeutungslos machen - 7 Stempel sind keine 7 Punkte.
@@ -346,7 +411,8 @@ export default function Karten() {
       // Falls ein eigenes Stempel-Bild ausgewählt wurde, ist stampIconUrl aktuell
       // eine lokale Data-URL (Vorschau) — die NICHT speichern. Wird nach dem
       // Anlegen separat an die neue Karte hochgeladen.
-      const { stampIconUrl, ...designToSave } = design
+      // stripImageUrl ist im Anlege-Modus ebenfalls nur eine Data-URL.
+      const { stampIconUrl, stripImageUrl, stripOriginalUrl, ...designToSave } = design
 
       if (cardType==='POINTS') {
         const res = await api.post('/api/shop/cards/points', {
@@ -392,6 +458,24 @@ export default function Karten() {
           const body = { base64: await toB64(pendingStampFile.blob), extension: ext }
           if (pendingStampFile.original) body.originalBase64 = await toB64(pendingStampFile.original)
           await api.post(`/api/shop/cards/${res.data.id}/stamp-icon`, body)
+        } catch {
+          alert(t('cards_err_stamp_upload'))
+        }
+      }
+
+      // Streifenbild derselbe Weg: erst die Karte, dann das Bild.
+      if (pendingStripFile?.blob && res.data?.id) {
+        try {
+          const toB64 = (b) => new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result.split(',')[1])
+            reader.onerror = reject
+            reader.readAsDataURL(b)
+          })
+          const ext = pendingStripFile.blob.name ? pendingStripFile.blob.name.split('.').pop() : 'png'
+          const body = { base64: await toB64(pendingStripFile.blob), extension: ext }
+          if (pendingStripFile.original) body.originalBase64 = await toB64(pendingStripFile.original)
+          await api.post(`/api/shop/cards/${res.data.id}/strip`, body)
         } catch {
           alert(t('cards_err_stamp_upload'))
         }
@@ -683,7 +767,7 @@ export default function Karten() {
           {/* Spalte 2: Design */}
           <div className="sk-design-col" style={s.panel}>
             <div style={s.panelTitle}>{t('cards_design_panel')}</div>
-            <DesignPanel design={design} onChange={setDesign} onStampFile={setPendingStampFile} t={t} zeigeStempelDesign={cardType==='STAMP'}/>
+            <DesignPanel design={design} onChange={setDesign} onStampFile={setPendingStampFile} onStripFile={setPendingStripFile} t={t} zeigeStempelDesign={cardType==='STAMP'}/>
           </div>
 
           {/* Vorschau — volle Breite, nebeneinander */}
