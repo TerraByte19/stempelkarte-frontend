@@ -141,12 +141,12 @@ function Streifen({ stil, anteil, akzent, fotoUrl, grund }) {
   const rahmen = { position:'relative', width:'100%', aspectRatio:'375 / 144', overflow:'hidden' }
   const prozent = Math.round(Math.max(0, Math.min(1, anteil)) * 100)
 
-  if (stil === 'foto') {
+  // Ohne Bild zeichnet der Pass den Balken - die Vorschau muss dasselbe
+  // zeigen, sonst verspricht sie ein Foto, das auf der Karte nicht kommt.
+  if (stil === 'foto' && fotoUrl) {
     return (
         <div style={rahmen}>
-          {fotoUrl
-            ? <img src={fotoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
-            : <div style={{width:'100%',height:'100%',background:'rgba(255,255,255,0.10)'}}/>}
+          <img src={fotoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
           <div style={{position:'absolute',inset:0,background:'linear-gradient(90deg, rgba(0,0,0,0.67) 0%, rgba(0,0,0,0) 70%)'}}/>
         </div>
     )
