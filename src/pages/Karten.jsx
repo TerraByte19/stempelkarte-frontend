@@ -8,6 +8,7 @@ import PointsSettings from '../components/PointsSettings'
 import RewardCatalog from '../components/RewardCatalog'
 import { DEFAULT_DESIGN } from '../lib/cardDesign'
 import { blobZuBase64 } from '../lib/bild'
+import { formatierePunkte } from '../lib/pointsOf'
 
 const PRESET_KEYS = ['coffee', 'star', 'heart', 'dot', 'square']
 
@@ -356,6 +357,9 @@ export default function Karten() {
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [previewStamps, setPreviewStamps] = useState(3)
+  // null = noch nicht angefasst, dann richtet sich die Vorschau nach dem
+  // Katalog. Sobald der Laden schiebt, gilt seine Zahl.
+  const [vorschauPunkte, setVorschauPunkte] = useState(null)
 
   const [form, setForm] = useState({name:'',description:'',rewardThreshold:10,rewardText:''})
   const [design, setDesign] = useState({...DEFAULT_DESIGN})
@@ -619,7 +623,11 @@ export default function Karten() {
   // saehe nie, wie die Karte mitten im Sammeln aussieht.
   const halberPreis = (liste) => liste.length === 0 ? 0
     : Math.round(Math.min(...liste.map(r => r.costPointsX100)) / 2)
-  const vorschauPunkteX100 = halberPreis(pendingRewards)
+  const vorschauPunkteX100 = vorschauPunkte ?? halberPreis(pendingRewards)
+  // Obergrenze des Reglers: die teuerste Praemie, sonst 20 Punkte. So
+  // laesst sich jeder Stand bis zum Ziel durchspielen.
+  const vorschauMaxX100 = Math.max(
+    2000, ...pendingRewards.map(r => r.costPointsX100 || 0))
   const editVorschauPunkteX100 = halberPreis(editRewards)
 
   // ?? 'STAMP', weil ein aelteres Backend das Feld noch nicht mitliefert.
@@ -745,6 +753,17 @@ export default function Karten() {
             ) : (
               <>
                 <PointsSettings value={pointsForm} onChange={setPointsForm} t={t}/>
+                {/* Derselbe Regler wie bei Stempelkarten: ohne ihn sieht man
+                    nicht, wie Balken, Ring oder Fuellstand mitwachsen. */}
+                <div style={{margin:'16px 0'}}>
+                  <div style={{fontSize:12,fontWeight:600,color:'#3C3489',marginBottom:6}}>
+                    {t('cards_preview_points', { n: formatierePunkte(vorschauPunkteX100) })}
+                  </div>
+                  <input type="range" min={0} max={vorschauMaxX100} step={100}
+                         value={Math.min(vorschauPunkteX100, vorschauMaxX100)}
+                         onChange={e=>setVorschauPunkte(Number(e.target.value))}
+                         style={{width:'100%',accentColor:'#3C3489'}}/>
+                </div>
                 {/* Praemien werden lokal gesammelt und erst nach dem Anlegen
                     hochgeladen - genau wie das Stempel-Bild, das auch erst
                     eine Karten-ID braucht. */}
@@ -752,6 +771,7 @@ export default function Karten() {
                   rewards={pendingRewards}
                   onAdd={(name,costPointsX100)=>setPendingRewards(r=>[...r,{name,costPointsX100}])}
                   onRemove={weg=>setPendingRewards(r=>r.filter(x=>x!==weg))}
+                  pointsPerEuroX100={pointsForm.pointsPerEuroX100}
                   t={t}/>
               </>
             )}

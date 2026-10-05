@@ -102,3 +102,33 @@ export function centsAusEingabe(text) {
   if (!Number.isFinite(cents) || cents <= 0) return null
   return cents
 }
+
+/**
+ * Kurs als Satzpaar: "Fuer je X Euro gibt es Y Punkte".
+ *
+ * Das Formular fragte den Kurs vorher als Zahl plus Auswahlfeld ("Punkte
+ * pro Euro" / "Euro pro Punkt"). Wer so etwas zum ersten Mal einrichtet,
+ * muss dabei im Kopf umdrehen - und ein falsch verstandenes Auswahlfeld
+ * faellt erst auf, wenn Kunden zu viele Punkte bekommen haben. Zwei Zahlen
+ * in einem Satz brauchen kein Umdrehen und tragen beide Richtungen.
+ */
+export function kursAusPaar(euro, punkte) {
+  if (!Number.isFinite(euro) || !Number.isFinite(punkte)) return null
+  if (euro <= 0 || punkte <= 0) return null
+  return Math.max(1, Math.round((punkte * 100) / euro))
+}
+
+/**
+ * Die Gegenrichtung: aus dem gespeicherten Kurs ein Paar machen, das sich
+ * gut liest. Ab einem Punkt je Euro steht die 1 beim Euro, darunter beim
+ * Punkt - sonst stuenden dort krumme Zahlen wie "0,2 Punkte pro Euro".
+ */
+export function paarAusKurs(pointsPerEuroX100) {
+  if (!Number.isFinite(pointsPerEuroX100) || pointsPerEuroX100 <= 0) {
+    return { euro: 1, punkte: 1 }
+  }
+  if (pointsPerEuroX100 >= 100) {
+    return { euro: 1, punkte: Math.round(pointsPerEuroX100) / 100 }
+  }
+  return { euro: Math.round(10000 / pointsPerEuroX100) / 100, punkte: 1 }
+}

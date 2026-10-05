@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { punkteFuer, formatierePunkte, centsAusEingabe,
-         kursAusAnzeige, anzeigeAusKurs } from './pointsOf.js'
+         kursAusAnzeige, anzeigeAusKurs, kursAusPaar, paarAusKurs } from './pointsOf.js'
 
 // Dieselben Faelle wie PunkteRechnungTest im Backend. Weicht eine der
 // beiden Seiten ab, zeigt der Scanner dem Personal eine andere Zahl an,
@@ -120,4 +120,42 @@ test('unsinnige Eingabe gibt null statt eines kaputten Kurses', () => {
   assert.equal(kursAusAnzeige(0, true), null)
   assert.equal(kursAusAnzeige(-3, false), null)
   assert.equal(kursAusAnzeige(NaN, true), null)
+})
+
+test('kursAusPaar traegt beide Richtungen', () => {
+  // 1 Euro = 1 Punkt
+  assert.equal(kursAusPaar(1, 1), 100)
+  // 1 Euro = 10 Punkte
+  assert.equal(kursAusPaar(1, 10), 1000)
+  // 5 Euro = 1 Punkt - das war die Richtung, die im alten Auswahlfeld
+  // einmal um Faktor 100 danebenlag.
+  assert.equal(kursAusPaar(5, 1), 20)
+  // 2,50 Euro = 1 Punkt
+  assert.equal(kursAusPaar(2.5, 1), 40)
+})
+
+test('kursAusPaar lehnt Unsinn ab', () => {
+  for (const [e, p] of [[0, 1], [1, 0], [-1, 1], [1, -1], [NaN, 1], [1, NaN]]) {
+    assert.equal(kursAusPaar(e, p), null)
+  }
+})
+
+test('kursAusPaar faellt nie auf null', () => {
+  // 1000 Euro fuer einen Punkt waere rechnerisch 0,1 - abgerundet 0, und
+  // dann braechte jeder Einkauf gar nichts.
+  assert.ok(kursAusPaar(1000, 1) >= 1)
+})
+
+test('paarAusKurs liest sich in beide Richtungen', () => {
+  assert.deepEqual(paarAusKurs(100), { euro: 1, punkte: 1 })
+  assert.deepEqual(paarAusKurs(1000), { euro: 1, punkte: 10 })
+  assert.deepEqual(paarAusKurs(20), { euro: 5, punkte: 1 })
+  assert.deepEqual(paarAusKurs(40), { euro: 2.5, punkte: 1 })
+})
+
+test('Paar und Kurs gehen verlustfrei hin und zurueck', () => {
+  for (const kurs of [1, 20, 40, 100, 250, 1000, 5000]) {
+    const { euro, punkte } = paarAusKurs(kurs)
+    assert.equal(kursAusPaar(euro, punkte), kurs)
+  }
 })

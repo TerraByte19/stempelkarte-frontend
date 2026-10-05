@@ -11,7 +11,7 @@ const MAX_REWARDS = 20
  * allerdings in ganzen Punkten - eine Praemie fuer 2,5 Punkte hat noch
  * niemand gebraucht, und die Eingabe bliebe fehleranfaellig.
  */
-export default function RewardCatalog({ rewards, onAdd, onRemove, t }) {
+export default function RewardCatalog({ rewards, onAdd, onRemove, t, pointsPerEuroX100 = 100 }) {
   const [name, setName] = useState('')
   const [kosten, setKosten] = useState('')
 
@@ -27,6 +27,14 @@ export default function RewardCatalog({ rewards, onAdd, onRemove, t }) {
 
   const voll = rewards.length >= MAX_REWARDS
 
+  // Was der Kunde dafuer einkaufen muss. Punkte allein sagen niemandem,
+  // ob eine Praemie zu billig oder zu teuer ist - Euro schon.
+  const euroFuer = (punkteGanz) => {
+    if (!Number.isFinite(punkteGanz) || punkteGanz < 1 || pointsPerEuroX100 < 1) return null
+    return Math.round((punkteGanz * 100 * 100) / pointsPerEuroX100) / 100
+  }
+  const euroVorschau = euroFuer(punkte)
+
   return (
     <div style={s.block}>
       <label style={s.label}>{t('cards_catalog')}</label>
@@ -41,6 +49,11 @@ export default function RewardCatalog({ rewards, onAdd, onRemove, t }) {
           <span style={s.zeileName}>{r.name}</span>
           <span style={s.zeileKosten}>
             {t('cards_points_count', { n: formatierePunkte(r.costPointsX100) })}
+            {euroFuer(r.costPointsX100 / 100) !== null && (
+              <span style={s.zeileEuro}>
+                {' '}{t('cards_catalog_equals_euro', { euro: String(euroFuer(r.costPointsX100 / 100)).replace('.', ',') })}
+              </span>
+            )}
           </span>
           <button style={s.weg} onClick={() => onRemove(r)} title={t('common_remove')}>
             <Icon name="x" size={16} strokeWidth={2.4} />
@@ -56,6 +69,7 @@ export default function RewardCatalog({ rewards, onAdd, onRemove, t }) {
             style={s.name}
             type="text"
             maxLength={40}
+            aria-label={t('cards_catalog_name_label')}
             placeholder={t('cards_catalog_name_ph')}
             value={name}
             onChange={e => setName(e.target.value)}
@@ -64,7 +78,8 @@ export default function RewardCatalog({ rewards, onAdd, onRemove, t }) {
             style={s.kosten}
             type="text"
             inputMode="numeric"
-            placeholder={t('cards_catalog_cost')}
+            aria-label={t('cards_catalog_cost_label')}
+            placeholder={t('cards_catalog_cost_ph')}
             value={kosten}
             onChange={e => setKosten(e.target.value)}
           />
@@ -78,11 +93,17 @@ export default function RewardCatalog({ rewards, onAdd, onRemove, t }) {
           </button>
         </div>
       )}
+      {!voll && euroVorschau !== null && (
+        <div style={s.hint}>
+          {t('cards_catalog_equals_euro', { euro: String(euroVorschau).replace('.', ',') })}
+        </div>
+      )}
     </div>
   )
 }
 
 const s = {
+  zeileEuro: { color: '#aaa', fontWeight: '400' },
   block: { marginBottom: '20px' },
   label: { display: 'block', fontSize: '13px', fontWeight: '600', color: '#555', marginBottom: '4px', textAlign: 'start' },
   hint: { fontSize: '12px', color: '#999', marginBottom: '10px', textAlign: 'start' },
