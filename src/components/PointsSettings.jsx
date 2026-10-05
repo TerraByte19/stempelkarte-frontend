@@ -47,9 +47,25 @@ export default function PointsSettings({ value, onChange, t }) {
   const beispiel = formatierePunkte(punkteFuer(1000, pointsPerEuroX100, pointsRounding))
 
   // Die Rundungsarten mit echten Zahlen beschriften. "Kaufmaennisch" sagt
-  // niemandem etwas; "5,20 € ergeben 5 Punkte" schon.
+  // niemandem etwas; "5,70 € ergeben 6 Punkte" schon.
+  //
+  // Der Beispielbetrag wird gesucht, nicht gesetzt: bei 5,20 € und Kurs
+  // 1:1 ergeben Abrunden und kaufmaennisch beide 5, und dann sieht der
+  // Laden zwei gleiche Zeilen und haelt die Auswahl fuer kaputt.
+  const beispielCents = (() => {
+    const kandidaten = [570, 520, 750, 990, 1250, 333, 1999]
+    for (const cents of kandidaten) {
+      const ab = punkteFuer(cents, pointsPerEuroX100, 'ABRUNDEN')
+      const kauf = punkteFuer(cents, pointsPerEuroX100, 'KAUFMAENNISCH')
+      if (ab !== kauf) return cents
+    }
+    return 570
+  })()
+
+  const beispielEuro = (beispielCents / 100).toFixed(2).replace('.', ',')
+
   function rundungsBeispiel(art) {
-    return formatierePunkte(punkteFuer(520, pointsPerEuroX100, art))
+    return formatierePunkte(punkteFuer(beispielCents, pointsPerEuroX100, art))
   }
 
   return (
@@ -69,7 +85,7 @@ export default function PointsSettings({ value, onChange, t }) {
       <div style={s.beispiel}>{t('cards_rate_example', { euro: '10', punkte: beispiel })}</div>
 
       <label style={s.label}>{t('cards_rounding')}</label>
-      <div style={s.beispielOben}>{t('cards_rounding_hint')}</div>
+      <div style={s.beispielOben}>{t('cards_rounding_hint', { euro: beispielEuro })}</div>
       <select
         style={s.select}
         value={pointsRounding}
