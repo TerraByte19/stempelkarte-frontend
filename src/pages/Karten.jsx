@@ -202,19 +202,18 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, onStripF
         </div>
 
         {/* ── Wallet-Stil ── */}
-        {/* Das Raster zeichnet Stempel und ergibt auf einer Punktekarte
-           nichts - alle anderen Stile rechnen mit dem Fortschritt und
-           passen auf beide Kartenarten. */}
+        {/* Stempelkarte: Zahlen oder Raster, wie gehabt. Punktekarte: Zahlen
+           oder ein eigenes Bild. Balken, Ring und Fuellstand kann das
+           Backend weiterhin zeichnen, stehen aber nicht zur Auswahl -
+           ein Laden soll sich nicht durch sechs Varianten arbeiten. */}
         <div style={dp.section}>
           <div style={dp.sectionTitle}>{t('design_wallet_style')}</div>
           <div style={dp.row2}>
             {[
               {val:'number',label:t('design_style_numbers'),desc:t('design_style_numbers_desc')},
-              ...(zeigeStempelDesign ? [{val:'grid',label:t('design_style_grid'),desc:t('design_style_grid_desc')}] : []),
-              {val:'balken',label:t('design_style_bar'),desc:t('design_style_bar_desc')},
-              {val:'ring',label:t('design_style_ring'),desc:t('design_style_ring_desc')},
-              {val:'fuellstand',label:t('design_style_fill'),desc:t('design_style_fill_desc')},
-              {val:'foto',label:t('design_style_photo'),desc:t('design_style_photo_desc')},
+              ...(zeigeStempelDesign
+                ? [{val:'grid',label:t('design_style_grid'),desc:t('design_style_grid_desc')}]
+                : [{val:'foto',label:t('design_style_photo'),desc:t('design_style_photo_desc')}]),
             ].map(({val,label,desc})=>(
                 <div key={val} style={{...dp.card,...(d.walletStyle===val?dp.active:{})}} onClick={()=>onChange({...d,walletStyle:val})}>
                   <div style={dp.cardLabel}>{label}</div><div style={dp.cardDesc}>{desc}</div>
