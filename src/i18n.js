@@ -16,6 +16,11 @@ export const translations = {
     crop_apply: 'Übernehmen', crop_cancel: 'Abbrechen',
 
     // Dashboard
+    dash_geo_warn_title: 'Standort fehlt',
+    dash_geo_warn_text: 'Ohne hinterlegten Ladenort lässt sich nicht prüfen, ob ein Scan wirklich im Laden passiert. Ab {datum} ist Scannen ohne Standort gesperrt.',
+    dash_geo_blocked_title: 'Scannen gesperrt',
+    dash_geo_blocked_text: 'Für diesen Laden ist kein Standort hinterlegt. Stempeln und Punkte buchen sind deshalb gesperrt. Standort im Profil festlegen – am besten im Laden stehend.',
+    dash_geo_cta: 'Standort festlegen',
     dash_welcome: 'Willkommen', dash_subtitle: 'Hier ist deine Übersicht',
     dash_no_cards: 'Noch keine Karten —', dash_create_now: 'Jetzt erstellen',
     dash_select_card: 'Karte auswählen', dash_qr_title: 'QR-Code für Kunden',
@@ -382,6 +387,11 @@ export const translations = {
     crop_apply: 'Apply', crop_cancel: 'Cancel',
 
     // Dashboard
+    dash_geo_warn_title: 'Location missing',
+    dash_geo_warn_text: 'Without a shop location there is no way to tell whether a scan really happened in the shop. From {datum} scanning without a location is blocked.',
+    dash_geo_blocked_title: 'Scanning blocked',
+    dash_geo_blocked_text: 'No location is set for this shop, so stamping and points are blocked. Set the location in the profile, best done while standing in the shop.',
+    dash_geo_cta: 'Set location',
     dash_welcome: 'Welcome', dash_subtitle: 'Here is your overview',
     dash_no_cards: 'No cards yet —', dash_create_now: 'Create now',
     dash_select_card: 'Select card', dash_qr_title: 'QR code for customers',
@@ -748,6 +758,11 @@ export const translations = {
     crop_apply: 'تطبيق', crop_cancel: 'إلغاء',
 
     // لوحة التحكم
+    dash_geo_warn_title: 'الموقع غير محدد',
+    dash_geo_warn_text: 'بدون موقع للمتجر لا يمكن التحقق مما إذا كان المسح قد تم داخل المتجر فعلاً. اعتباراً من {datum} يُمنع المسح بدون موقع.',
+    dash_geo_blocked_title: 'المسح متوقف',
+    dash_geo_blocked_text: 'لا يوجد موقع محدد لهذا المتجر، لذلك تم إيقاف الأختام والنقاط. حدِّد الموقع في الملف الشخصي، ويفضَّل وأنت داخل المتجر.',
+    dash_geo_cta: 'تحديد الموقع',
     dash_welcome: 'مرحبًا', dash_subtitle: 'إليك نظرة عامة',
     dash_no_cards: 'لا توجد بطاقات بعد —', dash_create_now: 'أنشئ الآن',
     dash_select_card: 'اختر بطاقة', dash_qr_title: 'رمز QR للعملاء',

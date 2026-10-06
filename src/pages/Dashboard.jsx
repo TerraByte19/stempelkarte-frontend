@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import api from '../api'
 import ScannerSetupSection from '../components/ScannerSetupSection'
@@ -11,6 +12,9 @@ export default function Dashboard() {
   const [cards, setCards] = useState([])
   const [selectedCard, setSelectedCard] = useState(null)
   const [stats, setStats] = useState([])
+  // Standort-Pflicht: ohne hinterlegten Ladenort laeuft die Geo-Pruefung
+  // ins Leere, deshalb sperrt das Backend irgendwann das Scannen.
+  const [standort, setStandort] = useState(null)
   const shop = JSON.parse(localStorage.getItem('shop') || '{}')
   const printStyle = `@media print { body * { visibility: hidden; } #print-qr, #print-qr * { visibility: visible; } #print-qr { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; } }`
 
@@ -26,12 +30,32 @@ export default function Dashboard() {
     api.get('/api/shop/stats')
         .then(res => setStats(Array.isArray(res.data) ? res.data : []))
         .catch(() => setStats([]))
+
+    api.get('/api/shop/me')
+        .then(res => setStandort(res.data))
+        .catch(() => setStandort(null))
   }, [])
 
   return (
       <div>
         <h1 style={styles.title}>{t('dash_welcome')}, {shop.name}!</h1>
         <p style={styles.subtitle}>{t('dash_subtitle')}</p>
+
+        {standort && !standort.standortGesetzt && (
+            <div style={standort.scanGesperrt ? styles.warnHart : styles.warnWeich}>
+              <div style={styles.warnTitel}>
+                {t(standort.scanGesperrt ? 'dash_geo_blocked_title' : 'dash_geo_warn_title')}
+              </div>
+              <div style={styles.warnText}>
+                {standort.scanGesperrt
+                    ? t('dash_geo_blocked_text')
+                    : t('dash_geo_warn_text', {
+                        datum: new Date(standort.standortFristBis).toLocaleDateString()
+                      })}
+              </div>
+              <Link to="/profil" style={styles.warnBtn}>{t('dash_geo_cta')}</Link>
+            </div>
+        )}
 
         {stats.length > 0 && (
             <div style={styles.statsGrid}>
@@ -99,6 +123,11 @@ export default function Dashboard() {
 }
 
 const styles = {
+  warnWeich: { background: '#FFF7E6', border: '1.5px solid #E3B77E', borderRadius: '12px', padding: '16px 18px', marginBottom: '20px' },
+  warnHart: { background: '#FDECEA', border: '1.5px solid #D98B7A', borderRadius: '12px', padding: '16px 18px', marginBottom: '20px' },
+  warnTitel: { fontWeight: '700', fontSize: '15px', marginBottom: '4px', color: '#333' },
+  warnText: { fontSize: '14px', color: '#555', marginBottom: '10px', lineHeight: '1.5' },
+  warnBtn: { display: 'inline-block', background: '#3C3489', color: 'white', padding: '9px 16px', borderRadius: '9px', fontSize: '14px', fontWeight: '600', textDecoration: 'none' },
   title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
   subtitle: { fontSize: '14px', color: '#888', margin: '0 0 24px' },
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginBottom: '28px' },
