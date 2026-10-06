@@ -7,6 +7,12 @@ import NewsletterSection from '../components/NewsletterSection'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
+/** Leeres oder unlesbares Datum darf nicht als "Invalid Date" dastehen. */
+function fristText(wert) {
+  const d = wert ? new Date(wert) : null
+  return d && !Number.isNaN(d.getTime()) ? d.toLocaleDateString() : '-'
+}
+
 export default function Dashboard() {
   const { t } = useLang()
   const [cards, setCards] = useState([])
@@ -41,7 +47,11 @@ export default function Dashboard() {
         <h1 style={styles.title}>{t('dash_welcome')}, {shop.name}!</h1>
         <p style={styles.subtitle}>{t('dash_subtitle')}</p>
 
-        {standort && !standort.standortGesetzt && (
+        {/* Nur zeigen, wenn das Backend die Felder WIRKLICH liefert. Ein
+            aelteres Backend kennt sie nicht - dann waere standortGesetzt
+            undefined, der Banner erschiene bei jedem Laden, und aus dem
+            fehlenden Datum wuerde "Invalid Date". */}
+        {standort?.standortGesetzt === false && (
             <div style={standort.scanGesperrt ? styles.warnHart : styles.warnWeich}>
               <div style={styles.warnTitel}>
                 {t(standort.scanGesperrt ? 'dash_geo_blocked_title' : 'dash_geo_warn_title')}
@@ -49,9 +59,7 @@ export default function Dashboard() {
               <div style={styles.warnText}>
                 {standort.scanGesperrt
                     ? t('dash_geo_blocked_text')
-                    : t('dash_geo_warn_text', {
-                        datum: new Date(standort.standortFristBis).toLocaleDateString()
-                      })}
+                    : t('dash_geo_warn_text', { datum: fristText(standort.standortFristBis) })}
               </div>
               <Link to="/profil" style={styles.warnBtn}>{t('dash_geo_cta')}</Link>
             </div>
