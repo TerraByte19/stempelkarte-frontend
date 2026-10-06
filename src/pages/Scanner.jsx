@@ -4,6 +4,7 @@ import { Html5Qrcode } from 'html5-qrcode'
 import { useLang, localeTag } from '../LangContext'
 import Icon from '../components/Icon'
 import { punkteFuer, formatierePunkte, centsAusEingabe } from '../lib/pointsOf'
+import { holeStandort } from '../lib/standort'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -111,11 +112,14 @@ export default function Scanner() {
     setLoading(true)
     setPointsError(null)
     try {
+      // Nur beim Buchen, nicht beim Zuruecknehmen oder Einloesen: dort
+      // bringt der Ort nichts und kostet nur Wartezeit.
+      const ort = pfad.endsWith('/earn') ? await holeStandort() : null
       const token = localStorage.getItem('staffToken')
       const res = await fetch(`${API_URL}${pfad}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
-        body: JSON.stringify({ qrPayload: pendingScan, ...rumpf }),
+        body: JSON.stringify({ qrPayload: pendingScan, ...rumpf, ...(ort || {}) }),
       })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
@@ -170,11 +174,14 @@ export default function Scanner() {
     setLoading(true)
     setResult(null)
     try {
+      // Ort mitschicken, wenn das Geraet ihn hergibt. Kommt keiner, laeuft
+      // der Scan trotzdem - der Server merkt sich das nur.
+      const ort = await holeStandort()
       const token = localStorage.getItem('staffToken')
       const res = await fetch(`${API_URL}/api/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
-        body: JSON.stringify({ qrPayload: pendingScan, count: selectedCount }),
+        body: JSON.stringify({ qrPayload: pendingScan, count: selectedCount, ...ort }),
       })
       // Antwort darf auch kein JSON sein (Proxy-Fehlerseite) - dann leeres Objekt.
       const data = await res.json().catch(() => ({}))

@@ -17,6 +17,9 @@ export default function Admin() {
   // gezeigt. Wer eingeloggt sortiert, saehe sonst nur die zurueckspringende
   // Zeile und keinen Grund.
   const [sortError, setSortError] = useState('')
+  // Scans, die nicht am Laden passiert sind. Nur eine Liste - gesperrt wird
+  // nichts, siehe GeoPruefung im Backend.
+  const [geoVorfaelle, setGeoVorfaelle] = useState([])
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken')
@@ -50,6 +53,20 @@ export default function Admin() {
     }
   }
 
+  async function loadGeoVorfaelle(token) {
+    const t = token || sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/geo-vorfaelle`, {
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      setGeoVorfaelle(Array.isArray(data) ? data : [])
+    } catch (e) {
+      // Kein Grund, das Panel scheitern zu lassen - die Liste ist Beiwerk.
+    }
+  }
+
   async function loadShops(token) {
     const t = token || sessionStorage.getItem('adminToken')
     setLoading(true)
@@ -60,6 +77,7 @@ export default function Admin() {
       if (res.status === 401) { logout(); return }
       const data = await res.json()
       setShops(Array.isArray(data) ? data : [])
+      loadGeoVorfaelle(t)
     } catch (e) {
       setError('Fehler beim Laden')
     } finally {
@@ -196,6 +214,33 @@ export default function Admin() {
           </div>
           <button style={styles.btnLogout} onClick={logout}>Ausloggen</button>
         </div>
+
+        {geoVorfaelle.length > 0 && (
+          <div style={{ background: '#FBEFE2', border: '1px solid #E3B77E', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>
+              Scans ausserhalb des Ladens ({geoVorfaelle.length})
+            </div>
+            <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+              Der Stempel wurde gebucht. Der Ort kommt aus dem Browser des Personals
+              und ist nur so genau wie dessen Geraet.
+            </div>
+            <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+              {geoVorfaelle.map(v => (
+                <div key={v.id} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline',
+                                         padding: '6px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13 }}>
+                  <span style={{ fontWeight: 600, minWidth: 140 }}>{v.shopName}</span>
+                  <span style={{ color: v.art === 'WEIT_WEG' ? '#B4462F' : '#6B6678' }}>
+                    {v.art === 'WEIT_WEG' ? `${v.distanzMeter} m entfernt` : 'kein Ort gesendet'}
+                  </span>
+                  <span style={{ color: '#6B6678' }}>{v.staffLabel || 'ohne Kasse'}</span>
+                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
+                    {new Date(v.passiertAm).toLocaleString('de-DE')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={styles.stats}>
           <div style={styles.statCard}>
