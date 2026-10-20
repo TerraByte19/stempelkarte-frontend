@@ -9,7 +9,9 @@ const publicApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
 })
 
-const EMPTY = { name: '', shop: '', email: '', message: '', website: '' }
+export const INSTAGRAM_URL = 'https://www.instagram.com/stampit2026/'
+
+const EMPTY ={ name: '', shop: '', email: '', message: '', website: '' }
 
 export default function Contact() {
   const { t } = useLang()
@@ -46,6 +48,16 @@ export default function Contact() {
         <div className="lp-contact-copy">
           <h2>{t('lp_contact_title')}</h2>
           <p className="lp-lede">{t('lp_contact_body')}</p>
+          <p className="lp-contact-alt">{t('lp_contact_insta')}</p>
+          <a className="lp-insta" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
+                 stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" />
+            </svg>
+            <span dir="ltr">@stampit2026</span>
+          </a>
         </div>
 
         <form className="lp-form" onSubmit={submit} noValidate>

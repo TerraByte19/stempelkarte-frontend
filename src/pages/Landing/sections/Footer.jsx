@@ -1,4 +1,5 @@
 import { useLang } from '../../../LangContext'
+import { INSTAGRAM_URL } from './Contact'
 
 export default function Footer() {
   const { t } = useLang()
@@ -9,6 +10,7 @@ export default function Footer() {
         <span className="lp-footer-links">
           <a href="/impressum">{t('lp_foot_imprint')}</a>
           <a href="/datenschutz">{t('lp_foot_privacy')}</a>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Instagram</a>
         </span>
         <span>{t('lp_foot_made')}</span>
       </div>

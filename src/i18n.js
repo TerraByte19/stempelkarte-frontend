@@ -343,6 +343,7 @@ export const translations = {
     lp_contact_send: 'Anfrage senden', lp_contact_sending: 'Wird gesendet…',
     lp_contact_ok: 'Angekommen. Wir melden uns am selben Werktag.',
     lp_contact_err: 'Die Anfrage kam nicht durch. Versuch es gleich noch einmal oder schreib direkt an hallo@stampit.de.',
+    lp_contact_insta: 'Lieber per Nachricht? Schreib uns auch gern auf Instagram.',
     // Landing — Zahlen (alle Quellen geprueft, siehe Spec)
     lp_proof_eyebrow: 'Zahlen',
     lp_proof_title: 'Stammkunden sind billiger als neue Kunden',
@@ -714,6 +715,7 @@ export const translations = {
     lp_contact_send: 'Send request', lp_contact_sending: 'Sending…',
     lp_contact_ok: 'Received. We will reply the same business day.',
     lp_contact_err: 'The request did not go through. Try again in a moment or write to hallo@stampit.de.',
+    lp_contact_insta: 'Prefer a DM? You can also message us on Instagram.',
     // Landing — proof
     lp_proof_eyebrow: 'The numbers',
     lp_proof_title: 'Regulars cost less than new customers',
@@ -1084,6 +1086,7 @@ export const translations = {
     lp_contact_send: 'أرسل الطلب', lp_contact_sending: 'جارٍ الإرسال…',
     lp_contact_ok: 'وصلت رسالتك. نردّ في نفس يوم العمل.',
     lp_contact_err: 'لم يصل الطلب. أعد المحاولة بعد قليل أو راسلنا على hallo@stampit.de.',
+    lp_contact_insta: 'تفضّل الرسائل؟ راسلنا أيضاً على إنستغرام.',
     // صفحة التعريف — الأرقام
     lp_proof_eyebrow: 'الأرقام',
     lp_proof_title: 'الزبون الدائم أرخص من زبون جديد',

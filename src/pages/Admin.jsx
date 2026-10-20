@@ -20,6 +20,9 @@ export default function Admin() {
   // Scans, die nicht am Laden passiert sind. Nur eine Liste - gesperrt wird
   // nichts, siehe GeoPruefung im Backend.
   const [geoVorfaelle, setGeoVorfaelle] = useState([])
+  // Anfragen aus dem Kontaktformular der Landing-Page.
+  const [anfragen, setAnfragen] = useState([])
+  const [offeneAnfrage, setOffeneAnfrage] = useState(null)
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken')
@@ -67,6 +70,47 @@ export default function Admin() {
     }
   }
 
+  async function loadAnfragen(token) {
+    const t = token || sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/kontaktanfragen`, {
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      setAnfragen(Array.isArray(data) ? data : [])
+    } catch (e) {
+      // Wie bei den Geo-Vorfaellen: Beiwerk, das Panel laeuft weiter.
+    }
+  }
+
+  async function toggleAnfrageErledigt(id) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/kontaktanfragen/${id}/erledigt`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (res.ok) loadAnfragen()
+    } catch (e) {
+      alert('Fehler beim Abhaken')
+    }
+  }
+
+  async function deleteAnfrage(id, name) {
+    if (!confirm(`Anfrage von "${name}" löschen?`)) return
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/kontaktanfragen/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (res.ok) loadAnfragen()
+    } catch (e) {
+      alert('Fehler beim Löschen')
+    }
+  }
+
   async function loadShops(token) {
     const t = token || sessionStorage.getItem('adminToken')
     setLoading(true)
@@ -78,6 +122,7 @@ export default function Admin() {
       const data = await res.json()
       setShops(Array.isArray(data) ? data : [])
       loadGeoVorfaelle(t)
+      loadAnfragen(t)
     } catch (e) {
       setError('Fehler beim Laden')
     } finally {
@@ -213,6 +258,54 @@ export default function Admin() {
             <p style={styles.subtitle}>{shops.length} Laden registriert</p>
           </div>
           <button style={styles.btnLogout} onClick={logout}>Ausloggen</button>
+        </div>
+
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>
+            Kontaktanfragen ({anfragen.filter(a => !a.erledigt).length} offen)
+          </div>
+          <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+            Aus dem Formular auf der Startseite. Antworten per Mail an die angegebene Adresse.
+          </div>
+          {anfragen.length === 0 && (
+            <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Anfragen.</div>
+          )}
+          <div style={{ maxHeight: 420, overflowY: 'auto' }}>
+            {anfragen.map(a => (
+              <div key={a.id} style={{ padding: '8px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
+                                       opacity: a.erledigt ? 0.5 : 1 }}>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
+                  <button
+                    onClick={() => setOffeneAnfrage(offeneAnfrage === a.id ? null : a.id)}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                             font: 'inherit', fontWeight: 600, textAlign: 'start', minWidth: 140 }}>
+                    {a.laden} · {a.name}
+                  </button>
+                  <a href={`mailto:${a.email}?subject=${encodeURIComponent('Deine Anfrage bei Stampit')}`}
+                     style={{ color: '#3C3489' }}>{a.email}</a>
+                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
+                    {new Date(a.eingegangenAm).toLocaleString('de-DE')}
+                  </span>
+                  <button onClick={() => toggleAnfrageErledigt(a.id)}
+                          style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                   border: '1px solid #DDD9EE', background: a.erledigt ? '#F3F1FA' : '#EAF3EA' }}>
+                    {a.erledigt ? 'Wieder öffnen' : 'Erledigt'}
+                  </button>
+                  <button onClick={() => deleteAnfrage(a.id, a.name)}
+                          style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                   border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
+                    Löschen
+                  </button>
+                </div>
+                {offeneAnfrage === a.id && (
+                  <div style={{ whiteSpace: 'pre-line', marginTop: 8, padding: '8px 12px',
+                                borderInlineStart: '3px solid #3C3489', background: '#F7F6FB', borderRadius: 6 }}>
+                    {a.nachricht}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {geoVorfaelle.length > 0 && (

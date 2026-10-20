@@ -545,6 +545,15 @@
 .lp-contact-in { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: start; }
 .lp-contact-copy { display: flex; flex-direction: column; gap: 12px; }
 .lp-contact h2 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 700; letter-spacing: -.02em; }
+.lp-contact-alt { margin-top: 8px; font-size: 15px; color: var(--lp-muted); }
+.lp-insta {
+  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 9px 16px; border-radius: 999px;
+  border: 1px solid var(--lp-line); background: var(--lp-surface);
+  color: var(--lp-ink); font-weight: 600; font-size: 15px; text-decoration: none;
+}
+.lp-insta:hover { border-color: var(--lp-brand); color: var(--lp-brand); }
 .lp-form {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
   background: var(--lp-surface); border: 1px solid var(--lp-line);
