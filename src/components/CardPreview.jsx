@@ -227,8 +227,8 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
             <div style={{borderRadius:13,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 6px 18px rgba(0,0,0,0.28)',fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif'}}>
               {/* Header: Logo + Name links, Stempelzahl rechts */}
               <div style={{display:'flex',alignItems:'center',gap:7,padding:'11px 12px 8px'}}>
-                <div style={{width:24,height:24,borderRadius:'50%',background:'rgba(255,255,255,0.97)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
-                  {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:9,fontWeight:700,color:d.colorBackground}}>SK</span>}
+                <div style={{width:24,height:24,borderRadius:'50%',background:d.logoUrl?'transparent':'rgba(255,255,255,0.97)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
+                  {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'contain',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:9,fontWeight:700,color:d.colorBackground}}>SK</span>}
                 </div>
                 <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2}}>{cardName||t('preview_default_name')}</span>
                 <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>
