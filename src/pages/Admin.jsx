@@ -1,7 +1,5 @@
 ﻿import { useState, useEffect, Fragment } from 'react'
 import StatsView from '../components/StatsView'
-import { ApplePreview, GooglePreview } from '../components/CardPreview'
-import { useLang } from '../LangContext'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -477,7 +475,6 @@ export default function Admin() {
                       </button>
                     </div>
                   </div>
-                  {expanded && <ShopKartenVorschau shop={shop} />}
                   {expanded && <ShopStatsExpanded shop={shop} />}
                 </Fragment>
             )
@@ -485,63 +482,6 @@ export default function Admin() {
         </div>
     )
   }
-}
-
-/**
- * Wallet-Vorschau aller aktiven Karten eines Ladens - dieselben Bausteine
- * wie im Karten-Editor des Ladens. Nur ansehen, geaendert wird dort.
- */
-function ShopKartenVorschau({ shop }) {
-  const { t } = useLang()
-  const [karten, setKarten] = useState(null)
-  const [error, setError] = useState(false)
-
-  useEffect(() => {
-    let ok = true
-    const token = sessionStorage.getItem('adminToken')
-    fetch(`${BASE_URL}/api/admin/shops/${shop.id}/cards`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-        .then(res => { if (!res.ok) throw new Error('Ladefehler'); return res.json() })
-        .then(d => { if (ok) setKarten(Array.isArray(d) ? d : []) })
-        .catch(() => { if (ok) setError(true) })
-    return () => { ok = false }
-  }, [shop.id])
-
-  if (error) return <div style={expandStyles.panel}>Karten konnten nicht geladen werden.</div>
-  if (!karten) return <div style={expandStyles.panel}>Lade Karten...</div>
-  if (karten.length === 0) return <div style={expandStyles.panel}>Keine aktiven Karten.</div>
-
-  return (
-      <div style={expandStyles.panel}>
-        {karten.map(k => {
-          const threshold = k.rewardThreshold || 10
-          const props = {
-            design: k.design, stamps: Math.floor(threshold / 2), threshold,
-            rewardText: k.rewardText, cardName: k.name, t,
-            cardType: k.type === 'POINTS' ? 'POINTS' : 'STAMP',
-          }
-          return (
-              <div key={k.id} style={{ marginBottom: 24 }}>
-                <div style={{ fontWeight: 700, marginBottom: 2 }}>{k.name}</div>
-                <div style={{ fontSize: 12, color: '#9A94A8', marginBottom: 12 }}>
-                  {k.id} · {k.type === 'POINTS' ? 'Punktekarte' : `${threshold} Stempel`}
-                </div>
-                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: '#6B6678', marginBottom: 6 }}>Apple Wallet</div>
-                    <ApplePreview {...props} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 12, color: '#6B6678', marginBottom: 6 }}>Google Wallet</div>
-                    <GooglePreview {...props} />
-                  </div>
-                </div>
-              </div>
-          )
-        })}
-      </div>
-  )
 }
 
 function ShopStatsExpanded({ shop }) {
