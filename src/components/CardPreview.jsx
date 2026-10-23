@@ -60,7 +60,7 @@ function StempelRaster({ stamps, threshold, stampColor, emptyStyle, preset, useU
       <svg width={w} height={h} style={{overflow:'visible'}}>
         {items.map(({cx,cy,filled,num})=>(
             <g key={num}>
-              {filled ? (<><circle cx={cx} cy={cy} r={r} fill="rgba(255,255,255,0.92)"/><PresetIcon preset={preset} cx={cx} cy={cy} size={r*1.1} color={stampColor} useUpload={useUpload} stampIconUrl={stampIconUrl}/></>) :
+              {filled ? (<>{!(useUpload && stampIconUrl) && <circle cx={cx} cy={cy} r={r} fill="rgba(255,255,255,0.92)"/>}<PresetIcon preset={preset} cx={cx} cy={cy} size={r*1.1} color={stampColor} useUpload={useUpload} stampIconUrl={stampIconUrl}/></>) :
                   emptyStyle==='number' ? (<><circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth={1}/><text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.6)" fontSize={r*.85} fontWeight="700">{num}</text></>) :
                       (<><circle cx={cx} cy={cy} r={r} fill="rgba(255,255,255,0.15)"/><PresetIcon preset={preset} cx={cx} cy={cy} size={r*1.1} color="rgba(255,255,255,0.35)" alpha={0.4} useUpload={useUpload} stampIconUrl={stampIconUrl}/></>)}
             </g>
