@@ -55,6 +55,7 @@ export default function Profil() {
         </div>
 
         <Sperrbildschirm t={t} shop={shop} />
+        <Rueckhol t={t} shop={shop} />
         <StaffTokens t={t} />
       </div>
   )
@@ -207,6 +208,87 @@ function Sperrbildschirm({ t, shop }) {
         </form>
 
         <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
+      </div>
+  )
+}
+
+/**
+ * Rueckhol-Nachricht: wer so viele Tage nicht da war, bekommt einmal eine
+ * Nachricht auf seine Wallet-Karte. Der Server prueft stuendlich zwischen
+ * 10 und 19 Uhr (RueckholService).
+ */
+function Rueckhol({ t, shop }) {
+  const [enabled, setEnabled] = useState(!!shop.winbackEnabled)
+  const [days, setDays] = useState(shop.winbackDays || 14)
+  // Leer lassen = Standardtext.
+  const [text, setText] = useState(shop.winbackText || '')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  async function speichern(e) {
+    e.preventDefault()
+    setError('')
+    setSaving(true)
+    try {
+      await api.put('/api/shop/me/winback', { enabled, days, text: text.trim() })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>{t('profil_winback_title')}</h2>
+        <p style={{ ...s.hint, margin: '0 0 16px' }}>{t('profil_winback_hint')}</p>
+
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <form onSubmit={speichern}>
+          <label style={s.switchRow}>
+            <input type="checkbox" checked={enabled} onChange={e => setEnabled(e.target.checked)} />
+            <span style={s.switchLabel}>{t('profil_winback_switch')}</span>
+          </label>
+
+          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 12 }}>
+              {t('profil_winback_days_title')}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[14, 21, 30].map(d => (
+                  <button key={d} type="button" onClick={() => setDays(d)}
+                          style={{ ...s.btnSecondary, flex: 1,
+                            background: days === d ? '#3C3489' : '#f0eeff',
+                            color: days === d ? 'white' : '#3C3489' }}>
+                    {t('profil_winback_days', { n: d })}
+                  </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+            <label style={s.label}>{t('profil_winback_text')}</label>
+            <input style={s.input} maxLength={160} value={text}
+                   onChange={e => setText(e.target.value)}
+                   placeholder={t('profil_winback_text_ph')} />
+            <p style={s.hint}>{t('profil_winback_text_hint')}</p>
+          </div>
+
+          <button style={{ ...s.btnPrimary, marginTop: 14 }} type="submit" disabled={saving}>
+            {saving ? t('profil_saving') : t('profil_save')}
+          </button>
+        </form>
+
+        <p style={s.hint}>{t('profil_winback_note')}</p>
       </div>
   )
 }
