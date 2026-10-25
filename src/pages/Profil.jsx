@@ -55,6 +55,7 @@ export default function Profil() {
         </div>
 
         <Sperrbildschirm t={t} shop={shop} />
+        <ScanRadius t={t} shop={shop} />
         <StaffTokens t={t} />
       </div>
   )
@@ -187,6 +188,54 @@ function Sperrbildschirm({ t, shop }) {
         </form>
 
         <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
+      </div>
+  )
+}
+
+/**
+ * Wie weit vom hinterlegten Ladenort gescannt werden darf. Gespeichert wird
+ * sofort beim Antippen - drei Werte brauchen keinen Speichern-Knopf.
+ */
+function ScanRadius({ t, shop }) {
+  const [radius, setRadius] = useState(shop.scanRadiusMeter || 150)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  async function waehlen(meter) {
+    if (meter === radius) return
+    const vorher = radius
+    setRadius(meter)
+    setError('')
+    try {
+      await api.put('/api/shop/me/scan-radius', { meter })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setRadius(vorher)
+      setError(err.response?.data?.error || t('profil_save_error'))
+    }
+  }
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>{t('profil_radius_title')}</h2>
+        <p style={{ ...s.hint, margin: '0 0 16px' }}>{t('profil_radius_hint')}</p>
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+        <div style={{ display: 'flex', gap: 8 }}>
+          {[150, 200, 250].map(m => (
+              <button key={m} type="button" onClick={() => waehlen(m)}
+                      style={{ ...s.btnSecondary, flex: 1,
+                        background: radius === m ? '#3C3489' : '#f0eeff',
+                        color: radius === m ? 'white' : '#3C3489' }}>
+                {m} m
+              </button>
+          ))}
+        </div>
       </div>
   )
 }
