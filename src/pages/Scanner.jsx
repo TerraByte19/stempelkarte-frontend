@@ -4,7 +4,7 @@ import { Html5Qrcode } from 'html5-qrcode'
 import { useLang, localeTag } from '../LangContext'
 import Icon from '../components/Icon'
 import { punkteFuer, formatierePunkte, centsAusEingabe } from '../lib/pointsOf'
-import { holeStandort, erlaubnisStatus } from '../lib/standort'
+import { holeStandort, erlaubnisStatus, warSchonFreigegeben, merkeFreigabe, plattform, alsAppInstalliert } from '../lib/standort'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -71,8 +71,10 @@ export default function Scanner() {
         if (s.state === 'granted') { setOrtStatus('frei'); return }
         if (s.state === 'denied') { setOrtStatus('verweigert'); return }
       }
-      // Noch nicht entschieden: gleich fragen.
-      ortFreigeben()
+      // Noch nicht entschieden. Schon einmal freigegeben: gleich fragen.
+      // Sonst erst erklaeren und auf den Knopf warten.
+      if (warSchonFreigegeben()) ortFreigeben()
+      else setOrtStatus('offen')
     })
     return () => {
       aktiv = false
@@ -87,7 +89,7 @@ export default function Scanner() {
   async function ortFreigeben() {
     setOrtStatus('pruefe')
     const ort = await holeStandort(15_000)
-    if (ort) { setOrtStatus('frei'); return }
+    if (ort) { merkeFreigabe(); setOrtStatus('frei'); return }
     const s = await erlaubnisStatus()
     setOrtStatus(s?.state === 'denied' ? 'verweigert' : 'offen')
   }
@@ -393,8 +395,7 @@ export default function Scanner() {
               <>
                 <h2 style={styles.popupTitle}>{t('scan_geo_denied_title')}</h2>
                 <p style={styles.popupSubtitle}>{t('scan_geo_denied_text')}</p>
-                <p style={styles.hinweis}>{t('scan_geo_ios')}</p>
-                <p style={styles.hinweis}>{t('scan_geo_android')}</p>
+                <AnleitungStandort t={t} />
                 <button style={styles.confirmBtn} onClick={ortFreigeben}>{t('scan_geo_retry')}</button>
               </>
           )}
@@ -672,6 +673,26 @@ export default function Scanner() {
             </>
         )}
       </div>
+  )
+}
+
+/**
+ * Wie man den Standort nach einem "Ablehnen" wieder freigibt. Nur die
+ * Schritte fuer dieses Geraet: in der installierten App liegt der Schalter
+ * woanders als im Browser, und eine Liste fuer alle Faelle liest niemand.
+ */
+function AnleitungStandort({ t }) {
+  const os = plattform()
+  const app = alsAppInstalliert()
+  const schluessel = os === 'ios'
+      ? (app ? 'scan_geo_steps_ios_app' : 'scan_geo_steps_ios_web')
+      : os === 'android'
+          ? (app ? 'scan_geo_steps_android_app' : 'scan_geo_steps_android_web')
+          : 'scan_geo_steps_desktop'
+  return (
+      <ol style={{ textAlign: 'start', fontSize: '14px', color: '#333', lineHeight: 1.5, margin: '0 0 16px', paddingInlineStart: '20px' }}>
+        {t(schluessel).split('|').map((schritt, i) => <li key={i} style={{ marginBottom: '6px' }}>{schritt}</li>)}
+      </ol>
   )
 }
 

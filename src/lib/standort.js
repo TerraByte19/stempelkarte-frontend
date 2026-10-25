@@ -60,3 +60,31 @@ export async function erlaubnisStatus() {
     return null
   }
 }
+
+// Merker: auf diesem Geraet gab es schon einmal einen Ort. Dann darf der
+// Scanner beim Oeffnen direkt fragen - die Abfrage ist bekannt und wird
+// erwartet. Beim allerersten Mal kommt vorher eine Erklaerung, weil ein
+// reflexhaftes "Ablehnen" in der installierten App muehsam zu beheben ist.
+const MERKER = 'standortFreigegeben'
+
+export function warSchonFreigegeben() {
+  try { return localStorage.getItem(MERKER) === '1' } catch { return false }
+}
+
+export function merkeFreigabe() {
+  try { localStorage.setItem(MERKER, '1') } catch { /* egal */ }
+}
+
+/** 'ios' | 'android' | 'andere' */
+export function plattform() {
+  const ua = navigator.userAgent || ''
+  // iPadOS meldet sich als Mac - erkennbar am Touchscreen.
+  if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios'
+  if (/Android/.test(ua)) return 'android'
+  return 'andere'
+}
+
+/** Laeuft der Scanner als installierte App (vom Startbildschirm)? */
+export function alsAppInstalliert() {
+  return window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true
+}
