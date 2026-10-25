@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Html5Qrcode } from 'html5-qrcode'
+import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode'
 import { useLang, localeTag } from '../LangContext'
 import Icon from '../components/Icon'
 import { punkteFuer, formatierePunkte, centsAusEingabe } from '../lib/pointsOf'
@@ -106,7 +106,7 @@ export default function Scanner() {
 
   async function handleQrScanned(payload) {
     setQrInput('')
-    await stopCamera()
+    kameraPausieren()
     setPendingScan(payload)
     setSelectedCount(1)
     punkteZustandZuruecksetzen()
@@ -327,6 +327,32 @@ export default function Scanner() {
     } catch { /* Geraet unterstuetzt das nicht - egal */ }
   }
 
+  // Zwischen zwei Kunden nur pausieren, nicht ausschalten: jedes neue
+  // Einschalten ist fuer das iPhone eine neue Kamera-Anfrage, und in der
+  // installierten App fragt es dann jedes Mal nach der Erlaubnis.
+  function kameraPausieren() {
+    try {
+      if (html5QrRef.current?.getState() === Html5QrcodeScannerState.SCANNING) {
+        html5QrRef.current.pause(true)
+      }
+    } catch { /* Kamera lief gar nicht - egal */ }
+    setCameraActive(false)
+  }
+
+  async function kameraWeiter() {
+    try {
+      if (html5QrRef.current?.getState() === Html5QrcodeScannerState.PAUSED) {
+        setCameraActive(true)
+        html5QrRef.current.resume()
+        return
+      }
+    } catch {
+      // Fortsetzen ging schief: alte Kamera sauber freigeben, dann neu.
+      await stopCamera()
+    }
+    startCamera()
+  }
+
   async function stopCamera() {
     if (html5QrRef.current) {
       try {
@@ -344,14 +370,14 @@ export default function Scanner() {
     setResult(null)
     punkteZustandZuruecksetzen()
     scanningRef.current = false
-    startCamera()
+    kameraWeiter()
   }
 
   function cancelScan() {
     setPendingScan(null)
     punkteZustandZuruecksetzen()
     scanningRef.current = false
-    startCamera()
+    kameraWeiter()
   }
 
   const kopf = (
