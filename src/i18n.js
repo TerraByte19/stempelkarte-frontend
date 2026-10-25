@@ -149,8 +149,6 @@ export const translations = {
     profil_preview_hint: 'So sieht die Karte ungefähr in Google Wallet aus.',
     profil_design_moved_hint: 'Logo, Farben & Banner stellst du jetzt direkt bei jeder Karte ein.',
     // Profil — Sperrbildschirm-Erinnerung
-    profil_radius_title: 'Scan-Radius',
-    profil_radius_hint: 'So weit vom hinterlegten Ladenort darf gescannt werden. Weiter weg wird der Scan abgelehnt. Bei ungenauem Standort (z. B. Tablet ohne GPS) einen größeren Radius wählen.',
     profil_lock_title: 'Erinnerung auf dem Sperrbildschirm',
     profil_lock_hint: 'Ist die Karte voll, bietet das iPhone sie in der Nähe deines Ladens von selbst auf dem Sperrbildschirm an. Du musst nichts verschicken.',
     profil_lock_switch: 'Erinnerung einschalten',
@@ -534,8 +532,6 @@ export const translations = {
     profil_preview_hint: 'This is approximately how the card looks in Google Wallet.',
     profil_design_moved_hint: 'Logo, colors & banner are now set directly on each card.',
     // Profile — lock screen reminder
-    profil_radius_title: 'Scan radius',
-    profil_radius_hint: 'How far from the saved shop location scanning is allowed. Scans further away are rejected. Choose a larger radius if the location is inaccurate (e.g. tablet without GPS).',
     profil_lock_title: 'Lock screen reminder',
     profil_lock_hint: 'When the card is full, the iPhone offers it on the lock screen near your shop, all by itself. You send nothing.',
     profil_lock_switch: 'Turn the reminder on',
@@ -918,8 +914,6 @@ export const translations = {
     profil_preview_hint: 'هكذا تبدو البطاقة تقريبًا في Google Wallet.',
     profil_design_moved_hint: 'يمكنك الآن ضبط الشعار والألوان والبانر مباشرةً لكل بطاقة.',
     // الملف الشخصي — تذكير شاشة القفل
-    profil_radius_title: 'نطاق المسح',
-    profil_radius_hint: 'المسافة المسموح بالمسح ضمنها من موقع المتجر المحفوظ. يُرفض المسح من مسافة أبعد. اختر نطاقًا أكبر إذا كان الموقع غير دقيق (مثل جهاز لوحي بدون GPS).',
     profil_lock_title: 'تذكير على شاشة القفل',
     profil_lock_hint: 'عند امتلاء البطاقة، يعرضها الآيفون تلقائياً على شاشة القفل قرب متجرك. لا ترسل أنت شيئاً.',
     profil_lock_switch: 'تشغيل التذكير',
