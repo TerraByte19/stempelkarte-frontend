@@ -687,11 +687,11 @@ function AnleitungStandort({ t }) {
   const schluessel = os === 'ios'
       ? (app ? 'scan_geo_steps_ios_app' : 'scan_geo_steps_ios_web')
       : os === 'android'
-          ? (app ? 'scan_geo_steps_android_app' : 'scan_geo_steps_android_web')
+          ? 'scan_geo_steps_android'
           : 'scan_geo_steps_desktop'
   return (
       <ol style={{ textAlign: 'start', fontSize: '14px', color: '#333', lineHeight: 1.5, margin: '0 0 16px', paddingInlineStart: '20px' }}>
-        {t(schluessel).split('|').map((schritt, i) => <li key={i} style={{ marginBottom: '6px' }}>{schritt}</li>)}
+        {t(schluessel, { adresse: window.location.host }).split('|').map((schritt, i) => <li key={i} style={{ marginBottom: '6px' }}>{schritt}</li>)}
       </ol>
   )
 }
