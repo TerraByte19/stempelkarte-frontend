@@ -149,6 +149,8 @@ export const translations = {
     profil_preview_hint: 'So sieht die Karte ungefähr in Google Wallet aus.',
     profil_design_moved_hint: 'Logo, Farben & Banner stellst du jetzt direkt bei jeder Karte ein.',
     // Profil — Sperrbildschirm-Erinnerung
+    profil_lock_radius_title: 'Ab welcher Nähe',
+    profil_lock_radius_hint: 'So nah muss der Kunde am Laden sein, damit die Karte auf dem Sperrbildschirm erscheint. Mehr als 100 m lässt das iPhone nicht zu.',
     profil_lock_title: 'Erinnerung auf dem Sperrbildschirm',
     profil_lock_hint: 'Ist die Karte voll, bietet das iPhone sie in der Nähe deines Ladens von selbst auf dem Sperrbildschirm an. Du musst nichts verschicken.',
     profil_lock_switch: 'Erinnerung einschalten',
@@ -532,6 +534,8 @@ export const translations = {
     profil_preview_hint: 'This is approximately how the card looks in Google Wallet.',
     profil_design_moved_hint: 'Logo, colors & banner are now set directly on each card.',
     // Profile — lock screen reminder
+    profil_lock_radius_title: 'Distance',
+    profil_lock_radius_hint: 'How close the customer has to be for the card to appear on the lock screen. The iPhone does not allow more than 100 m.',
     profil_lock_title: 'Lock screen reminder',
     profil_lock_hint: 'When the card is full, the iPhone offers it on the lock screen near your shop, all by itself. You send nothing.',
     profil_lock_switch: 'Turn the reminder on',
@@ -914,6 +918,8 @@ export const translations = {
     profil_preview_hint: 'هكذا تبدو البطاقة تقريبًا في Google Wallet.',
     profil_design_moved_hint: 'يمكنك الآن ضبط الشعار والألوان والبانر مباشرةً لكل بطاقة.',
     // الملف الشخصي — تذكير شاشة القفل
+    profil_lock_radius_title: 'المسافة',
+    profil_lock_radius_hint: 'مدى قرب العميل من المتجر حتى تظهر البطاقة على شاشة القفل. لا يسمح iPhone بأكثر من 100 م.',
     profil_lock_title: 'تذكير على شاشة القفل',
     profil_lock_hint: 'عند امتلاء البطاقة، يعرضها الآيفون تلقائياً على شاشة القفل قرب متجرك. لا ترسل أنت شيئاً.',
     profil_lock_switch: 'تشغيل التذكير',

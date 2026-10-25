@@ -87,6 +87,8 @@ function Sperrbildschirm({ t, shop }) {
   // Eigener Text statt Standardtext. Leer lassen = Standard.
   const [textFull, setTextFull] = useState(shop.lockScreenTextFull || '')
   const [textProgress, setTextProgress] = useState(shop.lockScreenTextProgress || '')
+  // Ab welcher Naehe die Karte auftaucht. Mehr als 100 m laesst iOS nicht zu.
+  const [radius, setRadius] = useState(shop.lockScreenRadiusMeter || 100)
 
   function standortHolen() {
     if (!navigator.geolocation) {
@@ -120,6 +122,7 @@ function Sperrbildschirm({ t, shop }) {
         enabled, ...(koordinaten || {}),
         textFull: textFull.trim(),
         textProgress: textProgress.trim(),
+        radiusMeter: radius,
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
@@ -163,6 +166,23 @@ function Sperrbildschirm({ t, shop }) {
                 <Icon name="check" size={14} strokeWidth={2.4} />{t('profil_lock_captured')}
               </p>
           )}
+
+          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
+              {t('profil_lock_radius_title')}
+            </div>
+            <p style={{ ...s.hint, margin: '0 0 12px' }}>{t('profil_lock_radius_hint')}</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[50, 75, 100].map(m => (
+                  <button key={m} type="button" onClick={() => setRadius(m)}
+                          style={{ ...s.btnSecondary, flex: 1,
+                            background: radius === m ? '#3C3489' : '#f0eeff',
+                            color: radius === m ? 'white' : '#3C3489' }}>
+                    {m} m
+                  </button>
+              ))}
+            </div>
+          </div>
 
           <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
