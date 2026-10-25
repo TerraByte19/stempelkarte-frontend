@@ -1,15 +1,16 @@
 /**
- * Ort des Scanner-Geraets, so gut er zu bekommen ist.
+ * Ort des Scanner-Geraets.
  *
- * Der Server vergleicht ihn mit dem hinterlegten Ort des Ladens und meldet
- * Scans, die weit weg passieren. Gesperrt wird nichts: der Browser gibt den
- * Ort nur mit Erlaubnis her, ein Tablet ohne GPS schaetzt ueber das WLAN,
- * und in einem Hinterzimmer kommt gar nichts. Ein Scan darf daran nicht
- * scheitern - deshalb liefert diese Funktion im Zweifel null und wartet
- * hoechstens ein paar Sekunden.
+ * Seit 25.10.2026 Pflicht: der Server lehnt Scans ohne Ort oder ausserhalb
+ * des Ladens ab. Vorher lief der Scan auch ohne Ort durch - wer die Abfrage
+ * wegklickte, hatte die Pruefung umgangen. Deshalb fragt der Scanner jetzt
+ * beim Oeffnen und laesst erst nach der Freigabe scannen.
+ *
+ * holeStandort liefert im Zweifel null und wartet hoechstens ein paar
+ * Sekunden; was dann passiert, entscheidet der Aufrufer.
  */
 
-const WARTEZEIT_MS = 4000
+const WARTEZEIT_MS = 8000
 // Eine Minute alte Position reicht: der Laden bewegt sich nicht.
 const MAX_ALTER_MS = 60_000
 
@@ -43,4 +44,19 @@ export function holeStandort(timeoutMs = WARTEZEIT_MS) {
       { enableHighAccuracy: false, timeout: timeoutMs, maximumAge: MAX_ALTER_MS }
     )
   })
+}
+
+/**
+ * Erlaubnis-Status des Browsers fuer den Standort, als PermissionStatus
+ * (state: 'granted' | 'denied' | 'prompt', meldet Aenderungen ueber
+ * onchange). Null, wo es die Permissions-API nicht gibt - dann klaert erst
+ * die Abfrage selbst, woran wir sind.
+ */
+export async function erlaubnisStatus() {
+  try {
+    if (!navigator.permissions?.query) return null
+    return await navigator.permissions.query({ name: 'geolocation' })
+  } catch {
+    return null
+  }
 }

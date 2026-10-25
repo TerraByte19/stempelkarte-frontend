@@ -4,7 +4,7 @@ import { Html5Qrcode } from 'html5-qrcode'
 import { useLang, localeTag } from '../LangContext'
 import Icon from '../components/Icon'
 import { punkteFuer, formatierePunkte, centsAusEingabe } from '../lib/pointsOf'
-import { holeStandort } from '../lib/standort'
+import { holeStandort, erlaubnisStatus } from '../lib/standort'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -35,6 +35,12 @@ export default function Scanner() {
   const scanningRef = useRef(false)
   const navigate = useNavigate()
 
+  // Standort-Freigabe: gescannt wird erst, wenn der Browser den Ort hergibt.
+  // Die Abfrage kommt beim Oeffnen, nicht erst nach dem Scan - dort liess sie
+  // sich wegklicken, und der Stempel ging trotzdem raus.
+  // 'pruefe' | 'frei' | 'offen' | 'verweigert'
+  const [ortStatus, setOrtStatus] = useState('pruefe')
+
   // Besitzer (mit token) → Zurück-Pfeil zum Dashboard.
   // Mitarbeiter (nur staffToken) → Abmelden-Button zurück zum Login.
   const isScannerDevice = !localStorage.getItem('token')
@@ -49,6 +55,42 @@ export default function Scanner() {
     inputRef.current?.focus()
     return () => stopCamera()
   }, [])
+
+  useEffect(() => {
+    let status = null
+    let aktiv = true
+    erlaubnisStatus().then(s => {
+      if (!aktiv) return
+      status = s
+      if (s) {
+        // Erlaubnis in den Einstellungen geaendert: sofort nachziehen.
+        s.onchange = () => {
+          if (s.state === 'granted') setOrtStatus('frei')
+          else if (s.state === 'denied') setOrtStatus('verweigert')
+        }
+        if (s.state === 'granted') { setOrtStatus('frei'); return }
+        if (s.state === 'denied') { setOrtStatus('verweigert'); return }
+      }
+      // Noch nicht entschieden: gleich fragen.
+      ortFreigeben()
+    })
+    return () => {
+      aktiv = false
+      if (status) status.onchange = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (ortStatus === 'frei') inputRef.current?.focus()
+  }, [ortStatus])
+
+  async function ortFreigeben() {
+    setOrtStatus('pruefe')
+    const ort = await holeStandort(15_000)
+    if (ort) { setOrtStatus('frei'); return }
+    const s = await erlaubnisStatus()
+    setOrtStatus(s?.state === 'denied' ? 'verweigert' : 'offen')
+  }
 
   useEffect(() => {
     if (!qrInput.trim()) return
@@ -112,9 +154,13 @@ export default function Scanner() {
     setLoading(true)
     setPointsError(null)
     try {
-      // Nur beim Buchen, nicht beim Zuruecknehmen oder Einloesen: dort
-      // bringt der Ort nichts und kostet nur Wartezeit.
-      const ort = pfad.endsWith('/earn') ? await holeStandort() : null
+      // Bei jeder Buchung: der Server prueft auch Korrektur, Einloesen und
+      // Zuruecknehmen.
+      const ort = await holeStandort()
+      if (!ort) {
+        setPointsError(t('scan_geo_none'))
+        return
+      }
       const token = localStorage.getItem('staffToken')
       const res = await fetch(`${API_URL}${pfad}`, {
         method: 'POST',
@@ -174,9 +220,12 @@ export default function Scanner() {
     setLoading(true)
     setResult(null)
     try {
-      // Ort mitschicken, wenn das Geraet ihn hergibt. Kommt keiner, laeuft
-      // der Scan trotzdem - der Server merkt sich das nur.
+      // Ohne Ort kein Stempel - der Server wuerde ihn ohnehin ablehnen.
       const ort = await holeStandort()
+      if (!ort) {
+        setResult({ success: false, message: t('scan_geo_none') })
+        return
+      }
       const token = localStorage.getItem('staffToken')
       const res = await fetch(`${API_URL}/api/scan`, {
         method: 'POST',
@@ -303,8 +352,7 @@ export default function Scanner() {
     startCamera()
   }
 
-  return (
-      <div>
+  const kopf = (
         <div style={styles.header}>
           {/* Besitzer: Pfeil zum Dashboard. Mitarbeiter: Abmelden zurück zum Login. */}
           {isScannerDevice ? (
@@ -318,6 +366,45 @@ export default function Scanner() {
           )}
           <h1 style={styles.title}>{t('scan_title')}</h1>
         </div>
+  )
+
+  if (ortStatus !== 'frei') return (
+      <div>
+        {kopf}
+        <div style={styles.popup}>
+          <div style={{ ...styles.popupIcon, display: 'flex', justifyContent: 'center', color: ortStatus === 'verweigert' ? '#c0392b' : '#3C3489' }}>
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/>
+              <circle cx="12" cy="9.5" r="2.5"/>
+            </svg>
+          </div>
+          {ortStatus === 'pruefe' && (
+              <h2 style={styles.popupTitle}>{t('scan_geo_checking')}</h2>
+          )}
+          {ortStatus === 'offen' && (
+              <>
+                <h2 style={styles.popupTitle}>{t('scan_geo_title')}</h2>
+                <p style={styles.popupSubtitle}>{t('scan_geo_text')}</p>
+                <p style={styles.hinweis}>{t('scan_geo_once')}</p>
+                <button style={styles.confirmBtn} onClick={ortFreigeben}>{t('scan_geo_btn')}</button>
+              </>
+          )}
+          {ortStatus === 'verweigert' && (
+              <>
+                <h2 style={styles.popupTitle}>{t('scan_geo_denied_title')}</h2>
+                <p style={styles.popupSubtitle}>{t('scan_geo_denied_text')}</p>
+                <p style={styles.hinweis}>{t('scan_geo_ios')}</p>
+                <p style={styles.hinweis}>{t('scan_geo_android')}</p>
+                <button style={styles.confirmBtn} onClick={ortFreigeben}>{t('scan_geo_retry')}</button>
+              </>
+          )}
+        </div>
+      </div>
+  )
+
+  return (
+      <div>
+        {kopf}
 
         {/* Volle Breite wie am Anfang, nur die Hoehe etwas gekuerzt -> das Video
             wird oben/unten leicht beschnitten (object-fit:cover, siehe index.css).
