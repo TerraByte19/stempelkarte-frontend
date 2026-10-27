@@ -51,7 +51,7 @@ export default function Dashboard() {
             aelteres Backend kennt sie nicht - dann waere standortGesetzt
             undefined, der Banner erschiene bei jedem Laden, und aus dem
             fehlenden Datum wuerde "Invalid Date". */}
-        {standort?.standortGesetzt === false && (
+        {standort?.standortGesetzt === false && !standort.geoBefreit && (
             <div style={standort.scanGesperrt ? styles.warnHart : styles.warnWeich}>
               <div style={styles.warnTitel}>
                 {t(standort.scanGesperrt ? 'dash_geo_blocked_title' : 'dash_geo_warn_title')}

@@ -193,6 +193,21 @@ export default function Admin() {
     }
   }
 
+  // Standort-Pflicht pro Laden: befreite Laeden scannen ohne Standort.
+  async function toggleGeoPflicht(shopId) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shopId}/geo-pflicht`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (!res.ok) throw new Error()
+      loadShops()
+    } catch {
+      alert('Fehler beim Umstellen der Standort-Pflicht')
+    }
+  }
+
   // Sprache wird beim Erstellen festgelegt und ist danach fix - kein Umschalten.
 
   async function deleteShop(shopId, shopName) {
@@ -391,6 +406,7 @@ export default function Admin() {
             <span>Karten</span>
             <span>Kunden</span>
             <span>Max Tokens</span>
+            <span>Standort</span>
             <span>Status</span>
             <span>Aktionen</span>
           </div>
@@ -433,6 +449,21 @@ export default function Admin() {
                     <span style={styles.cell}>{shop.cardCount}</span>
                     <span style={styles.cell}>{shop.customerCount}</span>
                     <span style={styles.cell}>{shop.maxTokens}</span>
+                    <button
+                        title={shop.geoBefreit
+                            ? 'Befreit: scannt ohne Standort. Klicken = Pflicht einschalten'
+                            : 'Pflicht: Scan nur im Laden. Klicken = befreien'}
+                        style={{
+                          ...styles.status,
+                          border: 'none',
+                          cursor: 'pointer',
+                          background: shop.geoBefreit ? '#fff4e5' : '#e6f4ea',
+                          color: shop.geoBefreit ? '#b35c00' : '#2C5F2E',
+                        }}
+                        onClick={() => toggleGeoPflicht(shop.id)}
+                    >
+                      {shop.geoBefreit ? 'Befreit' : (shop.standortGesetzt ? 'Pflicht' : 'Pflicht · fehlt')}
+                    </button>
                     <span style={{
                       ...styles.status,
                       background: shop.active ? '#e6f4ea' : '#fce8e6',
@@ -670,8 +701,8 @@ const styles = {
   statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
   statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
   table: { background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'auto' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '1010px' },
-  tableRow: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1fr 3.4fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '1010px' },
+  tableHeader: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1.2fr 1fr 3.4fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '1110px' },
+  tableRow: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1.2fr 1fr 3.4fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '1110px' },
   dragHandle: { cursor: 'grab', color: '#bbb', fontSize: '16px', userSelect: 'none', lineHeight: 1 },
   sortError: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',

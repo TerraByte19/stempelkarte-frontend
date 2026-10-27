@@ -40,6 +40,8 @@ export default function Scanner() {
   // sich wegklicken, und der Stempel ging trotzdem raus.
   // 'pruefe' | 'frei' | 'offen' | 'verweigert'
   const [ortStatus, setOrtStatus] = useState('pruefe')
+  // Vom Admin befreite Laeden scannen ohne Standort.
+  const [ortPflicht, setOrtPflicht] = useState(true)
 
   // Besitzer (mit token) → Zurück-Pfeil zum Dashboard.
   // Mitarbeiter (nur staffToken) → Abmelden-Button zurück zum Login.
@@ -59,7 +61,16 @@ export default function Scanner() {
   useEffect(() => {
     let status = null
     let aktiv = true
-    erlaubnisStatus().then(s => {
+    standortPflicht().then(pflicht => {
+      if (!aktiv) return null
+      if (!pflicht) {
+        setOrtPflicht(false)
+        setOrtStatus('frei')
+        return null
+      }
+      return erlaubnisStatus().then(pruefeErlaubnis)
+    })
+    function pruefeErlaubnis(s) {
       if (!aktiv) return
       status = s
       if (s) {
@@ -75,7 +86,7 @@ export default function Scanner() {
       // Sonst erst erklaeren und auf den Knopf warten.
       if (warSchonFreigegeben()) ortFreigeben()
       else setOrtStatus('offen')
-    })
+    }
     return () => {
       aktiv = false
       if (status) status.onchange = null
@@ -85,6 +96,21 @@ export default function Scanner() {
   useEffect(() => {
     if (ortStatus === 'frei') inputRef.current?.focus()
   }, [ortStatus])
+
+  // Fragt den Server, ob dieser Laden einen Standort braucht. Geht das
+  // schief (alter Server, kein Netz), gilt die Pflicht - sicherer Rueckfall.
+  async function standortPflicht() {
+    try {
+      const res = await fetch(`${API_URL}/api/scan/einstellungen`, {
+        headers: { 'X-Staff-Token': localStorage.getItem('staffToken') },
+      })
+      if (!res.ok) return true
+      const data = await res.json()
+      return data.standortPflicht !== false
+    } catch {
+      return true
+    }
+  }
 
   async function ortFreigeben() {
     setOrtStatus('pruefe')
@@ -158,8 +184,8 @@ export default function Scanner() {
     try {
       // Bei jeder Buchung: der Server prueft auch Korrektur, Einloesen und
       // Zuruecknehmen.
-      const ort = await holeStandort()
-      if (!ort) {
+      const ort = ortPflicht ? await holeStandort() : null
+      if (ortPflicht && !ort) {
         setPointsError(t('scan_geo_none'))
         return
       }
@@ -223,8 +249,8 @@ export default function Scanner() {
     setResult(null)
     try {
       // Ohne Ort kein Stempel - der Server wuerde ihn ohnehin ablehnen.
-      const ort = await holeStandort()
-      if (!ort) {
+      const ort = ortPflicht ? await holeStandort() : null
+      if (ortPflicht && !ort) {
         setResult({ success: false, message: t('scan_geo_none') })
         return
       }
@@ -232,7 +258,7 @@ export default function Scanner() {
       const res = await fetch(`${API_URL}/api/scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
-        body: JSON.stringify({ qrPayload: pendingScan, count: selectedCount, ...ort }),
+        body: JSON.stringify({ qrPayload: pendingScan, count: selectedCount, ...(ort || {}) }),
       })
       // Antwort darf auch kein JSON sein (Proxy-Fehlerseite) - dann leeres Objekt.
       const data = await res.json().catch(() => ({}))
