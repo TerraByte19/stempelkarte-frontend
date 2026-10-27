@@ -377,6 +377,7 @@ export default function Karten() {
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
   const [editReward, setEditReward] = useState('')
   const [editStamps, setEditStamps] = useState(10)
+  const [editName, setEditName] = useState('')
 
   useEffect(()=>{
     loadCards()
@@ -523,23 +524,33 @@ export default function Karten() {
   }
 
   async function saveEditDesign() {
+    const nm = editName.trim()
+    if (!nm) return alert(t('cards_err_name_empty'))
     setLoading(true)
     try {
       await api.put(`/api/shop/cards/${editCard.id}/design`, editDesign)
       const rw = editReward.trim()
       const st = parseInt(editStamps)
+      const nameChanged = nm !== editCard.name
       const rewardChanged = rw && rw !== (editCard.rewardText || '')
       const stampsChanged = st >= 1 && st <= 100 && st !== editCard.rewardThreshold
-      if (rewardChanged || stampsChanged) {
-        await api.put(`/api/shop/cards/${editCard.id}/info`, {
+      if (nameChanged || rewardChanged || stampsChanged) {
+        const res = await api.put(`/api/shop/cards/${editCard.id}/info`, {
+          name: nameChanged ? nm : null,
           rewardText: rewardChanged ? rw : null,
           rewardThreshold: stampsChanged ? st : null,
         })
+        // Ein aelteres Backend ignoriert das Feld "name" stillschweigend und
+        // antwortet ohne es. Dann nicht so tun, als waere umbenannt worden.
+        const nameBackendAlt = nameChanged && res.data?.name !== nm
+        if (nameBackendAlt) setEditName(editCard.name)
         setEditCard(c => ({
           ...c,
+          name: nameChanged && !nameBackendAlt ? nm : c.name,
           rewardText: rewardChanged ? rw : c.rewardText,
           rewardThreshold: stampsChanged ? st : c.rewardThreshold,
         }))
+        if (nameBackendAlt) alert(t('scan_points_backend_old'))
       }
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       loadCards()
@@ -581,6 +592,7 @@ export default function Karten() {
     setEditCard(card)
     setEditReward(card.rewardText || '')
     setEditStamps(card.rewardThreshold || 10)
+    setEditName(card.name || '')
     setEditRewards([])
     if ((card.type ?? 'STAMP') === 'POINTS') ladeRewards(card.id)
     setEditDesign({
@@ -736,6 +748,7 @@ export default function Karten() {
                   </label>
                   <input style={s.input} value={form[key]} placeholder={placeholder} maxLength={max}
                          onChange={e=>setForm({...form,[key]:e.target.value})}/>
+                  {key==='name' && <div style={s.fieldHint}>{t('cards_name_android_hint')}</div>}
                 </div>
             ))}
             {cardType==='STAMP' ? (
@@ -820,6 +833,20 @@ export default function Karten() {
           <div style={{...s.panel,maxHeight:'80vh',overflowY:'auto'}}>
             <div style={s.panelTitle}>{t('cards_design_panel')}</div>
 
+            <div style={{marginBottom:16}}>
+              <label style={{fontSize:11,fontWeight:800,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:0.8,display:'block'}}>
+                {t('cards_name')}
+                <span style={{float:'right',fontSize:11,color:editName.length>=18?'#c00':'#bbb',fontWeight:500}}>{editName.length}/18</span>
+              </label>
+              <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
+                     value={editName} maxLength={18} onChange={e=>setEditName(e.target.value)}
+                     placeholder={t(istPunktekarte ? 'cards_name_ph_points' : 'cards_name_ph')}/>
+              <div style={s.fieldHint}>{t('cards_name_android_hint')}</div>
+              {editName.trim() && editName.trim() !== editCard.name && (
+                  <div style={{fontSize:11,color:'#B35309',marginTop:6,lineHeight:1.45}}>{t('cards_name_warn')}</div>
+              )}
+            </div>
+
             {/* Bei einer Punktekarte ersetzt der Katalog Belohnung und
                 Schwelle. Der Typ selbst wird nicht angeboten - er ist fest. */}
             {istPunktekarte ? (
@@ -867,7 +894,7 @@ export default function Karten() {
             </div>
             <div>
               <div style={s.previewLabel}>Google Wallet</div>
-              <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}
+              <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editName.trim() || editCard.name} t={t}
                             cardType={istPunktekarte ? 'POINTS' : 'STAMP'} rewards={editRewards} pointsX100={editVorschauPunkteX100}/>
             </div>
           </div>
@@ -892,6 +919,7 @@ const s = {
   editGrid: {display:'grid',gridTemplateColumns:'1fr',gap:20,alignItems:'start'},
   field: {display:'flex',flexDirection:'column',marginBottom:12},
   label: {fontSize:13,fontWeight:500,color:'#444',marginBottom:5},
+  fieldHint: {fontSize:11,color:'#999',marginTop:5,lineHeight:1.45,textAlign:'start'},
   input: {padding:'9px 13px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:14,outline:'none',boxSizing:'border-box'},
   btnCreate: {width:'100%',marginTop:8,padding:13,borderRadius:10,border:'none',background:'#3C3489',color:'white',fontSize:14,fontWeight:700,cursor:'pointer',transition:'background 0.2s'},
   previewLabel: {fontSize:12,fontWeight:700,color:'#555',marginBottom:10},
