@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import api from '../api'
 import { useLang } from '../LangContext'
 import Icon from '../components/Icon'
+import { ApplePreview, GooglePreview } from '../components/CardPreview'
 
 export default function Profil() {
   const { t } = useLang()
@@ -52,11 +53,138 @@ export default function Profil() {
             </button>
           </form>
           <p style={s.hint}>{t('profil_design_moved_hint')}</p>
+          <NamensFarbe t={t} shop={shop} name={name} />
         </div>
 
         <Sperrbildschirm t={t} shop={shop} />
         <Rueckhol t={t} shop={shop} />
         <StaffTokens t={t} />
+      </div>
+  )
+}
+
+/**
+ * Eigene Farbe fuer den Ladennamen. Wirkt auf der Kundenseite und im
+ * Apple-Pass - dort zeichnet der Server den Namen ins Logo, weil Apple den
+ * Text sonst immer in der Textfarbe der Karte zeigt. Google waehlt selbst.
+ *
+ * Darunter die Wallet-Vorschau, eingeklappt: sie laedt die Karten erst beim
+ * Aufklappen und nimmt sonst keinen Platz weg.
+ */
+function NamensFarbe({ t, shop, name }) {
+  const [eigene, setEigene] = useState(!!shop.nameColor)
+  const [farbe, setFarbe] = useState(shop.nameColor || '#FFFFFF')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+  const [offen, setOffen] = useState(false)
+  const [karten, setKarten] = useState(null)
+  const [kartenId, setKartenId] = useState('')
+
+  useEffect(() => {
+    if (!offen || karten) return
+    api.get('/api/shop/cards')
+        .then(r => { setKarten(r.data); setKartenId(r.data[0]?.id || '') })
+        .catch(() => setKarten([]))
+  }, [offen, karten])
+
+  async function speichern() {
+    setError('')
+    setSaving(true)
+    try {
+      await api.put('/api/shop/me/name-color', { color: eigene ? farbe : '' })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const karte = karten?.find(k => k.id === kartenId)
+  // Wie im Karten-Design: Karte zuerst, Laden als Rueckfall.
+  const design = karte && {
+    colorBackground: karte.colorBackground || '#3C3489',
+    colorForeground: karte.colorForeground || '#FFFFFF',
+    colorLabel: karte.colorLabel || '#FAC875',
+    logoUrl: karte.logoUrl || shop.logoUrl || '',
+    logoRing: !!karte.logoRing,
+    heroImageUrl: karte.heroImageUrl || '',
+    walletStyle: karte.walletStyle || 'number',
+    stampIconType: karte.stampIconType || 'preset',
+    stampPreset: karte.stampPreset || 'coffee',
+    stampColor: karte.stampColor || '#6F4E37',
+    emptyStampStyle: karte.emptyStampStyle || 'number',
+    stampIconUrl: karte.stampIconUrl || '',
+  }
+  const schwelle = karte?.rewardThreshold || 10
+
+  return (
+      <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
+          {t('profil_name_color_title')}
+        </div>
+        <p style={{ ...s.hint, margin: '0 0 12px' }}>{t('profil_name_color_hint')}</p>
+
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <label style={s.switchRow}>
+          <input type="checkbox" checked={eigene} onChange={e => setEigene(e.target.checked)} />
+          <span style={s.switchLabel}>{t('profil_name_color_switch')}</span>
+        </label>
+
+        {eigene && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
+              <input type="color" value={farbe} onChange={e => setFarbe(e.target.value.toUpperCase())}
+                     style={{ width: 44, height: 36, border: 'none', background: 'none', padding: 0, cursor: 'pointer' }} />
+              <span style={{ fontFamily: 'monospace', fontSize: 13, color: '#555' }}>{farbe}</span>
+            </div>
+        )}
+
+        <button type="button" style={{ ...s.btnPrimary, marginTop: 14 }} onClick={speichern} disabled={saving}>
+          {saving ? t('profil_saving') : t('profil_name_color_save')}
+        </button>
+        <p style={s.hint}>{t('profil_name_color_delay')}</p>
+
+        <button type="button" onClick={() => setOffen(o => !o)}
+                style={{ ...s.btnSecondary, width: '100%', marginTop: 16,
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>{offen ? t('profil_preview_hide') : t('profil_preview_show')}</span>
+          <span style={{ transform: offen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▾</span>
+        </button>
+
+        {offen && (
+            <div style={{ marginTop: 14 }}>
+              {karten === null && <p style={s.hint}>{t('common_loading')}</p>}
+              {karten?.length === 0 && <p style={s.hint}>{t('profil_preview_none')}</p>}
+              {karten?.length > 1 && (
+                  <select style={{ ...s.input, marginBottom: 14 }} value={kartenId}
+                          onChange={e => setKartenId(e.target.value)}>
+                    {karten.map(k => <option key={k.id} value={k.id}>{k.name}</option>)}
+                  </select>
+              )}
+              {design && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'center' }}>
+                    <ApplePreview design={design} stamps={Math.floor(schwelle / 2)} threshold={schwelle}
+                                  rewardText={karte.rewardText} cardName={karte.name} t={t}
+                                  cardType={karte.type ?? 'STAMP'}
+                                  titel={name} titelFarbe={eigene ? farbe : undefined} />
+                    <div>
+                      <GooglePreview design={design} stamps={Math.floor(schwelle / 2)} threshold={schwelle}
+                                     rewardText={karte.rewardText} cardName={karte.name} t={t}
+                                     cardType={karte.type ?? 'STAMP'} />
+                      <p style={{ ...s.hint, textAlign: 'center', maxWidth: 236 }}>{t('profil_preview_google_hint')}</p>
+                    </div>
+                  </div>
+              )}
+            </div>
+        )}
       </div>
   )
 }

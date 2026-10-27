@@ -198,8 +198,11 @@ function wellenPfad(pegel) {
 
 // ─── Wallet Vorschauen ───────────────────────────────────────────────────────
 
+// titel/titelFarbe: der echte Pass zeigt oben den Ladennamen (logoText),
+// mit eigener Namensfarbe als Bild in dieser Farbe. Ohne titel bleibt es
+// beim Kartennamen wie bisher.
 export function ApplePreview({ design, stamps, threshold, rewardText, cardName, t,
-                              cardType='STAMP', rewards=[], pointsX100=0 }) {
+                              cardType='STAMP', rewards=[], pointsX100=0, titel, titelFarbe }) {
   const d = {...DEFAULT_DESIGN, ...design}
   const useUpload = d.stampIconType==='upload' && d.stampIconUrl
   const punkte = cardType==='POINTS'
@@ -230,7 +233,7 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
                 <div style={{width:24,height:24,borderRadius:'50%',background:'rgba(255,255,255,0.97)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
                   {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:9,fontWeight:700,color:d.colorBackground}}>SK</span>}
                 </div>
-                <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2}}>{cardName||t('preview_default_name')}</span>
+                <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2,color:titelFarbe}}>{titel||cardName||t('preview_default_name')}</span>
                 <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>
                   {punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
                 </span>
