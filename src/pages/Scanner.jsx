@@ -278,6 +278,39 @@ export default function Scanner() {
     }
   }
 
+  // Willkommensgeschenk einloesen. Gleiche Standort-Regel wie beim Stempel:
+  // der Server lehnt ohne Ort ohnehin ab.
+  async function willkommenEinloesen() {
+    if (!pendingScan) return
+    setLoading(true)
+    setResult(null)
+    try {
+      const ort = ortPflicht ? await holeStandort() : null
+      if (ortPflicht && !ort) {
+        setResult({ success: false, message: t('scan_geo_none') })
+        return
+      }
+      const token = localStorage.getItem('staffToken')
+      const res = await fetch(`${API_URL}/api/scan/willkommen`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
+        body: JSON.stringify({ qrPayload: pendingScan, ...(ort || {}) }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setResult({ success: true, welcome: true, data })
+      } else {
+        // z.B. "schon eingeloest" - genau das soll das Personal lesen.
+        setResult({ success: false, message: data.error || t('scan_server_error') })
+      }
+    } catch {
+      setResult({ success: false, message: t('scan_server_error') })
+    } finally {
+      setLoading(false)
+      setPendingScan(null)
+    }
+  }
+
   async function resetCard() {
     if (!pendingScan) return
     setLoading(true)
@@ -472,6 +505,21 @@ export default function Scanner() {
         )}
 
         {result && (() => {
+          if (result.welcome) {
+            return (
+              <div style={{ ...styles.resultBox, background: '#FFF8EC', borderColor: '#B35309' }}>
+                <div style={styles.hero}>
+                  <div style={{ ...styles.heroIcon, color: '#B35309', display: 'flex', justifyContent: 'center' }}>
+                    <Icon name="gift" size={56} strokeWidth={1.5} />
+                  </div>
+                  <div style={{ ...styles.heroTitle, color: '#1a1a1a' }}>{t('scan_welcome_done_title')}</div>
+                  <div style={{ ...styles.heroSub, color: '#5a4600' }}>{t('scan_welcome_done_sub')}</div>
+                </div>
+                <button style={{ ...styles.btnNext, background: '#3C3489', color: '#fff' }}
+                        onClick={nextCustomer}>{t('scan_next')}</button>
+              </div>
+            )
+          }
           if (result.points) {
             const d = result.data
             return (
@@ -579,6 +627,29 @@ export default function Scanner() {
               </div>
               <h2 style={styles.popupTitle}>{t('scan_detected')}</h2>
               <p style={styles.popupSubtitle}>{t('scan_checking_card')}</p>
+              <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
+            </div>
+          )
+
+          // Gesperrte Karte: statt Stempeln das Geschenk einloesen. Strikt
+          // auf true pruefen - ein aelteres Backend liefert das Feld nicht,
+          // dann bleibt alles wie bisher.
+          if (scanState?.willkommenOffen === true) return (
+            <div style={styles.popup}>
+              <div style={{ ...styles.popupIcon, display: 'flex', justifyContent: 'center', color: '#B35309' }}>
+                <Icon name="gift" size={44} strokeWidth={1.8} />
+              </div>
+              <h2 style={styles.popupTitle}>{t('scan_welcome_title')}</h2>
+              <p style={styles.popupSubtitle}>{scanState.customerName}</p>
+              <div style={styles.standBox}>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a1a' }}>
+                  {scanState.willkommenText}
+                </div>
+              </div>
+              <p style={styles.popupSubtitle}>{t('scan_welcome_hint')}</p>
+              <button style={styles.confirmBtn} onClick={willkommenEinloesen} disabled={loading}>
+                {loading ? t('scan_processing') : t('scan_welcome_confirm')}
+              </button>
               <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
             </div>
           )

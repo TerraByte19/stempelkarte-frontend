@@ -6,6 +6,7 @@ import Icon from '../components/Icon'
 import { ApplePreview, GooglePreview } from '../components/CardPreview'
 import PointsSettings from '../components/PointsSettings'
 import RewardCatalog from '../components/RewardCatalog'
+import WillkommenSettings from '../components/WillkommenSettings'
 import { DEFAULT_DESIGN } from '../lib/cardDesign'
 import { blobZuBase64 } from '../lib/bild'
 import { formatierePunkte } from '../lib/pointsOf'
@@ -377,6 +378,15 @@ export default function Karten() {
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
   const [editReward, setEditReward] = useState('')
   const [editStamps, setEditStamps] = useState(10)
+  // Willkommensgeschenk. null = (noch) nicht geladen ODER das Backend kennt
+  // die Route noch nicht (Frontend ist oft schneller live) - dann wird der
+  // Abschnitt gar nicht gezeigt, statt einen Schalter ohne Wirkung zu bieten.
+  const [editWillkommen, setEditWillkommen] = useState(null)
+  const [willkommenStart, setWillkommenStart] = useState(null)
+  // Fuer welche Karte die Antwort gilt. Wer schnell zwischen Karten
+  // wechselt, bekaeme sonst den Schalter der vorigen Karte - und mit dem
+  // naechsten Speichern landete er auf der falschen.
+  const willkommenFuer = useRef(null)
 
   useEffect(()=>{
     loadCards()
@@ -541,6 +551,24 @@ export default function Karten() {
           rewardThreshold: stampsChanged ? st : c.rewardThreshold,
         }))
       }
+      // Nur bei Aenderung schicken - und nur, wenn der Abschnitt ueberhaupt
+      // geladen wurde (sonst kennt das Backend die Route evtl. nicht).
+      if (editWillkommen && willkommenStart && (
+          editWillkommen.enabled !== willkommenStart.enabled ||
+          (editWillkommen.text || '').trim() !== (willkommenStart.text || '').trim())) {
+        const r = await api.put(`/api/shop/cards/${editCard.id}/willkommen`, {
+          enabled: editWillkommen.enabled,
+          text: (editWillkommen.text || '').trim(),
+        })
+        const w = {
+          enabled: !!r.data.enabled,
+          text: r.data.text || '',
+          offen: r.data.offen || 0,
+          eingeloest: r.data.eingeloest || 0,
+        }
+        setEditWillkommen(w)
+        setWillkommenStart(w)
+      }
       setSaved(true); setTimeout(()=>setSaved(false),2500)
       loadCards()
     } catch { alert(t('profil_save_error')) }
@@ -577,12 +605,35 @@ export default function Karten() {
     ladeRewards(editCard.id)
   }
 
+  async function ladeWillkommen(cardId) {
+    willkommenFuer.current = cardId
+    try {
+      const r = await api.get(`/api/shop/cards/${cardId}/willkommen`)
+      if (willkommenFuer.current !== cardId) return
+      const w = {
+        enabled: !!r.data.enabled,
+        text: r.data.text || '',
+        offen: r.data.offen || 0,
+        eingeloest: r.data.eingeloest || 0,
+      }
+      setEditWillkommen(w)
+      setWillkommenStart(w)
+    } catch {
+      // 404 = Backend noch ohne Willkommensgeschenk (Deploy laeuft).
+      // Abschnitt bleibt dann weg.
+    }
+  }
+
   async function openEdit(card) {
     setEditCard(card)
     setEditReward(card.rewardText || '')
     setEditStamps(card.rewardThreshold || 10)
     setEditRewards([])
+    setEditWillkommen(null)
+    setWillkommenStart(null)
+    willkommenFuer.current = null
     if ((card.type ?? 'STAMP') === 'POINTS') ladeRewards(card.id)
+    else ladeWillkommen(card.id)
     setEditDesign({
       colorBackground: card.colorBackground||'#3C3489',
       colorForeground: card.colorForeground||'#FFFFFF',
@@ -847,6 +898,9 @@ export default function Karten() {
                       </div>
                   )}
                 </div>
+                {editWillkommen && (
+                  <WillkommenSettings value={editWillkommen} onChange={setEditWillkommen} t={t}/>
+                )}
               </>
             )}
             <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t} zeigeStempelDesign={!istPunktekarte}/>
