@@ -14,6 +14,9 @@ import { formatierePunkte } from '../lib/pointsOf'
 const PRESET_KEYS = ['coffee', 'star', 'heart', 'dot', 'square']
 // Dieselbe Grenze prueft der Server beim Umbenennen.
 const MAX_NAME = 18
+// Wie Card.WILLKOMMEN_STANDARD im Backend: steht auf der Karte, wenn der
+// Laden keinen eigenen Text eintraegt.
+const WILLKOMMEN_STANDARD = 'Erster Kaffee geht auf uns'
 
 // Steht am Namensfeld und ueber der Google-Vorschau, damit man beides
 // zusammenbringt: dieser Name ist der, den Android zeigt.
@@ -982,6 +985,28 @@ export default function Karten() {
                             ladenName={shop?.name} nameHervorheben={nameFokus}/>
             </div>
           </div>
+          {/* Gesperrte Karte, solange das Willkommensgeschenk an ist. Folgt
+              dem Textfeld, damit der Laden vor dem Speichern sieht, was der
+              neue Kunde bekommt. */}
+          {!istPunktekarte && editWillkommen?.enabled && (
+            <div style={{background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
+              <div style={{...s.previewLabel, textAlign:'center', marginBottom:16}}>🎁 {t('welcome_preview_title')}</div>
+              <div style={{display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center'}}>
+                <div>
+                  <div style={s.previewLabel}>Apple Wallet</div>
+                  <ApplePreview design={editDesign} stamps={0} threshold={editThreshold} cardName={editVorschauName} t={t}
+                                titel={shop?.name} titelFarbe={shop?.nameColor || undefined}
+                                willkommen={editWillkommen.text?.trim() || WILLKOMMEN_STANDARD}/>
+                </div>
+                <div>
+                  <div style={s.previewLabel}>Google Wallet<AndroidAbzeichen/></div>
+                  <GooglePreview design={editDesign} stamps={0} threshold={editThreshold} cardName={editVorschauName} t={t}
+                                 ladenName={shop?.name}
+                                 willkommen={editWillkommen.text?.trim() || WILLKOMMEN_STANDARD}/>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
   )

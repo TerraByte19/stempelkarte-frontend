@@ -141,6 +141,8 @@ export const translations = {
     preview_reward_label: 'BELOHNUNG', preview_stamps_label: 'STEMPEL',
     preview_stamps_of: '{stamps} von {threshold}', preview_tap_update: 'Zum Aktualisieren tippen',
     preview_default_name: 'Stempelkarte', preview_stamps_field: 'Stempel',
+    preview_welcome_gift: 'GESCHENK', preview_welcome_how: "SO GEHT'S", preview_welcome_how_value: 'An der Kasse vorzeigen',
+    preview_welcome_google: 'Willkommen', welcome_preview_title: 'So sieht die Karte aus, bis das Geschenk eingelöst ist',
 
     // Profil
     profil_title: 'Profil', profil_subtitle: 'Passe dein Laden-Profil an',
@@ -561,6 +563,8 @@ export const translations = {
     preview_reward_label: 'REWARD', preview_stamps_label: 'STAMPS',
     preview_stamps_of: '{stamps} of {threshold}', preview_tap_update: 'Tap to update',
     preview_default_name: 'Loyalty card', preview_stamps_field: 'Stamps',
+    preview_welcome_gift: 'GIFT', preview_welcome_how: 'HOW IT WORKS', preview_welcome_how_value: 'Show at the counter',
+    preview_welcome_google: 'Welcome', welcome_preview_title: 'How the card looks until the gift is redeemed',
 
     // Profile
     profil_title: 'Profile', profil_subtitle: 'Customize your shop profile',
@@ -980,6 +984,8 @@ export const translations = {
     preview_reward_label: 'المكافأة', preview_stamps_label: 'الأختام',
     preview_stamps_of: '{stamps} من {threshold}', preview_tap_update: 'اضغط للتحديث',
     preview_default_name: 'بطاقة الولاء', preview_stamps_field: 'الأختام',
+    preview_welcome_gift: 'هدية', preview_welcome_how: 'طريقة الاستخدام', preview_welcome_how_value: 'أظهرها عند الدفع',
+    preview_welcome_google: 'أهلاً بك', welcome_preview_title: 'هكذا تبدو البطاقة حتى يتم استلام الهدية',
 
     // الملف الشخصي
     profil_title: 'الملف الشخصي', profil_subtitle: 'خصّص ملف متجرك',
