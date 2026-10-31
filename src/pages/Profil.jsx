@@ -178,7 +178,7 @@ function NamensFarbe({ t, shop, name }) {
                     <div>
                       <GooglePreview design={design} stamps={Math.floor(schwelle / 2)} threshold={schwelle}
                                      rewardText={karte.rewardText} cardName={karte.name} t={t}
-                                     cardType={karte.type ?? 'STAMP'} />
+                                     cardType={karte.type ?? 'STAMP'} ladenName={name} />
                       <p style={{ ...s.hint, textAlign: 'center', maxWidth: 236 }}>{t('profil_preview_google_hint')}</p>
                     </div>
                   </div>

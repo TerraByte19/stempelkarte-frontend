@@ -295,8 +295,13 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
   )
 }
 
+// ladenName: Google zeigt neben dem Logo den issuerName (Ladenname) und
+// darunter gross den programName (Kartenname). nameHervorheben rahmt den
+// Kartennamen ein, solange im Namensfeld getippt wird - so sieht der
+// Laden, welcher Name auf Android wo landet.
 export function GooglePreview({ design, stamps, threshold, rewardText, cardName, t,
-                               cardType='STAMP', rewards=[], pointsX100=0 }) {
+                               cardType='STAMP', rewards=[], pointsX100=0,
+                               ladenName, nameHervorheben=false }) {
   const d = {...DEFAULT_DESIGN, ...design}
   const punkte = cardType==='POINTS'
   const ziel = punkte ? naechstesZiel(rewards, pointsX100) : null
@@ -319,12 +324,19 @@ export function GooglePreview({ design, stamps, threshold, rewardText, cardName,
 
           {/* Die Karte (Google: abgerundet, Hero unten) */}
           <div style={{margin:'0 12px 14px',borderRadius:16,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 3px 10px rgba(0,0,0,0.2)',fontFamily:'Roboto,"Segoe UI",sans-serif'}}>
-            {/* Kopf: Logo + Name */}
-            <div style={{display:'flex',alignItems:'center',gap:10,padding:'14px 14px 10px'}}>
-              <div style={{width:32,height:32,borderRadius:'50%',background:'white',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
-                {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{color:'#3C3489',fontWeight:700,fontSize:12}}>SK</span>}
+            {/* Kopf: Logo + Ladenname, darunter gross der Kartenname */}
+            <div style={{padding:'14px 14px 10px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <div style={{width:32,height:32,borderRadius:'50%',background:'white',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
+                  {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{color:'#3C3489',fontWeight:700,fontSize:12}}>SK</span>}
+                </div>
+                {ladenName && <div style={{fontSize:12,fontWeight:500,opacity:0.85,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{ladenName}</div>}
               </div>
-              <div style={{fontSize:14,fontWeight:500,letterSpacing:0.2}}>{cardName||t('preview_default_name')}</div>
+              <div style={{fontSize:18,fontWeight:500,letterSpacing:0.2,marginTop:10,display:'inline-block',maxWidth:'100%',overflowWrap:'anywhere',borderRadius:4,
+                outline:nameHervorheben?'2px dashed currentColor':'2px dashed transparent',outlineOffset:3,
+                transition:'outline-color 0.15s'}}>
+                {cardName||t('preview_default_name')}
+              </div>
             </div>
 
             {/* Felder. Google fuellt loyaltyPoints und secondaryLoyaltyPoints -

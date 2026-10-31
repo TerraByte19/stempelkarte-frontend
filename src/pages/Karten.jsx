@@ -12,6 +12,14 @@ import { blobZuBase64 } from '../lib/bild'
 import { formatierePunkte } from '../lib/pointsOf'
 
 const PRESET_KEYS = ['coffee', 'star', 'heart', 'dot', 'square']
+// Dieselbe Grenze prueft der Server beim Umbenennen.
+const MAX_NAME = 18
+
+// Steht am Namensfeld und ueber der Google-Vorschau, damit man beides
+// zusammenbringt: dieser Name ist der, den Android zeigt.
+function AndroidAbzeichen() {
+  return <span style={s.androidBadge}>Android</span>
+}
 
 // ─── Komplettes Design Panel ─────────────────────────────────────────────────
 
@@ -378,6 +386,9 @@ export default function Karten() {
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
   const [editReward, setEditReward] = useState('')
   const [editStamps, setEditStamps] = useState(10)
+  const [editName, setEditName] = useState('')
+  // Solange im Namensfeld getippt wird, rahmt die Google-Vorschau den Namen ein.
+  const [nameFokus, setNameFokus] = useState(false)
   // Willkommensgeschenk. null = (noch) nicht geladen ODER das Backend kennt
   // die Route noch nicht (Frontend ist oft schneller live) - dann wird der
   // Abschnitt gar nicht gezeigt, statt einen Schalter ohne Wirkung zu bieten.
@@ -535,22 +546,33 @@ export default function Karten() {
   async function saveEditDesign() {
     setLoading(true)
     try {
-      await api.put(`/api/shop/cards/${editCard.id}/design`, editDesign)
+      const nm = editName.trim()
       const rw = editReward.trim()
       const st = parseInt(editStamps)
+      const nameChanged = nm && nm !== editCard.name
       const rewardChanged = rw && rw !== (editCard.rewardText || '')
       const stampsChanged = st >= 1 && st <= 100 && st !== editCard.rewardThreshold
-      if (rewardChanged || stampsChanged) {
-        await api.put(`/api/shop/cards/${editCard.id}/info`, {
+      let nameAngekommen = true
+      // Infos VOR dem Design: beide Aufrufe schreiben die Google-Class im
+      // Hintergrund neu. Kaeme das Design zuerst, koennte dessen Lauf mit
+      // dem alten Namen nach dem neuen bei Google ankommen.
+      if (nameChanged || rewardChanged || stampsChanged) {
+        const res = await api.put(`/api/shop/cards/${editCard.id}/info`, {
+          name: nameChanged ? nm : null,
           rewardText: rewardChanged ? rw : null,
           rewardThreshold: stampsChanged ? st : null,
         })
+        // Ein aelterer Server ignoriert "name" und antwortet trotzdem 200,
+        // nur ohne das Feld. Dann ist alles gespeichert ausser dem Namen.
+        nameAngekommen = !nameChanged || res.data?.name !== undefined
         setEditCard(c => ({
           ...c,
+          name: nameChanged && nameAngekommen ? nm : c.name,
           rewardText: rewardChanged ? rw : c.rewardText,
           rewardThreshold: stampsChanged ? st : c.rewardThreshold,
         }))
       }
+      await api.put(`/api/shop/cards/${editCard.id}/design`, editDesign)
       // Nur bei Aenderung schicken - und nur, wenn der Abschnitt ueberhaupt
       // geladen wurde (sonst kennt das Backend die Route evtl. nicht).
       if (editWillkommen && willkommenStart && (
@@ -569,7 +591,11 @@ export default function Karten() {
         setEditWillkommen(w)
         setWillkommenStart(w)
       }
-      setSaved(true); setTimeout(()=>setSaved(false),2500)
+      if (nameAngekommen) {
+        setSaved(true); setTimeout(()=>setSaved(false),2500)
+      } else {
+        alert(t('cards_name_backend_old'))
+      }
       loadCards()
     } catch { alert(t('profil_save_error')) }
     finally { setLoading(false) }
@@ -626,6 +652,7 @@ export default function Karten() {
 
   async function openEdit(card) {
     setEditCard(card)
+    setEditName(card.name || '')
     setEditReward(card.rewardText || '')
     setEditStamps(card.rewardThreshold || 10)
     setEditRewards([])
@@ -667,6 +694,9 @@ export default function Karten() {
   // Vorschau folgt direkt dem Eingabefeld, damit die Aenderung sichtbar wird,
   // bevor gespeichert ist.
   const editThreshold = Math.min(100, Math.max(1, parseInt(editStamps) || editCard?.rewardThreshold || 10))
+  // Ein geleertes Feld speichert nichts, also zeigt die Vorschau dann den
+  // bisherigen Namen.
+  const editVorschauName = editName.trim() || editCard?.name
 
   // Beispiel-Punktestand fuer die Vorschau: die Haelfte der billigsten
   // Praemie. Bei 0 stuende dort immer "noch der volle Preis", und der Laden
@@ -771,7 +801,7 @@ export default function Karten() {
                 nicht in der Liste. Bei einer Punktekarte ist es reine
                 Reibung; createCard schickt dort den Kartennamen. */}
             {[
-              {label:t('cards_name'),key:'name',max:18,
+              {label:t('cards_name'),key:'name',max:MAX_NAME,
                placeholder:t(cardType==='POINTS' ? 'cards_name_ph_points' : 'cards_name_ph')},
               ...(cardType==='STAMP'
                 ? [{label:t('cards_desc'),key:'description',placeholder:t('cards_desc_ph'),max:40},
@@ -781,12 +811,15 @@ export default function Karten() {
                 <div key={key} style={s.field}>
                   <label style={s.label}>
                     {label}
+                    {key==='name' && <AndroidAbzeichen/>}
                     <span style={{float:'right',fontSize:11,color:(form[key]?.length||0)>=max?'#c00':'#bbb',fontWeight:500}}>
                   {form[key]?.length||0}/{max}
                 </span>
                   </label>
                   <input style={s.input} value={form[key]} placeholder={placeholder} maxLength={max}
-                         onChange={e=>setForm({...form,[key]:e.target.value})}/>
+                         onChange={e=>setForm({...form,[key]:e.target.value})}
+                         {...(key==='name' ? {onFocus:()=>setNameFokus(true), onBlur:()=>setNameFokus(false)} : {})}/>
+                  {key==='name' && <div style={s.fieldHint}>{t('cards_name_android_hint')}</div>}
                 </div>
             ))}
             {cardType==='STAMP' ? (
@@ -842,15 +875,20 @@ export default function Karten() {
 
           {/* Vorschau — volle Breite, nebeneinander */}
           <div style={{gridColumn:'1 / -1', display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
+            {/* titel: oben auf dem Apple-Pass steht der Ladenname, nicht der
+                Kartenname - sonst widerspraeche die Vorschau dem Hinweis am
+                Namensfeld. */}
             <div>
               <div style={s.previewLabel}>Apple Wallet</div>
               <ApplePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name} t={t}
-                            cardType={cardType} rewards={pendingRewards} pointsX100={vorschauPunkteX100}/>
+                            cardType={cardType} rewards={pendingRewards} pointsX100={vorschauPunkteX100}
+                            titel={shop?.name} titelFarbe={shop?.nameColor || undefined}/>
             </div>
             <div>
-              <div style={s.previewLabel}>Google Wallet</div>
+              <div style={s.previewLabel}>Google Wallet<AndroidAbzeichen/></div>
               <GooglePreview design={design} stamps={previewStamps} threshold={threshold} rewardText={form.rewardText} cardName={form.name} t={t}
-                            cardType={cardType} rewards={pendingRewards} pointsX100={vorschauPunkteX100}/>
+                            cardType={cardType} rewards={pendingRewards} pointsX100={vorschauPunkteX100}
+                            ladenName={shop?.name} nameHervorheben={nameFokus}/>
             </div>
           </div>
         </div>
@@ -870,6 +908,23 @@ export default function Karten() {
         <div style={s.editGrid}>
           <div style={{...s.panel,maxHeight:'80vh',overflowY:'auto'}}>
             <div style={s.panelTitle}>{t('cards_design_panel')}</div>
+
+            {/* Name fuer beide Kartentypen. Leer lassen aendert nichts -
+                saveEditDesign schickt dann keinen Namen mit. */}
+            <div style={{marginBottom:16}}>
+              <label style={{fontSize:11,fontWeight:800,color:'#888',marginBottom:8,textTransform:'uppercase',letterSpacing:0.8,display:'flex',alignItems:'center'}}>
+                {t('cards_name')}
+                <AndroidAbzeichen/>
+                <span style={{marginInlineStart:'auto',fontWeight:500,letterSpacing:0,color:editName.length>=MAX_NAME?'#c00':'#bbb'}}>
+                  {editName.length}/{MAX_NAME}
+                </span>
+              </label>
+              <input style={{width:'100%',padding:'8px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:13,outline:'none',boxSizing:'border-box'}}
+                     value={editName} maxLength={MAX_NAME} placeholder={editCard.name}
+                     onChange={e=>setEditName(e.target.value)}
+                     onFocus={()=>setNameFokus(true)} onBlur={()=>setNameFokus(false)}/>
+              <div style={s.fieldHint}>{t('cards_name_android_hint')} {t('cards_name_edit_note')}</div>
+            </div>
 
             {/* Bei einer Punktekarte ersetzt der Katalog Belohnung und
                 Schwelle. Der Typ selbst wird nicht angeboten - er ist fest. */}
@@ -916,13 +971,15 @@ export default function Karten() {
           <div style={{display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
             <div>
               <div style={s.previewLabel}>Apple Wallet</div>
-              <ApplePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}
-                            cardType={istPunktekarte ? 'POINTS' : 'STAMP'} rewards={editRewards} pointsX100={editVorschauPunkteX100}/>
+              <ApplePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editVorschauName} t={t}
+                            cardType={istPunktekarte ? 'POINTS' : 'STAMP'} rewards={editRewards} pointsX100={editVorschauPunkteX100}
+                            titel={shop?.name} titelFarbe={shop?.nameColor || undefined}/>
             </div>
             <div>
-              <div style={s.previewLabel}>Google Wallet</div>
-              <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editCard.name} t={t}
-                            cardType={istPunktekarte ? 'POINTS' : 'STAMP'} rewards={editRewards} pointsX100={editVorschauPunkteX100}/>
+              <div style={s.previewLabel}>Google Wallet<AndroidAbzeichen/></div>
+              <GooglePreview design={editDesign} stamps={Math.floor(editThreshold/2)} threshold={editThreshold} rewardText={editCard.rewardText} cardName={editVorschauName} t={t}
+                            cardType={istPunktekarte ? 'POINTS' : 'STAMP'} rewards={editRewards} pointsX100={editVorschauPunkteX100}
+                            ladenName={shop?.name} nameHervorheben={nameFokus}/>
             </div>
           </div>
         </div>
@@ -946,6 +1003,10 @@ const s = {
   editGrid: {display:'grid',gridTemplateColumns:'1fr',gap:20,alignItems:'start'},
   field: {display:'flex',flexDirection:'column',marginBottom:12},
   label: {fontSize:13,fontWeight:500,color:'#444',marginBottom:5},
+  fieldHint: {fontSize:11,color:'#888',marginTop:6,lineHeight:1.45},
+  // Gruen wie das Android-Logo, damit es sich vom Lila der App abhebt.
+  androidBadge: {display:'inline-block',marginInlineStart:6,padding:'1px 7px',borderRadius:10,background:'#E6F4EA',color:'#137333',
+    fontSize:10,fontWeight:700,letterSpacing:0.3,textTransform:'none',verticalAlign:'middle',lineHeight:'16px'},
   input: {padding:'9px 13px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:14,outline:'none',boxSizing:'border-box'},
   btnCreate: {width:'100%',marginTop:8,padding:13,borderRadius:10,border:'none',background:'#3C3489',color:'white',fontSize:14,fontWeight:700,cursor:'pointer',transition:'background 0.2s'},
   previewLabel: {fontSize:12,fontWeight:700,color:'#555',marginBottom:10},
