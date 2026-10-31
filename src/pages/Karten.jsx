@@ -18,6 +18,21 @@ const MAX_NAME = 18
 // Laden keinen eigenen Text eintraegt.
 const WILLKOMMEN_STANDARD = 'Erster Kaffee geht auf uns'
 
+// Felder des Willkommens-Abschnitts, die mit dem Speichern-Knopf zum Server
+// gehen. Leer = Standard; ein aelterer Server ignoriert die Design-Felder.
+const WILLKOMMEN_FELDER = ['text', 'title', 'hint', 'imageUrl', 'colorBackground', 'colorForeground', 'colorLabel']
+
+function willkommenAus(data) {
+  const w = { enabled: !!data.enabled, offen: data.offen || 0, eingeloest: data.eingeloest || 0 }
+  for (const f of WILLKOMMEN_FELDER) w[f] = data[f] || ''
+  return w
+}
+
+function willkommenGeaendert(a, b) {
+  return a.enabled !== b.enabled
+    || WILLKOMMEN_FELDER.some(f => (a[f] || '').trim() !== (b[f] || '').trim())
+}
+
 // Steht am Namensfeld und ueber der Google-Vorschau, damit man beides
 // zusammenbringt: dieser Name ist der, den Android zeigt.
 function AndroidAbzeichen() {
@@ -578,19 +593,11 @@ export default function Karten() {
       await api.put(`/api/shop/cards/${editCard.id}/design`, editDesign)
       // Nur bei Aenderung schicken - und nur, wenn der Abschnitt ueberhaupt
       // geladen wurde (sonst kennt das Backend die Route evtl. nicht).
-      if (editWillkommen && willkommenStart && (
-          editWillkommen.enabled !== willkommenStart.enabled ||
-          (editWillkommen.text || '').trim() !== (willkommenStart.text || '').trim())) {
-        const r = await api.put(`/api/shop/cards/${editCard.id}/willkommen`, {
-          enabled: editWillkommen.enabled,
-          text: (editWillkommen.text || '').trim(),
-        })
-        const w = {
-          enabled: !!r.data.enabled,
-          text: r.data.text || '',
-          offen: r.data.offen || 0,
-          eingeloest: r.data.eingeloest || 0,
-        }
+      if (editWillkommen && willkommenStart && willkommenGeaendert(editWillkommen, willkommenStart)) {
+        const body = { enabled: editWillkommen.enabled }
+        for (const f of WILLKOMMEN_FELDER) body[f] = (editWillkommen[f] || '').trim()
+        const r = await api.put(`/api/shop/cards/${editCard.id}/willkommen`, body)
+        const w = willkommenAus(r.data)
         setEditWillkommen(w)
         setWillkommenStart(w)
       }
@@ -639,12 +646,7 @@ export default function Karten() {
     try {
       const r = await api.get(`/api/shop/cards/${cardId}/willkommen`)
       if (willkommenFuer.current !== cardId) return
-      const w = {
-        enabled: !!r.data.enabled,
-        text: r.data.text || '',
-        offen: r.data.offen || 0,
-        eingeloest: r.data.eingeloest || 0,
-      }
+      const w = willkommenAus(r.data)
       setEditWillkommen(w)
       setWillkommenStart(w)
     } catch {
@@ -957,7 +959,8 @@ export default function Karten() {
                   )}
                 </div>
                 {editWillkommen && (
-                  <WillkommenSettings value={editWillkommen} onChange={setEditWillkommen} t={t}/>
+                  <WillkommenSettings value={editWillkommen} onChange={setEditWillkommen} t={t}
+                                      cardId={editCard.id} standardFarben={editDesign}/>
                 )}
               </>
             )}
@@ -996,13 +999,15 @@ export default function Karten() {
                   <div style={s.previewLabel}>Apple Wallet</div>
                   <ApplePreview design={editDesign} stamps={0} threshold={editThreshold} cardName={editVorschauName} t={t}
                                 titel={shop?.name} titelFarbe={shop?.nameColor || undefined}
-                                willkommen={editWillkommen.text?.trim() || WILLKOMMEN_STANDARD}/>
+                                willkommen={editWillkommen.text?.trim() || WILLKOMMEN_STANDARD}
+                                willkommenDesign={editWillkommen}/>
                 </div>
                 <div>
                   <div style={s.previewLabel}>Google Wallet<AndroidAbzeichen/></div>
                   <GooglePreview design={editDesign} stamps={0} threshold={editThreshold} cardName={editVorschauName} t={t}
                                  ladenName={shop?.name}
-                                 willkommen={editWillkommen.text?.trim() || WILLKOMMEN_STANDARD}/>
+                                 willkommen={editWillkommen.text?.trim() || WILLKOMMEN_STANDARD}
+                                 willkommenDesign={editWillkommen}/>
                 </div>
               </div>
             </div>

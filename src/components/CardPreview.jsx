@@ -202,12 +202,18 @@ function wellenPfad(pegel) {
 // mit eigener Namensfarbe als Bild in dieser Farbe. Ohne titel bleibt es
 // beim Kartennamen wie bisher.
 // willkommen: Geschenktext einer noch gesperrten Karte. Dann wie der echte
-// Pass (baueFelderGesperrt): 🎁 statt Stempelstand, kein Streifen, kein
-// Raster - nur Geschenk und QR.
+// Pass (baueFelderGesperrt): Ueberschrift statt Stempelstand, Willkommensbild
+// statt Streifen, kein Raster - Geschenk, Hinweis und QR.
+// willkommenDesign: {title, hint, imageUrl, colorBackground, ...}, leer = Standard.
 export function ApplePreview({ design, stamps, threshold, rewardText, cardName, t,
                               cardType='STAMP', rewards=[], pointsX100=0, titel, titelFarbe,
-                              willkommen }) {
-  const d = {...DEFAULT_DESIGN, ...design}
+                              willkommen, willkommenDesign }) {
+  const wd = willkommen ? (willkommenDesign || {}) : {}
+  // Eigene Farben gelten nur im gesperrten Zustand, jede einzeln.
+  const d = {...DEFAULT_DESIGN, ...design,
+    ...(wd.colorBackground ? { colorBackground: wd.colorBackground } : {}),
+    ...(wd.colorForeground ? { colorForeground: wd.colorForeground } : {}),
+    ...(wd.colorLabel ? { colorLabel: wd.colorLabel } : {})}
   const useUpload = d.stampIconType==='upload' && d.stampIconUrl
   const punkte = cardType==='POINTS'
   const ziel = punkte ? naechstesZiel(rewards, pointsX100) : null
@@ -239,9 +245,13 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
                 </div>
                 <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2,color:titelFarbe}}>{titel||cardName||t('preview_default_name')}</span>
                 <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>
-                  {willkommen ? '🎁' : punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
+                  {willkommen ? (wd.title?.trim() || t('preview_welcome_google')) : punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
                 </span>
               </div>
+
+              {willkommen && wd.imageUrl && (
+                  <img src={wd.imageUrl} alt="" style={{width:'100%',aspectRatio:'375 / 144',objectFit:'cover',display:'block'}}/>
+              )}
 
               {streifenStil && !willkommen && (
                   <Streifen stil={streifenStil} anteil={anteil}
@@ -251,11 +261,15 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
 
               {/* Inhalt je nach Kartentyp und Stil */}
               {willkommen ? (
-                  <div style={{padding:'9px 12px 11px'}}>
-                    <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_welcome_gift')}</div>
-                    <div style={{fontSize:15,fontWeight:500,marginBottom:9}}>{willkommen}</div>
-                    <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_welcome_how')}</div>
-                    <div style={{fontSize:11,fontWeight:500}}>{t('preview_welcome_how_value')}</div>
+                  <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>🎁 {t('preview_welcome_gift')}</div>
+                      <div style={{fontSize:11,fontWeight:500}}>{willkommen}</div>
+                    </div>
+                    <div>
+                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_welcome_how')}</div>
+                      <div style={{fontSize:11,fontWeight:500}}>{wd.hint?.trim() || t('preview_welcome_how_value')}</div>
+                    </div>
                   </div>
               ) : punkte ? (
                   <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
@@ -312,8 +326,10 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
 // Laden, welcher Name auf Android wo landet.
 export function GooglePreview({ design, stamps, threshold, rewardText, cardName, t,
                                cardType='STAMP', rewards=[], pointsX100=0,
-                               ladenName, nameHervorheben=false, willkommen }) {
+                               ladenName, nameHervorheben=false, willkommen, willkommenDesign }) {
   const d = {...DEFAULT_DESIGN, ...design}
+  // Keine eigenen Farben: Google kennt Farben nur an der Klasse des Ladens.
+  const wd = willkommen ? (willkommenDesign || {}) : {}
   const punkte = cardType==='POINTS'
   const ziel = punkte ? naechstesZiel(rewards, pointsX100) : null
   return (
@@ -355,7 +371,7 @@ export function GooglePreview({ design, stamps, threshold, rewardText, cardName,
             <div style={{display:'flex',gap:20,padding:'0 14px 14px'}}>
               <div>
                 <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>
-                  {willkommen ? t('preview_welcome_google') : punkte ? t('cards_catalog_cost') : t('preview_stamps_field')}
+                  {willkommen ? (wd.title?.trim() || t('preview_welcome_google')) : punkte ? t('cards_catalog_cost') : t('preview_stamps_field')}
                 </div>
                 <div style={{fontSize:14,fontWeight:500}}>
                   {willkommen ? willkommen : punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
@@ -366,7 +382,7 @@ export function GooglePreview({ design, stamps, threshold, rewardText, cardName,
                   {willkommen ? t('preview_welcome_how') : punkte ? t('scan_points_next_goal') : t('cards_reward')}
                 </div>
                 <div style={{fontSize:14,fontWeight:500}}>
-                  {willkommen ? t('preview_welcome_how_value') : punkte
+                  {willkommen ? (wd.hint?.trim() || t('preview_welcome_how_value')) : punkte
                     ? (ziel ? `${ziel.name}, ${t('scan_points_missing', { n: formatierePunkte(Math.max(0, ziel.costPointsX100 - pointsX100)) })}` : t('scan_points_no_goal'))
                     : (rewardText||'-')}
                 </div>
@@ -386,7 +402,8 @@ export function GooglePreview({ design, stamps, threshold, rewardText, cardName,
             </div>
 
             {/* Hero-Image unten (Android-typisch) */}
-            {d.heroImageUrl && <img src={d.heroImageUrl} alt="" style={{width:'100%',height:80,objectFit:'cover',display:'block'}}/>}
+            {/* Gesperrt: Willkommensbild am Objekt, sonst das der Klasse. */}
+            {(wd.imageUrl || d.heroImageUrl) && <img src={wd.imageUrl || d.heroImageUrl} alt="" style={{width:'100%',height:80,objectFit:'cover',display:'block'}}/>}
           </div>
         </div>
       </div>
