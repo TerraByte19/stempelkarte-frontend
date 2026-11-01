@@ -91,16 +91,36 @@ export default function WillkommenSettings({ value, onChange, t, cardId, standar
                          onAbbrechen={() => setCropDatei(null)}/>
           )}
 
-          {/* 18 und 40 wie im Backend (Card.WILLKOMMEN_TITEL_MAX / _HINWEIS_MAX). */}
-          <label style={s.label}>{t('welcome_title_label')}</label>
-          <input style={{ ...s.input, marginBottom: 12 }} maxLength={18} value={value.title || ''}
-                 onChange={e => onChange({ ...value, title: e.target.value })}
-                 placeholder={t('preview_welcome_google')} />
+          {/* Jeder Text ist abschaltbar, Standard aus. 18 und 40 wie im
+              Backend (Card.WILLKOMMEN_TITEL_MAX / _HINWEIS_MAX). */}
+          <label style={s.switchRow}>
+            <input type="checkbox" checked={!!value.showTitle}
+                   onChange={e => onChange({ ...value, showTitle: e.target.checked })} />
+            <span style={s.label}>{t('welcome_show_title')}</span>
+          </label>
+          {value.showTitle && (
+            <input style={{ ...s.input, margin: '6px 0 12px' }} maxLength={18} value={value.title || ''}
+                   onChange={e => onChange({ ...value, title: e.target.value })}
+                   placeholder={t('preview_welcome_google')} />
+          )}
 
-          <label style={s.label}>{t('welcome_hint_label')}</label>
-          <input style={{ ...s.input, marginBottom: 12 }} maxLength={40} value={value.hint || ''}
-                 onChange={e => onChange({ ...value, hint: e.target.value })}
-                 placeholder={t('preview_welcome_how_value')} />
+          <label style={s.switchRow}>
+            <input type="checkbox" checked={!!value.showGift}
+                   onChange={e => onChange({ ...value, showGift: e.target.checked })} />
+            <span style={s.label}>{t('welcome_show_gift')}</span>
+          </label>
+
+          <label style={s.switchRow}>
+            <input type="checkbox" checked={!!value.showHint}
+                   onChange={e => onChange({ ...value, showHint: e.target.checked })} />
+            <span style={s.label}>{t('welcome_show_hint')}</span>
+          </label>
+          {value.showHint && (
+            <input style={{ ...s.input, margin: '6px 0 12px' }} maxLength={40} value={value.hint || ''}
+                   onChange={e => onChange({ ...value, hint: e.target.value })}
+                   placeholder={t('preview_welcome_how_value')} />
+          )}
+          <div style={{ height: 12 }} />
 
           <label style={s.label}>{t('welcome_colors')}</label>
           <p style={s.hint}>{t('welcome_colors_iphone')}</p>

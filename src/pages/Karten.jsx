@@ -21,16 +21,20 @@ const WILLKOMMEN_STANDARD = 'Erster Kaffee geht auf uns'
 // Felder des Willkommens-Abschnitts, die mit dem Speichern-Knopf zum Server
 // gehen. Leer = Standard; ein aelterer Server ignoriert die Design-Felder.
 const WILLKOMMEN_FELDER = ['text', 'title', 'hint', 'imageUrl', 'colorBackground', 'colorForeground', 'colorLabel']
+// Welche Texte die gesperrte Karte zeigt. Fehlt = aus.
+const WILLKOMMEN_SCHALTER = ['showTitle', 'showGift', 'showHint']
 
 function willkommenAus(data) {
   const w = { enabled: !!data.enabled, offen: data.offen || 0, eingeloest: data.eingeloest || 0 }
   for (const f of WILLKOMMEN_FELDER) w[f] = data[f] || ''
+  for (const f of WILLKOMMEN_SCHALTER) w[f] = !!data[f]
   return w
 }
 
 function willkommenGeaendert(a, b) {
   return a.enabled !== b.enabled
     || WILLKOMMEN_FELDER.some(f => (a[f] || '').trim() !== (b[f] || '').trim())
+    || WILLKOMMEN_SCHALTER.some(f => !!a[f] !== !!b[f])
 }
 
 // Steht am Namensfeld und ueber der Google-Vorschau, damit man beides
@@ -596,6 +600,7 @@ export default function Karten() {
       if (editWillkommen && willkommenStart && willkommenGeaendert(editWillkommen, willkommenStart)) {
         const body = { enabled: editWillkommen.enabled }
         for (const f of WILLKOMMEN_FELDER) body[f] = (editWillkommen[f] || '').trim()
+        for (const f of WILLKOMMEN_SCHALTER) body[f] = !!editWillkommen[f]
         const r = await api.put(`/api/shop/cards/${editCard.id}/willkommen`, body)
         const w = willkommenAus(r.data)
         setEditWillkommen(w)

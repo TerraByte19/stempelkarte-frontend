@@ -137,6 +137,26 @@ function anteilVon(stand, ziel) {
  * wie im Backend (Balken im unteren Drittel, Ring rechts, Foto links
  * abgedunkelt) - sonst verspricht die Vorschau etwas anderes als die Karte.
  */
+// Wie GoogleWalletService.willkommenFelder: Geschenk mit Titel als Label,
+// nur Titel als Wert ohne Label, Hinweis daneben. Abgeschaltetes fehlt.
+function GoogleWillkommenFelder({ wd, geschenk, farbe, t }) {
+  const titel = wd.showTitle ? (wd.title?.trim() || t('preview_welcome_google')) : null
+  const haupt = wd.showGift ? { label: titel, wert: geschenk } : titel ? { label: null, wert: titel } : null
+  const neben = wd.showHint ? { label: t('preview_welcome_how'), wert: wd.hint?.trim() || t('preview_welcome_how_value') } : null
+  const felder = [haupt, neben].filter(Boolean)
+  if (!felder.length) return null
+  return (
+    <div style={{display:'flex',gap:20,padding:'0 14px 14px'}}>
+      {felder.map((f, i) => (
+        <div key={i}>
+          {f.label && <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:farbe,marginBottom:3,textTransform:'uppercase'}}>{f.label}</div>}
+          <div style={{fontSize:14,fontWeight:500}}>{f.wert}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function Streifen({ stil, anteil, akzent, fotoUrl, grund }) {
   const rahmen = { position:'relative', width:'100%', aspectRatio:'375 / 144', overflow:'hidden' }
   const prozent = Math.round(Math.max(0, Math.min(1, anteil)) * 100)
@@ -245,7 +265,7 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
                 </div>
                 <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2,color:titelFarbe}}>{titel||cardName||t('preview_default_name')}</span>
                 <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>
-                  {willkommen ? (wd.title?.trim() || t('preview_welcome_google')) : punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
+                  {willkommen ? (wd.showTitle ? (wd.title?.trim() || t('preview_welcome_google')) : '') : punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
                 </span>
               </div>
 
@@ -261,16 +281,22 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
 
               {/* Inhalt je nach Kartentyp und Stil */}
               {willkommen ? (
+                  (wd.showGift || wd.showHint) && (
                   <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
+                    {wd.showGift && (
                     <div style={{flex:1}}>
                       <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>🎁 {t('preview_welcome_gift')}</div>
                       <div style={{fontSize:11,fontWeight:500}}>{willkommen}</div>
                     </div>
+                    )}
+                    {wd.showHint && (
                     <div>
                       <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_welcome_how')}</div>
                       <div style={{fontSize:11,fontWeight:500}}>{wd.hint?.trim() || t('preview_welcome_how_value')}</div>
                     </div>
+                    )}
                   </div>
+                  )
               ) : punkte ? (
                   <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
                     <div style={{flex:1}}>
@@ -368,26 +394,30 @@ export function GooglePreview({ design, stamps, threshold, rewardText, cardName,
 
             {/* Felder. Google fuellt loyaltyPoints und secondaryLoyaltyPoints -
                 bei Punkten stehen dort Stand und naechste Praemie. */}
+            {willkommen ? (
+              <GoogleWillkommenFelder wd={wd} geschenk={willkommen} farbe={d.colorLabel} t={t}/>
+            ) : (
             <div style={{display:'flex',gap:20,padding:'0 14px 14px'}}>
               <div>
                 <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>
-                  {willkommen ? (wd.title?.trim() || t('preview_welcome_google')) : punkte ? t('cards_catalog_cost') : t('preview_stamps_field')}
+                  {punkte ? t('cards_catalog_cost') : t('preview_stamps_field')}
                 </div>
                 <div style={{fontSize:14,fontWeight:500}}>
-                  {willkommen ? willkommen : punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
+                  {punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
                 </div>
               </div>
               <div>
                 <div style={{fontSize:9,fontWeight:500,letterSpacing:0.6,color:d.colorLabel,marginBottom:3,textTransform:'uppercase'}}>
-                  {willkommen ? t('preview_welcome_how') : punkte ? t('scan_points_next_goal') : t('cards_reward')}
+                  {punkte ? t('scan_points_next_goal') : t('cards_reward')}
                 </div>
                 <div style={{fontSize:14,fontWeight:500}}>
-                  {willkommen ? (wd.hint?.trim() || t('preview_welcome_how_value')) : punkte
+                  {punkte
                     ? (ziel ? `${ziel.name}, ${t('scan_points_missing', { n: formatierePunkte(Math.max(0, ziel.costPointsX100 - pointsX100)) })}` : t('scan_points_no_goal'))
                     : (rewardText||'-')}
                 </div>
               </div>
             </div>
+            )}
 
             {/* Stempel-Raster, falls gewählt. Bei Punkten gibt es nichts zu rastern. */}
             {!punkte && !willkommen && d.walletStyle==='grid' && (
