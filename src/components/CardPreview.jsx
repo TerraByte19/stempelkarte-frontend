@@ -218,13 +218,91 @@ function wellenPfad(pegel) {
 
 // ─── Wallet Vorschauen ───────────────────────────────────────────────────────
 
+// Beispielname im Feld KUNDE - auf der echten Karte steht der Kundenname.
+const BEISPIEL_KUNDE = 'Anna'
+
+/**
+ * Die Felder des Apple-Passes, genau wie ApplePassService.baueFelder sie
+ * setzt. Die Beschriftungen sind dort fest deutsch, also hier auch - die
+ * Vorschau soll zeigen, was auf dem iPhone steht, nicht die Sprache des Panels.
+ *
+ * kopf: rechts oben. haupt: grosses Feld (ueber dem Streifen, falls einer da
+ * ist). zeile: Secondary + Auxiliary - iOS setzt sie in EINE Reihe.
+ */
+function appleFelder({ punkte, willkommen, wd, grid, stamps, threshold, rewardText, ziel, pointsX100 }) {
+  const kunde = { label: 'KUNDE', wert: BEISPIEL_KUNDE }
+
+  if (willkommen) {
+    const zeile = []
+    if (wd.showGift) zeile.push({ label: '🎁 GESCHENK', wert: willkommen })
+    if (wd.showHint) zeile.push({ label: "SO GEHT'S", wert: wd.hint?.trim() || 'An der Kasse vorzeigen' })
+    zeile.push(kunde)
+    return {
+      kopf: { label: null, wert: wd.showTitle ? (wd.title?.trim() || 'Willkommen') : '' },
+      haupt: null,
+      zeile,
+    }
+  }
+
+  if (punkte) {
+    const stand = formatierePunkte(pointsX100)
+    if (!ziel) {
+      return { kopf: { label: 'PUNKTE', wert: stand }, haupt: { label: 'PUNKTE', wert: stand }, zeile: [kunde] }
+    }
+    const fehlend = Math.max(0, ziel.costPointsX100 - pointsX100)
+    return {
+      kopf: { label: 'PUNKTE', wert: stand },
+      haupt: fehlend > 0
+        ? { label: 'Punkte bis ↓', wert: formatierePunkte(fehlend) }
+        : { label: 'BEREIT', wert: 'Bereit! 🎉' },
+      zeile: [{ label: 'NÄCHSTE PRÄMIE', wert: ziel.name }, kunde],
+    }
+  }
+
+  const rest = Math.max(0, threshold - stamps)
+  return {
+    kopf: { label: 'STEMPEL', wert: `${Math.min(stamps, threshold)}/${threshold}` },
+    haupt: grid ? null : rest > 0
+      ? { label: 'Stempel bis ↓', wert: String(rest) }
+      : { label: 'BELOHNUNG', wert: 'Bereit! 🎉' },
+    zeile: [{ label: 'BELOHNUNG', wert: rewardText || '—' }, kunde],
+  }
+}
+
+// iOS verkleinert alle Werte der Zeile gleich, bis alles hineinpasst: kurze
+// Texte stehen gross (16), drei lange Felder wie auf dem Foto bei ~8.
+// 198 = Kartenbreite ohne Rand, 0,5 = mittlere Zeichenbreite je Schriftgrad.
+function zeilenGroesse(zeile) {
+  const zeichen = zeile.reduce((n, f) => n + String(f.wert).length, 0)
+  const platz = 198 - 8 * (zeile.length - 1)
+  return Math.max(6.5, Math.min(16, platz / (zeichen * 0.5)))
+}
+
+function PassFeld({ feld, labelFarbe, wertGroesse, rechts }) {
+  return (
+    <div style={{minWidth:0,textAlign:rechts?'right':'left',flexShrink:rechts?0:1}}>
+      {feld.label && (
+        <div style={{fontSize:6.5,fontWeight:500,letterSpacing:0.4,color:labelFarbe,textTransform:'uppercase',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',marginBottom:1}}>
+          {feld.label}
+        </div>
+      )}
+      <div style={{fontSize:wertGroesse,fontWeight:400,lineHeight:1.15,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
+        {feld.wert}
+      </div>
+    </div>
+  )
+}
+
 // titel/titelFarbe: der echte Pass zeigt oben den Ladennamen (logoText),
 // mit eigener Namensfarbe als Bild in dieser Farbe. Ohne titel bleibt es
 // beim Kartennamen wie bisher.
 // willkommen: Geschenktext einer noch gesperrten Karte. Dann wie der echte
 // Pass (baueFelderGesperrt): Ueberschrift statt Stempelstand, Willkommensbild
-// statt Streifen, kein Raster - Geschenk, Hinweis und QR.
-// willkommenDesign: {title, hint, imageUrl, colorBackground, ...}, leer = Standard.
+// statt Streifen, kein Raster.
+// willkommenDesign: {title, hint, imageUrl, colorBackground, show*...}, leer = Standard.
+//
+// Masse nach einem Foto der echten Karte: Seitenverhaeltnis 1 : 1,41,
+// Streifen 375:144 direkt unter dem Kopf, eine Feldzeile, QR ganz unten.
 export function ApplePreview({ design, stamps, threshold, rewardText, cardName, t,
                               cardType='STAMP', rewards=[], pointsX100=0, titel, titelFarbe,
                               willkommen, willkommenDesign }) {
@@ -237,108 +315,92 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
   const useUpload = d.stampIconType==='upload' && d.stampIconUrl
   const punkte = cardType==='POINTS'
   const ziel = punkte ? naechstesZiel(rewards, pointsX100) : null
+  const grid = !punkte && d.walletStyle==='grid'
   const streifenStil = STREIFEN_STILE.includes(d.walletStyle) ? d.walletStyle : null
   const anteil = punkte
       ? anteilVon(pointsX100, ziel ? ziel.costPointsX100 : 0)
       : anteilVon(stamps, threshold)
+  const { kopf, haupt, zeile } = appleFelder({ punkte, willkommen, wd, grid, stamps, threshold, rewardText, ziel, pointsX100 })
+  const schrift = '-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif'
+
+  // Streifen wie im Pass: gesperrt nur das Willkommensbild, sonst Raster
+  // oder Streifen-Stil. Kein Streifen = kein Platz dafuer.
+  let streifen = null
+  if (willkommen) {
+    if (wd.imageUrl) streifen = <img src={wd.imageUrl} alt="" style={{width:'100%',aspectRatio:'375 / 144',objectFit:'cover',display:'block'}}/>
+  } else if (grid) {
+    streifen = (
+      <div style={{width:'100%',aspectRatio:'375 / 144',display:'flex',alignItems:'center',justifyContent:'center',transform:'scale(1.1)'}}>
+        <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={useUpload} stampIconUrl={d.stampIconUrl}/>
+      </div>
+    )
+  } else if (streifenStil) {
+    streifen = <Streifen stil={streifenStil} anteil={anteil} akzent={d.stampColor || d.colorLabel} fotoUrl={d.stripImageUrl} grund={d.colorBackground}/>
+  }
+
+  const hauptFeld = haupt && (
+    <div style={{padding:'4px 10px'}}>
+      <div style={{fontSize:7,fontWeight:500,letterSpacing:0.4,color:d.colorLabel,textTransform:'uppercase'}}>{haupt.label}</div>
+      <div style={{fontSize:28,fontWeight:300,lineHeight:1.05}}>{haupt.wert}</div>
+    </div>
+  )
+
   return (
       <div style={{width:236,background:'linear-gradient(160deg,#3a3a3c,#1c1c1e)',borderRadius:42,padding:11,boxShadow:'0 22px 60px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.06)',margin:'0 auto'}}>
-        {/* Bildschirm */}
-        <div style={{background:'#000',borderRadius:32,overflow:'hidden',position:'relative',paddingTop:0}}>
+        {/* Bildschirm: Wallet zeigt eine geoeffnete Karte auf Schwarz */}
+        <div style={{background:'#000',borderRadius:32,overflow:'hidden',position:'relative',fontFamily:schrift}}>
           {/* Dynamic Island */}
           <div style={{position:'absolute',top:9,left:'50%',transform:'translateX(-50%)',width:72,height:21,background:'#000',borderRadius:14,zIndex:5}}/>
           {/* Statusleiste */}
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 18px 6px',fontSize:11,color:'white',fontWeight:600,fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 18px 4px',fontSize:11,color:'white',fontWeight:600}}>
             <span>9:41</span>
-            <span style={{display:'flex',gap:4,alignItems:'center',fontSize:10}}>
-            <span>􀙇</span><span>􀋨</span><span>􀛨</span>
-          </span>
+            <span style={{fontSize:10}}>5G ▮</span>
           </div>
-          {/* Wallet-Hintergrund */}
-          <div style={{background:'#f2f2f7',padding:'8px 10px 16px',minHeight:200}}>
+          {/* Wallet-Leiste */}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 14px 8px',color:'white'}}>
+            <span style={{fontSize:12,fontWeight:600}}>Fertig</span>
+            <span style={{width:18,height:18,borderRadius:'50%',border:'1.5px solid white',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,lineHeight:1}}>···</span>
+          </div>
+
+          <div style={{padding:'0 8px 18px'}}>
             {/* Die Karte */}
-            <div style={{borderRadius:13,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,boxShadow:'0 6px 18px rgba(0,0,0,0.28)',fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif'}}>
-              {/* Header: Logo + Name links, Stempelzahl rechts */}
-              <div style={{display:'flex',alignItems:'center',gap:7,padding:'11px 12px 8px'}}>
-                <div style={{width:24,height:24,borderRadius:'50%',background:'rgba(255,255,255,0.97)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'2px solid white':'none',boxSizing:'border-box'}}>
-                  {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:d.logoRing?'80%':'100%',height:d.logoRing?'80%':'100%',objectFit:'cover',borderRadius:d.logoRing?'50%':0}}/> : <span style={{fontSize:9,fontWeight:700,color:d.colorBackground}}>SK</span>}
+            <div style={{borderRadius:10,overflow:'hidden',background:d.colorBackground,color:d.colorForeground,aspectRatio:'1 / 1.41',display:'flex',flexDirection:'column'}}>
+              {/* Kopf: Logo + Ladenname links, Kopffeld rechts */}
+              <div style={{display:'flex',alignItems:'center',gap:6,padding:'7px 9px',minHeight:44,boxSizing:'border-box'}}>
+                <div style={{width:29,height:29,borderRadius:'50%',background:'rgba(255,255,255,0.97)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0,border:d.logoRing?'1.5px solid white':'none',boxSizing:'border-box'}}>
+                  {d.logoUrl ? <img src={d.logoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/> : <span style={{fontSize:9,fontWeight:700,color:d.colorBackground}}>SK</span>}
                 </div>
-                <span style={{fontSize:12,fontWeight:600,flex:1,letterSpacing:0.2,color:titelFarbe}}>{titel||cardName||t('preview_default_name')}</span>
-                <span style={{fontSize:15,fontWeight:600,color:d.colorLabel}}>
-                  {willkommen ? (wd.showTitle ? (wd.title?.trim() || t('preview_welcome_google')) : '') : punkte ? formatierePunkte(pointsX100) : `${stamps}/${threshold}`}
+                <span style={{fontSize:12,fontWeight:500,flex:1,minWidth:0,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',color:titelFarbe || d.colorForeground}}>
+                  {titel||cardName||t('preview_default_name')}
                 </span>
+                <div style={{textAlign:'right',flexShrink:0,maxWidth:'50%'}}>
+                  {kopf.label && <div style={{fontSize:6.5,fontWeight:500,letterSpacing:0.4,color:d.colorLabel}}>{kopf.label}</div>}
+                  <div style={{fontSize:13,fontWeight:400,lineHeight:1.1,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{kopf.wert}</div>
+                </div>
               </div>
 
-              {willkommen && wd.imageUrl && (
-                  <img src={wd.imageUrl} alt="" style={{width:'100%',aspectRatio:'375 / 144',objectFit:'cover',display:'block'}}/>
-              )}
+              {/* Hauptfeld liegt auf dem Streifen, ohne Streifen steht es frei */}
+              {streifen ? (
+                <div style={{position:'relative'}}>
+                  {streifen}
+                  {hauptFeld && <div style={{position:'absolute',left:0,top:0,right:0}}>{hauptFeld}</div>}
+                </div>
+              ) : hauptFeld}
 
-              {streifenStil && !willkommen && (
-                  <Streifen stil={streifenStil} anteil={anteil}
-                            akzent={d.stampColor || d.colorLabel} fotoUrl={d.stripImageUrl}
-                            grund={d.colorBackground}/>
-              )}
-
-              {/* Inhalt je nach Kartentyp und Stil */}
-              {willkommen ? (
-                  (wd.showGift || wd.showHint) && (
-                  <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
-                    {wd.showGift && (
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>🎁 {t('preview_welcome_gift')}</div>
-                      <div style={{fontSize:11,fontWeight:500}}>{willkommen}</div>
-                    </div>
-                    )}
-                    {wd.showHint && (
-                    <div>
-                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_welcome_how')}</div>
-                      <div style={{fontSize:11,fontWeight:500}}>{wd.hint?.trim() || t('preview_welcome_how_value')}</div>
-                    </div>
-                    )}
-                  </div>
-                  )
-              ) : punkte ? (
-                  <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('scan_points_next_goal')}</div>
-                      <div style={{fontSize:11,fontWeight:500}}>{ziel ? ziel.name : t('scan_points_no_goal')}</div>
-                    </div>
-                    <div>
-                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('cards_catalog_cost')}</div>
-                      <div style={{fontSize:11,fontWeight:500}}>
-                        {ziel
-                          ? t('scan_points_missing', { n: formatierePunkte(Math.max(0, ziel.costPointsX100 - pointsX100)) })
-                          : formatierePunkte(pointsX100)}
-                      </div>
-                    </div>
-                  </div>
-              ) : d.walletStyle==='grid' ? (
-                  <div style={{padding:'10px 10px',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                    <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={useUpload} stampIconUrl={d.stampIconUrl}/>
-                  </div>
-              ) : (
-                  <div style={{display:'flex',gap:18,padding:'9px 12px 11px'}}>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_reward_label')}</div>
-                      <div style={{fontSize:11,fontWeight:500}}>{rewardText||'—'}</div>
-                    </div>
-                    <div>
-                      <div style={{fontSize:8,fontWeight:600,letterSpacing:0.5,color:d.colorLabel,marginBottom:2,opacity:0.95}}>{t('preview_stamps_label')}</div>
-                      <div style={{fontSize:11,fontWeight:500}}>{t('preview_stamps_of', { stamps, threshold })}</div>
-                    </div>
-                  </div>
-              )}
-
-              {/* Barcode-Bereich: Hintergrund = Kartenfarbe, nur hinter dem QR weiß */}
-              <div style={{padding:'12px 12px 11px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
-                <MockQR size={92}/>
-                <span style={{fontSize:9,color:d.colorForeground,opacity:0.55,fontFamily:'"SF Mono",monospace',letterSpacing:1}}>CC-7F3A···902B</span>
+              {/* Secondary + Auxiliary in einer Reihe, letztes Feld rechtsbuendig */}
+              <div style={{display:'flex',justifyContent:'space-between',gap:8,padding:'6px 9px 0'}}>
+                {zeile.map((f, i) => (
+                  <PassFeld key={i} feld={f} labelFarbe={d.colorLabel}
+                            wertGroesse={zeilenGroesse(zeile)}
+                            rechts={i === zeile.length - 1 && zeile.length > 1}/>
+                ))}
               </div>
-            </div>
 
-            {/* Detail-Hinweis unter der Karte (wie echtes Wallet) */}
-            <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:5,marginTop:11,fontSize:11,color:'#8e8e93'}}>
-              <span>􀅴</span><span>{t('preview_tap_update')}</span>
+              {/* Barcode ganz unten, nur hinter dem QR weiss. Kein Text darunter:
+                  der Pass setzt alternateText leer. */}
+              <div style={{marginTop:'auto',padding:'0 0 9px',display:'flex',justifyContent:'center'}}>
+                <MockQR size={78}/>
+              </div>
             </div>
           </div>
         </div>
