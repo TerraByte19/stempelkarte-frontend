@@ -59,6 +59,7 @@ export default function Profil() {
         <Sperrbildschirm t={t} shop={shop} />
         <Rueckhol t={t} shop={shop} />
         <GoogleBewertung t={t} shop={shop} />
+        <Anmeldefelder t={t} shop={shop} />
         <StaffTokens t={t} />
       </div>
   )
@@ -337,6 +338,80 @@ function Sperrbildschirm({ t, shop }) {
         </form>
 
         <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
+      </div>
+  )
+}
+
+/** Drei Knoepfe fuer ein Anmeldefeld: nicht abfragen, optional, Pflicht. */
+function FeldAuswahl({ t, werte, label, wert, setWert }) {
+  return (
+      <div style={{ marginBottom: 14 }}>
+        <label style={s.label}>{label}</label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {werte.map(w => (
+              <button key={w} type="button" onClick={() => setWert(w)}
+                      style={{ ...s.btnSecondary, flex: 1,
+                        background: wert === w ? '#3C3489' : '#f0eeff',
+                        color: wert === w ? 'white' : '#3C3489' }}>
+                {t(`profil_signup_${w.toLowerCase()}`)}
+              </button>
+          ))}
+        </div>
+      </div>
+  )
+}
+
+/**
+ * Anmeldeformular: welche Zusatzfelder der Kunde beim Holen der Karte
+ * ausfuellt. Name und E-Mail bleiben immer Pflicht. Der Geburtstag schaltet
+ * die Zielgruppe "Geburtstag diesen Monat" bei Nachrichten frei.
+ */
+function Anmeldefelder({ t, shop }) {
+  const WERTE = ['OFF', 'OPTIONAL', 'REQUIRED']
+  // Aelteres Backend liefert die Felder nicht - dann "aus".
+  const [birthday, setBirthday] = useState(shop.signupBirthday || 'OFF')
+  const [phone, setPhone] = useState(shop.signupPhone || 'OFF')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  async function speichern(e) {
+    e.preventDefault()
+    setError('')
+    setSaving(true)
+    try {
+      const res = await api.put('/api/shop/me/anmeldefelder', { birthday, phone })
+      setBirthday(res.data?.signupBirthday || 'OFF')
+      setPhone(res.data?.signupPhone || 'OFF')
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>{t('profil_signup_title')}</h2>
+        <p style={{ ...s.hint, margin: '0 0 16px' }}>{t('profil_signup_hint')}</p>
+
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <form onSubmit={speichern}>
+          <FeldAuswahl t={t} werte={WERTE} label={t('profil_signup_birthday')} wert={birthday} setWert={setBirthday} />
+          <FeldAuswahl t={t} werte={WERTE} label={t('profil_signup_phone')} wert={phone} setWert={setPhone} />
+          <button style={s.btnPrimary} type="submit" disabled={saving}>
+            {saving ? t('profil_saving') : t('profil_save')}
+          </button>
+        </form>
+        <p style={s.hint}>{t('profil_signup_note')}</p>
       </div>
   )
 }

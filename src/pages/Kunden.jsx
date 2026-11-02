@@ -158,6 +158,9 @@ function KundenZeile({ kunde, t, datum, onChange }) {
           <span>{t('kunden_last_visit')}: <b>{datum(kunde.lastVisitAt)}</b></span>
           <span>{t('kunden_since')}: {datum(kunde.createdAt)}</span>
           <span>{t('kunden_rewards', { n: kunde.totalRewards })}</span>
+          {/* Nur wenn der Laden die Felder abfragt und der Kunde sie ausgefuellt hat. */}
+          {kunde.birthday && <span>{t('kunden_birthday')}: {datum(kunde.birthday + 'T12:00:00')}</span>}
+          {kunde.phone && <span>{t('kunden_phone')}: <a href={`tel:${kunde.phone}`} style={{ color: '#3C3489' }}>{kunde.phone}</a></span>}
         </div>
 
         <div style={s.badges}>

@@ -19,7 +19,7 @@ import { useLang, localeTag } from '../LangContext'
 
 // Reihenfolge wie im Backend-Enum; unbekannte Gruppen eines neueren
 // Backends werden trotzdem angezeigt (mit rohem Namen).
-const GRUPPEN = ['ALLE', 'NEU', 'INAKTIV_30', 'INAKTIV_60', 'INAKTIV_90', 'EINMAL', 'STAMM_RUHIG', 'PRAEMIE_WARTET', 'FAST_VOLL']
+const GRUPPEN = ['ALLE', 'NEU', 'GEBURTSTAG', 'INAKTIV_30', 'INAKTIV_60', 'INAKTIV_90', 'EINMAL', 'STAMM_RUHIG', 'PRAEMIE_WARTET', 'FAST_VOLL']
 const VORLAGEN = ['happy', 'neu', 'event', 'angebot']
 
 /** datetime-local will "JJJJ-MM-TTTHH:MM" in Ortszeit, ohne Sekunden. */
