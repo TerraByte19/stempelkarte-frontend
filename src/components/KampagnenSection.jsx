@@ -11,19 +11,33 @@ import { useLang, localeTag } from '../LangContext'
  * Nachricht am Tag - wer heute schon eine hatte, zaehlt in "heuteSchon" und
  * wird uebersprungen. Der Versand laeuft im Hintergrund in Paketen; solange
  * ein Eintrag auf RUNNING steht, wird der Verlauf leise nachgeladen.
+ *
+ * Planen: Datum und Uhrzeit, die Kampagne wartet als SCHEDULED. Die
+ * Empfaenger bestimmt der Server erst zum Zeitpunkt. Der Entwurf bleibt im
+ * Browser, bis er gesendet wurde.
  */
 
 // Reihenfolge wie im Backend-Enum; unbekannte Gruppen eines neueren
 // Backends werden trotzdem angezeigt (mit rohem Namen).
 const GRUPPEN = ['ALLE', 'NEU', 'INAKTIV_30', 'INAKTIV_60', 'INAKTIV_90', 'EINMAL', 'STAMM_RUHIG', 'PRAEMIE_WARTET', 'FAST_VOLL']
+const VORLAGEN = ['happy', 'neu', 'event', 'angebot']
+
+/** datetime-local will "JJJJ-MM-TTTHH:MM" in Ortszeit, ohne Sekunden. */
+function lokal(d) {
+  const p = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+}
 
 export default function KampagnenSection() {
     const { t, lang } = useLang()
     const shop = JSON.parse(localStorage.getItem('shop') || '{}')
+    const entwurfKey = `kamp_entwurf_${shop.id || ''}`
     // null = noch nicht geladen, false = Backend kennt den Endpunkt nicht (alter Server)
     const [stand, setStand] = useState(null)
     const [gruppe, setGruppe] = useState('ALLE')
-    const [text, setText] = useState('')
+    const [text, setText] = useState(() => { try { return localStorage.getItem(entwurfKey) || '' } catch { return '' } })
+    const [spaeter, setSpaeter] = useState(false)
+    const [wann, setWann] = useState('')
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState(null)      // {ok, text}
     const [open, setOpen] = useState(false)
@@ -31,6 +45,11 @@ export default function KampagnenSection() {
 
     const pollRef = useRef(null)
     useEffect(() => () => clearTimeout(pollRef.current), [])
+
+    // Entwurf im Browser halten: wer unterbrochen wird, findet den Text wieder.
+    useEffect(() => {
+        try { if (text) localStorage.setItem(entwurfKey, text); else localStorage.removeItem(entwurfKey) } catch { /* privat/gesperrt */ }
+    }, [text, entwurfKey])
 
     const textMax = stand?.textMax || 160
 
@@ -71,21 +90,44 @@ export default function KampagnenSection() {
         return name === k ? key : name
     }
 
+    function formatDate(iso) {
+        try {
+            const d = new Date(iso)
+            const tag = localeTag(lang)
+            return d.toLocaleDateString(tag, { day: '2-digit', month: '2-digit', year: 'numeric' })
+                + ' ' + d.toLocaleTimeString(tag, { hour: '2-digit', minute: '2-digit' })
+        } catch { return iso }
+    }
+
     async function send() {
         const entwurf = text.replace(/\s+/g, ' ').trim()
         if (!entwurf) {
             setFeedback({ ok: false, text: t('kamp_err_empty') })
             return
         }
+        let geplantAm = null
+        if (spaeter) {
+            const d = wann ? new Date(wann) : null
+            if (!d || Number.isNaN(d.getTime())) {
+                setFeedback({ ok: false, text: t('kamp_err_when') })
+                return
+            }
+            geplantAm = d.toISOString()
+        }
         const n = zahl(gruppe).empfaenger
-        if (!confirm(t('kamp_confirm_send', { n, gruppe: gruppenName(gruppe) }))) return
+        const frage = spaeter
+            ? t('kamp_confirm_plan', { gruppe: gruppenName(gruppe), wann: formatDate(geplantAm) })
+            : t('kamp_confirm_send', { n, gruppe: gruppenName(gruppe) })
+        if (!confirm(frage)) return
 
         setSending(true)
         setFeedback(null)
         try {
-            await api.post('/api/shop/kampagnen', { text: entwurf, gruppe })
-            setFeedback({ ok: true, text: t('kamp_queued') })
+            await api.post('/api/shop/kampagnen', { text: entwurf, gruppe, geplantAm })
+            setFeedback({ ok: true, text: spaeter ? t('kamp_planned') : t('kamp_queued') })
             setText('')
+            setSpaeter(false)
+            setWann('')
             setOpen(false)
             setHistoryOpen(true)
             load(0)
@@ -99,26 +141,30 @@ export default function KampagnenSection() {
         }
     }
 
-    function formatDate(iso) {
+    async function abbrechen(item) {
+        if (!confirm(t('kamp_cancel_confirm'))) return
         try {
-            const d = new Date(iso)
-            const tag = localeTag(lang)
-            return d.toLocaleDateString(tag, { day: '2-digit', month: '2-digit', year: 'numeric' })
-                + ' ' + d.toLocaleTimeString(tag, { hour: '2-digit', minute: '2-digit' })
-        } catch { return iso }
+            await api.delete(`/api/shop/kampagnen/${item.id}`)
+            setFeedback({ ok: true, text: t('kamp_cancelled') })
+        } catch (e) {
+            setFeedback({ ok: false, text: e.response?.data?.error || t('kamp_err_send') })
+        }
+        load(0)
     }
 
     if (stand === false) return null
 
     const geladen = stand !== null
     const gewaehlt = zahl(gruppe)
-    const darfSenden = geladen && gewaehlt.empfaenger > 0
+    // Geplant darf auch bei 0 raus: zum Zeitpunkt kann die Gruppe voll sein.
+    const darfSenden = geladen && (spaeter || gewaehlt.empfaenger > 0)
     const vorschau = text.trim() || t('kamp_preview_ph')
     // Backend-Gruppen zuerst in bekannter Reihenfolge, dann unbekannte hinten dran.
     const gruppenKeys = geladen
         ? [...GRUPPEN.filter(k => stand.gruppen.some(g => g.gruppe === k)),
            ...stand.gruppen.map(g => g.gruppe).filter(k => !GRUPPEN.includes(k))]
         : GRUPPEN
+    const minWann = lokal(new Date(Date.now() + 5 * 60 * 1000))
 
     return (
         <div style={s.card}>
@@ -126,6 +172,7 @@ export default function KampagnenSection() {
                 .sk-kp-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
                 .sk-kp-buttons { display: flex; gap: 8px; flex-shrink: 0; }
                 .sk-kp-gruppe:hover { border-color: #c9c4ee; }
+                .sk-kp-vorlage:hover { background: #e4e0fa; }
                 @media (max-width: 600px) {
                     .sk-kp-header { flex-direction: column; align-items: stretch; }
                     .sk-kp-buttons { width: 100%; }
@@ -194,6 +241,16 @@ export default function KampagnenSection() {
                         })}
                     </div>
 
+                    <label style={s.label}>{t('kamp_tpl_label')}</label>
+                    <div style={s.vorlagen}>
+                        {VORLAGEN.map(v => (
+                            <button key={v} type="button" className="sk-kp-vorlage" style={s.vorlage}
+                                    onClick={() => setText(t(`kamp_tpl_${v}`).slice(0, textMax))}>
+                                {t(`kamp_tpl_${v}_l`)}
+                            </button>
+                        ))}
+                    </div>
+
                     <label style={s.label}>{t('kamp_text_label')}</label>
                     <textarea
                         style={s.textarea}
@@ -203,9 +260,12 @@ export default function KampagnenSection() {
                         maxLength={textMax}
                         rows={3}
                     />
-                    <p style={{ ...s.counter, color: text.length >= textMax ? '#c0392b' : '#999' }}>
-                        {text.length} / {textMax}
-                    </p>
+                    <div style={s.unterText}>
+                        <span style={s.hint}>{t('kamp_draft_hint')}</span>
+                        <span style={{ ...s.counter, color: text.length >= textMax ? '#c0392b' : '#999' }}>
+                            {text.length} / {textMax}
+                        </span>
+                    </div>
 
                     {/* Vorschau: so sieht die Mitteilung auf dem Sperrbildschirm aus. */}
                     <label style={s.label}>{t('kamp_preview_label')}</label>
@@ -228,6 +288,18 @@ export default function KampagnenSection() {
                     </div>
                     <p style={s.hint}>{t('kamp_preview_hint')}</p>
 
+                    <label style={s.switchRow}>
+                        <input type="checkbox" checked={spaeter} onChange={e => setSpaeter(e.target.checked)} />
+                        <span style={s.switchLabel}>{t('kamp_later')}</span>
+                    </label>
+                    {spaeter && (
+                        <div style={{ marginTop: 8 }}>
+                            <input type="datetime-local" style={s.input} value={wann} min={minWann}
+                                   onChange={e => setWann(e.target.value)} />
+                            <p style={s.hint}>{t('kamp_later_hint')}</p>
+                        </div>
+                    )}
+
                     <p style={s.legal}>{t('kamp_legal')}</p>
 
                     <button
@@ -237,7 +309,9 @@ export default function KampagnenSection() {
                     >
                         {sending
                             ? t('kamp_sending')
-                            : t('kamp_send_btn', { n: geladen ? gewaehlt.empfaenger : 0 })}
+                            : spaeter
+                                ? t('kamp_plan_btn')
+                                : t('kamp_send_btn', { n: geladen ? gewaehlt.empfaenger : 0 })}
                     </button>
                 </div>
             )}
@@ -258,10 +332,17 @@ export default function KampagnenSection() {
                             <div style={s.historyRecipients}>
                                 {t('kamp_history_to', { gruppe: gruppenName(item.gruppe) })}
                                 {' · '}
-                                {item.status === 'RUNNING'
-                                    ? t('kamp_history_running', { n: item.gesendet, total: item.empfaenger })
-                                    : t('kamp_history_done', { n: item.gesendet })}
+                                {item.status === 'SCHEDULED'
+                                    ? t('kamp_history_scheduled', { wann: formatDate(item.geplantAm) })
+                                    : item.status === 'RUNNING'
+                                        ? t('kamp_history_running', { n: item.gesendet, total: item.empfaenger })
+                                        : t('kamp_history_done', { n: item.gesendet })}
                             </div>
+                            {item.status === 'SCHEDULED' && (
+                                <button type="button" style={s.cancelBtn} onClick={() => abbrechen(item)}>
+                                    {t('kamp_cancel')}
+                                </button>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -289,8 +370,15 @@ const s = {
     gruppeBeschr: { fontSize: 12, color: '#888', lineHeight: 1.35 },
     gruppeZahl: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, fontSize: 14 },
     gruppeHeute: { fontSize: 11, color: '#999', whiteSpace: 'nowrap' },
+    // Vorlagen als Chips: ein Tipp fuellt das Textfeld, danach frei aenderbar.
+    vorlagen: { display: 'flex', flexWrap: 'wrap', gap: 6 },
+    vorlage: { background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: 999, padding: '6px 12px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' },
     textarea: { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontSize: 14, outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.5 },
-    counter: { fontSize: 12, textAlign: 'end', margin: '4px 0 0' },
+    unterText: { display: 'flex', justifyContent: 'space-between', gap: 8, margin: '4px 0 0' },
+    counter: { fontSize: 12 },
+    input: { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' },
+    switchRow: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, cursor: 'pointer' },
+    switchLabel: { fontSize: 14, fontWeight: 600, color: '#1a1a1a' },
     // Sperrbildschirm-Ausschnitt: dunkler Verlauf wie ein iPhone-Hintergrund,
     // darauf die Mitteilung in Glas-Optik.
     phone: { background: 'linear-gradient(160deg, #2b2a5c 0%, #0f0e2a 100%)', borderRadius: 16, padding: '26px 14px', margin: '0 0 8px' },
@@ -311,4 +399,5 @@ const s = {
     historyText: { fontSize: 14, fontWeight: 600, color: '#1a1a1a' },
     historyMeta: { fontSize: 12, color: '#999', flexShrink: 0 },
     historyRecipients: { fontSize: 12, color: '#3C3489', marginTop: 4 },
+    cancelBtn: { marginTop: 10, background: '#fff0f0', color: '#c0392b', border: 'none', borderRadius: 8, padding: '7px 12px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' },
 }
