@@ -39,6 +39,7 @@ export default function Layout() {
           <NavLink to="/scanner" style={navStyle}>{t('nav_scanner')}</NavLink>
           <NavLink to="/" end style={navStyle}>{t('nav_dashboard')}</NavLink>
           <NavLink to="/karten" style={navStyle}>{t('nav_cards')}</NavLink>
+          <NavLink to="/kunden" style={navStyle}>{t('nav_customers')}</NavLink>
           <NavLink to="/statistik" style={navStyle}>{t('nav_stats')}</NavLink>
           <NavLink to="/profil" style={navStyle}>{t('nav_profile')}</NavLink>
         </nav>
@@ -76,6 +77,15 @@ export default function Layout() {
             <line x1="2" y1="10" x2="22" y2="10"/>
           </svg>
           {t('nav_cards')}
+        </NavLink>
+        <NavLink to="/kunden" style={bottomNavStyle}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="9" cy="8" r="3.5"/>
+            <path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/>
+            <circle cx="17" cy="9" r="2.5"/>
+            <path d="M16 14.5c3 0 5.5 2 5.5 5"/>
+          </svg>
+          {t('nav_customers')}
         </NavLink>
         <NavLink to="/statistik" style={bottomNavStyle}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

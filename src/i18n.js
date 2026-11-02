@@ -2,7 +2,28 @@ export const translations = {
   de: {
     // Navigation
     nav_scanner: 'Scanner', nav_dashboard: 'Dashboard', nav_cards: 'Karten',
-    nav_stats: 'Statistik',
+    nav_stats: 'Statistik', nav_customers: 'Kunden',
+    // Kundenliste
+    kunden_title: 'Kunden',
+    kunden_subtitle: 'Alle, die eine Karte von dir haben. Zuletzt gesehene zuerst.',
+    kunden_search_ph: 'Name oder E-Mail suchen',
+    kunden_count: '{n} Kundenkarte(n)',
+    kunden_empty: 'Noch keine Kunden. Sobald jemand deinen QR-Code scannt, steht er hier.',
+    kunden_empty_search: 'Niemand gefunden.',
+    kunden_backend_old: 'Der Server wird gerade aktualisiert. In ein paar Minuten nochmal laden.',
+    kunden_load_error: 'Kunden konnten nicht geladen werden.',
+    kunden_last_visit: 'Zuletzt da', kunden_never: 'noch nie', kunden_since: 'Dabei seit',
+    kunden_rewards: '{n} Prämie(n) geholt',
+    kunden_stand: '{n} von {total} Stempeln', kunden_points: '{n} Punkte',
+    kunden_badge_locked: 'Geschenk offen', kunden_badge_full: 'Karte voll',
+    kunden_badge_apple: 'iPhone', kunden_badge_consent: 'Werbung ok',
+    kunden_badge_unconfirmed: 'E-Mail unbestätigt',
+    kunden_fix: 'Stempel korrigieren', kunden_fix_cancel: 'Abbrechen', kunden_fix_save: 'Speichern',
+    kunden_fix_hint: 'Zwischen 0 und {max}. Die Karte auf dem Handy wird sofort aktualisiert, der Kunde sieht den neuen Stand. Zählt nicht als Besuch.',
+    kunden_fix_range: 'Bitte eine Zahl zwischen 0 und {max}.',
+    kunden_fix_ok: 'Gespeichert, die Karte wird aktualisiert.',
+    kunden_fix_error: 'Nicht gespeichert. Bitte nochmal versuchen.',
+    kunden_fix_points_hint: 'Punkte korrigierst du im Scanner.',
     nav_profile: 'Profil', nav_logout: 'Ausloggen',
 
     // Gemeinsame Begriffe (mehrfach verwendet)
@@ -470,7 +491,28 @@ export const translations = {
   en: {
     // Navigation
     nav_scanner: 'Scanner', nav_dashboard: 'Dashboard', nav_cards: 'Cards',
-    nav_stats: 'Statistics',
+    nav_stats: 'Statistics', nav_customers: 'Customers',
+    // Customer list
+    kunden_title: 'Customers',
+    kunden_subtitle: 'Everyone who has one of your cards. Most recently seen first.',
+    kunden_search_ph: 'Search name or email',
+    kunden_count: '{n} customer card(s)',
+    kunden_empty: 'No customers yet. As soon as someone scans your QR code, they show up here.',
+    kunden_empty_search: 'Nobody found.',
+    kunden_backend_old: 'The server is being updated right now. Reload in a few minutes.',
+    kunden_load_error: 'Could not load customers.',
+    kunden_last_visit: 'Last visit', kunden_never: 'never', kunden_since: 'Member since',
+    kunden_rewards: '{n} reward(s) collected',
+    kunden_stand: '{n} of {total} stamps', kunden_points: '{n} points',
+    kunden_badge_locked: 'Gift open', kunden_badge_full: 'Card full',
+    kunden_badge_apple: 'iPhone', kunden_badge_consent: 'Marketing ok',
+    kunden_badge_unconfirmed: 'Email unconfirmed',
+    kunden_fix: 'Correct stamps', kunden_fix_cancel: 'Cancel', kunden_fix_save: 'Save',
+    kunden_fix_hint: 'Between 0 and {max}. The card on the phone updates right away and the customer sees the new count. Does not count as a visit.',
+    kunden_fix_range: 'Please enter a number between 0 and {max}.',
+    kunden_fix_ok: 'Saved, the card is being updated.',
+    kunden_fix_error: 'Not saved. Please try again.',
+    kunden_fix_points_hint: 'Points are corrected in the scanner.',
     nav_profile: 'Profile', nav_logout: 'Logout',
 
     // Common terms (used across multiple pages)
@@ -938,7 +980,28 @@ export const translations = {
   ar: {
     // التنقل
     nav_scanner: 'الماسح الضوئي', nav_dashboard: 'لوحة التحكم', nav_cards: 'البطاقات',
-    nav_stats: 'الإحصائيات',
+    nav_stats: 'الإحصائيات', nav_customers: 'العملاء',
+    // قائمة العملاء
+    kunden_title: 'العملاء',
+    kunden_subtitle: 'كل من لديه إحدى بطاقاتك. الأحدث زيارة أولًا.',
+    kunden_search_ph: 'ابحث بالاسم أو البريد الإلكتروني',
+    kunden_count: '{n} بطاقة عميل',
+    kunden_empty: 'لا عملاء بعد. بمجرد أن يمسح أحدهم رمز QR الخاص بك سيظهر هنا.',
+    kunden_empty_search: 'لم يُعثر على أحد.',
+    kunden_backend_old: 'يتم تحديث الخادم الآن. أعد التحميل بعد بضع دقائق.',
+    kunden_load_error: 'تعذر تحميل العملاء.',
+    kunden_last_visit: 'آخر زيارة', kunden_never: 'لم يزر بعد', kunden_since: 'عضو منذ',
+    kunden_rewards: 'حصل على {n} مكافأة',
+    kunden_stand: '{n} من {total} طوابع', kunden_points: '{n} نقطة',
+    kunden_badge_locked: 'هدية مفتوحة', kunden_badge_full: 'البطاقة ممتلئة',
+    kunden_badge_apple: 'iPhone', kunden_badge_consent: 'موافق على التسويق',
+    kunden_badge_unconfirmed: 'البريد غير مؤكد',
+    kunden_fix: 'تصحيح الطوابع', kunden_fix_cancel: 'إلغاء', kunden_fix_save: 'حفظ',
+    kunden_fix_hint: 'بين 0 و{max}. تُحدَّث البطاقة على الهاتف فورًا ويرى العميل العدد الجديد. لا تُحتسب زيارة.',
+    kunden_fix_range: 'أدخل رقمًا بين 0 و{max}.',
+    kunden_fix_ok: 'تم الحفظ، يتم تحديث البطاقة.',
+    kunden_fix_error: 'لم يُحفظ. حاول مرة أخرى.',
+    kunden_fix_points_hint: 'تُصحَّح النقاط في الماسح.',
     nav_profile: 'الملف الشخصي', nav_logout: 'تسجيل الخروج',
 
     // مصطلحات مشتركة (تُستخدم في أكثر من صفحة)

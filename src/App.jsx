@@ -15,6 +15,7 @@ import Landing from './pages/Landing/Landing'
 const Scanner = lazy(() => import('./pages/Scanner'))
 const Statistik = lazy(() => import('./pages/Statistik'))
 const Admin = lazy(() => import('./pages/Admin'))
+const Kunden = lazy(() => import('./pages/Kunden'))
 
 function App() {
   const token = localStorage.getItem('token')
@@ -53,6 +54,7 @@ function App() {
         <Route path="/" element={rootElement()}>
           <Route index element={<Dashboard />} />
           <Route path="karten" element={<Karten />} />
+          <Route path="kunden" element={<Kunden />} />
           <Route path="statistik" element={<Statistik />} />
           <Route path="profil" element={<Profil />} />
         </Route>
