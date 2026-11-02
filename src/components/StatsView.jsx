@@ -102,16 +102,16 @@ export default function StatsView({ data, fetchDay, onToggleExcludeSunday }) {
             <CountUp target={data.totalStamps} lang={lang} />
             <div style={s.derivedLabel}>{t('stat_stamps_total')}</div>
             <div style={s.counterSub}>
-              <span><b>{data.stampsThisWeek ?? 0}</b> {t('stat_this_week')}</span>
-              <span><b>{data.stampsThisMonth ?? 0}</b> {t('stat_this_month')}</span>
+              <span><b>{data.stampsThisWeek ?? 0}</b> {t('stat_this_week')} <Delta now={data.stampsThisWeek} prev={data.stampsLastWeek} label={t('stat_delta_week')} /></span>
+              <span><b>{data.stampsThisMonth ?? 0}</b> {t('stat_this_month')} <Delta now={data.stampsThisMonth} prev={data.stampsPrevMonth} label={t('stat_delta_month')} /></span>
             </div>
           </div>
           <div style={s.derivedCard}>
             <CountUp target={data.totalRewards} lang={lang} />
             <div style={s.derivedLabel}>{t('stat_rewards')}</div>
             <div style={s.counterSub}>
-              <span><b>{data.rewardsThisWeek ?? 0}</b> {t('stat_this_week')}</span>
-              <span><b>{data.rewardsThisMonth ?? 0}</b> {t('stat_this_month')}</span>
+              <span><b>{data.rewardsThisWeek ?? 0}</b> {t('stat_this_week')} <Delta now={data.rewardsThisWeek} prev={data.rewardsLastWeek} label={t('stat_delta_week')} /></span>
+              <span><b>{data.rewardsThisMonth ?? 0}</b> {t('stat_this_month')} <Delta now={data.rewardsThisMonth} prev={data.rewardsPrevMonth} label={t('stat_delta_month')} /></span>
             </div>
           </div>
           <div style={s.derivedCard}>
@@ -212,6 +212,19 @@ function formatHour(h, t) {
 // idx 0 = Montag. 2024-01-01 war ein Montag.
 function weekdayName(idx, lang) {
   return new Date(2024, 0, 1 + idx).toLocaleDateString(localeTag(lang), { weekday: 'long' })
+}
+
+// Kleiner Vergleich zum Vorzeitraum ("▲ 12 % vs. Vorwoche"). Nichts, wenn
+// der Vorzeitraum leer ist oder ein aelteres Backend ihn nicht liefert.
+function Delta({ now, prev, label }) {
+  if (typeof prev !== 'number' || prev <= 0 || typeof now !== 'number') return null
+  const pct = Math.round((now - prev) / prev * 100)
+  const color = pct >= 0 ? '#2C5F2E' : '#c0392b'
+  return (
+      <span style={{ color, fontWeight: 600, fontSize: 11, whiteSpace: 'nowrap' }} title={label}>
+        {pct >= 0 ? '▲' : '▼'} {Math.abs(pct)}% {label}
+      </span>
+  )
 }
 
 // Wachstums-Anzeige: Zahl diese Woche + Vergleich zur Vorwoche

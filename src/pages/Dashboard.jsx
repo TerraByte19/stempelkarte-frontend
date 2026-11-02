@@ -5,6 +5,7 @@ import api from '../api'
 import ScannerSetupSection from '../components/ScannerSetupSection'
 import NewsletterSection from '../components/NewsletterSection'
 import KampagnenSection from '../components/KampagnenSection'
+import AktivitaetSection from '../components/AktivitaetSection'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -80,6 +81,9 @@ export default function Dashboard() {
               ))}
             </div>
         )}
+
+        {/* Zuletzt passiert: juengste Scans und neueste Kunden */}
+        <AktivitaetSection />
 
         {/* Scanner-Einrichtung mit QR-Codes */}
         <ScannerSetupSection />
