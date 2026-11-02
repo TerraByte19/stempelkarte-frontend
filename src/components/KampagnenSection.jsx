@@ -338,6 +338,15 @@ export default function KampagnenSection() {
                                         ? t('kamp_history_running', { n: item.gesendet, total: item.empfaenger })
                                         : t('kamp_history_done', { n: item.gesendet })}
                             </div>
+                            {/* Ergebnis: wer in den 7 Tagen danach vorbeikam. Aelteres
+                                Backend liefert das Feld nicht, dann bleibt die Zeile weg. */}
+                            {typeof item.wiedergekommen === 'number' && item.empfaenger > 0 && (
+                                <div style={{ ...s.ergebnis, color: item.ergebnisFest ? '#1e7a4c' : '#666' }}>
+                                    {item.ergebnisFest
+                                        ? t('kamp_result', { n: item.wiedergekommen, pct: Math.round(item.wiedergekommen / item.empfaenger * 100) })
+                                        : t('kamp_result_sofar', { n: item.wiedergekommen, pct: Math.round(item.wiedergekommen / item.empfaenger * 100) })}
+                                </div>
+                            )}
                             {item.status === 'SCHEDULED' && (
                                 <button type="button" style={s.cancelBtn} onClick={() => abbrechen(item)}>
                                     {t('kamp_cancel')}
@@ -399,5 +408,6 @@ const s = {
     historyText: { fontSize: 14, fontWeight: 600, color: '#1a1a1a' },
     historyMeta: { fontSize: 12, color: '#999', flexShrink: 0 },
     historyRecipients: { fontSize: 12, color: '#3C3489', marginTop: 4 },
+    ergebnis: { fontSize: 12, fontWeight: 600, marginTop: 4 },
     cancelBtn: { marginTop: 10, background: '#fff0f0', color: '#c0392b', border: 'none', borderRadius: 8, padding: '7px 12px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' },
 }
