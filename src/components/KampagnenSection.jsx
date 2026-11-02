@@ -38,6 +38,8 @@ export default function KampagnenSection() {
     const [text, setText] = useState(() => { try { return localStorage.getItem(entwurfKey) || '' } catch { return '' } })
     const [spaeter, setSpaeter] = useState(false)
     const [wann, setWann] = useState('')
+    // Kontrollgruppe: ein Zehntel bekommt nichts, zum Vergleich im Ergebnis.
+    const [kontrolle, setKontrolle] = useState(false)
     const [sending, setSending] = useState(false)
     const [feedback, setFeedback] = useState(null)      // {ok, text}
     const [open, setOpen] = useState(false)
@@ -123,7 +125,7 @@ export default function KampagnenSection() {
         setSending(true)
         setFeedback(null)
         try {
-            await api.post('/api/shop/kampagnen', { text: entwurf, gruppe, geplantAm })
+            await api.post('/api/shop/kampagnen', { text: entwurf, gruppe, geplantAm, kontrollgruppe: kontrolle })
             setFeedback({ ok: true, text: spaeter ? t('kamp_planned') : t('kamp_queued') })
             setText('')
             setSpaeter(false)
@@ -289,6 +291,12 @@ export default function KampagnenSection() {
                     <p style={s.hint}>{t('kamp_preview_hint')}</p>
 
                     <label style={s.switchRow}>
+                        <input type="checkbox" checked={kontrolle} onChange={e => setKontrolle(e.target.checked)} />
+                        <span style={s.switchLabel}>{t('kamp_control')}</span>
+                    </label>
+                    {kontrolle && <p style={s.hint}>{t('kamp_control_hint')}</p>}
+
+                    <label style={s.switchRow}>
                         <input type="checkbox" checked={spaeter} onChange={e => setSpaeter(e.target.checked)} />
                         <span style={s.switchLabel}>{t('kamp_later')}</span>
                     </label>
@@ -345,6 +353,19 @@ export default function KampagnenSection() {
                                     {item.ergebnisFest
                                         ? t('kamp_result', { n: item.wiedergekommen, pct: Math.round(item.wiedergekommen / item.empfaenger * 100) })
                                         : t('kamp_result_sofar', { n: item.wiedergekommen, pct: Math.round(item.wiedergekommen / item.empfaenger * 100) })}
+                                    {/* Kontrollgruppe: dieselbe Zahl fuer die, die nichts bekamen. */}
+                                    {item.kontrolleEmpfaenger > 0 && typeof item.kontrolleWiedergekommen === 'number' && (
+                                        <span style={{ color: '#666', fontWeight: 500 }}>
+                                            {' · '}{t('kamp_result_control', {
+                                                n: item.kontrolleWiedergekommen, total: item.kontrolleEmpfaenger,
+                                                pct: Math.round(item.kontrolleWiedergekommen / item.kontrolleEmpfaenger * 100) })}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            {item.kontrolleEmpfaenger > 0 && typeof item.wiedergekommen !== 'number' && (
+                                <div style={{ ...s.ergebnis, color: '#666', fontWeight: 500 }}>
+                                    {t('kamp_history_control', { n: item.kontrolleEmpfaenger })}
                                 </div>
                             )}
                             {item.status === 'SCHEDULED' && (

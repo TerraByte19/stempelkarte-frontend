@@ -208,6 +208,22 @@ export default function Admin() {
     }
   }
 
+  // Weitere Orte je nach Tarif: 0 = Funktion aus, hoechstens 9 (Apple: zehn pro Karte).
+  async function setMaxOrte(shopId, max) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shopId}/max-orte`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ max })
+      })
+      if (!res.ok) throw new Error()
+      loadShops()
+    } catch {
+      alert('Fehler beim Setzen der weiteren Orte')
+    }
+  }
+
   // Sprache wird beim Erstellen festgelegt und ist danach fix - kein Umschalten.
 
   async function deleteShop(shopId, shopName) {
@@ -405,7 +421,7 @@ export default function Admin() {
             <span>E-Mail</span>
             <span>Karten</span>
             <span>Kunden</span>
-            <span>Max Tokens</span>
+            <span>Tokens · Orte</span>
             <span>Standort</span>
             <span>Status</span>
             <span>Aktionen</span>
@@ -448,7 +464,20 @@ export default function Admin() {
                     <span style={styles.shopEmail}>{shop.email}</span>
                     <span style={styles.cell}>{shop.cardCount}</span>
                     <span style={styles.cell}>{shop.customerCount}</span>
-                    <span style={styles.cell}>{shop.maxTokens}</span>
+                    <span style={{ ...styles.cell, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {shop.maxTokens}
+                      {/* Weitere Orte fuer Naehe-Erinnerung und Scan, je nach Tarif. */}
+                      <select
+                          title="Weitere Orte (Marktstand, zweiter Eingang): 0 = aus, bis 9"
+                          value={shop.maxOrte ?? 0}
+                          onChange={e => setMaxOrte(shop.id, Number(e.target.value))}
+                          style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd', background: (shop.maxOrte ?? 0) > 0 ? '#eef2ff' : 'white' }}
+                      >
+                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                            <option key={n} value={n}>{n === 0 ? 'Orte: aus' : `Orte: ${n}`}</option>
+                        ))}
+                      </select>
+                    </span>
                     <button
                         title={shop.geoBefreit
                             ? 'Befreit: scannt ohne Standort. Klicken = Pflicht einschalten'

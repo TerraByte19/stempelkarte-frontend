@@ -43,6 +43,9 @@ export default function Kunden() {
   }
   useEffect(() => () => clearTimeout(timer.current), [])
 
+  // Bewusst kein CSV-Export: die Datei laege dann auf dem Laptop des Ladens
+  // und umginge die Regel, dass Werbung nur an Kunden mit Einwilligung geht.
+
   function aktualisiere(kunde) {
     setSeite(s => s && { ...s, items: s.items.map(k => k.customerCardId === kunde.customerCardId ? kunde : k) })
   }

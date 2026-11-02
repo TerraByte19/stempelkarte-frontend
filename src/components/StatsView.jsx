@@ -124,6 +124,26 @@ export default function StatsView({ data, fetchDay, onToggleExcludeSunday }) {
             <div style={s.derivedLabel}>{t('stat_newsletter_reach')}</div>
             <div style={s.derivedHint}>{t('stat_newsletter_hint')}</div>
           </div>
+          {/* Beliebteste Praemien ueber alle Karten, 30 Tage. Aelteres Backend liefert das Feld nicht. */}
+          {Array.isArray(data.topRewardsAll) && (
+              <div style={s.derivedCard}>
+                <div style={s.derivedLabel}>{t('stat_top_rewards_all')}</div>
+                {data.topRewardsAll.length === 0 ? (
+                    <div style={s.derivedHint}>{t('stat_top_rewards_none')}</div>
+                ) : (
+                    <div style={{ marginTop: 8 }}>
+                      {data.topRewardsAll.map((r, i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 13, marginBottom: 4 }}>
+                            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {r.name}{r.card ? <span style={{ color: '#999' }}> · {r.card}</span> : null}
+                            </span>
+                            <b>{r.count}</b>
+                          </div>
+                      ))}
+                    </div>
+                )}
+              </div>
+          )}
         </div>
 
         {/* Punktekarten haben eigene Kennzahlen - Stempel und Punkte sind

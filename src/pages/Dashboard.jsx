@@ -6,6 +6,7 @@ import ScannerSetupSection from '../components/ScannerSetupSection'
 import NewsletterSection from '../components/NewsletterSection'
 import KampagnenSection from '../components/KampagnenSection'
 import AktivitaetSection from '../components/AktivitaetSection'
+import RueckmeldungenSection from '../components/RueckmeldungenSection'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -77,6 +78,14 @@ export default function Dashboard() {
                       <div style={styles.statItem}><div style={styles.statNumber}>{s.totalStamps}</div><div style={styles.statLabel}>{t('dash_stat_stamps')}</div></div>
                       <div style={styles.statItem}><div style={styles.statNumber}>{s.totalRewards}</div><div style={styles.statLabel}>{t('dash_stat_rewards')}</div></div>
                     </div>
+                    {/* Wird der QR-Code benutzt? Aelteres Backend liefert die Zahlen nicht. */}
+                    {typeof s.scans7d === 'number' && (
+                        <div style={{ marginTop: 10, fontSize: 12, color: s.scans7d > 0 ? '#3C3489' : '#999', textAlign: 'center' }}>
+                          {s.scans7d > 0
+                              ? t('dash_stat_scans', { heute: s.scansToday, woche: s.scans7d })
+                              : t('dash_stat_scans_none')}
+                        </div>
+                    )}
                   </div>
               ))}
             </div>
@@ -84,6 +93,9 @@ export default function Dashboard() {
 
         {/* Zuletzt passiert: juengste Scans und neueste Kunden */}
         <AktivitaetSection />
+
+        {/* Private Rueckmeldungen der Kunden (Sterne + Satz) */}
+        <RueckmeldungenSection />
 
         {/* Scanner-Einrichtung mit QR-Codes */}
         <ScannerSetupSection />

@@ -338,7 +338,138 @@ function Sperrbildschirm({ t, shop }) {
           </button>
         </form>
 
+        <WeitereOrte t={t} />
+
         <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
+      </div>
+  )
+}
+
+/**
+ * Weitere Orte fuer die Naehe-Erinnerung und die Geo-Pruefung beim Scannen:
+ * Marktstand, zweiter Eingang, Food-Truck. Apple nimmt zehn Orte pro Karte,
+ * also neun hier plus der Hauptort oben. Eigene Liste mit eigenem Speichern,
+ * unabhaengig vom Formular darueber. Altes Backend (404): Block bleibt weg.
+ */
+function WeitereOrte({ t }) {
+  // null = laedt, false = nicht verfuegbar
+  const [orte, setOrte] = useState(null)
+  // Vom Admin je nach Tarif freigeschaltet. 0 = Block bleibt unsichtbar.
+  const [max, setMax] = useState(0)
+  const [label, setLabel] = useState('')
+  const [lat, setLat] = useState('')
+  const [lon, setLon] = useState('')
+  const [locating, setLocating] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  // Antwort: { max, orte }. Ein ganz altes Backend lieferte eine nackte Liste.
+  function uebernehmen(data) {
+    const liste = Array.isArray(data) ? data : (Array.isArray(data?.orte) ? data.orte : [])
+    setOrte(liste)
+    setMax(Array.isArray(data) ? 9 : Number(data?.max) || 0)
+  }
+
+  useEffect(() => {
+    api.get('/api/shop/me/orte')
+        .then(r => uebernehmen(r.data))
+        .catch(() => setOrte(false))
+  }, [])
+
+  function standortHolen() {
+    if (!navigator.geolocation) { setError(t('profil_lock_geo_unsupported')); return }
+    setError('')
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+          setLat(String(Number(pos.coords.latitude.toFixed(6))))
+          setLon(String(Number(pos.coords.longitude.toFixed(6))))
+          setLocating(false)
+        },
+        () => { setError(t('profil_lock_geo_denied')); setLocating(false) },
+        { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
+
+  async function hinzufuegen() {
+    setError('')
+    const latitude = Number(String(lat).replace(',', '.'))
+    const longitude = Number(String(lon).replace(',', '.'))
+    if (!label.trim() || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      setError(t('profil_orte_incomplete'))
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await api.post('/api/shop/me/orte', { label: label.trim(), latitude, longitude })
+      uebernehmen(res.data)
+      setLabel(''); setLat(''); setLon('')
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function loeschen(ort) {
+    if (!confirm(t('profil_orte_delete_confirm', { label: ort.label }))) return
+    setError('')
+    try {
+      const res = await api.delete(`/api/shop/me/orte/${ort.id}`)
+      uebernehmen(res.data)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    }
+  }
+
+  if (orte === false || orte === null) return null
+  // Nicht im Tarif und nichts angelegt: der Laden sieht die Funktion gar nicht.
+  if (max === 0 && orte.length === 0) return null
+  const voll = orte.length >= max
+
+  return (
+      <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
+          {t('profil_orte_title')}
+        </div>
+        <p style={{ ...s.hint, margin: '0 0 12px' }}>{t('profil_orte_hint', { max })}</p>
+
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        {orte.length === 0 && <p style={s.hint}>{t('profil_orte_empty')}</p>}
+        {orte.map(o => (
+            <div key={o.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid #f3f3f3' }}>
+              <span style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis' }}>{o.label}</span>
+              <span style={{ fontSize: 12, color: '#999', fontFamily: 'monospace' }}>{o.latitude}, {o.longitude}</span>
+              <button type="button" onClick={() => loeschen(o)}
+                      style={{ background: '#fff0f0', color: '#c0392b', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                {t('profil_orte_delete')}
+              </button>
+            </div>
+        ))}
+
+        {!voll && (
+            <div style={{ marginTop: 12, padding: 12, background: '#f7f7fb', borderRadius: 10 }}>
+              <input style={s.input} maxLength={40} value={label} onChange={e => setLabel(e.target.value)}
+                     placeholder={t('profil_orte_label_ph')} />
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <input style={{ ...s.input, flex: 1 }} inputMode="decimal" value={lat}
+                       onChange={e => setLat(e.target.value)} placeholder={t('profil_orte_lat')} />
+                <input style={{ ...s.input, flex: 1 }} inputMode="decimal" value={lon}
+                       onChange={e => setLon(e.target.value)} placeholder={t('profil_orte_lon')} />
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                <button type="button" style={{ ...s.btnSecondary, flex: 1 }} onClick={standortHolen} disabled={locating}>
+                  {locating ? t('profil_lock_locating') : t('profil_orte_use_location')}
+                </button>
+                <button type="button" style={{ ...s.btnPrimary, flex: 1 }} onClick={hinzufuegen} disabled={saving}>
+                  {saving ? t('profil_saving') : t('profil_orte_add')}
+                </button>
+              </div>
+              <p style={s.hint}>{t('profil_orte_coords_hint')}</p>
+            </div>
+        )}
+        {voll && <p style={s.hint}>{t('profil_orte_max', { max })}</p>}
       </div>
   )
 }
@@ -490,9 +621,17 @@ function Anmeldefelder({ t, shop }) {
 function GoogleBewertung({ t, shop }) {
   // Aelteres Backend liefert das Feld nicht - dann leer starten.
   const [url, setUrl] = useState(shop.googleReviewUrl || '')
+  // Was wirklich gespeichert ist - die Erinnerung braucht einen gespeicherten Link.
+  const [savedUrl, setSavedUrl] = useState(shop.googleReviewUrl || '')
+  const [visits, setVisits] = useState(shop.reviewReminderVisits || 0)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+
+  function kurzBestaetigen() {
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+  }
 
   async function speichern(e) {
     e.preventDefault()
@@ -500,13 +639,30 @@ function GoogleBewertung({ t, shop }) {
     setSaving(true)
     try {
       const res = await api.put('/api/shop/me/google-review', { url: url.trim() })
-      setUrl(res.data?.googleReviewUrl || '')
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      const neu = res.data?.googleReviewUrl || ''
+      setUrl(neu)
+      setSavedUrl(neu)
+      // Link weg = Erinnerung aus (macht das Backend).
+      if (typeof res.data?.reviewReminderVisits === 'number') setVisits(res.data.reviewReminderVisits)
+      kurzBestaetigen()
     } catch (err) {
       setError(err.response?.data?.error || t('profil_save_error'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function erinnerung(n) {
+    setError('')
+    const vorher = visits
+    setVisits(n)
+    try {
+      const res = await api.put('/api/shop/me/bewertungs-erinnerung', { visits: n })
+      if (typeof res.data?.reviewReminderVisits === 'number') setVisits(res.data.reviewReminderVisits)
+      kurzBestaetigen()
+    } catch (err) {
+      setVisits(vorher)
+      setError(err.response?.data?.error || t('profil_save_error'))
     }
   }
 
@@ -533,14 +689,27 @@ function GoogleBewertung({ t, shop }) {
           </button>
         </form>
 
-        {url.trim() && (
+        {savedUrl && (
             <p style={s.hint}>
               {t('profil_review_preview')}{' '}
-              <a href={url.trim()} target="_blank" rel="noopener noreferrer" style={{ color: '#3C3489' }}>
+              <a href={savedUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#3C3489' }}>
                 ⭐ {t('profil_review_link_text')}
               </a>
             </p>
         )}
+
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #eee' }}>
+          <label style={s.label}>{t('profil_remind_title')}</label>
+          <p style={{ ...s.hint, margin: '0 0 10px' }}>{t('profil_remind_hint')}</p>
+          <select style={{ ...s.input, maxWidth: 280 }} value={visits} disabled={!savedUrl}
+                  onChange={e => erinnerung(Number(e.target.value))}>
+            <option value={0}>{t('profil_remind_off')}</option>
+            {[2, 3, 5, 10].map(n => (
+                <option key={n} value={n}>{t('profil_remind_after', { n })}</option>
+            ))}
+          </select>
+          {!savedUrl && <p style={s.hint}>{t('profil_remind_needs_link')}</p>}
+        </div>
       </div>
   )
 }
