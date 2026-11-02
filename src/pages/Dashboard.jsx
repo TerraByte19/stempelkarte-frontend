@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import api from '../api'
 import ScannerSetupSection from '../components/ScannerSetupSection'
 import NewsletterSection from '../components/NewsletterSection'
+import KampagnenSection from '../components/KampagnenSection'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -82,6 +83,9 @@ export default function Dashboard() {
 
         {/* Scanner-Einrichtung mit QR-Codes */}
         <ScannerSetupSection />
+
+        {/* Push-Kampagne: Mitteilung auf die Wallet-Karten aller Kunden */}
+        <KampagnenSection />
 
         {/* Newsletter an Kunden mit Werbe-Einwilligung */}
         <NewsletterSection />

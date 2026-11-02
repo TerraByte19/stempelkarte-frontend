@@ -58,6 +58,7 @@ export default function Profil() {
 
         <Sperrbildschirm t={t} shop={shop} />
         <Rueckhol t={t} shop={shop} />
+        <GoogleBewertung t={t} shop={shop} />
         <StaffTokens t={t} />
       </div>
   )
@@ -336,6 +337,69 @@ function Sperrbildschirm({ t, shop }) {
         </form>
 
         <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
+      </div>
+  )
+}
+
+/**
+ * Link zur Google-Bewertung. Erscheint als "Bewerte uns bei Google" auf der
+ * Anmeldeseite und der Kartenseite der Kunden. Leer = kein Link. Der Server
+ * nimmt nur https an; die Meldung dazu kommt von ihm.
+ */
+function GoogleBewertung({ t, shop }) {
+  // Aelteres Backend liefert das Feld nicht - dann leer starten.
+  const [url, setUrl] = useState(shop.googleReviewUrl || '')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  async function speichern(e) {
+    e.preventDefault()
+    setError('')
+    setSaving(true)
+    try {
+      const res = await api.put('/api/shop/me/google-review', { url: url.trim() })
+      setUrl(res.data?.googleReviewUrl || '')
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>{t('profil_review_title')}</h2>
+        <p style={{ ...s.hint, margin: '0 0 16px' }}>{t('profil_review_hint')}</p>
+
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <form onSubmit={speichern}>
+          <label style={s.label}>{t('profil_review_label')}</label>
+          <input style={s.input} type="url" inputMode="url" maxLength={500} value={url}
+                 onChange={e => setUrl(e.target.value)}
+                 placeholder="https://g.page/r/…/review" />
+          <p style={s.hint}>{t('profil_review_how')}</p>
+          <button style={{ ...s.btnPrimary, marginTop: 14 }} type="submit" disabled={saving}>
+            {saving ? t('profil_saving') : t('profil_save')}
+          </button>
+        </form>
+
+        {url.trim() && (
+            <p style={s.hint}>
+              {t('profil_review_preview')}{' '}
+              <a href={url.trim()} target="_blank" rel="noopener noreferrer" style={{ color: '#3C3489' }}>
+                ⭐ {t('profil_review_link_text')}
+              </a>
+            </p>
+        )}
       </div>
   )
 }

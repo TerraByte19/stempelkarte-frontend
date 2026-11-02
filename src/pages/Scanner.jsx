@@ -661,6 +661,15 @@ export default function Scanner() {
             <div style={styles.popup}>
               <div style={{ ...styles.popupIcon, display: 'flex', justifyContent: 'center', color: '#3C3489' }}><Icon name="check-circle" size={44} strokeWidth={1.8} /></div>
               <h2 style={styles.popupTitle}>{t('scan_detected')}</h2>
+              {/* Wer steht da: Name und Stand, wie beim Punkte-Fenster. Ein
+                  aelteres Backend liefert keinen scanState - dann wie bisher. */}
+              {scanState?.customerName && (
+                  <p style={{ ...styles.popupSubtitle, fontWeight: 700, color: '#1a1a1a' }}>
+                    {scanState.customerName}
+                    {Number.isInteger(scanState.stamps) && Number.isInteger(scanState.rewardThreshold)
+                        && ` · ${t('scan_stand', { n: Math.min(scanState.stamps, scanState.rewardThreshold), total: scanState.rewardThreshold })}`}
+                  </p>
+              )}
               <p style={styles.popupSubtitle}>{t('scan_how_many')}</p>
               <div style={styles.countButtons}>
                 {[1,2,3,4,5,6,7,8,9,10].map(n => (
