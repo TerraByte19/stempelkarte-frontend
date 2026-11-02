@@ -60,6 +60,7 @@ export default function Profil() {
         <Rueckhol t={t} shop={shop} />
         <GoogleBewertung t={t} shop={shop} />
         <Anmeldefelder t={t} shop={shop} />
+        <Geburtstagsgruss t={t} shop={shop} />
         <StaffTokens t={t} />
       </div>
   )
@@ -338,6 +339,71 @@ function Sperrbildschirm({ t, shop }) {
         </form>
 
         <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
+      </div>
+  )
+}
+
+/**
+ * Geburtstagsgruss: ab 9 Uhr geht an jede Karte mit Geburtstag heute eine
+ * Nachricht, als Kampagne (steht im Verlauf). Braucht den Geburtstag im
+ * Anmeldeformular, sonst trifft es niemanden.
+ */
+function Geburtstagsgruss({ t, shop }) {
+  const [enabled, setEnabled] = useState(!!shop.birthdayGreetingEnabled)
+  const [text, setText] = useState(shop.birthdayGreetingText || '')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+  const standard = shop.birthdayGreetingDefault || ''
+  const geburtstagAus = (shop.signupBirthday || 'OFF') === 'OFF'
+
+  async function speichern(e) {
+    e.preventDefault()
+    setError('')
+    setSaving(true)
+    try {
+      await api.put('/api/shop/me/geburtstag', { enabled, text: text.trim() })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>{t('profil_bday_title')}</h2>
+        <p style={{ ...s.hint, margin: '0 0 16px' }}>{t('profil_bday_hint')}</p>
+
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+        {geburtstagAus && enabled && <div style={s.errorBox}>{t('profil_bday_needs_field')}</div>}
+
+        <form onSubmit={speichern}>
+          <label style={s.switchRow}>
+            <input type="checkbox" checked={enabled} onChange={e => setEnabled(e.target.checked)} />
+            <span style={s.switchLabel}>{t('profil_bday_switch')}</span>
+          </label>
+
+          <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+            <label style={s.label}>{t('profil_bday_text')}</label>
+            <input style={s.input} maxLength={160} value={text}
+                   onChange={e => setText(e.target.value)}
+                   placeholder={standard} />
+            <p style={s.hint}>{t('profil_bday_text_hint')}</p>
+          </div>
+
+          <button style={{ ...s.btnPrimary, marginTop: 14 }} type="submit" disabled={saving}>
+            {saving ? t('profil_saving') : t('profil_save')}
+          </button>
+        </form>
+        <p style={s.hint}>{t('profil_bday_note')}</p>
       </div>
   )
 }
