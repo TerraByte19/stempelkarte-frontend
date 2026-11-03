@@ -7,7 +7,10 @@ import { useLang, localeTag } from '../LangContext'
  * das hier selbst ein; aus = kein Link irgendwo. Ein aelteres Backend
  * kennt den Endpunkt nicht (404) - dann bleibt der Block unsichtbar.
  */
-export default function RueckmeldungenSection() {
+// nurWennAktiv: ausgeschaltet nichts zeigen (Dashboard: dort steht der
+// Schritt in der Einrichtung). onStand(aktiv): meldet den Schalter nach
+// jedem Laden nach oben; null = Endpunkt nicht verfuegbar.
+export default function RueckmeldungenSection({ nurWennAktiv = false, onStand } = {}) {
   const { t, lang } = useLang()
   // null = laedt, false = nicht verfuegbar
   const [stand, setStand] = useState(null)
@@ -15,14 +18,18 @@ export default function RueckmeldungenSection() {
 
   function laden() {
     return api.get('/api/shop/rueckmeldungen')
-        .then(r => setStand({
-          aktiv: !!r.data?.aktiv,
-          ungelesen: r.data?.ungelesen || 0,
-          schnitt: r.data?.schnitt || 0,
-          anzahl30: r.data?.anzahl30 || 0,
-          items: Array.isArray(r.data?.items) ? r.data.items : [],
-        }))
-        .catch(() => setStand(false))
+        .then(r => {
+          const neu = {
+            aktiv: !!r.data?.aktiv,
+            ungelesen: r.data?.ungelesen || 0,
+            schnitt: r.data?.schnitt || 0,
+            anzahl30: r.data?.anzahl30 || 0,
+            items: Array.isArray(r.data?.items) ? r.data.items : [],
+          }
+          setStand(neu)
+          onStand?.(neu.aktiv)
+        })
+        .catch(() => { setStand(false); onStand?.(null) })
   }
 
   useEffect(() => { laden() }, [])
@@ -71,6 +78,7 @@ export default function RueckmeldungenSection() {
   }
 
   if (!stand.aktiv) {
+    if (nurWennAktiv) return null
     return (
         <div style={s.card}>
           <h2 style={s.title}>{t('rm_title')}</h2>

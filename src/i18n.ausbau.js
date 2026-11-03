@@ -8,6 +8,14 @@
 export const ausbau = {
   de: {
     nav_messages: 'Nachrichten', nav_team: 'Team & Standorte', nav_more: 'Mehr', nav_language: 'Sprache',
+    // Dashboard: Heute + Einrichtung, Login fuer Mitarbeiter
+    dash_today_title: 'Heute', dash_today_stamps: 'Stempel', dash_today_rewards: 'Prämien', dash_today_new: 'Neue Kunden',
+    setup_title: 'Einrichtung', setup_left: 'Noch {n} offen',
+    setup_card_title: 'Erste Karte anlegen', setup_card_text: 'Leg fest, wofür deine Kunden stempeln und was sie dafür bekommen.', setup_card_btn: 'Karte anlegen',
+    setup_scanner_title: 'Scanner einrichten', setup_scanner_text: 'Leg einen Zugang für dein Team an. Damit stempelt ihr an der Kasse mit Handy oder Tablet.', setup_scanner_btn: 'Zu Team & Standorte',
+    setup_feedback_title: 'Rückmeldungen einschalten',
+    setup_msg_title: 'Nachrichten an deine Kunden',
+    login_staff_link: 'Mitarbeiter? Per QR-Code anmelden', login_staff_type: 'Code lieber eintippen',
     nachr_title: 'Nachrichten aufs Handy',
     nachr_subtitle: 'Alles, was auf den Wallet-Karten deiner Kunden landet: Tagesangebot, Kampagnen, Automaten, Newsletter.',
     dash_nachr_link: 'Kampagnen, Automaten und Newsletter findest du jetzt unter „Nachrichten“.',
@@ -159,6 +167,14 @@ export const ausbau = {
   },
   en: {
     nav_messages: 'Messages', nav_team: 'Team & locations', nav_more: 'More', nav_language: 'Language',
+    // Dashboard: today + setup, staff login
+    dash_today_title: 'Today', dash_today_stamps: 'Stamps', dash_today_rewards: 'Rewards', dash_today_new: 'New customers',
+    setup_title: 'Setup', setup_left: '{n} left',
+    setup_card_title: 'Create your first card', setup_card_text: 'Decide what your customers collect stamps for and what they get.', setup_card_btn: 'Create card',
+    setup_scanner_title: 'Set up the scanner', setup_scanner_text: 'Create an access for your team. They use it to stamp at the till with a phone or tablet.', setup_scanner_btn: 'Go to Team & locations',
+    setup_feedback_title: 'Turn on feedback',
+    setup_msg_title: 'Messages to your customers',
+    login_staff_link: 'Staff? Sign in with a QR code', login_staff_type: 'Type the code instead',
     nachr_title: 'Messages to the phone',
     nachr_subtitle: 'Everything that lands on your customers\' wallet cards: deal of the day, campaigns, automations, newsletter.',
     dash_nachr_link: 'Campaigns, automations and the newsletter now live under "Messages".',
@@ -301,6 +317,14 @@ export const ausbau = {
   },
   ar: {
     nav_messages: 'الرسائل', nav_team: 'الفريق والفروع', nav_more: 'المزيد', nav_language: 'اللغة',
+    // لوحة التحكم: اليوم + الإعداد، دخول الموظفين
+    dash_today_title: 'اليوم', dash_today_stamps: 'الأختام', dash_today_rewards: 'المكافآت', dash_today_new: 'عملاء جدد',
+    setup_title: 'الإعداد', setup_left: 'متبقٍ {n}',
+    setup_card_title: 'أنشئ بطاقتك الأولى', setup_card_text: 'حدّد ما يجمع عملاؤك الأختام من أجله وما يحصلون عليه.', setup_card_btn: 'إنشاء بطاقة',
+    setup_scanner_title: 'إعداد الماسح', setup_scanner_text: 'أنشئ وصولًا لفريقك. به تختمون عند الصندوق بالهاتف أو الجهاز اللوحي.', setup_scanner_btn: 'إلى الفريق والفروع',
+    setup_feedback_title: 'تفعيل التقييمات',
+    setup_msg_title: 'رسائل إلى عملائك',
+    login_staff_link: 'موظف؟ سجّل الدخول برمز QR', login_staff_type: 'أدخل الرمز يدويًا',
     nachr_title: 'رسائل إلى الهاتف',
     nachr_subtitle: 'كل ما يصل إلى بطاقات عملائك في المحفظة: عرض اليوم، الحملات، الرسائل التلقائية، النشرة.',
     dash_nachr_link: 'الحملات والرسائل التلقائية والنشرة أصبحت الآن تحت «الرسائل».',

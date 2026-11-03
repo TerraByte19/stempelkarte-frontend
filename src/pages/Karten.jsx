@@ -46,6 +46,16 @@ function willkommenGeaendert(a, b) {
 
 // Steht am Namensfeld und ueber der Google-Vorschau, damit man beides
 // zusammenbringt: dieser Name ist der, den Android zeigt.
+/** Helle Farbe (z. B. Creme)? Relative Helligkeit nach WCAG, Schwelle 0,6. */
+function istHell(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '')
+  if (!m) return false
+  const n = parseInt(m[1], 16)
+  const kanal = c => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 }
+  const l = 0.2126 * kanal((n >> 16) & 255) + 0.7152 * kanal((n >> 8) & 255) + 0.0722 * kanal(n & 255)
+  return l > 0.6
+}
+
 function AndroidAbzeichen() {
   return <span style={s.androidBadge}>Android</span>
 }
@@ -780,31 +790,52 @@ export default function Karten() {
             <div style={s.empty}>{t('cards_empty')}</div>
         ) : (
             <div style={s.cardGrid}>
-              {cards.map(card=>(
-                  <div key={card.id} style={{...s.card, borderTop:`4px solid ${card.colorBackground||'#3C3489'}`}}>
-                    <div style={s.cardTop}>
-                      <div style={s.cardName}>{card.name}</div>
-                      {/* card.type ?? 'STAMP': ein aelteres Backend liefert
-                          das Feld noch nicht mit. */}
-                      <div style={{...s.badge,background:card.colorBackground||'#3C3489',color:card.colorForeground||'#fff'}}>
-                        {typBadge(card)}
+              {cards.map(card=>{
+                // Jede Karte so, wie sie im Wallet aussieht: ihre Farben,
+                // ihr Logo, bei Stempelkarten die leeren Stempelfelder.
+                // Loeschen liegt in der Bearbeiten-Ansicht, nicht hier.
+                const typ = card.type ?? 'STAMP'
+                const grund = card.colorBackground || '#3C3489'
+                const schrift = card.colorForeground || '#FFFFFF'
+                const label = card.colorLabel || '#FAC875'
+                // Buchstabe im weissen Logo-Kreis: Kartenfarbe, auf heller
+                // Karte die Schriftfarbe - sonst steht Weiss auf Weiss.
+                const initialFarbe = istHell(grund) ? schrift : grund
+                const felder = typ==='STAMP' ? Math.min(Math.max(card.rewardThreshold||0,0),12) : 0
+                return (
+                  <button key={card.id} type="button" className="sk-kartenkachel" style={s.kachel} onClick={()=>openEdit(card)}>
+                    <div style={{...s.wallet, background:grund, color:schrift}}>
+                      <div style={s.walletKopf}>
+                        <span style={s.walletLogo}>
+                          {card.logoUrl
+                              ? <img src={card.logoUrl} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                              : <span style={{fontSize:12,fontWeight:700,color:initialFarbe}}>{(card.name||'?').trim().charAt(0).toUpperCase()}</span>}
+                        </span>
+                        <span style={s.walletName}>{card.name}</span>
+                        <span style={{...s.walletTyp, color:label}}>{typBadge(card)}</span>
                       </div>
+                      {felder > 0 && (
+                          <div style={s.walletFelder} aria-hidden="true">
+                            {Array.from({length:felder}).map((_,i)=>(
+                                <span key={i} style={{...s.walletFeld, borderColor:label}}/>
+                            ))}
+                          </div>
+                      )}
+                      {card.rewardText && <div style={s.walletPraemie}>{card.rewardText}</div>}
                     </div>
-                    <div style={s.cardReward}>{card.rewardText}</div>
-                    {/* Raster-Stil und Stempel-Symbol zeichnen nur auf einer
-                        Stempelkarte etwas - dann auch nur dort nennen. */}
-                    {(card.type ?? 'STAMP')==='STAMP' && (
-                      <div style={s.designBadge}>
-                        {card.walletStyle==='grid'?t('design_style_grid'):t('design_style_numbers')} · {t(`preset_${card.stampPreset||'coffee'}`)}
-                      </div>
-                    )}
-                    <div style={s.cardId}>{t('cards_id_label')} {card.id}</div>
-                    <div style={s.btnRow}>
-                      <button style={s.btnEdit} onClick={()=>openEdit(card)}>{t('common_edit')}</button>
-                      <button style={s.btnDelete} onClick={()=>deleteCard(card.id,card.name)}>{t('common_delete')}</button>
+                    <div style={s.kachelFuss}>
+                      <span style={s.kachelMeta}>
+                        {/* Raster-Stil und Stempel-Symbol zeichnen nur auf einer
+                            Stempelkarte etwas - dann auch nur dort nennen. */}
+                        {typ==='STAMP'
+                            ? `${card.walletStyle==='grid'?t('design_style_grid'):t('design_style_numbers')}, ${t(`preset_${card.stampPreset||'coffee'}`)}`
+                            : ''}
+                      </span>
+                      <span style={s.kachelEdit}>{t('common_edit')}</span>
                     </div>
-                  </div>
-              ))}
+                  </button>
+                )
+              })}
             </div>
         )}
       </div>
@@ -1123,15 +1154,17 @@ const s = {
   previewLabel: {fontSize:12,fontWeight:700,color:'#555',marginBottom:10},
   empty: {background:'white',borderRadius:12,padding:40,textAlign:'center',color:'#888',fontSize:14,boxShadow:'0 2px 8px rgba(0,0,0,0.06)'},
   cardGrid: {display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:16},
-  card: {background:'white',borderRadius:12,padding:20,boxShadow:'0 2px 8px rgba(0,0,0,0.06)'},
-  cardTop: {display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8},
-  cardName: {fontSize:16,fontWeight:600,color:'#1a1a1a'},
-  badge: {borderRadius:20,padding:'3px 10px',fontSize:12,fontWeight:600},
+  kachel: {display:'flex',flexDirection:'column',alignItems:'stretch',textAlign:'start',background:'white',border:'none',borderRadius:16,padding:8,boxShadow:'0 2px 8px rgba(0,0,0,0.06)',cursor:'pointer',color:'inherit',font:'inherit',width:'100%'},
+  wallet: {width:'100%',boxSizing:'border-box',borderRadius:11,padding:'14px 16px 16px',minHeight:124,display:'flex',flexDirection:'column',gap:10},
+  walletKopf: {display:'flex',alignItems:'center',gap:8,minWidth:0},
+  walletLogo: {width:28,height:28,borderRadius:'50%',background:'rgba(255,255,255,0.96)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',flexShrink:0},
+  walletName: {fontSize:15,fontWeight:600,flex:1,minWidth:0,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'},
+  walletTyp: {fontSize:12,fontWeight:600,flexShrink:0,whiteSpace:'nowrap'},
+  walletFelder: {display:'flex',flexWrap:'wrap',gap:6},
+  walletFeld: {width:18,height:18,borderRadius:'50%',border:'1.5px dashed',opacity:0.85},
+  walletPraemie: {marginTop:'auto',fontSize:13,opacity:0.92,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'},
+  kachelFuss: {width:'100%',boxSizing:'border-box',display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'10px 6px 4px'},
+  kachelMeta: {fontSize:12,color:'#888',minWidth:0,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'},
+  kachelEdit: {fontSize:13,fontWeight:600,color:'#3C3489',flexShrink:0},
   cardDesc: {fontSize:13,color:'#666',marginBottom:6},
-  cardReward: {fontSize:13,color:'#2C5F2E',fontWeight:500,marginBottom:6},
-  designBadge: {fontSize:11,color:'#888',background:'#f5f5f5',borderRadius:6,padding:'3px 8px',display:'inline-block',marginBottom:8},
-  cardId: {fontSize:11,color:'#bbb',fontFamily:'monospace',marginBottom:12},
-  btnRow: {display:'flex',gap:8},
-  btnEdit: {flex:1,background:'#f0eeff',color:'#3C3489',border:'none',borderRadius:8,padding:'8px 0',fontSize:13,fontWeight:600,cursor:'pointer'},
-  btnDelete: {flex:1,background:'#fce8e6',color:'#c00',border:'none',borderRadius:8,padding:'8px 0',fontSize:13,fontWeight:600,cursor:'pointer'},
 }

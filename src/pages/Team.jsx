@@ -2,11 +2,13 @@ import { useLang } from '../LangContext'
 import FilialenSection from '../components/FilialenSection'
 import TeamSection from '../components/TeamSection'
 import StandorteSection from '../components/StandorteSection'
+import ScannerSetupSection from '../components/ScannerSetupSection'
 
 /**
  * Team & Standorte: Filialen-Uebersicht (Zahlen je Standort), die
  * Mitarbeiter-Zugaenge mit Rolle und Filiale, die Standorte selbst.
- * Vorher lagen Team und Orte im Profil.
+ * Vorher lagen Team und Orte im Profil. Die QR-Codes zum Einrichten eines
+ * Scanner-Geraets stehen direkt unter den Zugaengen (vorher im Dashboard).
  */
 export default function Team() {
   const { t } = useLang()
@@ -16,6 +18,7 @@ export default function Team() {
         <p style={s.subtitle}>{t('team_subtitle')}</p>
         <FilialenSection />
         <TeamSection />
+        <ScannerSetupSection />
         <StandorteSection />
       </div>
   )

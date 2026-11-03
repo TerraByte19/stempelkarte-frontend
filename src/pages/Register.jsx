@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLang } from '../LangContext'
 import api from '../api'
+import { LogoZeichen, MARKE } from '../components/Logo'
 
 export default function Login() {
   const { t } = useLang()
@@ -46,8 +47,8 @@ export default function Login() {
   return (
       <div style={styles.container}>
         <div style={styles.card}>
-          <div style={styles.logo}>SK</div>
-          <h1 style={styles.title}>Stempelkarte</h1>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><LogoZeichen size={52} /></div>
+          <h1 style={styles.title}>{MARKE}</h1>
           <p style={styles.subtitle}>{t('login_subtitle')}</p>
           {error && <div style={styles.error}>{error}</div>}
           <form onSubmit={handleLogin}>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import { useLang } from '../LangContext'
 import Icon from '../components/Icon'
+import { LogoZeichen } from '../components/Logo'
 
 // wird nicht verwendet
 export default function ScannerLogin() {
@@ -70,7 +71,7 @@ export default function ScannerLogin() {
   return (
       <div style={styles.container}>
         <div style={styles.card}>
-          <div style={styles.logo}>SK</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><LogoZeichen size={52} /></div>
           <h1 style={styles.title}>{t('scan_login_title')}</h1>
           <p style={styles.subtitle}>{t('scan_login_subtitle')}</p>
           {error && <div style={styles.error}>{error}</div>}

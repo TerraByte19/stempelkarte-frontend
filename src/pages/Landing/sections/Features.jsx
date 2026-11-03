@@ -10,7 +10,6 @@ export default function Features() {
       <div className="lp-wrap">
         <Reveal>
           <div className="lp-sec-head">
-            <span className="lp-eyebrow">{t('lp_feat_eyebrow')}</span>
             <h2>{t('lp_feat_title')}</h2>
           </div>
         </Reveal>

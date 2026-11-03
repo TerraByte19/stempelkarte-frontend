@@ -37,7 +37,6 @@ export default function HowItWorks() {
           Kopfzeile. */}
       <div id="how" className="lp-how-head">
         <div className="lp-wrap lp-sec-head">
-          <span className="lp-eyebrow">{t('lp_how_eyebrow')}</span>
           <h2>{t('lp_how_title')}</h2>
         </div>
       </div>

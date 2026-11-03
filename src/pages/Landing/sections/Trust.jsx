@@ -10,7 +10,6 @@ export default function Trust() {
       <div className="lp-wrap lp-trust-in">
         <Reveal>
           <div className="lp-sec-head">
-            <span className="lp-eyebrow">{t('lp_trust_eyebrow')}</span>
             <h2>{t('lp_trust_title')}</h2>
             <p className="lp-lede">{t('lp_trust_body')}</p>
           </div>

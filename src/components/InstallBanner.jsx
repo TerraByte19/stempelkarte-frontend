@@ -20,7 +20,7 @@ export default function InstallBanner() {
     if (isInstalled || dismissed || (!prompt && !isIOS)) return null
 
     return (
-        <div style={styles.banner}>
+        <div className="install-banner" style={styles.banner}>
             <div style={styles.left}>
                 <div style={{ ...styles.icon, display: 'flex', color: '#3C3489' }}><Icon name="download" size={26} strokeWidth={1.8} /></div>
                 <div>

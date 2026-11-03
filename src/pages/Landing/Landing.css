@@ -396,7 +396,7 @@
 .lp-how-head .lp-sec-head { margin-bottom: 0; }
 .lp-stage-hint {
   position: absolute; bottom: 18px; inset-inline: 0; text-align: center;
-  font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--lp-muted);
+  font-size: 13px; color: var(--lp-muted);
 }
 .lp-step {
   text-align: center; max-width: 22em; min-height: 96px;
@@ -408,8 +408,8 @@
   to   { opacity: 1; transform: none; }
 }
 .lp-step-n {
-  font-family: var(--lp-display); font-size: 12px; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--lp-brand);
+  font-family: var(--lp-display); font-size: 14px; font-weight: 600;
+  color: var(--lp-brand);
 }
 .lp-step h3 { font-size: clamp(20px, 4.4vw, 26px); font-weight: 700; }
 .lp-step p { font-size: 15px; color: var(--lp-muted); }
@@ -644,10 +644,8 @@
 }
 .lp-appnote-label {
   font-family: var(--lp-display);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
   color: var(--lp-brand);
 }
 .lp-appnote-body { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }

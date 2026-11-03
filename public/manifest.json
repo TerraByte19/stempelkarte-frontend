@@ -1,6 +1,6 @@
 {
-  "name": "StampIT",
-  "short_name": "StampIT",
+  "name": "Stampit",
+  "short_name": "Stampit",
   "description": "Digitale Stempelkarten für deinen Laden",
   "start_url": "/",
   "display": "standalone",

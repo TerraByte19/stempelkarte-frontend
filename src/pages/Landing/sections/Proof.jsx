@@ -13,7 +13,6 @@ export default function Proof() {
       <div className="lp-wrap">
         <Reveal>
           <div className="lp-sec-head">
-            <span className="lp-eyebrow">{t('lp_proof_eyebrow')}</span>
             <h2>{t('lp_proof_title')}</h2>
             <p className="lp-lede">{t('lp_proof_body')}</p>
           </div>

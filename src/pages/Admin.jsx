@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, Fragment } from 'react'
 import StatsView from '../components/StatsView'
+import { LogoZeichen } from '../components/Logo'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -290,7 +291,7 @@ export default function Admin() {
     return (
         <div style={styles.loginContainer}>
           <div style={styles.loginCard}>
-            <div style={styles.loginLogo}>SK</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><LogoZeichen size={52} /></div>
             <h1 style={styles.loginTitle}>Admin-Panel</h1>
             <p style={styles.loginSubtitle}>Nur fur Betreiber</p>
             {error && <div style={styles.loginError}>{error}</div>}

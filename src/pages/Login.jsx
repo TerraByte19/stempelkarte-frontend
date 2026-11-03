@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import api from '../api'
+import { LogoZeichen, MARKE } from '../components/Logo'
 
 export default function Login() {
   const { t } = useLang()
@@ -14,6 +15,7 @@ export default function Login() {
   // --- Mitarbeiter (Staff) ---
   const [staffTokenInput, setStaffTokenInput] = useState('')
   const [cameraActive, setCameraActive] = useState(false)
+  const [tokenOffen, setTokenOffen] = useState(false)
   const html5QrRef = useRef(null)
 
   async function handleLogin(e) {
@@ -110,8 +112,8 @@ export default function Login() {
   return (
       <div style={styles.container}>
         <div style={styles.card}>
-          <div style={styles.logo}>SK</div>
-          <h1 style={styles.title}>Stempelkarte</h1>
+          <div style={styles.logo}><LogoZeichen size={52} /></div>
+          <h1 style={styles.title}>{MARKE}</h1>
           <p style={styles.subtitle}>{t('login_subtitle')}</p>
           {error && <div style={styles.error}>{error}</div>}
 
@@ -130,48 +132,53 @@ export default function Login() {
             </button>
           </form>
 
-          {/* --- Mitarbeiter-Login --- */}
-          <div style={styles.divider}>{t('login_staff_divider')}</div>
-
-          {cameraActive ? (
-              <>
-                <div id="qr-login-reader" style={styles.qrReader} />
-                <button style={styles.btnStop} onClick={stopQr}>{t('scan_stop_camera')}</button>
-              </>
-          ) : (
-              <>
-                <button style={styles.btnQr} onClick={startQrSetup}>{t('login_qr_btn')}</button>
-                <form onSubmit={handleStaffSubmit}>
+          {/* --- Mitarbeiter-Login: nur ein Link, die Kamera oder das
+              Eintippen kommt erst auf Wunsch. --- */}
+          <div style={styles.staff}>
+            {cameraActive ? (
+                <>
+                  <div id="qr-login-reader" style={styles.qrReader} />
+                  <button style={styles.btnStop} onClick={stopQr}>{t('scan_stop_camera')}</button>
+                </>
+            ) : tokenOffen ? (
+                <form onSubmit={handleStaffSubmit} style={{ width: '100%' }}>
                   <input
-                      style={{ ...styles.input, textAlign: 'center', fontFamily: 'monospace', marginTop: '10px' }}
+                      style={{ ...styles.input, textAlign: 'center' }}
                       type="text"
                       placeholder={t('login_token_placeholder')}
                       value={staffTokenInput}
                       onChange={e => setStaffTokenInput(e.target.value)}
-                      autoComplete="off" autoCorrect="off" autoCapitalize="off"
+                      autoComplete="off" autoCorrect="off" autoCapitalize="off" autoFocus
                   />
                   <button style={styles.btnStaff} type="submit">{t('login_staff_submit')}</button>
+                  <button type="button" style={styles.linkLeise} onClick={startQrSetup}>{t('login_staff_link')}</button>
                 </form>
-              </>
-          )}
+            ) : (
+                <>
+                  <button type="button" style={styles.link} onClick={startQrSetup}>{t('login_staff_link')}</button>
+                  <button type="button" style={styles.linkLeise} onClick={() => setTokenOffen(true)}>{t('login_staff_type')}</button>
+                </>
+            )}
+          </div>
         </div>
       </div>
   )
 }
 
 const styles = {
-  container: { minHeight: '100vh', background: '#f5f5f7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' },
+  container: { minHeight: '100vh', background: 'var(--sk-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' },
   card: { background: 'white', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '400px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', textAlign: 'center' },
-  logo: { width: '56px', height: '56px', borderRadius: '14px', background: '#3C3489', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '700', margin: '0 auto 16px' },
-  title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
-  subtitle: { fontSize: '14px', color: '#888', margin: '0 0 28px' },
+  logo: { display: 'flex', justifyContent: 'center', marginBottom: '14px' },
+  title: { fontSize: '26px', fontWeight: '700', margin: '0 0 4px', color: 'var(--sk-ink)' },
+  subtitle: { fontSize: '14px', color: 'var(--sk-muted)', margin: '0 0 28px' },
   error: { background: '#fff0f0', color: '#d00', padding: '10px 14px', borderRadius: '8px', fontSize: '14px', marginBottom: '16px' },
-  field: { marginBottom: '16px', textAlign: 'left' },
+  field: { marginBottom: '16px', textAlign: 'start' },
   label: { display: 'block', fontSize: '13px', fontWeight: '500', color: '#444', marginBottom: '6px' },
   input: { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '15px', outline: 'none', boxSizing: 'border-box' },
   button: { width: '100%', padding: '12px', background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', marginTop: '8px' },
-  divider: { fontSize: '12px', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '28px 0 16px', borderTop: '1px solid #eee', paddingTop: '20px' },
-  btnQr: { width: '100%', padding: '12px', background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' },
+  staff: { marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--sk-line)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' },
+  link: { background: 'none', border: 'none', color: '#3C3489', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '6px 8px' },
+  linkLeise: { background: 'none', border: 'none', color: 'var(--sk-muted)', fontSize: '13px', cursor: 'pointer', padding: '6px 8px', marginTop: '4px' },
   btnStaff: { width: '100%', padding: '12px', background: '#f0eeff', color: '#3C3489', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', marginTop: '10px' },
   btnStop: { width: '100%', padding: '12px', background: '#ff4444', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
   qrReader: { width: '100%', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' },
