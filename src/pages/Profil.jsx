@@ -61,7 +61,91 @@ export default function Profil() {
         <GoogleBewertung t={t} shop={shop} />
         <Anmeldefelder t={t} shop={shop} />
         <Geburtstagsgruss t={t} shop={shop} />
+        <Kundengruppen t={t} />
         <StaffTokens t={t} />
+      </div>
+  )
+}
+
+/**
+ * Regeln der Kundengruppen: ab wie vielen Besuchen Stammgast, nach wie
+ * vielen Tagen "wird ruhig" bzw. "verloren". Werte und aktuelle Zahlen
+ * kommen vom Server; ein aelteres Backend (404) blendet den Block aus.
+ */
+function Kundengruppen({ t }) {
+  const [regeln, setRegeln] = useState(null)   // {stammAb, ruhigTage, verlorenTage}
+  const [zahlen, setZahlen] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    api.get('/api/shop/kunden/gruppen')
+        .then(r => { setRegeln(r.data?.regeln || null); setZahlen(r.data?.zahlen || null) })
+        .catch(() => setRegeln(null))
+  }, [])
+
+  if (!regeln) return null
+
+  function setze(feld, wert) {
+    setRegeln(r => ({ ...r, [feld]: wert }))
+  }
+
+  async function speichern(e) {
+    e.preventDefault()
+    setError('')
+    setSaving(true)
+    try {
+      const res = await api.put('/api/shop/kunden/gruppen', {
+        stammAb: Number(regeln.stammAb), ruhigTage: Number(regeln.ruhigTage), verlorenTage: Number(regeln.verlorenTage),
+      })
+      if (res.data?.regeln) setRegeln(res.data.regeln)
+      if (res.data?.zahlen) setZahlen(res.data.zahlen)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const feld = (key, label, min, max) => (
+      <div style={{ marginBottom: 12 }}>
+        <label style={s.label}>{label}</label>
+        <input style={{ ...s.input, marginBottom: 0, maxWidth: 140 }} type="number" min={min} max={max}
+               value={regeln[key] ?? ''} onChange={e => setze(key, e.target.value)} required />
+      </div>
+  )
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>{t('profil_gruppen_title')}</h2>
+        <p style={{ ...s.hint, margin: '0 0 16px' }}>{t('profil_gruppen_hint')}</p>
+
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <form onSubmit={speichern}>
+          {feld('stammAb', t('profil_gruppen_stamm'), 2, 50)}
+          {feld('ruhigTage', t('profil_gruppen_ruhig'), 7, 180)}
+          {feld('verlorenTage', t('profil_gruppen_verloren'), 14, 365)}
+          <button style={{ ...s.btnPrimary, marginTop: 6 }} type="submit" disabled={saving}>
+            {saving ? t('profil_saving') : t('profil_save')}
+          </button>
+        </form>
+        {zahlen && (
+            <p style={s.hint}>
+              {t('profil_gruppen_counts', {
+                neu: zahlen.NEU ?? 0, stamm: zahlen.STAMMGAST ?? 0, gelegentlich: zahlen.GELEGENTLICH ?? 0,
+                ruhig: zahlen.WIRD_RUHIG ?? 0, verloren: zahlen.VERLOREN ?? 0,
+              })}
+            </p>
+        )}
       </div>
   )
 }
@@ -795,65 +879,149 @@ function Rueckhol({ t, shop }) {
   )
 }
 
+/**
+ * Mitarbeiter-Zugaenge (Staff-Tokens) mit Name, Rolle, zuletzt benutzt und
+ * Scans der letzten 7 Tage. Ein aelteres Backend kennt /api/shop/team nicht
+ * (404) - dann bleibt der Block weg.
+ */
 function StaffTokens({ t }) {
-  const [tokens, setTokens] = useState([])
+  // null = laedt, false = nicht verfuegbar
+  const [zugaenge, setZugaenge] = useState(null)
   const [label, setLabel] = useState('')
-  const [newToken, setNewToken] = useState(null)
+  const [rolle, setRolle] = useState('MITARBEITER')
   const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [copied, setCopied] = useState('')
 
-  useEffect(() => {
-    api.get('/api/shop/staff-tokens')
-        .then(res => setTokens(Array.isArray(res.data) ? res.data : []))
-        .catch(() => setTokens([]))
-  }, [])
+  function laden() {
+    return api.get('/api/shop/team')
+        .then(res => setZugaenge(Array.isArray(res.data) ? res.data : []))
+        .catch(() => setZugaenge(false))
+  }
 
-  async function createToken(e) {
+  useEffect(() => { laden() }, [])
+
+  if (!zugaenge) return null
+
+  function fehler(err) {
+    setError(err.response?.data?.error || t('profil_staff_error'))
+  }
+
+  async function anlegen(e) {
     e.preventDefault()
     setError('')
+    setBusy(true)
     try {
-      const res = await api.post('/api/shop/staff-token', { label })
-      setNewToken(res.data.token)
+      await api.post('/api/shop/team', { label: label.trim(), rolle })
       setLabel('')
-      api.get('/api/shop/staff-tokens')
-          .then(res => setTokens(Array.isArray(res.data) ? res.data : []))
-          .catch(() => {})
-    } catch (err) {
-      setError(err.response?.data?.error || t('profil_staff_error'))
+      await laden()
+    } catch (err) { fehler(err) }
+    setBusy(false)
+  }
+
+  async function rolleAendern(z, neu) {
+    setError('')
+    try {
+      await api.put(`/api/shop/team/${z.token}`, { rolle: neu })
+      await laden()
+    } catch (err) { fehler(err) }
+  }
+
+  async function umbenennen(z, neu) {
+    const n = neu.trim()
+    if (!n || n === z.label) return
+    setError('')
+    try {
+      await api.put(`/api/shop/team/${z.token}`, { label: n })
+      await laden()
+    } catch (err) { fehler(err) }
+  }
+
+  async function entfernen(z) {
+    if (!confirm(t('profil_team_delete_confirm', { label: z.label }))) return
+    setError('')
+    try {
+      await api.delete(`/api/shop/team/${z.token}`)
+      await laden()
+    } catch (err) { fehler(err) }
+  }
+
+  function setupUrl(z) {
+    const params = new URLSearchParams({ token: z.token, label: z.label || 'Scanner' })
+    return `${window.location.origin}/scanner-setup?${params.toString()}`
+  }
+
+  async function linkKopieren(z) {
+    try {
+      await navigator.clipboard.writeText(setupUrl(z))
+      setCopied(z.token)
+      setTimeout(() => setCopied(''), 2000)
+    } catch {
+      alert(setupUrl(z))
     }
   }
 
+  function zuletzt(iso) {
+    if (!iso) return t('profil_team_never')
+    try {
+      const d = new Date(iso)
+      return d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' }) + ' '
+          + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+    } catch { return iso }
+  }
+
+  const rollen = (
+      <>
+        <option value="MITARBEITER">{t('profil_team_role_staff')}</option>
+        <option value="AUSHILFE">{t('profil_team_role_helper')}</option>
+      </>
+  )
+
   return (
       <div style={s.card}>
-        <h2 style={s.cardTitle}>{t('profil_staff_title')}</h2>
-        <p style={s.hint}>{t('profil_staff_hint')}</p>
-
-        {newToken && (
-            <div style={s.tokenBox}>
-              <div style={s.tokenLabel}>{t('profil_staff_new_token')}</div>
-              <div style={s.tokenValue}>{newToken}</div>
-              <button style={s.btnSecondary} onClick={() => {
-                navigator.clipboard.writeText(newToken)
-                alert(t('profil_staff_copied'))
-              }}>{t('profil_staff_copy')}</button>
-            </div>
-        )}
+        <h2 style={s.cardTitle}>{t('profil_team_title')}</h2>
+        <p style={s.hint}>{t('profil_team_hint')}</p>
 
         {error && <div style={s.errorBox}>{error}</div>}
 
-        <div style={s.tokenList}>
-          {tokens.map((tok, i) => (
-              <div key={i} style={s.tokenItem}>
-                <span style={s.tokenItemLabel}>{tok.label}</span>
-                <span style={s.tokenFull}>{tok.token}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+          {zugaenge.map(z => (
+              <div key={z.token} style={{ border: '1.5px solid #e8e8e8', borderRadius: 10, padding: 12 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input key={z.label} style={{ ...s.input, marginBottom: 0, flex: 1, minWidth: 140 }}
+                         defaultValue={z.label} maxLength={40} aria-label={t('profil_team_name')}
+                         onBlur={e => umbenennen(z, e.target.value)} />
+                  <select style={{ ...s.input, marginBottom: 0, width: 'auto' }} value={z.rolle}
+                          onChange={e => rolleAendern(z, e.target.value)}>
+                    {rollen}
+                  </select>
+                </div>
+                <div style={{ fontSize: 12, color: '#888', marginTop: 8 }}>
+                  {t('profil_team_last_used')}: {zuletzt(z.zuletzt)} · {t('profil_team_stamps7', { n: z.stempel7d })}
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  <button type="button" style={{ ...s.btnSecondary, flex: 1 }} onClick={() => linkKopieren(z)}>
+                    {copied === z.token ? t('scanner_setup_copied') : t('profil_team_copy_link')}
+                  </button>
+                  <button type="button" style={{ ...s.btnSecondary, color: '#c00', background: '#fff0f0' }}
+                          onClick={() => entfernen(z)}>
+                    {t('profil_team_delete')}
+                  </button>
+                </div>
               </div>
           ))}
         </div>
 
-        <form onSubmit={createToken}>
-          <input style={{ ...s.input, marginBottom: 10 }} value={label}
+        <form onSubmit={anlegen} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <input style={{ ...s.input, marginBottom: 0, flex: 1, minWidth: 140 }} value={label} maxLength={40}
                  onChange={e => setLabel(e.target.value)} placeholder={t('profil_staff_placeholder')} required />
-          <button style={s.btnPrimary} type="submit">{t('profil_staff_create')}</button>
+          <select style={{ ...s.input, marginBottom: 0, width: 'auto' }} value={rolle}
+                  onChange={e => setRolle(e.target.value)}>
+            {rollen}
+          </select>
+          <button style={s.btnPrimary} type="submit" disabled={busy}>{t('profil_team_create')}</button>
         </form>
+        <p style={{ ...s.hint, margin: '12px 0 0' }}>{t('profil_team_roles_hint')}</p>
       </div>
   )
 }

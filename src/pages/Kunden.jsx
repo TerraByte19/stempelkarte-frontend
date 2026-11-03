@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import api from '../api'
 import { useLang, localeTag } from '../LangContext'
+import { GRUPPEN, GRUPPEN_FARBEN, istGruppe } from '../kundengruppen'
 
 /**
- * Kundenliste: wer hat eine Karte, wie steht sie, wann war er zuletzt da.
- * Eine Zeile pro Kundenkarte - hat jemand zwei Karten, steht er zweimal.
+ * Kundenliste: wer hat eine Karte, wie steht sie, wann war er zuletzt da,
+ * in welcher Gruppe steht er. Eine Zeile pro Kundenkarte - hat jemand zwei
+ * Karten, steht er zweimal.
+ *
+ * Gruppen-Chips ueber der Liste filtern; ?gruppe= in der URL, damit das
+ * Dashboard herverlinken kann. Ein aelteres Backend kennt die Gruppen
+ * nicht (404 auf /gruppen) - dann bleiben die Chips weg.
  *
  * Stempel-Korrektur nur bei Stempelkarten und nur, wenn das Geschenk nicht
  * mehr offen ist; alles andere sagt der Server mit seiner Meldung. Punkte
@@ -12,8 +19,11 @@ import { useLang, localeTag } from '../LangContext'
  */
 export default function Kunden() {
   const { t, lang } = useLang()
+  const [params, setParams] = useSearchParams()
+  const gruppe = istGruppe(params.get('gruppe')) ? params.get('gruppe') : ''
   const [q, setQ] = useState('')
   const [seite, setSeite] = useState(null)     // {items, page, totalPages, totalItems}
+  const [zahlen, setZahlen] = useState(null)   // {NEU: n, ...} oder null = unbekannt
   const [loading, setLoading] = useState(true)
   const [fehler, setFehler] = useState('')     // '' | 'alt' | 'allgemein'
   const timer = useRef(null)
@@ -21,19 +31,26 @@ export default function Kunden() {
   // Der eigentliche Abruf setzt Zustand nur in den Promise-Rueckrufen: beim
   // ersten Laden im Effekt darf vor der Antwort nichts gesetzt werden
   // (react-hooks/set-state-in-effect), und loading startet ohnehin auf true.
-  function abrufen(suche, page) {
-    return api.get('/api/shop/kunden', { params: { q: suche, page, size: 25 } })
+  function abrufen(suche, page, g) {
+    return api.get('/api/shop/kunden', { params: { q: suche, page, size: 25, gruppe: g || '' } })
         .then(r => { setSeite(r.data); setFehler('') })
         .catch(e => setFehler(e.response?.status === 404 ? 'alt' : 'allgemein'))
         .finally(() => setLoading(false))
   }
 
-  function laden(suche, page = 0) {
-    setLoading(true)
-    abrufen(suche, page)
+  function zahlenLaden() {
+    return api.get('/api/shop/kunden/gruppen')
+        .then(r => setZahlen(r.data?.zahlen && typeof r.data.zahlen === 'object' ? r.data.zahlen : null))
+        .catch(() => setZahlen(null))
   }
 
-  useEffect(() => { abrufen('', 0) }, [])
+  function laden(suche, page = 0, g = gruppe) {
+    setLoading(true)
+    abrufen(suche, page, g)
+  }
+
+  // Beim ersten Aufruf gilt die Gruppe aus der URL (Link vom Dashboard).
+  useEffect(() => { abrufen('', 0, gruppe); zahlenLaden() }, [])  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Suche erst nach kurzer Pause abschicken, nicht bei jedem Buchstaben.
   function suchen(wert) {
@@ -43,12 +60,21 @@ export default function Kunden() {
   }
   useEffect(() => () => clearTimeout(timer.current), [])
 
+  function gruppeWaehlen(g) {
+    setParams(g ? { gruppe: g } : {}, { replace: true })
+    laden(q, 0, g)
+  }
+
   // Bewusst kein CSV-Export: die Datei laege dann auf dem Laptop des Ladens
   // und umginge die Regel, dass Werbung nur an Kunden mit Einwilligung geht.
 
   function aktualisiere(kunde) {
     setSeite(s => s && { ...s, items: s.items.map(k => k.customerCardId === kunde.customerCardId ? kunde : k) })
+    // Eine Korrektur kann die Gruppe aendern (Stammgast ab n Besuchen).
+    zahlenLaden()
   }
+
+  const gesamtZahl = zahlen ? GRUPPEN.reduce((sum, g) => sum + (Number(zahlen[g]) || 0), 0) : 0
 
   function datum(iso) {
     if (!iso) return t('kunden_never')
@@ -69,12 +95,30 @@ export default function Kunden() {
             {seite && <span style={s.anzahl}>{t('kunden_count', { n: seite.totalItems })}</span>}
           </div>
 
+          {zahlen && (
+              <div style={s.chips}>
+                <button type="button" onClick={() => gruppeWaehlen('')}
+                        style={{ ...s.chip, ...(gruppe ? {} : s.chipAktiv) }}>
+                  {t('kunden_gruppe_all')} <span style={s.chipZahl}>{gesamtZahl}</span>
+                </button>
+                {GRUPPEN.map(g => (
+                    <button key={g} type="button" onClick={() => gruppeWaehlen(g)}
+                            style={{ ...s.chip, ...GRUPPEN_FARBEN[g], ...(gruppe === g ? s.chipAktiv : {}) }}>
+                      {t(`kunden_gruppe_${g}`)} <span style={s.chipZahl}>{Number(zahlen[g]) || 0}</span>
+                    </button>
+                ))}
+                <Link to="/profil" style={s.regeln}>{t('kunden_gruppe_rules')}</Link>
+              </div>
+          )}
+
           {fehler === 'alt' && <p style={s.hinweis}>{t('kunden_backend_old')}</p>}
           {fehler === 'allgemein' && <p style={s.hinweis}>{t('kunden_load_error')}</p>}
           {loading && !seite && <p style={s.hinweis}>{t('common_loading')}</p>}
 
           {seite && seite.items.length === 0 && !loading && (
-              <p style={s.hinweis}>{q.trim() ? t('kunden_empty_search') : t('kunden_empty')}</p>
+              <p style={s.hinweis}>
+                {q.trim() ? t('kunden_empty_search') : gruppe ? t('kunden_empty_group') : t('kunden_empty')}
+              </p>
           )}
 
           {seite && seite.items.length > 0 && (
@@ -167,6 +211,8 @@ function KundenZeile({ kunde, t, datum, onChange }) {
         </div>
 
         <div style={s.badges}>
+          {/* Gruppe zuerst; aelteres Backend liefert keine. */}
+          {istGruppe(kunde.gruppe) && <span style={{ ...s.badge, ...GRUPPEN_FARBEN[kunde.gruppe] }}>{t(`kunden_gruppe_${kunde.gruppe}`)}</span>}
           {kunde.welcomePending && <span style={{ ...s.badge, background: '#fbecd2', color: '#9a5d00' }}>{t('kunden_badge_locked')}</span>}
           {voll && <span style={{ ...s.badge, background: '#ddf2e6', color: '#1e7a4c' }}>{t('kunden_badge_full')}</span>}
           {kunde.apple && <span style={s.badge}>{t('kunden_badge_apple')}</span>}
@@ -212,6 +258,11 @@ const s = {
   kopf: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 14 },
   suche: { flex: '1 1 220px', padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e0e0e0', fontSize: 14, outline: 'none', boxSizing: 'border-box' },
   anzahl: { fontSize: 13, color: '#888', whiteSpace: 'nowrap' },
+  chips: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 14 },
+  chip: { border: '2px solid transparent', borderRadius: 999, padding: '5px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: '#f0eeff', color: '#3C3489' },
+  chipAktiv: { borderColor: 'currentColor' },
+  chipZahl: { opacity: 0.75, fontWeight: 500, marginInlineStart: 2 },
+  regeln: { fontSize: 12, color: '#3C3489', marginInlineStart: 'auto', whiteSpace: 'nowrap' },
   hinweis: { fontSize: 13, color: '#888', margin: '8px 0' },
   zeile: { borderTop: '1px solid #f0f0f0', padding: '14px 0' },
   zeileKopf: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 },

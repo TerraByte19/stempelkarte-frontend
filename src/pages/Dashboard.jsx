@@ -7,6 +7,7 @@ import NewsletterSection from '../components/NewsletterSection'
 import KampagnenSection from '../components/KampagnenSection'
 import AktivitaetSection from '../components/AktivitaetSection'
 import RueckmeldungenSection from '../components/RueckmeldungenSection'
+import KundengruppenSection from '../components/KundengruppenSection'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -90,6 +91,9 @@ export default function Dashboard() {
               ))}
             </div>
         )}
+
+        {/* Kundengruppen: Neu, Stammgast, Gelegentlich, wird ruhig, verloren */}
+        <KundengruppenSection />
 
         {/* Zuletzt passiert: juengste Scans und neueste Kunden */}
         <AktivitaetSection />

@@ -75,7 +75,9 @@ export default function AktivitaetSection() {
                         <span style={s.zeit}>{zeit(scan.zeit)}</span>
                         <span style={s.wer}>
                           <span style={s.name}>{scan.kunde || t('dash_act_unknown')}</span>
-                          <span style={s.karte}>{scan.karte}</span>
+                          <span style={s.karte}>
+                            {scan.karte}{scan.von ? ` · ${t('dash_act_by', { name: scan.von })}` : ''}
+                          </span>
                         </span>
                         <span style={{ ...s.pill, color: w.farbe, background: w.bg }}>{w.text}</span>
                       </div>
