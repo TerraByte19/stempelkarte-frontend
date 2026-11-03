@@ -1,12 +1,21 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { languages } from '../i18n'
 import './Layout.css'
 
 export default function Layout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { lang, setLang, t } = useLang()
   const shop = JSON.parse(localStorage.getItem('shop') || '{}')
+  // Handy: der untere Balken hat fuenf Felder; der Rest liegt hinter "Mehr".
+  // Das Blatt schliesst beim Tippen auf einen Eintrag (zu, nicht per Effekt).
+  const [mehrOffen, setMehrOffen] = useState(false)
+  const mehrSeiten = ['/nachrichten', '/statistik', '/team', '/profil']
+  const mehrAktiv = mehrSeiten.includes(location.pathname)
+  const mehrEintrag = ({ isActive }) => 'mehr-eintrag' + (isActive ? ' aktiv' : '')
+  const zu = () => setMehrOffen(false)
 
   function logout() {
     localStorage.removeItem('token')
@@ -89,41 +98,51 @@ export default function Layout() {
           </svg>
           {t('nav_customers')}
         </NavLink>
-        <NavLink to="/nachrichten" style={bottomNavStyle}>
+        <button type="button" onClick={() => setMehrOffen(o => !o)} aria-expanded={mehrOffen}
+                style={{ ...styles.mobileBottomBtn, color: mehrAktiv || mehrOffen ? '#3C3489' : '#888', fontWeight: mehrAktiv ? '600' : '400' }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M4 5h16v11H8l-4 4z"/>
+            <circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>
           </svg>
-          {t('nav_messages')}
-        </NavLink>
-        <NavLink to="/statistik" style={bottomNavStyle}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="18" y1="20" x2="18" y2="10"/>
-            <line x1="12" y1="20" x2="12" y2="4"/>
-            <line x1="6" y1="20" x2="6" y2="14"/>
-          </svg>
-          {t('nav_stats')}
-        </NavLink>
-        <NavLink to="/profil" style={bottomNavStyle}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-          </svg>
-          {t('nav_profile')}
-        </NavLink>
-        <select value={lang} onChange={e => setLang(e.target.value)} style={styles.mobileLangSelect}>
-          {languages.map(l => (
-            <option key={l.code} value={l.code}>{l.code.toUpperCase()}</option>
-          ))}
-        </select>
-        <button onClick={logout} style={styles.mobileBottomBtn}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          <span style={{ fontSize: '11px', color: '#888' }}>{t('nav_logout')}</span>
+          <span style={{ fontSize: '11px' }}>{t('nav_more')}</span>
         </button>
       </nav>
+
+      {mehrOffen && (
+        <>
+          <div className="mehr-hintergrund" onClick={() => setMehrOffen(false)} />
+          <div className="mehr-blatt" role="dialog" aria-label={t('nav_more')}>
+            <div className="mehr-griff" />
+            <NavLink to="/nachrichten" className={mehrEintrag} onClick={zu}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 5h16v11H8l-4 4z"/></svg>
+              {t('nav_messages')}
+            </NavLink>
+            <NavLink to="/statistik" className={mehrEintrag} onClick={zu}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              {t('nav_stats')}
+            </NavLink>
+            <NavLink to="/team" className={mehrEintrag} onClick={zu}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c3 0 5.5 2 5.5 5"/></svg>
+              {t('nav_team')}
+            </NavLink>
+            <NavLink to="/profil" className={mehrEintrag} onClick={zu}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              {t('nav_profile')}
+            </NavLink>
+            <label className="mehr-eintrag" style={{ justifyContent: 'space-between' }}>
+              <span>{t('nav_language')}</span>
+              <select value={lang} onChange={e => setLang(e.target.value)} style={styles.mehrLangSelect}>
+                {languages.map(l => (
+                  <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+              </select>
+            </label>
+            <button type="button" className="mehr-eintrag" onClick={logout} style={{ color: '#c0392b' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              {t('nav_logout')}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -133,6 +152,6 @@ const styles = {
   shopName: { fontSize: '14px', fontWeight: '600', textAlign: 'center', marginBottom: '32px', opacity: 0.9, color: 'white' },
   langSelect: { background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', fontSize: '13px', width: '100%', marginBottom: '8px' },
   logout: { background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px', cursor: 'pointer', fontSize: '14px', width: '100%' },
-  mobileBottomBtn: { color: '#888', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', flex: 1, padding: '8px 0' },
-  mobileLangSelect: { color: '#888', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', flex: 1, padding: '8px 0', textAlign: 'center' },
+  mobileBottomBtn: { color: '#888', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', flex: 1, padding: '8px 0', fontFamily: 'inherit' },
+  mehrLangSelect: { fontSize: '15px', padding: '6px 8px', borderRadius: '8px', border: '1.5px solid #e0e0e0', background: 'white', color: '#1a1a1a' },
 }

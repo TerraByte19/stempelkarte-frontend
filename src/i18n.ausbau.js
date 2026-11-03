@@ -7,7 +7,7 @@
  */
 export const ausbau = {
   de: {
-    nav_messages: 'Nachrichten', nav_team: 'Team & Standorte',
+    nav_messages: 'Nachrichten', nav_team: 'Team & Standorte', nav_more: 'Mehr', nav_language: 'Sprache',
     nachr_title: 'Nachrichten aufs Handy',
     nachr_subtitle: 'Alles, was auf den Wallet-Karten deiner Kunden landet: Tagesangebot, Kampagnen, Automaten, Newsletter.',
     dash_nachr_link: 'Kampagnen, Automaten und Newsletter findest du jetzt unter „Nachrichten“.',
@@ -158,7 +158,7 @@ export const ausbau = {
     api_err: 'Konnte nicht gespeichert werden.',
   },
   en: {
-    nav_messages: 'Messages', nav_team: 'Team & locations',
+    nav_messages: 'Messages', nav_team: 'Team & locations', nav_more: 'More', nav_language: 'Language',
     nachr_title: 'Messages to the phone',
     nachr_subtitle: 'Everything that lands on your customers\' wallet cards: deal of the day, campaigns, automations, newsletter.',
     dash_nachr_link: 'Campaigns, automations and the newsletter now live under "Messages".',
@@ -300,7 +300,7 @@ export const ausbau = {
     api_err: 'Could not be saved.',
   },
   ar: {
-    nav_messages: 'الرسائل', nav_team: 'الفريق والفروع',
+    nav_messages: 'الرسائل', nav_team: 'الفريق والفروع', nav_more: 'المزيد', nav_language: 'اللغة',
     nachr_title: 'رسائل إلى الهاتف',
     nachr_subtitle: 'كل ما يصل إلى بطاقات عملائك في المحفظة: عرض اليوم، الحملات، الرسائل التلقائية، النشرة.',
     dash_nachr_link: 'الحملات والرسائل التلقائية والنشرة أصبحت الآن تحت «الرسائل».',

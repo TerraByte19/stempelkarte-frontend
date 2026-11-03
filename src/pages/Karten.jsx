@@ -1098,8 +1098,9 @@ export default function Karten() {
 }
 
 const s = {
-  typeRow: { display:'flex', gap:'8px', marginBottom:'6px' },
-  typeBtn: { flex:1, padding:'12px', borderRadius:'10px', border:'none', fontSize:'15px', fontWeight:'700', cursor:'pointer' },
+  // Vier Typen: auf dem Handy zwei je Zeile, am Rechner alle nebeneinander.
+  typeRow: { display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(130px, 1fr))', gap:'8px', marginBottom:'6px' },
+  typeBtn: { padding:'12px 8px', borderRadius:'10px', border:'none', fontSize:'14px', fontWeight:'700', cursor:'pointer' },
   typeHint: { fontSize:'12px', color:'#999', marginBottom:'16px', textAlign:'start' },
   header: {display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:28},
   title: {fontSize:24,fontWeight:700,margin:'0 0 4px',color:'#1a1a1a'},
