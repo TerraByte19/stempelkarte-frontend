@@ -224,6 +224,38 @@ export default function Admin() {
     }
   }
 
+  // Schnittstelle (API-Schluessel, Webhooks) je Laden freischalten - Tarif.
+  async function setApi(shopId, freigeschaltet) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shopId}/api`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ freigeschaltet })
+      })
+      if (!res.ok) throw new Error()
+      loadShops()
+    } catch {
+      alert('Fehler beim Umstellen der Schnittstelle')
+    }
+  }
+
+  // Demo-Laden fuer die Website: Besucher holen sich eine Karte und stempeln sich selbst.
+  async function setDemo(shopId, demo) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shopId}/demo`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ demo })
+      })
+      if (!res.ok) throw new Error()
+      loadShops()
+    } catch {
+      alert('Fehler beim Umstellen des Demo-Ladens')
+    }
+  }
+
   // Sprache wird beim Erstellen festgelegt und ist danach fix - kein Umschalten.
 
   async function deleteShop(shopId, shopName) {
@@ -466,17 +498,30 @@ export default function Admin() {
                     <span style={styles.cell}>{shop.customerCount}</span>
                     <span style={{ ...styles.cell, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {shop.maxTokens}
-                      {/* Weitere Orte fuer Naehe-Erinnerung und Scan, je nach Tarif. */}
+                      {/* Filialen = Hauptstandort + weitere Orte (Tarif). Gespeichert
+                          wird die Zahl der weiteren Orte (0-9), angezeigt die Filialen. */}
                       <select
-                          title="Weitere Orte (Marktstand, zweiter Eingang): 0 = aus, bis 9"
+                          title="Filialen im Tarif: Hauptstandort plus weitere Standorte (bis 10)"
                           value={shop.maxOrte ?? 0}
                           onChange={e => setMaxOrte(shop.id, Number(e.target.value))}
                           style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd', background: (shop.maxOrte ?? 0) > 0 ? '#eef2ff' : 'white' }}
                       >
                         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                            <option key={n} value={n}>{n === 0 ? 'Orte: aus' : `Orte: ${n}`}</option>
+                            <option key={n} value={n}>{`Filialen: ${n + 1}`}</option>
                         ))}
                       </select>
+                      <button
+                          title={shop.apiFreigeschaltet ? 'Schnittstelle (API, Webhooks) frei. Klicken = sperren' : 'Schnittstelle gesperrt. Klicken = freischalten'}
+                          onClick={() => setApi(shop.id, !shop.apiFreigeschaltet)}
+                          style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                                   background: shop.apiFreigeschaltet ? '#e6f4ea' : '#f0f0f0', color: shop.apiFreigeschaltet ? '#2C5F2E' : '#777' }}
+                      >API</button>
+                      <button
+                          title={shop.demo ? 'Demo-Laden für die Website. Klicken = aus' : 'Als Demo-Laden für die Website markieren'}
+                          onClick={() => setDemo(shop.id, !shop.demo)}
+                          style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                                   background: shop.demo ? '#fff4e5' : '#f0f0f0', color: shop.demo ? '#b35c00' : '#777' }}
+                      >Demo</button>
                     </span>
                     <button
                         title={shop.geoBefreit

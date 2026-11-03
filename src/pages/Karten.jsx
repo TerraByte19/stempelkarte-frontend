@@ -7,6 +7,13 @@ import { ApplePreview, GooglePreview } from '../components/CardPreview'
 import PointsSettings from '../components/PointsSettings'
 import RewardCatalog from '../components/RewardCatalog'
 import WillkommenSettings from '../components/WillkommenSettings'
+import StufenSettings from '../components/StufenSettings'
+import EmpfehlungSettings from '../components/EmpfehlungSettings'
+import AufkleberSettings from '../components/AufkleberSettings'
+import PaketSettings from '../components/PaketSettings'
+
+// Vier Kartentypen; MEMBER und PACKAGE brauchen weder Praemie noch Stempel-Design.
+const TYPEN = { STAMP: 'cards_type_stamp', POINTS: 'cards_type_points', MEMBER: 'cards_type_member', PACKAGE: 'cards_type_package' }
 import { DEFAULT_DESIGN } from '../lib/cardDesign'
 import { blobZuBase64 } from '../lib/bild'
 import { formatierePunkte } from '../lib/pointsOf'
@@ -403,6 +410,8 @@ export default function Karten() {
     pointsPerEuroX100: 100, pointsRounding: 'GENAU',
   })
   const [pendingRewards, setPendingRewards] = useState([])
+  // 10er-Karte beim Anlegen: Paketgroesse und Einheit ("Kurse").
+  const [paketForm, setPaketForm] = useState({ groesse: 10, einheit: '' })
   const [editRewards, setEditRewards] = useState([])
   const [editCard, setEditCard] = useState(null)
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
@@ -446,11 +455,10 @@ export default function Karten() {
   async function createCard() {
     // Eine Punktekarte hat keinen Belohnungstext - der Katalog ersetzt ihn.
     // Ohne diese Unterscheidung liesse sich gar keine anlegen.
-    const pflichtFehlt = cardType==='POINTS'
-      ? !form.name
-      : !form.name || !form.rewardText
+    const nurName = cardType!=='STAMP'
+    const pflichtFehlt = nurName ? !form.name : (!form.name || !form.rewardText)
     if (pflichtFehlt) {
-      return alert(t(cardType==='POINTS' ? 'cards_err_required_points' : 'cards_err_required'))
+      return alert(t(nurName ? 'cards_err_required_points' : 'cards_err_required'))
     }
     setLoading(true)
     try {
@@ -477,6 +485,24 @@ export default function Karten() {
         for (const r of pendingRewards) {
           await api.post(`/api/shop/cards/${res.data.id}/rewards`, {
             name: r.name, costPointsX100: r.costPointsX100,
+          })
+        }
+        zurueckZurListe()
+        return
+      }
+
+      // Mitglieds- und 10er-Karte: nur Name, Beschreibung, Farben und Bilder.
+      if (cardType==='MEMBER' || cardType==='PACKAGE') {
+        const farben = {
+          colorBackground: designToSave.colorBackground, colorForeground: designToSave.colorForeground,
+          colorLabel: designToSave.colorLabel, logoUrl: designToSave.logoUrl, heroImageUrl: designToSave.heroImageUrl,
+        }
+        if (cardType==='MEMBER') {
+          await api.post('/api/shop/cards/member', { name: form.name, description: form.description || form.name, ...farben })
+        } else {
+          await api.post('/api/shop/cards/package', {
+            name: form.name, description: form.description || form.name,
+            groesse: parseInt(paketForm.groesse) || 10, einheit: paketForm.einheit, ...farben,
           })
         }
         zurueckZurListe()
@@ -561,6 +587,7 @@ export default function Karten() {
     setPendingStampFile(null)
     setPendingRewards([])
     setPointsForm({pointsPerEuroX100:100, pointsRounding:'GENAU'})
+    setPaketForm({ groesse: 10, einheit: '' })
     setCardType('STAMP')
     loadCards()
   }
@@ -669,8 +696,9 @@ export default function Karten() {
     setEditWillkommen(null)
     setWillkommenStart(null)
     willkommenFuer.current = null
-    if ((card.type ?? 'STAMP') === 'POINTS') ladeRewards(card.id)
-    else ladeWillkommen(card.id)
+    const typ = card.type ?? 'STAMP'
+    if (typ === 'POINTS') ladeRewards(card.id)
+    else if (typ === 'STAMP') ladeWillkommen(card.id)
     setEditDesign({
       colorBackground: card.colorBackground||'#3C3489',
       colorForeground: card.colorForeground||'#FFFFFF',
@@ -721,7 +749,25 @@ export default function Karten() {
   const editVorschauPunkteX100 = halberPreis(editRewards)
 
   // ?? 'STAMP', weil ein aelteres Backend das Feld noch nicht mitliefert.
-  const istPunktekarte = (editCard?.type ?? 'STAMP') === 'POINTS'
+  const editTyp = editCard?.type ?? 'STAMP'
+  const istPunktekarte = editTyp === 'POINTS'
+  const istMitglied = editTyp === 'MEMBER'
+  const istPaket = editTyp === 'PACKAGE'
+  const istStempel = editTyp === 'STAMP'
+
+  function typBadge(card) {
+    const typ = card.type ?? 'STAMP'
+    if (typ === 'POINTS') return t('cards_type_points')
+    if (typ === 'MEMBER') return t('cards_badge_member')
+    if (typ === 'PACKAGE') return `${card.rewardThreshold} ${card.paketEinheit || ''}`.trim()
+    return t('cards_stamp_count', { n: card.rewardThreshold })
+  }
+
+  const vorschauFehlt = (typ) => (
+      <div style={{gridColumn:'1 / -1', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)', fontSize:13, color:'#666', lineHeight:1.5}}>
+        {t('cards_preview_na', { felder: t(typ === 'MEMBER' ? 'cards_preview_member_fields' : 'cards_preview_package_fields') })}
+      </div>
+  )
 
   // ─── LIST ───────────────────────────────────────────────────────────────
   if (mode==='list') return (
@@ -741,15 +787,13 @@ export default function Karten() {
                       {/* card.type ?? 'STAMP': ein aelteres Backend liefert
                           das Feld noch nicht mit. */}
                       <div style={{...s.badge,background:card.colorBackground||'#3C3489',color:card.colorForeground||'#fff'}}>
-                        {(card.type ?? 'STAMP')==='POINTS'
-                          ? t('cards_type_points')
-                          : t('cards_stamp_count', { n: card.rewardThreshold })}
+                        {typBadge(card)}
                       </div>
                     </div>
                     <div style={s.cardReward}>{card.rewardText}</div>
-                    {/* Raster-Stil und Stempel-Symbol zeichnen auf einer
-                        Punktekarte nichts - dann auch nicht hier nennen. */}
-                    {(card.type ?? 'STAMP')!=='POINTS' && (
+                    {/* Raster-Stil und Stempel-Symbol zeichnen nur auf einer
+                        Stempelkarte etwas - dann auch nur dort nennen. */}
+                    {(card.type ?? 'STAMP')==='STAMP' && (
                       <div style={s.designBadge}>
                         {card.walletStyle==='grid'?t('design_style_grid'):t('design_style_numbers')} · {t(`preset_${card.stampPreset||'coffee'}`)}
                       </div>
@@ -794,17 +838,19 @@ export default function Karten() {
             {/* Typ zuerst: er entscheidet, welche Felder darunter stehen,
                 und ist nach dem Anlegen fest. */}
             <div style={s.typeRow}>
-              {['STAMP','POINTS'].map(typ=>(
+              {Object.keys(TYPEN).map(typ=>(
                 <button key={typ}
                         style={{...s.typeBtn,
                           background: cardType===typ ? '#3C3489' : '#f0f0f0',
                           color: cardType===typ ? 'white' : '#333'}}
                         onClick={()=>waehleTyp(typ)}>
-                  {t(typ==='STAMP' ? 'cards_type_stamp' : 'cards_type_points')}
+                  {t(TYPEN[typ])}
                 </button>
               ))}
             </div>
-            <div style={s.typeHint}>{t('cards_type_hint')}</div>
+            <div style={s.typeHint}>
+              {t(cardType==='MEMBER' ? 'cards_type_member_hint' : cardType==='PACKAGE' ? 'cards_type_package_hint' : 'cards_type_hint')}
+            </div>
 
             {/* Beschreibung nur bei Stempelkarten. Das Feld wird nirgends
                 angezeigt - nicht auf der Kundenkarte, nicht im Wallet-Pass,
@@ -813,9 +859,11 @@ export default function Karten() {
             {[
               {label:t('cards_name'),key:'name',max:MAX_NAME,
                placeholder:t(cardType==='POINTS' ? 'cards_name_ph_points' : 'cards_name_ph')},
+              ...(cardType!=='POINTS'
+                ? [{label:t('cards_desc'),key:'description',placeholder:t('cards_desc_ph'),max:40}]
+                : []),
               ...(cardType==='STAMP'
-                ? [{label:t('cards_desc'),key:'description',placeholder:t('cards_desc_ph'),max:40},
-                   {label:t('cards_reward'),key:'rewardText',placeholder:t('cards_reward_ph'),max:25}]
+                ? [{label:t('cards_reward'),key:'rewardText',placeholder:t('cards_reward_ph'),max:25}]
                 : []),
             ].map(({label,key,placeholder,max})=>(
                 <div key={key} style={s.field}>
@@ -843,7 +891,20 @@ export default function Karten() {
                   <input type="range" min={0} max={threshold} value={previewStamps} onChange={e=>setPreviewStamps(Number(e.target.value))} style={{width:'100%',accentColor:'#3C3489'}}/>
                 </div>
               </>
-            ) : (
+            ) : cardType==='PACKAGE' ? (
+              <>
+                <div style={s.field}>
+                  <label style={s.label}>{t('cards_paket_groesse')}</label>
+                  <input style={s.input} type="number" min="1" max="100" value={paketForm.groesse}
+                         onChange={e=>setPaketForm({...paketForm,groesse:e.target.value})}/>
+                </div>
+                <div style={s.field}>
+                  <label style={s.label}>{t('cards_paket_einheit')}</label>
+                  <input style={s.input} value={paketForm.einheit} maxLength={20} placeholder={t('cards_paket_einheit_ph')}
+                         onChange={e=>setPaketForm({...paketForm,einheit:e.target.value})}/>
+                </div>
+              </>
+            ) : cardType==='MEMBER' ? null : (
               <>
                 <PointsSettings value={pointsForm} onChange={setPointsForm} t={t}/>
                 {/* Derselbe Regler wie bei Stempelkarten: ohne ihn sieht man
@@ -883,7 +944,9 @@ export default function Karten() {
             <DesignPanel design={design} onChange={setDesign} onStampFile={setPendingStampFile} onStripFile={setPendingStripFile} t={t} zeigeStempelDesign={cardType==='STAMP'}/>
           </div>
 
-          {/* Vorschau — volle Breite, nebeneinander */}
+          {/* Vorschau — volle Breite, nebeneinander. Mitglieds- und 10er-Karte
+              haben noch keine Vorschau, dort steht ein Satz, was auf der Karte ist. */}
+          {(cardType==='MEMBER' || cardType==='PACKAGE') ? vorschauFehlt(cardType) : (
           <div style={{gridColumn:'1 / -1', display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
             {/* titel: oben auf dem Apple-Pass steht der Ladenname, nicht der
                 Kartenname - sonst widerspraeche die Vorschau dem Hinweis am
@@ -901,6 +964,7 @@ export default function Karten() {
                             ladenName={shop?.name} nameHervorheben={nameFokus}/>
             </div>
           </div>
+          )}
         </div>
       </div>
   )
@@ -941,6 +1005,9 @@ export default function Karten() {
             {istPunktekarte ? (
               <RewardCatalog rewards={editRewards} onAdd={rewardHinzufuegen}
                              onRemove={rewardEntfernen} t={t}/>
+            ) : istMitglied ? null : istPaket ? (
+              <PaketSettings card={editCard} t={t}
+                             onSaved={c=>{ setEditCard(x=>({...x, rewardThreshold:c.rewardThreshold, paketEinheit:c.paketEinheit})); loadCards() }}/>
             ) : (
               <>
                 <div style={{marginBottom:16}}>
@@ -969,7 +1036,7 @@ export default function Karten() {
                 )}
               </>
             )}
-            <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t} zeigeStempelDesign={!istPunktekarte}/>
+            <DesignPanel design={editDesign} onChange={setEditDesign} cardId={editCard.id} t={t} zeigeStempelDesign={istStempel}/>
             <button style={{...s.btnCreate,...(saved?{background:'#2C5F2E'}:{})}} onClick={saveEditDesign} disabled={loading}>
               {saved ? (
                   <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
@@ -979,6 +1046,7 @@ export default function Karten() {
             </button>
           </div>
           {/* Vorschau — volle Breite, nebeneinander */}
+          {(istMitglied || istPaket) ? vorschauFehlt(editTyp) : (
           <div style={{display:'flex', gap:32, flexWrap:'wrap', justifyContent:'center', background:'white', borderRadius:12, padding:20, boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
             <div>
               <div style={s.previewLabel}>Apple Wallet</div>
@@ -993,6 +1061,13 @@ export default function Karten() {
                             ladenName={shop?.name} nameHervorheben={nameFokus}/>
             </div>
           </div>
+          )}
+          {/* Zusatzbloecke je Karte: Stufen (nicht Punkte), Kunde wirbt Kunde
+              (Stempel und Punkte), Aufkleber (alle). Jeder laedt sich selbst
+              und bleibt bei einem aelteren Backend unsichtbar. */}
+          <StufenSettings cardId={editCard.id} t={t}/>
+          {(istStempel || istPunktekarte) && <EmpfehlungSettings cardId={editCard.id} cardType={editTyp} t={t}/>}
+          <AufkleberSettings cardId={editCard.id} t={t}/>
           {/* Gesperrte Karte, solange das Willkommensgeschenk an ist. Folgt
               dem Textfeld, damit der Laden vor dem Speichern sieht, was der
               neue Kunde bekommt. */}

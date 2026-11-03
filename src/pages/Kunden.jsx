@@ -149,19 +149,28 @@ export default function Kunden() {
   )
 }
 
+const PAKET_REST_MAX = 500
+
 function KundenZeile({ kunde, t, datum, onChange }) {
   const [offen, setOffen] = useState(false)
   const [wert, setWert] = useState(kunde.stamps)
   const [saving, setSaving] = useState(false)
   const [meldung, setMeldung] = useState(null)   // {ok, text}
 
+  // Vier Kartentypen: Stempel (Stand von Hand setzbar), Punkte (korrigiert
+  // der Scanner), Mitglied (zaehlt Besuche, nichts zu korrigieren), 10er
+  // (Guthaben setzen und Paket aufladen).
   const punkte = kunde.type === 'POINTS'
-  const max = kunde.rewardThreshold
-  const darfKorrigieren = !punkte && !kunde.welcomePending
-  const voll = !punkte && kunde.stamps >= max
+  const mitglied = kunde.type === 'MEMBER'
+  const paket = kunde.type === 'PACKAGE'
+  const stempel = !punkte && !mitglied && !paket
+  const max = paket ? PAKET_REST_MAX : kunde.rewardThreshold
+  const aktuell = paket ? (kunde.paketRest ?? 0) : kunde.stamps
+  const darfKorrigieren = (stempel && !kunde.welcomePending) || paket
+  const voll = stempel && kunde.stamps >= max
 
   function oeffnen() {
-    setWert(kunde.stamps)
+    setWert(aktuell)
     setMeldung(null)
     setOffen(o => !o)
   }
@@ -175,15 +184,40 @@ function KundenZeile({ kunde, t, datum, onChange }) {
     setSaving(true)
     setMeldung(null)
     try {
-      const res = await api.put(`/api/shop/kunden/${kunde.customerCardId}/stempel`, { stamps: n })
+      const res = paket
+          ? await api.put(`/api/shop/kunden/${kunde.customerCardId}/paket`, { rest: n })
+          : await api.put(`/api/shop/kunden/${kunde.customerCardId}/stempel`, { stamps: n })
       onChange(res.data)
       setMeldung({ ok: true, text: t('kunden_fix_ok') })
       setTimeout(() => { setOffen(false); setMeldung(null) }, 1500)
     } catch (e) {
-      setMeldung({ ok: false, text: e.response?.data?.error || t('kunden_fix_error') })
+      setMeldung({ ok: false, text: e.response?.data?.error || e.response?.data?.message || t('kunden_fix_error') })
     } finally {
       setSaving(false)
     }
+  }
+
+  async function aufladen() {
+    if (!confirm(t('kunden_paket_topup_confirm', { n: kunde.rewardThreshold }))) return
+    setSaving(true)
+    setMeldung(null)
+    try {
+      const res = await api.post(`/api/shop/kunden/${kunde.customerCardId}/aufladen`)
+      onChange(res.data)
+      setMeldung({ ok: true, text: t('kunden_paket_topup_ok', { n: res.data?.paketRest ?? 0 }) })
+      setTimeout(() => setMeldung(null), 2500)
+    } catch (e) {
+      setMeldung({ ok: false, text: e.response?.data?.error || e.response?.data?.message || t('kunden_fix_error') })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function standText() {
+    if (punkte) return t('kunden_points', { n: kunde.pointsText })
+    if (mitglied) return t('kunden_besuche', { n: kunde.stamps })
+    if (paket) return t('kunden_paket_rest', { n: kunde.paketRest ?? 0 })
+    return t('kunden_stand', { n: Math.min(kunde.stamps, max), total: max })
   }
 
   return (
@@ -194,8 +228,8 @@ function KundenZeile({ kunde, t, datum, onChange }) {
             <div style={s.email}>{kunde.email}</div>
           </div>
           <div style={s.stand}>
-            <div style={{ ...s.standWert, color: voll ? '#1e7a4c' : '#3C3489' }}>
-              {punkte ? t('kunden_points', { n: kunde.pointsText }) : t('kunden_stand', { n: Math.min(kunde.stamps, max), total: max })}
+            <div style={{ ...s.standWert, color: voll ? '#1e7a4c' : (paket && !(kunde.paketRest > 0)) ? '#b23b3b' : '#3C3489' }}>
+              {standText()}
             </div>
             <div style={s.standKarte}>{kunde.cardName}</div>
           </div>
@@ -204,7 +238,8 @@ function KundenZeile({ kunde, t, datum, onChange }) {
         <div style={s.meta}>
           <span>{t('kunden_last_visit')}: <b>{datum(kunde.lastVisitAt)}</b></span>
           <span>{t('kunden_since')}: {datum(kunde.createdAt)}</span>
-          <span>{t('kunden_rewards', { n: kunde.totalRewards })}</span>
+          {!mitglied && !paket && <span>{t('kunden_rewards', { n: kunde.totalRewards })}</span>}
+          {paket && <span>{t('kunden_paket_gekauft', { n: kunde.paketeGekauft ?? 0 })} · {t('kunden_besuche', { n: kunde.stamps })}</span>}
           {/* Nur wenn der Laden die Felder abfragt und der Kunde sie ausgefuellt hat. */}
           {kunde.birthday && <span>{t('kunden_birthday')}: {datum(kunde.birthday + 'T12:00:00')}</span>}
           {kunde.phone && <span>{t('kunden_phone')}: <a href={`tel:${kunde.phone}`} style={{ color: '#3C3489' }}>{kunde.phone}</a></span>}
@@ -213,6 +248,9 @@ function KundenZeile({ kunde, t, datum, onChange }) {
         <div style={s.badges}>
           {/* Gruppe zuerst; aelteres Backend liefert keine. */}
           {istGruppe(kunde.gruppe) && <span style={{ ...s.badge, ...GRUPPEN_FARBEN[kunde.gruppe] }}>{t(`kunden_gruppe_${kunde.gruppe}`)}</span>}
+          {/* Stufe (Bronze, Silber, Gold), nur bei Karten mit Stufen. */}
+          {kunde.stufe && <span style={{ ...s.badge, background: '#fff3d6', color: '#8a5a00' }}>🏅 {kunde.stufe}</span>}
+          {mitglied && <span style={s.badge}>{t('kunden_badge_member')}</span>}
           {kunde.welcomePending && <span style={{ ...s.badge, background: '#fbecd2', color: '#9a5d00' }}>{t('kunden_badge_locked')}</span>}
           {voll && <span style={{ ...s.badge, background: '#ddf2e6', color: '#1e7a4c' }}>{t('kunden_badge_full')}</span>}
           {kunde.apple && <span style={s.badge}>{t('kunden_badge_apple')}</span>}
@@ -220,23 +258,36 @@ function KundenZeile({ kunde, t, datum, onChange }) {
           {!kunde.emailConfirmed && <span style={{ ...s.badge, background: '#f4e1e1', color: '#8a3b3b' }}>{t('kunden_badge_unconfirmed')}</span>}
         </div>
 
-        {darfKorrigieren && (
-            <button type="button" style={s.fixBtn} onClick={oeffnen}>
-              {offen ? t('kunden_fix_cancel') : t('kunden_fix')}
-            </button>
-        )}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {paket && (
+              <button type="button" style={{ ...s.fixBtn, background: '#3C3489', color: 'white' }} onClick={aufladen} disabled={saving}>
+                {t('kunden_paket_topup')}
+              </button>
+          )}
+          {darfKorrigieren && (
+              <button type="button" style={s.fixBtn} onClick={oeffnen}>
+                {offen ? t('kunden_fix_cancel') : (paket ? t('kunden_paket_fix') : t('kunden_fix'))}
+              </button>
+          )}
+        </div>
         {punkte && <p style={s.hint}>{t('kunden_fix_points_hint')}</p>}
+        {mitglied && <p style={s.hint}>{t('kunden_member_hint')}</p>}
+        {!offen && meldung && (
+            <div style={{ ...s.meldung, background: meldung.ok ? '#f0fff4' : '#fff0f0', color: meldung.ok ? '#2C5F2E' : '#c00' }}>
+              {meldung.text}
+            </div>
+        )}
 
         {offen && (
             <div style={s.fixBox}>
-              <p style={{ ...s.hint, margin: '0 0 10px' }}>{t('kunden_fix_hint', { max })}</p>
+              <p style={{ ...s.hint, margin: '0 0 10px' }}>{paket ? t('kunden_paket_fix_hint', { max }) : t('kunden_fix_hint', { max })}</p>
               <div style={s.fixRow}>
                 <button type="button" style={s.stepBtn} onClick={() => setWert(w => Math.max(0, Number(w) - 1))} disabled={saving}>−</button>
                 <input style={s.fixInput} type="number" min={0} max={max} value={wert}
                        onChange={e => setWert(e.target.value)} />
                 <button type="button" style={s.stepBtn} onClick={() => setWert(w => Math.min(max, Number(w) + 1))} disabled={saving}>+</button>
-                <span style={s.fixMax}>/ {max}</span>
-                <button type="button" style={s.saveBtn} onClick={speichern} disabled={saving || Number(wert) === kunde.stamps}>
+                {!paket && <span style={s.fixMax}>/ {max}</span>}
+                <button type="button" style={s.saveBtn} onClick={speichern} disabled={saving || Number(wert) === aktuell}>
                   {saving ? t('profil_saving') : t('kunden_fix_save')}
                 </button>
               </div>

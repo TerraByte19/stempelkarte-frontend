@@ -40,7 +40,9 @@ export default function Layout() {
           <NavLink to="/" end style={navStyle}>{t('nav_dashboard')}</NavLink>
           <NavLink to="/karten" style={navStyle}>{t('nav_cards')}</NavLink>
           <NavLink to="/kunden" style={navStyle}>{t('nav_customers')}</NavLink>
+          <NavLink to="/nachrichten" style={navStyle}>{t('nav_messages')}</NavLink>
           <NavLink to="/statistik" style={navStyle}>{t('nav_stats')}</NavLink>
+          <NavLink to="/team" style={navStyle}>{t('nav_team')}</NavLink>
           <NavLink to="/profil" style={navStyle}>{t('nav_profile')}</NavLink>
         </nav>
         <select value={lang} onChange={e => setLang(e.target.value)} style={styles.langSelect}>
@@ -86,6 +88,12 @@ export default function Layout() {
             <path d="M16 14.5c3 0 5.5 2 5.5 5"/>
           </svg>
           {t('nav_customers')}
+        </NavLink>
+        <NavLink to="/nachrichten" style={bottomNavStyle}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 5h16v11H8l-4 4z"/>
+          </svg>
+          {t('nav_messages')}
         </NavLink>
         <NavLink to="/statistik" style={bottomNavStyle}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

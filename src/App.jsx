@@ -16,6 +16,9 @@ const Scanner = lazy(() => import('./pages/Scanner'))
 const Statistik = lazy(() => import('./pages/Statistik'))
 const Admin = lazy(() => import('./pages/Admin'))
 const Kunden = lazy(() => import('./pages/Kunden'))
+const Nachrichten = lazy(() => import('./pages/Nachrichten'))
+const Team = lazy(() => import('./pages/Team'))
+const Demo = lazy(() => import('./pages/Demo'))
 
 function App() {
   const token = localStorage.getItem('token')
@@ -51,10 +54,14 @@ function App() {
         <Route path="/scanner-login" element={<Navigate to="/login" replace />} />
         <Route path="/scanner" element={<Scanner />} />
         <Route path="/admin" element={<Admin />} />
+        {/* Oeffentliche Demo-Seite fuer Besucher der Website. */}
+        <Route path="/demo" element={<Demo />} />
         <Route path="/" element={rootElement()}>
           <Route index element={<Dashboard />} />
           <Route path="karten" element={<Karten />} />
           <Route path="kunden" element={<Kunden />} />
+          <Route path="nachrichten" element={<Nachrichten />} />
+          <Route path="team" element={<Team />} />
           <Route path="statistik" element={<Statistik />} />
           <Route path="profil" element={<Profil />} />
         </Route>

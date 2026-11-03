@@ -24,6 +24,8 @@ export default function Scanner() {
 
   // Punktekarten: was der Server nach dem Scan ueber die Karte sagt.
   const [scanState, setScanState] = useState(null)
+  // Letzter gescannter QR, fuer "Paket aufladen" aus dem Ergebnis "leer".
+  const letzterQr = useRef(null)
   const [betrag, setBetrag] = useState('')
   const [pointsError, setPointsError] = useState(null)
   const [korrekturOffen, setKorrekturOffen] = useState(false)
@@ -245,6 +247,7 @@ export default function Scanner() {
 
   async function confirmScan() {
     if (!pendingScan) return
+    letzterQr.current = pendingScan
     setLoading(true)
     setResult(null)
     try {
@@ -301,6 +304,42 @@ export default function Scanner() {
         setResult({ success: true, welcome: true, data })
       } else {
         // z.B. "schon eingeloest" - genau das soll das Personal lesen.
+        setResult({ success: false, message: data.error || t('scan_server_error') })
+      }
+    } catch {
+      setResult({ success: false, message: t('scan_server_error') })
+    } finally {
+      setLoading(false)
+      setPendingScan(null)
+    }
+  }
+
+  // 10er-Karte: neues Paket laden. Geht aus der Maske vor dem Scan und aus
+  // dem Ergebnis "Paket leer" (dann ist pendingScan schon weg - der letzte
+  // QR bleibt dafuer gemerkt). Gleiche Standort-Regel wie beim Stempel.
+  async function aufladen() {
+    const qr = pendingScan || letzterQr.current
+    if (!qr) return
+    const groesse = scanState?.rewardThreshold ?? result?.data?.rewardThreshold ?? ''
+    if (!confirm(t('scan_topup_confirm', { n: groesse }))) return
+    setLoading(true)
+    setResult(null)
+    try {
+      const ort = ortPflicht ? await holeStandort() : null
+      if (ortPflicht && !ort) {
+        setResult({ success: false, message: t('scan_geo_none') })
+        return
+      }
+      const token = localStorage.getItem('staffToken')
+      const res = await fetch(`${API_URL}/api/scan/aufladen`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Staff-Token': token },
+        body: JSON.stringify({ qrPayload: qr, ...(ort || {}) }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setResult({ success: true, data })
+      } else {
         setResult({ success: false, message: data.error || t('scan_server_error') })
       }
     } catch {
@@ -541,16 +580,22 @@ export default function Scanner() {
             )
           }
           const d = result.success ? result.data : null
+          // Mitglieds- und 10er-Karte: Besuch, Abbuchen, leer, aufgeladen.
+          // Dort gibt es kein "voll" - die Schwelle ist dort Paketgroesse
+          // bzw. 1 und darf nicht als volle Karte gelesen werden.
+          const sonder = !!d && ['visited', 'debited', 'empty', 'topup'].includes(d.action)
+          const isEmpty = !!d && d.action === 'empty'
           const isRedeemed = !!d && d.action === 'redeemed'
-          const isFull = !!d && !isRedeemed && (
+          const isFull = !!d && !isRedeemed && !sonder && (
               d.action === 'full' || d.rewardEarned ||
               (d.rewardThreshold > 0 && d.stamps >= d.rewardThreshold)
           )
           const left = d ? (d.rewardThreshold - d.stamps) : 0
-          const isAlmost = !!d && !isFull && !isRedeemed && d.rewardThreshold > 0 && left > 0 && left <= 2
+          const isAlmost = !!d && !isFull && !isRedeemed && !sonder && d.rewardThreshold > 0 && left > 0 && left <= 2
 
           const box = !result.success
               ? { bg: '#FFF0F0', border: '#D00' }
+              : isEmpty ? { bg: '#FFF4E5', border: '#B35309' }
               : isRedeemed ? { bg: '#0B7A34', border: '#0B7A34' }
               : isFull ? { bg: '#F4B400', border: '#F4B400' }
               : { bg: '#F0FFF4', border: '#2C5F2E' }
@@ -588,7 +633,7 @@ export default function Scanner() {
                   </>
               )}
 
-              {result.success && (
+              {result.success && !sonder && (
                   <div style={{
                     ...styles.resultStamps,
                     color: isRedeemed ? 'rgba(255,255,255,0.92)' : isFull ? '#5a4600' : '#666',
@@ -596,6 +641,21 @@ export default function Scanner() {
                     Neuer Stand: {d.stamps}/{d.rewardThreshold}
                     {d.stampsAdded > 1 && <span style={styles.badge}>+{d.stampsAdded}</span>}
                   </div>
+              )}
+
+              {sonder && (
+                  <div style={{ ...styles.resultStamps, color: isEmpty ? '#B35309' : '#666' }}>
+                    {d.action === 'visited'
+                        ? t('scan_visits', { n: d.stamps })
+                        : t('scan_rest', { n: d.paketRest ?? 0 })}
+                  </div>
+              )}
+
+              {isEmpty && (
+                  <button style={{ ...styles.btnNext, background: '#B35309', color: '#fff', marginBottom: 8 }}
+                          onClick={aufladen} disabled={loading}>
+                    {loading ? t('scan_processing') : t('scan_topup', { n: d.rewardThreshold })}
+                  </button>
               )}
 
               {isAlmost && (
@@ -654,8 +714,56 @@ export default function Scanner() {
             </div>
           )
 
-          const istPunkte = (scanState?.type ?? 'STAMP') === 'POINTS'
+          const typ = scanState?.type ?? 'STAMP'
+          const istPunkte = typ === 'POINTS'
           const cents = centsAusEingabe(betrag)
+
+          // Mitgliedskarte: ein Tipp = ein Besuch. Keine Anzahl, kein Reset.
+          if (typ === 'MEMBER') return (
+            <div style={styles.popup}>
+              <div style={{ ...styles.popupIcon, display: 'flex', justifyContent: 'center', color: '#3C3489' }}><Icon name="check-circle" size={44} strokeWidth={1.8} /></div>
+              <h2 style={styles.popupTitle}>{t('scan_member')}</h2>
+              <p style={{ ...styles.popupSubtitle, fontWeight: 700, color: '#1a1a1a' }}>
+                {scanState.customerName}
+                {Number.isInteger(scanState.stamps) && ` · ${t('scan_visits', { n: scanState.stamps })}`}
+              </p>
+              <button style={styles.confirmBtn} onClick={confirmScan} disabled={loading}>
+                {loading ? t('scan_processing') : t('scan_visit_confirm')}
+              </button>
+              <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
+            </div>
+          )
+
+          // 10er-Karte: abbuchen (Anzahl = Personen auf einer Karte) oder aufladen.
+          if (typ === 'PACKAGE') {
+            const rest = scanState.paketRest ?? 0
+            return (
+              <div style={styles.popup}>
+                <div style={{ ...styles.popupIcon, display: 'flex', justifyContent: 'center', color: rest > 0 ? '#3C3489' : '#B35309' }}><Icon name="check-circle" size={44} strokeWidth={1.8} /></div>
+                <h2 style={styles.popupTitle}>{scanState.customerName}</h2>
+                <p style={{ ...styles.popupSubtitle, fontWeight: 700, color: rest > 0 ? '#1a1a1a' : '#B35309' }}>
+                  {t('scan_package_stand', { n: rest, paket: `${scanState.rewardThreshold} ${scanState.paketEinheit || ''}`.trim() })}
+                </p>
+                {rest > 0 && (
+                    <>
+                      <div style={styles.countButtons}>
+                        {[1,2,3,4,5].map(n => (
+                            <button key={n} style={{ ...styles.countBtn, background: selectedCount === n ? '#3C3489' : '#f0f0f0', color: selectedCount === n ? 'white' : '#333' }} onClick={() => setSelectedCount(n)}>{n}</button>
+                        ))}
+                      </div>
+                      <button style={styles.confirmBtn} onClick={confirmScan} disabled={loading}>
+                        {loading ? t('scan_processing') : `${selectedCount} ${t('scan_debit_confirm')}`}
+                      </button>
+                    </>
+                )}
+                <button style={{ ...(rest > 0 ? styles.resetBtn : styles.confirmBtn), ...(rest > 0 ? {} : { background: '#B35309' }) }}
+                        onClick={aufladen} disabled={loading}>
+                  {loading ? t('scan_processing') : t('scan_topup', { n: scanState.rewardThreshold })}
+                </button>
+                <button style={styles.cancelBtn} onClick={cancelScan}>{t('scan_cancel')}</button>
+              </div>
+            )
+          }
 
           if (!istPunkte) return (
             <div style={styles.popup}>

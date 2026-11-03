@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import api from '../api'
 import ScannerSetupSection from '../components/ScannerSetupSection'
-import NewsletterSection from '../components/NewsletterSection'
-import KampagnenSection from '../components/KampagnenSection'
 import AktivitaetSection from '../components/AktivitaetSection'
+import FilialenSection from '../components/FilialenSection'
 import RueckmeldungenSection from '../components/RueckmeldungenSection'
 import KundengruppenSection from '../components/KundengruppenSection'
 
@@ -27,6 +26,15 @@ export default function Dashboard() {
   const [standort, setStandort] = useState(null)
   const shop = JSON.parse(localStorage.getItem('shop') || '{}')
   const printStyle = `@media print { body * { visibility: hidden; } #print-qr, #print-qr * { visibility: visible; } #print-qr { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; } }`
+
+  /** Kurzzeile je Karte in der Auswahl, je nach Typ. */
+  function kartenMeta(card) {
+    const typ = card.type ?? 'STAMP'
+    if (typ === 'POINTS') return t('cards_type_points')
+    if (typ === 'MEMBER') return t('cards_type_member')
+    if (typ === 'PACKAGE') return `${card.rewardThreshold} ${card.paketEinheit || ''}`.trim()
+    return `${card.rewardThreshold} ${t('dash_stat_stamps')} → ${card.rewardText}`
+  }
 
   useEffect(() => {
     api.get('/api/shop/cards')
@@ -71,13 +79,18 @@ export default function Dashboard() {
 
         {stats.length > 0 && (
             <div style={styles.statsGrid}>
-              {stats.map(s => (
+              {stats.map(s => {
+                // Kartentyp aus der Kartenliste: Mitglieds- und 10er-Karte
+                // zaehlen Besuche statt Stempel und haben keine Praemien.
+                const typ = cards.find(c => c.id === s.cardId)?.type ?? 'STAMP'
+                const besuche = typ === 'MEMBER' || typ === 'PACKAGE'
+                return (
                   <div key={s.cardId} style={styles.statCard}>
                     <div style={styles.statCardName}>{s.cardName}</div>
                     <div style={styles.statRow}>
                       <div style={styles.statItem}><div style={styles.statNumber}>{s.customerCount}</div><div style={styles.statLabel}>{t('dash_stat_customers')}</div></div>
-                      <div style={styles.statItem}><div style={styles.statNumber}>{s.totalStamps}</div><div style={styles.statLabel}>{t('dash_stat_stamps')}</div></div>
-                      <div style={styles.statItem}><div style={styles.statNumber}>{s.totalRewards}</div><div style={styles.statLabel}>{t('dash_stat_rewards')}</div></div>
+                      <div style={styles.statItem}><div style={styles.statNumber}>{s.totalStamps}</div><div style={styles.statLabel}>{t(besuche ? 'dash_stat_visits' : 'dash_stat_stamps')}</div></div>
+                      {!besuche && <div style={styles.statItem}><div style={styles.statNumber}>{s.totalRewards}</div><div style={styles.statLabel}>{t('dash_stat_rewards')}</div></div>}
                     </div>
                     {/* Wird der QR-Code benutzt? Aelteres Backend liefert die Zahlen nicht. */}
                     {typeof s.scans7d === 'number' && (
@@ -88,12 +101,16 @@ export default function Dashboard() {
                         </div>
                     )}
                   </div>
-              ))}
+                )
+              })}
             </div>
         )}
 
         {/* Kundengruppen: Neu, Stammgast, Gelegentlich, wird ruhig, verloren */}
         <KundengruppenSection />
+
+        {/* Filialen: Zahlen je Standort, nur bei mehr als einem Standort eine Tabelle */}
+        <FilialenSection />
 
         {/* Zuletzt passiert: juengste Scans und neueste Kunden */}
         <AktivitaetSection />
@@ -104,11 +121,11 @@ export default function Dashboard() {
         {/* Scanner-Einrichtung mit QR-Codes */}
         <ScannerSetupSection />
 
-        {/* Push-Kampagne: Mitteilung auf die Wallet-Karten aller Kunden */}
-        <KampagnenSection />
-
-        {/* Newsletter an Kunden mit Werbe-Einwilligung */}
-        <NewsletterSection />
+        {/* Kampagnen, Automaten und Newsletter sind nach "Nachrichten" umgezogen. */}
+        <div style={styles.hinweisKarte}>
+          <span style={styles.hinweisText}>{t('dash_nachr_link')}</span>
+          <Link to="/nachrichten" style={styles.warnBtn}>{t('dash_nachr_open')}</Link>
+        </div>
 
         {cards.length === 0 ? (
             <div style={styles.empty}>{t('dash_no_cards')} <a href="/karten" style={{ color: '#3C3489' }}>{t('dash_create_now')}</a></div>
@@ -120,7 +137,7 @@ export default function Dashboard() {
                   {cards.map(card => (
                       <div key={card.id} style={{ ...styles.cardItem, ...(selectedCard?.id === card.id ? styles.cardItemActive : {}) }} onClick={() => setSelectedCard(card)}>
                         <div style={styles.cardItemName}>{card.name}</div>
-                        <div style={styles.cardItemMeta}>{card.rewardThreshold} {t('dash_stat_stamps')} → {card.rewardText}</div>
+                        <div style={styles.cardItemMeta}>{kartenMeta(card)}</div>
                       </div>
                   ))}
                 </div>
@@ -162,6 +179,8 @@ const styles = {
   warnBtn: { display: 'inline-block', background: '#3C3489', color: 'white', padding: '9px 16px', borderRadius: '9px', fontSize: '14px', fontWeight: '600', textDecoration: 'none' },
   title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
   subtitle: { fontSize: '14px', color: '#888', margin: '0 0 24px' },
+  hinweisKarte: { background: 'white', borderRadius: '12px', padding: '16px 20px', marginBottom: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' },
+  hinweisText: { fontSize: '14px', color: '#555' },
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginBottom: '28px' },
   statCard: { background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   statCardName: { fontSize: '15px', fontWeight: '600', color: '#1a1a1a', marginBottom: '16px' },

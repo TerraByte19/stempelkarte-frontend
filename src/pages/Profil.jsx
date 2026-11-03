@@ -3,6 +3,7 @@ import api from '../api'
 import { useLang } from '../LangContext'
 import Icon from '../components/Icon'
 import { ApplePreview, GooglePreview } from '../components/CardPreview'
+import SchnittstellenSection from '../components/SchnittstellenSection'
 
 export default function Profil() {
   const { t } = useLang()
@@ -62,7 +63,8 @@ export default function Profil() {
         <Anmeldefelder t={t} shop={shop} />
         <Geburtstagsgruss t={t} shop={shop} />
         <Kundengruppen t={t} />
-        <StaffTokens t={t} />
+        {/* Nur sichtbar, wenn der Admin die Schnittstelle freigeschaltet hat (sonst Hinweis). */}
+        <SchnittstellenSection />
       </div>
   )
 }
@@ -422,141 +424,12 @@ function Sperrbildschirm({ t, shop }) {
           </button>
         </form>
 
-        <WeitereOrte t={t} />
 
         <p style={s.hint}>{t('profil_lock_delay_hint')}</p>
       </div>
   )
 }
 
-/**
- * Weitere Orte fuer die Naehe-Erinnerung und die Geo-Pruefung beim Scannen:
- * Marktstand, zweiter Eingang, Food-Truck. Apple nimmt zehn Orte pro Karte,
- * also neun hier plus der Hauptort oben. Eigene Liste mit eigenem Speichern,
- * unabhaengig vom Formular darueber. Altes Backend (404): Block bleibt weg.
- */
-function WeitereOrte({ t }) {
-  // null = laedt, false = nicht verfuegbar
-  const [orte, setOrte] = useState(null)
-  // Vom Admin je nach Tarif freigeschaltet. 0 = Block bleibt unsichtbar.
-  const [max, setMax] = useState(0)
-  const [label, setLabel] = useState('')
-  const [lat, setLat] = useState('')
-  const [lon, setLon] = useState('')
-  const [locating, setLocating] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-
-  // Antwort: { max, orte }. Ein ganz altes Backend lieferte eine nackte Liste.
-  function uebernehmen(data) {
-    const liste = Array.isArray(data) ? data : (Array.isArray(data?.orte) ? data.orte : [])
-    setOrte(liste)
-    setMax(Array.isArray(data) ? 9 : Number(data?.max) || 0)
-  }
-
-  useEffect(() => {
-    api.get('/api/shop/me/orte')
-        .then(r => uebernehmen(r.data))
-        .catch(() => setOrte(false))
-  }, [])
-
-  function standortHolen() {
-    if (!navigator.geolocation) { setError(t('profil_lock_geo_unsupported')); return }
-    setError('')
-    setLocating(true)
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-          setLat(String(Number(pos.coords.latitude.toFixed(6))))
-          setLon(String(Number(pos.coords.longitude.toFixed(6))))
-          setLocating(false)
-        },
-        () => { setError(t('profil_lock_geo_denied')); setLocating(false) },
-        { enableHighAccuracy: true, timeout: 10000 }
-    )
-  }
-
-  async function hinzufuegen() {
-    setError('')
-    const latitude = Number(String(lat).replace(',', '.'))
-    const longitude = Number(String(lon).replace(',', '.'))
-    if (!label.trim() || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-      setError(t('profil_orte_incomplete'))
-      return
-    }
-    setSaving(true)
-    try {
-      const res = await api.post('/api/shop/me/orte', { label: label.trim(), latitude, longitude })
-      uebernehmen(res.data)
-      setLabel(''); setLat(''); setLon('')
-    } catch (err) {
-      setError(err.response?.data?.error || t('profil_save_error'))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function loeschen(ort) {
-    if (!confirm(t('profil_orte_delete_confirm', { label: ort.label }))) return
-    setError('')
-    try {
-      const res = await api.delete(`/api/shop/me/orte/${ort.id}`)
-      uebernehmen(res.data)
-    } catch (err) {
-      setError(err.response?.data?.error || t('profil_save_error'))
-    }
-  }
-
-  if (orte === false || orte === null) return null
-  // Nicht im Tarif und nichts angelegt: der Laden sieht die Funktion gar nicht.
-  if (max === 0 && orte.length === 0) return null
-  const voll = orte.length >= max
-
-  return (
-      <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>
-          {t('profil_orte_title')}
-        </div>
-        <p style={{ ...s.hint, margin: '0 0 12px' }}>{t('profil_orte_hint', { max })}</p>
-
-        {error && <div style={s.errorBox}>{error}</div>}
-
-        {orte.length === 0 && <p style={s.hint}>{t('profil_orte_empty')}</p>}
-        {orte.map(o => (
-            <div key={o.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid #f3f3f3' }}>
-              <span style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis' }}>{o.label}</span>
-              <span style={{ fontSize: 12, color: '#999', fontFamily: 'monospace' }}>{o.latitude}, {o.longitude}</span>
-              <button type="button" onClick={() => loeschen(o)}
-                      style={{ background: '#fff0f0', color: '#c0392b', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                {t('profil_orte_delete')}
-              </button>
-            </div>
-        ))}
-
-        {!voll && (
-            <div style={{ marginTop: 12, padding: 12, background: '#f7f7fb', borderRadius: 10 }}>
-              <input style={s.input} maxLength={40} value={label} onChange={e => setLabel(e.target.value)}
-                     placeholder={t('profil_orte_label_ph')} />
-              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                <input style={{ ...s.input, flex: 1 }} inputMode="decimal" value={lat}
-                       onChange={e => setLat(e.target.value)} placeholder={t('profil_orte_lat')} />
-                <input style={{ ...s.input, flex: 1 }} inputMode="decimal" value={lon}
-                       onChange={e => setLon(e.target.value)} placeholder={t('profil_orte_lon')} />
-              </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-                <button type="button" style={{ ...s.btnSecondary, flex: 1 }} onClick={standortHolen} disabled={locating}>
-                  {locating ? t('profil_lock_locating') : t('profil_orte_use_location')}
-                </button>
-                <button type="button" style={{ ...s.btnPrimary, flex: 1 }} onClick={hinzufuegen} disabled={saving}>
-                  {saving ? t('profil_saving') : t('profil_orte_add')}
-                </button>
-              </div>
-              <p style={s.hint}>{t('profil_orte_coords_hint')}</p>
-            </div>
-        )}
-        {voll && <p style={s.hint}>{t('profil_orte_max', { max })}</p>}
-      </div>
-  )
-}
 
 /**
  * Geburtstagsgruss: ab 9 Uhr geht an jede Karte mit Geburtstag heute eine
@@ -879,152 +752,6 @@ function Rueckhol({ t, shop }) {
   )
 }
 
-/**
- * Mitarbeiter-Zugaenge (Staff-Tokens) mit Name, Rolle, zuletzt benutzt und
- * Scans der letzten 7 Tage. Ein aelteres Backend kennt /api/shop/team nicht
- * (404) - dann bleibt der Block weg.
- */
-function StaffTokens({ t }) {
-  // null = laedt, false = nicht verfuegbar
-  const [zugaenge, setZugaenge] = useState(null)
-  const [label, setLabel] = useState('')
-  const [rolle, setRolle] = useState('MITARBEITER')
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [copied, setCopied] = useState('')
-
-  function laden() {
-    return api.get('/api/shop/team')
-        .then(res => setZugaenge(Array.isArray(res.data) ? res.data : []))
-        .catch(() => setZugaenge(false))
-  }
-
-  useEffect(() => { laden() }, [])
-
-  if (!zugaenge) return null
-
-  function fehler(err) {
-    setError(err.response?.data?.error || t('profil_staff_error'))
-  }
-
-  async function anlegen(e) {
-    e.preventDefault()
-    setError('')
-    setBusy(true)
-    try {
-      await api.post('/api/shop/team', { label: label.trim(), rolle })
-      setLabel('')
-      await laden()
-    } catch (err) { fehler(err) }
-    setBusy(false)
-  }
-
-  async function rolleAendern(z, neu) {
-    setError('')
-    try {
-      await api.put(`/api/shop/team/${z.token}`, { rolle: neu })
-      await laden()
-    } catch (err) { fehler(err) }
-  }
-
-  async function umbenennen(z, neu) {
-    const n = neu.trim()
-    if (!n || n === z.label) return
-    setError('')
-    try {
-      await api.put(`/api/shop/team/${z.token}`, { label: n })
-      await laden()
-    } catch (err) { fehler(err) }
-  }
-
-  async function entfernen(z) {
-    if (!confirm(t('profil_team_delete_confirm', { label: z.label }))) return
-    setError('')
-    try {
-      await api.delete(`/api/shop/team/${z.token}`)
-      await laden()
-    } catch (err) { fehler(err) }
-  }
-
-  function setupUrl(z) {
-    const params = new URLSearchParams({ token: z.token, label: z.label || 'Scanner' })
-    return `${window.location.origin}/scanner-setup?${params.toString()}`
-  }
-
-  async function linkKopieren(z) {
-    try {
-      await navigator.clipboard.writeText(setupUrl(z))
-      setCopied(z.token)
-      setTimeout(() => setCopied(''), 2000)
-    } catch {
-      alert(setupUrl(z))
-    }
-  }
-
-  function zuletzt(iso) {
-    if (!iso) return t('profil_team_never')
-    try {
-      const d = new Date(iso)
-      return d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' }) + ' '
-          + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-    } catch { return iso }
-  }
-
-  const rollen = (
-      <>
-        <option value="MITARBEITER">{t('profil_team_role_staff')}</option>
-        <option value="AUSHILFE">{t('profil_team_role_helper')}</option>
-      </>
-  )
-
-  return (
-      <div style={s.card}>
-        <h2 style={s.cardTitle}>{t('profil_team_title')}</h2>
-        <p style={s.hint}>{t('profil_team_hint')}</p>
-
-        {error && <div style={s.errorBox}>{error}</div>}
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-          {zugaenge.map(z => (
-              <div key={z.token} style={{ border: '1.5px solid #e8e8e8', borderRadius: 10, padding: 12 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <input key={z.label} style={{ ...s.input, marginBottom: 0, flex: 1, minWidth: 140 }}
-                         defaultValue={z.label} maxLength={40} aria-label={t('profil_team_name')}
-                         onBlur={e => umbenennen(z, e.target.value)} />
-                  <select style={{ ...s.input, marginBottom: 0, width: 'auto' }} value={z.rolle}
-                          onChange={e => rolleAendern(z, e.target.value)}>
-                    {rollen}
-                  </select>
-                </div>
-                <div style={{ fontSize: 12, color: '#888', marginTop: 8 }}>
-                  {t('profil_team_last_used')}: {zuletzt(z.zuletzt)} · {t('profil_team_stamps7', { n: z.stempel7d })}
-                </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                  <button type="button" style={{ ...s.btnSecondary, flex: 1 }} onClick={() => linkKopieren(z)}>
-                    {copied === z.token ? t('scanner_setup_copied') : t('profil_team_copy_link')}
-                  </button>
-                  <button type="button" style={{ ...s.btnSecondary, color: '#c00', background: '#fff0f0' }}
-                          onClick={() => entfernen(z)}>
-                    {t('profil_team_delete')}
-                  </button>
-                </div>
-              </div>
-          ))}
-        </div>
-
-        <form onSubmit={anlegen} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <input style={{ ...s.input, marginBottom: 0, flex: 1, minWidth: 140 }} value={label} maxLength={40}
-                 onChange={e => setLabel(e.target.value)} placeholder={t('profil_staff_placeholder')} required />
-          <select style={{ ...s.input, marginBottom: 0, width: 'auto' }} value={rolle}
-                  onChange={e => setRolle(e.target.value)}>
-            {rollen}
-          </select>
-          <button style={s.btnPrimary} type="submit" disabled={busy}>{t('profil_team_create')}</button>
-        </form>
-        <p style={{ ...s.hint, margin: '12px 0 0' }}>{t('profil_team_roles_hint')}</p>
-      </div>
-  )
-}
 
 const s = {
   page: { maxWidth: 700, margin: '0 auto' },

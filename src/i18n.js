@@ -1,5 +1,11 @@
+import { ausbau } from './i18n.ausbau.js'
+
+// Die Texte des Ausbau-Durchgangs (i18n.ausbau.js) werden je Sprache
+// eingemischt; sie liegen in einer eigenen Datei, damit diese hier nicht
+// bei jedem neuen Block weiter waechst.
 export const translations = {
   de: {
+    ...ausbau.de,
     // Navigation
     nav_scanner: 'Scanner', nav_dashboard: 'Dashboard', nav_cards: 'Karten',
     nav_stats: 'Statistik', nav_customers: 'Kunden',
@@ -577,6 +583,7 @@ export const translations = {
     lp_contact_preview: 'Das ist eine Vorschau. Hier ist noch kein Versand angeschlossen.',
   },
   en: {
+    ...ausbau.en,
     // Navigation
     nav_scanner: 'Scanner', nav_dashboard: 'Dashboard', nav_cards: 'Cards',
     nav_stats: 'Statistics', nav_customers: 'Customers',
@@ -1154,6 +1161,7 @@ export const translations = {
     lp_contact_preview: 'This is a preview. Sending is not connected here yet.',
   },
   ar: {
+    ...ausbau.ar,
     // التنقل
     nav_scanner: 'الماسح الضوئي', nav_dashboard: 'لوحة التحكم', nav_cards: 'البطاقات',
     nav_stats: 'الإحصائيات', nav_customers: 'العملاء',
