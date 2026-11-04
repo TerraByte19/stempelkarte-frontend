@@ -4,6 +4,7 @@ import KampagnenSection from '../components/KampagnenSection'
 import AutoNachrichtenSection from '../components/AutoNachrichtenSection'
 import AutomationenSection from '../components/AutomationenSection'
 import NewsletterSection from '../components/NewsletterSection'
+import AbPro from '../components/AbPro'
 
 /**
  * Alles, was auf den Handys der Kunden landet, auf einer Seite: das
@@ -17,11 +18,12 @@ export default function Nachrichten() {
       <div>
         <h1 style={s.title}>{t('nachr_title')}</h1>
         <p style={s.subtitle}>{t('nachr_subtitle')}</p>
-        <TagesangebotSection />
-        <KampagnenSection />
-        <AutoNachrichtenSection />
-        <AutomationenSection />
-        <NewsletterSection />
+        {/* Basic: jede Sektion als Karte "Ab Pro" (Backend sperrt ohnehin). */}
+        <AbPro funktion="tagesangebot" titel={t('tag_title')}><TagesangebotSection /></AbPro>
+        <AbPro funktion="kampagnen" titel={t('kamp_title')}><KampagnenSection /></AbPro>
+        <AbPro funktion="auto_nachrichten" titel={t('auto_title')}><AutoNachrichtenSection /></AbPro>
+        <AbPro funktion="automationen" titel={t('autom_title')}><AutomationenSection /></AbPro>
+        <AbPro funktion="newsletter" titel={t('newsletter_title')}><NewsletterSection /></AbPro>
       </div>
   )
 }

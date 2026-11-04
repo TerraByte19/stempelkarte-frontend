@@ -3,6 +3,7 @@ import FilialenSection from '../components/FilialenSection'
 import TeamSection from '../components/TeamSection'
 import StandorteSection from '../components/StandorteSection'
 import ScannerSetupSection from '../components/ScannerSetupSection'
+import AbPro from '../components/AbPro'
 
 /**
  * Team & Standorte: Filialen-Uebersicht (Zahlen je Standort), die
@@ -16,10 +17,11 @@ export default function Team() {
       <div style={s.page}>
         <h1 style={s.title}>{t('team_title')}</h1>
         <p style={s.subtitle}>{t('team_subtitle')}</p>
-        <FilialenSection />
+        {/* Basic hat einen Standort: keine Filialen-Uebersicht, keine weiteren Orte. */}
+        <AbPro funktion="filialen" titel={t('fil_title')}><FilialenSection /></AbPro>
         <TeamSection />
         <ScannerSetupSection />
-        <StandorteSection />
+        <AbPro funktion="filialen" titel={t('orte_title')}><StandorteSection /></AbPro>
       </div>
   )
 }

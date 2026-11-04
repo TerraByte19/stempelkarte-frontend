@@ -1,3 +1,4 @@
+import { tarifVergessen } from '../tarif'
 import { useState } from 'react'
 import { useLang } from '../LangContext'
 import api from '../api'
@@ -23,6 +24,7 @@ export default function Login() {
       }
 
       localStorage.setItem('token', res.data.token)
+      tarifVergessen()
       localStorage.setItem('shop', JSON.stringify({ id: res.data.shopId, name: res.data.name }))
 
       try {

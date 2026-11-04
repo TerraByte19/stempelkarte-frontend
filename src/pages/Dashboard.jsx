@@ -6,6 +6,7 @@ import AktivitaetSection from '../components/AktivitaetSection'
 import FilialenSection from '../components/FilialenSection'
 import RueckmeldungenSection from '../components/RueckmeldungenSection'
 import KundengruppenSection from '../components/KundengruppenSection'
+import { useTarif } from '../tarif'
 
 const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -37,6 +38,7 @@ function lesen(key) {
 
 export default function Dashboard() {
   const { t } = useLang()
+  const tarif = useTarif()
   const [cards, setCards] = useState([])
   const [kartenGeladen, setKartenGeladen] = useState(false)
   const [selectedCard, setSelectedCard] = useState(null)
@@ -172,6 +174,27 @@ export default function Dashboard() {
             </div>
         )}
 
+        {/* Gratis-Testphase: Resttage, danach gesperrt (Scanner, Nachrichten) bis der Admin verlaengert. */}
+        {typeof standort?.testTage === 'number' && (
+            <div style={standort.testTage > 0 ? styles.testInfo : styles.warnHart}>
+              <div style={styles.warnTitel}>
+                {standort.testTage > 1 ? t('test_tage_title', { tage: standort.testTage })
+                    : standort.testTage === 1 ? t('test_letzter_title') : t('test_vorbei_title')}
+              </div>
+              <div style={{ ...styles.warnText, marginBottom: 0 }}>
+                {t(standort.testTage > 0 ? 'test_tage_text' : 'test_vorbei_text')}
+              </div>
+            </div>
+        )}
+
+        {/* Basic ab 100 Kunden: nur ein Hinweis, niemand wird abgewiesen. */}
+        {tarif?.grenzeErreicht && (
+            <div style={styles.warnWeich}>
+              <div style={styles.warnTitel}>{t('tarif_grenze_title', { zahl: tarif.kundenGrenze })}</div>
+              <div style={{ ...styles.warnText, marginBottom: 0 }}>{t('tarif_grenze_text')}</div>
+            </div>
+        )}
+
         {/* Heute: das, was der Laden jeden Tag zuerst wissen will. */}
         {heute && (
             <section style={styles.heute} aria-label={t('dash_today_title')}>
@@ -297,6 +320,7 @@ export default function Dashboard() {
 }
 
 const styles = {
+  testInfo: { background: '#EEF2FF', border: '1.5px solid #C7CCF5', borderRadius: '12px', padding: '16px 18px', marginBottom: '20px' },
   warnWeich: { background: '#FFF7E6', border: '1.5px solid #E3B77E', borderRadius: '12px', padding: '16px 18px', marginBottom: '20px' },
   warnHart: { background: '#FDECEA', border: '1.5px solid #D98B7A', borderRadius: '12px', padding: '16px 18px', marginBottom: '20px' },
   warnTitel: { fontWeight: '700', fontSize: '15px', marginBottom: '4px', color: '#333' },

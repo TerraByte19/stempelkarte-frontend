@@ -241,6 +241,46 @@ export default function Admin() {
     }
   }
 
+  // Tarif: BASIC, PRO oder KETTE. Ohne Eintrag liefert das Backend PRO.
+  // Basic sperrt Kampagnen, Auto-Nachrichten, Tagesangebot, Newsletter, API, Filialen.
+  async function setTarif(shop, tarif) {
+    if (tarif === 'BASIC' && !confirm(`"${shop.name}" auf Basic stellen?\n\nDann gibt es dort keine Kampagnen, automatischen Nachrichten, Tagesangebot, Newsletter, API und Filialen mehr. Die Einstellungen bleiben gespeichert und laufen bei Pro wieder.`)) {
+      return
+    }
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/tarif`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tarif })
+      })
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      if (data.hinweis) alert(data.hinweis)
+      loadShops()
+    } catch {
+      alert('Fehler beim Setzen des Tarifs')
+    }
+  }
+
+  // Testphase: 0 = bezahlt (Testphase weg), sonst ab heute noch so viele Tage.
+  // Nach Ablauf wird nichts gesperrt, der Laden sieht nur einen Hinweis.
+  async function setTest(shop, tage) {
+    if (tage === 0 && !confirm(`"${shop.name}" als bezahlt markieren? Die Testphase ist dann vorbei.`)) return
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/test`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tage })
+      })
+      if (!res.ok) throw new Error()
+      loadShops()
+    } catch {
+      alert('Fehler beim Setzen der Testphase')
+    }
+  }
+
   // Demo-Laden fuer die Website: Besucher holen sich eine Karte und stempeln sich selbst.
   async function setDemo(shopId, demo) {
     const t = sessionStorage.getItem('adminToken')
@@ -496,9 +536,40 @@ export default function Admin() {
                     <span style={styles.shopName}>{shop.name}</span>
                     <span style={styles.shopEmail}>{shop.email}</span>
                     <span style={styles.cell}>{shop.cardCount}</span>
-                    <span style={styles.cell}>{shop.customerCount}</span>
+                    {/* Basic: Kunden gegen die Grenze, rot ab 100 (nur Hinweis, keine Sperre). */}
+                    <span
+                        style={{ ...styles.cell, ...(shop.kundenGrenze && shop.customerCount >= shop.kundenGrenze ? { color: '#c5221f', fontWeight: 600 } : {}) }}
+                        title={shop.kundenGrenze ? `Basic: bis ${shop.kundenGrenze} Kunden` : 'Unbegrenzt'}
+                    >
+                      {shop.kundenGrenze ? `${shop.customerCount} / ${shop.kundenGrenze}` : shop.customerCount}
+                    </span>
                     <span style={{ ...styles.cell, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {shop.maxTokens}
+                      <select
+                          title="Tarif des Ladens"
+                          value={shop.tarif ?? 'PRO'}
+                          onChange={e => setTarif(shop, e.target.value)}
+                          style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd', fontWeight: 600,
+                                   background: shop.tarif === 'BASIC' ? '#f0f0f0' : shop.tarif === 'KETTE' ? '#fff4e5' : '#eef2ff' }}
+                      >
+                        <option value="BASIC">Basic</option>
+                        <option value="PRO">Pro</option>
+                        <option value="KETTE">Kette</option>
+                      </select>
+                      {/* Testphase: Stand als Beschriftung, Auswahl = bezahlt oder verlaengern. */}
+                      <select
+                          title={shop.testBis ? `Gratis-Test bis ${new Date(shop.testBis).toLocaleDateString('de-DE')}` : 'Bezahlt, keine Testphase'}
+                          value=""
+                          onChange={e => { if (e.target.value !== '') setTest(shop, Number(e.target.value)) }}
+                          style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd',
+                                   background: shop.testTage == null ? 'white' : shop.testTage > 0 ? '#eef2ff' : '#fce8e6',
+                                   color: shop.testTage === 0 ? '#c5221f' : '#333', fontWeight: shop.testTage === 0 ? 600 : 400 }}
+                      >
+                        <option value="">{shop.testTage == null ? 'Bezahlt' : shop.testTage > 0 ? `Test: ${shop.testTage} T` : 'Test vorbei'}</option>
+                        {shop.testTage != null && <option value="0">Als bezahlt markieren</option>}
+                        <option value="7">Test: 7 Tage ab heute</option>
+                        <option value="14">Test: 14 Tage ab heute</option>
+                      </select>
                       {/* Filialen = Hauptstandort + weitere Orte (Tarif). Gespeichert
                           wird die Zahl der weiteren Orte (0-9), angezeigt die Filialen. */}
                       <select

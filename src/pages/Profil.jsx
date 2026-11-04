@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import Icon from '../components/Icon'
 import { ApplePreview, GooglePreview } from '../components/CardPreview'
 import SchnittstellenSection from '../components/SchnittstellenSection'
+import AbPro from '../components/AbPro'
 
 export default function Profil() {
   const { t } = useLang()
@@ -61,10 +62,11 @@ export default function Profil() {
         <Rueckhol t={t} shop={shop} />
         <GoogleBewertung t={t} shop={shop} />
         <Anmeldefelder t={t} shop={shop} />
-        <Geburtstagsgruss t={t} shop={shop} />
+        {/* Geburtstagsgruss zaehlt zu den automatischen Nachrichten (ab Pro). */}
+        <AbPro funktion="auto_nachrichten" titel={t('profil_bday_title')}><Geburtstagsgruss t={t} shop={shop} /></AbPro>
         <Kundengruppen t={t} />
         {/* Nur sichtbar, wenn der Admin die Schnittstelle freigeschaltet hat (sonst Hinweis). */}
-        <SchnittstellenSection />
+        <AbPro funktion="api" titel={t('api_title')}><SchnittstellenSection /></AbPro>
       </div>
   )
 }
