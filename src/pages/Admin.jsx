@@ -263,6 +263,23 @@ export default function Admin() {
     }
   }
 
+  // Sprache der Kundenseiten und Mails (de, en, ar, tr). Gilt fuer neue
+  // Kunden; wer sich schon angemeldet hat, behaelt seine Sprache.
+  async function setSprache(shop, language) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/sprache`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language })
+      })
+      if (!res.ok) throw new Error()
+      loadShops()
+    } catch {
+      alert('Fehler beim Setzen der Sprache')
+    }
+  }
+
   // Testphase: 0 = bezahlt (Testphase weg), sonst ab heute noch so viele Tage.
   // Nach Ablauf wird nichts gesperrt, der Laden sieht nur einen Hinweis.
   async function setTest(shop, tage) {
@@ -570,6 +587,18 @@ export default function Admin() {
                         <option value="7">Test: 7 Tage ab heute</option>
                         <option value="14">Test: 14 Tage ab heute</option>
                       </select>
+                      {/* Sprache der Kundenseiten und Mails dieses Ladens. */}
+                      <select
+                          title="Sprache der Kundenseiten und Mails (Anmeldung, Karte, Bestätigungs-Mail)"
+                          value={shop.language ?? 'de'}
+                          onChange={e => setSprache(shop, e.target.value)}
+                          style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd', background: 'white' }}
+                      >
+                        <option value="de">DE</option>
+                        <option value="en">EN</option>
+                        <option value="ar">AR</option>
+                        <option value="tr">TR</option>
+                      </select>
                       {/* Filialen = Hauptstandort + weitere Orte (Tarif). Gespeichert
                           wird die Zahl der weiteren Orte (0-9), angezeigt die Filialen. */}
                       <select
@@ -749,10 +778,11 @@ function CreateShop({ onCreated }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '13px', color: '#444', marginBottom: '6px' }}>
-              Sprache <span style={{ color: '#999' }}>(fest, danach nicht mehr änderbar)</span>
+              Sprache <span style={{ color: '#999' }}>(fest, danach nicht mehr änderbar; gilt für Kundenseiten und Mails)</span>
             </label>
             <select style={createStyles.input} value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}>
               <option value="de">Deutsch</option>
+              <option value="en">English</option>
               <option value="ar">العربية (RTL)</option>
               <option value="tr">Türkçe</option>
             </select>
