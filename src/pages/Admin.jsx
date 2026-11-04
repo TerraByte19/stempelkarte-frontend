@@ -754,6 +754,7 @@ function CreateShop({ onCreated }) {
             <select style={createStyles.input} value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}>
               <option value="de">Deutsch</option>
               <option value="ar">العربية (RTL)</option>
+              <option value="tr">Türkçe</option>
             </select>
           </div>
           <button style={createStyles.btn} type="submit" disabled={loading}>

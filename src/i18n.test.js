@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { translations } from './i18n.js'
 
 /**
- * Jeder sichtbare Text braucht alle drei Sprachen.
+ * Jeder sichtbare Text braucht alle vier Sprachen.
  *
  * Ein fehlender Schluessel faellt beim Build NICHT auf: t() faellt still auf
  * Deutsch zurueck und zeigt sonst den rohen Schluesselnamen. In einem
@@ -27,10 +27,16 @@ test('ar hat jeden deutschen Schluessel', () => {
   assert.deepEqual(fehlt, [], `fehlende ar-Schluessel: ${fehlt.join(', ')}`)
 })
 
+test('tr hat jeden deutschen Schluessel', () => {
+  const fehlt = Object.keys(translations[REFERENZ])
+    .filter(k => !(k in translations.tr))
+  assert.deepEqual(fehlt, [], `fehlende tr-Schluessel: ${fehlt.join(', ')}`)
+})
+
 test('kein Schluessel ohne deutsches Gegenstueck', () => {
   // Andersherum ebenfalls: ein Schluessel, den es nur auf Englisch gibt,
   // ist meistens ein Tippfehler im deutschen Block.
-  for (const lang of ['en', 'ar']) {
+  for (const lang of ['en', 'ar', 'tr']) {
     const ueberzaehlig = Object.keys(translations[lang])
       .filter(k => !(k in translations[REFERENZ]))
     assert.deepEqual(ueberzaehlig, [],

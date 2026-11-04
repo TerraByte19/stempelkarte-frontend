@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../api'
-import { useLang } from '../LangContext'
+import { useLang, localeTag } from '../LangContext'
 
 const TEXT_MAX = 80
 
@@ -52,7 +52,7 @@ export default function TagesangebotSection() {
 
   function bisText(iso) {
     try {
-      return new Date(iso).toLocaleTimeString(lang === 'ar' ? 'ar-u-nu-latn' : lang === 'en' ? 'en-US' : 'de-DE',
+      return new Date(iso).toLocaleTimeString(localeTag(lang),
           { hour: '2-digit', minute: '2-digit' })
     } catch { return '' }
   }

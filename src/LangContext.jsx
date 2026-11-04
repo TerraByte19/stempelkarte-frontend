@@ -3,7 +3,7 @@ import { translations, languages } from './i18n'
 
 const LangContext = createContext()
 
-const LOCALE_TAGS = { de: 'de-DE', en: 'en-US', ar: 'ar-u-nu-latn' }
+const LOCALE_TAGS = { de: 'de-DE', en: 'en-US', ar: 'ar-u-nu-latn', tr: 'tr-TR' }
 
 export function localeTag(lang) {
   return LOCALE_TAGS[lang] || LOCALE_TAGS.de
