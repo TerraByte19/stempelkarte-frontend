@@ -20,11 +20,15 @@ import { LogoZeichen } from '../components/Logo'
 // handy  = eingebauter Leser des Browsers (Chrome auf Android), falls vorhanden
 
 // Die .wasm-Datei liefern wir selbst aus statt vom fremden CDN (DSGVO, offline).
-prepareZXingModule({
+// Sofort laden (fireImmediately): sonst zaehlt der erste Scan die Ladezeit
+// der Datei (~400 kB) mit und ZXing wirkt langsamer, als es ist.
+const zxingBereit = prepareZXingModule({
   overrides: {
     locateFile: (path, prefix) => (path.endsWith('.wasm') ? zxingWasmUrl : prefix + path),
   },
+  fireImmediately: true,
 })
+zxingBereit.catch(() => { /* Fehler zeigt starten() beim Warten */ })
 // qr-scanner wuerde auf Android sonst still den eingebauten Leser nehmen -
 // dann waere es dasselbe wie "handy". So testet es immer seinen eigenen.
 QrScanner._disableBarcodeDetector = true
@@ -261,6 +265,10 @@ export default function ScannerTest() {
           }
         }
       } else {
+        if (welche === 'neu') {
+          await zxingBereit
+          if (lauf !== laufRef.current) return
+        }
         const Leser = welche === 'handy' ? window.BarcodeDetector : BarcodeDetector
         const leser = new Leser({ formats: ['qr_code'] })
         lesen = async () => {
