@@ -358,7 +358,12 @@ export default function ScannerTest() {
 
         {einfach && schritt === null && (
             <>
-              <p style={s.karte}>{t('stest_easy_card')}</p>
+              <div style={s.karte}>
+                <h2 style={s.anleitungTitel}>{t('stest_easy_how')}</h2>
+                <ol style={s.liste}>
+                  {[1, 2, 3, 4].map(n => <li key={n} style={s.punkt}>{t(`stest_easy_how_${n}`)}</li>)}
+                </ol>
+              </div>
               <button type="button" style={s.haupt} onClick={testStarten}>{t('stest_easy_start')}</button>
             </>
         )}
@@ -446,6 +451,9 @@ const s = {
   titel: { fontSize: 22, margin: '2px 0 4px', color: 'var(--sk-ink)' },
   text: { fontSize: 14, color: 'var(--sk-muted)', margin: 0, lineHeight: 1.5 },
   karte: { fontSize: 15, color: 'var(--sk-ink)', background: 'white', border: '1px solid var(--sk-line)', borderRadius: 12, padding: '14px 16px', margin: '0 0 14px', lineHeight: 1.5 },
+  anleitungTitel: { fontSize: 16, margin: '0 0 8px', color: 'var(--sk-ink)' },
+  liste: { margin: 0, paddingInlineStart: 22, display: 'flex', flexDirection: 'column', gap: 8 },
+  punkt: { paddingInlineStart: 2 },
   haupt: { width: '100%', padding: 15, borderRadius: 12, border: 0, background: 'var(--sk-brand)', color: 'white', fontWeight: 700, fontSize: 16, cursor: 'pointer', marginTop: 4 },
   schritt: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, margin: '0 0 10px', fontSize: 15, color: 'var(--sk-muted)' },
   wahl: { display: 'flex', gap: 6, padding: 4, background: 'white', border: '1px solid var(--sk-line)', borderRadius: 12, marginBottom: 12 },
