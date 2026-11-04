@@ -2,15 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { BarcodeDetector, prepareZXingModule } from 'barcode-detector/ponyfill'
 import zxingWasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url'
+import QrScanner from 'qr-scanner'
 import { useLang } from '../LangContext'
 import { LogoZeichen } from '../components/Logo'
 
-// Testseite: alter und neuer Scanner nebeneinander, zum Ausprobieren bei
-// echtem Licht. Liest nur den Code und misst die Zeit - stempelt NICHTS,
-// schickt nichts an den Server. Deshalb ohne Anmeldung erreichbar.
+// Testseite: mehrere Scanner nebeneinander, zum Ausprobieren bei echtem
+// Licht. Liest nur den Code und misst die Zeit - stempelt NICHTS, schickt
+// nichts an den Server. Deshalb ohne Anmeldung erreichbar.
 //
 // alt    = html5-qrcode (wie der Scanner heute)
 // neu    = ZXing-C++ als WebAssembly (barcode-detector), auf jedem Handy gleich
+// nimiq  = qr-scanner von Nimiq, rechnet in einem eigenen Worker
 // handy  = eingebauter Leser des Browsers (Chrome auf Android), falls vorhanden
 
 // Die .wasm-Datei liefern wir selbst aus statt vom fremden CDN (DSGVO, offline).
@@ -19,6 +21,9 @@ prepareZXingModule({
     locateFile: (path, prefix) => (path.endsWith('.wasm') ? zxingWasmUrl : prefix + path),
   },
 })
+// qr-scanner wuerde auf Android sonst still den eingebauten Leser nehmen -
+// dann waere es dasselbe wie "handy". So testet es immer seinen eigenen.
+QrScanner._disableBarcodeDetector = true
 
 const KAMERA = {
   facingMode: 'environment',
@@ -38,11 +43,12 @@ export default function ScannerTest() {
   const [laeuft, setLaeuft] = useState(false)
   const [fehler, setFehler] = useState('')
   const [treffer, setTreffer] = useState(null) // { ms, laenge }
-  const [zeiten, setZeiten] = useState({ alt: [], neu: [], handy: [] })
+  const [zeiten, setZeiten] = useState({ alt: [], neu: [], nimiq: [], handy: [] })
 
   const videoRef = useRef(null)
   const streamRef = useRef(null)
   const html5Ref = useRef(null)
+  const workerRef = useRef(null) // Worker von qr-scanner
   const laufRef = useRef(0) // Zaehler: alte Schleifen erkennen und beenden
   const startRef = useRef(0)
 
@@ -52,6 +58,10 @@ export default function ScannerTest() {
       try { await html5Ref.current.stop() } catch { /* war schon aus */ }
       try { html5Ref.current.clear() } catch { /* leer */ }
       html5Ref.current = null
+    }
+    if (workerRef.current) {
+      workerRef.current.terminate()
+      workerRef.current = null
     }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop())
@@ -108,17 +118,47 @@ export default function ScannerTest() {
       video.srcObject = stream
       await video.play()
 
-      const Leser = welche === 'handy' ? window.BarcodeDetector : BarcodeDetector
-      const leser = new Leser({ formats: ['qr_code'] })
+      // lesen(): ein Kamerabild auswerten, Text oder null zurueck.
+      let lesen
+      if (welche === 'nimiq') {
+        const worker = await QrScanner.createQrEngine()
+        if (lauf !== laufRef.current) { worker.terminate(); return }
+        workerRef.current = worker
+        const leinwand = document.createElement('canvas')
+        lesen = async () => {
+          // Wie qr-scanner selbst: mittleres Quadrat (2/3), auf 400 px verkleinert.
+          const seite = Math.round(Math.min(video.videoWidth, video.videoHeight) * 2 / 3)
+          const bereich = {
+            x: Math.round((video.videoWidth - seite) / 2), y: Math.round((video.videoHeight - seite) / 2),
+            width: seite, height: seite, downScaledWidth: 400, downScaledHeight: 400,
+          }
+          try {
+            const ergebnis = await QrScanner.scanImage(video, {
+              scanRegion: bereich, qrEngine: worker, canvas: leinwand, returnDetailedScanResult: true,
+            })
+            return ergebnis.data
+          } catch (e) {
+            if (e === QrScanner.NO_QR_CODE_FOUND) return null
+            throw e
+          }
+        }
+      } else {
+        const Leser = welche === 'handy' ? window.BarcodeDetector : BarcodeDetector
+        const leser = new Leser({ formats: ['qr_code'] })
+        lesen = async () => {
+          const codes = await leser.detect(video)
+          return codes.length > 0 ? codes[0].rawValue : null
+        }
+      }
       startRef.current = jetzt()
 
       // Ein Bild nach dem anderen: erst wenn das letzte ausgewertet ist,
       // kommt das naechste. So staut sich auf langsamen Handys nichts.
       while (lauf === laufRef.current) {
         if (video.readyState >= 2) {
-          const codes = await leser.detect(video)
+          const text = await lesen()
           if (lauf !== laufRef.current) break
-          if (codes.length > 0) await erkannt(welche, codes[0].rawValue)
+          if (text) await erkannt(welche, text)
         }
         await new Promise(resolve => requestAnimationFrame(resolve))
       }
@@ -132,7 +172,7 @@ export default function ScannerTest() {
   useEffect(() => () => { stoppen() }, [])
 
   const schnitt = liste => liste.length ? Math.round(liste.reduce((a, b) => a + b, 0) / liste.length) : null
-  const arten = ['alt', 'neu', ...(hatHandyLeser ? ['handy'] : [])]
+  const arten = ['alt', 'neu', 'nimiq', ...(hatHandyLeser ? ['handy'] : [])]
 
   return (
       <div style={s.seite}>
@@ -193,7 +233,7 @@ const s = {
   titel: { fontSize: 22, margin: '2px 0 4px', color: 'var(--sk-ink)' },
   text: { fontSize: 14, color: 'var(--sk-muted)', margin: 0, lineHeight: 1.5 },
   wahl: { display: 'flex', gap: 6, padding: 4, background: 'white', border: '1px solid var(--sk-line)', borderRadius: 12, marginBottom: 12 },
-  wahlKnopf: { flex: '1 1 0', padding: '10px 6px', border: 0, borderRadius: 9, background: 'transparent', color: 'var(--sk-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' },
+  wahlKnopf: { flex: '1 1 0', minWidth: 0, padding: '10px 4px', border: 0, borderRadius: 9, background: 'transparent', color: 'var(--sk-muted)', fontWeight: 600, fontSize: 14, cursor: 'pointer' },
   wahlAktiv: { background: 'var(--sk-brand)', color: 'white' },
   bild: { position: 'relative', background: '#111', borderRadius: 14, overflow: 'hidden', minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' },
   video: { width: '100%', height: 'auto' },
