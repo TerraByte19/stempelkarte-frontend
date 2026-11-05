@@ -589,7 +589,7 @@ export default function Admin() {
                       </select>
                       {/* Sprache der Kundenseiten und Mails dieses Ladens. */}
                       <select
-                          title="Sprache der Kundenseiten und Mails (Anmeldung, Karte, Bestätigungs-Mail)"
+                          title="Sprache des Ladens, nur für die Anzeige im Admin. Kunden starten auf Deutsch und schalten auf der Karte selbst um."
                           value={shop.language ?? 'de'}
                           onChange={e => setSprache(shop, e.target.value)}
                           style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd', background: 'white' }}
@@ -778,7 +778,7 @@ function CreateShop({ onCreated }) {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontSize: '13px', color: '#444', marginBottom: '6px' }}>
-              Sprache <span style={{ color: '#999' }}>(fest, danach nicht mehr änderbar; gilt für Kundenseiten und Mails)</span>
+              Sprache <span style={{ color: '#999' }}>(nur Anzeige im Admin; Kunden starten auf Deutsch und schalten selbst um)</span>
             </label>
             <select style={createStyles.input} value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}>
               <option value="de">Deutsch</option>
