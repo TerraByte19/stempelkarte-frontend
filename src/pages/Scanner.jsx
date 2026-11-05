@@ -46,7 +46,10 @@ export default function Scanner() {
   // Vom Admin befreite Laeden scannen ohne Standort.
   const [ortPflicht, setOrtPflicht] = useState(true)
   // Zugang mit Rolle KIOSK: Tablet, der Kunde stempelt selbst (Kiosk.jsx).
-  // null = noch nicht bekannt.
+  // null = noch nicht bekannt, 'fehler' = Einstellungen nicht geladen.
+  // Solange nicht klar ist, ob das ein Tablet ist, gibt es keine
+  // Personal-Masken - auf einem Kundentablet waere "Karte zuruecksetzen"
+  // fuer jeden erreichbar (der Server lehnt ab, aber zeigen muss man es nicht).
   const [kiosk, setKiosk] = useState(null)
 
   // Besitzer (mit token) → Zurück-Pfeil zum Dashboard.
@@ -110,11 +113,12 @@ export default function Scanner() {
       const res = await fetch(`${API_URL}/api/scan/einstellungen`, {
         headers: { 'X-Staff-Token': localStorage.getItem('staffToken') },
       })
-      if (!res.ok) return true
+      if (!res.ok) { setKiosk('fehler'); return true }
       const data = await res.json()
       setKiosk(data.kiosk === true ? { shopName: data.shopName || '' } : false)
       return data.standortPflicht !== false
     } catch {
+      setKiosk('fehler')
       return true
     }
   }
@@ -499,9 +503,21 @@ export default function Scanner() {
         </div>
   )
 
-  // Tablet-Zugang: eigene Oberflaeche, keine Masken fuers Personal. Der
-  // Standort wird dort beim Stempeln geholt, deshalb vor der Ortsfreigabe.
-  if (kiosk) return <Kiosk shopName={kiosk.shopName} ortPflicht={ortPflicht} />
+  // Einstellungen noch nicht da (Render-Kaltstart, kein Netz): warten und
+  // neu versuchen, nicht raten.
+  if (kiosk === null || kiosk === 'fehler') return (
+      <div>
+        {kopf}
+        <div style={styles.popup}>
+          <h2 style={styles.popupTitle}>{kiosk === 'fehler' ? t('scan_settings_error') : t('scan_settings_loading')}</h2>
+          {kiosk === 'fehler' && (
+              <button style={styles.confirmBtn} onClick={() => { setKiosk(null); standortPflicht().then(p => { if (!p) { setOrtPflicht(false); setOrtStatus('frei') } }) }}>
+                {t('scan_geo_retry')}
+              </button>
+          )}
+        </div>
+      </div>
+  )
 
   if (ortStatus !== 'frei') return (
       <div>
@@ -535,6 +551,9 @@ export default function Scanner() {
         </div>
       </div>
   )
+
+  // Tablet-Zugang: eigene Oberflaeche, keine Masken fuers Personal.
+  if (kiosk) return <Kiosk shopName={kiosk.shopName} ortPflicht={ortPflicht} />
 
   return (
       <div>

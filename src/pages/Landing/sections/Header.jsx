@@ -7,12 +7,13 @@ export default function Header() {
   return (
     <header className="lp-header">
       <div className="lp-wrap lp-header-in">
-        <span className="lp-logo">Stampit</span>
+        <Link className="lp-logo" to="/">Stampit</Link>
         <nav className="lp-nav">
-          <a href="#how">{t('lp_nav_how')}</a>
-          <a href="#features">{t('lp_nav_features')}</a>
+          {/* Absolute Ziele: auf den Branchenseiten fuehren sie zur Startseite. */}
+          <a href="/#how">{t('lp_nav_how')}</a>
+          <a href="/#features">{t('lp_nav_features')}</a>
           <BranchenMenu />
-          <a href="#contact">{t('lp_nav_contact')}</a>
+          <a href="/#contact">{t('lp_nav_contact')}</a>
         </nav>
         <Link className="lp-btn lp-btn--ghost" to="/login">{t('lp_nav_login')}</Link>
       </div>

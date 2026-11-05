@@ -7,6 +7,9 @@
  */
 export const ausbau = {
   de: {
+    kiosk_exit_hint: 'Zum Beenden 3 Sekunden gedrückt halten',
+    scan_settings_loading: 'Verbindung wird aufgebaut …',
+    scan_settings_error: 'Keine Verbindung zum Server. Gleich noch einmal versuchen.',
     profil_team_role_kiosk: 'Tablet (Kunde stempelt selbst)',
     team_kiosk_title: 'Selbst-Stempeln am Tablet',
     team_kiosk_hint: 'Lege einen Zugang mit der Rolle „Tablet“ an und öffne den Scanner-Link auf einem Tablet an der Theke. Der Kunde hält seine Karte vor die Kamera und bekommt einen Stempel. Prämien gibt weiter das Personal.',
@@ -234,6 +237,9 @@ export const ausbau = {
     api_err: 'Konnte nicht gespeichert werden.',
   },
   en: {
+    kiosk_exit_hint: 'Hold for 3 seconds to exit',
+    scan_settings_loading: 'Connecting …',
+    scan_settings_error: 'No connection to the server. Try again in a moment.',
     profil_team_role_kiosk: 'Tablet (customer stamps alone)',
     team_kiosk_title: 'Self-stamping on a tablet',
     team_kiosk_hint: 'Create an access with the role "Tablet" and open the scanner link on a tablet at the counter. The customer holds the card up to the camera and gets a stamp. Rewards are still handed out by staff.',
@@ -452,6 +458,9 @@ export const ausbau = {
     api_err: 'Could not be saved.',
   },
   ar: {
+    kiosk_exit_hint: 'اضغط مطولًا 3 ثوانٍ للإنهاء',
+    scan_settings_loading: 'جارٍ الاتصال …',
+    scan_settings_error: 'لا يوجد اتصال بالخادم. حاول مرة أخرى بعد قليل.',
     profil_team_role_kiosk: 'جهاز لوحي (العميل يختم بنفسه)',
     team_kiosk_title: 'الختم الذاتي على جهاز لوحي',
     team_kiosk_hint: 'أنشئ وصولًا بدور «جهاز لوحي» وافتح رابط الماسح على جهاز لوحي عند الكاونتر. يضع العميل بطاقته أمام الكاميرا ويحصل على ختم. المكافآت يسلّمها الموظفون كما هو.',
@@ -670,6 +679,9 @@ export const ausbau = {
     api_err: 'تعذر الحفظ.',
   },
   tr: {
+    kiosk_exit_hint: 'Çıkmak için 3 saniye basılı tut',
+    scan_settings_loading: 'Bağlantı kuruluyor …',
+    scan_settings_error: 'Sunucuya bağlantı yok. Birazdan tekrar dene.',
     profil_team_role_kiosk: 'Tablet (müşteri kendi damgalar)',
     team_kiosk_title: 'Tablette kendi kendine damgalama',
     team_kiosk_hint: '„Tablet“ rolüyle bir erişim oluştur ve tarayıcı bağlantısını tezgahtaki bir tablette aç. Müşteri kartını kameraya tutar ve bir damga alır. Ödülleri yine personel verir.',
