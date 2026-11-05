@@ -5,6 +5,7 @@ import { useLang, localeTag } from '../LangContext'
 import Icon from '../components/Icon'
 import { punkteFuer, formatierePunkte, centsAusEingabe } from '../lib/pointsOf'
 import { holeStandort, erlaubnisStatus, warSchonFreigegeben, merkeFreigabe, plattform, alsAppInstalliert } from '../lib/standort'
+import Kiosk from './Kiosk'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -44,6 +45,9 @@ export default function Scanner() {
   const [ortStatus, setOrtStatus] = useState('pruefe')
   // Vom Admin befreite Laeden scannen ohne Standort.
   const [ortPflicht, setOrtPflicht] = useState(true)
+  // Zugang mit Rolle KIOSK: Tablet, der Kunde stempelt selbst (Kiosk.jsx).
+  // null = noch nicht bekannt.
+  const [kiosk, setKiosk] = useState(null)
 
   // Besitzer (mit token) → Zurück-Pfeil zum Dashboard.
   // Mitarbeiter (nur staffToken) → Abmelden-Button zurück zum Login.
@@ -108,6 +112,7 @@ export default function Scanner() {
       })
       if (!res.ok) return true
       const data = await res.json()
+      setKiosk(data.kiosk === true ? { shopName: data.shopName || '' } : false)
       return data.standortPflicht !== false
     } catch {
       return true
@@ -493,6 +498,10 @@ export default function Scanner() {
           <h1 style={styles.title}>{t('scan_title')}</h1>
         </div>
   )
+
+  // Tablet-Zugang: eigene Oberflaeche, keine Masken fuers Personal. Der
+  // Standort wird dort beim Stempeln geholt, deshalb vor der Ortsfreigabe.
+  if (kiosk) return <Kiosk shopName={kiosk.shopName} ortPflicht={ortPflicht} />
 
   if (ortStatus !== 'frei') return (
       <div>

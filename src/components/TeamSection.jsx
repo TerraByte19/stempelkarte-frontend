@@ -19,6 +19,8 @@ export default function TeamSection() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState('')
+  // Selbst-Stempeln am Tablet: Sperre nach einem Stempel, in Stunden.
+  const [kioskSperre, setKioskSperre] = useState(null)
 
   function laden() {
     return api.get('/api/shop/team')
@@ -28,6 +30,9 @@ export default function TeamSection() {
 
   useEffect(() => {
     laden()
+    api.get('/api/shop/me')
+        .then(r => setKioskSperre(typeof r.data?.kioskSperreStunden === 'number' ? r.data.kioskSperreStunden : 2))
+        .catch(() => setKioskSperre(2))
     api.get('/api/shop/me/orte')
         .then(r => setOrte(Array.isArray(r.data?.orte) ? r.data.orte : []))
         .catch(() => setOrte([]))
@@ -49,6 +54,15 @@ export default function TeamSection() {
       await laden()
     } catch (err) { fehler(err) }
     setBusy(false)
+  }
+
+  async function kioskSperreSetzen(stunden) {
+    setError('')
+    const vorher = kioskSperre
+    setKioskSperre(stunden)
+    try {
+      await api.put('/api/shop/me/kiosk', { stunden })
+    } catch (err) { setKioskSperre(vorher); fehler(err) }
   }
 
   async function aendern(z, felder) {
@@ -102,6 +116,7 @@ export default function TeamSection() {
       <>
         <option value="MITARBEITER">{t('profil_team_role_staff')}</option>
         <option value="AUSHILFE">{t('profil_team_role_helper')}</option>
+        <option value="KIOSK">{t('profil_team_role_kiosk')}</option>
       </>
   )
   // Filiale nur anbieten, wenn es ueberhaupt weitere Standorte gibt.
@@ -170,6 +185,21 @@ export default function TeamSection() {
           <button style={s.btnPrimary} type="submit" disabled={busy}>{t('profil_team_create')}</button>
         </form>
         <p style={{ ...s.hint, margin: '12px 0 0' }}>{t('profil_team_roles_hint')}</p>
+        {kioskSperre != null && (
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid #eee' }}>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{t('team_kiosk_title')}</div>
+              <p style={{ ...s.hint, margin: '0 0 10px' }}>{t('team_kiosk_hint')}</p>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
+                {t('team_kiosk_sperre')}
+                <select style={{ ...s.input, marginBottom: 0, width: 'auto' }} value={kioskSperre}
+                        onChange={e => kioskSperreSetzen(Number(e.target.value))}>
+                  {[1, 2, 3, 4, 6, 12, 24].map(h => (
+                      <option key={h} value={h}>{h === 1 ? t('team_kiosk_stunde') : t('team_kiosk_stunden', { n: h })}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+        )}
       </div>
   )
 }
