@@ -6,6 +6,8 @@ import Icon from '../components/Icon'
 import { punkteFuer, formatierePunkte, centsAusEingabe } from '../lib/pointsOf'
 import { holeStandort, erlaubnisStatus, warSchonFreigegeben, merkeFreigabe, plattform, alsAppInstalliert } from '../lib/standort'
 import Kiosk from './Kiosk'
+import { lade as ladeWahl, speichere as speichereWahl, rundeHinzu, naechsterGegner, messenJetzt, statusText } from '../lib/scannerWahl'
+import { starteLeser, verfuegbareLeser } from '../lib/scannerLeser'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -36,6 +38,11 @@ export default function Scanner() {
   const inputRef = useRef()
   const html5QrRef = useRef(null)
   const scanningRef = useRef(false)
+  // Stille Scanner-Messung (lib/scannerWahl): neben dem heutigen Scanner
+  // liest je Stempel ein Herausforderer mit. Der erste Treffer stempelt.
+  const wahlRef = useRef(ladeWahl(localStorage))
+  const rundeRef = useRef(null)
+  const [wahlStatus, setWahlStatus] = useState(() => statusText(wahlRef.current))
   const navigate = useNavigate()
 
   // Standort-Freigabe: gescannt wird erst, wenn der Browser den Ort hergibt.
@@ -143,7 +150,9 @@ export default function Scanner() {
 
   async function handleQrScanned(payload) {
     setQrInput('')
-    kameraPausieren()
+    // Waehrend einer Messrunde bleibt das Bild noch kurz an, damit der
+    // zweite Leser seine Zeit melden kann; rundeBeenden pausiert dann.
+    if (!rundeRef.current?.messen) kameraPausieren()
     setPendingScan(payload)
     setSelectedCount(1)
     punkteZustandZuruecksetzen()
@@ -174,6 +183,63 @@ export default function Scanner() {
     } finally {
       setTypPruefung(false)
     }
+  }
+
+  // ── Scanner-Messung ──────────────────────────────────────────────────
+
+  function rundeStarten() {
+    rundeBeenden(false)
+    const stand = wahlRef.current
+    const runde = { start: performance.now(), gegner: null, messen: false, leser: null, alt: null, gegnerMs: null, timer: null, pausiert: false }
+    rundeRef.current = runde
+    const video = document.querySelector('#qr-reader video')
+    if (!video) return
+    const messen = messenJetzt(stand)
+    const gegner = messen ? naechsterGegner(stand, verfuegbareLeser()) : stand.aktiv
+    if (!gegner) return
+    runde.gegner = gegner
+    runde.messen = messen
+    runde.leser = starteLeser(gegner, video, text => treffer(gegner, text))
+  }
+
+  function treffer(art, text) {
+    const r = rundeRef.current
+    const ms = r ? performance.now() - r.start : 0
+    if (r) {
+      if (art === 'alt') { if (r.alt == null) r.alt = ms } else if (r.gegnerMs == null) r.gegnerMs = ms
+    }
+    // Der erste Treffer stempelt, egal von welchem Leser.
+    if (!scanningRef.current) {
+      scanningRef.current = true
+      handleQrScanned(text)
+    }
+    if (!r) return
+    if (!r.messen || (r.alt != null && r.gegnerMs != null)) rundeBeenden(true)
+    else if (!r.timer) r.timer = setTimeout(() => rundeBeenden(true), 1500)
+  }
+
+  function rundeBeenden(werten) {
+    const r = rundeRef.current
+    if (!r) return
+    rundeRef.current = null
+    clearTimeout(r.timer)
+    r.leser?.stop()
+    if (r.messen && scanningRef.current) kameraPausieren()
+    if (!werten || !r.messen || !r.gegner || (r.alt == null && r.gegnerMs == null)) return
+    // Hat der alte Leser nach dem Herausforderer 1,5 s lang nichts gefunden,
+    // zaehlt er mit dieser Wartezeit als Untergrenze.
+    const alt = Math.round(r.alt != null ? r.alt : r.gegnerMs + 1500)
+    const gegnerMs = r.gegnerMs == null ? null : Math.round(r.gegnerMs)
+    wahlRef.current = rundeHinzu(wahlRef.current, { gegner: r.gegner, alt, gegnerMs })
+    speichereWahl(localStorage, wahlRef.current)
+    setWahlStatus(statusText(wahlRef.current))
+    // Fuer die Uebersicht im Admin, ohne Kundendaten. Fehler sind egal.
+    fetch(`${API_URL}/api/scan/messung`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Staff-Token': localStorage.getItem('staffToken') },
+      body: JSON.stringify({ gegner: r.gegner, altMs: alt, gegnerMs, aktiv: wahlRef.current.aktiv,
+        plattform: plattform(), geraet: (navigator.userAgent || '').slice(0, 200) }),
+    }).catch(() => {})
   }
 
   function punkteZustandZuruecksetzen() {
@@ -413,13 +479,11 @@ export default function Scanner() {
             },
           },
           (decodedText) => {
-            if (!scanningRef.current) {
-              scanningRef.current = true
-              handleQrScanned(decodedText)
-            }
+            if (!scanningRef.current) treffer('alt', decodedText)
           },
           () => {}
       )
+      rundeStarten()
     } catch (e) {
       console.error(e)
       setCameraActive(false)
@@ -451,6 +515,7 @@ export default function Scanner() {
       if (html5QrRef.current?.getState() === Html5QrcodeScannerState.PAUSED) {
         setCameraActive(true)
         html5QrRef.current.resume()
+        rundeStarten()
         return
       }
     } catch {
@@ -461,6 +526,11 @@ export default function Scanner() {
   }
 
   async function stopCamera() {
+    // Messrunde ohne Wertung abbrechen (bewusst nicht ueber rundeBeenden,
+    // das haengt an State und wuerde den Aufraeum-Effekt oben verkomplizieren).
+    const runde = rundeRef.current
+    rundeRef.current = null
+    if (runde) { clearTimeout(runde.timer); runde.leser?.stop() }
     if (html5QrRef.current) {
       try {
         await html5QrRef.current.stop()
@@ -567,6 +637,7 @@ export default function Scanner() {
         {cameraActive && (
             <>
               <p style={styles.camHint}>Auf den QR-Code halten &middot; bei Unschaerfe aufs Bild tippen</p>
+              <p style={{ ...styles.camHint, opacity: .6 }} title={t('scan_wahl_hint')}>{t('scan_wahl_status', { status: wahlStatus })}</p>
               <button style={styles.btnStop} onClick={stopCamera}>{t('scan_stop_camera')}</button>
             </>
         )}

@@ -7,6 +7,8 @@
  */
 export const ausbau = {
   de: {
+    scan_wahl_status: 'Scanner-Messung: {status}',
+    scan_wahl_hint: 'Neben dem Scanner liest still ein zweiter mit. Nach 30 Stempeln bleibt der schnellere auf diesem Gerät an.',
     kiosk_exit_hint: 'Zum Beenden 3 Sekunden gedrückt halten',
     scan_settings_loading: 'Verbindung wird aufgebaut …',
     scan_settings_error: 'Keine Verbindung zum Server. Gleich noch einmal versuchen.',
@@ -237,6 +239,8 @@ export const ausbau = {
     api_err: 'Konnte nicht gespeichert werden.',
   },
   en: {
+    scan_wahl_status: 'Scanner check: {status}',
+    scan_wahl_hint: 'A second reader runs silently next to the scanner. After 30 stamps the faster one stays on for this device.',
     kiosk_exit_hint: 'Hold for 3 seconds to exit',
     scan_settings_loading: 'Connecting …',
     scan_settings_error: 'No connection to the server. Try again in a moment.',
@@ -458,6 +462,8 @@ export const ausbau = {
     api_err: 'Could not be saved.',
   },
   ar: {
+    scan_wahl_status: 'قياس الماسح: {status}',
+    scan_wahl_hint: 'يعمل قارئ ثانٍ بصمت بجانب الماسح. بعد 30 ختمًا يبقى الأسرع مفعّلًا على هذا الجهاز.',
     kiosk_exit_hint: 'اضغط مطولًا 3 ثوانٍ للإنهاء',
     scan_settings_loading: 'جارٍ الاتصال …',
     scan_settings_error: 'لا يوجد اتصال بالخادم. حاول مرة أخرى بعد قليل.',
@@ -679,6 +685,8 @@ export const ausbau = {
     api_err: 'تعذر الحفظ.',
   },
   tr: {
+    scan_wahl_status: 'Tarayıcı ölçümü: {status}',
+    scan_wahl_hint: 'Tarayıcının yanında ikinci bir okuyucu sessizce çalışır. 30 damgadan sonra daha hızlı olan bu cihazda açık kalır.',
     kiosk_exit_hint: 'Çıkmak için 3 saniye basılı tut',
     scan_settings_loading: 'Bağlantı kuruluyor …',
     scan_settings_error: 'Sunucuya bağlantı yok. Birazdan tekrar dene.',

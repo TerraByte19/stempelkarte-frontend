@@ -381,6 +381,8 @@ export default function Admin() {
           <button style={styles.btnLogout} onClick={logout}>Ausloggen</button>
         </div>
 
+        <ScannerMessung />
+
         <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
           <div style={{ fontWeight: 700, marginBottom: 4 }}>
             Kontaktanfragen ({anfragen.filter(a => !a.erledigt).length} offen)
@@ -688,6 +690,54 @@ export default function Admin() {
         </div>
     )
   }
+}
+
+/**
+ * Stille Scanner-Messung: je Geraetetyp, welcher Herausforderer wie oft
+ * zuerst traf. A = heutiger Scanner, B = ZXing, C = Nimiq, D = Handy-eigen.
+ */
+function ScannerMessung() {
+  const [zeilen, setZeilen] = useState(null)
+  useEffect(() => {
+    const t = sessionStorage.getItem('adminToken')
+    fetch(`${BASE_URL}/api/admin/scanner-messung`, { headers: { 'Authorization': `Bearer ${t}` } })
+        .then(r => (r.ok ? r.json() : []))
+        .then(d => setZeilen(Array.isArray(d) ? d : []))
+        .catch(() => setZeilen([]))
+  }, [])
+  const name = { neu: 'B (ZXing)', nimiq: 'C (Nimiq)', handy: 'D (Handy)' }
+  return (
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>Scanner-Messung (letzte 60 Tage)</div>
+          <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+            Beim Stempeln liest still ein zweiter Scanner mit. Ab 30 Runden und 80 % „zuerst“ mit 150 ms Vorsprung
+            schaltet das Gerät selbst um. A = heutiger Scanner.
+          </div>
+          {zeilen === null ? <div style={{ fontSize: 13, color: '#9A94A8' }}>Lädt …</div>
+            : zeilen.length === 0 ? <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Messungen.</div>
+            : (
+              <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                <thead><tr style={{ textAlign: 'left', color: '#6B6678' }}>
+                  <th style={{ padding: 6 }}>Gerät</th><th style={{ padding: 6 }}>Gegen A</th><th style={{ padding: 6 }}>Runden</th>
+                  <th style={{ padding: 6 }}>Zuerst</th><th style={{ padding: 6 }}>Vorsprung</th><th style={{ padding: 6 }}>Verfehlt</th><th style={{ padding: 6 }}>Umgeschaltet</th>
+                </tr></thead>
+                <tbody>
+                  {zeilen.map((z, i) => (
+                      <tr key={i} style={{ borderTop: '1px solid #eee', background: z.anteilProzent >= 80 && z.runden >= 30 ? '#e8f5ec' : 'transparent' }}>
+                        <td style={{ padding: 6 }}>{z.geraet}</td>
+                        <td style={{ padding: 6 }}>{name[z.gegner] || z.gegner}</td>
+                        <td style={{ padding: 6 }}>{z.runden}</td>
+                        <td style={{ padding: 6 }}>{z.anteilProzent} %</td>
+                        <td style={{ padding: 6 }}>{z.vorsprungMs == null ? '-' : `${z.vorsprungMs > 0 ? '+' : ''}${z.vorsprungMs} ms`}</td>
+                        <td style={{ padding: 6 }}>{z.verfehlt}</td>
+                        <td style={{ padding: 6 }}>{z.gewechselt > 0 ? `ja (${z.gewechselt})` : 'nein'}</td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+        </div>
+  )
 }
 
 function ShopStatsExpanded({ shop }) {
