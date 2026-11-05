@@ -1,0 +1,73 @@
+/* Branchenseiten und Branchen-Menue. Baut auf Landing.css auf (lp-*). */
+
+/* ---------- Menue "Branchen" in der Kopfzeile ---------- */
+.lp-branchen { position: relative; }
+.lp-branchen > button {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  color: var(--lp-muted); font: inherit; font-size: 14.5px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.lp-branchen > button:hover, .lp-branchen[data-open="1"] > button { color: var(--lp-ink); }
+.lp-branchen-list {
+  position: absolute; top: calc(100% + 10px); inset-inline-start: -8px; z-index: 50;
+  min-width: 220px; padding: 6px;
+  background: var(--lp-surface); border: 1px solid var(--lp-line); border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(26, 26, 46, .12);
+  display: none; flex-direction: column;
+}
+.lp-branchen[data-open="1"] .lp-branchen-list { display: flex; }
+.lp-branchen-list a {
+  padding: 9px 12px; border-radius: 8px; color: var(--lp-ink); font-size: 14.5px; text-decoration: none;
+}
+.lp-branchen-list a:hover { background: var(--lp-surface-2); }
+
+/* ---------- Seite ---------- */
+.lp-branche-hero .lp-eyebrow { margin-bottom: -8px; }
+.lp-branche-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.lp-branche-grid > .lp-reveal { display: flex; }
+@media (max-width: 860px) { .lp-branche-grid { grid-template-columns: 1fr; } }
+
+.lp-ideas { padding-block: 80px; background: var(--lp-surface-2); }
+.lp-why { padding-block: 80px; background: var(--lp-surface); }
+.lp-faq { padding-block: 80px; background: var(--lp-surface-2); }
+.lp-faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 760px; }
+.lp-faq-list details {
+  background: var(--lp-surface); border: 1px solid var(--lp-line); border-radius: 12px; padding: 4px 18px;
+}
+.lp-faq-list summary {
+  cursor: pointer; padding: 12px 0; font-weight: 600; font-size: 16px; list-style: none;
+  display: flex; justify-content: space-between; gap: 12px; align-items: center;
+}
+.lp-faq-list summary::-webkit-details-marker { display: none; }
+.lp-faq-list summary::after { content: '+'; color: var(--lp-brand); font-size: 20px; line-height: 1; }
+.lp-faq-list details[open] summary::after { content: '–'; }
+.lp-faq-list details p { padding: 0 0 14px; color: var(--lp-muted); font-size: 15px; line-height: 1.55; }
+
+.lp-other { padding-block: 56px; background: var(--lp-surface); border-top: 1px solid var(--lp-line); }
+.lp-other-list { display: flex; flex-wrap: wrap; gap: 10px; }
+.lp-other-list a {
+  padding: 9px 14px; border: 1px solid var(--lp-line); border-radius: 999px;
+  color: var(--lp-ink); text-decoration: none; font-size: 14.5px; background: var(--lp-surface-2);
+}
+.lp-other-list a:hover { border-color: var(--lp-brand); color: var(--lp-brand); }
+
+/* ---------- "Wir richten deine Karte ein" ---------- */
+.lp-setup { padding-block: 90px; background: var(--lp-brand); color: #fff; }
+.lp-setup-in { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: start; }
+.lp-setup-copy h2 { font-size: clamp(26px, 4.4vw, 38px); font-weight: 700; letter-spacing: -.02em; margin-bottom: 12px; }
+.lp-setup-copy p { font-size: 16.5px; line-height: 1.55; opacity: .92; max-width: 30em; }
+.lp-setup-form {
+  display: flex; flex-direction: column; gap: 12px;
+  background: var(--lp-surface); color: var(--lp-ink); border-radius: 16px; padding: 22px;
+}
+.lp-setup-form label { display: flex; flex-direction: column; gap: 5px; font-size: 13.5px; color: var(--lp-muted); }
+.lp-setup-form input, .lp-setup-form textarea {
+  font: inherit; font-size: 15px; padding: 10px 12px; border: 1px solid var(--lp-line); border-radius: 10px;
+  color: var(--lp-ink); background: var(--lp-surface-2);
+}
+.lp-setup-form input:focus, .lp-setup-form textarea:focus { outline: 2px solid var(--lp-brand); outline-offset: 1px; }
+.lp-setup-form small { font-size: 12.5px; color: var(--lp-muted); line-height: 1.45; }
+.lp-setup-msg { font-size: 14.5px; padding: 10px 12px; border-radius: 10px; background: var(--lp-surface-2); }
+.lp-setup-msg--ok { background: #e8f5ec; color: #1f6b3a; }
+.lp-setup-msg--err { background: #fde8e8; color: #9b2222; }
+@media (max-width: 860px) { .lp-setup-in { grid-template-columns: 1fr; gap: 28px; } }

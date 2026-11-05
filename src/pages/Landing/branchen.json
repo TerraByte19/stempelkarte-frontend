@@ -1,0 +1,946 @@
+{
+ "labels": {
+  "de": {
+   "menu": "Branchen",
+   "eyebrow": "Digitale Stempelkarte",
+   "cta": "Kostenlos anfragen",
+   "demo": "Karte selbst ausprobieren",
+   "note": "14 Tage gratis testen. Keine Kreditkarte, keine App für deine Kunden.",
+   "ideasTitle": "Ideen für deine Belohnung",
+   "whyTitle": "Warum digital besser passt",
+   "faqTitle": "Häufige Fragen",
+   "otherTitle": "Auch für andere Läden",
+   "setupTitle": "Keine Zeit dafür? Wir richten deine Karte ein.",
+   "setupText": "Schick uns Logo und Farben, wir bauen deine Karte und schicken dir den Aushang für die Theke. Du musst nur noch scannen.",
+   "setupCta": "Karte einrichten lassen",
+   "setupName": "Dein Name",
+   "setupShop": "Name des Ladens",
+   "setupEmail": "E-Mail",
+   "setupPhone": "Telefon (wenn wir lieber anrufen sollen)",
+   "setupWish": "Was soll es geben? Zum Beispiel: 10 Kaffee, der elfte gratis",
+   "setupSend": "Anfrage schicken",
+   "setupSending": "Wird geschickt …",
+   "setupOk": "Danke, deine Anfrage ist da. Wir melden uns per E-Mail, meist am selben Tag.",
+   "setupError": "Das hat nicht geklappt. Schreib uns an info@stampit-app.de.",
+   "setupConsent": "Wir nutzen deine Angaben nur, um dich zu dieser Anfrage zu kontaktieren."
+  },
+  "en": {
+   "menu": "Industries",
+   "eyebrow": "Digital stamp card",
+   "cta": "Request for free",
+   "demo": "Try a card yourself",
+   "note": "14 days free. No credit card, no app for your customers.",
+   "ideasTitle": "Ideas for your reward",
+   "whyTitle": "Why digital fits better",
+   "faqTitle": "Common questions",
+   "otherTitle": "Also for other shops",
+   "setupTitle": "No time for this? We set up your card.",
+   "setupText": "Send us your logo and colours, we build your card and send you the sign for the counter. All you do is scan.",
+   "setupCta": "Have my card set up",
+   "setupName": "Your name",
+   "setupShop": "Name of the shop",
+   "setupEmail": "Email",
+   "setupPhone": "Phone (if you prefer a call)",
+   "setupWish": "What should it be? For example: 10 coffees, the 11th free",
+   "setupSend": "Send request",
+   "setupSending": "Sending …",
+   "setupOk": "Thanks, your request is in. We reply by email, usually the same day.",
+   "setupError": "That didn't work. Write to us at info@stampit-app.de.",
+   "setupConsent": "We use your details only to get back to you about this request."
+  },
+  "ar": {
+   "menu": "القطاعات",
+   "eyebrow": "بطاقة أختام رقمية",
+   "cta": "اطلب مجانًا",
+   "demo": "جرّب البطاقة بنفسك",
+   "note": "جرّب 14 يومًا مجانًا. بدون بطاقة ائتمان، وبدون تطبيق لعملائك.",
+   "ideasTitle": "أفكار لمكافأتك",
+   "whyTitle": "لماذا الرقمي أنسب لك",
+   "faqTitle": "أسئلة شائعة",
+   "otherTitle": "مناسب أيضًا لمتاجر أخرى",
+   "setupTitle": "ليس لديك وقت؟ نحن نجهّز بطاقتك.",
+   "setupText": "أرسل لنا شعارك وألوانك، ونحن نصمّم بطاقتك ونرسل لك اللافتة الخاصة بالكاونتر. كل ما عليك هو المسح.",
+   "setupCta": "جهّزوا بطاقتي",
+   "setupName": "اسمك",
+   "setupShop": "اسم المحل",
+   "setupEmail": "البريد الإلكتروني",
+   "setupPhone": "الهاتف (إذا كنت تفضّل أن نتصل بك)",
+   "setupWish": "ماذا تريد أن تقدّم؟ مثلًا: 10 أكواب قهوة، والحادي عشر مجانًا",
+   "setupSend": "أرسل الطلب",
+   "setupSending": "جارٍ الإرسال …",
+   "setupOk": "شكرًا، وصلنا طلبك. سنرد عليك عبر البريد الإلكتروني، غالبًا في اليوم نفسه.",
+   "setupError": "لم ينجح الإرسال. راسلنا على info@stampit-app.de.",
+   "setupConsent": "نستخدم بياناتك فقط للتواصل معك بخصوص هذا الطلب."
+  },
+  "tr": {
+   "menu": "Sektörler",
+   "eyebrow": "Dijital damga kartı",
+   "cta": "Ücretsiz talep et",
+   "demo": "Kartı kendin dene",
+   "note": "14 gün ücretsiz dene. Kredi kartı yok, müşterilerin için uygulama yok.",
+   "ideasTitle": "Ödülün için fikirler",
+   "whyTitle": "Dijital neden daha iyi",
+   "faqTitle": "Sık sorulan sorular",
+   "otherTitle": "Diğer işletmeler için de",
+   "setupTitle": "Buna vaktin yok mu? Kartını biz kuralım.",
+   "setupText": "Logonu ve renklerini bize gönder, kartını hazırlayalım ve tezgah için afişini yollayalım. Sana sadece taramak kalır.",
+   "setupCta": "Kartımı hazırlayın",
+   "setupName": "Adın",
+   "setupShop": "İşletmenin adı",
+   "setupEmail": "E-posta",
+   "setupPhone": "Telefon (aramamızı tercih edersen)",
+   "setupWish": "Ne olsun? Örneğin: 10 kahve, on birincisi bedava",
+   "setupSend": "Talebi gönder",
+   "setupSending": "Gönderiliyor …",
+   "setupOk": "Teşekkürler, talebin bize ulaştı. Genellikle aynı gün e-postayla dönüş yapıyoruz.",
+   "setupError": "Bir sorun oluştu. Bize info@stampit-app.de adresinden yaz.",
+   "setupConsent": "Bilgilerini yalnızca bu talep hakkında seninle iletişime geçmek için kullanıyoruz."
+  }
+ },
+ "branchen": [
+  {
+   "slug": "cafe",
+   "de": {
+    "name": "Café & Bäckerei",
+    "title": "Der zehnte Kaffee geht aufs Haus.",
+    "sub": "Kaffee kauft man jeden Tag, oft beim gleichen Laden. Eine Stempelkarte im Handy macht aus dem Gewohnheitskauf einen Grund, wiederzukommen.",
+    "cardShop": "Café Morgenrot",
+    "cardReward": "Ein Kaffee gratis",
+    "cardChip": "gratis",
+    "ideas": [
+     {
+      "t": "Zehn Kaffee, der elfte gratis.",
+      "b": "Der Klassiker. Funktioniert, weil fast jeder Gast beim ersten Kaffee schon weiß, dass er wiederkommt."
+     },
+     {
+      "t": "Fünf Frühstücke, dann ein Croissant dazu.",
+      "b": "Für Bäckereien mit Sitzplätzen: kleine Belohnung, schnell erreicht, hält die Karte lebendig."
+     },
+     {
+      "t": "Jeder achte Kuchen gratis.",
+      "b": "Für den Nachmittag. Die Karte erinnert die Kunden am Handy, wenn sie in der Nähe sind."
+     }
+    ],
+    "why": [
+     {
+      "t": "Kein Karton im Portemonnaie",
+      "b": "Die Karte liegt in Apple Wallet oder Google Wallet. Sie wird nicht vergessen und nicht nass."
+     },
+     {
+      "t": "Du siehst, wer wiederkommt",
+      "b": "Stammgäste, neue Gäste, Gäste, die lange nicht da waren. Mit einem Tipp schickst du ihnen eine Nachricht aufs Handy."
+     },
+     {
+      "t": "Schnell an der Theke",
+      "b": "Der Gast zeigt den QR-Code, du scannst mit dem Handy. Drei Sekunden, auch im Morgenstress."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Muss mein Team etwas Neues lernen?",
+      "a": "Nein. Scannen geht mit jedem Handy im Browser, ohne App. Wer Instagram bedienen kann, kann das."
+     },
+     {
+      "q": "Was ist, wenn ein Gast kein Smartphone hat?",
+      "a": "Dann stempelst du wie bisher auf Papier. Die meisten Gäste haben die Karte aber lieber im Handy."
+     },
+     {
+      "q": "Kann ich auch mehrere Karten haben?",
+      "a": "Ja. Zum Beispiel eine für Kaffee und eine für Kuchen, oder eine Mitgliedskarte für Stammgäste."
+     }
+    ],
+    "metaTitle": "Digitale Stempelkarte für Cafés und Bäckereien",
+    "metaDesc": "Stempelkarte in Apple Wallet und Google Wallet für dein Café. Keine App, kein Karton. 14 Tage gratis testen."
+   },
+   "en": {
+    "name": "Café & bakery",
+    "title": "The tenth coffee is on the house.",
+    "sub": "People buy coffee every day, often at the same place. A stamp card on the phone turns a habit into a reason to come back.",
+    "cardShop": "Café Morgenrot",
+    "cardReward": "One free coffee",
+    "cardChip": "free",
+    "ideas": [
+     {
+      "t": "Ten coffees, the eleventh free.",
+      "b": "The classic. It works because most guests already know at the first coffee that they will be back."
+     },
+     {
+      "t": "Five breakfasts, then a croissant on top.",
+      "b": "For bakeries with seating: a small reward, reached quickly, keeps the card alive."
+     },
+     {
+      "t": "Every eighth cake free.",
+      "b": "For the afternoon. The card reminds customers on their phone when they are nearby."
+     }
+    ],
+    "why": [
+     {
+      "t": "No cardboard in the wallet",
+      "b": "The card lives in Apple Wallet or Google Wallet. It is not forgotten and does not get wet."
+     },
+     {
+      "t": "You see who comes back",
+      "b": "Regulars, new guests, guests who have not been in for a while. One tap sends them a message to their phone."
+     },
+     {
+      "t": "Fast at the counter",
+      "b": "The guest shows the QR code, you scan with your phone. Three seconds, even in the morning rush."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Does my team have to learn something new?",
+      "a": "No. Scanning works with any phone in the browser, no app. Anyone who can use Instagram can do this."
+     },
+     {
+      "q": "What if a guest has no smartphone?",
+      "a": "Then you stamp on paper as before. Most guests prefer the card on their phone though."
+     },
+     {
+      "q": "Can I have more than one card?",
+      "a": "Yes. For example one for coffee and one for cake, or a membership card for regulars."
+     }
+    ],
+    "metaTitle": "Digital stamp card for cafés and bakeries",
+    "metaDesc": "Stamp card in Apple Wallet and Google Wallet for your café. No app, no cardboard. 14 days free."
+   },
+   "ar": {
+    "name": "مقهى ومخبز",
+    "title": "القهوة العاشرة هدية من المحل.",
+    "sub": "الناس يشترون القهوة كل يوم، وغالبًا من المكان نفسه. بطاقة الأختام على الهاتف تحوّل هذه العادة إلى سبب للعودة إليك.",
+    "cardShop": "Café Morgenrot",
+    "cardReward": "قهوة مجانية",
+    "cardChip": "مجانًا",
+    "ideas": [
+     {
+      "t": "عشرة أكواب قهوة، والحادي عشر مجانًا.",
+      "b": "الفكرة الكلاسيكية. تنجح لأن معظم الزبائن يعرفون من أول كوب أنهم سيعودون."
+     },
+     {
+      "t": "خمس وجبات فطور، ثم كرواسون هدية.",
+      "b": "للمخابز التي فيها أماكن للجلوس: مكافأة صغيرة يصل إليها الزبون بسرعة، فتبقى البطاقة حيّة."
+     },
+     {
+      "t": "كل قطعة كيك ثامنة مجانًا.",
+      "b": "لفترة العصر. البطاقة تذكّر العملاء على هواتفهم عندما يكونون بالقرب منك."
+     }
+    ],
+    "why": [
+     {
+      "t": "لا بطاقات ورقية في المحفظة",
+      "b": "البطاقة محفوظة في Apple Wallet أو Google Wallet. لا تُنسى ولا تبتل."
+     },
+     {
+      "t": "تعرف من يعود إليك",
+      "b": "الزبائن الدائمون، والزبائن الجدد، ومن غابوا منذ فترة. بلمسة واحدة ترسل لهم رسالة على هواتفهم."
+     },
+     {
+      "t": "سريع عند الكاونتر",
+      "b": "الزبون يُظهر رمز QR، وأنت تمسحه بهاتفك. ثلاث ثوانٍ فقط، حتى في زحمة الصباح."
+     }
+    ],
+    "faq": [
+     {
+      "q": "هل يحتاج فريقي إلى تعلّم شيء جديد؟",
+      "a": "لا. المسح يعمل من المتصفح على أي هاتف، بدون تطبيق. من يعرف استخدام Instagram يعرف استخدام هذا."
+     },
+     {
+      "q": "ماذا لو لم يكن لدى الزبون هاتف ذكي؟",
+      "a": "عندها تختم له على الورق كما كنت تفعل. لكن معظم الزبائن يفضّلون البطاقة على الهاتف."
+     },
+     {
+      "q": "هل يمكنني امتلاك أكثر من بطاقة؟",
+      "a": "نعم. مثلًا بطاقة للقهوة وأخرى للكيك، أو بطاقة عضوية للزبائن الدائمين."
+     }
+    ],
+    "metaTitle": "بطاقة أختام رقمية للمقاهي والمخابز",
+    "metaDesc": "بطاقة أختام في Apple Wallet و Google Wallet لمقهاك. بدون تطبيق وبدون ورق. جرّب 14 يومًا مجانًا."
+   },
+   "tr": {
+    "name": "Kafe & Fırın",
+    "title": "Onuncu kahve bizden.",
+    "sub": "Kahve her gün alınır, çoğu zaman da aynı yerden. Telefondaki damga kartı bu alışkanlığı tekrar gelmek için bir sebebe dönüştürür.",
+    "cardShop": "Café Morgenrot",
+    "cardReward": "Bir kahve bedava",
+    "cardChip": "bedava",
+    "ideas": [
+     {
+      "t": "On kahve, on birincisi bedava.",
+      "b": "Klasik. İşe yarıyor, çünkü çoğu müşteri daha ilk kahvede tekrar geleceğini bilir."
+     },
+     {
+      "t": "Beş kahvaltı, ardından bir kruvasan hediye.",
+      "b": "Oturma alanı olan fırınlar için: küçük ve çabuk ulaşılan bir ödül kartı canlı tutar."
+     },
+     {
+      "t": "Her sekizinci pasta bedava.",
+      "b": "Öğleden sonralar için. Kart, müşterilerin yakındayken telefonlarında onlara hatırlatma yapar."
+     }
+    ],
+    "why": [
+     {
+      "t": "Cüzdanda karton yok",
+      "b": "Kart Apple Wallet veya Google Wallet'ta durur. Unutulmaz, ıslanmaz."
+     },
+     {
+      "t": "Kimin tekrar geldiğini görürsün",
+      "b": "Sadık müşteriler, yeni müşteriler, uzun süredir uğramayanlar. Tek dokunuşla telefonlarına mesaj gönderirsin."
+     },
+     {
+      "t": "Tezgahta hızlı",
+      "b": "Müşteri QR kodu gösterir, sen telefonla tararsın. Sabah yoğunluğunda bile üç saniye."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Ekibimin yeni bir şey öğrenmesi gerekiyor mu?",
+      "a": "Hayır. Tarama, uygulama olmadan her telefonun tarayıcısında çalışır. Instagram'ı kullanabilen bunu da kullanır."
+     },
+     {
+      "q": "Müşterinin akıllı telefonu yoksa ne olacak?",
+      "a": "O zaman eskisi gibi kağıda damga basarsın. Ama çoğu müşteri kartı telefonunda taşımayı tercih ediyor."
+     },
+     {
+      "q": "Birden fazla kartım olabilir mi?",
+      "a": "Evet. Örneğin biri kahve, biri pasta için ya da sadık müşterilerin için bir üyelik kartı."
+     }
+    ],
+    "metaTitle": "Kafe ve fırınlar için dijital damga kartı",
+    "metaDesc": "Kafen için Apple Wallet ve Google Wallet'ta damga kartı. Uygulama yok, karton yok. 14 gün ücretsiz dene."
+   }
+  },
+  {
+   "slug": "friseur",
+   "de": {
+    "name": "Friseur & Barbershop",
+    "title": "Der zehnte Haarschnitt geht aufs Haus.",
+    "sub": "Haare wachsen nach. Wer alle vier Wochen kommt, soll nicht zum Laden gegenüber abwandern. Die Stempelkarte im Handy hält den Kontakt, auch zwischen zwei Terminen.",
+    "cardShop": "Barber Kreuzberg",
+    "cardReward": "Ein Haarschnitt gratis",
+    "cardChip": "gratis",
+    "ideas": [
+     {
+      "t": "Zehn Haarschnitte, der elfte gratis.",
+      "b": "Einfach und ehrlich. Bei vier Wochen Abstand ist das ein Jahr Treue."
+     },
+     {
+      "t": "Fünf Besuche, dann Bartpflege gratis.",
+      "b": "Schneller erreicht und bringt eine Dienstleistung ins Spiel, die der Kunde danach öfter bucht."
+     },
+     {
+      "t": "Bring einen Freund mit, beide bekommen einen Stempel.",
+      "b": "Kunde wirbt Kunde ist eingebaut. Dein bester Werbekanal sind deine Kunden."
+     }
+    ],
+    "why": [
+     {
+      "t": "Erinnerung nach vier Wochen",
+      "b": "Wer lange nicht da war, bekommt automatisch eine Nachricht aufs Handy. Ohne dass du daran denken musst."
+     },
+     {
+      "t": "Geburtstagsgruß von selbst",
+      "b": "Ein Gruß mit kleinem Geschenk am Geburtstag. Das merken sich Kunden, und sie erzählen es weiter."
+     },
+     {
+      "t": "Jeder im Team kann stempeln",
+      "b": "Jeder Mitarbeiter hat seinen eigenen Zugang auf dem Handy. Du siehst, wer wann gestempelt hat."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Ich arbeite mit Terminen. Passt das?",
+      "a": "Ja. Gestempelt wird nach dem Schnitt, beim Bezahlen. Der Termin bleibt, wie er ist."
+     },
+     {
+      "q": "Was ist mit Kunden, die bar zahlen?",
+      "a": "Egal, wie bezahlt wird. Der Stempel kommt per QR-Code aufs Handy des Kunden."
+     },
+     {
+      "q": "Geht das auch für Bart, Färben oder Kinderhaarschnitt?",
+      "a": "Du kannst mehrere Karten anlegen, zum Beispiel eine pro Leistung, oder eine Punktekarte nach Umsatz."
+     }
+    ],
+    "metaTitle": "Digitale Stempelkarte für Friseure und Barbershops",
+    "metaDesc": "Stempelkarte in Apple Wallet und Google Wallet für deinen Salon. Erinnerung nach vier Wochen, Geburtstagsgruß, keine App. 14 Tage gratis."
+   },
+   "en": {
+    "name": "Hair salon & barbershop",
+    "title": "The tenth haircut is on the house.",
+    "sub": "Hair grows back. Someone who comes every four weeks should not drift to the shop across the street. The stamp card on the phone keeps the contact, even between two appointments.",
+    "cardShop": "Barber Kreuzberg",
+    "cardReward": "One free haircut",
+    "cardChip": "free",
+    "ideas": [
+     {
+      "t": "Ten haircuts, the eleventh free.",
+      "b": "Simple and honest. At four-week intervals that is a year of loyalty."
+     },
+     {
+      "t": "Five visits, then a free beard trim.",
+      "b": "Reached faster and brings a service into play the customer books more often afterwards."
+     },
+     {
+      "t": "Bring a friend, both get a stamp.",
+      "b": "Refer-a-friend is built in. Your best advertising channel is your customers."
+     }
+    ],
+    "why": [
+     {
+      "t": "Reminder after four weeks",
+      "b": "Anyone who has not been in for a while automatically gets a message on their phone. Without you having to think about it."
+     },
+     {
+      "t": "Birthday greeting by itself",
+      "b": "A greeting with a small gift on the birthday. Customers remember that, and they tell others."
+     },
+     {
+      "t": "Everyone on the team can stamp",
+      "b": "Every employee has their own access on the phone. You see who stamped when."
+     }
+    ],
+    "faq": [
+     {
+      "q": "I work with appointments. Does this fit?",
+      "a": "Yes. Stamping happens after the cut, when paying. The appointment stays as it is."
+     },
+     {
+      "q": "What about customers who pay cash?",
+      "a": "It does not matter how they pay. The stamp goes to the customer's phone via QR code."
+     },
+     {
+      "q": "Does it work for beard, colouring or kids' cuts too?",
+      "a": "You can create several cards, for example one per service, or a points card based on spend."
+     }
+    ],
+    "metaTitle": "Digital stamp card for hair salons and barbershops",
+    "metaDesc": "Stamp card in Apple Wallet and Google Wallet for your salon. Reminder after four weeks, birthday greeting, no app. 14 days free."
+   },
+   "ar": {
+    "name": "صالون شعر وباربر شوب",
+    "title": "قصة الشعر العاشرة هدية من المحل.",
+    "sub": "الشعر ينمو من جديد. والزبون الذي يأتيك كل أربعة أسابيع لا يجب أن يذهب إلى المحل المقابل. بطاقة الأختام على الهاتف تُبقي التواصل قائمًا، حتى بين موعد وآخر.",
+    "cardShop": "Barber Kreuzberg",
+    "cardReward": "قصة شعر مجانية",
+    "cardChip": "مجانًا",
+    "ideas": [
+     {
+      "t": "عشر قصات، والحادية عشرة مجانًا.",
+      "b": "بسيطة وصادقة. مع زيارة كل أربعة أسابيع، هذا يعني سنة كاملة من الولاء."
+     },
+     {
+      "t": "خمس زيارات، ثم العناية باللحية مجانًا.",
+      "b": "يصل إليها الزبون أسرع، وتعرّفه على خدمة سيحجزها بعد ذلك أكثر."
+     },
+     {
+      "t": "أحضر صديقًا، وكلاكما يحصل على ختم.",
+      "b": "التسويق من زبون لزبون مدمج في البطاقة. أفضل قناة إعلانية لديك هم زبائنك."
+     }
+    ],
+    "why": [
+     {
+      "t": "تذكير بعد أربعة أسابيع",
+      "b": "من غاب فترة طويلة تصله رسالة على هاتفه تلقائيًا، دون أن تضطر أنت لتذكّر ذلك."
+     },
+     {
+      "t": "تهنئة عيد الميلاد تلقائيًا",
+      "b": "تهنئة مع هدية صغيرة في يوم ميلاده. الزبائن يتذكرون ذلك ويحكون عنه لغيرهم."
+     },
+     {
+      "t": "كل فريقك يستطيع الختم",
+      "b": "لكل موظف دخوله الخاص على هاتفه. وترى أنت من ختم ومتى."
+     }
+    ],
+    "faq": [
+     {
+      "q": "أعمل بالمواعيد. هل يناسبني هذا؟",
+      "a": "نعم. الختم يتم بعد القصة، عند الدفع. والموعد يبقى كما هو."
+     },
+     {
+      "q": "وماذا عن الزبائن الذين يدفعون نقدًا؟",
+      "a": "طريقة الدفع لا تهم. الختم يصل إلى هاتف الزبون عبر رمز QR."
+     },
+     {
+      "q": "هل يصلح هذا أيضًا للحية أو الصبغة أو قصات الأطفال؟",
+      "a": "يمكنك إنشاء عدة بطاقات، مثلًا بطاقة لكل خدمة، أو بطاقة نقاط حسب قيمة المشتريات."
+     }
+    ],
+    "metaTitle": "بطاقة أختام رقمية لصالونات الشعر والباربر شوب",
+    "metaDesc": "بطاقة أختام في Apple Wallet و Google Wallet لصالونك. تذكير بعد أربعة أسابيع، تهنئة بعيد الميلاد، بدون تطبيق. 14 يومًا مجانًا."
+   },
+   "tr": {
+    "name": "Kuaför & Berber",
+    "title": "Onuncu saç kesimi bizden.",
+    "sub": "Saç uzar. Dört haftada bir gelen müşterin karşıdaki dükkana kaymasın. Telefondaki damga kartı, iki randevu arasında da bağı canlı tutar.",
+    "cardShop": "Barber Kreuzberg",
+    "cardReward": "Bir saç kesimi bedava",
+    "cardChip": "bedava",
+    "ideas": [
+     {
+      "t": "On saç kesimi, on birincisi bedava.",
+      "b": "Basit ve dürüst. Dört haftada bir gelen biri için bu, bir yıllık sadakat demek."
+     },
+     {
+      "t": "Beş ziyaret, ardından sakal bakımı bedava.",
+      "b": "Daha çabuk ulaşılır ve müşterinin sonrasında daha sık alacağı bir hizmeti tanıtır."
+     },
+     {
+      "t": "Bir arkadaşını getir, ikinize de birer damga.",
+      "b": "Tavsiye sistemi hazır içinde. En iyi reklam kanalın müşterilerin."
+     }
+    ],
+    "why": [
+     {
+      "t": "Dört hafta sonra hatırlatma",
+      "b": "Uzun süredir gelmeyen müşteri telefonuna otomatik bir mesaj alır. Senin aklında tutmana gerek kalmaz."
+     },
+     {
+      "t": "Doğum günü tebriki kendiliğinden",
+      "b": "Doğum gününde küçük bir hediyeyle tebrik. Müşteriler bunu unutmaz ve çevresine anlatır."
+     },
+     {
+      "t": "Ekipteki herkes damga basabilir",
+      "b": "Her çalışanın telefonda kendi erişimi var. Kimin ne zaman damga bastığını görürsün."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Randevuyla çalışıyorum. Uyar mı?",
+      "a": "Evet. Damga, kesimden sonra ödeme sırasında basılır. Randevu düzenin olduğu gibi kalır."
+     },
+     {
+      "q": "Nakit ödeyen müşteriler ne olacak?",
+      "a": "Nasıl ödendiği fark etmez. Damga, QR kodla müşterinin telefonuna gelir."
+     },
+     {
+      "q": "Sakal, boya veya çocuk kesimi için de olur mu?",
+      "a": "Birden fazla kart oluşturabilirsin, örneğin her hizmet için bir tane ya da harcamaya göre bir puan kartı."
+     }
+    ],
+    "metaTitle": "Kuaförler ve berberler için dijital damga kartı",
+    "metaDesc": "Salonun için Apple Wallet ve Google Wallet'ta damga kartı. Dört hafta sonra hatırlatma, doğum günü tebriki, uygulama yok. 14 gün ücretsiz."
+   }
+  },
+  {
+   "slug": "doener",
+   "de": {
+    "name": "Döner, Imbiss & Pizza",
+    "title": "Der zehnte Döner geht aufs Haus.",
+    "sub": "Mittags geht es schnell, und die Konkurrenz ist zwei Türen weiter. Die Stempelkarte im Handy gibt deinen Kunden einen Grund, genau zu dir zu kommen.",
+    "cardShop": "Döner Palast",
+    "cardReward": "Ein Döner gratis",
+    "cardChip": "gratis",
+    "ideas": [
+     {
+      "t": "Zehn Döner, der elfte gratis.",
+      "b": "Wer zweimal die Woche kommt, hat die Karte in fünf Wochen voll. Genau richtig, damit es sich lohnt."
+     },
+     {
+      "t": "Fünf Pizzen, dann ein Getränk aufs Haus.",
+      "b": "Kleine Belohnung, schnell erreicht. Für Lieferung und Abholung gibt es Aufkleber für die Tüte."
+     },
+     {
+      "t": "Tagesangebot aufs Handy.",
+      "b": "„Heute Lahmacun 4,50 €“: einmal eintippen, und alle Kunden mit Karte sehen es auf dem Sperrbildschirm."
+     }
+    ],
+    "why": [
+     {
+      "t": "Geht auch bei Lieferung",
+      "b": "Der Aufkleber auf der Tüte führt zur Karte. So werden auch Lieferkunden zu Stammkunden, nicht nur Laufkundschaft."
+     },
+     {
+      "t": "Stempeln in drei Sekunden",
+      "b": "QR-Code zeigen, scannen, fertig. Auch wenn die Schlange bis zur Tür steht."
+     },
+     {
+      "t": "Deine Kunden sprechen viele Sprachen",
+      "b": "Die Karte gibt es auf Deutsch, Türkisch, Arabisch und Englisch. Jeder Kunde sieht seine Sprache."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Lohnt sich das bei kleinen Beträgen?",
+      "a": "Gerade da. Ein Gratis-Döner nach zehn Besuchen kostet dich wenig, bringt aber neun bezahlte Besuche."
+     },
+     {
+      "q": "Ich habe keine Zeit für Technik.",
+      "a": "Wir richten die Karte für dich ein und schicken dir den Aushang. Du musst nur noch scannen."
+     },
+     {
+      "q": "Funktioniert das mit meiner Kasse?",
+      "a": "Die Stempelkarte läuft neben der Kasse, auf jedem Handy. Eine Anbindung an die Kasse ist nicht nötig."
+     }
+    ],
+    "metaTitle": "Digitale Stempelkarte für Döner, Imbiss und Pizza",
+    "metaDesc": "Stempelkarte in Apple Wallet und Google Wallet für deinen Imbiss. Tagesangebot aufs Handy, Aufkleber für die Liefertüte, vier Sprachen. 14 Tage gratis."
+   },
+   "en": {
+    "name": "Kebab, snack bar & pizza",
+    "title": "The tenth kebab is on the house.",
+    "sub": "Lunch is quick, and the competition is two doors down. The stamp card on the phone gives your customers a reason to come to you.",
+    "cardShop": "Döner Palast",
+    "cardReward": "One free kebab",
+    "cardChip": "free",
+    "ideas": [
+     {
+      "t": "Ten kebabs, the eleventh free.",
+      "b": "Someone who comes twice a week fills the card in five weeks. Just right for it to pay off."
+     },
+     {
+      "t": "Five pizzas, then a drink on the house.",
+      "b": "Small reward, reached quickly. For delivery and pickup there are stickers for the bag."
+     },
+     {
+      "t": "Daily offer on the phone.",
+      "b": "\"Today lahmacun 4.50 €\": type it once and every customer with a card sees it on the lock screen."
+     }
+    ],
+    "why": [
+     {
+      "t": "Works for delivery too",
+      "b": "The sticker on the bag leads to the card. Delivery customers become regulars too, not just walk-ins."
+     },
+     {
+      "t": "Stamping in three seconds",
+      "b": "Show the QR code, scan, done. Even when the queue reaches the door."
+     },
+     {
+      "t": "Your customers speak many languages",
+      "b": "The card comes in German, Turkish, Arabic and English. Every customer sees their language."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Is it worth it for small amounts?",
+      "a": "Especially then. A free kebab after ten visits costs you little but brings nine paid visits."
+     },
+     {
+      "q": "I have no time for tech.",
+      "a": "We set up the card for you and send you the sign. All you do is scan."
+     },
+     {
+      "q": "Does it work with my till?",
+      "a": "The stamp card runs next to the till, on any phone. No connection to the till is needed."
+     }
+    ],
+    "metaTitle": "Digital stamp card for kebab, snack bars and pizza",
+    "metaDesc": "Stamp card in Apple Wallet and Google Wallet for your snack bar. Daily offer on the phone, stickers for the delivery bag, four languages. 14 days free."
+   },
+   "ar": {
+    "name": "دونر ووجبات سريعة وبيتزا",
+    "title": "الدونر العاشر هدية من المحل.",
+    "sub": "وقت الغداء كل شيء سريع، والمنافس على بُعد بابين منك. بطاقة الأختام على الهاتف تعطي زبائنك سببًا ليأتوا إليك أنت بالذات.",
+    "cardShop": "Döner Palast",
+    "cardReward": "دونر مجاني",
+    "cardChip": "مجانًا",
+    "ideas": [
+     {
+      "t": "عشر وجبات دونر، والحادية عشرة مجانًا.",
+      "b": "من يأتي مرتين في الأسبوع يملأ البطاقة في خمسة أسابيع. مدة مثالية لتكون المكافأة مجزية."
+     },
+     {
+      "t": "خمس بيتزا، ثم مشروب هدية من المحل.",
+      "b": "مكافأة صغيرة يصل إليها الزبون بسرعة. وللتوصيل والطلبات الخارجية هناك ملصقات للأكياس."
+     },
+     {
+      "t": "عرض اليوم على الهاتف.",
+      "b": "«اليوم لحم بعجين بـ 4,50 €»: تكتبه مرة واحدة، ويراه كل زبائن البطاقة على شاشة القفل."
+     }
+    ],
+    "why": [
+     {
+      "t": "يناسب التوصيل أيضًا",
+      "b": "الملصق على الكيس يقود إلى البطاقة. هكذا يصبح زبائن التوصيل أيضًا زبائن دائمين، وليس مجرد زبائن عابرين."
+     },
+     {
+      "t": "الختم في ثلاث ثوانٍ",
+      "b": "الزبون يُظهر رمز QR، أنت تمسحه، وانتهى الأمر. حتى عندما يصل الطابور إلى الباب."
+     },
+     {
+      "t": "زبائنك يتحدثون لغات كثيرة",
+      "b": "البطاقة متوفرة بالألمانية والتركية والعربية والإنجليزية. كل زبون يراها بلغته."
+     }
+    ],
+    "faq": [
+     {
+      "q": "هل يستحق الأمر مع المبالغ الصغيرة؟",
+      "a": "بالذات مع المبالغ الصغيرة. دونر مجاني بعد عشر زيارات يكلّفك القليل، لكنه يجلب لك تسع زيارات مدفوعة."
+     },
+     {
+      "q": "ليس لدي وقت للتقنية.",
+      "a": "نحن نجهّز البطاقة لك ونرسل لك اللافتة. كل ما عليك هو المسح."
+     },
+     {
+      "q": "هل يعمل مع جهاز الكاشير عندي؟",
+      "a": "بطاقة الأختام تعمل بجانب الكاشير، على أي هاتف. لا حاجة لربطها بالكاشير."
+     }
+    ],
+    "metaTitle": "بطاقة أختام رقمية لمحلات الدونر والوجبات السريعة والبيتزا",
+    "metaDesc": "بطاقة أختام في Apple Wallet و Google Wallet لمحلك. عرض اليوم على الهاتف، ملصقات لأكياس التوصيل، أربع لغات. 14 يومًا مجانًا."
+   },
+   "tr": {
+    "name": "Döner, Büfe & Pizza",
+    "title": "Onuncu döner bizden.",
+    "sub": "Öğle saatleri hızlı geçer, rakip de iki kapı ötede. Telefondaki damga kartı müşterilerine tam da sana gelmeleri için bir sebep verir.",
+    "cardShop": "Döner Palast",
+    "cardReward": "Bir döner bedava",
+    "cardChip": "bedava",
+    "ideas": [
+     {
+      "t": "On döner, on birincisi bedava.",
+      "b": "Haftada iki kez gelen biri kartı beş haftada doldurur. Hem müşteriye hem sana değmesi için tam kıvamında."
+     },
+     {
+      "t": "Beş pizza, ardından bir içecek bizden.",
+      "b": "Küçük ve çabuk ulaşılan bir ödül. Paket servis ve gel al için poşete yapıştırılan etiketler var."
+     },
+     {
+      "t": "Günün fırsatı telefona.",
+      "b": "“Bugün lahmacun 4,50 €”: bir kez yaz, kartı olan tüm müşteriler kilit ekranında görsün."
+     }
+    ],
+    "why": [
+     {
+      "t": "Paket serviste de çalışır",
+      "b": "Poşetteki etiket karta yönlendirir. Böylece sadece yoldan geçenler değil, paket servis müşterileri de sadık müşteriye dönüşür."
+     },
+     {
+      "t": "Üç saniyede damga",
+      "b": "QR kodu göster, tara, bitti. Kuyruk kapıya kadar uzasa bile."
+     },
+     {
+      "t": "Müşterilerin birçok dil konuşuyor",
+      "b": "Kart Almanca, Türkçe, Arapça ve İngilizce olarak mevcut. Her müşteri kendi dilini görür."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Küçük tutarlarda buna değer mi?",
+      "a": "Asıl orada değer. On ziyaretten sonra bedava bir döner sana az mal olur ama dokuz ücretli ziyaret getirir."
+     },
+     {
+      "q": "Teknolojiyle uğraşacak vaktim yok.",
+      "a": "Kartı senin için kurar, afişini de göndeririz. Sana sadece taramak kalır."
+     },
+     {
+      "q": "Kasamla çalışır mı?",
+      "a": "Damga kartı kasanın yanında, herhangi bir telefonda çalışır. Kasaya bağlantı gerekmez."
+     }
+    ],
+    "metaTitle": "Döner, büfe ve pizzacılar için dijital damga kartı",
+    "metaDesc": "Büfen için Apple Wallet ve Google Wallet'ta damga kartı. Günün fırsatı telefona, paket servis poşeti için etiket, dört dil. 14 gün ücretsiz."
+   }
+  },
+  {
+   "slug": "eiscafe",
+   "de": {
+    "name": "Eiscafé & Bubble Tea",
+    "title": "Die zehnte Kugel schenkt das Haus.",
+    "sub": "Eis, Bubble Tea und Smoothies kauft man spontan und oft, gerade im Sommer. Genau da wirkt eine Stempelkarte am besten.",
+    "cardShop": "Eis am Markt",
+    "cardReward": "Eine Kugel gratis",
+    "cardChip": "gratis",
+    "ideas": [
+     {
+      "t": "Zehn Kugeln, die elfte gratis.",
+      "b": "Für die Eisdiele. Kinder zählen die Stempel mit, und die Eltern kommen wieder."
+     },
+     {
+      "t": "Acht Becher, beim neunten das Topping aufs Haus.",
+      "b": "Für Bubble Tea. Kleine Belohnung, die nichts kostet und trotzdem Freude macht."
+     },
+     {
+      "t": "Zehn Smoothies, der elfte in groß zum Preis von klein.",
+      "b": "Für die Saftbar. Die Belohnung steigert den Bon statt ihn zu senken."
+     }
+    ],
+    "why": [
+     {
+      "t": "Saisonkarten",
+      "b": "Im Winter geschlossen? Die Karten bleiben. Im Frühling geht es mit denselben Kunden weiter."
+     },
+     {
+      "t": "Erinnerung, wenn es heiß wird",
+      "b": "Du schreibst „Heute 32 Grad, komm vorbei“, und die Nachricht landet auf dem Sperrbildschirm deiner Kunden."
+     },
+     {
+      "t": "Schnell an der Ausgabe",
+      "b": "Ein Handy reicht zum Scannen. Drei Sekunden, auch wenn die Schlange lang ist."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Was passiert im Winter?",
+      "a": "Nichts. Die Karten bleiben auf den Handys der Kunden. Im Frühling stempelst du einfach weiter."
+     },
+     {
+      "q": "Geht das am Ausgabefenster?",
+      "a": "Ja. Ein Handy mit Kamera reicht, es braucht kein Gerät an der Theke."
+     },
+     {
+      "q": "Können Kinder auch sammeln?",
+      "a": "Die Karte liegt auf dem Handy der Eltern. Die sammeln für die ganze Familie mit."
+     }
+    ],
+    "metaTitle": "Digitale Stempelkarte für Eiscafés und Bubble Tea",
+    "metaDesc": "Stempelkarte in Apple Wallet und Google Wallet für deine Eisdiele. Saisonkarten, Erinnerung bei Hitze, keine App. 14 Tage gratis."
+   },
+   "en": {
+    "name": "Ice cream & bubble tea",
+    "title": "The tenth scoop is on the house.",
+    "sub": "Ice cream, bubble tea and smoothies are bought on impulse and often, especially in summer. That is exactly where a stamp card works best.",
+    "cardShop": "Eis am Markt",
+    "cardReward": "One free scoop",
+    "cardChip": "free",
+    "ideas": [
+     {
+      "t": "Ten scoops, the eleventh free.",
+      "b": "For the ice cream parlour. Kids count the stamps, and the parents come back."
+     },
+     {
+      "t": "Eight cups, the ninth topping on the house.",
+      "b": "For bubble tea. A small reward that costs nothing and still brings joy."
+     },
+     {
+      "t": "Ten smoothies, the eleventh large for the price of small.",
+      "b": "For the juice bar. The reward raises the receipt instead of lowering it."
+     }
+    ],
+    "why": [
+     {
+      "t": "Seasonal cards",
+      "b": "Closed in winter? The cards stay. In spring you continue with the same customers."
+     },
+     {
+      "t": "Reminder when it gets hot",
+      "b": "You write \"32 degrees today, come by\", and the message lands on your customers' lock screens."
+     },
+     {
+      "t": "Fast at the hatch",
+      "b": "One phone is enough for scanning. Three seconds, even with a long queue."
+     }
+    ],
+    "faq": [
+     {
+      "q": "What happens in winter?",
+      "a": "Nothing. The cards stay on your customers' phones. In spring you simply keep stamping."
+     },
+     {
+      "q": "Does it work at a serving hatch?",
+      "a": "Yes. A phone with a camera is enough, no device at the counter needed."
+     },
+     {
+      "q": "Can kids collect too?",
+      "a": "The card lives on the parents' phone. They collect for the whole family."
+     }
+    ],
+    "metaTitle": "Digital stamp card for ice cream parlours and bubble tea",
+    "metaDesc": "Stamp card in Apple Wallet and Google Wallet for your ice cream parlour. Seasonal cards, reminder in the heat, no app. 14 days free."
+   },
+   "ar": {
+    "name": "آيس كريم وبابل تي",
+    "title": "كرة الآيس كريم العاشرة هدية من المحل.",
+    "sub": "الآيس كريم والبابل تي والسموذي يشتريها الناس بعفوية وبكثرة، خاصة في الصيف. وهنا بالذات تعطي بطاقة الأختام أفضل نتيجة.",
+    "cardShop": "Eis am Markt",
+    "cardReward": "كرة آيس كريم مجانية",
+    "cardChip": "مجانًا",
+    "ideas": [
+     {
+      "t": "عشر كرات، والحادية عشرة مجانًا.",
+      "b": "لمحلات الآيس كريم. الأطفال يعدّون الأختام، والأهل يعودون."
+     },
+     {
+      "t": "ثمانية أكواب، وفي التاسع الإضافات مجانًا.",
+      "b": "للبابل تي. مكافأة صغيرة لا تكلّف شيئًا تقريبًا، ومع ذلك تُفرح الزبون."
+     },
+     {
+      "t": "عشرة أكواب سموذي، والحادي عشر بحجم كبير بسعر الصغير.",
+      "b": "لمحلات العصير. المكافأة ترفع قيمة الفاتورة بدل أن تخفضها."
+     }
+    ],
+    "why": [
+     {
+      "t": "بطاقات موسمية",
+      "b": "تغلق في الشتاء؟ البطاقات تبقى. وفي الربيع تكمل مع نفس الزبائن."
+     },
+     {
+      "t": "تذكير عندما يشتد الحر",
+      "b": "تكتب «اليوم 32 درجة، تعال عندنا»، فتصل الرسالة إلى شاشة القفل عند زبائنك."
+     },
+     {
+      "t": "سريع عند نافذة البيع",
+      "b": "هاتف واحد يكفي للمسح. ثلاث ثوانٍ، حتى مع طابور طويل."
+     }
+    ],
+    "faq": [
+     {
+      "q": "ماذا يحدث في الشتاء؟",
+      "a": "لا شيء. البطاقات تبقى على هواتف الزبائن. وفي الربيع تكمل الختم ببساطة."
+     },
+     {
+      "q": "هل يعمل عند نافذة البيع؟",
+      "a": "نعم. يكفي هاتف بكاميرا، ولا حاجة لأي جهاز على الكاونتر."
+     },
+     {
+      "q": "هل يستطيع الأطفال الجمع أيضًا؟",
+      "a": "البطاقة تكون على هاتف الأهل، وهم يجمعون الأختام للعائلة كلها."
+     }
+    ],
+    "metaTitle": "بطاقة أختام رقمية لمحلات الآيس كريم والبابل تي",
+    "metaDesc": "بطاقة أختام في Apple Wallet و Google Wallet لمحل الآيس كريم. بطاقات موسمية، تذكير في الحر، بدون تطبيق. 14 يومًا مجانًا."
+   },
+   "tr": {
+    "name": "Dondurmacı & Bubble Tea",
+    "title": "Onuncu top bizden.",
+    "sub": "Dondurma, bubble tea ve smoothie anlık bir istekle ve sık sık alınır, özellikle yazın. Damga kartı tam da burada en iyi sonucu verir.",
+    "cardShop": "Eis am Markt",
+    "cardReward": "Bir top bedava",
+    "cardChip": "bedava",
+    "ideas": [
+     {
+      "t": "On top, on birincisi bedava.",
+      "b": "Dondurmacılar için. Çocuklar damgaları sayar, ebeveynler de tekrar gelir."
+     },
+     {
+      "t": "Sekiz bardak, dokuzuncuda topping bizden.",
+      "b": "Bubble tea için. Neredeyse hiçbir maliyeti olmayan ama yine de sevindiren küçük bir ödül."
+     },
+     {
+      "t": "On smoothie, on birincisi küçük fiyatına büyük boy.",
+      "b": "Meyve suyu barı için. Bu ödül fişi küçültmek yerine büyütür."
+     }
+    ],
+    "why": [
+     {
+      "t": "Sezonluk kartlar",
+      "b": "Kışın kapalı mısın? Kartlar kalır. İlkbaharda aynı müşterilerle devam edersin."
+     },
+     {
+      "t": "Hava ısındığında hatırlatma",
+      "b": "“Bugün 32 derece, uğra” yazarsın ve mesaj müşterilerinin kilit ekranına düşer."
+     },
+     {
+      "t": "Serviste hızlı",
+      "b": "Taramak için bir telefon yeter. Kuyruk uzun olsa bile üç saniye."
+     }
+    ],
+    "faq": [
+     {
+      "q": "Kışın ne olacak?",
+      "a": "Hiçbir şey. Kartlar müşterilerinin telefonlarında kalır. İlkbaharda damga basmaya kaldığın yerden devam edersin."
+     },
+     {
+      "q": "Servis penceresinde çalışır mı?",
+      "a": "Evet. Kameralı bir telefon yeter, tezgaha ayrı bir cihaz gerekmez."
+     },
+     {
+      "q": "Çocuklar da biriktirebilir mi?",
+      "a": "Kart ebeveynlerin telefonunda durur. Onlar tüm aile için biriktirir."
+     }
+    ],
+    "metaTitle": "Dondurmacılar ve bubble tea için dijital damga kartı",
+    "metaDesc": "Dondurmacın için Apple Wallet ve Google Wallet'ta damga kartı. Sezonluk kartlar, sıcakta hatırlatma, uygulama yok. 14 gün ücretsiz."
+   }
+  }
+ ]
+}

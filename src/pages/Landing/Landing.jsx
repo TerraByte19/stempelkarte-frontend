@@ -8,6 +8,7 @@ import Features from './sections/Features'
 import Trust from './sections/Trust'
 import WalletFinale from './sections/WalletFinale'
 import Contact from './sections/Contact'
+import Einrichten from './sections/Einrichten'
 import Footer from './sections/Footer'
 
 export default function Landing() {
@@ -22,6 +23,7 @@ export default function Landing() {
         <Features />
         <Trust />
         <WalletFinale />
+        <Einrichten />
         <Contact />
       </main>
       <Footer />

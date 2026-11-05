@@ -19,6 +19,8 @@ const Kunden = lazy(() => import('./pages/Kunden'))
 const Nachrichten = lazy(() => import('./pages/Nachrichten'))
 const Team = lazy(() => import('./pages/Team'))
 const Demo = lazy(() => import('./pages/Demo'))
+// Branchenseiten der Werbeseite (/branchen/cafe usw.)
+const Branche = lazy(() => import('./pages/Landing/Branche'))
 // Testseite zum Vergleich der Scanner (liest nur, stempelt nichts).
 const ScannerTest = lazy(() => import('./pages/ScannerTest'))
 
@@ -58,6 +60,7 @@ function App() {
         <Route path="/admin" element={<Admin />} />
         {/* Oeffentliche Demo-Seite fuer Besucher der Website. */}
         <Route path="/demo" element={<Demo />} />
+        <Route path="/branchen/:slug" element={<Branche />} />
         <Route path="/scanner-test" element={<ScannerTest />} />
         <Route path="/" element={rootElement()}>
           <Route index element={<Dashboard />} />
