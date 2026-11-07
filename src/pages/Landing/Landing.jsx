@@ -5,6 +5,7 @@ import ValueBand from './sections/ValueBand'
 import Proof from './sections/Proof'
 import HowItWorks from './sections/HowItWorks'
 import Features from './sections/Features'
+import Stimmen from './sections/Stimmen'
 import Trust from './sections/Trust'
 import WalletFinale from './sections/WalletFinale'
 import Contact from './sections/Contact'
@@ -21,6 +22,7 @@ export default function Landing() {
         <Proof />
         <HowItWorks />
         <Features />
+        <Stimmen />
         <Trust />
         <WalletFinale />
         <Einrichten />

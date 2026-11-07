@@ -1,0 +1,64 @@
+/* ---------- Stimmen von Laeden ----------
+   Eigene Datei statt Landing.css: der Abschnitt kam spaeter dazu und soll
+   sich ohne Eingriff in die grosse Datei ein- und ausbauen lassen. Nutzt
+   dieselben Variablen und denselben Kachel-Stil wie der Zahlen-Abschnitt. */
+.lp-stimmen { background: var(--lp-surface); padding-block: 90px; }
+
+.lp-stimmen-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 700px) {
+  /* Zwei oder drei Stimmen fuellen die Reihe glatt; mehr als drei brechen
+     in Zweier- oder Dreierreihen um (stimmen.test.js: hoechstens sechs). */
+  .lp-stimmen-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+}
+.lp-stimmen-grid > .lp-reveal { display: flex; }
+
+.lp-stimme {
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px 24px 24px;
+  background: var(--lp-surface-2);
+  border: 1px solid var(--lp-line);
+  border-radius: 14px;
+  position: relative;
+}
+/* Das Anfuehrungszeichen als Bild, nicht als Text: so bleibt das Zitat in
+   der Datei ohne eigene Zeichen und liest sich im Screenreader ohne
+   "Anfuehrungszeichen unten". */
+.lp-stimme::before {
+  content: '\201E';
+  position: absolute;
+  top: 6px;
+  inset-inline-start: 20px;
+  font-family: var(--lp-display);
+  font-size: 64px;
+  line-height: 1;
+  color: var(--lp-brand);
+  opacity: .18;
+  pointer-events: none;
+}
+.lp-stimme blockquote { margin: 0; padding-top: 14px; }
+.lp-stimme blockquote p {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--lp-ink);
+  text-wrap: pretty;
+}
+.lp-stimme figcaption {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 6px;
+  font-size: 13.5px;
+  color: var(--lp-muted);
+  line-height: 1.45;
+}
+.lp-stimme-person { font-weight: 600; color: var(--lp-ink); }
+.lp-stimme-person::after { content: ','; }
+.lp-stimme-ort::before { content: '\00B7'; margin-inline-end: 6px; }

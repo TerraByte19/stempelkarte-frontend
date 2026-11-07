@@ -237,6 +237,8 @@ export const ausbau = {
     api_webhook_new_secret: 'Neues Geheimnis erzeugen',
     api_webhook_state: '{offen} offen · {fehler} fehlgeschlagen', api_webhook_last: 'zuletzt {datum}',
     api_err: 'Konnte nicht gespeichert werden.',
+    lp_stimmen_title: 'Das sagen Läden, die Stampit nutzen',
+    lp_stimmen_body: 'Echte Stimmen von Inhaberinnen und Inhabern, mit ihrer Erlaubnis veröffentlicht.',
   },
   en: {
     scan_wahl_status: 'Scanner check: {status}',
@@ -460,6 +462,8 @@ export const ausbau = {
     api_webhook_new_secret: 'Generate new secret',
     api_webhook_state: '{offen} pending · {fehler} failed', api_webhook_last: 'last {datum}',
     api_err: 'Could not be saved.',
+    lp_stimmen_title: 'What shops using Stampit say',
+    lp_stimmen_body: 'Real feedback from owners, published with their permission.',
   },
   ar: {
     scan_wahl_status: 'قياس الماسح: {status}',
@@ -683,6 +687,8 @@ export const ausbau = {
     api_webhook_new_secret: 'إنشاء سر جديد',
     api_webhook_state: '{offen} معلّق · {fehler} فشل', api_webhook_last: 'آخر مرة {datum}',
     api_err: 'تعذر الحفظ.',
+    lp_stimmen_title: 'ماذا يقول أصحاب المحلات الذين يستخدمون Stampit',
+    lp_stimmen_body: 'آراء حقيقية من أصحاب المحلات، منشورة بإذنهم.',
   },
   tr: {
     scan_wahl_status: 'Tarayıcı ölçümü: {status}',
@@ -1000,5 +1006,7 @@ export const ausbau = {
     api_webhook_state: '{offen} bekliyor · {fehler} başarısız',
     api_webhook_last: 'son: {datum}',
     api_err: 'Kaydedilemedi.',
+    lp_stimmen_title: 'Stampit kullanan işletmeler ne diyor',
+    lp_stimmen_body: 'İşletme sahiplerinden gerçek görüşler, izinleriyle yayınlanmıştır.',
   },
 }
