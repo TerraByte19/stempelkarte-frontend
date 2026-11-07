@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import Icon from '../components/Icon'
 import { ApplePreview, GooglePreview } from '../components/CardPreview'
 import SchnittstellenSection from '../components/SchnittstellenSection'
+import StimmeSection from '../components/StimmeSection'
 import AbPro from '../components/AbPro'
 
 export default function Profil() {
@@ -65,6 +66,8 @@ export default function Profil() {
         {/* Geburtstagsgruss zaehlt zu den automatischen Nachrichten (ab Pro). */}
         <AbPro funktion="auto_nachrichten" titel={t('profil_bday_title')}><Geburtstagsgruss t={t} shop={shop} /></AbPro>
         <Kundengruppen t={t} />
+        {/* Zitat fuer die Startseite - geht erst nach Freigabe im Admin live. */}
+        <StimmeSection />
         {/* Nur sichtbar, wenn der Admin die Schnittstelle freigeschaltet hat (sonst Hinweis). */}
         <AbPro funktion="api" titel={t('api_title')}><SchnittstellenSection /></AbPro>
       </div>

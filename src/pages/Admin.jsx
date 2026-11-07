@@ -24,6 +24,8 @@ export default function Admin() {
   // Anfragen aus dem Kontaktformular der Landing-Page.
   const [anfragen, setAnfragen] = useState([])
   const [offeneAnfrage, setOffeneAnfrage] = useState(null)
+  // Zitate der Laeden fuer die Startseite - erst nach Freigabe hier live.
+  const [stimmen, setStimmen] = useState([])
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken')
@@ -112,6 +114,36 @@ export default function Admin() {
     }
   }
 
+  async function loadStimmen(token) {
+    const t = token || sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/stimmen`, {
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      setStimmen(Array.isArray(data) ? data : [])
+    } catch {
+      // Beiwerk wie die Kontaktanfragen.
+    }
+  }
+
+  // aktion: 'freigeben' | 'ablehnen'. Der Wortlaut wird nie geaendert - passt
+  // etwas nicht, ablehnen; der Laden sieht das in der App und reicht neu ein.
+  async function entscheideStimme(id, aktion) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/stimmen/${id}/${aktion}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (res.ok) loadStimmen()
+      else alert('Das hat nicht geklappt')
+    } catch {
+      alert('Das hat nicht geklappt')
+    }
+  }
+
   async function loadShops(token) {
     const t = token || sessionStorage.getItem('adminToken')
     setLoading(true)
@@ -124,6 +156,7 @@ export default function Admin() {
       setShops(Array.isArray(data) ? data : [])
       loadGeoVorfaelle(t)
       loadAnfragen(t)
+      loadStimmen(t)
     } catch (e) {
       setError('Fehler beim Laden')
     } finally {
@@ -426,6 +459,57 @@ export default function Admin() {
                     {a.nachricht}
                   </div>
                 )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>
+            Stimmen für die Startseite ({stimmen.filter(x => x.status === 'OFFEN').length} offen)
+          </div>
+          <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+            Zitate aus der App (Profil). Freigegebene stehen auf der Startseite, der Wortlaut bleibt wie eingereicht.
+            Passt etwas nicht: ablehnen, der Laden sieht das und kann neu einreichen.
+          </div>
+          {stimmen.length === 0 && (
+            <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Stimmen.</div>
+          )}
+          <div style={{ maxHeight: 480, overflowY: 'auto' }}>
+            {stimmen.map(x => (
+              <div key={x.id} style={{ padding: '10px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
+                                       opacity: x.status === 'ABGELEHNT' ? 0.6 : 1 }}>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
+                  <span style={{ fontWeight: 600, minWidth: 140 }}>{x.laden} · {x.ort}</span>
+                  {x.person && <span style={{ color: '#6B6678' }}>{x.person}</span>}
+                  <a href={`mailto:${x.email}`} style={{ color: '#3C3489' }}>{x.email}</a>
+                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}
+                        title={`Einverständnis ${new Date(x.einverstandenAm).toLocaleString('de-DE')}`}>
+                    {new Date(x.eingereichtAm).toLocaleString('de-DE')}
+                  </span>
+                  <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6,
+                                 background: x.status === 'FREIGEGEBEN' ? '#EAF3EA' : x.status === 'ABGELEHNT' ? '#FBEDEB' : '#FBF3E2' }}>
+                    {x.status === 'FREIGEGEBEN' ? 'auf der Website' : x.status === 'ABGELEHNT' ? 'abgelehnt' : 'wartet'}
+                  </span>
+                  {x.status !== 'FREIGEGEBEN' && (
+                    <button onClick={() => entscheideStimme(x.id, 'freigeben')}
+                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                     border: '1px solid #DDD9EE', background: '#EAF3EA' }}>
+                      Freigeben
+                    </button>
+                  )}
+                  {x.status !== 'ABGELEHNT' && (
+                    <button onClick={() => entscheideStimme(x.id, 'ablehnen')}
+                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                     border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
+                      Ablehnen
+                    </button>
+                  )}
+                </div>
+                <div style={{ marginTop: 8, padding: '8px 12px', borderInlineStart: '3px solid #3C3489',
+                              background: '#F7F6FB', borderRadius: 6, whiteSpace: 'pre-line' }}>
+                  „{x.zitat}“
+                </div>
               </div>
             ))}
           </div>
