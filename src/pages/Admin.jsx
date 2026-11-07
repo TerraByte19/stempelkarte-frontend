@@ -26,6 +26,8 @@ export default function Admin() {
   const [offeneAnfrage, setOffeneAnfrage] = useState(null)
   // Zitate der Laeden fuer die Startseite - erst nach Freigabe hier live.
   const [stimmen, setStimmen] = useState([])
+  // Terminanfragen fuer Vorfuehrungen von der Startseite.
+  const [termine, setTermine] = useState([])
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken')
@@ -144,6 +146,49 @@ export default function Admin() {
     }
   }
 
+  async function loadTermine(token) {
+    const t = token || sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/termine`, {
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      setTermine(Array.isArray(data) ? data : [])
+    } catch {
+      // Beiwerk, das Panel laeuft weiter.
+    }
+  }
+
+  async function setzeTerminStatus(id, status) {
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/termine/${id}/status`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (res.ok) loadTermine()
+      else alert('Das hat nicht geklappt')
+    } catch {
+      alert('Das hat nicht geklappt')
+    }
+  }
+
+  async function loescheTermin(id, laden) {
+    if (!confirm(`Terminanfrage von "${laden}" löschen?`)) return
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/termine/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (res.ok) loadTermine()
+    } catch {
+      alert('Fehler beim Löschen')
+    }
+  }
+
   async function loadShops(token) {
     const t = token || sessionStorage.getItem('adminToken')
     setLoading(true)
@@ -157,6 +202,7 @@ export default function Admin() {
       loadGeoVorfaelle(t)
       loadAnfragen(t)
       loadStimmen(t)
+      loadTermine(t)
     } catch (e) {
       setError('Fehler beim Laden')
     } finally {
@@ -473,7 +519,10 @@ export default function Admin() {
             Passt etwas nicht: ablehnen, der Laden sieht das und kann neu einreichen.
           </div>
           {stimmen.length === 0 && (
-            <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Stimmen.</div>
+            <div style={{ fontSize: 13, color: '#7A5200', background: '#FBF3E2', padding: '8px 12px', borderRadius: 8 }}>
+              Noch keine Stimmen. Erinnerung: 2 bis 3 zufriedene Läden bitten, in der App unter Profil ein Zitat
+              einzureichen (Block „Deine Stimme für die Stampit-Website“). Danach hier freigeben, dann steht es auf der Startseite.
+            </div>
           )}
           <div style={{ maxHeight: 480, overflowY: 'auto' }}>
             {stimmen.map(x => (
@@ -510,6 +559,69 @@ export default function Admin() {
                               background: '#F7F6FB', borderRadius: 6, whiteSpace: 'pre-line' }}>
                   „{x.zitat}“
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>
+            Vorführungen ({termine.filter(x => x.status === 'OFFEN').length} offen)
+          </div>
+          <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+            Terminanfragen von der Startseite. Bestätigen per WhatsApp, Anruf oder Mail, dann hier auf „Bestätigt“.
+          </div>
+          {termine.length === 0 && (
+            <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Anfragen.</div>
+          )}
+          <div style={{ maxHeight: 480, overflowY: 'auto' }}>
+            {termine.map(x => (
+              <div key={x.id} style={{ padding: '10px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
+                                       opacity: x.status === 'ERLEDIGT' ? 0.5 : 1 }}>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
+                  <span style={{ fontWeight: 700, minWidth: 150 }}>
+                    {new Date(x.wunschAm + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} · {x.wunschZeit}
+                  </span>
+                  <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, background: '#F3F1FA' }}>
+                    {x.art === 'IM_LADEN' ? 'Im Laden' : x.art === 'TELEFON' ? 'Telefon' : 'Video'}
+                  </span>
+                  <span style={{ fontWeight: 600 }}>{x.laden} · {x.name}</span>
+                  {x.telefon && <a href={`tel:${x.telefon.replace(/\s+/g, '')}`} style={{ color: '#3C3489' }}>{x.telefon}</a>}
+                  {x.email && <a href={`mailto:${x.email}?subject=${encodeURIComponent('Deine Stampit-Vorführung')}`} style={{ color: '#3C3489' }}>{x.email}</a>}
+                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
+                    {new Date(x.eingegangenAm).toLocaleString('de-DE')}{x.sprache && x.sprache !== 'de' ? ` · ${x.sprache.toUpperCase()}` : ''}
+                  </span>
+                  <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6,
+                                 background: x.status === 'BESTAETIGT' ? '#EAF3EA' : x.status === 'ERLEDIGT' ? '#F3F1FA' : '#FBF3E2' }}>
+                    {x.status === 'BESTAETIGT' ? 'bestätigt' : x.status === 'ERLEDIGT' ? 'erledigt' : 'offen'}
+                  </span>
+                  {x.status !== 'BESTAETIGT' && (
+                    <button onClick={() => setzeTerminStatus(x.id, 'BESTAETIGT')}
+                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                     border: '1px solid #DDD9EE', background: '#EAF3EA' }}>
+                      Bestätigt
+                    </button>
+                  )}
+                  {x.status !== 'ERLEDIGT' && (
+                    <button onClick={() => setzeTerminStatus(x.id, 'ERLEDIGT')}
+                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                     border: '1px solid #DDD9EE', background: '#F3F1FA' }}>
+                      Erledigt
+                    </button>
+                  )}
+                  <button onClick={() => loescheTermin(x.id, x.laden)}
+                          style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                   border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
+                    Löschen
+                  </button>
+                </div>
+                {(x.adresse || x.nachricht) && (
+                  <div style={{ marginTop: 8, padding: '8px 12px', borderInlineStart: '3px solid #3C3489',
+                                background: '#F7F6FB', borderRadius: 6, whiteSpace: 'pre-line' }}>
+                    {x.adresse && <div>{x.adresse}</div>}
+                    {x.nachricht && <div style={{ color: '#6B6678' }}>{x.nachricht}</div>}
+                  </div>
+                )}
               </div>
             ))}
           </div>
