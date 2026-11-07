@@ -1,0 +1,5 @@
+/* Link unter dem Datenschutz-Block zur Vertrauensseite. Eigene Datei, damit
+   Landing.css fuer diese Zeile nicht angefasst werden muss. */
+.lp-trust-more { margin-top: 28px; font-size: 15.5px; }
+.lp-trust-more a { color: var(--lp-brand); font-weight: 600; text-decoration: none; }
+.lp-trust-more a:hover { text-decoration: underline; }

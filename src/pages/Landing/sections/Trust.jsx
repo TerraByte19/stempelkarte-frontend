@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom'
 import { useLang } from '../../../LangContext'
 import Reveal from '../components/Reveal'
+import './Trust.css'
 
 const POINTS = [1, 2, 3]
 
@@ -24,6 +26,9 @@ export default function Trust() {
             </Reveal>
           ))}
         </div>
+        <Reveal delay={200}>
+          <p className="lp-trust-more"><Link to="/vertrauen">{t('lp_trust_more')}</Link></p>
+        </Reveal>
       </div>
     </section>
   )

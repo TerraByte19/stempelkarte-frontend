@@ -1,0 +1,58 @@
+/* ---------- Textseiten: Impressum, Datenschutz, Vertrauen, AVV ----------
+   Baut auf Landing.css auf (lp-*). Schmaler Lesetext, ruhige Kaesten,
+   eine Tabelle fuer die Unterauftragsverarbeiter, Druckansicht fuer den AVV. */
+.lp-recht { padding-block: 56px 90px; background: var(--lp-surface); }
+.lp-recht-in { max-width: 780px; }
+.lp-recht--breit .lp-recht-in { max-width: 920px; }
+.lp-recht-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 36px; }
+.lp-recht-head h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; letter-spacing: -.02em; line-height: 1.1; text-wrap: balance; }
+.lp-recht h2 { font-size: 22px; font-weight: 700; letter-spacing: -.01em; margin: 40px 0 12px; }
+.lp-recht h3 { font-size: 17px; font-weight: 600; margin: 24px 0 8px; }
+.lp-recht p, .lp-recht li { font-size: 16px; line-height: 1.6; color: var(--lp-ink); }
+.lp-recht p { margin: 0 0 12px; }
+.lp-recht ul, .lp-recht ol { margin: 0 0 14px; padding-inline-start: 22px; }
+.lp-recht li { margin-bottom: 6px; }
+.lp-recht a { color: var(--lp-brand); }
+.lp-recht-meta { color: var(--lp-muted); font-size: 14px; }
+
+.lp-recht-box { background: var(--lp-surface-2); border: 1px solid var(--lp-line); border-radius: 14px; padding: 18px 20px; margin: 18px 0; }
+.lp-recht-box > :last-child { margin-bottom: 0; }
+.lp-recht-box--hinweis { background: #FBF3E2; border-color: #E3C88E; }
+
+/* Drei Karten in einer Reihe; auto-fit liesse bei 780 px die dritte allein stehen. */
+.lp-recht-karten { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 18px 0; }
+@media (max-width: 760px) { .lp-recht-karten { grid-template-columns: 1fr; } }
+.lp-recht-karte { background: var(--lp-surface-2); border: 1px solid var(--lp-line); border-radius: 14px; padding: 18px 20px; }
+.lp-recht-karte h3 { margin-top: 0; }
+.lp-recht-karte p, .lp-recht-karte li { font-size: 15px; }
+.lp-recht-karte > :last-child { margin-bottom: 0; }
+
+.lp-recht-tabelle { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 15px; }
+.lp-recht-tabelle th, .lp-recht-tabelle td {
+  text-align: start; padding: 10px 12px; border-bottom: 1px solid var(--lp-line); vertical-align: top; line-height: 1.45;
+}
+.lp-recht-tabelle th { font-size: 13px; font-weight: 600; color: var(--lp-muted); }
+
+.lp-recht-aktionen { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+.lp-avv-parteien { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+@media (max-width: 700px) {
+  .lp-recht-tabelle thead { display: none; }
+  .lp-recht-tabelle, .lp-recht-tabelle tbody, .lp-recht-tabelle tr, .lp-recht-tabelle td { display: block; }
+  .lp-recht-tabelle tr { padding: 10px 0; border-bottom: 1px solid var(--lp-line); }
+  .lp-recht-tabelle td { border: 0; padding: 2px 0; }
+  .lp-recht-tabelle td::before { content: attr(data-l) ': '; color: var(--lp-muted); }
+  .lp-avv-parteien { grid-template-columns: 1fr; }
+}
+
+@media print {
+  .lp-header, .lp-footer, .lp-recht-aktionen, .lp-recht-head .lp-eyebrow { display: none !important; }
+  .lp-recht { padding: 0; }
+  .lp-recht-in { max-width: none; }
+  .lp-recht-head h1 { font-size: 24px; }
+  .lp-recht h2 { font-size: 17px; margin-top: 22px; break-after: avoid; }
+  .lp-recht h3 { font-size: 14px; }
+  .lp-recht p, .lp-recht li, .lp-recht-tabelle { font-size: 12px; }
+  .lp-recht-box, .lp-recht-karte, .lp-recht-tabelle tr { break-inside: avoid; }
+  .lp-recht a { color: inherit; text-decoration: none; }
+}

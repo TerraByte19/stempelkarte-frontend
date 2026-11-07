@@ -282,6 +282,8 @@ export const ausbau = {
     lp_termin_ok: 'Danke! Wir melden uns innerhalb eines Tages und bestätigen den Termin.',
     lp_termin_error: 'Das hat nicht geklappt. Bitte noch einmal versuchen oder an info@stampit-app.de schreiben.',
     lp_termin_consent: 'Wir nutzen deine Angaben nur für diesen Termin.',
+    lp_foot_trust: 'Vertrauen & Datenschutz',
+    lp_trust_more: 'Mehr zu Hosting, beteiligten Diensten und AVV für Läden',
   },
   en: {
     scan_wahl_status: 'Scanner check: {status}',
@@ -550,6 +552,8 @@ export const ausbau = {
     lp_termin_ok: 'Thank you! We will get back to you within one day to confirm.',
     lp_termin_error: 'That did not work. Please try again or write to info@stampit-app.de.',
     lp_termin_consent: 'We use your details for this appointment only.',
+    lp_foot_trust: 'Trust & privacy',
+    lp_trust_more: 'More on hosting, sub-processors and the data processing agreement',
   },
   ar: {
     scan_wahl_status: 'قياس الماسح: {status}',
@@ -818,6 +822,8 @@ export const ausbau = {
     lp_termin_ok: 'شكراً! سنتواصل معك خلال يوم واحد لتأكيد الموعد.',
     lp_termin_error: 'لم ينجح ذلك. حاول مرة أخرى أو اكتب إلى info@stampit-app.de.',
     lp_termin_consent: 'نستخدم بياناتك لهذا الموعد فقط.',
+    lp_foot_trust: 'الثقة والخصوصية',
+    lp_trust_more: 'المزيد عن الاستضافة والخدمات المشاركة واتفاقية معالجة البيانات للمحلات',
   },
   tr: {
     scan_wahl_status: 'Tarayıcı ölçümü: {status}',
@@ -1180,5 +1186,7 @@ export const ausbau = {
     lp_termin_ok: 'Teşekkürler! Bir gün içinde dönüp randevuyu onaylarız.',
     lp_termin_error: 'Bu işe yaramadı. Lütfen tekrar dene veya info@stampit-app.de adresine yaz.',
     lp_termin_consent: 'Bilgilerini yalnızca bu randevu için kullanırız.',
+    lp_foot_trust: 'Güven ve gizlilik',
+    lp_trust_more: 'Barındırma, kullanılan hizmetler ve işletmeler için veri işleme sözleşmesi hakkında daha fazla',
   },
 }

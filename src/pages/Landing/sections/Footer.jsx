@@ -13,8 +13,9 @@ export default function Footer() {
         </span>
         <span>{t('lp_foot_copy')}</span>
         <span className="lp-footer-links">
-          <a href="/impressum">{t('lp_foot_imprint')}</a>
-          <a href="/datenschutz">{t('lp_foot_privacy')}</a>
+          <Link to="/impressum">{t('lp_foot_imprint')}</Link>
+          <Link to="/datenschutz">{t('lp_foot_privacy')}</Link>
+          <Link to="/vertrauen">{t('lp_foot_trust')}</Link>
           <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Instagram</a>
         </span>
         <span>{t('lp_foot_made')}</span>
