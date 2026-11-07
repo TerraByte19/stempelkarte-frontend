@@ -26,6 +26,8 @@ const Impressum = lazy(() => import('./pages/Landing/Impressum'))
 const Datenschutz = lazy(() => import('./pages/Landing/Datenschutz'))
 const Vertrauen = lazy(() => import('./pages/Landing/Vertrauen'))
 const Avv = lazy(() => import('./pages/Landing/Avv'))
+// Gratis-Tool fuer Laeden: Google-Bewertungslink und QR-Code.
+const BewertungslinkTool = lazy(() => import('./pages/Landing/BewertungslinkTool'))
 // Testseite zum Vergleich der Scanner (liest nur, stempelt nichts).
 const ScannerTest = lazy(() => import('./pages/ScannerTest'))
 
@@ -70,6 +72,7 @@ function App() {
         <Route path="/datenschutz" element={<Datenschutz />} />
         <Route path="/vertrauen" element={<Vertrauen />} />
         <Route path="/avv" element={<Avv />} />
+        <Route path="/tools/bewertungslink" element={<BewertungslinkTool />} />
         <Route path="/scanner-test" element={<ScannerTest />} />
         <Route path="/" element={rootElement()}>
           <Route index element={<Dashboard />} />

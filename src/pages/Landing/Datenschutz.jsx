@@ -27,9 +27,13 @@ export default function Datenschutz() {
       <p>Wir setzen keine Werbe- oder Analyse-Dienste ein. Die Website merkt sich im Browser nur deine gewählte
         Sprache (Local Storage). Das ist technisch notwendig und erfordert keine Einwilligung.</p>
       <h3>Schriftarten</h3>
-      <p>Die Website lädt Schriftarten von Google Fonts (Google Ireland Ltd.). Dabei erhält Google deine
-        IP-Adresse. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (einheitliche Darstellung). Wenn du das nicht
-        möchtest, blockiere in deinem Browser Anfragen an fonts.googleapis.com; die Seite bleibt lesbar.</p>
+      <p>Die Schriftarten der Website liefern wir selbst aus. Es wird keine Verbindung zu Google Fonts oder
+        anderen Schriftdiensten aufgebaut.</p>
+      <h3>Gratis-Tool „Bewertungslink“</h3>
+      <p>Gibst du dort den Namen eines Ladens ein, schickt unser Server diese Eingabe an Google Places
+        (Google Ireland Ltd.), um den Laden zu finden. Deine IP-Adresse geht dabei nicht an Google. Die
+        Eingabe speichern wir bis zu 24 Stunden im Arbeitsspeicher, um wiederholte Suchen zu beschleunigen;
+        sie ist keiner Person zugeordnet. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (du nutzt das Tool).</p>
       <h3>Kontakt-, Einrichtungs- und Terminformular</h3>
       <p>Füllst du ein Formular aus, speichern wir die eingegebenen Daten (Name, Laden, E-Mail, Telefon,
         Nachricht, bei Terminen Wunschtag, Uhrzeit, Art und Adresse), um dir zu antworten und den Termin zu

@@ -28,7 +28,7 @@ export const UNTERAUFTRAGSVERARBEITER = [
   { name: 'Vercel Inc.', sitz: 'San Francisco, USA', zweck: 'Auslieferung der Website und der App-Oberfläche' },
   { name: 'Cloudflare, Inc.', sitz: 'San Francisco, USA', zweck: 'Netz vor dem Server (über Render), Schutz vor Angriffen' },
   { name: 'Apple Inc. / Apple Distribution International Ltd.', sitz: 'Cupertino, USA / Cork, Irland', zweck: 'Apple-Wallet-Karte, Push-Aktualisierung der Karte, „Mit Apple anmelden“' },
-  { name: 'Google Ireland Ltd. / Google LLC', sitz: 'Dublin, Irland / Mountain View, USA', zweck: 'Google-Wallet-Karte, „Mit Google anmelden“, Schriftarten der Website' },
+  { name: 'Google Ireland Ltd. / Google LLC', sitz: 'Dublin, Irland / Mountain View, USA', zweck: 'Google-Wallet-Karte, „Mit Google anmelden“, Ladensuche im Gratis-Tool Bewertungslink' },
   { name: 'Brevo (Sendinblue SAS)', sitz: 'Paris, Frankreich', zweck: 'Versand von E-Mails (Bestätigung, Karte, Newsletter, Erinnerungen)' },
   { name: 'Cloudinary Ltd.', sitz: 'Petach Tikwa, Israel / USA', zweck: 'Speichern und Zuschneiden von Bildern (Logos, Hintergründe)' },
 ]

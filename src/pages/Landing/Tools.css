@@ -1,0 +1,42 @@
+/* ---------- Gratis-Tools (Bewertungslink) ---------- Baut auf Rechtliches.css auf. */
+.lp-tool { background: var(--lp-surface-2); border: 1px solid var(--lp-line); border-radius: 16px; padding: 22px; margin: 0 0 28px; }
+.lp-tool-form label { display: block; font-size: 13.5px; color: var(--lp-muted); margin-bottom: 6px; }
+.lp-tool-row { display: flex; gap: 10px; }
+.lp-tool-row input {
+  flex: 1; min-width: 0; font: inherit; font-size: 15px; padding: 10px 12px; min-height: 44px;
+  border: 1px solid var(--lp-line); border-radius: 10px; color: var(--lp-ink); background: var(--lp-surface);
+}
+.lp-tool-row input:focus { outline: 2px solid var(--lp-brand); outline-offset: 1px; }
+.lp-tool-msg { margin-top: 14px; font-size: 14.5px; padding: 10px 12px; border-radius: 10px; background: var(--lp-surface); }
+.lp-tool-msg--err { background: #fde8e8; color: #9b2222; }
+
+.lp-tool-treffer { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lp-tool-treffer li { margin: 0; }
+.lp-tool-treffer button {
+  width: 100%; text-align: start; display: flex; flex-direction: column; gap: 2px; cursor: pointer;
+  padding: 12px 14px; border: 1px solid var(--lp-line); border-radius: 12px; background: var(--lp-surface); font: inherit; color: var(--lp-ink);
+}
+.lp-tool-treffer button:hover { border-color: var(--lp-brand); }
+.lp-tool-treffer strong { font-size: 15.5px; }
+.lp-tool-treffer span { font-size: 13.5px; color: var(--lp-muted); }
+
+.lp-tool-ergebnis { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; margin-top: 18px; }
+.lp-tool-ergebnis h2 { margin: 0 0 4px; font-size: 20px; }
+.lp-tool-ergebnis label { display: block; font-size: 13.5px; color: var(--lp-muted); margin: 14px 0 6px; }
+.lp-tool-ergebnis-text p { font-size: 15px; margin-top: 12px; }
+.lp-tool-qr { display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--lp-surface); border: 1px solid var(--lp-line); border-radius: 14px; padding: 14px; }
+.lp-tool-qr img { display: block; width: 220px; height: 220px; }
+.lp-tool-qr span { font-size: 13px; color: var(--lp-muted); }
+
+.lp-tool-cta { background: var(--lp-brand); color: #fff; border-radius: 16px; padding: 24px; margin: 28px 0 8px; }
+.lp-tool-cta h2 { margin: 0 0 8px; color: #fff; font-size: 22px; }
+.lp-tool-cta p { color: #fff; opacity: .92; }
+.lp-tool-cta .lp-recht-meta { color: #fff; opacity: .8; }
+.lp-tool-cta .lp-btn--primary { background: #fff; color: var(--lp-brand); }
+.lp-tool-cta .lp-btn--ghost { border-color: rgba(255,255,255,.5); color: #fff; background: transparent; }
+
+@media (max-width: 700px) {
+  .lp-tool-row { flex-direction: column; }
+  .lp-tool-ergebnis { grid-template-columns: 1fr; }
+  .lp-tool-qr { align-self: center; }
+}
