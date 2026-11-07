@@ -13,7 +13,6 @@ export default function Footer() {
         </span>
         <span>{t('lp_foot_copy')}</span>
         <span className="lp-footer-links">
-          <Link to="/impressum">{t('lp_foot_imprint')}</Link>
           <Link to="/datenschutz">{t('lp_foot_privacy')}</Link>
           <Link to="/vertrauen">{t('lp_foot_trust')}</Link>
           <Link to="/tools/bewertungslink">{t('lp_foot_tool')}</Link>

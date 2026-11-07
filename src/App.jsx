@@ -22,7 +22,6 @@ const Demo = lazy(() => import('./pages/Demo'))
 // Branchenseiten der Werbeseite (/branchen/cafe usw.)
 const Branche = lazy(() => import('./pages/Landing/Branche'))
 // Textseiten: Impressum, Datenschutz, Vertrauen fuer Laeden, AVV-Muster.
-const Impressum = lazy(() => import('./pages/Landing/Impressum'))
 const Datenschutz = lazy(() => import('./pages/Landing/Datenschutz'))
 const Vertrauen = lazy(() => import('./pages/Landing/Vertrauen'))
 const Avv = lazy(() => import('./pages/Landing/Avv'))
@@ -68,7 +67,8 @@ function App() {
         {/* Oeffentliche Demo-Seite fuer Besucher der Website. */}
         <Route path="/demo" element={<Demo />} />
         <Route path="/branchen/:slug" element={<Branche />} />
-        <Route path="/impressum" element={<Impressum />} />
+        {/* Impressum provisorisch raus, bis die Anschrift eingetragen ist (pages/Landing/Impressum.jsx bleibt). */}
+        <Route path="/impressum" element={<Navigate to="/" replace />} />
         <Route path="/datenschutz" element={<Datenschutz />} />
         <Route path="/vertrauen" element={<Vertrauen />} />
         <Route path="/avv" element={<Avv />} />

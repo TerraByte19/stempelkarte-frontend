@@ -13,7 +13,7 @@ export default function Datenschutz() {
                 beschreibung="Welche Daten wir verarbeiten, wofür, wie lange, und welche Rechte du hast. Für Besucher der Website, für Läden und für Kunden mit einer Stempelkarte.">
 
       <h2>1. Verantwortlicher</h2>
-      <p>{BETREIBER.marke}, Inhaber {BETREIBER.inhaber}, {BETREIBER.strasse}, {BETREIBER.plzOrt},
+      <p>{BETREIBER.marke}, Inhaber {BETREIBER.inhaber}{BETREIBER.strasse ? `, ${BETREIBER.strasse}, ${BETREIBER.plzOrt}` : ''},
         E-Mail <a href={`mailto:${BETREIBER.email}`}>{BETREIBER.email}</a>. Ein Datenschutzbeauftragter ist
         nicht bestellt, weil die gesetzlichen Voraussetzungen dafür nicht vorliegen.</p>
 
@@ -89,8 +89,8 @@ export default function Datenschutz() {
         können für Statistiken des Ladens anonymisiert erhalten bleiben.</p>
 
       <h2>5. Empfänger und Unterauftragsverarbeiter</h2>
-      <p>Server und Datenbank stehen bei Render im Rechenzentrum {SERVER_REGION}. Folgende Dienste verarbeiten
-        Daten in unserem Auftrag:</p>
+      <p>Server und Datenbank stehen bei Render{SERVER_REGION ? ` im Rechenzentrum ${SERVER_REGION}` : ''}. Folgende Dienste
+        verarbeiten Daten in unserem Auftrag:</p>
       <UavTabelle />
       <p>Soweit Dienste Daten in den USA oder in Israel verarbeiten, geschieht das auf Grundlage von
         EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO), bei zertifizierten Anbietern zusätzlich
@@ -116,7 +116,7 @@ export default function Datenschutz() {
       <p>Wir passen diese Erklärung an, wenn sich der Dienst oder die Rechtslage ändert. Es gilt die hier
         veröffentlichte Fassung.</p>
       <p className="lp-recht-meta">Stand: {STAND}. Siehe auch <Link to="/vertrauen">Vertrauen und Datenschutz
-        für Läden</Link> und <Link to="/impressum">Impressum</Link>.</p>
+        für Läden</Link>.</p>
     </RechtSeite>
   )
 }

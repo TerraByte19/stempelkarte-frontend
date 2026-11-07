@@ -17,8 +17,8 @@ export default function Vertrauen() {
       <div className="lp-recht-karten">
         <div className="lp-recht-karte">
           <h3>Wo die Daten liegen</h3>
-          <p>Server und Datenbank laufen bei Render im Rechenzentrum {SERVER_REGION}. Die Website und die
-            Oberfläche der App liefert Vercel aus. Jede Verbindung ist verschlüsselt (HTTPS).</p>
+          <p>Server und Datenbank laufen bei Render{SERVER_REGION ? ` im Rechenzentrum ${SERVER_REGION}` : ''}. Die Website
+            und die Oberfläche der App liefert Vercel aus. Jede Verbindung ist verschlüsselt (HTTPS).</p>
         </div>
         <div className="lp-recht-karte">
           <h3>Wer verantwortlich ist</h3>

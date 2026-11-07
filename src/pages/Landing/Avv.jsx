@@ -32,7 +32,9 @@ export default function Avv() {
         </div>
         <div className="lp-recht-karte">
           <h3>Auftragsverarbeiter (Auftragnehmer)</h3>
-          <p>{BETREIBER.marke}, Inhaber {BETREIBER.inhaber}<br />{BETREIBER.strasse}<br />{BETREIBER.plzOrt}<br />
+          <p>{BETREIBER.marke}, Inhaber {BETREIBER.inhaber}<br />
+            {BETREIBER.strasse && <>{BETREIBER.strasse}<br />{BETREIBER.plzOrt}<br /></>}
+            {BETREIBER.email}<br />
             nachfolgend „Stampit“</p>
         </div>
       </div>
@@ -56,7 +58,7 @@ export default function Avv() {
         </li>
         <li><strong>Betroffene:</strong> Kunden des Ladens, die eine Karte holen; Mitarbeitende des Ladens mit
           Zugang zum Scanner (Name des Zugangs, Zeitpunkte der Scans).</li>
-        <li><strong>Ort:</strong> Server und Datenbank bei Render im Rechenzentrum {SERVER_REGION}. Weitere
+        <li><strong>Ort:</strong> Server und Datenbank bei Render{SERVER_REGION ? ` im Rechenzentrum ${SERVER_REGION}` : ''}. Weitere
           Dienste siehe § 7.</li>
       </ol>
 
@@ -139,8 +141,8 @@ export default function Avv() {
       <h2>Anlage 1: Technische und organisatorische Maßnahmen</h2>
       <h3>Zugang und Zutritt</h3>
       <ul>
-        <li>Betrieb in Rechenzentren von Render ({SERVER_REGION}) mit Zutrittskontrolle durch den Anbieter; kein
-          eigener Serverraum.</li>
+        <li>Betrieb in Rechenzentren von Render{SERVER_REGION ? ` (${SERVER_REGION})` : ''} mit Zutrittskontrolle durch den
+          Anbieter; kein eigener Serverraum.</li>
         <li>Zugang zur Verwaltung nur für den Betreiber mit eigenem Zugang; Zugang der Läden mit E-Mail und
           Passwort (nur als Hash gespeichert); Zugänge des Personals über Einmal-Codes mit Rollen (Aushilfe,
           Mitarbeiter, Tablet), die der Laden jederzeit sperren kann.</li>

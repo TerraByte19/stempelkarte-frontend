@@ -9,22 +9,22 @@
 export const BETREIBER = {
   marke: 'Stampit',
   inhaber: 'Adham Khalil',
-  strasse: '[Straße und Hausnummer]',
-  plzOrt: '[PLZ] Berlin',
+  strasse: null,               // Anschrift folgt - bis dahin zeigen die Seiten keine Adresszeilen
+  plzOrt: null,
   land: 'Deutschland',
   email: 'info@stampit-app.de',
   website: 'https://www.stampit-app.de',
   ustId: null,                 // z. B. 'DE123456789' oder null (Kleinunternehmer)
 }
 
-/** Region des Render-Dienstes und der Datenbank. Bitte im Render-Dashboard pruefen. */
-export const SERVER_REGION = 'Frankfurt (EU)'
+/** Region des Render-Dienstes und der Datenbank (z. B. 'Frankfurt (EU)'). null = noch nicht geprueft, dann ohne Ortsangabe. */
+export const SERVER_REGION = null
 
 export const STAND = '7. November 2026'
 
 /** Unterauftragsverarbeiter: wer ausser uns Daten sieht, wofuer, wo. */
 export const UNTERAUFTRAGSVERARBEITER = [
-  { name: 'Render Services, Inc.', sitz: 'San Francisco, USA', zweck: `Server und Datenbank (Rechenzentrum ${SERVER_REGION})` },
+  { name: 'Render Services, Inc.', sitz: 'San Francisco, USA', zweck: SERVER_REGION ? `Server und Datenbank (Rechenzentrum ${SERVER_REGION})` : 'Server und Datenbank' },
   { name: 'Vercel Inc.', sitz: 'San Francisco, USA', zweck: 'Auslieferung der Website und der App-Oberfläche' },
   { name: 'Cloudflare, Inc.', sitz: 'San Francisco, USA', zweck: 'Netz vor dem Server (über Render), Schutz vor Angriffen' },
   { name: 'Apple Inc. / Apple Distribution International Ltd.', sitz: 'Cupertino, USA / Cork, Irland', zweck: 'Apple-Wallet-Karte, Push-Aktualisierung der Karte, „Mit Apple anmelden“' },
