@@ -13,6 +13,7 @@ export default function Header() {
           <a href="/#how">{t('lp_nav_how')}</a>
           <a href="/#features">{t('lp_nav_features')}</a>
           <BranchenMenu />
+          <a href="#pricing">{t('lp_nav_pricing')}</a>
           <a href="/#contact">{t('lp_nav_contact')}</a>
         </nav>
         <Link className="lp-btn lp-btn--ghost" to="/login">{t('lp_nav_login')}</Link>

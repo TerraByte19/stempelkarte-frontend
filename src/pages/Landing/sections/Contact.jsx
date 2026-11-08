@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useLang } from '../../../LangContext'
+import { TARIF_EVENT } from './Pricing'
 
 // Eigener, nackter Client statt src/api.js: dessen Interceptor wirft bei 403
 // auf /login um. Waere der oeffentliche Endpunkt nicht freigegeben, floege ein
@@ -19,6 +20,17 @@ export default function Contact() {
   const [state, setState] = useState('idle') // idle | sending | ok | error
 
   const set = field => event => setForm(f => ({ ...f, [field]: event.target.value }))
+
+  // Klick auf einen Tarif im Preis-Abschnitt: der Tarif steht schon in der
+  // Nachricht, der Besucher muss nur noch Name, Laden und E-Mail eintragen.
+  useEffect(() => {
+    const vorbelegen = event => {
+      setForm(f => ({ ...f, message: event.detail }))
+      setState('idle')
+    }
+    window.addEventListener(TARIF_EVENT, vorbelegen)
+    return () => window.removeEventListener(TARIF_EVENT, vorbelegen)
+  }, [])
 
   // In der verschickbaren Einzeldatei-Fassung gibt es kein Backend. Statt
   // eine rote Fehlermeldung zu zeigen, sagt das Formular offen, dass es eine

@@ -7,6 +7,7 @@ import HowItWorks from './sections/HowItWorks'
 import Features from './sections/Features'
 import Stimmen from './sections/Stimmen'
 import Vorfuehrung from './sections/Vorfuehrung'
+import Pricing from './sections/Pricing'
 import Trust from './sections/Trust'
 import WalletFinale from './sections/WalletFinale'
 import Contact from './sections/Contact'
@@ -24,6 +25,7 @@ export default function Landing() {
         <HowItWorks />
         <Features />
         <Stimmen />
+        <Pricing />
         <Vorfuehrung />
         <Trust />
         <WalletFinale />

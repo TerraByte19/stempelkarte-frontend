@@ -512,10 +512,225 @@
 .lp-feat h3 { font-size: 17px; font-weight: 600; }
 .lp-feat p { font-size: 14.5px; color: var(--lp-muted); }
 
+/* ---------- Preise ---------- */
+/* Weiss zwischen den grauen Funktionen und dem grauen DSGVO-Abschnitt.
+   Drei Tarife, Pro in der Mitte in Kartenfarben - es sieht aus wie die
+   Stempelkarte selbst und ist der empfohlene Tarif. */
+.lp-pricing { background: var(--lp-surface); padding-block: 90px; }
+.lp-price-head {
+  display: flex; flex-wrap: wrap; gap: 20px 40px;
+  align-items: flex-end; justify-content: space-between;
+  margin-bottom: 40px;
+}
+.lp-price-head .lp-sec-head { margin-bottom: 0; max-width: 34em; }
+
+.lp-price-trust {
+  list-style: none; padding: 0; margin: 4px 0 0;
+  display: flex; flex-wrap: wrap; gap: 8px 18px;
+  font-size: 14.5px; font-weight: 600; color: var(--lp-ink);
+}
+.lp-price-trust li { position: relative; padding-inline-start: 20px; }
+.lp-price-trust li::before {
+  content: ''; position: absolute; left: auto; inset-inline-start: 2px; top: .38em;
+  width: 9px; height: 5px;
+  border-left: 2px solid var(--lp-brand); border-bottom: 2px solid var(--lp-brand);
+  transform: rotate(-45deg);
+}
+
+.lp-price-switch {
+  display: inline-flex; gap: 4px; padding: 4px;
+  background: var(--lp-surface-2); border: 1px solid var(--lp-line);
+  border-radius: 12px;
+}
+.lp-price-switch button {
+  font: inherit; font-family: var(--lp-display); font-weight: 600; font-size: 14.5px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border: 0; border-radius: 9px;
+  background: transparent; color: var(--lp-muted); cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+.lp-price-switch button[aria-pressed='true'] {
+  background: var(--lp-surface); color: var(--lp-ink);
+  box-shadow: 0 1px 2px rgba(26, 26, 46, .08), 0 0 0 1px var(--lp-line);
+}
+.lp-price-save {
+  font-size: 12px; font-weight: 600; color: var(--lp-gold);
+  background: #FBF3E4; padding: 2px 7px; border-radius: 6px;
+}
+
+.lp-price-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px; align-items: stretch;
+}
+.lp-price-grid > .lp-reveal { display: flex; }
+
+.lp-tier {
+  width: 100%;
+  display: flex; flex-direction: column; gap: 18px;
+  padding: 28px 24px;
+  border-radius: 18px;
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line);
+}
+.lp-tier--pro {
+  color: #fff; border-color: transparent;
+  background: linear-gradient(155deg, var(--lp-card-from), var(--lp-card-to));
+  box-shadow: 0 24px 50px -28px rgba(44, 37, 112, .7);
+}
+.lp-tier-top { display: flex; flex-direction: column; gap: 4px; }
+.lp-tier h3 {
+  font-size: 22px; font-weight: 700; letter-spacing: -.01em;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.lp-tier-badge {
+  font-family: var(--lp-body); font-size: 12px; font-weight: 600; letter-spacing: 0;
+  color: #3A2A05; background: #FAC875;
+  padding: 3px 9px; border-radius: 999px;
+}
+.lp-tier-sub { font-size: 14.5px; color: var(--lp-muted); }
+/* Zwei Zeilen Platz, damit die Preise in allen drei Karten auf einer Hoehe stehen. */
+@media (min-width: 981px) { .lp-tier-sub { min-height: 3.1em; } }
+.lp-tier--pro .lp-tier-sub { color: rgba(255, 255, 255, .78); }
+
+.lp-tier-preis { display: flex; flex-direction: column; gap: 4px; }
+.lp-tier-amount { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-height: 48px; }
+.lp-tier-amount span {
+  font-family: var(--lp-display); font-size: clamp(34px, 4.4vw, 46px);
+  font-weight: 700; letter-spacing: -.03em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.lp-tier--kette .lp-tier-amount span { font-size: clamp(28px, 3.4vw, 34px); align-self: center; }
+.lp-tier-amount small { font-size: 15px; color: var(--lp-muted); }
+.lp-tier-hint { font-size: 13.5px; color: var(--lp-muted); min-height: 1.55em; }
+.lp-tier--pro .lp-tier-amount small,
+.lp-tier--pro .lp-tier-hint { color: rgba(255, 255, 255, .78); }
+
+.lp-tier-btn { background: var(--lp-brand); color: #fff; }
+.lp-tier-btn:hover { background: #322A75; }
+.lp-tier--pro .lp-tier-btn { background: #fff; color: var(--lp-brand); }
+.lp-tier--pro .lp-tier-btn:hover { background: #F0EEFF; }
+.lp-tier--kette .lp-tier-btn { background: var(--lp-surface); color: var(--lp-brand); border-color: var(--lp-brand); }
+.lp-tier--kette .lp-tier-btn:hover { background: #F0EEFF; }
+.lp-tier--pro :focus-visible { outline-color: #fff; }
+
+.lp-tier-loc {
+  font-size: 14px; font-weight: 600; line-height: 1.4;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--lp-surface-2); color: var(--lp-ink);
+}
+.lp-tier--pro .lp-tier-loc { background: rgba(255, 255, 255, .12); color: #fff; }
+
+.lp-tier-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.lp-tier-list li {
+  position: relative; padding-inline-start: 24px;
+  font-size: 14.5px; line-height: 1.45; color: var(--lp-ink);
+}
+/* Haken: linke Kante fest (nicht inline-start), ein Haken wird auch auf
+   Arabisch nicht gespiegelt. */
+.lp-tier-list li::before {
+  content: '';
+  position: absolute; inset-inline-start: 2px; top: .3em;
+  width: 10px; height: 5px;
+  border-left: 2px solid var(--lp-brand);
+  border-bottom: 2px solid var(--lp-brand);
+  transform: rotate(-45deg);
+}
+.lp-tier-list li.is-strong { font-weight: 700; }
+.lp-tier-list li.is-lead { padding-inline-start: 0; font-weight: 600; margin-top: 4px; }
+.lp-tier-list li.is-lead::before { content: none; }
+.lp-tier--pro .lp-tier-list li { color: #fff; }
+.lp-tier--pro .lp-tier-list li::before { border-color: #FAC875; }
+
+/* Laden wirbt Laden: ein ruhiger Streifen in Prämien-Gold */
+.lp-ref {
+  margin-top: 28px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px;
+  padding: 20px 22px; border-radius: 14px;
+  background: #FBF3E4; border: 1px solid #F1E1C2;
+}
+.lp-ref-copy { display: flex; flex-direction: column; gap: 4px; max-width: 46em; }
+.lp-ref h3 { font-size: 18px; font-weight: 700; }
+.lp-ref p { font-size: 15px; color: #5C4A26; }
+.lp-ref .lp-btn { border-color: #E3C88E; }
+
+/* Vergleich zum Aufklappen */
+.lp-cmp { margin-top: 28px; border: 1px solid var(--lp-line); border-radius: 14px; background: var(--lp-surface); }
+.lp-cmp > summary,
+.lp-faq summary {
+  cursor: pointer; list-style: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  font-family: var(--lp-display); font-weight: 600;
+}
+.lp-cmp > summary { padding: 16px 20px; font-size: 16px; color: var(--lp-brand); }
+.lp-cmp > summary::-webkit-details-marker,
+.lp-faq summary::-webkit-details-marker { display: none; }
+.lp-cmp > summary::after,
+.lp-faq summary::after {
+  content: ''; flex-shrink: 0;
+  width: 8px; height: 8px;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform .2s ease;
+}
+.lp-cmp[open] > summary::after,
+.lp-faq details[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
+.lp-cmp-scroll { overflow-x: auto; padding: 0 20px 18px; }
+.lp-cmp table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 520px; }
+.lp-cmp th, .lp-cmp td { padding: 10px 8px; border-top: 1px solid var(--lp-line); }
+.lp-cmp thead th {
+  border-top: 0; font-family: var(--lp-display); font-size: 15px; font-weight: 700;
+  text-align: center; width: 18%;
+}
+.lp-cmp thead th:first-child { width: auto; }
+.lp-cmp tbody th[scope='row'] { text-align: start; font-weight: 400; color: var(--lp-ink); }
+.lp-cmp td { text-align: center; color: var(--lp-ink); font-weight: 600; }
+.lp-cmp-gruppe th {
+  text-align: start; padding-top: 20px;
+  font-family: var(--lp-display); font-size: 13.5px; font-weight: 600; color: var(--lp-muted);
+}
+.lp-cmp-ja, .lp-cmp-nein { display: inline-block; vertical-align: middle; }
+.lp-cmp-ja {
+  width: 11px; height: 6px; margin-top: -4px;
+  border-left: 2px solid var(--lp-brand); border-bottom: 2px solid var(--lp-brand);
+  transform: rotate(-45deg);
+}
+.lp-cmp-nein { width: 10px; height: 2px; background: #C4C3D6; }
+
+/* Fragen */
+.lp-faq { margin-top: 48px; max-width: 760px; }
+.lp-faq h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.lp-faq details { border-bottom: 1px solid var(--lp-line); }
+.lp-faq summary { padding: 16px 0; font-size: 16px; color: var(--lp-ink); }
+.lp-faq details p { padding: 0 0 16px; font-size: 15px; color: var(--lp-muted); max-width: 40em; }
+
+.lp-price-foot { margin-top: 22px; font-size: 14px; color: var(--lp-muted); }
+
+.lp-sr {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+  .lp-price-grid { grid-template-columns: minmax(0, 560px); justify-content: center; }
+}
+@media (max-width: 760px) {
+  .lp-pricing { padding-block: 64px; }
+  .lp-price-head { margin-bottom: 28px; }
+  .lp-cmp-scroll { padding-inline: 12px; }
+  /* Am Handy ohne Querscrollen: schmale Tarifspalten, kleinere Schrift. */
+  .lp-cmp table { min-width: 0; font-size: 13.5px; }
+  .lp-cmp thead th { width: 15%; font-size: 13.5px; }
+  .lp-cmp th, .lp-cmp td { padding: 9px 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-price-switch button,
+  .lp-cmp > summary::after,
+  .lp-faq summary::after { transition: none; }
+}
+
 /* ---------- DSGVO ---------- */
-/* Weiss, nicht grau: seit der Preis-Abschnitt raus ist, grenzt DSGVO direkt
-   an die Funktionen — zwei graue Flaechen ohne Trennung waeren ein Block. */
-.lp-trust { background: var(--lp-surface); padding-block: 90px; }
+/* Grau: davor steht der weisse Preis-Abschnitt, danach das weisse Wallet-Finale. */
+.lp-trust { background: var(--lp-surface-2); padding-block: 90px; }
 .lp-trust-in { display: grid; grid-template-columns: 1fr 1.15fr; gap: 48px; align-items: start; }
 .lp-trust-in .lp-sec-head { margin-bottom: 0; }
 .lp-trust-list { display: flex; flex-direction: column; gap: 22px; }
