@@ -11,12 +11,13 @@ const shops = [
   { id: 6, ordner: 'Kunde' },
 ]
 
-test('benutzte Ordner: Vorschlaege zuerst, Rest alphabetisch', () => {
-  assert.deepEqual(benutzteOrdner(shops), ['Kunde', 'Intern', 'Apfel', 'Zebra'])
+test('benutzte Ordner alphabetisch, ohne Doppelte', () => {
+  assert.deepEqual(benutzteOrdner(shops), ['Apfel', 'Intern', 'Kunde', 'Zebra'])
 })
 
-test('Auswahl enthaelt alle Vorschlaege plus eigene', () => {
-  assert.deepEqual(auswahlOrdner(shops), ['Kunde', 'Interessent', 'Intern', 'Pausiert', 'Apfel', 'Zebra'])
+test('keine vorgegebenen Ordner', () => {
+  assert.deepEqual(auswahlOrdner([{ id: 1, ordner: null }]), [])
+  assert.deepEqual(auswahlOrdner(shops), ['Apfel', 'Intern', 'Kunde', 'Zebra'])
 })
 
 test('Filter', () => {

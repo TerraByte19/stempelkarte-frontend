@@ -1,22 +1,18 @@
-// Ordner im Admin-Panel: der Betreiber ordnet jeden Laden selbst ein.
-// Gespeichert ist nur der Name am Laden (Shop.adminOrdner), null = ohne Ordner.
+// Ordner im Admin-Panel: der Betreiber legt alle Ordner selbst an und ordnet
+// jeden Laden ein. Gespeichert ist nur der Name am Laden (Shop.adminOrdner),
+// null = ohne Ordner. Es gibt keine vorgegebenen Ordner.
 
-export const VORSCHLAEGE = ['Kunde', 'Interessent', 'Intern', 'Pausiert']
 export const ALLE = '__alle'
 export const OHNE = '__ohne'
 
-/** Benutzte Ordner in fester Reihenfolge: erst die Vorschlaege, dann der Rest alphabetisch. */
+/** Benutzte Ordner, alphabetisch. */
 export function benutzteOrdner(shops) {
-  const set = new Set(shops.map(s => s.ordner).filter(Boolean))
-  const vorn = VORSCHLAEGE.filter(o => set.has(o))
-  const rest = [...set].filter(o => !VORSCHLAEGE.includes(o)).sort((a, b) => a.localeCompare(b, 'de'))
-  return [...vorn, ...rest]
+  return [...new Set(shops.map(s => s.ordner).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'de'))
 }
 
-/** Auswahl je Laden: Vorschlaege plus alles, was schon benutzt wird. */
+/** Auswahl je Laden: nur die selbst angelegten Ordner. */
 export function auswahlOrdner(shops) {
-  const benutzt = benutzteOrdner(shops)
-  return [...VORSCHLAEGE, ...benutzt.filter(o => !VORSCHLAEGE.includes(o))]
+  return benutzteOrdner(shops)
 }
 
 export function imOrdner(shops, filter) {
