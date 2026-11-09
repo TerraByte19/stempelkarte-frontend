@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, Fragment } from 'react'
 import StatsView from '../components/StatsView'
 import { LogoZeichen } from '../components/Logo'
+import { ALLE, OHNE, auswahlOrdner, benutzteOrdner, imOrdner } from '../lib/adminOrdner'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -28,6 +29,12 @@ export default function Admin() {
   const [stimmen, setStimmen] = useState([])
   // Terminanfragen fuer Vorfuehrungen von der Startseite.
   const [termine, setTermine] = useState([])
+  // Reiter oben und Ordner-Filter im Reiter Laeden. Bleibt beim Neuladen der Seite.
+  const [reiter, setReiterState] = useState(() => sessionStorage.getItem('adminReiter') || 'laeden')
+  const [ordnerFilter, setOrdnerFilterState] = useState(() => sessionStorage.getItem('adminOrdner') || ALLE)
+  const [neuerLadenOffen, setNeuerLadenOffen] = useState(false)
+  function setReiter(r) { setReiterState(r); sessionStorage.setItem('adminReiter', r) }
+  function setOrdnerFilter(o) { setOrdnerFilterState(o); sessionStorage.setItem('adminOrdner', o) }
 
   useEffect(() => {
     const token = sessionStorage.getItem('adminToken')
@@ -378,6 +385,36 @@ export default function Admin() {
   }
 
   // Demo-Laden fuer die Website: Besucher holen sich eine Karte und stempeln sich selbst.
+  // Ordner setzen: sofort anzeigen, bei Fehler zuruecknehmen.
+  async function setOrdner(shop, ordner) {
+    const t = sessionStorage.getItem('adminToken')
+    const vorher = shop.ordner ?? null
+    setShops(list => list.map(s => s.id === shop.id ? { ...s, ordner } : s))
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/ordner`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordner })
+      })
+      if (res.status === 401) { logout(); return }
+      if (!res.ok) throw new Error(res.status === 404 ? 'Server kennt Ordner noch nicht (Backend-Deploy fehlt).' : '')
+      const data = await res.json()
+      setShops(list => list.map(s => s.id === shop.id ? { ...s, ordner: data.ordner ?? null } : s))
+    } catch (e) {
+      setShops(list => list.map(s => s.id === shop.id ? { ...s, ordner: vorher } : s))
+      alert('Ordner nicht gespeichert. ' + (e.message || ''))
+    }
+  }
+
+  function waehleOrdner(shop, wert) {
+    if (wert === '__neu') {
+      const name = (prompt('Name des neuen Ordners:') || '').trim()
+      if (name) setOrdner(shop, name.slice(0, 40))
+      return
+    }
+    setOrdner(shop, wert || null)
+  }
+
   async function setDemo(shopId, demo) {
     const t = sessionStorage.getItem('adminToken')
     try {
@@ -450,6 +487,12 @@ export default function Admin() {
     )
   }
 
+  const ordner = benutzteOrdner(shops)
+  // Gespeicherter Ordner kann inzwischen leer sein - dann alle zeigen.
+  const aktiverOrdner = ordnerFilter === ALLE || ordnerFilter === OHNE || ordner.includes(ordnerFilter) ? ordnerFilter : ALLE
+  const sichtbar = imOrdner(shops, aktiverOrdner)
+  const ordnerAuswahl = auswahlOrdner(shops)
+
   return (
       <div style={styles.container}>
         <div style={styles.header}>
@@ -460,242 +503,302 @@ export default function Admin() {
           <button style={styles.btnLogout} onClick={logout}>Ausloggen</button>
         </div>
 
-        <ScannerMessung />
-
-        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>
-            Kontaktanfragen ({anfragen.filter(a => !a.erledigt).length} offen)
-          </div>
-          <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
-            Aus dem Formular auf der Startseite. Antworten per Mail an die angegebene Adresse.
-          </div>
-          {anfragen.length === 0 && (
-            <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Anfragen.</div>
-          )}
-          <div style={{ maxHeight: 420, overflowY: 'auto' }}>
-            {anfragen.map(a => (
-              <div key={a.id} style={{ padding: '8px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
-                                       opacity: a.erledigt ? 0.5 : 1 }}>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
-                  <button
-                    onClick={() => setOffeneAnfrage(offeneAnfrage === a.id ? null : a.id)}
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                             font: 'inherit', fontWeight: 600, textAlign: 'start', minWidth: 140 }}>
-                    {a.laden} · {a.name}
-                  </button>
-                  <a href={`mailto:${a.email}?subject=${encodeURIComponent('Deine Anfrage bei Stampit')}`}
-                     style={{ color: '#3C3489' }}>{a.email}</a>
-                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
-                    {new Date(a.eingegangenAm).toLocaleString('de-DE')}
-                  </span>
-                  <button onClick={() => toggleAnfrageErledigt(a.id)}
-                          style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
-                                   border: '1px solid #DDD9EE', background: a.erledigt ? '#F3F1FA' : '#EAF3EA' }}>
-                    {a.erledigt ? 'Wieder öffnen' : 'Erledigt'}
-                  </button>
-                  <button onClick={() => deleteAnfrage(a.id, a.name)}
-                          style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
-                                   border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
-                    Löschen
-                  </button>
-                </div>
-                {offeneAnfrage === a.id && (
-                  <div style={{ whiteSpace: 'pre-line', marginTop: 8, padding: '8px 12px',
-                                borderInlineStart: '3px solid #3C3489', background: '#F7F6FB', borderRadius: 6 }}>
-                    {a.nachricht}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        <div style={styles.reiterLeiste}>
+          {[
+            ['laeden', 'Läden', shops.length],
+            ['anfragen', 'Anfragen', anfragen.filter(a => !a.erledigt).length],
+            ['vorfuehrungen', 'Vorführungen', termine.filter(x => x.status === 'OFFEN').length],
+            ['stimmen', 'Stimmen', stimmen.filter(x => x.status === 'OFFEN').length],
+            ['technik', 'Technik', geoVorfaelle.length],
+          ].map(([id, label, n]) => (
+            <button key={id} onClick={() => setReiter(id)}
+                    style={{ ...styles.reiter, ...(reiter === id ? styles.reiterAktiv : {}) }}>
+              {label}
+              {n > 0 && <span style={{ ...styles.reiterZahl, ...(id !== 'laeden' ? styles.reiterZahlOffen : {}),
+                                        ...(reiter === id ? styles.reiterZahlAktiv : {}) }}>{n}</span>}
+            </button>
+          ))}
         </div>
 
-        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>
-            Stimmen für die Startseite ({stimmen.filter(x => x.status === 'OFFEN').length} offen)
-          </div>
-          <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
-            Zitate aus der App (Profil). Freigegebene stehen auf der Startseite, der Wortlaut bleibt wie eingereicht.
-            Passt etwas nicht: ablehnen, der Laden sieht das und kann neu einreichen.
-          </div>
-          {stimmen.length === 0 && (
-            <div style={{ fontSize: 13, color: '#7A5200', background: '#FBF3E2', padding: '8px 12px', borderRadius: 8 }}>
-              Noch keine Stimmen. Erinnerung: 2 bis 3 zufriedene Läden bitten, in der App unter Profil ein Zitat
-              einzureichen (Block „Deine Stimme für die Stampit-Website“). Danach hier freigeben, dann steht es auf der Startseite.
-            </div>
-          )}
-          <div style={{ maxHeight: 480, overflowY: 'auto' }}>
-            {stimmen.map(x => (
-              <div key={x.id} style={{ padding: '10px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
-                                       opacity: x.status === 'ABGELEHNT' ? 0.6 : 1 }}>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
-                  <span style={{ fontWeight: 600, minWidth: 140 }}>{x.laden} · {x.ort}</span>
-                  {x.person && <span style={{ color: '#6B6678' }}>{x.person}</span>}
-                  <a href={`mailto:${x.email}`} style={{ color: '#3C3489' }}>{x.email}</a>
-                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}
-                        title={`Einverständnis ${new Date(x.einverstandenAm).toLocaleString('de-DE')}`}>
-                    {new Date(x.eingereichtAm).toLocaleString('de-DE')}
-                  </span>
-                  <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6,
-                                 background: x.status === 'FREIGEGEBEN' ? '#EAF3EA' : x.status === 'ABGELEHNT' ? '#FBEDEB' : '#FBF3E2' }}>
-                    {x.status === 'FREIGEGEBEN' ? 'auf der Website' : x.status === 'ABGELEHNT' ? 'abgelehnt' : 'wartet'}
-                  </span>
-                  {x.status !== 'FREIGEGEBEN' && (
-                    <button onClick={() => entscheideStimme(x.id, 'freigeben')}
-                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
-                                     border: '1px solid #DDD9EE', background: '#EAF3EA' }}>
-                      Freigeben
-                    </button>
-                  )}
-                  {x.status !== 'ABGELEHNT' && (
-                    <button onClick={() => entscheideStimme(x.id, 'ablehnen')}
-                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
-                                     border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
-                      Ablehnen
-                    </button>
-                  )}
-                </div>
-                <div style={{ marginTop: 8, padding: '8px 12px', borderInlineStart: '3px solid #3C3489',
-                              background: '#F7F6FB', borderRadius: 6, whiteSpace: 'pre-line' }}>
-                  „{x.zitat}“
-                </div>
+        {reiter === 'laeden' && (
+          <>
+            <div style={styles.stats}>
+              <div style={styles.statCard}>
+                <div style={styles.statNumber}>{shops.length}</div>
+                <div style={styles.statLabel}>Gesamt Laden</div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>
-            Vorführungen ({termine.filter(x => x.status === 'OFFEN').length} offen)
-          </div>
-          <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
-            Terminanfragen von der Startseite. Bestätigen per WhatsApp, Anruf oder Mail, dann hier auf „Bestätigt“.
-          </div>
-          {termine.length === 0 && (
-            <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Anfragen.</div>
-          )}
-          <div style={{ maxHeight: 480, overflowY: 'auto' }}>
-            {termine.map(x => (
-              <div key={x.id} style={{ padding: '10px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
-                                       opacity: x.status === 'ERLEDIGT' ? 0.5 : 1 }}>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
-                  <span style={{ fontWeight: 700, minWidth: 150 }}>
-                    {new Date(x.wunschAm + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} · {x.wunschZeit}
-                  </span>
-                  <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, background: '#F3F1FA' }}>
-                    {x.art === 'IM_LADEN' ? 'Im Laden' : x.art === 'TELEFON' ? 'Telefon' : 'Video'}
-                  </span>
-                  <span style={{ fontWeight: 600 }}>{x.laden} · {x.name}</span>
-                  {x.telefon && <a href={`tel:${x.telefon.replace(/\s+/g, '')}`} style={{ color: '#3C3489' }}>{x.telefon}</a>}
-                  {x.email && <a href={`mailto:${x.email}?subject=${encodeURIComponent('Deine Stampit-Vorführung')}`} style={{ color: '#3C3489' }}>{x.email}</a>}
-                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
-                    {new Date(x.eingegangenAm).toLocaleString('de-DE')}{x.sprache && x.sprache !== 'de' ? ` · ${x.sprache.toUpperCase()}` : ''}
-                  </span>
-                  <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6,
-                                 background: x.status === 'BESTAETIGT' ? '#EAF3EA' : x.status === 'ERLEDIGT' ? '#F3F1FA' : '#FBF3E2' }}>
-                    {x.status === 'BESTAETIGT' ? 'bestätigt' : x.status === 'ERLEDIGT' ? 'erledigt' : 'offen'}
-                  </span>
-                  {x.status !== 'BESTAETIGT' && (
-                    <button onClick={() => setzeTerminStatus(x.id, 'BESTAETIGT')}
-                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
-                                     border: '1px solid #DDD9EE', background: '#EAF3EA' }}>
-                      Bestätigt
-                    </button>
-                  )}
-                  {x.status !== 'ERLEDIGT' && (
-                    <button onClick={() => setzeTerminStatus(x.id, 'ERLEDIGT')}
-                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
-                                     border: '1px solid #DDD9EE', background: '#F3F1FA' }}>
-                      Erledigt
-                    </button>
-                  )}
-                  <button onClick={() => loescheTermin(x.id, x.laden)}
-                          style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
-                                   border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
-                    Löschen
-                  </button>
-                </div>
-                {(x.adresse || x.nachricht) && (
-                  <div style={{ marginTop: 8, padding: '8px 12px', borderInlineStart: '3px solid #3C3489',
-                                background: '#F7F6FB', borderRadius: 6, whiteSpace: 'pre-line' }}>
-                    {x.adresse && <div>{x.adresse}</div>}
-                    {x.nachricht && <div style={{ color: '#6B6678' }}>{x.nachricht}</div>}
-                  </div>
-                )}
+              <div style={styles.statCard}>
+                <div style={styles.statNumber}>{shops.filter(s => s.active).length}</div>
+                <div style={styles.statLabel}>Aktive Laden</div>
               </div>
-            ))}
-          </div>
-        </div>
+              <div style={styles.statCard}>
+                <div style={styles.statNumber}>{shops.reduce((sum, s) => sum + s.customerCount, 0)}</div>
+                <div style={styles.statLabel}>Gesamt Kunden</div>
+              </div>
+              <div style={styles.statCard}>
+                <div style={styles.statNumber}>{shops.reduce((sum, s) => sum + s.cardCount, 0)}</div>
+                <div style={styles.statLabel}>Gesamt Karten</div>
+              </div>
+            </div>
 
-        {geoVorfaelle.length > 0 && (
-          <div style={{ background: '#FBEFE2', border: '1px solid #E3B77E', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-            <div style={{ fontWeight: 700, marginBottom: 4 }}>
-              Scans ausserhalb des Ladens ({geoVorfaelle.length})
-            </div>
-            <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
-              Der Stempel wurde gebucht. Der Ort kommt aus dem Browser des Personals
-              und ist nur so genau wie dessen Geraet.
-            </div>
-            <div style={{ maxHeight: 260, overflowY: 'auto' }}>
-              {geoVorfaelle.map(v => (
-                <div key={v.id} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline',
-                                         padding: '6px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13 }}>
-                  <span style={{ fontWeight: 600, minWidth: 140 }}>{v.shopName}</span>
-                  <span style={{ color: v.art === 'WEIT_WEG' ? '#B4462F' : '#6B6678' }}>
-                    {v.art === 'WEIT_WEG' ? `${v.distanzMeter} m entfernt` : 'kein Ort gesendet'}
-                  </span>
-                  <span style={{ color: '#6B6678' }}>{v.staffLabel || 'ohne Kasse'}</span>
-                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
-                    {new Date(v.passiertAm).toLocaleString('de-DE')}
-                  </span>
-                </div>
+            <div style={styles.ordnerLeiste}>
+              {[[ALLE, 'Alle', shops.length],
+                ...ordner.map(o => [o, o, shops.filter(s => s.ordner === o).length]),
+                [OHNE, 'Ohne Ordner', shops.filter(s => !s.ordner).length],
+              ].map(([id, label, n]) => (
+                <button key={id} onClick={() => setOrdnerFilter(id)}
+                        style={{ ...styles.ordner, ...(aktiverOrdner === id ? styles.ordnerAktiv : {}) }}>
+                  {label} <span style={{ opacity: 0.6 }}>{n}</span>
+                </button>
               ))}
+              <button onClick={() => setNeuerLadenOffen(o => !o)} style={styles.btnNeuerLaden}>
+                {neuerLadenOffen ? 'Schließen' : '+ Neuer Laden'}
+              </button>
             </div>
-          </div>
-        )}
-
-        <div style={styles.stats}>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>{shops.length}</div>
-            <div style={styles.statLabel}>Gesamt Laden</div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>{shops.filter(s => s.active).length}</div>
-            <div style={styles.statLabel}>Aktive Laden</div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>{shops.reduce((sum, s) => sum + s.customerCount, 0)}</div>
-            <div style={styles.statLabel}>Gesamt Kunden</div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statNumber}>{shops.reduce((sum, s) => sum + s.cardCount, 0)}</div>
-            <div style={styles.statLabel}>Gesamt Karten</div>
-          </div>
-        </div>
-
-        <CreateShop onCreated={loadShops} />
-
-        {changingPasswordFor && (
-            <ChangePassword
-                shop={changingPasswordFor}
-                onDone={() => setChangingPasswordFor(null)}
-            />
-        )}
-
-        {sortError && (
-            <div style={styles.sortError}>
-              {sortError}
-              <button style={styles.sortErrorClose} onClick={() => setSortError('')}>✕</button>
+            <div style={{ fontSize: 12, color: '#9A94A8', margin: '-8px 0 14px' }}>
+              Einordnen über die Auswahl unter dem Ladennamen. Ordner sind nur für dich, am Laden ändert sich nichts.
             </div>
+
+            {neuerLadenOffen && <CreateShop onCreated={loadShops} />}
+
+
+            {changingPasswordFor && (
+                <ChangePassword
+                    shop={changingPasswordFor}
+                    onDone={() => setChangingPasswordFor(null)}
+                />
+            )}
+
+            {sortError && (
+                <div style={styles.sortError}>
+                  {sortError}
+                  <button style={styles.sortErrorClose} onClick={() => setSortError('')}>✕</button>
+                </div>
+            )}
+
+            {sichtbar.length === 0 && (
+                <div style={{ fontSize: 13, color: '#9A94A8', padding: '16px 0' }}>In diesem Ordner liegt noch kein Laden.</div>
+            )}
+
+            {sichtbar.some(s => (s.language || 'de') !== 'ar') && renderShopTable(sichtbar.filter(s => (s.language || 'de') !== 'ar'))}
+
+            {sichtbar.some(s => (s.language || 'de') === 'ar') && (
+                <>
+                  <h2 style={styles.sectionTitle}>Arabische Läden (RTL)</h2>
+                  {renderShopTable(sichtbar.filter(s => (s.language || 'de') === 'ar'))}
+                </>
+            )}
+          </>
         )}
 
-        {renderShopTable(shops.filter(s => (s.language || 'de') !== 'ar'))}
+        {reiter === 'anfragen' && (
+          <>
+            <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                Kontaktanfragen ({anfragen.filter(a => !a.erledigt).length} offen)
+              </div>
+              <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+                Aus dem Formular auf der Startseite. Antworten per Mail an die angegebene Adresse.
+              </div>
+              {anfragen.length === 0 && (
+                <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Anfragen.</div>
+              )}
+              <div style={{ maxHeight: 420, overflowY: 'auto' }}>
+                {anfragen.map(a => (
+                  <div key={a.id} style={{ padding: '8px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
+                                           opacity: a.erledigt ? 0.5 : 1 }}>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
+                      <button
+                        onClick={() => setOffeneAnfrage(offeneAnfrage === a.id ? null : a.id)}
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                                 font: 'inherit', fontWeight: 600, textAlign: 'start', minWidth: 140 }}>
+                        {a.laden} · {a.name}
+                      </button>
+                      <a href={`mailto:${a.email}?subject=${encodeURIComponent('Deine Anfrage bei Stampit')}`}
+                         style={{ color: '#3C3489' }}>{a.email}</a>
+                      <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
+                        {new Date(a.eingegangenAm).toLocaleString('de-DE')}
+                      </span>
+                      <button onClick={() => toggleAnfrageErledigt(a.id)}
+                              style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                       border: '1px solid #DDD9EE', background: a.erledigt ? '#F3F1FA' : '#EAF3EA' }}>
+                        {a.erledigt ? 'Wieder öffnen' : 'Erledigt'}
+                      </button>
+                      <button onClick={() => deleteAnfrage(a.id, a.name)}
+                              style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                       border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
+                        Löschen
+                      </button>
+                    </div>
+                    {offeneAnfrage === a.id && (
+                      <div style={{ whiteSpace: 'pre-line', marginTop: 8, padding: '8px 12px',
+                                    borderInlineStart: '3px solid #3C3489', background: '#F7F6FB', borderRadius: 6 }}>
+                        {a.nachricht}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
-        {shops.some(s => (s.language || 'de') === 'ar') && (
-            <>
-              <h2 style={styles.sectionTitle}>Arabische Läden (RTL)</h2>
-              {renderShopTable(shops.filter(s => (s.language || 'de') === 'ar'))}
-            </>
+        {reiter === 'vorfuehrungen' && (
+          <>
+            <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                Vorführungen ({termine.filter(x => x.status === 'OFFEN').length} offen)
+              </div>
+              <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+                Terminanfragen von der Startseite. Bestätigen per WhatsApp, Anruf oder Mail, dann hier auf „Bestätigt“.
+              </div>
+              {termine.length === 0 && (
+                <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Anfragen.</div>
+              )}
+              <div style={{ maxHeight: 480, overflowY: 'auto' }}>
+                {termine.map(x => (
+                  <div key={x.id} style={{ padding: '10px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
+                                           opacity: x.status === 'ERLEDIGT' ? 0.5 : 1 }}>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
+                      <span style={{ fontWeight: 700, minWidth: 150 }}>
+                        {new Date(x.wunschAm + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} · {x.wunschZeit}
+                      </span>
+                      <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, background: '#F3F1FA' }}>
+                        {x.art === 'IM_LADEN' ? 'Im Laden' : x.art === 'TELEFON' ? 'Telefon' : 'Video'}
+                      </span>
+                      <span style={{ fontWeight: 600 }}>{x.laden} · {x.name}</span>
+                      {x.telefon && <a href={`tel:${x.telefon.replace(/\s+/g, '')}`} style={{ color: '#3C3489' }}>{x.telefon}</a>}
+                      {x.email && <a href={`mailto:${x.email}?subject=${encodeURIComponent('Deine Stampit-Vorführung')}`} style={{ color: '#3C3489' }}>{x.email}</a>}
+                      <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
+                        {new Date(x.eingegangenAm).toLocaleString('de-DE')}{x.sprache && x.sprache !== 'de' ? ` · ${x.sprache.toUpperCase()}` : ''}
+                      </span>
+                      <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6,
+                                     background: x.status === 'BESTAETIGT' ? '#EAF3EA' : x.status === 'ERLEDIGT' ? '#F3F1FA' : '#FBF3E2' }}>
+                        {x.status === 'BESTAETIGT' ? 'bestätigt' : x.status === 'ERLEDIGT' ? 'erledigt' : 'offen'}
+                      </span>
+                      {x.status !== 'BESTAETIGT' && (
+                        <button onClick={() => setzeTerminStatus(x.id, 'BESTAETIGT')}
+                                style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                         border: '1px solid #DDD9EE', background: '#EAF3EA' }}>
+                          Bestätigt
+                        </button>
+                      )}
+                      {x.status !== 'ERLEDIGT' && (
+                        <button onClick={() => setzeTerminStatus(x.id, 'ERLEDIGT')}
+                                style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                         border: '1px solid #DDD9EE', background: '#F3F1FA' }}>
+                          Erledigt
+                        </button>
+                      )}
+                      <button onClick={() => loescheTermin(x.id, x.laden)}
+                              style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                       border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
+                        Löschen
+                      </button>
+                    </div>
+                    {(x.adresse || x.nachricht) && (
+                      <div style={{ marginTop: 8, padding: '8px 12px', borderInlineStart: '3px solid #3C3489',
+                                    background: '#F7F6FB', borderRadius: 6, whiteSpace: 'pre-line' }}>
+                        {x.adresse && <div>{x.adresse}</div>}
+                        {x.nachricht && <div style={{ color: '#6B6678' }}>{x.nachricht}</div>}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {reiter === 'stimmen' && (
+          <>
+            <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                Stimmen für die Startseite ({stimmen.filter(x => x.status === 'OFFEN').length} offen)
+              </div>
+              <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+                Zitate aus der App (Profil). Freigegebene stehen auf der Startseite, der Wortlaut bleibt wie eingereicht.
+                Passt etwas nicht: ablehnen, der Laden sieht das und kann neu einreichen.
+              </div>
+              {stimmen.length === 0 && (
+                <div style={{ fontSize: 13, color: '#7A5200', background: '#FBF3E2', padding: '8px 12px', borderRadius: 8 }}>
+                  Noch keine Stimmen. Erinnerung: 2 bis 3 zufriedene Läden bitten, in der App unter Profil ein Zitat
+                  einzureichen (Block „Deine Stimme für die Stampit-Website“). Danach hier freigeben, dann steht es auf der Startseite.
+                </div>
+              )}
+              <div style={{ maxHeight: 480, overflowY: 'auto' }}>
+                {stimmen.map(x => (
+                  <div key={x.id} style={{ padding: '10px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13,
+                                           opacity: x.status === 'ABGELEHNT' ? 0.6 : 1 }}>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline' }}>
+                      <span style={{ fontWeight: 600, minWidth: 140 }}>{x.laden} · {x.ort}</span>
+                      {x.person && <span style={{ color: '#6B6678' }}>{x.person}</span>}
+                      <a href={`mailto:${x.email}`} style={{ color: '#3C3489' }}>{x.email}</a>
+                      <span style={{ color: '#9A94A8', marginLeft: 'auto' }}
+                            title={`Einverständnis ${new Date(x.einverstandenAm).toLocaleString('de-DE')}`}>
+                        {new Date(x.eingereichtAm).toLocaleString('de-DE')}
+                      </span>
+                      <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6,
+                                     background: x.status === 'FREIGEGEBEN' ? '#EAF3EA' : x.status === 'ABGELEHNT' ? '#FBEDEB' : '#FBF3E2' }}>
+                        {x.status === 'FREIGEGEBEN' ? 'auf der Website' : x.status === 'ABGELEHNT' ? 'abgelehnt' : 'wartet'}
+                      </span>
+                      {x.status !== 'FREIGEGEBEN' && (
+                        <button onClick={() => entscheideStimme(x.id, 'freigeben')}
+                                style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                         border: '1px solid #DDD9EE', background: '#EAF3EA' }}>
+                          Freigeben
+                        </button>
+                      )}
+                      {x.status !== 'ABGELEHNT' && (
+                        <button onClick={() => entscheideStimme(x.id, 'ablehnen')}
+                                style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                         border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
+                          Ablehnen
+                        </button>
+                      )}
+                    </div>
+                    <div style={{ marginTop: 8, padding: '8px 12px', borderInlineStart: '3px solid #3C3489',
+                                  background: '#F7F6FB', borderRadius: 6, whiteSpace: 'pre-line' }}>
+                      „{x.zitat}“
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {reiter === 'technik' && (
+          <>
+            {(
+              <div style={{ background: '#FBEFE2', border: '1px solid #E3B77E', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                  Scans ausserhalb des Ladens ({geoVorfaelle.length})
+                </div>
+                <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+                  Der Stempel wurde gebucht. Der Ort kommt aus dem Browser des Personals
+                  und ist nur so genau wie dessen Geraet.
+                </div>
+                <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+                  {geoVorfaelle.map(v => (
+                    <div key={v.id} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline',
+                                             padding: '6px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13 }}>
+                      <span style={{ fontWeight: 600, minWidth: 140 }}>{v.shopName}</span>
+                      <span style={{ color: v.art === 'WEIT_WEG' ? '#B4462F' : '#6B6678' }}>
+                        {v.art === 'WEIT_WEG' ? `${v.distanzMeter} m entfernt` : 'kein Ort gesendet'}
+                      </span>
+                      <span style={{ color: '#6B6678' }}>{v.staffLabel || 'ohne Kasse'}</span>
+                      <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
+                        {new Date(v.passiertAm).toLocaleString('de-DE')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <ScannerMessung />
+          </>
         )}
       </div>
   )
@@ -748,7 +851,19 @@ export default function Admin() {
                         }}
                         onDragEnd={() => { setDraggedId(null); setDragOverId(null) }}
                     >⠿</span>
-                    <span style={styles.shopName}>{shop.name}</span>
+                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4, minWidth: 0 }}>
+                      <span style={styles.shopName}>{shop.name}</span>
+                      <select
+                          title="Ordner im Admin-Panel"
+                          value={shop.ordner ?? ''}
+                          onChange={e => waehleOrdner(shop, e.target.value)}
+                          style={{ ...styles.ordnerSelect, color: shop.ordner ? '#3C3489' : '#9A94A8' }}
+                      >
+                        <option value="">Ohne Ordner</option>
+                        {ordnerAuswahl.map(o => <option key={o} value={o}>{o}</option>)}
+                        <option value="__neu">+ Neuer Ordner…</option>
+                      </select>
+                    </span>
                     <span style={styles.shopEmail}>{shop.email}</span>
                     <span style={styles.cell}>{shop.cardCount}</span>
                     {/* Basic: Kunden gegen die Grenze, rot ab 100 (nur Hinweis, keine Sperre). */}
@@ -1114,6 +1229,17 @@ const styles = {
   input: { width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '15px', outline: 'none', boxSizing: 'border-box' },
   btnLogin: { width: '100%', padding: '12px', background: '#3C3489', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' },
   container: { padding: '24px', maxWidth: '1200px', margin: '0 auto' },
+  reiterLeiste: { display: 'flex', gap: 4, borderBottom: '1px solid #DDD9EE', marginBottom: 20, overflowX: 'auto', overflowY: 'hidden' },
+  reiter: { display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: 'none', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#6B6678', whiteSpace: 'nowrap' },
+  reiterAktiv: { color: '#3C3489', borderBottomColor: '#3C3489' },
+  reiterZahl: { fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 10, background: '#F3F1FA', color: '#6B6678' },
+  reiterZahlOffen: { background: '#FBF3E2', color: '#7A5200' },
+  reiterZahlAktiv: { background: '#3C3489', color: 'white' },
+  ordnerLeiste: { display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', marginBottom: 14 },
+  ordner: { padding: '6px 12px', borderRadius: 16, border: '1px solid #DDD9EE', background: 'white', cursor: 'pointer', fontSize: 13, color: '#333' },
+  ordnerAktiv: { background: '#3C3489', borderColor: '#3C3489', color: 'white' },
+  btnNeuerLaden: { marginLeft: 'auto', padding: '6px 14px', borderRadius: 8, border: 'none', background: '#3C3489', color: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  ordnerSelect: { fontSize: 11, padding: '1px 4px', borderRadius: 6, border: '1px solid #e4e1ef', background: '#FAF9FD', maxWidth: 160 },
   sectionTitle: { fontSize: '16px', fontWeight: '700', color: '#1a4fa0', margin: '28px 0 10px' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
   title: { fontSize: '24px', fontWeight: '700', margin: '0 0 4px', color: '#1a1a1a' },
