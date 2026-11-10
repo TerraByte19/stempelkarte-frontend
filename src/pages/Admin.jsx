@@ -2,6 +2,7 @@
 import StatsView from '../components/StatsView'
 import { LogoZeichen } from '../components/Logo'
 import { ALLE, OHNE, auswahlOrdner, benutzteOrdner, imOrdner } from '../lib/adminOrdner'
+import { supportStarten } from '../lib/supportZugang'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -12,6 +13,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [changingPasswordFor, setChangingPasswordFor] = useState(null)
+  const [changingEmailFor, setChangingEmailFor] = useState(null)
   const [expandedShopId, setExpandedShopId] = useState(null)
   const [draggedId, setDraggedId] = useState(null)   // Laden am Haken
   const [dragOverId, setDragOverId] = useState(null) // Zeile unter dem Zeiger
@@ -453,6 +455,50 @@ export default function Admin() {
     }
   }
 
+  /**
+   * Support-Zugang: oeffnet das Dashboard eines Ladens in einem neuen Tab.
+   * Das Backend schreibt den Zugriff ins Protokoll und gibt einen Laden-Token
+   * fuer eine Stunde heraus. Das Passwort des Ladens bleibt unberuehrt.
+   *
+   * Der Tab wird VOR der Anfrage geoeffnet: nach einem await blockt der
+   * Browser neue Fenster.
+   */
+  async function oeffneLaden(shop) {
+    if (!confirm(`Laden "${shop.name}" öffnen?\n\n- Du siehst und änderst den ECHTEN Laden.\n- Der Zugriff wird protokolliert.\n- Gilt 1 Stunde.\n- Ein Laden-Login in diesem Browser wird ersetzt.`)) return
+
+    const tab = window.open('', '_blank')
+    const t = sessionStorage.getItem('adminToken')
+    let res
+    try {
+      res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/zugang`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+    } catch {
+      tab?.close()
+      alert('Server nicht erreichbar')
+      return
+    }
+    if (res.status === 401) { tab?.close(); logout(); return }
+    const data = await res.json().catch(() => ({}))
+    try {
+      if (!res.ok) throw new Error(data.error || 'Laden konnte nicht geöffnet werden')
+      supportStarten(localStorage, data)
+    } catch (e) {
+      tab?.close()
+      alert('Fehler: ' + e.message)
+      return
+    }
+    if (tab) {
+      // Der neue Tab erbt eine Kopie des Admin-Logins. Im Laden-Tab hat der
+      // Admin-Token nichts verloren.
+      try { tab.sessionStorage.removeItem('adminToken') } catch { /* dann bleibt die Kopie */ }
+      tab.location.href = '/'
+    } else {
+      window.location.href = '/'   // Fenster geblockt: im selben Tab oeffnen
+    }
+  }
+
   function logout() {
     sessionStorage.removeItem('adminToken')
     setLoggedIn(false)
@@ -566,6 +612,15 @@ export default function Admin() {
                 <ChangePassword
                     shop={changingPasswordFor}
                     onDone={() => setChangingPasswordFor(null)}
+                />
+            )}
+
+            {changingEmailFor && (
+                <ChangeEmail
+                    key={changingEmailFor.id}
+                    shop={changingEmailFor}
+                    onChanged={loadShops}
+                    onDone={() => setChangingEmailFor(null)}
                 />
             )}
 
@@ -798,6 +853,7 @@ export default function Admin() {
             )}
 
             <ScannerMessung />
+            <ZugriffProtokoll />
           </>
         )}
       </div>
@@ -959,7 +1015,21 @@ export default function Admin() {
                     }}>
                   {shop.active ? 'Aktiv' : 'Gesperrt'}
                 </span>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+                      <button
+                          title={shop.active
+                              ? 'Dashboard dieses Ladens öffnen (1 Stunde, wird protokolliert)'
+                              : 'Gesperrt - erst entsperren, dann öffnen'}
+                          disabled={!shop.active}
+                          style={{
+                            ...styles.btnToggle,
+                            background: '#fff4e5', color: '#b35c00',
+                            ...(shop.active ? {} : { opacity: 0.45, cursor: 'not-allowed' }),
+                          }}
+                          onClick={() => oeffneLaden(shop)}
+                      >
+                        Öffnen
+                      </button>
                       <button
                           style={{
                             ...styles.btnToggle,
@@ -985,6 +1055,13 @@ export default function Admin() {
                           onClick={() => setChangingPasswordFor(shop)}
                       >
                         PW
+                      </button>
+                      <button
+                          title="Login-Adresse des Ladens ändern"
+                          style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
+                          onClick={() => setChangingEmailFor(shop)}
+                      >
+                        Mail
                       </button>
                       <button
                           style={{ ...styles.btnToggle, background: '#1a1a1a', color: 'white' }}
@@ -1203,6 +1280,111 @@ function ChangePassword({ shop, onDone }) {
             {loading ? 'Andert...' : 'Passwort andern'}
           </button>
         </form>
+      </div>
+  )
+}
+
+/**
+ * Login-Adresse eines Ladens aendern. Das Backend prueft Form und Dopplung,
+ * speichert klein geschrieben und schreibt alt -> neu ins Protokoll.
+ */
+function ChangeEmail({ shop, onChanged, onDone }) {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+
+  async function handleChange(e) {
+    e.preventDefault()
+    const neu = email.trim()
+    if (!neu) return
+    if (!confirm(`Login-Adresse von "${shop.name}" ändern?\n\nAlt: ${shop.email}\nNeu: ${neu.toLowerCase()}\n\nDer Laden loggt sich danach nur noch mit der neuen Adresse ein. Das Passwort bleibt gleich.`)) return
+    setLoading(true)
+    setError('')
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
+        body: JSON.stringify({ email: neu })
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setSuccess(`Geändert. Neue Login-Adresse: ${data.email}`)
+        setEmail('')
+        onChanged()
+        setTimeout(onDone, 2500)
+      } else {
+        setError(data.error || 'Fehler')
+      }
+    } catch {
+      setError('Server nicht erreichbar')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+      <div style={createStyles.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <h2 style={{ ...createStyles.title, margin: 0 }}>E-Mail ändern: {shop.name}</h2>
+          <button onClick={onDone} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888' }}>x</button>
+        </div>
+        <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 14 }}>
+          Jetzt: <strong>{shop.email}</strong>. Mit dieser Adresse loggt sich der Laden ein, und an sie gehen unsere Mails.
+          Das Passwort bleibt gleich. Sag dem Laden Bescheid.
+        </div>
+        {error && <div style={createStyles.error}>{error}</div>}
+        {success && <div style={createStyles.success}>{success}</div>}
+        <form onSubmit={handleChange} style={createStyles.form}>
+          <input style={createStyles.input} type="email" placeholder="Neue E-Mail-Adresse" value={email}
+                 onChange={e => setEmail(e.target.value)} autoComplete="off" required />
+          <button style={createStyles.btn} type="submit" disabled={loading}>
+            {loading ? 'Ändert …' : 'E-Mail ändern'}
+          </button>
+        </form>
+      </div>
+  )
+}
+
+/**
+ * Protokoll: wann der Betreiber einen Laden geoeffnet oder dessen
+ * Login-Adresse geaendert hat. Nur lesen - Eintraege loescht niemand.
+ */
+function ZugriffProtokoll() {
+  const [zeilen, setZeilen] = useState(null)
+  useEffect(() => {
+    const t = sessionStorage.getItem('adminToken')
+    fetch(`${BASE_URL}/api/admin/zugriffe`, { headers: { 'Authorization': `Bearer ${t}` } })
+        .then(r => (r.ok ? r.json() : []))
+        .then(d => setZeilen(Array.isArray(d) ? d : []))
+        .catch(() => setZeilen([]))
+  }, [])
+  return (
+      <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>Zugriffe auf Läden {zeilen ? `(${zeilen.length})` : ''}</div>
+        <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+          Jedes „Öffnen“ und jede geänderte Login-Adresse. Die letzten 200 Einträge.
+        </div>
+        {zeilen === null ? <div style={{ fontSize: 13, color: '#9A94A8' }}>Lädt …</div>
+          : zeilen.length === 0 ? <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Zugriffe.</div>
+          : (
+            <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+              {zeilen.map(z => (
+                <div key={z.id} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline',
+                                         padding: '6px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13 }}>
+                  <span style={{ fontWeight: 600, minWidth: 140 }}>{z.shopName}</span>
+                  <span style={{ color: z.art === 'EMAIL' ? '#3C3489' : '#b35c00' }}>
+                    {z.art === 'EMAIL' ? 'E-Mail geändert' : 'Laden geöffnet'}
+                  </span>
+                  {z.detail && <span style={{ color: '#6B6678' }}>{z.detail}</span>}
+                  <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
+                    {new Date(z.zeitpunkt).toLocaleString('de-DE')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
       </div>
   )
 }

@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import { languages } from '../i18n'
 import './Layout.css'
 import Logo from './Logo'
+import { supportAusToken, supportBeenden, uhrzeit } from '../lib/supportZugang'
 
 // Strich-Symbole fuer Seitenleiste, untere Leiste und Mehr-Blatt - einmal
 // definiert, damit alle drei gleich aussehen.
@@ -54,11 +55,23 @@ export default function Layout() {
   const mehrEintrag = ({ isActive }) => 'mehr-eintrag' + (isActive ? ' aktiv' : '')
   const zu = () => setMehrOffen(false)
 
+  // Support-Zugang aus dem Admin-Panel: der Balken sagt dem Betreiber, in
+  // welchem Laden er gerade ist. Haengt am Token selbst, nicht an einem Merker.
+  const support = supportAusToken(localStorage.getItem('token'))
+
   function logout() {
     localStorage.removeItem('token')
     localStorage.removeItem('shop')
     localStorage.removeItem('staffToken')
     navigate('/login')
+  }
+
+  // Der Zugang wurde in einem eigenen Tab geoeffnet: zumachen. Laesst der
+  // Browser das nicht zu, geht es zurueck ins Admin-Panel.
+  function supportEnde() {
+    supportBeenden(localStorage)
+    window.close()
+    window.location.href = '/admin'
   }
 
   const navStyle = ({ isActive }) => ({
@@ -99,6 +112,14 @@ export default function Layout() {
       </aside>
 
       <main className="main-content">
+        {support && (
+          <div style={styles.support} role="status">
+            <span>
+              <strong>Support-Zugang.</strong> Du bist im Laden „{shop.name || shop.id}“. Änderungen gelten für den echten Laden. Endet um {uhrzeit(support.bis)}.
+            </span>
+            <button type="button" onClick={supportEnde} style={styles.supportBtn}>Beenden</button>
+          </div>
+        )}
         <Outlet />
       </main>
 
@@ -167,6 +188,8 @@ export default function Layout() {
 }
 
 const styles = {
+  support: { position: 'sticky', top: 0, zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', background: '#fff4e5', color: '#7a3f00', border: '1.5px solid #f0b060', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', fontSize: '14px', lineHeight: 1.4 },
+  supportBtn: { background: '#b35c00', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'inherit', flexShrink: 0 },
   marke: { display: 'flex', justifyContent: 'center', marginBottom: '14px' },
   shopName: { fontSize: '14px', fontWeight: '600', textAlign: 'center', marginBottom: '32px', opacity: 0.9, color: 'white' },
   langSelect: { background: 'rgba(255,255,255,0.15)', color: 'white', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', fontSize: '13px', width: '100%', marginBottom: '8px' },
