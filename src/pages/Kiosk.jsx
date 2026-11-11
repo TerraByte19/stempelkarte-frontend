@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode'
 import { useLang } from '../LangContext'
 import { holeStandort } from '../lib/standort'
+import { beobachteLage } from '../lib/scannerLage'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -44,8 +45,13 @@ export default function Kiosk({ shopName, ortPflicht }) {
   useEffect(() => {
     lebt.current = true
     starteKamera()
+    // Tablet hoch oder quer in der Halterung, auch nach dem Umdrehen: die
+    // Leseflaeche folgt dem Kamerafenster (lib/scannerLage). Der Behaelter
+    // bleibt die ganze Zeit stehen, deshalb reicht ein Beobachter.
+    const lageEnde = beobachteLage(document.getElementById('kiosk-reader'), () => qrRef.current)
     return () => {
       lebt.current = false
+      lageEnde()
       clearTimeout(timerRef.current)
       stoppeKamera()
     }

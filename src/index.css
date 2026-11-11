@@ -77,6 +77,16 @@ h1, h2, h3 {
   object-fit: cover !important;
 }
 
+/* Scanner im Querformat (Tablet in der Halterung, gedrehtes Handy): das
+   Kamerafenster nimmt, was unter Kopfzeile und Knoepfen an Hoehe bleibt -
+   sonst rutscht "Kamera stoppen" aus dem Bild. Hochformat bleibt wie es war. */
+@media (orientation: landscape) {
+  #qr-reader {
+    max-height: calc(100vh - 200px) !important;
+    min-height: 180px;
+  }
+}
+
 /* Platzhalter waehrend eine nachgeladene Route geholt wird. */
 .route-loading {
   display: flex;

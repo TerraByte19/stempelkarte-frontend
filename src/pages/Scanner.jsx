@@ -8,6 +8,7 @@ import { holeStandort, erlaubnisStatus, warSchonFreigegeben, merkeFreigabe, plat
 import Kiosk from './Kiosk'
 import { lade as ladeWahl, speichere as speichereWahl, rundeHinzu, naechsterGegner, messenJetzt, statusText } from '../lib/scannerWahl'
 import { starteLeser, verfuegbareLeser } from '../lib/scannerLeser'
+import { beobachteLage, lageDaten } from '../lib/scannerLage'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -42,6 +43,9 @@ export default function Scanner() {
   // liest je Stempel ein Herausforderer mit. Der erste Treffer stempelt.
   const wahlRef = useRef(ladeWahl(localStorage))
   const rundeRef = useRef(null)
+  // Hoch- und Querformat: haelt die Leseflaeche des alten Lesers aktuell,
+  // solange die Kamera laeuft (lib/scannerLage). Wert = Aufraeum-Funktion.
+  const lageRef = useRef(null)
   const [wahlStatus, setWahlStatus] = useState(() => statusText(wahlRef.current))
   const navigate = useNavigate()
 
@@ -238,7 +242,9 @@ export default function Scanner() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Staff-Token': localStorage.getItem('staffToken') },
       body: JSON.stringify({ gegner: r.gegner, altMs: alt, gegnerMs, aktiv: wahlRef.current.aktiv,
-        plattform: plattform(), geraet: (navigator.userAgent || '').slice(0, 200) }),
+        plattform: plattform(), geraet: (navigator.userAgent || '').slice(0, 200),
+        // Hoch oder quer gehalten, und passt das Kamerabild dazu?
+        ...lageDaten(document.querySelector('#qr-reader video')), app: alsAppInstalliert() === true }),
     }).catch(() => {})
   }
 
@@ -483,6 +489,10 @@ export default function Scanner() {
           },
           () => {}
       )
+      // Ab jetzt folgt die Leseflaeche dem Kamerafenster - auch wenn das
+      // Geraet mitten im Scannen gedreht wird.
+      lageRef.current?.()
+      lageRef.current = beobachteLage(document.getElementById('qr-reader'), () => html5QrRef.current)
       rundeStarten()
     } catch (e) {
       console.error(e)
@@ -531,6 +541,8 @@ export default function Scanner() {
     const runde = rundeRef.current
     rundeRef.current = null
     if (runde) { clearTimeout(runde.timer); runde.leser?.stop() }
+    lageRef.current?.()
+    lageRef.current = null
     if (html5QrRef.current) {
       try {
         await html5QrRef.current.stop()

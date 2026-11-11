@@ -853,6 +853,7 @@ export default function Admin() {
             )}
 
             <ScannerMessung />
+            <ScannerLage />
             <ZugriffProtokoll />
           </>
         )}
@@ -1119,6 +1120,55 @@ function ScannerMessung() {
                         <td style={{ padding: 6 }}>{z.vorsprungMs == null ? '-' : `${z.vorsprungMs > 0 ? '+' : ''}${z.vorsprungMs} ms`}</td>
                         <td style={{ padding: 6 }}>{z.verfehlt}</td>
                         <td style={{ padding: 6 }}>{z.gewechselt > 0 ? `ja (${z.gewechselt})` : 'nein'}</td>
+                      </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+        </div>
+  )
+}
+
+/**
+ * Hochformat gegen Querformat: je Laden und Geraet, wie das Geraet beim
+ * Stempeln gehalten wurde und wie schnell der erste Treffer kam. "Bild
+ * gedreht" = die Kamera lieferte ein Bild, das nicht zur Lage passt.
+ */
+function ScannerLage() {
+  const [zeilen, setZeilen] = useState(null)
+  useEffect(() => {
+    const t = sessionStorage.getItem('adminToken')
+    fetch(`${BASE_URL}/api/admin/scanner-lage`, { headers: { 'Authorization': `Bearer ${t}` } })
+        .then(r => (r.ok ? r.json() : []))
+        .then(d => setZeilen(Array.isArray(d) ? d : []))
+        .catch(() => setZeilen([]))
+  }, [])
+  return (
+        <div style={{ background: '#FFFFFF', border: '1px solid #DDD9EE', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>Hochformat und Querformat (letzte 60 Tage)</div>
+          <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+            Wie das Gerät beim Stempeln gehalten wurde und wie lange es bis zum Treffer dauerte.
+            „Bild gedreht“ heißt: Die Kamera lieferte ein Bild, das nicht zur Lage passt.
+          </div>
+          {zeilen === null ? <div style={{ fontSize: 13, color: '#9A94A8' }}>Lädt …</div>
+            : zeilen.length === 0 ? <div style={{ fontSize: 13, color: '#9A94A8' }}>Noch keine Messungen.</div>
+            : (
+              <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                <thead><tr style={{ textAlign: 'left', color: '#6B6678' }}>
+                  <th style={{ padding: 6 }}>Laden</th><th style={{ padding: 6 }}>Gerät</th><th style={{ padding: 6 }}>Lage</th>
+                  <th style={{ padding: 6 }}>Geöffnet als</th><th style={{ padding: 6 }}>Runden</th><th style={{ padding: 6 }}>Treffer nach</th>
+                  <th style={{ padding: 6 }}>Bild gedreht</th>
+                </tr></thead>
+                <tbody>
+                  {zeilen.map((z, i) => (
+                      <tr key={i} style={{ borderTop: '1px solid #eee', background: z.bildGedreht > 0 ? '#fff4e5' : 'transparent' }}>
+                        <td style={{ padding: 6 }}>{z.laden}</td>
+                        <td style={{ padding: 6 }}>{z.geraet}</td>
+                        <td style={{ padding: 6 }}>{z.lage === 'quer' ? 'quer' : 'hoch'}</td>
+                        <td style={{ padding: 6 }}>{z.app == null ? '-' : z.app ? 'App' : 'Browser'}</td>
+                        <td style={{ padding: 6 }}>{z.runden}</td>
+                        <td style={{ padding: 6 }}>{z.trefferMs} ms</td>
+                        <td style={{ padding: 6 }}>{z.bildGedreht > 0 ? `ja (${z.bildGedreht})` : 'nein'}</td>
                       </tr>
                   ))}
                 </tbody>
