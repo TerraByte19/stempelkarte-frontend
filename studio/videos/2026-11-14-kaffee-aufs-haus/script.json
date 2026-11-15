@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "title": "Kaffee aufs Haus",
+    "slug": "kaffee-aufs-haus",
+    "language": "de",
+    "date": "2026-11-14",
+    "note": "Das erste Video (launch-video/Stampit-Werbevideo-v7.mp4), unverändert nachgebaut. Dient als Referenz: tools/regress.mjs vergleicht es Bild für Bild mit dem Original. Nicht ändern."
+  },
+  "voice": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "model_id": "eleven_multilingual_v2",
+    "language_code": "de",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.0
+  },
+  "timing": { "lead": 0.35, "hold": 3.2 },
+  "say": { "Stampit": "StampIt" },
+  "scenes": [
+    {
+      "component": "paper-card",
+      "captions": [
+        { "lines": ["Der sechste Kaffee", "geht aufs Haus.", "Warum eigentlich?"], "accent": 6 }
+      ]
+    },
+    {
+      "component": "cup-row",
+      "captions": [
+        { "lines": ["Weil der Gratis-Kaffee", "vielleicht einen", "Euro kostet."], "accent": 3 },
+        { "lines": ["Und du dafür", "wiederkommst."], "accent": 3 }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "wallet-vanish",
+          "captions": [
+            { "lines": ["Nur die Papierkarte", "macht nicht mit."], "accent": 3 },
+            { "lines": ["Zerknickt,", "vergessen,", "verloren."], "accent": 2 }
+          ]
+        },
+        {
+          "component": "guest-ghost",
+          "captions": [
+            { "lines": ["Und das Café", "merkt nie, wer fast", "schon Stammgast war."], "accent": 5 }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "wallet-pass",
+      "captions": [
+        { "lines": ["Mit Stampit liegt", "die Karte in Apple", "und Google Wallet."], "accent": 6 },
+        { "lines": ["Einmal scannen,", "kein Download."], "accent": 2 },
+        { "lines": ["Jeder Besuch", "ein Stempel,", "sofort auf dem Handy."], "accent": 4 }
+      ]
+    },
+    {
+      "component": "lock-notification",
+      "captions": [
+        { "lines": ["Ist die Karte voll,", "meldet sie sich von", "selbst, in Ladennähe."], "accent": 4 }
+      ]
+    },
+    {
+      "component": "calc-panel",
+      "captions": [
+        { "lines": ["Und das lohnt sich!"] },
+        { "lines": ["Bleiben dir pro Kaffee", "zwei Euro fünfzig,"], "accent": 4 },
+        { "lines": ["und fünfzig", "Stammkunden kommen", "einmal mehr pro Woche,"], "accent": 3 },
+        { "lines": ["sind das 6.500{sechstausendfünfhundert} Euro", "mehr im Jahr."], "accent": 2 }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "captions": [
+        { "lines": ["Klingt interessant?"], "accent": 1, "keep": true },
+        { "role": "cta", "lines": ["Dann kommentiere jetzt KARTE,{Karte,}", "und wir melden uns bei dir."] }
+      ]
+    }
+  ]
+}

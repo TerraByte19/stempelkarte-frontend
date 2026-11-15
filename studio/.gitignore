@@ -1,0 +1,4 @@
+# Fertige Videos und Zwischenstaende gehoeren nicht ins Repo: sie sind gross
+# und lassen sich aus script.json + Stimme jederzeit neu bauen.
+videos/*/out/
+*.wav

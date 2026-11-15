@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "title": "TITEL DES VIDEOS",
+    "slug": "kurzer-name-ohne-leerzeichen",
+    "language": "de",
+    "idee": "Ein Satz: Welche Beobachtung steckt hinter diesem Video und woher kam die Anregung (Konto, Datum)? Anregung heißt Aufbau oder Kniff, nie Text oder Bild übernehmen.",
+    "_hinweis": "Diesen Ordner kopieren nach videos/<JJJJ-MM-TT>-<slug>/ und nur die Kopie ändern. Alles, was mit _ beginnt, ist ein Hinweis für dich und wird ignoriert. Regeln und Bausteine: studio/PLAYBOOK.md"
+  },
+  "voice": { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.0 },
+  "timing": { "lead": 0.35, "hold": 3.2 },
+  "scenes": [
+    {
+      "_hinweis": "Einstieg. In den ersten zwei Sekunden muss klar sein, worum es geht. Der Anker 'free' gehört auf das Wort, das die Belohnung nennt.",
+      "component": "paper-card",
+      "params": { "shop": "Café Nordwind", "stamps": 6, "filled": 5, "freeLabel": "GRATIS", "icon": "cup", "mug": true },
+      "anchors": { "hit": { "at": "start", "offset": 0.5 }, "free": { "cap": 0, "word": 5 } },
+      "captions": [
+        { "lines": ["Der sechste Kaffee", "geht aufs Haus.", "Warum eigentlich?"], "accent": 6 }
+      ]
+    },
+    {
+      "_hinweis": "Nur für Café, Bäckerei, Imbiss: Becher. Für andere Läden diese Szene löschen.",
+      "component": "cup-row",
+      "params": { "paid": 5, "extra": 3, "freeLabel": "GRATIS", "price": "1 €" },
+      "anchors": { "tag": { "cap": 0, "word": 4 }, "more": { "cap": 1, "word": 3 } },
+      "captions": [
+        { "lines": ["Weil der Gratis-Kaffee", "vielleicht einen", "Euro kostet."], "accent": 3 },
+        { "lines": ["Und du dafür", "wiederkommst."], "accent": 3 }
+      ]
+    },
+    {
+      "_hinweis": "Eine Szene aus zwei Teilen, die ineinander überblenden. Jeder Teil geht auch allein als eigene Szene (dann ohne 'parts').",
+      "parts": [
+        {
+          "component": "wallet-vanish",
+          "params": { "shop": "Café Nordwind", "stamps": 6, "filled": 5, "icon": "cup" },
+          "anchors": { "crumple": { "cap": 1, "word": 0 }, "wallet": { "cap": 1, "word": 1 }, "drop": { "cap": 1, "word": 2 } },
+          "captions": [
+            { "lines": ["Nur die Papierkarte", "macht nicht mit."], "accent": 3 },
+            { "lines": ["Zerknickt,", "vergessen,", "verloren."], "accent": 2 }
+          ]
+        },
+        {
+          "component": "guest-ghost",
+          "params": { "chip": "5 von 6 Stempeln" },
+          "anchors": { "chip": { "cap": 0, "word": 6 } },
+          "captions": [
+            { "lines": ["Und das Café", "merkt nie, wer fast", "schon Stammgast war."], "accent": 5 }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Das Produkt. 'Stampit' wird automatisch 'StampIt' gesprochen. Jeder neue Stempel (after minus before) braucht einen Anker stamp1, stamp2, ...",
+      "component": "wallet-pass",
+      "params": { "shop": "Café Nordwind", "location": "HH-OTTENSEN", "reward": "6 Stempel = 1 Kaffee gratis", "stamps": 6, "before": 2, "after": 5, "icon": "cup" },
+      "anchors": {
+        "card": { "cap": 0, "word": 4 }, "scan": { "cap": 1, "word": 0 }, "ok": { "cap": 1, "word": 2 },
+        "stamp1": { "cap": 2, "word": 1 }, "stamp2": { "cap": 2, "word": 3 }, "stamp3": { "cap": 2, "word": 4 }
+      },
+      "captions": [
+        { "lines": ["Mit Stampit liegt", "die Karte in Apple", "und Google Wallet."], "accent": 6 },
+        { "lines": ["Einmal scannen,", "kein Download."], "accent": 2 },
+        { "lines": ["Jeder Besuch", "ein Stempel,", "sofort auf dem Handy."], "accent": 4 }
+      ]
+    },
+    {
+      "_hinweis": "Der Beweis-Moment: die Karte meldet sich von selbst. Uhrzeit und Datum zum Laden passend wählen.",
+      "component": "lock-notification",
+      "params": { "clock": "08:14", "date": "Donnerstag, 10. September", "title": "Café Nordwind", "body": "6 von 6, dein Kaffee wartet", "icon": "cup", "pin": true },
+      "anchors": { "notify": { "cap": 0, "word": 4 }, "pin": { "cap": 0, "word": 9 } },
+      "captions": [
+        { "lines": ["Ist die Karte voll,", "meldet sie sich von", "selbst, in Ladennähe."], "accent": 4 }
+      ]
+    },
+    {
+      "_hinweis": "Beispielrechnung. Der Bau rechnet nach: Produkt der Zeilen = Ergebnis. Zahlen werden gezeigt wie geschrieben, gesprochen wie in {geschweiften Klammern}.",
+      "component": "calc-panel",
+      "params": {
+        "rows": [
+          { "big": "2,50 €", "label": "bleiben pro Kaffee", "small": "3,50 € − 1,00 €" },
+          { "big": "× 50", "label": "Stammkunden" },
+          { "big": "× 1", "label": "Besuch mehr pro Woche" },
+          { "big": "× 52", "label": "Wochen" }
+        ],
+        "result": { "big": "= 6.500 €", "label": "mehr im Jahr" },
+        "coin": "€"
+      },
+      "anchors": {
+        "coin": { "cap": 0, "word": 0 }, "panel": { "cap": 1, "word": 0 },
+        "row1": { "cap": 1, "word": 1 }, "row2": { "cap": 2, "word": 1 }, "row3": { "cap": 2, "word": 4 }, "row4": { "cap": 3, "word": 0, "offset": -0.45 },
+        "result": { "cap": 3, "word": 2 }
+      },
+      "captions": [
+        { "lines": ["Und das lohnt sich!"] },
+        { "lines": ["Bleiben dir pro Kaffee", "zwei Euro fünfzig,"], "accent": 4 },
+        { "lines": ["und fünfzig", "Stammkunden kommen", "einmal mehr pro Woche,"], "accent": 3 },
+        { "lines": ["sind das 6.500{sechstausendfünfhundert} Euro", "mehr im Jahr."], "accent": 2 }
+      ]
+    },
+    {
+      "_hinweis": "Schluss, immer so: eine kurze Frage oben (keep), dann der Satz mit Stichwort. Zeile 1 endet mit dem Stichwort in GROSSBUCHSTABEN, gesprochen normal: STICHWORT,{Stichwort,}",
+      "component": "cta-comment",
+      "captions": [
+        { "lines": ["Klingt interessant?"], "accent": 1, "keep": true },
+        { "role": "cta", "lines": ["Dann kommentiere jetzt KARTE,{Karte,}", "und wir melden uns bei dir."] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,287 @@
+// Die Maschine hinter jedem Video. Liest script.json + Wort-Zeiten, baut die
+// Buehne (Szenen, Textzeilen, Stempelreihe), laesst jeden Baustein sein Bild
+// und seine Toene anmelden und stellt window.seek(t) bereit.
+//
+// Grundidee (bewaehrt im ersten Video): jede Bewegung ist eine ANGEHALTENE
+// Web-Animation ueber die ganze Videolaenge. seek(t) stellt alle auf denselben
+// Zeitpunkt - so laesst sich jedes Bild einzeln und immer gleich rendern,
+// egal wie schnell der Rechner ist.
+import { normalize, timeline, STAGE } from './script.mjs'
+import { BRAND, CSS_VARS, logoSvg } from './brand.js'
+import { icon, symbolDefs } from './icons.js'
+
+export const EASE = { BACK: 'cubic-bezier(.34,1.56,.64,1)', OUT: 'cubic-bezier(.16,1,.3,1)', IN: 'cubic-bezier(.7,0,.84,0)' }
+// Was tools/sfx.py spielen kann. Ein Tippfehler im Namen soll hier auffallen
+// und nicht erst als stiller Fehler im Ton.
+export const SOUNDS = ['pop', 'thud', 'whoosh', 'drop', 'chime', 'ding', 'buzz', 'tick', 'scan', 'ok', 'crumple', 'kaching', 'sparkle', 'riser', 'impact', 'wtick']
+
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; return e }
+
+export async function boot() {
+  const state = window.STUDIO = { ready: false, errors: [], warnings: [], anchors: [], cues: [] }
+  try { await build(state) }
+  // Fehler landen in STUDIO.errors (und damit im Bericht), nicht zusaetzlich in der Konsole - sonst stehen sie doppelt da
+  catch (e) { state.errors.push(String(e && e.message || e)) }
+  state.ready = true
+}
+
+async function build(state) {
+  // ?rest=1 an der Seitenadresse wird durchgereicht, der Server setzt daraus data.rest
+  const data = await (await fetch('/__video/data.json' + location.search)).json()
+  // rest = Ruhelage: keine Animation wird angelegt. So messen die Pruefungen,
+  // wo jedes Element von sich aus sitzt, ohne dass Einflug oder Kamerafahrt stoeren.
+  const rest = !!data.rest
+  for (const [k, v] of Object.entries(CSS_VARS)) document.documentElement.style.setProperty(k, v)
+  document.documentElement.lang = (data.script.meta && data.script.meta.language) || 'de'
+  document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute"><defs>${symbolDefs()}</defs></svg>`)
+  // Erst alle Schriften laden: Bausteine messen Textbreiten (fit), und ein
+  // Bild mit Ersatzschrift waere der haeufigste stille Fehler.
+  await Promise.all([...document.fonts].map(f => f.load().catch(() => state.errors.push('Schrift lädt nicht: ' + f.family))))
+  await document.fonts.ready
+
+  const norm = normalize(data.script), TL = timeline(norm, data.times), DUR = TL.duration, S = TL.scenes
+  const stage = document.getElementById('stage'), capsEl = document.getElementById('caps'), progEl = document.getElementById('prog')
+
+  // ---- Animationen
+  const anims = []
+  function key(e, frames) {
+    if (!e) throw new Error('key(): Element fehlt')
+    if (rest) return
+    const f = [...frames].sort((a, b) => a[0] - b[0]), k = []
+    if (f[0][0] > 0) k.push({ offset: 0, ...f[0][1] })
+    for (const [t, p, ease] of f) k.push({ offset: Math.max(0, Math.min(1, t / DUR)), ...p, ...(ease ? { easing: ease } : {}) })
+    if (f[f.length - 1][0] < DUR) k.push({ offset: 1, ...f[f.length - 1][1] })
+    const a = e.animate(k, { duration: DUR * 1000, fill: 'both' }); a.pause(); anims.push(a)
+  }
+  function loop(e, frames, period, phase = 0) {
+    if (!e) throw new Error('loop(): Element fehlt')
+    if (rest) return
+    const a = e.animate(frames, { duration: period * 1000, iterations: Infinity, delay: -phase * 1000 }); a.pause(); anims.push(a)
+  }
+  const pop = (e, t, d = 0.42) => key(e, [[t, { opacity: 0, scale: 0.4 }, EASE.BACK], [t + d, { opacity: 1, scale: 1 }]])
+  const rise = (e, t, d = 0.45, dy = 26) => key(e, [[t, { opacity: 0, translate: `0px ${dy}px` }, EASE.OUT], [t + d, { opacity: 1, translate: '0px 0px' }]])
+  window.seek = t => { for (const a of anims) a.currentTime = t * 1000 }
+
+  // ---- Toene: jeder meldet seinen Ton dort an, wo die Bewegung entsteht
+  const cue = (meta) => (t, name, vol = 1, pitch = 1) => {
+    if (!SOUNDS.includes(name)) throw new Error(`Ton "${name}" gibt es nicht (${meta.by}). Erlaubt: ${SOUNDS.join(', ')}`)
+    if (!(t >= 0) || t > DUR) { state.warnings.push(`Ton "${name}" von ${meta.by} liegt bei ${t} s außerhalb des Videos und entfällt`); return }
+    state.cues.push({ t: +t.toFixed(3), name, vol, pitch, ...meta })
+  }
+  const engineCue = cue({ scene: 0, by: 'engine' })
+
+  // ---- Szenen: alte Szene schiebt nach links weg, neue kommt von rechts
+  const sceneEls = S.map((sc, n) => {
+    const scene = el('div', 'scene'); scene.id = 's' + (n + 1)
+    const ill = el('div', 'ill'); scene.append(ill); stage.insertBefore(scene, capsEl)
+    const { s, e } = sc, fr = []
+    if (n === 0) fr.push([0, { opacity: 1, translate: '0px 0px' }])
+    else fr.push([s, { opacity: 0, translate: '110px 0px' }, EASE.OUT], [s + 0.45, { opacity: 1, translate: '0px 0px' }])
+    if (n < S.length - 1) fr.push([e, { opacity: 1, translate: '0px 0px' }, EASE.IN], [e + 0.28, { opacity: 0, translate: '-110px 0px' }])
+    key(scene, fr)
+    // langsame Kamerafahrt, damit kein Bild stillsteht
+    key(ill, [[s, { scale: 1.05 }, 'linear'], [e + 0.3, { scale: 1 }]])
+    if (n > 0) engineCue(s - 0.05, 'whoosh', 0.7)
+    return { scene, ill }
+  })
+
+  // ---- Stempelreihe: ein Stempel pro Szene, die Schluss-Szene zaehlt nicht mit
+  const dots = []
+  for (let i = 0; i < S.length - 1; i++) {
+    const p = el('div', 'p', '<i></i>'); progEl.append(p); dots.push(p)
+    if (i === 0) p.firstChild.style.opacity = 1
+    else pop(p.firstChild, S[i].s + 0.2)
+  }
+  const progressPulse = t => dots.forEach((p, i) => key(p, [[t + i * 0.08, { scale: 1 }, EASE.OUT], [t + 0.18 + i * 0.08, { scale: 1.35 }, EASE.OUT], [t + 0.5 + i * 0.08, { scale: 1 }]]))
+
+  // ---- Textzeilen oben. Zeilen mit "role" zeichnet der Baustein selbst.
+  for (const c of TL.caps) {
+    if (c.role) continue
+    const box = el('div', 'cap'); box.dataset.cap = c.id; let k = 0
+    for (const line of c.lines) {
+      const row = el('div')
+      for (const word of line) {
+        const sp = el('span', 'w' + (k >= c.accent ? ' acc' : '')); sp.textContent = word.show; row.append(sp)
+        key(sp, [[c.t[k] - 0.03, { opacity: 0, translate: '0px 18px' }, EASE.OUT], [c.t[k] + 0.22, { opacity: 1, translate: '0px 0px' }]])
+        k++
+      }
+      box.append(row)
+    }
+    if (!c.keep) key(box, [[c.e, { opacity: 1 }], [c.e + 0.1, { opacity: 0 }]])
+    capsEl.append(box)
+  }
+
+  // ---- Bausteine
+  const ruler = el('span'); ruler.style.cssText = 'position:absolute;left:0;top:-4000px;visibility:hidden;white-space:nowrap'
+  document.body.append(ruler)
+  const loaded = new Map()
+  async function component(name) {
+    if (!loaded.has(name)) {
+      let mod
+      try { mod = (await import(`/components/${name}.js`)).default }
+      catch (e) { throw new Error(`Baustein "${name}" lässt sich nicht laden (studio/components/${name}.js): ${e.message}`) }
+      if (!mod || typeof mod.build !== 'function') throw new Error(`Baustein "${name}" hat keine build(ctx)-Funktion`)
+      // @scope haelt die Regeln eines Bausteins in seiner eigenen Szene: zwei
+      // Bausteine duerfen dieselbe Klasse verwenden, ohne sich zu stoeren.
+      if (mod.css) { const st = el('style'); st.dataset.component = name; st.textContent = `@scope (.c-${name}) {\n${mod.css}\n}`; document.head.append(st) }
+      loaded.set(name, mod)
+    }
+    return loaded.get(name)
+  }
+
+  for (const [n, sc] of S.entries()) {
+    const { scene, ill } = sceneEls[n], multi = sc.parts.length > 1
+    for (const [j, part] of sc.parts.entries()) {
+      const mod = await component(part.component), by = `Szene ${n + 1}${multi ? ', Teil ' + (j + 1) : ''} (${part.component})`
+      scene.classList.add('c-' + part.component)
+      let root = ill
+      if (multi) {
+        root = el('div', 'part'); ill.append(root)
+        // Teile blenden ineinander ueber, kurz bevor der erste Satz des neuen Teils beginnt
+        if (j > 0) key(root, [[part.s + 0.1, { opacity: 0 }], [part.s + 0.5, { opacity: 1 }]])
+        if (j + 1 < sc.parts.length) { const t2 = sc.parts[j + 1].s; key(root, [[t2, { opacity: 1 }], [t2 + 0.3, { opacity: 0 }]]) }
+      }
+      // Parameter: Vorgaben des Bausteins + Angaben im Skript. Unbekannte Namen
+      // sind fast immer Tippfehler und sollen nicht still ignoriert werden.
+      const decl = mod.params || {}, p = {}
+      for (const [k, d] of Object.entries(decl)) p[k] = d.default
+      for (const [k, v] of Object.entries(part.params)) {
+        if (!(k in decl)) throw new Error(`${by}: Parameter "${k}" gibt es nicht. Erlaubt: ${Object.keys(decl).join(', ') || '(keine)'}`)
+        const dv = decl[k].default
+        if (dv != null && v != null && typeof dv !== typeof v) throw new Error(`${by}: Parameter "${k}" erwartet ${Array.isArray(dv) ? 'eine Liste' : typeof dv}, bekam ${JSON.stringify(v)}`)
+        if (Array.isArray(dv) !== Array.isArray(v) && dv != null && v != null) throw new Error(`${by}: Parameter "${k}" erwartet ${Array.isArray(dv) ? 'eine Liste' : 'keinen Listenwert'}`)
+        p[k] = v
+      }
+      const caps = part.caps.map(i => TL.caps[i])
+      const need = mod.captions || {}
+      if (need.min && caps.length < need.min) throw new Error(`${by}: braucht mindestens ${need.min} Textzeile(n), hat ${caps.length}`)
+      for (const role of need.roles || []) if (!caps.some(c => c.role === role)) throw new Error(`${by}: braucht eine Textzeile mit "role": "${role}"`)
+
+      // Anker: benannte Zeitpunkte des Bausteins. Vorgabe steht im Baustein,
+      // das Skript kann sie je Szene ueberschreiben ({cap, word, offset} oder {at, offset}).
+      const adecl = typeof mod.anchors === 'function' ? mod.anchors(p, caps) : (mod.anchors || {})
+      for (const k of Object.keys(part.anchors)) if (!(k in adecl)) throw new Error(`${by}: Anker "${k}" gibt es nicht. Erlaubt: ${Object.keys(adecl).join(', ') || '(keine)'}`)
+      const resolved = {}
+      const at = name => {
+        if (name in resolved) return resolved[name]
+        if (!(name in adecl)) throw new Error(`${by}: Anker "${name}" ist im Baustein nicht deklariert`)
+        const over = part.anchors[name], base = adecl[name]
+        let spec = { ...base }, source = 'vorgabe'
+        if (over != null) {
+          source = 'skript'
+          if (typeof over === 'number') spec = { abs: over }
+          else {
+            if ('cap' in over || 'word' in over) delete spec.at
+            if ('at' in over) { delete spec.cap; delete spec.word }
+            spec = { ...spec, ...over }
+          }
+        }
+        const info = { scene: n + 1, part: multi ? j + 1 : null, component: part.component, name, source, doc: base.doc || '' }
+        let t
+        if (spec.abs != null) t = spec.abs
+        else if (spec.at) {
+          if (spec.at !== 'start' && spec.at !== 'end') throw new Error(`${by}: Anker "${name}": "at" muss "start" oder "end" sein`)
+          t = (spec.at === 'start' ? part.s : part.e) + (spec.offset || 0); info.at = spec.at
+        } else {
+          let ci = spec.cap ?? 0, clamped = false
+          if (ci < 0) ci += caps.length
+          if (ci < 0 || ci >= caps.length) { ci = Math.max(0, Math.min(caps.length - 1, ci)); clamped = true }
+          const c = caps[ci]; let wi = spec.word ?? 0
+          if (wi < 0) wi += c.t.length
+          if (wi < 0 || wi >= c.t.length) { wi = Math.max(0, Math.min(c.t.length - 1, wi)); clamped = true }
+          t = c.t[wi] + (spec.offset || 0)
+          Object.assign(info, { cap: ci, word: wi, wordText: c.words[wi], clamped })
+          if (clamped) {
+            const msg = `${by}: Anker "${name}" zeigt auf Text ${(spec.cap ?? 0) + 1}, Wort ${(spec.word ?? 0) + 1}, das gibt es in dieser Szene nicht. Genommen wurde "${c.words[wi]}" (Text ${ci + 1}, Wort ${wi + 1}).`
+            if (source === 'skript') throw new Error(msg)
+            state.warnings.push(msg + ' Bitte im Skript unter "anchors" festlegen.')
+          }
+        }
+        info.offset = spec.offset || 0; info.t = +t.toFixed(3)
+        state.anchors.push(info)
+        return (resolved[name] = t)
+      }
+
+      const $ = sel => root.querySelector(sel)
+      const res = x => typeof x === 'string' ? ($(x) || scene.querySelector(x)) : x
+      const ctx = {
+        root, scene, p, caps,
+        s: part.s, e: part.e, sceneStart: sc.s, sceneEnd: sc.e, duration: DUR,
+        isFirst: n === 0, isLast: n === S.length - 1, rest,
+        w: (c, k) => {
+          const cap = caps[c < 0 ? c + caps.length : c]
+          if (!cap) throw new Error(`${by}: Text ${c + 1} gibt es nicht`)
+          const t = cap.t[k < 0 ? k + cap.t.length : k]
+          if (t == null) throw new Error(`${by}: Text ${c + 1} hat kein Wort ${k + 1}`)
+          return t
+        },
+        cap: role => caps.find(c => c.role === role) || null,
+        at,
+        key: (x, frames) => key(res(x), frames), loop: (x, frames, period, phase) => loop(res(x), frames, period, phase),
+        pop: (x, t, d) => pop(res(x), t, d), rise: (x, t, d, dy) => rise(res(x), t, d, dy),
+        cue: cue({ scene: n + 1, by: part.component }),
+        el, $, $$: sel => [...root.querySelectorAll(sel)],
+        html: h => { root.insertAdjacentHTML('beforeend', h) },
+        // Hintergrund hinter der Kamerafahrt: liegt in der Szene, nicht in .ill
+        backdrop: h => { scene.insertBefore(el('div', null, h).firstElementChild, ill) },
+        icon, logoSvg, ease: EASE, B: BRAND, STAGE, progressPulse,
+        // Schrift so weit verkleinern, bis der Text in die Breite passt (lange Woerter,
+        // laengere Ladennamen). Gemessen wird in einem unsichtbaren Feld ausserhalb der
+        // Szene, weil dort keine Kamerafahrt und keine Drehung die Breite verfaelscht.
+        fit: (x, maxWidth, min = 24) => {
+          const e = res(x), cs = getComputedStyle(e); let size = parseFloat(cs.fontSize), steps = 0
+          for (const k of ['fontFamily', 'fontWeight', 'fontStyle', 'letterSpacing', 'textTransform']) ruler.style[k] = cs[k]
+          ruler.style.fontSize = size + 'px'; ruler.textContent = e.textContent
+          if (ruler.offsetWidth <= maxWidth) return size
+          while (ruler.offsetWidth > maxWidth && size > min && steps++ < 200) { size = Math.max(min, Math.floor(size * 0.97)); ruler.style.fontSize = size + 'px' }
+          e.style.fontSize = size + 'px'
+          return size
+        },
+        warn: msg => state.warnings.push(`${by}: ${msg}`),
+        fail: msg => { throw new Error(`${by}: ${msg}`) }
+      }
+      try { await mod.build(ctx) }
+      catch (e) { throw new Error(e.message.startsWith('Szene') ? e.message : `${by}: ${e.message}`) }
+      // Jeder deklarierte Anker soll im Bericht stehen, auch wenn der Baustein ihn (noch) nicht benutzt
+      for (const k of Object.keys(adecl)) if (!(k in resolved)) { try { at(k) } catch (e) { state.errors.push(e.message) } }
+    }
+  }
+
+  state.cues.sort((a, b) => a.t - b.t)
+  window.CUES = { duration: DUR, events: state.cues.map(({ t, name, vol, pitch }) => ({ t, name, vol, pitch })) }
+  Object.assign(state, {
+    duration: DUR, rest,
+    scenes: S.map((sc, n) => ({ index: n + 1, s: +sc.s.toFixed(3), e: +sc.e.toFixed(3), parts: sc.parts.map(p => ({ component: p.component, s: +p.s.toFixed(3), e: +p.e.toFixed(3) })) })),
+    caps: TL.caps.map(c => ({ id: c.id, scene: c.scene + 1, text: c.words.join(' '), lines: c.lines.map(l => l.map(w => w.show).join(' ')), words: c.words.length, role: c.role, keep: c.keep, start: c.t[0], last: c.last, end: +c.e.toFixed(3) })),
+    // Titelbild: Ende der ersten Szene, wenn ihr letzter Satz ganz dasteht, aber bevor sie wegschiebt
+    poster: Math.max(0, Math.min(DUR - 0.05, typeof norm.poster === 'number' ? norm.poster : Math.min(TL.caps[S[0].parts.at(-1).caps.at(-1)].last + 0.5, S[0].e - 0.15))),
+    measure
+  })
+  window.seek(0)
+
+  // ---- Messen fuer die Pruefungen (nur in Ruhelage sinnvoll)
+  function measure() {
+    const sr = stage.getBoundingClientRect(), rect = e => { const r = e.getBoundingClientRect(); return { left: Math.round(r.left - sr.left), top: Math.round(r.top - sr.top), right: Math.round(r.right - sr.left), bottom: Math.round(r.bottom - sr.top) } }
+    const caps = [...capsEl.children].map(box => {
+      const cs = getComputedStyle(box), lh = parseFloat(cs.lineHeight)
+      const rows = [...box.children].map(row => {
+        let w = 0
+        for (const sp of row.children) { const m = getComputedStyle(sp); w += sp.offsetWidth + parseFloat(m.marginLeft) + parseFloat(m.marginRight) }
+        return { text: [...row.children].map(s => s.textContent).join(' '), width: Math.round(w), wrapped: row.offsetHeight > lh * 1.5 }
+      })
+      return { id: box.dataset.cap, rows, box: rect(box), maxWidth: box.clientWidth }
+    })
+    const label = e => e.dataset.safe || e.className.toString().split(' ').filter(Boolean).join('.') || e.tagName.toLowerCase()
+    const sceneOf = e => { const sc = e.closest('.scene'); return sc ? +sc.id.slice(1) : 0 }
+    const safe = [...stage.querySelectorAll('[data-safe]')].map(e => ({ scene: sceneOf(e), what: label(e), ...rect(e) }))
+    // data-oneline: Text, der in genau einer Zeile bleiben muss. Gezaehlt wird ueber die
+    // Hoehe des Elements (offsetHeight), weil die von Drehungen der Karte unberuehrt bleibt.
+    const lines = [...stage.querySelectorAll('[data-oneline]')].map(e => {
+      const cs = getComputedStyle(e), px = k => parseFloat(cs[k]) || 0
+      const lh = parseFloat(cs.lineHeight) || px('fontSize') * 1.2
+      const h = e.offsetHeight - px('paddingTop') - px('paddingBottom') - px('borderTopWidth') - px('borderBottomWidth')
+      return { scene: sceneOf(e), what: e.dataset.oneline || label(e), text: e.textContent.trim().slice(0, 60), width: e.scrollWidth, room: e.clientWidth, rows: Math.max(1, Math.round(h / lh)) }
+    })
+    return { caps, safe, lines }
+  }
+}

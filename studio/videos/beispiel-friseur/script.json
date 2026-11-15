@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "title": "Der achte Haarschnitt",
+    "slug": "beispiel-friseur",
+    "language": "de",
+    "note": "Zweites Beispiel: beweist, dass die Bausteine mit anderem Laden, 8 Stempeln, anderer Reihenfolge und anderer Rechnung funktionieren. Nur als Entwurf gebaut (--no-voice), es gibt keine Aufnahme dazu."
+  },
+  "voice": { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.0 },
+  "timing": { "lead": 0.35, "hold": 3.2 },
+  "scenes": [
+    {
+      "component": "paper-card",
+      "params": { "shop": "Salon Haarscharf", "stamps": 8, "filled": 7, "icon": "scissors", "mug": false },
+      "anchors": { "free": { "cap": 0, "word": 5 } },
+      "captions": [
+        { "lines": ["Der achte Haarschnitt", "geht aufs Haus."], "accent": 3 },
+        { "lines": ["Wenn die Karte", "dann noch da ist."], "accent": 3 }
+      ]
+    },
+    {
+      "component": "guest-ghost",
+      "params": { "chip": "7 von 8 Stempeln" },
+      "anchors": { "chip": { "cap": 0, "word": 5 } },
+      "captions": [
+        { "lines": ["Und wer war fast", "schon Stammkunde?"], "accent": 3 },
+        { "lines": ["Papier verrät", "es dir nicht."], "accent": 0 }
+      ]
+    },
+    {
+      "component": "wallet-pass",
+      "params": {
+        "shop": "Salon Haarscharf", "location": "K-EHRENFELD", "reward": "8 Stempel = 1 Haarschnitt gratis",
+        "stamps": 8, "before": 5, "after": 7, "icon": "scissors"
+      },
+      "anchors": {
+        "card": { "cap": 0, "word": 4 },
+        "scan": { "cap": 1, "word": 0 },
+        "ok": { "cap": 1, "word": 2 },
+        "stamp1": { "cap": 2, "word": 1 },
+        "stamp2": { "cap": 2, "word": 3 }
+      },
+      "captions": [
+        { "lines": ["Mit Stampit liegt", "die Karte in Apple", "und Google Wallet."], "accent": 6 },
+        { "lines": ["Einmal scannen,", "kein Download."], "accent": 2 },
+        { "lines": ["Jeder Besuch", "ein Stempel."], "accent": 2 }
+      ]
+    },
+    {
+      "component": "lock-notification",
+      "params": {
+        "clock": "17:42", "date": "Samstag, 14. November", "title": "Salon Haarscharf",
+        "body": "8 von 8, dein Schnitt geht aufs Haus", "icon": "scissors"
+      },
+      "captions": [
+        { "lines": ["Ist die Karte voll,", "meldet sie sich von", "selbst, in Ladennähe."], "accent": 4 }
+      ]
+    },
+    {
+      "component": "calc-panel",
+      "params": {
+        "rows": [
+          { "big": "28 €", "label": "pro Haarschnitt" },
+          { "big": "× 40", "label": "Stammkunden" },
+          { "big": "× 2", "label": "Besuche mehr im Jahr" }
+        ],
+        "result": { "big": "= 2.240 €", "label": "mehr im Jahr" }
+      },
+      "anchors": {
+        "row1": { "cap": 1, "word": 3 },
+        "row2": { "cap": 2, "word": 1 },
+        "row3": { "cap": 2, "word": 4 },
+        "result": { "cap": 3, "word": 2 }
+      },
+      "captions": [
+        { "lines": ["Und das rechnet sich!"] },
+        { "lines": ["Kostet ein Schnitt", "28{achtundzwanzig} Euro,"], "accent": 3 },
+        { "lines": ["und 40{vierzig} Stammkunden", "kommen zweimal", "mehr im Jahr,"], "accent": 4 },
+        { "lines": ["sind das 2.240{zweitausendzweihundertvierzig} Euro", "mehr im Jahr."], "accent": 2 }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "captions": [
+        { "lines": ["Neugierig?"], "accent": 0, "keep": true },
+        { "role": "cta", "lines": ["Dann kommentiere jetzt SALON,{Salon,}", "und wir melden uns bei dir."] }
+      ]
+    }
+  ]
+}

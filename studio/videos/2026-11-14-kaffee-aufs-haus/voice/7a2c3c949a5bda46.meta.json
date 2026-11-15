@@ -1,0 +1,20 @@
+{
+ "key": "7a2c3c949a5bda46",
+ "text": "Der sechste Kaffee geht aufs Haus. Warum eigentlich? Weil der Gratis-Kaffee vielleicht einen Euro kostet. Und du dafür wiederkommst. Nur die Papierkarte macht nicht mit. Zerknickt, vergessen, verloren. Und das Café merkt nie, wer fast schon Stammgast war. Mit StampIt liegt die Karte in Apple und Google Wallet. Einmal scannen, kein Download. Jeder Besuch ein Stempel, sofort auf dem Handy. Ist die Karte voll, meldet sie sich von selbst, in Ladennähe. Und das lohnt sich! Bleiben dir pro Kaffee zwei Euro fünfzig, und fünfzig Stammkunden kommen einmal mehr pro Woche, sind das sechstausendfünfhundert Euro mehr im Jahr. Klingt interessant? Dann kommentiere jetzt Karte, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1
+  }
+ },
+ "source": "seed",
+ "chars": 698,
+ "from": "liam.wav",
+ "spent": 0
+}

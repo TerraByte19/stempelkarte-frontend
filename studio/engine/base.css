@@ -1,0 +1,52 @@
+/* Buehne und alles, was mehrere Bausteine teilen. Die Farben kommen als
+   CSS-Variablen aus brand.js (engine.js setzt sie auf :root). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--night); }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: #fff;
+  font-family: var(--body); background: linear-gradient(180deg, var(--night) 0%, var(--night2) 100%); }
+.scene { position: absolute; inset: 0; opacity: 0; }
+/* .ill traegt die langsame Kamerafahrt; der Drehpunkt liegt etwas unter der Mitte,
+   dort wo in fast allen Bildern der Gegenstand sitzt. */
+.ill { position: absolute; inset: 0; transform-origin: 50% 62%; }
+/* Eine Szene kann aus mehreren Teilen bestehen, die ineinander ueberblenden. */
+.part { position: absolute; inset: 0; }
+.abs { position: absolute; }
+svg.ico { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+
+/* Stempelreihe oben: fuellt sich mit jeder Szene, am Schluss ist die Karte voll.
+   Liegt absichtlich in der oberen Sperrzone (Instagram verdeckt sie teils) -
+   sie ist Schmuck, kein Inhalt. */
+#prog { position: absolute; top: 176px; left: 0; right: 0; display: flex; justify-content: center; gap: 18px; z-index: 30; }
+#prog .p { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,.32); position: relative; }
+#prog .p i { position: absolute; inset: -3px; border-radius: 50%; background: var(--lilac); opacity: 0; }
+
+/* Textzeile: ein Satz zur Zeit, Wort fuer Wort zur Stimme */
+#caps { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.cap { position: absolute; left: 70px; right: 70px; top: 258px; text-align: center;
+  font: 700 82px/1.12 var(--display); letter-spacing: -0.02em; text-shadow: 0 4px 28px rgba(14,10,36,.7); }
+.cap .w { display: inline-block; opacity: 0; margin: 0 .11em; }
+.cap .acc { color: var(--lilac); }
+
+/* ---------- Kulisse: Lichtschein und Theke ---------- */
+.glow { border-radius: 50%; background: radial-gradient(closest-side, rgba(185,176,255,.24), rgba(185,176,255,0)); }
+.counter { left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #2C2269 0%, #1A1345 70%); border-top: 7px solid #4A40A8; }
+
+/* ---------- Papierkarte: Stempelfelder (paper-card, wallet-vanish) ---------- */
+.slot { width: 124px; height: 124px; border-radius: 50%; border: 4px dashed rgba(26,26,46,.22); position: relative;
+  display: grid; place-items: center; font: 700 21px var(--body); letter-spacing: .12em; color: rgba(26,26,46,.42); }
+.ink { position: absolute; inset: -4px; border-radius: 50%; border: 8px solid var(--brand); color: var(--brand);
+  display: grid; place-items: center; background: var(--paper); }
+.ink svg { width: 66px; }
+.freeglow { position: absolute; inset: -46px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, rgba(126,112,245,.85), rgba(126,112,245,0)); }
+.freeon { position: absolute; inset: -4px; border-radius: 50%; background: var(--brand); color: #fff; opacity: 0;
+  display: grid; place-items: center; font: 700 21px var(--body); letter-spacing: .12em; }
+
+/* ---------- Handy (wallet-pass, lock-notification) ---------- */
+.glow4 { left: -60px; top: 480px; width: 1200px; height: 1200px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(90,79,207,.55), rgba(90,79,207,0)); }
+.phone { left: 270px; top: 600px; width: 540px; height: 930px; border-radius: 82px; padding: 14px; background: #06041A;
+  border: 3px solid rgba(185,176,255,.42); box-shadow: 0 50px 90px rgba(0,0,0,.55); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 66px; overflow: hidden;
+  background: linear-gradient(180deg, #17123A, #0B0822); }
+.island { position: absolute; top: 20px; left: 50%; margin-left: -76px; width: 152px; height: 38px; border-radius: 19px; background: #000; }
