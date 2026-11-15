@@ -8,7 +8,8 @@ export default {
     paid: { default: 5, doc: 'Bezahlte Becher vor dem Gratis-Becher, 2 bis 5' },
     extra: { default: 3, doc: 'Becher, die nach dem Gratis-Becher dazukommen (Wiederkommen), 0 bis 4' },
     freeLabel: { default: 'GRATIS', doc: 'Aufschrift auf dem Gratis-Becher (höchstens 7 Buchstaben)' },
-    price: { default: '1 €', doc: 'Text auf dem Preisschild (kurz, etwa 4 Zeichen)' }
+    price: { default: '1 €', doc: 'Text auf dem Preisschild (kurz, etwa 4 Zeichen)' },
+    whoosh: { default: 0.2, doc: 'Lautstärke des Wisch-Tons, wenn die Reihe weiterrückt (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise' }
   },
   captions: { min: 1 },
   anchors: {
@@ -30,6 +31,7 @@ export default {
     const { p, key, loop, cue, el } = ctx, { BACK, OUT } = ctx.ease
     if (!Number.isInteger(p.paid) || p.paid < 2 || p.paid > 5) ctx.fail('"paid" muss zwischen 2 und 5 liegen, mehr Becher passen nicht ins Bild')
     if (!Number.isInteger(p.extra) || p.extra < 0 || p.extra > 4) ctx.fail('"extra" muss zwischen 0 und 4 liegen')
+    if (!(p.whoosh >= 0 && p.whoosh <= 1)) ctx.fail('"whoosh" muss zwischen 0 und 1 liegen')
     ctx.html(`
       <div class="abs glow" style="left:380px;top:740px;width:860px;height:860px"></div>
       <div class="abs counter" style="top:1290px"></div>
@@ -66,7 +68,8 @@ export default {
     if (p.extra > 0) {
       const tb = ctx.at('more') - 0.2
       key(row, [[tb, { translate: '0px 0px' }, OUT], [tb + 0.8, { translate: `-${p.extra * 126 + 62}px 0px` }]])
-      cue(tb, 'whoosh', 0.4)
+      // Vorgabe 0,2: dem Nutzer waren die Wischer im ersten Entwurf (0,4) zu laut
+      if (p.whoosh > 0) cue(tb, 'whoosh', p.whoosh)
       for (let i = 0; i < p.extra; i++) {
         const [c, n] = add(xf + 234 + i * 126, 110, togo(ctx.B.lilac, '#FFFFFF', ctx.B.brand), p.paid + 2 + i, ctx.B.lilac)
         const t = tb + 0.3 + i * 0.2

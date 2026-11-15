@@ -6,20 +6,23 @@
     "idee": "Ein Satz: Welche Beobachtung steckt hinter diesem Video und woher kam die Anregung (Konto, Datum)? Anregung heißt Aufbau oder Kniff, nie Text oder Bild übernehmen.",
     "_hinweis": "Diesen Ordner kopieren nach videos/<JJJJ-MM-TT>-<slug>/ und nur die Kopie ändern. Alles, was mit _ beginnt, ist ein Hinweis für dich und wird ignoriert. Regeln und Bausteine: studio/PLAYBOOK.md"
   },
-  "voice": { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.0 },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05
+  },
   "timing": { "lead": 0.35, "hold": 3.2 },
   "scenes": [
     {
-      "_hinweis": "Einstieg. In den ersten zwei Sekunden muss klar sein, worum es geht. Der Anker 'free' gehört auf das Wort, das die Belohnung nennt.",
+      "_hinweis": "Einstieg. Schon das erste Bild muss sagen, worum es geht: deshalb 'instant' an der ersten Textzeile (der ganze Satz steht ab Bild 0 da). Der Anker 'free' gehört auf das Wort, das die Belohnung nennt. Ladenname, Stempelzahl und Symbol in JEDER Szene mit Laden gleich setzen.",
       "component": "paper-card",
       "params": { "shop": "Café Nordwind", "stamps": 6, "filled": 5, "freeLabel": "GRATIS", "icon": "cup", "mug": true },
       "anchors": { "hit": { "at": "start", "offset": 0.5 }, "free": { "cap": 0, "word": 5 } },
       "captions": [
-        { "lines": ["Der sechste Kaffee", "geht aufs Haus.", "Warum eigentlich?"], "accent": 6 }
+        { "lines": ["Der sechste Kaffee", "geht aufs Haus.", "Warum eigentlich?"], "accent": 6, "instant": true }
       ]
     },
     {
-      "_hinweis": "Nur für Café, Bäckerei, Imbiss: Becher. Für andere Läden diese Szene löschen.",
+      "_hinweis": "Nur für Café, Bäckerei, Imbiss: Becher. Für andere Läden diese Szene löschen. Achtung TikTok: das Preisschild steht rund zwei Sekunden in der rechten Knopfspalte (Warnung 'knopfspalte').",
       "component": "cup-row",
       "params": { "paid": 5, "extra": 3, "freeLabel": "GRATIS", "price": "1 €" },
       "anchors": { "tag": { "cap": 0, "word": 4 }, "more": { "cap": 1, "word": 3 } },
@@ -65,7 +68,7 @@
       ]
     },
     {
-      "_hinweis": "Der Beweis-Moment: die Karte meldet sich von selbst. Uhrzeit und Datum zum Laden passend wählen.",
+      "_hinweis": "Der Beweis-Moment: die Karte meldet sich von selbst. Uhrzeit und Datum zum Laden passend wählen; Datum ohne Jahr, und der Wochentag muss zum Tag passen.",
       "component": "lock-notification",
       "params": { "clock": "08:14", "date": "Donnerstag, 10. September", "title": "Café Nordwind", "body": "6 von 6, dein Kaffee wartet", "icon": "cup", "pin": true },
       "anchors": { "notify": { "cap": 0, "word": 4 }, "pin": { "cap": 0, "word": 9 } },
@@ -99,7 +102,7 @@
       ]
     },
     {
-      "_hinweis": "Schluss, immer so: eine kurze Frage oben (keep), dann der Satz mit Stichwort. Zeile 1 endet mit dem Stichwort in GROSSBUCHSTABEN, gesprochen normal: STICHWORT,{Stichwort,}",
+      "_hinweis": "Schluss, immer so: eine kurze Frage oben (keep, höchstens 2 Zeilen), dann der Satz mit Stichwort. Zeile 1 endet mit dem Stichwort in GROSSBUCHSTABEN, gesprochen normal: STICHWORT,{Stichwort,}",
       "component": "cta-comment",
       "captions": [
         { "lines": ["Klingt interessant?"], "accent": 1, "keep": true },

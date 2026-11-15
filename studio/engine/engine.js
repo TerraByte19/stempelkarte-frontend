@@ -8,7 +8,7 @@
 // egal wie schnell der Rechner ist.
 import { normalize, timeline, STAGE } from './script.mjs'
 import { BRAND, CSS_VARS, logoSvg } from './brand.js'
-import { icon, symbolDefs } from './icons.js'
+import { icon, symbolDefs, ICONS } from './icons.js'
 
 export const EASE = { BACK: 'cubic-bezier(.34,1.56,.64,1)', OUT: 'cubic-bezier(.16,1,.3,1)', IN: 'cubic-bezier(.7,0,.84,0)' }
 // Was tools/sfx.py spielen kann. Ein Tippfehler im Namen soll hier auffallen
@@ -81,7 +81,8 @@ async function build(state) {
     key(scene, fr)
     // langsame Kamerafahrt, damit kein Bild stillsteht
     key(ill, [[s, { scale: 1.05 }, 'linear'], [e + 0.3, { scale: 1 }]])
-    if (n > 0) engineCue(s - 0.05, 'whoosh', 0.7)
+    // Wisch-Ton zum Szenenwechsel. Lautstaerke aus "sound.sceneWhoosh" (Vorgabe 0,35; 0 = keiner).
+    if (n > 0 && norm.sound.sceneWhoosh > 0) engineCue(s - 0.05, 'whoosh', norm.sound.sceneWhoosh)
     return { scene, ill }
   })
 
@@ -98,11 +99,17 @@ async function build(state) {
   for (const c of TL.caps) {
     if (c.role) continue
     const box = el('div', 'cap'); box.dataset.cap = c.id; let k = 0
+    // "instant": der ganze Satz steht auf einmal da statt Wort fuer Wort. Bei der
+    // allerersten Textzeile schon im ersten Bild: dort entscheidet sich, ob jemand
+    // weiterschaut, und ohne das ist der Textbereich die ersten 0,4 s leer.
+    const first = c === TL.caps.find(x => !x.role)
     for (const line of c.lines) {
       const row = el('div')
       for (const word of line) {
         const sp = el('span', 'w' + (k >= c.accent ? ' acc' : '')); sp.textContent = word.show; row.append(sp)
-        key(sp, [[c.t[k] - 0.03, { opacity: 0, translate: '0px 18px' }, EASE.OUT], [c.t[k] + 0.22, { opacity: 1, translate: '0px 0px' }]])
+        const t = c.instant ? c.t[0] : c.t[k]
+        if (c.instant && first) sp.style.opacity = 1
+        else key(sp, [[t - 0.03, { opacity: 0, translate: '0px 18px' }, EASE.OUT], [t + 0.22, { opacity: 1, translate: '0px 0px' }]])
         k++
       }
       box.append(row)
@@ -115,6 +122,13 @@ async function build(state) {
   const ruler = el('span'); ruler.style.cssText = 'position:absolute;left:0;top:-4000px;visibility:hidden;white-space:nowrap'
   document.body.append(ruler)
   const loaded = new Map()
+  // Alles, was ein Zuschauer lesen kann: fuer die Pruefung "schreibweise"
+  state.texts = TL.caps.map(c => ({ where: `Textzeile ${c.id}`, text: c.words.join(' ') }))
+  const collectTexts = (v, where) => {
+    if (typeof v === 'string') { if (v) state.texts.push({ where, text: v }) }
+    else if (v && typeof v === 'object') for (const x of Object.values(v)) collectTexts(x, where)
+  }
+  const same = {}
   async function component(name) {
     if (!loaded.has(name)) {
       let mod
@@ -146,11 +160,19 @@ async function build(state) {
       const decl = mod.params || {}, p = {}
       for (const [k, d] of Object.entries(decl)) p[k] = d.default
       for (const [k, v] of Object.entries(part.params)) {
+        if (k.startsWith('_')) continue // Hinweis im Skript
         if (!(k in decl)) throw new Error(`${by}: Parameter "${k}" gibt es nicht. Erlaubt: ${Object.keys(decl).join(', ') || '(keine)'}`)
         const dv = decl[k].default
         if (dv != null && v != null && typeof dv !== typeof v) throw new Error(`${by}: Parameter "${k}" erwartet ${Array.isArray(dv) ? 'eine Liste' : typeof dv}, bekam ${JSON.stringify(v)}`)
         if (Array.isArray(dv) !== Array.isArray(v) && dv != null && v != null) throw new Error(`${by}: Parameter "${k}" erwartet ${Array.isArray(dv) ? 'eine Liste' : 'keinen Listenwert'}`)
         p[k] = v
+      }
+      // Ein unbekanntes Symbol fiel frueher still auf die Tasse zurueck: ein Friseur-Video mit Kaffeetasse.
+      if ('icon' in decl && !ICONS[p.icon]) throw new Error(`${by}: Symbol "${p.icon}" gibt es nicht. Erlaubt: ${Object.keys(ICONS).join(', ')}`)
+      for (const [k, d] of Object.entries(decl)) {
+        // "same": Angaben, die im ganzen Video gleich sein sollten (Ladenname, Stempelzahl, Symbol)
+        if (d.same) (same[d.same] ||= []).push({ value: p[k], by, explicit: k in part.params })
+        collectTexts(p[k], `${by}, Parameter "${k}"`)
       }
       const caps = part.caps.map(i => TL.caps[i])
       const need = mod.captions || {}
@@ -171,6 +193,8 @@ async function build(state) {
           source = 'skript'
           if (typeof over === 'number') spec = { abs: over }
           else {
+            // "wrod" statt "word" fiele sonst still auf die Vorgabe des Bausteins zurueck
+            for (const k of Object.keys(over)) if (!k.startsWith('_') && !['cap', 'word', 'offset', 'at'].includes(k)) throw new Error(`${by}: Anker "${name}": "${k}" gibt es nicht. Erlaubt: cap, word, offset, at`)
             if ('cap' in over || 'word' in over) delete spec.at
             if ('at' in over) { delete spec.cap; delete spec.word }
             spec = { ...spec, ...over }
@@ -247,15 +271,27 @@ async function build(state) {
     }
   }
 
+  // Derselbe Laden in jeder Szene? Der haeufigste Fehler bei neuem Skript: eine Szene
+  // vergisst "shop" und zeigt die Vorgabe des Bausteins.
+  for (const [what, list] of Object.entries(same)) {
+    const values = [...new Set(list.map(x => JSON.stringify(x.value)))]
+    if (values.length < 2) continue
+    state.warnings.push(`${what} ist nicht in allen Szenen gleich: ` + values.map(v => `${v} in ${list.filter(x => JSON.stringify(x.value) === v).map(x => x.by + (x.explicit ? '' : ' [Vorgabe des Bausteins, im Skript nicht gesetzt]')).join(' und ')}`).join('; '))
+  }
+
   state.cues.sort((a, b) => a.t - b.t)
+  const hook = TL.caps.find(c => !c.role) || TL.caps[0]
   window.CUES = { duration: DUR, events: state.cues.map(({ t, name, vol, pitch }) => ({ t, name, vol, pitch })) }
   Object.assign(state, {
     duration: DUR, rest,
     scenes: S.map((sc, n) => ({ index: n + 1, s: +sc.s.toFixed(3), e: +sc.e.toFixed(3), parts: sc.parts.map(p => ({ component: p.component, s: +p.s.toFixed(3), e: +p.e.toFixed(3) })) })),
     caps: TL.caps.map(c => ({ id: c.id, scene: c.scene + 1, text: c.words.join(' '), lines: c.lines.map(l => l.map(w => w.show).join(' ')), words: c.words.length, role: c.role, keep: c.keep, start: c.t[0], last: c.last, end: +c.e.toFixed(3) })),
-    // Titelbild: Ende der ersten Szene, wenn ihr letzter Satz ganz dasteht, aber bevor sie wegschiebt
-    poster: Math.max(0, Math.min(DUR - 0.05, typeof norm.poster === 'number' ? norm.poster : Math.min(TL.caps[S[0].parts.at(-1).caps.at(-1)].last + 0.5, S[0].e - 0.15))),
-    measure
+    // Titelbild: der Moment, in dem die ERSTE Textzeile des Videos vollstaendig dasteht (der
+    // Aufhaenger), bevor sie verschwindet und bevor ueberblendet oder weggeschoben wird.
+    // Frueher zaehlte der letzte Satz des letzten Teils der ersten Szene: bei "Papierkarte +
+    // Karte verschwindet" war das Titelbild dann ein leerer Umriss mit Fragezeichen.
+    poster: Math.max(0, Math.min(DUR - 0.05, typeof norm.poster === 'number' ? norm.poster : Math.min(hook.last + 0.5, hook.e - 0.05, S[0].parts[0].e - 0.15))),
+    measure, probe
   })
   window.seek(0)
 
@@ -280,8 +316,58 @@ async function build(state) {
       const cs = getComputedStyle(e), px = k => parseFloat(cs[k]) || 0
       const lh = parseFloat(cs.lineHeight) || px('fontSize') * 1.2
       const h = e.offsetHeight - px('paddingTop') - px('paddingBottom') - px('borderTopWidth') - px('borderBottomWidth')
-      return { scene: sceneOf(e), what: e.dataset.oneline || label(e), text: e.textContent.trim().slice(0, 60), width: e.scrollWidth, room: e.clientWidth, rows: Math.max(1, Math.round(h / lh)) }
+      return { scene: sceneOf(e), what: e.dataset.oneline || e.dataset.maxlines || label(e), text: e.textContent.trim().slice(0, 60), width: e.scrollWidth, room: e.clientWidth, rows: Math.max(1, Math.round(h / lh)), max: 1 }
     })
-    return { caps, safe, lines }
+    // data-maxlines="Name" data-max="2": Text, der umbrechen darf, aber nur bis zu so vielen Zeilen
+    for (const e of stage.querySelectorAll('[data-maxlines]')) {
+      const cs = getComputedStyle(e), lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2
+      lines.push({ scene: sceneOf(e), what: e.dataset.maxlines, text: e.textContent.trim().slice(0, 60), width: e.scrollWidth, room: e.clientWidth, rows: Math.max(1, Math.round(e.offsetHeight / lh)), max: +e.dataset.max || 1 })
+    }
+    // data-fit: ein Feld, aus dem sein Inhalt nicht seitlich herauslaufen darf (Kopfzeile der
+    // Wallet-Karte: der Ladenname bricht nicht um, er schiebt das Kuerzel aus der Karte)
+    const fits = [...stage.querySelectorAll('[data-fit]')].map(e => ({ scene: sceneOf(e), what: e.dataset.fit, text: e.textContent.trim().replace(/\s+/g, ' ').slice(0, 60), width: e.scrollWidth, room: e.clientWidth }))
+    // data-apart="gruppe": Elemente derselben Gruppe duerfen sich nicht ueberdecken
+    // (Absender und "jetzt" in der Benachrichtigung, Datum und Ortsnadel). Gemessen wird
+    // die Schrift selbst, nicht ihr Kasten: der ist bei zentriertem Text bildschirmbreit.
+    const apart = [...stage.querySelectorAll('[data-apart]')].map(e => ({ scene: sceneOf(e), group: e.dataset.apart, what: e.dataset.label || e.textContent.trim().slice(0, 40) || label(e), ...ink(e, sr) })).filter(a => a.right > a.left)
+    return { caps, safe, lines, fits, apart }
+  }
+
+  // Wo die Schrift und die Zeichnungen eines Elements wirklich sitzen (nicht sein Kasten).
+  // visible(knoten) entscheidet, was mitzaehlt; ohne Schrift und Zeichnung zaehlt der Kasten.
+  // Was in einem Element mit data-deco steckt, ist Beiwerk in Bewegung (der Stempel, der
+  // von rechts oben hereinfliegt) und zaehlt nicht als Inhalt.
+  function ink(e, sr, visible = () => true) {
+    const rects = [], walker = document.createTreeWalker(e, NodeFilter.SHOW_TEXT), range = document.createRange()
+    const counts = x => !x.closest('[data-deco]') && visible(x)
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      if (!n.nodeValue.trim() || !counts(n.parentElement)) continue
+      range.selectNodeContents(n); rects.push(...range.getClientRects())
+    }
+    for (const g of [...(e instanceof SVGElement ? [e] : []), ...e.querySelectorAll('svg')]) if (counts(g)) rects.push(g.getBoundingClientRect())
+    if (!rects.length && !e.textContent.trim() && !e.querySelector('svg') && visible(e)) rects.push(e.getBoundingClientRect())
+    const real = rects.filter(r => r.width > 0 && r.height > 0)
+    if (!real.length) return { left: 0, top: 0, right: 0, bottom: 0 }
+    return { left: Math.round(Math.min(...real.map(r => r.left)) - sr.left), top: Math.round(Math.min(...real.map(r => r.top)) - sr.top), right: Math.round(Math.max(...real.map(r => r.right)) - sr.left), bottom: Math.round(Math.max(...real.map(r => r.bottom)) - sr.top) }
+  }
+
+  // ---- Momentaufnahme fuer Pruefungen IN der Bewegung (nach seek(t)): wo sitzt gerade
+  // sichtbare Schrift/Zeichnung der wichtigen Elemente? Die Ruhelage reicht dafuer nicht:
+  // die Becherreihe rueckt zur Seite, ein Preisschild steht nur zwei Sekunden am Rand.
+  function probe() {
+    const sr = stage.getBoundingClientRect(), memo = new Map()
+    const opacity = e => {
+      if (!e || e === stage) return 1
+      if (!memo.has(e)) memo.set(e, parseFloat(getComputedStyle(e).opacity) * opacity(e.parentElement))
+      return memo.get(e)
+    }
+    const visible = e => opacity(e) >= 0.5
+    const out = []
+    for (const e of stage.querySelectorAll('[data-safe]')) {
+      const sc = e.closest('.scene'); if (!sc || !visible(e)) continue
+      const r = ink(e, sr, visible)
+      if (r.right > r.left) out.push({ scene: +sc.id.slice(1), what: e.dataset.safe, ...r })
+    }
+    return out
   }
 }

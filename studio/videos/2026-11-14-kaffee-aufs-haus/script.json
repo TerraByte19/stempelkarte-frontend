@@ -4,7 +4,8 @@
     "slug": "kaffee-aufs-haus",
     "language": "de",
     "date": "2026-11-14",
-    "note": "Das erste Video (launch-video/Stampit-Werbevideo-v7.mp4), unverändert nachgebaut. Dient als Referenz: tools/regress.mjs vergleicht es Bild für Bild mit dem Original. Nicht ändern."
+    "note": "Fassung 7 des ersten Videos (launch-video/Stampit-Werbevideo-v7.mp4), unverändert nachgebaut. Dient als Referenz: tools/regress.mjs vergleicht es Bild für Bild mit dem Original. Nicht ändern. Veröffentlicht wurde Fassung 10, sie liegt in videos/2026-11-15-kaffee-aufs-haus.",
+    "_hinweis": "Stimme (Tempo 1,0, ohne seed), laute Wisch-Töne (sound, whoosh) und Mischung (mix) stehen hier ausdrücklich, weil sie NICHT mehr die Vorgaben sind. Neue Videos lassen diese Angaben weg."
   },
   "voice": {
     "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
@@ -16,6 +17,8 @@
     "speed": 1.0
   },
   "timing": { "lead": 0.35, "hold": 3.2 },
+  "sound": { "sceneWhoosh": 0.7 },
+  "mix": { "limit": 0.95, "level": true },
   "say": { "Stampit": "StampIt" },
   "scenes": [
     {
@@ -26,6 +29,7 @@
     },
     {
       "component": "cup-row",
+      "params": { "whoosh": 0.4 },
       "captions": [
         { "lines": ["Weil der Gratis-Kaffee", "vielleicht einen", "Euro kostet."], "accent": 3 },
         { "lines": ["Und du dafür", "wiederkommst."], "accent": 3 }
@@ -35,6 +39,7 @@
       "parts": [
         {
           "component": "wallet-vanish",
+          "params": { "whoosh": 0.45 },
           "captions": [
             { "lines": ["Nur die Papierkarte", "macht nicht mit."], "accent": 3 },
             { "lines": ["Zerknickt,", "vergessen,", "verloren."], "accent": 2 }

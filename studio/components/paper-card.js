@@ -7,13 +7,13 @@ export default {
   title: 'Papier-Stempelkarte auf der Theke',
   use: 'Einstieg: zeigt das Bekannte (Papierkarte, letzter Stempel, Gratis-Feld), bevor das Video es in Frage stellt.',
   params: {
-    shop: { default: 'Café Nordwind', doc: 'Name des Ladens, oben rechts auf der Karte' },
+    shop: { default: 'Café Nordwind', doc: 'Name des Ladens, oben rechts auf der Karte (höchstens etwa 30 Zeichen)', same: 'Ladenname' },
     header: { default: 'Stempelkarte', doc: 'Aufdruck oben links (wird in Großbuchstaben gesetzt)' },
-    stamps: { default: 6, doc: 'Felder auf der Karte, 4 bis 10. Das letzte ist das Gratis-Feld' },
+    stamps: { default: 6, doc: 'Felder auf der Karte, 4 bis 10. Das letzte ist das Gratis-Feld', same: 'Stempelzahl' },
     filled: { default: 5, doc: 'Wie viele Felder am Ende gestempelt sind. Der letzte davon ist der Stempel, der im Bild fällt' },
     freeLabel: { default: 'GRATIS', doc: 'Aufschrift im Gratis-Feld (kurz halten, etwa 6 Buchstaben)' },
-    icon: { default: 'cup', doc: 'Stempel-Symbol: cup, scissors, star, heart, check' },
-    mug: { default: true, doc: 'Dampfende Tasse links auf der Theke. Für alles außer Café/Bäckerei auf false' }
+    icon: { default: 'cup', doc: 'Stempel-Symbol: cup, bread, scissors, star, heart, check', same: 'Symbol' },
+    mug: { default: true, doc: 'Café-Kulisse: dampfende Tasse links auf der Theke und das Regal mit Bechern dahinter. Für alles außer Café/Bäckerei auf false, dann bleiben nur Theke und Karte' }
   },
   captions: { min: 1 },
   anchors: {
@@ -41,7 +41,7 @@ export default {
     checkStamps(ctx, p.stamps, p.filled)
     ctx.html(`
       <div class="abs glow" style="left:330px;top:420px;width:1000px;height:1000px"></div>
-      <div class="abs shelf"><b style="left:44px;width:66px;height:76px"></b><b style="left:132px;width:66px;height:76px"></b><b style="left:220px;width:66px;height:76px"></b><b style="left:350px;width:88px;height:108px;border-radius:14px 14px 10px 10px"></b></div>
+      ${p.mug ? '<div class="abs shelf"><b style="left:44px;width:66px;height:76px"></b><b style="left:132px;width:66px;height:76px"></b><b style="left:220px;width:66px;height:76px"></b><b style="left:350px;width:88px;height:108px;border-radius:14px 14px 10px 10px"></b></div>' : ''}
       <div class="abs counter" style="top:1000px"></div>
       ${p.mug ? `<svg class="abs mug" viewBox="0 0 230 220">
         <g fill="none" stroke="rgba(255,255,255,.4)" stroke-width="7" stroke-linecap="round">
@@ -63,6 +63,7 @@ export default {
     // Der Stempel trifft das letzte gefuellte Feld
     const hit = ctx.at('hit'), target = slots[p.filled - 1]
     const st = el('div', 'stamper', '<svg viewBox="0 0 220 236"><circle cx="110" cy="58" r="58" fill="url(#stg)"/><rect x="88" y="104" width="44" height="66" fill="url(#stg)"/><rect x="8" y="160" width="204" height="58" rx="16" fill="url(#stg)"/><rect x="22" y="222" width="176" height="12" rx="6" fill="' + ctx.B.lilac + '"/></svg>')
+    st.dataset.deco = 'Stempel' // fliegt von rechts oben herein: Beiwerk, kein Inhalt (zaehlt nicht fuer die Knopfspalte)
     target.append(st); target.style.zIndex = 4
     key(st, [
       [ctx.s, { translate: '250px -470px', rotate: '20deg' }, IN],

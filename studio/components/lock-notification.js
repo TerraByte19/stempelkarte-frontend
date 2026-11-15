@@ -5,11 +5,11 @@ export default {
   use: 'Die Karte erinnert von selbst: Benachrichtigung auf dem Sperrbildschirm, in der Nähe des Ladens.',
   params: {
     clock: { default: '08:14', doc: 'Uhrzeit auf dem Sperrbildschirm' },
-    date: { default: 'Donnerstag, 10. September', doc: 'Datumszeile über der Uhr' },
-    title: { default: 'Café Nordwind', doc: 'Absender der Benachrichtigung (Name des Ladens)' },
-    body: { default: '6 von 6, dein Kaffee wartet', doc: 'Text der Benachrichtigung, höchstens zwei kurze Zeilen (etwa 30 Zeichen je Zeile)' },
+    date: { default: 'Donnerstag, 10. September', doc: 'Datumszeile über der Uhr: Wochentag, Tag und Monat, ohne Jahr (höchstens 25 Zeichen, das reicht für jedes Datum; mit Jahr stößt sie an die Ortsnadel)' },
+    title: { default: 'Café Nordwind', doc: 'Absender der Benachrichtigung (Name des Ladens). Lange Namen werden kleiner gesetzt, höchstens etwa 24 Zeichen, sonst läuft er in die Zeitangabe', same: 'Ladenname' },
+    body: { default: '6 von 6, dein Kaffee wartet', doc: 'Text der Benachrichtigung, höchstens zwei Zeilen, zusammen etwa 50 Zeichen' },
     when: { default: 'jetzt', doc: 'Zeitangabe rechts oben in der Benachrichtigung' },
-    icon: { default: 'cup', doc: 'Symbol im Absender-Feld: cup, scissors, star, heart, check' },
+    icon: { default: 'cup', doc: 'Symbol im Absender-Feld: cup, bread, scissors, star, heart, check', same: 'Symbol' },
     pin: { default: true, doc: 'Ortsnadel mit Wellen zeigen ("in Ladennähe")' }
   },
   captions: { min: 1 },
@@ -40,11 +40,11 @@ export default {
       <div class="abs glow4"></div>
       <div class="abs phone"><div class="screen lock">
         <div class="island"></div>
-        <div class="ldate" data-safe="Datum" data-oneline="Datum"></div>
+        <div class="ldate" data-safe="Datum" data-oneline="Datum" data-apart="datum-nadel" data-label="Datum"></div>
         <div class="lclock" data-safe="Uhr"></div>
-        <div class="notif" data-safe="Benachrichtigung"><span class="nsw">${ctx.icon(p.icon)}</span><span><b></b><i></i></span><em></em></div>
+        <div class="notif" data-safe="Benachrichtigung"><span class="nsw">${ctx.icon(p.icon)}</span><span><b data-oneline="Absender der Benachrichtigung" data-apart="kopf" data-label="Absender"></b><i data-maxlines="Text der Benachrichtigung" data-max="2"></i></span><em data-apart="kopf" data-label="Zeitangabe"></em></div>
       </div></div>
-      ${p.pin ? `<div class="abs pin"><div class="pring"><s></s><s></s></div>
+      ${p.pin ? `<div class="abs pin"><div class="pring"><s data-apart="datum-nadel" data-label="Ortsnadel (Wellen)"></s><s></s></div>
         <svg viewBox="0 0 150 150"><path fill="${ctx.B.lilac}" d="M75 8 C47 8 26 29 26 56 C26 92 75 138 75 138 C75 138 124 92 124 56 C124 29 103 8 75 8 Z"/><circle cx="75" cy="56" r="20" fill="${ctx.B.night2}"/></svg>
       </div>` : ''}`)
     ctx.$('.ldate').textContent = p.date
@@ -52,6 +52,10 @@ export default {
     ctx.$('.notif b').textContent = p.title
     ctx.$('.notif i').textContent = p.body
     ctx.$('.notif em').textContent = p.when
+    // Langer Ladenname: Schrift verkleinern, statt in die Zeitangabe rechts oben zu laufen.
+    // Reicht auch das nicht, meldet die Pruefung "ueberdeckung" den Rest.
+    const b = ctx.$('.notif b'), em = ctx.$('.notif em')
+    ctx.fit(b, em.offsetLeft - b.offsetLeft - 16, 20)
 
     const s0 = ctx.s, tn = ctx.at('notify') - 0.1
     key('.phone', [[s0, { translate: '0px 520px' }, OUT], [s0 + 0.7, { translate: '0px 0px' }]])

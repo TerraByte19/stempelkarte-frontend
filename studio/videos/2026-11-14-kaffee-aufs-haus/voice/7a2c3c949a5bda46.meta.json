@@ -6,6 +6,7 @@
   "model_id": "eleven_multilingual_v2",
   "language_code": "de",
   "output_format": "mp3_44100_128",
+  "seed": null,
   "voice_settings": {
    "stability": 0.35,
    "similarity_boost": 0.75,
@@ -13,8 +14,20 @@
    "speed": 1
   }
  },
- "source": "seed",
+ "source": "splice",
  "chars": 698,
- "from": "liam.wav",
+ "base": "61c6528941628e07",
+ "cut": [
+  453,
+  471
+ ],
+ "sentence": "Und das lohnt sich!",
+ "clip": "7a2c3c949a5bda46.clip.mp3",
+ "clip_sha256": "51271ca1f593f6d8252882e87f7404754c152455b98846a615247fc9c874e7ce",
+ "gain": 1.267829418182373,
+ "shift": 0.68,
+ "cut_from": 30.25,
+ "cut_to": 31.288,
+ "from": "satz-austausch-neuer-satz.mp3",
  "spent": 0
 }

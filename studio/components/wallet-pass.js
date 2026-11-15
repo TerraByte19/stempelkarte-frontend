@@ -13,13 +13,13 @@ export default {
   title: 'Handy mit Wallet-Karte',
   use: 'Zeigt das Produkt: Karte in der Wallet, einmal scannen, Stempel landen sofort auf dem Handy.',
   params: {
-    shop: { default: 'Café Nordwind', doc: 'Name des Ladens auf der Karte' },
-    location: { default: 'HH-OTTENSEN', doc: 'Kürzel rechts oben auf der Karte (Stadt-Viertel), Großbuchstaben. Leer lassen für keins' },
-    reward: { default: '6 Stempel = 1 Kaffee gratis', doc: 'Belohnungszeile unter den Stempeln, muss in eine Zeile passen (etwa 28 Zeichen)' },
-    stamps: { default: 6, doc: 'Felder auf der Karte, 4 bis 10' },
+    shop: { default: 'Café Nordwind', doc: 'Name des Ladens auf der Karte. Neben einem Kürzel von 11 Zeichen passen höchstens etwa 22 Zeichen, ab etwa 18 wird der Name kleiner gesetzt (dann warnt der Bau). Ohne Kürzel etwa 35', same: 'Ladenname' },
+    location: { default: 'HH-OTTENSEN', doc: 'Kürzel rechts oben auf der Karte (Stadt-Viertel), Großbuchstaben, höchstens etwa 14 Zeichen (je länger, desto kleiner wird der Ladenname). Leer lassen für keins' },
+    reward: { default: '6 Stempel = 1 Kaffee gratis', doc: 'Belohnungszeile unter den Stempeln, muss in eine Zeile passen (höchstens etwa 32 Zeichen)' },
+    stamps: { default: 6, doc: 'Felder auf der Karte, 4 bis 10', same: 'Stempelzahl' },
     before: { default: 2, doc: 'Stempel, die schon da sind, wenn die Karte erscheint' },
     after: { default: 5, doc: 'Stempel am Ende der Szene. Jeder neue Stempel braucht einen Anker (stamp1, stamp2, ...)' },
-    icon: { default: 'cup', doc: 'Stempel-Symbol: cup, scissors, star, heart, check' },
+    icon: { default: 'cup', doc: 'Stempel-Symbol: cup, bread, scissors, star, heart, check', same: 'Symbol' },
     walletTitle: { default: 'Wallet', doc: 'Überschrift auf dem Handy' },
     scan: { default: true, doc: 'Scan-Rahmen und Haken über dem QR-Code zeigen (false: nur Karte und Stempel)' }
   },
@@ -83,7 +83,7 @@ export default {
         <div class="peek" style="top:150px;background:#2A2452"><u style="width:150px"></u></div>
         <div class="peek" style="top:196px;background:#352D68"><u style="width:110px"></u></div>
         <div class="scard" data-safe="Wallet-Karte">
-          <div class="shead"><span class="smark">${ctx.icon(p.icon)}</span><span class="sshop"></span><span class="sloc"></span></div>
+          <div class="shead" data-fit="Kopf der Wallet-Karte (Ladenname und Kürzel)"><span class="smark">${ctx.icon(p.icon)}</span><span class="sshop"></span><span class="sloc"></span></div>
           <div class="sgrid"></div>
           <div class="sreward" data-oneline="Belohnungszeile"></div>
           <div class="qrwrap">
@@ -98,7 +98,10 @@ export default {
     ctx.$('.sloc').textContent = p.location
     ctx.$('.sreward').textContent = p.reward
     // Langer Ladenname: Schrift verkleinern statt das Kuerzel aus der Karte zu schieben
-    ctx.fit('.sshop', 404 - 56 - 16 - ctx.$('.sloc').offsetWidth - (p.location ? 14 : 0), 18)
+    const shopSize = ctx.fit('.sshop', 404 - 56 - 16 - ctx.$('.sloc').offsetWidth - (p.location ? 14 : 0), 18)
+    // Unter 22 px (Vorgabe 30) ist der Name auf dem Handy kaum noch zu lesen: sagen, statt still zu schrumpfen.
+    // Passt er auch bei 18 px nicht, schiebt er das Kuerzel aus der Karte; das meldet die Pruefung "ueberlauf".
+    if (shopSize < 22) ctx.warn(`der Ladenname "${p.shop}" steht nur noch in ${shopSize} px (sonst 30). Namen oder Kürzel kürzen.`)
 
     // derselbe gezeichnete QR-Code wie auf der Landing Page (kein echter Code)
     const { m, size, quiet } = QR, side = size + quiet * 2

@@ -5,7 +5,7 @@
     "language": "de",
     "note": "Zweites Beispiel: beweist, dass die Bausteine mit anderem Laden, 8 Stempeln, anderer Reihenfolge und anderer Rechnung funktionieren. Nur als Entwurf gebaut (--no-voice), es gibt keine Aufnahme dazu."
   },
-  "voice": { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.0 },
+  "voice": { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05 },
   "timing": { "lead": 0.35, "hold": 3.2 },
   "scenes": [
     {
@@ -13,7 +13,7 @@
       "params": { "shop": "Salon Haarscharf", "stamps": 8, "filled": 7, "icon": "scissors", "mug": false },
       "anchors": { "free": { "cap": 0, "word": 5 } },
       "captions": [
-        { "lines": ["Der achte Haarschnitt", "geht aufs Haus."], "accent": 3 },
+        { "lines": ["Der achte Haarschnitt", "geht aufs Haus."], "accent": 3, "instant": true },
         { "lines": ["Wenn die Karte", "dann noch da ist."], "accent": 3 }
       ]
     },

@@ -1,70 +1,143 @@
 #!/usr/bin/env python3
 # voice.py - Sprecherstimme ueber ElevenLabs, mit Cache und Satz-Austausch.
 #
-#   voice.py plan   --dir <video>/voice --text-file t.txt [--settings s.json]
-#   voice.py ensure --dir <video>/voice --text-file t.txt [--settings s.json] [--allow-voice-spend] [--splice]
-#   voice.py seed   --dir <video>/voice --text-file t.txt --wav a.wav --alignment a.json [--settings s.json]
+#   voice.py plan   --dir <video>/voice --text-file t.txt [--settings s.json] [--splice]
+#   voice.py ensure --dir <video>/voice --text-file t.txt [--settings s.json] [--work <ordner>] [--allow-voice-spend] [--splice]
+#   voice.py seed   --dir <video>/voice --text-file t.txt --audio a.mp3 --alignment a.json [--settings s.json]
+#   voice.py seed-splice --dir <video>/voice --text-file t.txt --audio vorher.mp3 --alignment vorher.json
+#                        --clip-audio satz.mp3 --clip-alignment satz.json [--settings s.json]
 #
 # JEDER Aufruf der Schnittstelle kostet Geld (1 Zeichen = 1 Credit). Deshalb:
 #   - Ohne --allow-voice-spend wird nie gesendet. "ensure" bricht dann mit
-#     Code 3 ab und sagt, wie viele Zeichen es kosten wuerde.
+#     Code 3 ab und sagt, wie viele Zeichen es kosten wuerde. Die Sperre sitzt
+#     in synthesize(), direkt vor der einzigen Stelle, die sendet.
 #   - Jede Aufnahme liegt im Cache des Videos, Schluessel = Hash aus Text und
 #     Einstellungen. Derselbe Text kostet nie zweimal.
 #   - --splice nimmt nur EINEN geaenderten Satz neu auf und setzt ihn in die
 #     vorhandene Aufnahme ein (so entstand im ersten Video "Und das lohnt sich!").
+#     Findet sich keine passende Aufnahme, wird NICHT stillschweigend der ganze
+#     Text aufgenommen, sondern abgelehnt.
+#   - Mehr als MAX_CHARS Zeichen in einem Aufruf werden nie gesendet.
+#   - Blieb ein frueherer Aufruf ohne Antwort (Zeitueberschreitung), wird nicht
+#     von selbst noch einmal gesendet: er kann trotzdem berechnet worden sein.
 #   - STUDIO_VOICE_OFFLINE=1 sperrt die Schnittstelle ganz (Tests, Proben).
+#
+# Was im Cache liegt (und mit dem Video ins Repo gehoert, rund 0,8 MB):
+#   <schluessel>.mp3              genau die Datei, die der Anbieter geliefert hat
+#   <schluessel>.alignment.json   Zeichen-Zeiten
+#   <schluessel>.meta.json        Text, Einstellungen, Herkunft, Kosten
+#   beim Satz-Austausch statt der .mp3: <schluessel>.clip.mp3 und
+#   .clip.alignment.json (nur der neue Satz) plus der Verweis auf die Aufnahme
+#   davor. Der fertige Ton wird daraus jedes Mal gleich neu zusammengesetzt.
+# Bewusst KEINE .wav im Cache: .wav ist von Git ausgenommen, ein frischer
+# Checkout haette die Aufnahme nicht mehr und muesste sie neu bezahlen. Eine
+# .wav entsteht nur noch als Zwischenergebnis im Arbeitsordner (out/work).
 #
 # Der Schluessel fuer ElevenLabs steht NICHT hier: der Proxy der Umgebung
 # haengt ihn als Kopfzeile xi-api-key an. Deshalb laeuft der Aufruf ueber curl.
-import argparse, base64, hashlib, json, os, re, shutil, subprocess, sys, wave
+import argparse, base64, hashlib, json, os, re, shutil, subprocess, sys, time, wave
 import numpy as np
 
 SR = 44100
 API = 'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/with-timestamps?output_format={output_format}'
-# Die im ersten Video gewaehlte Stimme: "Liam", lebhaft.
+# Die vom Nutzer gewaehlte Stimme: "Liam", lebhaft. Tempo 1,05: von drei
+# Aufnahmen fuer das veroeffentlichte Video hat er die mit 1,05 genommen.
+# seed: None = der Anbieter wuerfelt. Eine Zahl macht die Aufnahme wiederholbar
+# (im veroeffentlichten Video 3303); sie gehoert dann zum Schluessel.
 DEFAULTS = {
     'voice_id': 'TX3LPaxmHKxFdv7VOQHJ', 'model_id': 'eleven_multilingual_v2', 'language_code': 'de',
-    'output_format': 'mp3_44100_128',
-    'voice_settings': {'stability': 0.35, 'similarity_boost': 0.75, 'style': 0.6, 'speed': 1.0},
+    'output_format': 'mp3_44100_128', 'seed': None,
+    'voice_settings': {'stability': 0.35, 'similarity_boost': 0.75, 'style': 0.6, 'speed': 1.05},
 }
+VOICE_SETTINGS = ('stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost')
+MAX_CHARS = 1500  # ein Video hat 500 bis 700 Zeichen; mehr in EINEM Aufruf ist ein Fehler im Skript, kein Auftrag
 PAD = 0.04     # ein Satz wird 40 ms vor seinem ersten Laut geschnitten, mitten in der Atempause
 FADE = 0.012   # 12 ms Blende an jeder Schnittkante, sonst knackt es
 CONTEXT = 300  # so viele Zeichen Umgebung bekommt die Stimme beim Satz-Austausch mit
+# curl-Ende-Codes, bei denen sicher nichts beim Anbieter ankam (Aufruf falsch,
+# Name nicht aufloesbar, keine Verbindung, TLS scheitert). Alles andere ist unklar.
+CURL_NOT_SENT = (2, 3, 5, 6, 7, 35, 60, 77)
 
 
 class Refused(Exception):
     """Es muesste Geld ausgegeben werden, das nicht freigegeben wurde."""
 
 
+class Unclear(RuntimeError):
+    """Gesendet, aber keine Antwort: moeglicherweise trotzdem berechnet."""
+
+
 # ---------------------------------------------------------------- Einstellungen und Cache
+def canon(x):
+    """
+    Zahlen einheitlich schreiben: 1.0 wird 1. Node schreibt "speed": 1, Python
+    1.0 - ohne diesen Schritt ergab derselbe Text mit denselben Einstellungen
+    zwei Schluessel, und die Aufnahme waere zweimal bezahlt worden.
+    """
+    if isinstance(x, dict): return {k: canon(v) for k, v in x.items()}
+    if isinstance(x, list): return [canon(v) for v in x]
+    if isinstance(x, float) and x == int(x): return int(x)
+    return x
+
+
 def merge_settings(over=None):
     s = json.loads(json.dumps(DEFAULTS)); over = over or {}
+    def setting(k, v):
+        if k not in VOICE_SETTINGS: raise SystemExit(f'voice: unbekannte Einstellung "{k}" in voice_settings')
+        s['voice_settings'][k] = v
     for k, v in over.items():
-        if k == 'voice_settings': s['voice_settings'].update(v)
+        if k.startswith('_'): continue  # Hinweise im Skript
+        if k == 'voice_settings':
+            for kk, vv in v.items(): setting(kk, vv)
         elif k in s: s[k] = v
-        elif k in s['voice_settings']: s['voice_settings'][k] = v   # Kurzform: "stability": 0.4
+        elif k in VOICE_SETTINGS: setting(k, v)   # Kurzform: "stability": 0.4
         else: raise SystemExit(f'voice: unbekannte Einstellung "{k}"')
-    return s
+    seed = s['seed']
+    if seed is not None and (isinstance(seed, bool) or not isinstance(seed, (int, float)) or seed != int(seed) or not 0 <= seed <= 4294967295):
+        raise SystemExit(f'voice: "seed" muss eine ganze Zahl zwischen 0 und 4294967295 sein (bekam {seed!r})')
+    speed = s['voice_settings']['speed']
+    if isinstance(speed, bool) or not isinstance(speed, (int, float)) or not 0.7 <= speed <= 1.2:
+        raise SystemExit(f'voice: "speed" muss zwischen 0.7 und 1.2 liegen (bekam {speed!r})')
+    return canon(s)
 
 
 def cache_key(text, settings):
-    blob = json.dumps({'text': text, **settings}, sort_keys=True, ensure_ascii=False)
+    s = canon(settings)
+    # ohne seed bleibt der Schluessel so, wie er vor der Einfuehrung von seed war
+    if s.get('seed') is None: s = {k: v for k, v in s.items() if k != 'seed'}
+    blob = json.dumps({'text': text, **s}, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode('utf-8')).hexdigest()[:16]
 
 
 def paths(d, key):
-    return {k: os.path.join(d, f'{key}.{ext}') for k, ext in
-            [('wav', 'wav'), ('alignment', 'alignment.json'), ('meta', 'meta.json'), ('mp3', 'mp3')]}
+    return {k: os.path.join(d, f'{key}.{ext}') for k, ext in [
+        ('alignment', 'alignment.json'), ('meta', 'meta.json'), ('mp3', 'mp3'),
+        ('clip', 'clip.mp3'), ('clip_alignment', 'clip.alignment.json'),
+        ('response', 'response.json'), ('clip_response', 'clip.response.json')]}
 
 
-def cached(d, key):
-    p = paths(d, key)
-    return os.path.exists(p['wav']) and os.path.exists(p['alignment'])
+def load_json(path):
+    with open(path, encoding='utf-8') as f: return json.load(f)
+
+
+def load_meta(d, key):
+    try: return load_json(paths(d, key)['meta'])
+    except (OSError, ValueError): return None
+
+
+def cached(d, key, seen=()):
+    """Liegt alles da, um den Ton dieser Aufnahme ohne Netz herzustellen?"""
+    m = load_meta(d, key); p = paths(d, key)
+    if not m or not os.path.exists(p['alignment']): return False
+    if m.get('source') == 'splice':
+        return (key not in seen and os.path.exists(p['clip']) and os.path.exists(p['clip_alignment'])
+                and cached(d, m.get('base', ''), seen + (key,)))
+    return os.path.exists(os.path.join(d, m.get('audio') or f'{key}.mp3'))
 
 
 # ---------------------------------------------------------------- Ton lesen und schreiben
 def decode(path):
-    """mp3/wav -> float32 mono 44,1 kHz, ueber ffmpeg."""
+    """mp3/flac/wav -> float32 mono 44,1 kHz, ueber ffmpeg."""
     r = subprocess.run(['ffmpeg', '-v', 'error', '-i', path, '-f', 'f32le', '-ar', str(SR), '-ac', '1', 'pipe:1'], capture_output=True)
     if r.returncode != 0: raise RuntimeError('ffmpeg: ' + r.stderr.decode('utf-8', 'replace')[:300])
     return np.frombuffer(r.stdout, dtype='<f4').copy()
@@ -80,14 +153,11 @@ def write_wav(path, x):
         f.setnchannels(1); f.setsampwidth(2); f.setframerate(SR); f.writeframes(to_pcm(x).tobytes())
 
 
-def read_wav(path):
-    with wave.open(path, 'rb') as f:
-        if f.getframerate() != SR or f.getnchannels() != 1 or f.getsampwidth() != 2:
-            raise RuntimeError(f'{path}: erwartet 44,1 kHz mono 16 bit')
-        i = np.frombuffer(f.readframes(f.getnframes()), dtype='<i2').astype(np.float64)
-    # Ein Viertel-Schritt Abstand zur Null hin: to_pcm schneidet ab statt zu runden,
-    # und ohne diesen Abstand kaeme aus 100 nach Lesen und Schreiben manchmal 99 zurueck.
-    return ((i + 0.25 * np.sign(i)) / 32767.0).astype(np.float32)
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for chunk in iter(lambda: f.read(1 << 20), b''): h.update(chunk)
+    return h.hexdigest()
 
 
 # ---------------------------------------------------------------- Saetze
@@ -156,6 +226,30 @@ def splice_merge(old, old_al, i0, i1, clip, clip_al):
     return audio, al, {'gain': float(gain), 'shift': round(shift, 3), 'cut_from': round(a_t, 3), 'cut_to': round(b_t, 3)}
 
 
+def audio_array(d, key):
+    """Der Ton einer Aufnahme als Zahlenreihe. Ein Satz-Austausch wird hier aus seinen Teilen zusammengesetzt."""
+    m = load_meta(d, key); p = paths(d, key)
+    if m.get('source') == 'splice':
+        i0, i1 = m['cut']
+        return splice_merge(audio_array(d, m['base']), load_json(paths(d, m['base'])['alignment']), i0, i1,
+                            decode(p['clip']), load_json(p['clip_alignment']))[0]
+    return decode(os.path.join(d, m.get('audio') or f'{key}.mp3'))
+
+
+def materialize(d, key, work):
+    """
+    Gibt die Tondatei zurueck, die ffmpeg in die Mischung nimmt.
+    Eine gelieferte Aufnahme geht unveraendert hinein (so wurde auch das
+    veroeffentlichte Video gemischt: direkt aus der .mp3). Nur der Satz-Austausch
+    braucht eine zusammengesetzte .wav; die liegt im Arbeitsordner, nie im Cache.
+    """
+    m = load_meta(d, key)
+    if m.get('source') != 'splice': return os.path.join(d, m.get('audio') or f'{key}.mp3')
+    os.makedirs(work, exist_ok=True); out = os.path.join(work, f'voice-{key}.wav')
+    write_wav(out, audio_array(d, key))
+    return out
+
+
 # ---------------------------------------------------------------- Schnittstelle
 def http_post(url, body):
     """Einzige Stelle, die ElevenLabs erreicht. Tests ersetzen diese Funktion."""
@@ -163,12 +257,13 @@ def http_post(url, body):
         raise Refused('STUDIO_VOICE_OFFLINE=1: die Schnittstelle ist gesperrt')
     r = subprocess.run(['curl', '-sS', '-m', '180', '-X', 'POST', url, '-H', 'Content-Type: application/json',
                         '--data-binary', '@-', '-w', '\n%{http_code}'], input=json.dumps(body), capture_output=True, text=True)
-    if r.returncode != 0: raise RuntimeError('curl: ' + r.stderr[:300])
+    if r.returncode in CURL_NOT_SENT: raise RuntimeError(f'curl ({r.returncode}): ' + r.stderr[:300])
+    if r.returncode != 0: raise Unclear(f'curl ({r.returncode}): ' + r.stderr[:300])
     out, code = r.stdout.rsplit('\n', 1)
     return int(code), out
 
 
-def synthesize(text, settings, raw_path, previous_text=None, next_text=None):
+def synthesize(text, settings, raw_path, allow=False, previous_text=None, next_text=None):
     """
     Holt eine Aufnahme. Die Antwort wird als Erstes unveraendert nach raw_path
     geschrieben und erst dann geprueft: scheitert danach irgendetwas, ist das
@@ -176,16 +271,38 @@ def synthesize(text, settings, raw_path, previous_text=None, next_text=None):
     statt noch einmal zu senden.
     """
     if os.path.exists(raw_path):
-        out = open(raw_path, encoding='utf-8').read()
+        print(f'ElevenLabs: die Antwort liegt schon vor ({os.path.basename(raw_path)}), es wird nichts gesendet.', file=sys.stderr)
+        with open(raw_path, encoding='utf-8') as f: out = f.read()
     else:
+        # Die Sperre steht bewusst HIER und nicht nur beim Aufrufer: kein Weg fuehrt ohne Freigabe zu http_post.
+        if not allow: raise Refused(f'Nicht freigegeben: {len(text)} Zeichen würden bei ElevenLabs verbraucht (--allow-voice-spend fehlt).')
+        if len(text) > MAX_CHARS: raise Refused(f'{len(text)} Zeichen in einem Aufruf sind mehr als die Obergrenze von {MAX_CHARS}. Es wurde nichts gesendet.')
+        pending = raw_path[:-len('response.json')] + 'pending.json'
+        if os.path.exists(pending):
+            raise Refused(f'Unklarer Stand: ein früherer Aufruf wurde gesendet und blieb ohne Antwort ({os.path.basename(pending)}). '
+                          'Er kann trotzdem berechnet worden sein. Nicht noch einmal senden, bevor der Nutzer das geklärt hat '
+                          '(Verlauf bei ElevenLabs). Erst danach diese Datei löschen.')
         body = {'text': text, 'model_id': settings['model_id'], 'language_code': settings['language_code'], 'voice_settings': settings['voice_settings']}
+        if settings.get('seed') is not None: body['seed'] = int(settings['seed'])
         if previous_text: body['previous_text'] = previous_text
         if next_text: body['next_text'] = next_text
         url = API.format(voice_id=settings['voice_id'], output_format=settings['output_format'])
-        code, out = http_post(url, body)
-        if code != 200: raise RuntimeError(f'ElevenLabs antwortet {code}: {out[:400]}')
         os.makedirs(os.path.dirname(raw_path), exist_ok=True)
-        open(raw_path, 'w', encoding='utf-8').write(out)
+        with open(pending, 'w', encoding='utf-8') as f:
+            json.dump({'started': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'chars': len(text)}, f)
+        print(f'ElevenLabs: {len(text)} Zeichen werden jetzt gesendet.', file=sys.stderr)
+        try:
+            code, out = http_post(url, body)
+        except Unclear as e:
+            # pending bleibt liegen: der naechste Lauf sendet nicht von selbst noch einmal
+            raise Unclear(f'{e} - unklar, ob ElevenLabs den Aufruf berechnet hat. {os.path.basename(pending)} bleibt als Sperre liegen.')
+        except (Refused, RuntimeError):
+            os.remove(pending); raise   # sicher nichts gesendet (Sperre, keine Verbindung)
+        if code != 200:
+            os.remove(pending)          # abgelehnte Aufrufe werden nicht berechnet
+            raise RuntimeError(f'ElevenLabs antwortet {code}: {out[:400]}')
+        with open(raw_path, 'w', encoding='utf-8') as f: f.write(out)
+        os.remove(pending)
     d = json.loads(out)
     al = d['alignment']
     if ''.join(al['characters']) != text:
@@ -194,100 +311,147 @@ def synthesize(text, settings, raw_path, previous_text=None, next_text=None):
 
 
 # ---------------------------------------------------------------- Befehle
-def info(d, key, text, settings, source, spent, extra=None):
-    p = paths(d, key)
-    with wave.open(p['wav'], 'rb') as f: length = f.getnframes() / f.getframerate()
-    return {'key': key, 'wav': p['wav'], 'alignment': p['alignment'], 'source': source, 'chars': len(text), 'spent': spent,
-            'seconds': round(length, 3), **(extra or {})}
+def info(d, key, text, source, spent, work=None, extra=None):
+    p = paths(d, key); al = load_json(p['alignment'])
+    out = {'key': key, 'alignment': p['alignment'], 'source': source, 'chars': len(text), 'spent': spent,
+           'seconds': round(al['character_end_times_seconds'][-1], 3), **(extra or {})}
+    if work: out['audio'] = materialize(d, key, work)
+    return out
 
 
-def store(d, key, text, settings, audio, al, source, extra=None):
+def store(d, key, text, settings, al, source, extra=None):
     os.makedirs(d, exist_ok=True); p = paths(d, key)
-    if audio is not None: write_wav(p['wav'], audio)
-    json.dump(al, open(p['alignment'], 'w', encoding='utf-8'), ensure_ascii=False)
-    json.dump({'key': key, 'text': text, 'settings': settings, 'source': source, 'chars': len(text), **(extra or {})},
-              open(p['meta'], 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    with open(p['alignment'], 'w', encoding='utf-8') as f: json.dump(al, f, ensure_ascii=False)
+    # meta zuletzt: erst mit ihr gilt die Aufnahme als "im Cache"
+    with open(p['meta'], 'w', encoding='utf-8') as f:
+        json.dump({'key': key, 'text': text, 'settings': canon(settings), 'source': source, 'chars': len(text), **(extra or {})}, f, ensure_ascii=False, indent=1)
+
+
+def store_splice(d, key, text, settings, base_key, i, clip_al, extra):
+    """Legt den Satz-Austausch als Bauanleitung ab: Aufnahme davor + neuer Satz. Prueft, dass das Ergebnis zum Text passt."""
+    base = load_meta(d, base_key); p = paths(d, key)
+    s_old = sentences(base['text'])[i]; s_new = sentences(text)[i]
+    if ''.join(clip_al['characters']) != s_new[2]:
+        raise RuntimeError(f'Satz-Austausch: die Zeichen des neuen Satzes passen nicht zu "{s_new[2]}"')
+    cut = [s_old[0], s_old[1] - 1]
+    _, al, how = splice_merge(audio_array(d, base_key), load_json(paths(d, base_key)['alignment']), cut[0], cut[1], decode(p['clip']), clip_al)
+    if ''.join(al['characters']) != text: raise RuntimeError('Satz-Austausch: zusammengesetzter Text stimmt nicht mit dem Skript überein')
+    with open(p['clip_alignment'], 'w', encoding='utf-8') as f: json.dump(clip_al, f, ensure_ascii=False)
+    store(d, key, text, settings, al, 'splice', {'base': base_key, 'cut': cut, 'sentence': s_new[2], 'clip': os.path.basename(p['clip']),
+                                                 'clip_sha256': sha256_file(p['clip']), **how, **extra})
+    return how
 
 
 def find_splice_base(d, text, settings):
     """Sucht im Cache eine Aufnahme mit gleichen Einstellungen, die sich in genau einem Satz unterscheidet."""
     if not os.path.isdir(d): return None
+    want = canon(settings)
     for name in sorted(os.listdir(d)):
         if not name.endswith('.meta.json'): continue
-        m = json.load(open(os.path.join(d, name), encoding='utf-8'))
-        if m.get('settings') != settings or not cached(d, m['key']): continue
+        try: m = load_json(os.path.join(d, name))
+        except ValueError: continue
+        if canon(m.get('settings')) != want or not cached(d, m['key']): continue
         i = one_sentence_diff(m['text'], text)
         if i is not None: return m, i
     return None
 
 
 def plan(d, text, settings, splice=False):
-    key = cache_key(text, settings)
+    key = cache_key(text, settings); p = paths(d, key)
     if cached(d, key): return {'key': key, 'cached': True, 'chars': len(text), 'would_spend': 0, 'how': 'cache'}
+    out = {'key': key, 'cached': False, 'chars': len(text)}
     if splice:
         base = find_splice_base(d, text, settings)
-        if base:
-            sent = sentences(text)[base[1]][2]
-            return {'key': key, 'cached': False, 'chars': len(text), 'would_spend': len(sent), 'how': 'splice', 'sentence': sent, 'base': base[0]['key']}
-    return {'key': key, 'cached': False, 'chars': len(text), 'would_spend': len(text), 'how': 'full'}
+        if not base: return {**out, 'would_spend': len(text), 'how': 'full', 'splice_possible': False}
+        sent = sentences(text)[base[1]][2]
+        # liegt die bezahlte Antwort schon da (Abbruch nach dem Empfang), kostet der naechste Lauf nichts
+        return {**out, 'would_spend': 0 if os.path.exists(p['clip_response']) else len(sent), 'how': 'splice', 'sentence': sent, 'base': base[0]['key'], 'splice_possible': True}
+    return {**out, 'would_spend': 0 if os.path.exists(p['response']) else len(text), 'how': 'full'}
 
 
-def ensure(d, text, settings, allow=False, splice=False):
+def ensure(d, text, settings, allow=False, splice=False, work=None):
     pl = plan(d, text, settings, splice); key = pl['key']
-    if pl['cached']: return info(d, key, text, settings, 'cache', 0)
-    if not allow:
+    if pl['cached']: return info(d, key, text, 'cache', 0, work)
+    if splice and pl['how'] != 'splice':
+        raise Refused(f'--splice: im Cache liegt keine Aufnahme mit denselben Einstellungen, die sich in genau einem Satz unterscheidet. '
+                      f'Es wurde nichts gesendet. Der ganze Text ({len(text)} Zeichen) wird nur ohne --splice neu aufgenommen.')
+    if pl['would_spend'] > 0 and not allow:
         raise Refused(f"Keine Aufnahme im Cache. Eine neue Aufnahme kostet {pl['would_spend']} Zeichen bei ElevenLabs "
                       f"({'nur der geänderte Satz' if pl['how'] == 'splice' else 'der ganze Text'}). "
                       f"Erst wenn der Entwurf stimmt: noch einmal mit --allow-voice-spend aufrufen.")
-    raw = os.path.join(d, f"{key}.clip.response.json" if pl['how'] == 'splice' else f'{key}.response.json')
-    if os.path.exists(raw): print(f'ElevenLabs: Antwort liegt schon vor ({os.path.basename(raw)}), es wird nichts gesendet.', file=sys.stderr)
-    else: print(f"ElevenLabs: {pl['would_spend']} Zeichen werden jetzt verbraucht ({pl['how']}).", file=sys.stderr)
     os.makedirs(d, exist_ok=True); p = paths(d, key)
     if pl['how'] == 'splice':
         base, i = find_splice_base(d, text, settings)
-        old_text = base['text']; s_old = sentences(old_text)[i]; s_new = sentences(text)[i]
-        bp = paths(d, base['key'])
-        old = read_wav(bp['wav']); old_al = json.load(open(bp['alignment'], encoding='utf-8'))
-        mp3, clip_al = synthesize(s_new[2], settings, os.path.join(d, f'{key}.clip.response.json'),
+        s_new = sentences(text)[i]
+        mp3, clip_al = synthesize(s_new[2], settings, p['clip_response'], allow,
                                   previous_text=text[:s_new[0]][-CONTEXT:].strip() or None, next_text=text[s_new[1]:][:CONTEXT].strip() or None)
-        clip_mp3 = os.path.join(d, f'{key}.clip.mp3'); open(clip_mp3, 'wb').write(mp3)
-        audio, al, how = splice_merge(old, old_al, s_old[0], s_old[1] - 1, decode(clip_mp3), clip_al)
-        if ''.join(al['characters']) != text: raise RuntimeError('Satz-Austausch: zusammengesetzter Text stimmt nicht mit dem Skript überein')
-        store(d, key, text, settings, audio, al, 'splice', {'base': base['key'], 'sentence': s_new[2], 'spent': len(s_new[2]), **how})
-        return info(d, key, text, settings, 'splice', len(s_new[2]), how)
-    mp3, al = synthesize(text, settings, os.path.join(d, f'{key}.response.json'))
-    open(p['mp3'], 'wb').write(mp3)
-    store(d, key, text, settings, decode(p['mp3']), al, 'api', {'spent': len(text)})
-    return info(d, key, text, settings, 'api', len(text))
+        with open(p['clip'], 'wb') as f: f.write(mp3)
+        how = store_splice(d, key, text, settings, base['key'], i, clip_al, {'spent': len(s_new[2])})
+        os.remove(p['clip_response'])   # .clip.mp3 und Zeiten liegen jetzt einzeln da; die Antwort waere dasselbe noch einmal
+        return info(d, key, text, 'splice', pl['would_spend'], work, how)
+    mp3, al = synthesize(text, settings, p['response'], allow)
+    with open(p['mp3'], 'wb') as f: f.write(mp3)
+    store(d, key, text, settings, al, 'api', {'audio': os.path.basename(p['mp3']), 'audio_sha256': sha256_file(p['mp3']), 'spent': len(text)})
+    os.remove(p['response'])
+    return info(d, key, text, 'api', pl['would_spend'], work)
 
 
-def seed(d, text, settings, wav, alignment):
-    """Legt eine vorhandene Aufnahme in den Cache (z. B. die des ersten Videos). Kostet nichts."""
-    al = json.load(open(alignment, encoding='utf-8'))
+def seed(d, text, settings, audio, alignment):
+    """Legt eine vorhandene Aufnahme unveraendert in den Cache (z. B. die des veroeffentlichten Videos). Kostet nichts."""
+    al = load_json(alignment)
     if ''.join(al['characters']) != text:
         raise SystemExit('seed: die Zeichen der Aufnahme passen nicht zum gesprochenen Text des Skripts - falsche Datei?')
-    read_wav(wav)  # prueft nur das Format
-    key = cache_key(text, settings); os.makedirs(d, exist_ok=True)
-    shutil.copyfile(wav, paths(d, key)['wav'])  # unveraendert kopieren, nicht neu schreiben
-    store(d, key, text, settings, None, al, 'seed', {'from': os.path.basename(wav), 'spent': 0})
-    return info(d, key, text, settings, 'seed', 0)
+    ext = os.path.splitext(audio)[1].lower().lstrip('.')
+    if ext not in ('mp3', 'flac', 'wav'): raise SystemExit('seed: die Aufnahme muss .mp3, .flac oder .wav sein')
+    if ext == 'wav':
+        print('seed: Achtung, .wav ist von Git ausgenommen. Diese Aufnahme überlebt keinen frischen Checkout. '
+              'Besser verlustfrei umwandeln und die .flac ablegen: ffmpeg -i aufnahme.wav aufnahme.flac', file=sys.stderr)
+    length = len(decode(audio)) / SR; end = al['character_end_times_seconds'][-1]
+    if not end - 0.5 <= length <= end + 5:
+        raise SystemExit(f'seed: die Aufnahme ist {length:.2f} s lang, ihre Zeichen-Zeiten enden bei {end:.2f} s - falsche Datei?')
+    key = cache_key(text, settings); os.makedirs(d, exist_ok=True); name = f'{key}.{ext}'
+    shutil.copyfile(audio, os.path.join(d, name))   # unveraendert kopieren, nicht neu schreiben
+    store(d, key, text, settings, al, 'seed', {'audio': name, 'audio_sha256': sha256_file(audio), 'from': os.path.basename(audio), 'spent': 0})
+    return info(d, key, text, 'seed', 0)
+
+
+def seed_splice(d, text, settings, audio, alignment, clip_audio, clip_alignment):
+    """
+    Legt einen frueher von Hand gemachten Satz-Austausch in den Cache: die Aufnahme
+    davor und den neu aufgenommenen Satz. So liegt die Stimme des ersten Videos
+    im Repo, ohne dass eine .wav gebraucht wird. Kostet nichts.
+    """
+    base_al = load_json(alignment); base_text = ''.join(base_al['characters'])
+    base = seed(d, base_text, settings, audio, alignment)
+    i = one_sentence_diff(base_text, text)
+    if i is None: raise SystemExit('seed-splice: die beiden Texte unterscheiden sich nicht in genau einem Satz')
+    key = cache_key(text, settings); p = paths(d, key)
+    shutil.copyfile(clip_audio, p['clip'])
+    how = store_splice(d, key, text, settings, base['key'], i, load_json(clip_alignment), {'from': os.path.basename(clip_audio), 'spent': 0})
+    return info(d, key, text, 'splice', 0, None, {'base': base['key'], **how})
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description='Sprecherstimme mit Cache. Sendet nur mit --allow-voice-spend.')
-    ap.add_argument('cmd', choices=['plan', 'ensure', 'seed'])
+    ap.add_argument('cmd', choices=['plan', 'ensure', 'seed', 'seed-splice'])
     ap.add_argument('--dir', required=True); ap.add_argument('--text-file', required=True); ap.add_argument('--settings')
     ap.add_argument('--allow-voice-spend', action='store_true'); ap.add_argument('--splice', action='store_true')
-    ap.add_argument('--wav'); ap.add_argument('--alignment')
+    ap.add_argument('--work'); ap.add_argument('--audio'); ap.add_argument('--alignment')
+    ap.add_argument('--clip-audio'); ap.add_argument('--clip-alignment')
     a = ap.parse_args(argv)
-    text = open(a.text_file, encoding='utf-8').read()
-    settings = merge_settings(json.load(open(a.settings, encoding='utf-8')) if a.settings else None)
+    with open(a.text_file, encoding='utf-8') as f: text = f.read()
+    settings = merge_settings(load_json(a.settings) if a.settings else None)
     try:
         if a.cmd == 'plan': out = plan(a.dir, text, settings, a.splice)
         elif a.cmd == 'seed':
-            if not (a.wav and a.alignment): raise SystemExit('seed braucht --wav und --alignment')
-            out = seed(a.dir, text, settings, a.wav, a.alignment)
-        else: out = ensure(a.dir, text, settings, a.allow_voice_spend, a.splice)
+            if not (a.audio and a.alignment): raise SystemExit('seed braucht --audio und --alignment')
+            out = seed(a.dir, text, settings, a.audio, a.alignment)
+        elif a.cmd == 'seed-splice':
+            if not (a.audio and a.alignment and a.clip_audio and a.clip_alignment): raise SystemExit('seed-splice braucht --audio, --alignment, --clip-audio und --clip-alignment')
+            out = seed_splice(a.dir, text, settings, a.audio, a.alignment, a.clip_audio, a.clip_alignment)
+        else:
+            # ohne --work liegt die zusammengesetzte .wav dort, wo make.mjs sie auch ablegt: im (von Git ausgenommenen) out-Ordner
+            out = ensure(a.dir, text, settings, a.allow_voice_spend, a.splice, a.work or os.path.join(a.dir, '..', 'out', 'work'))
     except Refused as e:
         print(json.dumps({'refused': True, 'message': str(e), **plan(a.dir, text, settings, a.splice)}, ensure_ascii=False)); return 3
     print(json.dumps(out, ensure_ascii=False)); return 0

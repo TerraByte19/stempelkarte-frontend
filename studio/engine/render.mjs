@@ -53,7 +53,7 @@ export async function openStudio(data) {
     return pg
   }
   /** Was die Seite ueber sich weiss: Laenge, Szenen, Texte, Toene, Anker, Fehler. */
-  const state = pg => pg.evaluate(() => { const { measure, ...rest } = window.STUDIO; return { ...rest, cuesFile: window.CUES || null } })
+  const state = pg => pg.evaluate(() => { const { measure, probe, ...rest } = window.STUDIO; return { ...rest, cuesFile: window.CUES || null } })
   const close = async () => { await browser.close(); await new Promise(r => server.close(r)) }
   return { page, state, close, problems }
 }
@@ -67,6 +67,28 @@ export async function openStudio(data) {
  * ergaben nicht dieselben Bilder. Mit Wartezeit sind sie gleich.
  */
 export const seek = (pg, t) => pg.evaluate(t => new Promise(r => { window.seek(t); requestAnimationFrame(() => requestAnimationFrame(r)) }), t)
+
+/**
+ * Geht das Video in kleinen Schritten durch und fragt die Seite jedes Mal, wo
+ * die sichtbaren wichtigen Elemente gerade sitzen (STUDIO.probe). Ohne Fotos,
+ * deshalb in ein bis zwei Sekunden fertig. Ergebnis je Element: von wann bis
+ * wann es zu sehen war und wie weit es dabei in jede Richtung reichte, dazu
+ * dasselbe nur fuer den Bereich, den `band` beschreibt.
+ */
+export async function sampleMotion(pg, duration, { step = 0.25, band = null } = {}) {
+  const seen = new Map()
+  for (let t = 0; t < duration; t = +(t + step).toFixed(3)) {
+    const items = await pg.evaluate(t => { window.seek(t); return window.STUDIO.probe() }, t)
+    for (const it of items) {
+      if (band && !(it.right > band.left && it.bottom > band.top && it.top < band.bottom)) continue
+      const k = it.scene + '|' + it.what, o = seen.get(k) || { scene: it.scene, what: it.what, from: t, to: t, right: it.right, top: it.top, bottom: it.bottom }
+      o.to = t; o.right = Math.max(o.right, it.right); o.top = Math.min(o.top, it.top); o.bottom = Math.max(o.bottom, it.bottom)
+      seen.set(k, o)
+    }
+  }
+  await pg.evaluate(() => window.seek(0))
+  return [...seen.values()]
+}
 
 /** Ein Standbild als PNG. */
 export async function still(pg, t, file) {

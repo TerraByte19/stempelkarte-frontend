@@ -7,12 +7,13 @@ export default {
   title: 'Papierkarte verschwindet im Portemonnaie',
   use: 'Das Problem mit Papier: zerknickt, vergessen, verloren. Drei Schläge auf drei Wörter.',
   params: {
-    shop: { default: 'Café Nordwind', doc: 'Name des Ladens auf der Karte' },
+    shop: { default: 'Café Nordwind', doc: 'Name des Ladens auf der Karte (höchstens etwa 30 Zeichen)', same: 'Ladenname' },
     header: { default: 'Stempelkarte', doc: 'Aufdruck oben links (wird in Großbuchstaben gesetzt)' },
-    stamps: { default: 6, doc: 'Felder auf der Karte, 4 bis 10' },
+    stamps: { default: 6, doc: 'Felder auf der Karte, 4 bis 10', same: 'Stempelzahl' },
     filled: { default: 5, doc: 'Wie viele Felder gestempelt sind' },
     freeLabel: { default: 'GRATIS', doc: 'Aufschrift im Gratis-Feld' },
-    icon: { default: 'cup', doc: 'Stempel-Symbol: cup, scissors, star, heart, check' }
+    icon: { default: 'cup', doc: 'Stempel-Symbol: cup, bread, scissors, star, heart, check', same: 'Symbol' },
+    whoosh: { default: 0.22, doc: 'Lautstärke des Wisch-Tons, wenn die Karte ins Portemonnaie rutscht (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise' }
   },
   captions: { min: 1 },
   anchors: {
@@ -50,6 +51,7 @@ export default {
   build(ctx) {
     const { p, key, loop, cue } = ctx, { OUT, IN } = ctx.ease
     checkStamps(ctx, p.stamps, p.filled)
+    if (!(p.whoosh >= 0 && p.whoosh <= 1)) ctx.fail('"whoosh" muss zwischen 0 und 1 liegen')
     ctx.html(`
       <div class="abs ghost">?</div>
       <div class="walA">
@@ -81,7 +83,8 @@ export default {
     key('.dogear', [[tz + 0.05, { opacity: 0 }], [tz + 0.2, { opacity: 1 }]])
     cue(tz, 'crumple')
     for (const part of ['.walA', '.walB']) key(part, [[tv, { translate: '0px 980px' }, OUT], [tv + 0.6, { translate: '0px 0px' }], [tl, { translate: '0px 0px' }, IN], [tl + 0.55, { translate: '0px 960px' }]])
-    cue(tw - 0.2, 'whoosh', 0.45)
+    // Vorgabe 0,22: dem Nutzer waren die Wischer im ersten Entwurf (0,45) zu laut
+    if (p.whoosh > 0) cue(tw - 0.2, 'whoosh', p.whoosh)
     cue(tl, 'drop', 0.9)
     key('.ghost', [[tl + 0.3, { opacity: 0 }], [tl + 0.7, { opacity: 1 }]])
     loop('.ghost', [{ scale: 1 }, { scale: 1.03 }, { scale: 1 }], 1.6)

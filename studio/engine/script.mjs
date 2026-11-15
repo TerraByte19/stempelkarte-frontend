@@ -4,7 +4,12 @@
 // zweimal (timeline.js fuer das Bild, events.mjs fuer den Ton), und beide
 // mussten von Hand gleich gehalten werden. Jetzt gibt es genau eine Quelle.
 
-export const STAGE = { w: 1080, h: 1920, safeTop: 220, safeBottom: 384, capMargin: 70, capMaxLines: 3 }
+export const STAGE = {
+  w: 1080, h: 1920, safeTop: 220, safeBottom: 384, capMargin: 70, capMaxLines: 3,
+  // Rechte Knopfspalte von TikTok (Herz, Kommentar, Teilen): das Video laeuft auf
+  // Instagram UND TikTok, dort liegt ab x = 950 zwischen y = 900 und 1540 die Bedienung darueber.
+  column: { left: 950, top: 900, bottom: 1540 }
+}
 
 // Zeitkonstanten des Referenzvideos. Wer sie aendert, aendert jedes Video.
 export const TIMING = {
@@ -17,6 +22,31 @@ export const TIMING = {
   scenePause: 0.35 // zusaetzliche Pause vor einer neuen Szene (nur Entwurf)
 }
 
+// Lautstaerke des Wisch-Tons beim Szenenwechsel. 0,35 ist die Haelfte des ersten
+// Entwurfs: dem Nutzer waren die Wischer zu laut. 0 schaltet ihn ab.
+export const SOUND = { sceneWhoosh: 0.35 }
+
+// Mischung: Stimme vorn, Effekte deutlich darunter. limit ist die Obergrenze des
+// Begrenzers (0,89 = rund -1 dBFS). level: true laesst ffmpeg danach wieder auf
+// 0 dBFS anheben - so waren die ersten Videos gemischt (limit 0,95), ihre
+// Skripte setzen das ausdruecklich, damit der Vergleich mit ihnen genau bleibt.
+export const MIX = { voice: 1.5, sfx: 0.45, limit: 0.89, level: false }
+
+// Was script.json enthalten darf. Alles andere ist fast immer ein Tippfehler
+// ("parms" statt "params") und fiel frueher still auf die Vorgaben zurueck:
+// ein Baeckerei-Video zeigte dann "Café Nordwind". Namen mit "_" am Anfang
+// sind Hinweise und werden ueberall ignoriert.
+const KEYS = {
+  script: ['meta', 'voice', 'timing', 'say', 'poster', 'sound', 'mix', 'scenes'],
+  timing: ['lead', 'hold'],
+  sound: Object.keys(SOUND),
+  mix: Object.keys(MIX),
+  voice: ['voice_id', 'model_id', 'language_code', 'output_format', 'seed', 'voice_settings', 'stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost'],
+  scene: ['component', 'params', 'anchors', 'captions'],
+  parts: ['parts'],
+  caption: ['lines', 'accent', 'keep', 'role', 'instant']
+}
+
 // Die Marke wird "Stampit" geschrieben, aber "Stamp It" gesprochen. Ohne
 // diese Vorgabe liest die Stimme "Stampit" wie ein deutsches Wort.
 export const SAY_DEFAULT = { Stampit: 'StampIt' }
@@ -24,6 +54,13 @@ export const SAY_DEFAULT = { Stampit: 'StampIt' }
 const PUNCT = /[.,!?:;]+$/
 
 function fail(msg) { const e = new Error(msg); e.script = true; throw e }
+
+function onlyKeys(obj, allowed, where) {
+  if (obj == null) return
+  if (typeof obj !== 'object' || Array.isArray(obj)) fail(`${where} muss ein Objekt sein ({ ... })`)
+  for (const k of Object.keys(obj)) if (!k.startsWith('_') && !allowed.includes(k)) fail(`${where}: "${k}" gibt es nicht. Erlaubt: ${allowed.join(', ')} (Hinweise beginnen mit "_")`)
+}
+const num = (v, lo, hi, where) => { if (typeof v !== 'number' || !(v >= lo && v <= hi)) fail(`${where} muss eine Zahl zwischen ${lo} und ${hi} sein (bekam ${JSON.stringify(v)})`); return v }
 
 // Ein Wort im Skript: "Kaffee" | "6.500{sechstausendfünfhundert}" | { show, say }
 function parseWord(raw, sayMap, where) {
@@ -48,6 +85,7 @@ function parseWord(raw, sayMap, where) {
 
 function parseCaption(c, sayMap, where) {
   if (!c || !Array.isArray(c.lines) || !c.lines.length) fail(`${where}: braucht "lines" (Liste von Zeilen)`)
+  onlyKeys(c, KEYS.caption, where)
   const lines = c.lines.map((line, li) => {
     const raw = Array.isArray(line) ? line : String(line).trim().split(/\s+/)
     if (!raw.length || raw[0] === '') fail(`${where}: Zeile ${li + 1} ist leer`)
@@ -56,7 +94,7 @@ function parseCaption(c, sayMap, where) {
   const words = lines.flat()
   const accent = c.accent == null ? words.length : Number(c.accent)
   if (!Number.isInteger(accent) || accent < 0) fail(`${where}: "accent" muss ein Wort-Index >= 0 sein`)
-  return { lines, words: words.map(x => x.show), say: words.map(x => x.say), accent, keep: !!c.keep, role: c.role || null }
+  return { lines, words: words.map(x => x.show), say: words.map(x => x.say), accent, keep: !!c.keep, role: c.role || null, instant: !!c.instant }
 }
 
 /** Macht aus script.json die flache Form, mit der alle rechnen. Wirft bei Fehlern. */
@@ -65,15 +103,27 @@ export function normalize(script) {
   const meta = script.meta || {}
   if (!meta.title || !meta.slug) fail('meta.title und meta.slug fehlen')
   if (!Array.isArray(script.scenes) || !script.scenes.length) fail('scenes fehlt oder ist leer')
+  onlyKeys(script, KEYS.script, 'script.json'); onlyKeys(script.timing, KEYS.timing, '"timing"')
+  onlyKeys(script.sound, KEYS.sound, '"sound"'); onlyKeys(script.mix, KEYS.mix, '"mix"'); onlyKeys(script.voice, KEYS.voice, '"voice"')
   const sayMap = { ...SAY_DEFAULT, ...(script.say || {}) }
   const t = script.timing || {}
   const timing = { ...TIMING, ...(t.lead != null ? { lead: +t.lead } : {}), ...(t.hold != null ? { hold: +t.hold } : {}) }
+  const sound = { ...SOUND, ...(script.sound || {}) }
+  num(sound.sceneWhoosh, 0, 1, '"sound.sceneWhoosh"')
+  const mix = { ...MIX, ...(script.mix || {}) }
+  num(mix.voice, 0, 4, '"mix.voice"'); num(mix.sfx, 0, 4, '"mix.sfx"'); num(mix.limit, 0.0625, 1, '"mix.limit"')
+  if (typeof mix.level !== 'boolean') fail('"mix.level" muss true oder false sein')
   const caps = [], scenes = []
   script.scenes.forEach((sc, si) => {
+    if (!sc || typeof sc !== 'object') fail(`Szene ${si + 1} muss ein Objekt sein`)
     const rawParts = Array.isArray(sc.parts) ? sc.parts : [sc]
     if (!rawParts.length) fail(`Szene ${si + 1}: "parts" ist leer`)
+    // Eine Szene mit Teilen traegt selbst nichts ausser "parts": ein "params" daneben wuerde nie gelesen.
+    if (Array.isArray(sc.parts)) onlyKeys(sc, KEYS.parts, `Szene ${si + 1} (mit "parts")`)
     const parts = rawParts.map((p, pi) => {
       const where = `Szene ${si + 1}${rawParts.length > 1 ? `, Teil ${pi + 1}` : ''}`
+      if (!p || typeof p !== 'object') fail(`${where} muss ein Objekt sein`)
+      onlyKeys(p, KEYS.scene, where)
       if (!p.component || !/^[a-z0-9-]+$/.test(p.component)) fail(`${where}: "component" fehlt oder hat unerlaubte Zeichen`)
       if (!Array.isArray(p.captions) || !p.captions.length) fail(`${where}: braucht mindestens eine Textzeile in "captions" (die Zeit hängt an den Wörtern)`)
       const idx = p.captions.map((c, ci) => {
@@ -87,7 +137,7 @@ export function normalize(script) {
   })
   const spoken = caps.flatMap(c => c.say).join(' ')
   return {
-    meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, poster: script.poster ?? null,
+    meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, sound, mix, poster: script.poster ?? null,
     scenes, caps, spoken, words: caps.reduce((n, c) => n + c.words.length, 0)
   }
 }

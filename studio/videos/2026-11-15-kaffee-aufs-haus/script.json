@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "title": "Kaffee aufs Haus",
+    "slug": "kaffee-aufs-haus",
+    "language": "de",
+    "date": "2026-11-15",
+    "note": "Das veröffentlichte Video (launch-video/Stampit-Werbevideo-v10.mp4, vom Nutzer freigegeben), als Skript aufgeschrieben. Bilder und Text wie Fassung 7, neue Aufnahme (Liam, Tempo 1,05, seed 3303), Wisch-Töne halb so laut. tools/regress.mjs vergleicht es mit launch-video/final-build. Nicht ändern.",
+    "_hinweis": "Die leisen Wisch-Töne sind die Vorgaben des Studios und stehen deshalb nicht im Skript. Die Mischung (mix) steht ausdrücklich da, weil dieses Video noch mit Begrenzer 0,95 und Anhebung auf 0 dBFS gemischt wurde; neue Videos lassen mix weg (Vorgabe: rund -1 dBFS). Ein seed gehört nur ins Skript, wenn eine Aufnahme wiederholbar sein soll."
+  },
+  "voice": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "model_id": "eleven_multilingual_v2",
+    "language_code": "de",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05,
+    "seed": 3303
+  },
+  "timing": { "lead": 0.35, "hold": 3.2 },
+  "mix": { "limit": 0.95, "level": true },
+  "say": { "Stampit": "StampIt" },
+  "scenes": [
+    {
+      "component": "paper-card",
+      "captions": [
+        { "lines": ["Der sechste Kaffee", "geht aufs Haus.", "Warum eigentlich?"], "accent": 6 }
+      ]
+    },
+    {
+      "component": "cup-row",
+      "captions": [
+        { "lines": ["Weil der Gratis-Kaffee", "vielleicht einen", "Euro kostet."], "accent": 3 },
+        { "lines": ["Und du dafür", "wiederkommst."], "accent": 3 }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "wallet-vanish",
+          "captions": [
+            { "lines": ["Nur die Papierkarte", "macht nicht mit."], "accent": 3 },
+            { "lines": ["Zerknickt,", "vergessen,", "verloren."], "accent": 2 }
+          ]
+        },
+        {
+          "component": "guest-ghost",
+          "captions": [
+            { "lines": ["Und das Café", "merkt nie, wer fast", "schon Stammgast war."], "accent": 5 }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "wallet-pass",
+      "captions": [
+        { "lines": ["Mit Stampit liegt", "die Karte in Apple", "und Google Wallet."], "accent": 6 },
+        { "lines": ["Einmal scannen,", "kein Download."], "accent": 2 },
+        { "lines": ["Jeder Besuch", "ein Stempel,", "sofort auf dem Handy."], "accent": 4 }
+      ]
+    },
+    {
+      "component": "lock-notification",
+      "captions": [
+        { "lines": ["Ist die Karte voll,", "meldet sie sich von", "selbst, in Ladennähe."], "accent": 4 }
+      ]
+    },
+    {
+      "component": "calc-panel",
+      "captions": [
+        { "lines": ["Und das lohnt sich!"] },
+        { "lines": ["Bleiben dir pro Kaffee", "zwei Euro fünfzig,"], "accent": 4 },
+        { "lines": ["und fünfzig", "Stammkunden kommen", "einmal mehr pro Woche,"], "accent": 3 },
+        { "lines": ["sind das 6.500{sechstausendfünfhundert} Euro", "mehr im Jahr."], "accent": 2 }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "captions": [
+        { "lines": ["Klingt interessant?"], "accent": 1, "keep": true },
+        { "role": "cta", "lines": ["Dann kommentiere jetzt KARTE,{Karte,}", "und wir melden uns bei dir."] }
+      ]
+    }
+  ]
+}
