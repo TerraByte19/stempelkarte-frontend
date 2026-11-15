@@ -1,0 +1,2666 @@
+<title>Stampit Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Aufbau: eine Spalte fuers Handy (dunkles Markenband oben, darunter Papier,
+   Karten untereinander, Player 9:16). Ab 960px Hauptspalte plus schmale
+   Spalte fuer Eingang, Ideen und Weiterarbeiten. Nur die Videos, die auf eine
+   Entscheidung warten, sind echte Karten. Alles andere sind ruhige Zeilen,
+   damit die Freigabe das Lauteste auf der Seite bleibt. Eine Karte bleibt
+   nach dem Tippen an ihrem Platz, bis das Speichern bestaetigt ist: so
+   verrutscht nichts unter dem Finger und getippter Text geht bei einem
+   Fehler nicht verloren. */
+:root {
+  /* Markenfarben der Videos, in beiden Themen gleich */
+  --night: #0E0A24;
+  --night-2: #1B1446;
+  --brand: #3C3489;
+  --lilac: #B9B0FF;
+  --paper: #F4EEE2;
+
+  /* Markenband oben: in beiden Themen dunkel, wie die Videos selbst */
+  --band-bg: #1B1446;
+  --band-ink: #F4EEE2;
+  --band-soft: #B9B0FF;
+  --band-line: #3C3489;
+  /* Der gestrichelte Ring fuer "kein Video" war mit --band-line kaum zu
+     sehen (1,7:1 auf dem Band). Dieser Ton kommt auf 3,6:1. */
+  --band-ring: #7168BC;
+  --alert-bg: #FFD8D1;
+  --alert-ink: #5A0F0A;
+  --video-bg: #0E0A24;
+  --video-ink: #B9B0FF;
+  /* Balken fuer die Zeichen der Stimme: die Fuellung traegt den Zustand
+     (normal, fast aufgebraucht, Limit erreicht), die Spur ist jeweils der
+     dunklere Ton derselben Farbe. */
+  --meter-track: #463D9A;
+  --meter-fill: #B9B0FF;
+  --meter-warn-track: #5C4A1C;
+  --meter-warn: #F0C56A;
+  --meter-over-track: #6A2A33;
+  --meter-over: #FFB4AB;
+
+  /* Flaechen und Schrift, helle Werte */
+  --bg: #F4EEE2;
+  --surface: #FCF9F3;
+  --inset: #FFFFFF;
+  --line: #DACFBB;
+  /* Rand von Textfeldern und ruhigen Knoepfen. Mit --line (1,3:1) war das
+     Feld auf dem Papier kaum als Feld zu erkennen, dieser Ton haelt 3:1. */
+  --line-strong: #8A8170;
+  --ink: #0E0A24;
+  --ink-soft: #4D4869;
+  --accent: #3C3489;
+  --on-accent: #F8F4EA;
+  --accent-tint: #E4DFF6;
+  --accent-ink: #2C2670;
+  --ok: #1E6B45;
+  --ok-tint: #DCEEDF;
+  --warn: #7A4E00;
+  --warn-tint: #F5E6BF;
+  --danger: #9F231B;
+  --danger-tint: #F6DAD4;
+  --on-danger: #FFF6F3;
+  --toast-bg: #0E0A24;
+  --toast-ink: #F4EEE2;
+  --toast-act: #B9B0FF;
+
+  --font-head: "Space Grotesk", "Hanken Grotesk", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-text: "Hanken Grotesk", "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+  --radius: 14px;
+  --tap: 48px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E0A24;
+    --surface: #1B1446;
+    --inset: #120D30;
+    --line: #352C76;
+    --line-strong: #6F66B8;
+    --ink: #F4EEE2;
+    --ink-soft: #B6AFD6;
+    --accent: #B9B0FF;
+    --on-accent: #0E0A24;
+    --accent-tint: #2B2368;
+    --accent-ink: #DAD5FF;
+    --ok: #86DDB0;
+    --ok-tint: #153A33;
+    --warn: #F0C56A;
+    --warn-tint: #3B2F14;
+    --danger: #FF9D93;
+    --danger-tint: #471A27;
+    --on-danger: #2A0708;
+    --toast-bg: #F4EEE2;
+    --toast-ink: #0E0A24;
+    --toast-act: #3C3489;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E0A24;
+  --surface: #1B1446;
+  --inset: #120D30;
+  --line: #352C76;
+  --line-strong: #6F66B8;
+  --ink: #F4EEE2;
+  --ink-soft: #B6AFD6;
+  --accent: #B9B0FF;
+  --on-accent: #0E0A24;
+  --accent-tint: #2B2368;
+  --accent-ink: #DAD5FF;
+  --ok: #86DDB0;
+  --ok-tint: #153A33;
+  --warn: #F0C56A;
+  --warn-tint: #3B2F14;
+  --danger: #FF9D93;
+  --danger-tint: #471A27;
+  --on-danger: #2A0708;
+  --toast-bg: #F4EEE2;
+  --toast-ink: #0E0A24;
+  --toast-act: #3C3489;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--font-text);
+  -webkit-text-size-adjust: 100%;
+  overflow-wrap: anywhere;
+}
+/* Das Band oben beginnt unter der Statusleiste des Handys. Ohne diesen
+   Streifen stuende dort Papierfarbe ueber dem dunklen Band. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--band-bg);
+}
+h1, h2, h3, p, ol, ul { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.wrap {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- Markenband ---------- */
+.band { background: var(--band-bg); color: var(--band-ink); border-bottom: 1px solid var(--band-line); }
+.band :focus-visible { outline-color: var(--band-soft); }
+.band-in { padding-block: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+.brandrow { display: flex; align-items: center; gap: 10px; }
+/* Der Stempel als Zeichen: ein Ring mit Punkt, wie ein frischer Abdruck. */
+.logo {
+  width: 30px; height: 30px; flex: none; border-radius: 50%;
+  border: 3px solid var(--band-soft);
+  background: radial-gradient(circle, var(--band-soft) 0 34%, transparent 36%);
+  transform: rotate(-8deg);
+}
+h1 { font: 700 22px/1.1 var(--font-head); letter-spacing: -0.01em; }
+h1 .sub { color: var(--band-soft); font-weight: 500; }
+/* Auf dem Handy liegt der Eingang unter den wartenden Videos. Der Sprung
+   dorthin steht oben, damit eine Idee nie mehr als ein Tippen entfernt ist.
+   Ab 960px steht der Eingang ohnehin rechts oben, dann braucht es ihn nicht. */
+.band-link {
+  margin-left: auto; min-height: 44px; padding: 8px 2px; border: 0; background: none; cursor: pointer;
+  color: var(--band-soft); font-weight: 600; text-decoration: underline; text-underline-offset: 3px;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+@media (min-width: 960px) { .band-link { display: none; } }
+.meldung { font-size: 17px; line-height: 1.4; max-width: 60ch; }
+.stand-meta { font-size: 13.5px; color: var(--band-soft); display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.problem {
+  background: var(--alert-bg); color: var(--alert-ink);
+  border-radius: 10px; padding: 10px 12px; font-weight: 600; line-height: 1.4;
+  max-width: 70ch;
+}
+.problem b { display: block; font: 700 12px/1.2 var(--font-head); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+.band-warn { font-size: 14px; color: var(--band-ink); border-left: 3px solid var(--band-soft); padding-left: 10px; }
+/* Verbrauch der Stimme: ein Satz mit beiden Zahlen, darunter ein duenner
+   Balken. Der Satz traegt die Aussage, der Balken nur das Verhaeltnis. */
+.voice { display: flex; flex-direction: column; gap: 6px; max-width: 340px; }
+.voice-text { font-size: 13.5px; color: var(--band-soft); font-variant-numeric: tabular-nums; }
+.voice-text b { color: var(--band-ink); font-weight: 700; }
+.meter { height: 8px; border-radius: 4px; background: var(--meter-track); overflow: hidden; }
+.meter span { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--meter-fill); }
+.voice[data-s="knapp"] .meter { background: var(--meter-warn-track); }
+.voice[data-s="knapp"] .meter span { background: var(--meter-warn); }
+.voice[data-s="voll"] .meter { background: var(--meter-over-track); }
+.voice[data-s="voll"] .meter span { background: var(--meter-over); }
+
+.week { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.week-label { font: 500 12px/1.2 var(--font-head); letter-spacing: 0.08em; text-transform: uppercase; color: var(--band-soft); }
+.week ol { display: flex; gap: 8px; }
+.week li { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 36px; }
+.week .wd { font-size: 11.5px; color: var(--band-soft); }
+.week .stamp {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  font: 700 13px/1 var(--font-head); font-variant-numeric: tabular-nums;
+  border: 2px dashed var(--band-ring); color: var(--band-soft);
+}
+.week li[data-s="offen"] .stamp { border: 2px solid var(--band-soft); color: var(--band-ink); }
+.week li[data-s="frei"] .stamp { border: 2px solid var(--band-soft); background: var(--band-soft); color: var(--night); transform: rotate(-8deg); }
+.legend { font-size: 12px; color: var(--band-soft); display: flex; flex-wrap: wrap; gap: 2px 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 11px; height: 11px; border-radius: 50%; border: 1.5px dashed var(--band-soft); flex: none; }
+.legend i.k-offen { border-style: solid; }
+.legend i.k-frei { border-style: solid; background: var(--band-soft); }
+
+/* ---------- Seitenaufbau ---------- */
+.layout { padding-block: 20px 96px; display: flex; flex-direction: column; gap: 24px; }
+/* Handy: eine Spalte in der Reihenfolge der Arbeit. Erst was der Nutzer
+   entscheiden oder eintragen soll (Freigabe, Aenderungen, Eingang, Ideen),
+   dann was er nur nachschlaegt. "Freigegeben" bekommt jeden Tag eine Zeile
+   dazu und ist deshalb eingeklappt: frueher stand der Eingang darunter und
+   rutschte mit jedem freigegebenen Video weiter nach unten. Die beiden
+   Spalten-Huellen loesen sich dafuer auf, die Reihenfolge kommt aus
+   "order". Ab 960px werden es zwei echte Spalten. */
+.cols { display: flex; flex-direction: column; gap: 28px; }
+.col-main, .col-side { display: contents; }
+.cols section { min-width: 0; }
+#sec-neu { order: 1; } #sec-aendern { order: 2; } #sec-eingang { order: 3; }
+#sec-ideen { order: 4; } #sec-frei { order: 5; } #sec-protokoll { order: 6; }
+#sec-weiter { order: 7; } #sec-rest { order: 8; } #sec-speicher { order: 9; }
+@media (min-width: 960px) {
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 40px; align-items: start; }
+  .col-main, .col-side { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+}
+body[data-state="fehler"] .cols { display: none; }
+
+section > h2, .fold > summary h2 {
+  font: 700 20px/1.2 var(--font-head); letter-spacing: -0.01em; text-wrap: balance;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.count { font: 500 14px/1 var(--font-text); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+section { display: flex; flex-direction: column; gap: 12px; }
+.sec-hint { color: var(--ink-soft); font-size: 14.5px; max-width: 60ch; }
+.empty, .loading { color: var(--ink-soft); padding: 14px 0; border-top: 1px solid var(--line); }
+
+/* ---------- Hinweise ---------- */
+#notice { display: flex; flex-direction: column; gap: 10px; }
+#notice:empty { display: none; }
+.note { border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; max-width: 75ch; }
+.note b { font: 700 16px/1.3 var(--font-head); }
+.note.err { background: var(--danger-tint); color: var(--ink); border: 1px solid var(--danger); }
+.note.warn { background: var(--warn-tint); color: var(--ink); border: 1px solid var(--warn); }
+.note.info { background: var(--accent-tint); color: var(--accent-ink); }
+
+/* ---------- Knoepfe ---------- */
+.btn {
+  min-height: var(--tap); padding: 10px 16px; border-radius: 12px;
+  border: 1.5px solid var(--accent); background: transparent; color: var(--accent-ink);
+  font-weight: 600; font-size: 16px; line-height: 1.2; cursor: pointer; text-align: center; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: 0.5; cursor: default; }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.go { min-height: 54px; font: 700 18px/1.2 var(--font-head); }
+.btn.soft { border-color: var(--line-strong); color: var(--ink); }
+.btn.drop { border-color: var(--line-strong); color: var(--danger); }
+.btn.danger { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
+.linkbtn {
+  min-height: 44px; padding: 8px 2px; border: 0; background: none; cursor: pointer;
+  color: var(--accent-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px;
+  touch-action: manipulation; display: inline-flex; align-items: center;
+}
+/* Wechselt eine Karte den Platz, zaehlt 0,7 s lang kein Tippen auf einen
+   Entscheidungs-Knopf (siehe SPERR_MS). Ohne Zeichen sah das aus, als haette
+   die Seite das Tippen verschluckt: die Knoepfe sind in der Zeit blass. */
+.entscheid { transition: opacity 0.12s; }
+body[data-sperre] .entscheid { opacity: 0.45; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* ---------- Karte "Zur Freigabe" ---------- */
+.cards { display: flex; flex-direction: column; gap: 16px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px; display: grid; gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "kopf" "film" "rest";
+}
+.card-head { grid-area: kopf; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.card-media { grid-area: film; min-width: 0; }
+.card-body { grid-area: rest; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+@media (min-width: 620px) {
+  .card { grid-template-columns: 250px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 20px; grid-template-areas: "film kopf" "film rest"; padding: 20px; }
+}
+/* Ueber dem Titel steht nur der Tag. Eine Uhrzeit stand hier einmal fest im
+   Text ("geplant fuer 10 Uhr"), obwohl nichts im Projekt zu einer Uhrzeit
+   postet. Das Board zeigt deshalb keine. */
+.eyebrow { font: 500 12.5px/1.35 var(--font-head); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+.title { font: 700 21px/1.2 var(--font-head); letter-spacing: -0.01em; text-wrap: balance; }
+.hook { color: var(--ink-soft); font-size: 15.5px; }
+.meta { color: var(--ink-soft); font-size: 14px; font-variant-numeric: tabular-nums; }
+.quelle { font-size: 14.5px; color: var(--ink-soft); }
+.quelle b, .said b { font-weight: 600; color: var(--ink); }
+
+.stage { background: var(--video-bg); border-radius: 12px; display: flex; justify-content: center; overflow: hidden; }
+/* Der Player nimmt auf dem Handy die Breite der Karte, solange er dabei
+   nicht hoeher als zwei Drittel des Bildschirms wird: dann passen Video und
+   Knoepfe zusammen auf einen Schirm. Fest auf 270px war das Hochkant-Video
+   auf jedem Handy nur ein Viertel so gross wie gedreht. Auf Vollbild ist kein
+   Verlass, das gibt es in der App nicht ueberall. */
+.player { width: min(100%, max(220px, calc(66vh * 9 / 16))); aspect-ratio: 9 / 16; max-width: 100%; display: grid; place-items: center; }
+.player video { width: 100%; height: 100%; display: block; background: var(--video-bg); object-fit: contain; }
+.player-msg { color: var(--video-ink); text-align: center; padding: 16px; font-size: 15px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.player-msg .linkbtn { color: var(--video-ink); }
+
+details.more { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+details.more > summary {
+  min-height: 46px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  cursor: pointer; font-weight: 600; list-style: none;
+}
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::after, .fold > summary::after {
+  content: ""; width: 9px; height: 9px; flex: none; margin-right: 4px;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(45deg); transition: transform 0.15s;
+}
+details.more[open] > summary::after, .fold[open] > summary::after { transform: rotate(-135deg); }
+.spoken { padding: 0 0 12px; max-width: 62ch; }
+
+.said { background: var(--accent-tint); color: var(--accent-ink); border-radius: 10px; padding: 10px 12px; font-size: 15px; }
+.said b { color: inherit; display: block; font: 700 12px/1.2 var(--font-head); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 3px; }
+.said.mine { background: var(--warn-tint); color: var(--ink); }
+
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.actions .go { grid-column: 1 / -1; }
+form.inline { display: flex; flex-direction: column; gap: 8px; }
+form.inline label, .in-form label { font-weight: 600; }
+textarea, input[type="text"] {
+  width: 100%; min-height: var(--tap); padding: 11px 12px; border-radius: 10px;
+  border: 1.5px solid var(--line-strong); background: var(--inset); color: var(--ink); font-size: 16px; line-height: 1.4;
+}
+textarea { resize: vertical; min-height: 92px; }
+textarea:focus-visible, input[type="text"]:focus-visible { outline-offset: 0; border-color: var(--accent); }
+.field-error { color: var(--danger); font-weight: 600; font-size: 14.5px; }
+textarea[readonly] { opacity: 0.75; }
+
+/* ---------- Stand eines Schreibvorgangs, direkt an der Karte ---------- */
+/* Vier Zustaende: laeuft ("wird gespeichert"), haengt (nach 15 s ohne
+   Antwort), fehler (abgelehnt), fertig (bestaetigt). Die Zeile steht dort,
+   wo getippt wurde, und bleibt stehen, bis der Zustand sich aendert. Eine
+   Meldung, die nach ein paar Sekunden verschwindet, reicht dafuer nicht. */
+.state {
+  border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;
+  align-items: flex-start; justify-content: center;
+  background: var(--accent-tint); color: var(--accent-ink); font-weight: 600; line-height: 1.4;
+}
+.state-text { display: flex; align-items: baseline; gap: 9px; }
+.state-text::before { content: ""; flex: none; width: 9px; height: 9px; border-radius: 50%; background: currentColor; align-self: center; }
+.state[data-phase="laeuft"] .state-text::before { animation: puls 1.1s ease-in-out infinite; }
+.state[data-phase="haengt"] { background: var(--warn-tint); color: var(--ink); border: 1px solid var(--warn); }
+.state[data-phase="fehler"] { background: var(--danger-tint); color: var(--ink); border: 1px solid var(--danger); }
+.state[data-phase="haengt"] .state-text::before { background: var(--warn); }
+.state[data-phase="fehler"] .state-text::before { background: var(--danger); }
+.state[data-phase="fertig"] { background: var(--ok-tint); color: var(--ok); }
+.state[data-phase="fertig"] .state-text::before { content: "✓"; width: auto; height: auto; background: none; border-radius: 0; font-weight: 700; align-self: baseline; }
+@keyframes puls { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+
+/* Text, der nicht gespeichert werden konnte, weil die Karte dazu verschwand. */
+.rescued { background: var(--inset); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; width: 100%; -webkit-user-select: text; user-select: text; }
+
+/* ---------- ruhige Zeilen (Aenderung, Freigegeben, Rest) ---------- */
+.rows { display: flex; flex-direction: column; }
+.item { border-top: 1px solid var(--line); padding: 14px 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.item .title { font-size: 18px; }
+.item-head { display: flex; flex-direction: column; gap: 4px; }
+.pillrow { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.pill {
+  display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 10px;
+  font: 600 12.5px/1.3 var(--font-text); background: var(--accent-tint); color: var(--accent-ink);
+}
+.pill.ok { background: var(--ok-tint); color: var(--ok); }
+.pill.warn { background: var(--warn-tint); color: var(--warn); }
+.pill.bad { background: var(--danger-tint); color: var(--danger); }
+.item .stage { margin-top: 2px; }
+@media (min-width: 620px) { .item .stage { max-width: 320px; } }
+.next-run { font-size: 14.5px; color: var(--ink-soft); }
+
+/* ---------- Eingang ---------- */
+.in-form { display: flex; flex-direction: column; gap: 8px; }
+.in-row { display: flex; gap: 8px; align-items: stretch; }
+.in-row input { flex: 1 1 auto; min-width: 0; }
+.in-row .btn { flex: none; }
+@media (max-width: 380px) { .in-row { flex-direction: column; } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 14px; color: var(--ink-soft); }
+.chips .pill { font-weight: 500; }
+.in-item { border-top: 1px solid var(--line); padding: 12px 0; display: flex; flex-direction: column; gap: 6px; }
+.in-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 13.5px; color: var(--ink-soft); }
+.in-meta .wartet { font-weight: 600; color: var(--accent-ink); }
+.in-meta .offen { font-weight: 600; color: var(--warn); }
+.in-meta .kaputt { font-weight: 600; color: var(--danger); }
+.in-answer { font-size: 15px; background: var(--accent-tint); color: var(--accent-ink); border-radius: 10px; padding: 8px 12px; }
+.in-answer b { font-weight: 700; }
+
+/* ---------- Ideen ---------- */
+.idea { border-top: 1px solid var(--line); padding: 12px 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.idea-head { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.idea-title { font: 700 16.5px/1.3 var(--font-head); letter-spacing: -0.005em; min-width: 0; }
+.idea-note { font-size: 15px; max-width: 62ch; }
+.idea .row { margin-top: 2px; }
+.idea .state { padding: 9px 12px; }
+
+/* ---------- Protokoll ---------- */
+.log-item { border-top: 1px solid var(--line); padding: 11px 0; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.log-head { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 13.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.log-time { font-weight: 600; color: var(--ink); }
+.log-text { font-size: 15.5px; max-width: 62ch; }
+/* Ein Problem im Protokoll ist als eigener Kasten abgesetzt und beginnt mit
+   dem Wort "Problem": es soll beim Ueberfliegen nicht wie ein Ergebnis aussehen. */
+.log-problem { background: var(--danger-tint); color: var(--ink); border: 1px solid var(--danger); border-radius: 10px; padding: 8px 12px; font-size: 15px; max-width: 62ch; }
+.log-problem b { display: block; font: 700 12px/1.2 var(--font-head); letter-spacing: 0.08em; text-transform: uppercase; color: var(--danger); margin-bottom: 3px; }
+
+/* ---------- Weiterarbeiten ---------- */
+.startsatz {
+  background: var(--inset); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px;
+  padding: 11px 12px; font-size: 16px; line-height: 1.45; white-space: pre-wrap;
+  -webkit-user-select: text; user-select: text;
+}
+.copy-status { font-size: 14.5px; color: var(--ink-soft); }
+
+/* ---------- eingeklappte Bereiche ---------- */
+.fold { border-top: 1px solid var(--line); }
+.fold > summary { min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; list-style: none; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary h2 { font-size: 17px; }
+.fold.small > summary { font-weight: 600; color: var(--ink-soft); min-height: 46px; }
+.fold-body { padding-bottom: 8px; }
+.fold-body > .empty { border-top: 0; padding-top: 0; }
+.fold-note { color: var(--ink-soft); font-size: 14px; padding: 10px 0 4px; border-top: 1px solid var(--line); }
+#speicher-text { color: var(--ink-soft); font-size: 14.5px; padding-bottom: 12px; }
+
+/* ---------- Meldung unten mit "Rueckgaengig" ---------- */
+.toast {
+  position: fixed; z-index: 20;
+  left: max(16px, env(safe-area-inset-left, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  margin-inline: auto; max-width: 520px;
+  background: var(--toast-bg); color: var(--toast-ink);
+  border-radius: 14px; padding: 6px 6px 6px 16px;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 28px rgba(14, 10, 36, 0.35);
+}
+.toast[data-kind="fehler"] { background: var(--danger); color: var(--on-danger); }
+.toast-text { flex: 1 1 auto; min-width: 0; padding: 8px 0; line-height: 1.35; }
+.toast button {
+  min-height: 44px; min-width: 44px; padding: 8px 12px; border: 0; border-radius: 10px; background: none; cursor: pointer;
+  font-weight: 700; color: var(--toast-act); flex: none; touch-action: manipulation;
+}
+.toast[data-kind="fehler"] button { color: var(--on-danger); }
+.toast .x { font-size: 22px; line-height: 1; font-weight: 400; color: inherit; opacity: 0.8; }
+.toast :focus-visible { outline-color: var(--toast-act); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<header class="band">
+  <div class="wrap band-in">
+    <div class="brandrow">
+      <span class="logo" aria-hidden="true"></span>
+      <h1>Stampit <span class="sub">Studio</span></h1>
+      <button type="button" class="band-link" id="zum-eingang">Zum Eingang</button>
+    </div>
+    <p class="meldung" id="stand-meldung">Der Stand wird geladen …</p>
+    <p class="stand-meta" id="stand-meta" hidden></p>
+    <p class="problem" id="stand-problem" role="alert" hidden></p>
+    <p class="band-warn" id="stand-alt" hidden></p>
+    <div class="voice" id="stimme" hidden>
+      <p class="voice-text" id="stimme-text"></p>
+      <div class="meter" id="stimme-bar" aria-hidden="true"><span id="stimme-fill"></span></div>
+    </div>
+    <div class="week" id="week" hidden>
+      <p class="week-label" id="week-label">Die nächsten 7 Tage</p>
+      <ol id="week-list" aria-labelledby="week-label"></ol>
+      <p class="legend" aria-hidden="true">
+        <span><i class="k-frei"></i>freigegeben</span>
+        <span><i class="k-offen"></i>noch nicht freigegeben</span>
+        <span><i></i>kein Video</span>
+      </p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap layout">
+  <div id="notice" aria-live="polite"></div>
+
+  <div class="cols">
+  <div class="col-main">
+  <section id="sec-neu" aria-labelledby="h-neu">
+    <h2 id="h-neu">Zur Freigabe <span class="count" id="n-neu"></span></h2>
+    <div class="cards" id="list-neu"></div>
+    <p class="loading" id="hint-neu">Die Videos werden geladen …</p>
+  </section>
+
+  <section id="sec-aendern" aria-labelledby="h-aendern">
+    <h2 id="h-aendern">Änderung angefragt <span class="count" id="n-aendern"></span></h2>
+    <div class="rows" id="list-aendern"></div>
+    <p class="loading" id="hint-aendern" hidden></p>
+  </section>
+
+  <section id="sec-frei">
+    <details class="fold" id="fold-frei">
+      <summary><h2>Freigegeben <span class="count" id="n-frei"></span></h2></summary>
+      <div class="fold-body">
+        <div class="rows" id="list-frei"></div>
+        <p class="loading" id="hint-frei" hidden></p>
+        <details class="fold small" id="fold-frei-alt" hidden>
+          <summary><span>Weitere freigegebene Videos <span class="count" id="n-frei-alt"></span></span></summary>
+          <div class="fold-body"><div class="rows" id="list-frei-alt"></div></div>
+        </details>
+      </div>
+    </details>
+  </section>
+
+  <section id="sec-protokoll" aria-labelledby="h-protokoll">
+    <h2 id="h-protokoll">Protokoll</h2>
+    <p class="sec-hint">Was die Automation zuletzt getan hat, neueste Läufe zuerst.</p>
+    <ul id="list-laeufe"></ul>
+    <p class="loading" id="hint-laeufe">Das Protokoll wird geladen …</p>
+    <details class="fold small" id="fold-laeufe-alt" hidden>
+      <summary><span>Frühere Läufe <span class="count" id="n-laeufe-alt"></span></span></summary>
+      <div class="fold-body"><ul id="list-laeufe-alt"></ul></div>
+    </details>
+  </section>
+
+  <section id="sec-rest">
+    <details class="fold" id="fold-rest">
+      <summary><h2>Verworfen und ersetzt <span class="count" id="n-rest"></span></h2></summary>
+      <div class="fold-body">
+        <div class="rows" id="list-rest"></div>
+        <p class="loading" id="hint-rest" hidden></p>
+      </div>
+    </details>
+  </section>
+
+  <section id="sec-speicher">
+    <details class="fold small" id="fold-speicher">
+      <summary>Speicher für Videos</summary>
+      <p id="speicher-text">Wird abgefragt …</p>
+    </details>
+  </section>
+  </div>
+
+  <div class="col-side">
+  <section id="sec-eingang" aria-labelledby="h-eingang">
+    <h2 id="h-eingang" tabindex="-1">Eingang</h2>
+    <p class="sec-hint" id="eingang-hint">Ideen für kommende Videos.</p>
+    <form class="in-form" id="in-form" novalidate>
+      <label for="in-text">Link, Konto oder Notiz</label>
+      <div class="in-row">
+        <input type="text" id="in-text" maxlength="2000" autocomplete="off" autocapitalize="off" enterkeyhint="send">
+        <button type="submit" class="btn primary" id="in-add">Hinzufügen</button>
+      </div>
+      <p class="field-error" id="in-error" role="alert" hidden></p>
+    </form>
+    <p class="chips" id="konten" hidden></p>
+    <ul id="list-eingang"></ul>
+    <p class="loading" id="hint-eingang">Der Eingang wird geladen …</p>
+    <details class="fold small" id="fold-eingang-alt" hidden>
+      <summary><span>Ältere Einträge <span class="count" id="n-eingang-alt"></span></span></summary>
+      <div class="fold-body">
+        <ul id="list-eingang-alt"></ul>
+        <p class="fold-note" id="eingang-mehr" hidden>Noch ältere Einträge zeigt das Board nicht mehr.</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="sec-ideen" aria-labelledby="h-ideen">
+    <h2 id="h-ideen">Ideen <span class="count" id="n-ideen"></span></h2>
+    <p class="sec-hint">Was die Automation als Nächstes vorhat. Was du nicht willst, sperrst du hier.</p>
+    <ul id="list-ideen"></ul>
+    <p class="loading" id="hint-ideen">Die Ideen werden geladen …</p>
+    <p class="sec-hint" id="ideen-mehr" hidden></p>
+    <details class="fold small" id="fold-ideen-zu" hidden>
+      <summary><span>Gesperrt und verwendet <span class="count" id="n-ideen-zu"></span></span></summary>
+      <div class="fold-body"><ul id="list-ideen-zu"></ul></div>
+    </details>
+  </section>
+
+  <section id="sec-weiter" aria-labelledby="h-weiter">
+    <h2 id="h-weiter">Weiterarbeiten</h2>
+    <p class="startsatz" id="start-satz" hidden></p>
+    <div class="row" id="start-reihe" hidden>
+      <button type="button" class="btn" id="start-kopie">Kopieren</button>
+      <span class="copy-status" id="start-status" role="status"></span>
+    </div>
+    <p class="sec-hint" id="start-hint" hidden>In einem neuen Chat einfügen, dann weiß Claude, wo wir stehen.</p>
+    <p class="loading" id="start-leer">Der Startsatz wird geladen …</p>
+  </section>
+  </div>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <span class="toast-text" id="toast-text"></span>
+  <button type="button" id="toast-act" hidden></button>
+  <button type="button" class="x" id="toast-x" aria-label="Meldung schließen">×</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ------------------------------------------------------------------
+  // Datenvertrag (fest, siehe LIESMICH.md): Sammlungen "videos", "eingang",
+  // "ideen", "laeufe" und das eine Dokument "stand/aktuell". Diese Seite
+  // schreibt nur videos.status, videos.feedback, videos.geaendert und
+  // ideen.status und legt eingang-Dokumente an. Alles andere schreibt die
+  // Automation.
+  // ------------------------------------------------------------------
+  var ASSET_BASE = '/_blob/';      // laut assets.d.ts: eine gespeicherte id liegt unter "/_blob/" + id
+  var LADE_FRIST_MS = 10000;       // laut db.d.ts: Laden nach etwa 10 s als "nicht erreichbar" melden
+  var UNDO_MS = 8000;
+  var ALT_NACH_MS = 36 * 3600 * 1000;
+  var WARTE_MS = 15000;            // so lange darf ein Schreibvorgang ohne Antwort bleiben, dann steht dort "noch nicht gespeichert"
+  var HALTE_MS = 2000;             // so lange bleibt eine Karte nach dem Tippen mindestens an ihrem Platz
+  var ZEIGE_MS = 1000;             // und mindestens so lange nach der Bestaetigung, damit man sie lesen kann
+  var SPERR_MS = 700;              // so lange zaehlt kein Tippen, nachdem etwas unter dem Finger verrutscht ist
+  var NACHLAUF_MS = 40000;         // so lange gilt eine bestaetigte Aenderung, die der Schnappschuss noch nicht zeigt
+  var FREI_KOMMEND = 7;            // "Freigegeben" zeigt offen die naechsten sieben Tage ...
+  var FREI_VORBEI = 3;             // ... und die letzten drei, der Rest liegt eingeklappt darunter
+  var STATUS = ['neu', 'freigegeben', 'aendern', 'verworfen', 'ersetzt'];
+  var SOFORT_LADEN = 3;            // so viele wartende Karten holen ihr Video von selbst, weitere erst auf Tippen
+  var EINGANG_OFFEN = 10;          // so viele Eintraege stehen offen im Eingang ...
+  var EINGANG_FENSTER = 40;        // ... und so viele holt die Seite insgesamt, der Rest liegt eingeklappt
+  var IDEEN_OFFEN = 20;            // hoechstens so viele offene Ideen zeigt die Liste
+  var IDEEN_FENSTER = 200;
+  var LAEUFE_FENSTER = 15;         // das Protokoll zeigt die letzten 15 Laeufe ...
+  var LAEUFE_OFFEN = 5;            // ... davon fuenf offen, damit "Weiterarbeiten" darunter erreichbar bleibt
+  var STIMME_LIMIT = 30000;        // Vorgabe, falls stand.stimme_limit_monat fehlt
+  var STIMME_KNAPP = 0.8;          // ab diesem Anteil heisst es "fast aufgebraucht"
+  // laeufe.modus und stand.modus: die vier Werte des Vertrags in Worten. Ein
+  // unbekannter Wert wird roh gezeigt statt zu verschwinden.
+  var MODUS = { scout: 'Ideensuche', produktion: 'Produktion', feedback: 'Änderungswünsche', manuell: 'Von Hand' };
+
+  function $(id) { return document.getElementById(id); }
+
+  // Baut Elemente ohne innerHTML. Alles aus der Datenbank landet als
+  // Textknoten, nie als HTML: die Zeilen sind fremde Eingaben.
+  function el(tag, props, kids) {
+    var n = document.createElement(tag);
+    if (props) {
+      for (var k in props) {
+        var v = props[k];
+        if (v == null || v === false) continue;
+        if (k === 'class') n.className = v;
+        else if (k === 'text') n.textContent = v;
+        else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
+        else if (k === 'hidden' || k === 'disabled' || k === 'controls' || k === 'open') n[k] = true;
+        else n.setAttribute(k, v === true ? '' : String(v));
+      }
+    }
+    if (kids != null) {
+      var list = Array.isArray(kids) ? kids : [kids];
+      for (var i = 0; i < list.length; i++) if (list[i] != null) n.append(list[i]);
+    }
+    return n;
+  }
+  function setText(node, value) { if (node.textContent !== value) node.textContent = value; }
+  function show(node, on) { if (node.hidden === on) node.hidden = !on; }
+
+  // Fehlende oder falsch getippte Felder duerfen die Seite nicht brechen.
+  function str(v) {
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number' && isFinite(v)) return String(v);
+    return '';
+  }
+  function num(v) {
+    if (typeof v === 'number' && isFinite(v)) return v;
+    if (typeof v === 'string' && v.trim() !== '' && isFinite(Number(v))) return Number(v);
+    return null;
+  }
+  // Die id wird in eine Adresse eingesetzt. Deshalb nur das zulassen, was
+  // eine Asset-id sein kann (32 Zeichen), nie einen beliebigen Text wie den
+  // Platzhalter aus seed.json.
+  function assetId(v) { return typeof v === 'string' && /^[A-Za-z0-9_-]{32}$/.test(v) ? v : ''; }
+  function nowIso() { return new Date().toISOString(); }
+  function jetzt() { return performance.now(); }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  // ---------- Datum und Zeit ----------
+  var fmtTag = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  var fmtTagKurz = new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+  var fmtWochentag = new Intl.DateTimeFormat('de-DE', { weekday: 'short', timeZone: 'UTC' });
+  var fmtTagLang = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+  // Zeiten kommen als UTC und werden so gezeigt, wie die Uhr in Deutschland sie anzeigt.
+  var fmtZeit = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  var fmtBerlinTag = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' });
+  var fmtBerlinKurz = new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: 'numeric', month: 'short', year: 'numeric' });
+
+  function parseTag(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(typeof s === 'string' ? s : '');
+    if (!m) return null;
+    var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    if (d.getUTCMonth() !== +m[2] - 1 || d.getUTCDate() !== +m[3]) return null;
+    return d;
+  }
+  function parseZeit(s) {
+    if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(s)) return null;
+    var t = Date.parse(s);
+    return isNaN(t) ? null : new Date(t);
+  }
+  function tagText(datum) { var d = parseTag(datum); return d ? fmtTag.format(d) : (datum ? datum : 'Ohne Datum'); }
+  function zeitText(iso) { var d = parseZeit(iso); return d ? fmtZeit.format(d) + ' Uhr' : ''; }
+  function heuteInBerlin() {
+    var p = {};
+    fmtBerlinTag.formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+    return new Date(Date.UTC(+p.year, +p.month - 1, +p.day));
+  }
+  function isoTag(d) { return d.toISOString().slice(0, 10); }
+  function zahl(n) { return n.toLocaleString('de-DE', { maximumFractionDigits: 0 }); }
+  function modusText(m) { m = str(m).trim(); return Object.prototype.hasOwnProperty.call(MODUS, m) ? MODUS[m] : m; }
+
+  // ---------- Zustand ----------
+  var S = {
+    db: null,
+    downloads: null,          // Promise auf die downloads-Faehigkeit
+    readOnly: false,
+    canWrite: null,           // true, false oder null (die Plattform hat nichts gesagt)
+    videos: null,             // null = noch nichts geliefert
+    eingang: null,
+    ideen: null,
+    laeufe: null,
+    stand: undefined,         // undefined = noch nichts geliefert, null = Dokument fehlt
+    frisch: { videos: false, eingang: false, stand: false, ideen: false, laeufe: false },
+    aktiv: false,             // hat sich die Automation in den letzten 36 Stunden gemeldet?
+    fristAbgelaufen: false,
+    fatal: '',
+    timer: 0,
+    subs: [],
+    vorgang: new Map(),       // id -> die eine Entscheidung, die fuer dieses Video gerade gespeichert wird oder gescheitert ist
+    bekannt: new Map(),       // id -> bestaetigte eigene Aenderung, die der Schnappschuss noch nicht zeigt
+    zurueck: new Map(),       // id -> abgelehnte eigene Aenderung, die der Schnappschuss noch zeigen kann
+    wartend: new Map(),       // id -> eigener Eingang-Eintrag, bis er bestaetigt ist
+    eingangWeg: new Set(),    // ids abgelehnter Eingang-Eintraege, die der Schnappschuss noch zeigen kann
+    eingangGeleert: 0,        // wann ein gespeicherter Eintrag das Feld zuletzt geleert hat
+    ideeOp: new Map(),        // id -> die eine Entscheidung, die fuer diese Idee gerade gespeichert wird oder gescheitert ist
+    ideeBekannt: new Map(),   // wie "bekannt", fuer ideen.status
+    ideeZurueck: new Map(),   // wie "zurueck", fuer ideen.status
+    ideeZeilen: new Map(),    // id -> Zeile
+    entwurf: new Map(),       // id -> { fb, weg }: was in den Feldern einer Karte steht, auch wenn die Karte neu gebaut wird
+    gerettet: [],             // Texte, die nicht gespeichert werden konnten, weil ihre Karte verschwand
+    cards: new Map(),         // id -> Karte
+    verschoben: 0,            // wann zuletzt eine Karte ihren Platz gewechselt hat
+    fremd: 0,                 // Videos mit einem Status ausserhalb des Vertrags
+    seq: 0
+  };
+
+  // ------------------------------------------------------------------
+  // Meldung unten (mit "Rueckgaengig")
+  // ------------------------------------------------------------------
+  var toastTimer = 0;
+  var toastAction = null;
+  var toastSeit = 0;
+  function hideToast() {
+    clearTimeout(toastTimer); toastTimer = 0; toastAction = null;
+    $('toast').hidden = true;
+  }
+  function showToast(text, opts) {
+    opts = opts || {};
+    clearTimeout(toastTimer);
+    var box = $('toast');
+    box.dataset.kind = opts.fehler ? 'fehler' : 'ok';
+    $('toast-text').textContent = text;
+    var act = $('toast-act');
+    toastAction = opts.action || null;
+    act.hidden = !toastAction;
+    act.textContent = opts.actionLabel || '';
+    box.hidden = false;
+    toastSeit = jetzt();
+    toastTimer = setTimeout(hideToast, opts.ms || (opts.fehler ? 12000 : UNDO_MS));
+  }
+  // Die Meldung taucht unten auf, waehrend der Finger vielleicht gerade dort
+  // tippt (ein Doppeltipp auf einen Knopf am unteren Rand). Ihre Knoepfe
+  // zaehlen deshalb erst, wenn sie einen Moment zu sehen waren.
+  function toastZuFrueh() { return jetzt() - toastSeit < SPERR_MS; }
+  $('toast-act').addEventListener('click', function () { if (toastZuFrueh()) return; var a = toastAction; hideToast(); if (a) a(); });
+  $('toast-x').addEventListener('click', function () { if (toastZuFrueh()) return; hideToast(); });
+
+  // ------------------------------------------------------------------
+  // Schreiben
+  //
+  // Grundsatz: die Seite zeigt eine Entscheidung erst dann als gespeichert,
+  // wenn die Datenbank sie bestaetigt hat. Bis dahin bleibt die Karte, wo
+  // sie ist, und sagt "wird gespeichert". Frueher wanderte sie sofort: ein
+  // zweites Tippen traf dann das naechste Video, ein abgelehnter
+  // Aenderungswunsch war samt Text weg, und ein Schreibvorgang ohne Antwort
+  // sah aus wie gespeichert.
+  //
+  // Dazu gehoert: die Laufzeit zeigt eigene Schreibvorgaenge schon im
+  // Schnappschuss, bevor sie bestaetigt sind (db.d.ts: "hasPendingWrites:
+  // true until confirmed"). Wird einer abgelehnt, sagt die Dokumentation
+  // nicht, was zuerst kommt: das gescheiterte Versprechen oder der
+  // Schnappschuss, der die Aenderung zuruecknimmt. Kam die Ablehnung zuerst,
+  // stand das Video bis zum naechsten Schnappschuss als "Freigegeben" da, und
+  // die Fehlerzeile war weg. Deshalb merkt sich die Seite jede abgelehnte
+  // Aenderung (S.zurueck) und zeigt den Stand von davor, solange ein
+  // unbestaetigter Schnappschuss noch genau diese Aenderung enthaelt.
+  // ------------------------------------------------------------------
+  var WORTE = {
+    freigeben: { laeuft: 'Freigabe wird gespeichert …', fertig: 'Freigegeben', toast: 'Freigegeben: ' },
+    aendern: { laeuft: 'Änderungswunsch wird gespeichert …', fertig: 'Änderung angefragt', toast: 'Änderung angefragt: ' },
+    verwerfen: { laeuft: 'Verwerfen wird gespeichert …', fertig: 'Verworfen', toast: 'Verworfen: ' },
+    zurueckziehen: { laeuft: 'Anfrage wird zurückgezogen …', fertig: 'Anfrage zurückgezogen', toast: 'Anfrage zurückgezogen: ' },
+    zuruecknehmen: { laeuft: 'Freigabe wird zurückgenommen …', fertig: 'Freigabe zurückgenommen', toast: 'Freigabe zurückgenommen: ' },
+    wiederholen: { laeuft: 'Wird wieder zur Freigabe gelegt …', fertig: 'Liegt wieder zur Freigabe', toast: 'Wieder zur Freigabe: ' },
+    rueck: { laeuft: 'Wird rückgängig gemacht …', fertig: 'Rückgängig gemacht', toast: 'Rückgängig gemacht: ' },
+    text: { laeuft: 'Änderungswunsch wird gespeichert …', fertig: 'Gespeichert', toast: '' }
+  };
+  var HAENGT_TEXT = 'Noch nicht gespeichert. Die Datenbank antwortet gerade nicht.';
+
+  // db.d.ts: "unavailable" ist voruebergehend, genau einmal nach kurzer,
+  // zufaelliger Pause wiederholen. Alle anderen Codes nicht wiederholen.
+  // "gueltig" sagt, ob der Versuch noch der aktuelle ist: ein abgeloester
+  // Versuch wiederholt nichts mehr.
+  function einmalWiederholen(fn, gueltig) {
+    function versuch() { try { return Promise.resolve(fn()); } catch (e) { return Promise.reject(e); } }
+    return versuch().catch(function (e) {
+      var code = e && e.code;
+      var bekannt = ['invalid_argument', 'resource_exhausted', 'quota_exceeded', 'revoked', 'not_granted',
+        'capability_disabled', 'capability_removed', 'transform_error'];
+      // Ein TypeError kommt aus einem kaputten Pfad (db.d.ts), das wird durch Wiederholen nicht besser.
+      if (bekannt.indexOf(code) !== -1 || e instanceof TypeError) throw e;
+      if (gueltig && !gueltig()) throw e;
+      return wait(400 + Math.random() * 800).then(function () {
+        if (gueltig && !gueltig()) throw e;
+        return versuch();
+      });
+    });
+  }
+  function schreibFehlerText(e) {
+    var code = e && e.code;
+    if (code === 'quota_exceeded') return 'Der Speicher des Boards ist voll. Es lässt sich erst wieder etwas anlegen, wenn alte Einträge gelöscht sind.';
+    if (code === 'resource_exhausted') return 'Das war zu schnell hintereinander. Bitte kurz warten und noch einmal versuchen.';
+    if (code === 'revoked' || code === 'not_granted' || code === 'capability_disabled' || code === 'capability_removed') return 'Speichern geht in dieser Ansicht gerade nicht.';
+    if (code === 'invalid_argument' || code === 'transform_error') return 'Das Speichern wurde abgelehnt.';
+    return 'Speichern hat nicht geklappt. Bitte noch einmal versuchen.';
+  }
+  // Derselbe Grund fuer die Zeile an der Karte. Sie beginnt immer mit "Nicht
+  // gespeichert", weil sie stehen bleibt, wenn die Meldung unten laengst weg ist.
+  function karteFehlerText(e) {
+    var t = schreibFehlerText(e);
+    return t.indexOf('Speichern hat nicht geklappt') === 0 ? 'Nicht gespeichert. Bitte noch einmal versuchen.' : 'Nicht gespeichert. ' + t;
+  }
+
+  function passt(daten, patch) {
+    if (!daten) return false;
+    for (var k in patch) if (daten[k] !== patch[k]) return false;
+    return true;
+  }
+  function mische(daten, patch) {
+    var out = {};
+    var k;
+    for (k in daten) out[k] = daten[k];
+    for (k in patch) out[k] = patch[k];
+    return out;
+  }
+  // Was fuer ein Video als gespeichert gilt: die gelieferten Daten, aber ohne
+  // eine eigene Aenderung, die abgelehnt wurde und dort noch unbestaetigt
+  // steht. Der eigene Zeitstempel im Patch macht sie eindeutig erkennbar.
+  // Erst ein bestaetigter Stand raeumt die Merkliste: zeigt er die Aenderung
+  // doch, ist sie angekommen, und er gilt.
+  function gespeichert(id, daten, sicher) {
+    var liste = S.zurueck.get(id);
+    if (!liste) return daten;
+    if (sicher) { S.zurueck.delete(id); return daten; }
+    for (var i = liste.length - 1; i >= 0; i--) if (passt(daten, liste[i].patch)) return mische(daten, liste[i].vor);
+    return daten;
+  }
+  function merkeAblehnung(op) {
+    var liste = S.zurueck.get(op.id) || [];
+    liste.push({ patch: op.patch, vor: op.vor });
+    if (liste.length > 8) liste.shift();
+    S.zurueck.set(op.id, liste);
+  }
+  function rohdaten(id) {
+    var liste = S.videos || [];
+    for (var i = 0; i < liste.length; i++) if (liste[i].id === id) return gespeichert(id, liste[i].data, liste[i].sicher);
+    return null;
+  }
+  // Solange gespeichert wird (und kurz danach) gehoert die Karte dem Vorgang:
+  // sie bleibt an ihrem Platz und ihre Knoepfe ruhen.
+  function beschaeftigt(op) { return op.phase === 'laeuft' || op.phase === 'haengt' || (op.phase === 'fertig' && op.gehalten); }
+  function zuFrueh() { return jetzt() - S.verschoben < SPERR_MS; }
+  // Merkt sich, dass gerade etwas den Platz gewechselt hat, und macht die
+  // Entscheidungs-Knoepfe fuer genau die Zeit blass, in der sie nicht zaehlen.
+  var sperrTimer = 0;
+  function verschobenJetzt() {
+    S.verschoben = jetzt();
+    document.body.dataset.sperre = '1';
+    clearTimeout(sperrTimer);
+    sperrTimer = setTimeout(function () { delete document.body.dataset.sperre; }, SPERR_MS);
+  }
+
+  // Startet eine Entscheidung fuer ein Video. Je Dokument gibt es immer nur
+  // einen Vorgang (db.d.ts: je Dokument ein Schreibvorgang zur Zeit, den
+  // naechsten erst nach dem vorigen).
+  function starte(v, art, aenderung) {
+    if (!S.db || S.readOnly) return null;
+    var alt = S.vorgang.get(v.id);
+    if (alt) {
+      if (alt.phase === 'laeuft' || alt.phase === 'haengt') return null;
+      // Waehrend die Karte nach der Bestaetigung noch steht, geht nur "Rueckgaengig".
+      if (alt.phase === 'fertig' && alt.gehalten && art !== 'rueck') return null;
+      clearTimeout(alt.timer); clearTimeout(alt.halten);
+    }
+    var patch = {};
+    var k;
+    for (k in aenderung) patch[k] = aenderung[k];
+    // Der Zeitstempel bleibt bei jedem weiteren Versuch derselbe: an ihm ist
+    // zu erkennen, ob genau dieser Schreibvorgang angekommen ist.
+    patch.geaendert = nowIso();
+    var roh = rohdaten(v.id) || {};
+    var vor = {};
+    for (k in patch) vor[k] = roh[k];
+    var op = {
+      id: v.id, art: art, titel: v.titel, patch: patch, vor: vor,
+      vorher: { status: v.status, feedback: v.feedback },
+      ort: v.ort, phase: 'laeuft', fehler: '', versuch: 0, gehalten: false,
+      start: jetzt(), timer: 0, halten: 0
+    };
+    S.vorgang.set(v.id, op);
+    sende(op);
+    renderVideos();
+    return op;
+  }
+
+  function sende(op) {
+    var versuch = ++op.versuch;
+    function gueltig() { return op.versuch === versuch && S.vorgang.get(op.id) === op; }
+    op.phase = 'laeuft'; op.fehler = '';
+    clearTimeout(op.timer);
+    // db.d.ts sagt nicht, ob ein Schreibvorgang ohne Verbindung schnell
+    // scheitert oder offen bleibt. Bleibt er offen, darf das nicht wie
+    // gespeichert aussehen: nach 15 s steht an der Karte "noch nicht gespeichert".
+    op.timer = setTimeout(function () {
+      if (!gueltig() || op.phase !== 'laeuft') return;
+      op.phase = 'haengt';
+      renderVideos();
+    }, WARTE_MS);
+    var ref;
+    try { ref = S.db.doc('videos/' + op.id); } catch (e) { scheitert(op, e); return; }
+    nachlesen(op, ref).then(function (schonDa) {
+      if (schonDa) return true;
+      if (!gueltig()) return false;
+      return einmalWiederholen(function () { return ref.update(op.patch); }, gueltig).then(function () { return true; });
+    }).then(function (ok) {
+      // Auch ein aelterer Versuch, der doch noch ankommt, ist eine Bestaetigung:
+      // alle Versuche eines Vorgangs schreiben dieselben Werte.
+      if (ok) bestaetigt(op);
+    }, function (e) {
+      if (gueltig()) abgelehnt(op, e, versuch);
+    });
+  }
+
+  // Die Seite kann beim Schreiben keine Version verlangen (db.d.ts: "Writes
+  // are last-writer-wins; there are no transactions"). Ein Tippen auf eine
+  // Karte, die noch den alten Stand zeigt, wuerde sonst ueberschreiben, was
+  // die Automation gerade geschrieben hat (aus "ersetzt" wurde so wieder
+  // "neu"). Deshalb vor jedem Schreiben einmal nachlesen. Das macht die Luecke
+  // klein, schliesst sie aber nicht: zwischen Lesen und Schreiben bleibt Zeit.
+  // Ergebnis true heisst: der eigene Schreibvorgang ist schon gespeichert.
+  function nachlesen(op, ref) {
+    var lesen;
+    try { lesen = Promise.resolve(ref.get()); } catch (e) { lesen = Promise.reject(e); }
+    return lesen.then(function (snap) {
+      if (!snap || !snap.exists) throw { code: 'weg' };
+      var m = snap.metadata || {};
+      var fest = m.hasPendingWrites === false && m.fromCache === false;
+      // Auch das Nachlesen kann noch eine eigene, abgelehnte Aenderung zeigen.
+      // Ohne diese Zeile hiesse es beim zweiten Versuch "hat sich inzwischen
+      // geaendert", obwohl nur der eigene erste Versuch dasteht.
+      var d = gespeichert(op.id, snap.data() || {}, fest);
+      if (passt(d, op.patch)) {
+        // Nur bei einem weiteren Versuch moeglich: der erste ist doch angekommen.
+        // Ist er laut Laufzeit noch unbestaetigt, wird noch einmal geschrieben.
+        return fest;
+      }
+      if (str(d.status) !== op.vorher.status) throw { code: 'veraltet', daten: d };
+      return false;
+    }, function () {
+      // Das Nachlesen selbst ging nicht. Dann entscheidet der Schreibversuch.
+      return false;
+    });
+  }
+
+  function bestaetigt(op) {
+    if (S.vorgang.get(op.id) !== op || op.phase === 'fertig') return;
+    clearTimeout(op.timer);
+    // Der Schnappschuss mit der eigenen Aenderung kann spaeter kommen als die
+    // Bestaetigung. Bis dahin gilt sie hier als bekannt, sonst spraenge die
+    // Karte nach der Haltezeit auf den alten Stand zurueck.
+    S.bekannt.set(op.id, { patch: op.patch, vor: op.vor, bis: Date.now() + NACHLAUF_MS });
+    setTimeout(renderVideos, NACHLAUF_MS + 100);
+    op.phase = 'fertig';
+    if (op.art === 'text') {
+      // Die Zeile bleibt, wo sie ist: nichts zu halten, nichts rueckgaengig zu machen.
+      op.gehalten = false;
+    } else {
+      // Die Karte bleibt noch kurz stehen. Rutschte sie sofort weg, laege das
+      // naechste Video unter dem Finger, und ein zweites Tippen gaebe es frei.
+      op.gehalten = true;
+      var rest = Math.max(ZEIGE_MS, HALTE_MS - (jetzt() - op.start));
+      op.halten = setTimeout(function () {
+        if (S.vorgang.get(op.id) !== op) return;
+        S.vorgang.delete(op.id);
+        renderVideos();
+      }, rest);
+      if (op.art === 'rueck') showToast(WORTE.rueck.toast + op.titel, { ms: 4000 });
+      else showToast(WORTE[op.art].toast + op.titel, { actionLabel: 'Rückgängig', action: function () { rueckgaengig(op); } });
+    }
+    renderVideos();
+  }
+
+  function scheitert(op, e) {
+    clearTimeout(op.timer);
+    op.phase = 'fehler';
+    op.fehler = karteFehlerText(e);
+    showToast(schreibFehlerText(e), { fehler: true });
+    renderVideos();
+  }
+  function dokumentWeg(op) {
+    clearTimeout(op.timer);
+    S.vorgang.delete(op.id);
+    if (S.videos) S.videos = S.videos.filter(function (d) { return d.id !== op.id; });
+    showToast('Dieses Video gibt es nicht mehr. Die Automation hat es vermutlich ersetzt.', { fehler: true });
+    renderVideos();
+  }
+  function nurNochLesen(op) {
+    clearTimeout(op.timer);
+    S.vorgang.delete(op.id);
+    S.readOnly = true;
+    showToast('Du kannst auf diesem Board nichts ändern.', { fehler: true });
+    renderVideos(); renderEingang(); renderIdeen();
+  }
+
+  function abgelehnt(op, e, versuch) {
+    if (S.vorgang.get(op.id) !== op || op.phase === 'fertig') return;
+    var code = e && e.code;
+    if (code === 'weg') { dokumentWeg(op); return; }
+    if (code === 'veraltet') {
+      // Das frisch Gelesene gleich zeigen: der Schnappschuss dazu kann noch unterwegs sein.
+      clearTimeout(op.timer);
+      S.vorgang.delete(op.id);
+      if (S.videos) S.videos = S.videos.map(function (d) { return d.id === op.id ? { id: d.id, data: e.daten, sicher: false } : d; });
+      showToast('Das Video hat sich inzwischen geändert. Es wurde nichts gespeichert.', { fehler: true });
+      renderVideos();
+      return;
+    }
+    // Ab hier wurde wirklich ein Schreibversuch abgelehnt. Der Schnappschuss
+    // kann ihn noch eine Weile unbestaetigt zeigen (siehe "gespeichert").
+    merkeAblehnung(op);
+    if (code !== 'invalid_argument' && code !== 'transform_error') { scheitert(op, e); return; }
+    function nochDran() { return S.vorgang.get(op.id) === op && op.versuch === versuch && op.phase !== 'fertig'; }
+    grundDerAblehnung('videos/' + op.id).then(function (grund) {
+      if (!nochDran()) return;
+      if (grund === 'weg') dokumentWeg(op);
+      else if (grund === 'lesen') nurNochLesen(op);
+      else scheitert(op, e);
+    });
+  }
+  // db.d.ts: wer nicht schreiben darf, bekommt "invalid_argument", und die
+  // Seite soll dann fuer den Rest des Besuchs nur noch lesen lassen. Denselben
+  // Code gibt es aber auch, wenn das Dokument zwischen Nachlesen und Schreiben
+  // geloescht wurde. Deshalb erst nachsehen, ob es das Dokument noch gibt.
+  // Ergebnis: 'weg', 'lesen' (diese Person darf nicht schreiben) oder 'fehler'.
+  function grundDerAblehnung(pfad) {
+    var lesen;
+    try { lesen = Promise.resolve(S.db.doc(pfad).get()); } catch (x) { lesen = Promise.reject(x); }
+    return lesen.then(function (snap) {
+      if (!snap || !snap.exists) return 'weg';
+      return S.canWrite === true ? 'fehler' : 'lesen';
+    }, function () { return 'fehler'; });
+  }
+
+  // "Rueckgaengig" stellt den Stand von vor dem Tippen wieder her. Es ist
+  // selbst eine Entscheidung und wird genauso erst nach der Bestaetigung als
+  // erledigt gemeldet.
+  function rueckgaengig(erste) {
+    var c = S.cards.get(erste.id);
+    if (!c) { showToast('Dieses Video gibt es nicht mehr.', { fehler: true }); return; }
+    var mitFeedback = Object.prototype.hasOwnProperty.call(erste.patch, 'feedback');
+    var aenderung = { status: erste.vorher.status };
+    if (mitFeedback) aenderung.feedback = erste.vorher.feedback;
+    var op = starte({
+      id: erste.id, titel: erste.titel, ort: c.mode,
+      status: typeof erste.patch.status === 'string' ? erste.patch.status : erste.vorher.status,
+      feedback: mitFeedback ? erste.patch.feedback : erste.vorher.feedback
+    }, 'rueck', aenderung);
+    if (!op) showToast(S.readOnly ? 'Du kannst auf diesem Board nichts ändern.' : 'Für dieses Video wird gerade schon etwas gespeichert. Es wurde nichts rückgängig gemacht.', { fehler: true });
+  }
+
+  // Raeumt einen Vorgang weg, der nichts mehr festhaelt: einen gescheiterten
+  // oder einen erledigten ohne Haltezeit. Gibt true zurueck, wenn es einen gab.
+  function vergiss(id) {
+    var op = S.vorgang.get(id);
+    if (!op || beschaeftigt(op)) return false;
+    S.vorgang.delete(id);
+    return true;
+  }
+
+  // Getippter Text, der nicht gespeichert werden kann, weil seine Karte
+  // verschwindet (die Automation hat das Video inzwischen ersetzt, oder die
+  // Seite darf nur noch lesen), kommt nach oben in einen Hinweis.
+  function retteText(titel, text, warum) {
+    S.gerettet.push({ n: ++S.seq, titel: titel, text: text, warum: warum, el: null });
+  }
+  function rette(c) {
+    var t = c.entwurf ? c.entwurf() : '';
+    if (t) retteText(c.titel(), t, 'geaendert');
+  }
+
+  // ------------------------------------------------------------------
+  // Player
+  // ------------------------------------------------------------------
+  function makePlayer() {
+    var box = el('div', { class: 'player' });
+    var key = null;
+    var letztes = null;
+    var geholt = false;
+    function meldung(text, knopf, tun) {
+      box.textContent = '';
+      var p = el('p', { class: 'player-msg' }, [el('span', { text: text })]);
+      if (knopf) p.append(el('button', { type: 'button', class: 'linkbtn', text: knopf, onclick: tun }));
+      box.append(p);
+    }
+    function nochmal() { key = null; if (letztes) set(letztes); }
+    // "sofort" false heisst: noch kein <video> bauen. Jede wartende Karte holte
+    // frueher gleich ihr Video, bei vielen wartenden Videos also alle auf
+    // einmal. Einmal geholt, bleibt ein Video stehen, auch wenn die Karte rutscht.
+    function set(v, sofort) {
+      letztes = v;
+      if (sofort !== false) geholt = true;
+      var k = v.asset + '|' + v.poster + '|' + (v.asset ? '' : v.status) + '|' + geholt;
+      if (k === key) return;       // dasselbe Video nicht neu aufbauen, sonst bricht die Wiedergabe ab
+      key = k;
+      // "Noch nicht hochgeladen" stimmt nur fuer ein Video, das auf die Freigabe
+      // wartet. Bei aelteren kann die Datei auch beim Aufraeumen geloescht worden sein.
+      if (!v.asset) { meldung(v.status === 'neu' ? 'Das Video ist noch nicht hochgeladen.' : 'Zu diesem Video ist keine Datei gespeichert.'); return; }
+      if (!geholt) { meldung('Dieses Video wird erst geladen, wenn du es ansehen willst.', 'Video laden', function () { geholt = true; nochmal(); }); return; }
+      box.textContent = '';
+      var video = el('video', { controls: true, playsinline: true, preload: 'metadata', 'aria-label': 'Video: ' + v.titel });
+      if (v.poster) video.poster = ASSET_BASE + v.poster;
+      // assets.d.ts: ein Zeiger, dessen Datei fehlt, gilt als "fehlt" und bekommt einen Platzhalter.
+      video.addEventListener('error', function () { meldung('Das Video lässt sich gerade nicht laden.', 'Noch einmal versuchen', nochmal); });
+      video.src = ASSET_BASE + v.asset;
+      box.append(video);
+    }
+    return { el: el('div', { class: 'stage' }, box), set: set };
+  }
+
+  // Player hinter einem Knopf: das Video wird erst geholt, wenn jemand es sehen will.
+  function makeFoldedPlayer() {
+    var player = null;
+    var letztes = null;
+    var slot = el('div', { hidden: true });
+    var btn = el('button', { type: 'button', class: 'btn soft', 'aria-expanded': 'false', text: 'Video ansehen' });
+    btn.addEventListener('click', function () {
+      var auf = slot.hidden;
+      if (auf && !player) { player = makePlayer(); slot.append(player.el); if (letztes) player.set(letztes); }
+      slot.hidden = !auf;
+      btn.setAttribute('aria-expanded', auf ? 'true' : 'false');
+      btn.textContent = auf ? 'Video ausblenden' : 'Video ansehen';
+      if (!auf && player) { var vid = slot.querySelector('video'); if (vid) vid.pause(); }
+    });
+    return { btn: btn, slot: slot, set: function (v) { letztes = v; if (player) player.set(v); } };
+  }
+
+  // ------------------------------------------------------------------
+  // Karten
+  // ------------------------------------------------------------------
+  function kopf() {
+    var eyebrow = el('p', { class: 'eyebrow' });
+    var title = el('h3', { class: 'title' });
+    return {
+      eyebrow: eyebrow, title: title,
+      set: function (v) {
+        setText(eyebrow, tagText(v.datum));
+        setText(title, v.titel);
+      }
+    };
+  }
+  function beschriftet(label, extraClass) {
+    var b = el('b', { text: label });
+    var t = el('span');
+    var box = el('p', { class: 'said' + (extraClass ? ' ' + extraClass : ''), hidden: true }, [b, t]);
+    return { el: box, set: function (text, neuesLabel) { if (neuesLabel) setText(b, neuesLabel); setText(t, text); show(box, !!text); } };
+  }
+  // Die Zeile, die an der Karte sagt, was mit der letzten Entscheidung ist.
+  function zustand() {
+    var text = el('span', { class: 'state-text' });
+    var knopf = el('button', { type: 'button', class: 'btn soft', hidden: true, text: 'Noch einmal versuchen' });
+    var box = el('div', { class: 'state', role: 'status', hidden: true }, [text, knopf]);
+    var op = null;
+    knopf.addEventListener('click', function () {
+      // Bewusst ein neuer Schreibversuch, obwohl der erste noch offen sein kann:
+      // er schreibt dieselben Werte, und nur der Nutzer loest ihn aus.
+      if (!op || op.phase !== 'haengt' || S.vorgang.get(op.id) !== op) return;
+      sende(op);
+      renderVideos();
+    });
+    return {
+      el: box,
+      set: function (o, platz) {
+        op = o || null;
+        if (!op) { show(box, false); return; }
+        var t = op.phase === 'laeuft' ? WORTE[op.art].laeuft : op.phase === 'haengt' ? HAENGT_TEXT : op.phase === 'fehler' ? op.fehler : WORTE[op.art].fertig;
+        setText(text, t);
+        if (box.dataset.phase !== op.phase) box.dataset.phase = op.phase;
+        show(knopf, op.phase === 'haengt');
+        var h = platz ? platz + 'px' : '';
+        if (box.style.minHeight !== h) box.style.minHeight = h;
+        show(box, true);
+      }
+    };
+  }
+  function metaText(v) {
+    var teile = [];
+    if (v.dauer != null && v.dauer > 0) teile.push(Math.round(v.dauer) + ' Sekunden');
+    if (v.version != null) teile.push('Version ' + v.version);
+    return teile.join(' · ');
+  }
+  function gleicherSatz(a, b) {
+    function n(s) { return s.toLowerCase().replace(/[\s.!?]+$/g, '').trim(); }
+    return n(a) === n(b);
+  }
+
+  // --- Zur Freigabe ---
+  function cardNeu(id) {
+    var k = kopf();
+    var hook = el('p', { class: 'hook', hidden: true });
+    var player = makePlayer();
+    var meta = el('p', { class: 'meta' });
+    var antwort = beschriftet('Das wurde geändert');
+    var spoken = el('p', { class: 'spoken' });
+    var mehr = el('details', { class: 'more' }, [el('summary', { text: 'Gesprochener Text' }), spoken]);
+    var quelle = el('p', { class: 'quelle', hidden: true });
+    var quelleText = el('span');
+    quelle.append(el('b', { text: 'Quelle: ' }), quelleText);
+
+    var aktuell = null;
+    var offen = '';      // welches Formular offen ist: '', 'fb' (aendern) oder 'weg' (verwerfen)
+    var platz = 0;       // Hoehe der Knopfreihe beim Tippen auf "Passt"
+    var st = zustand();
+    var btnOk = el('button', { type: 'button', class: 'btn primary go entscheid', text: 'Passt' });
+    var btnAendern = el('button', { type: 'button', class: 'btn', text: 'Ändern' });
+    var btnWeg = el('button', { type: 'button', class: 'btn drop', text: 'Verwerfen' });
+    var actions = el('div', { class: 'actions' }, [btnOk, btnAendern, btnWeg]);
+
+    var fbFeld = el('textarea', { id: 'fb-' + id, rows: 3, maxlength: 2000 });
+    var fbFehler = el('p', { class: 'field-error', role: 'alert', hidden: true, text: 'Schreib kurz, was anders werden soll. Ohne Text geht die Anfrage nicht raus.' });
+    var fbSenden = el('button', { type: 'submit', class: 'btn primary entscheid', text: 'Änderung anfragen' });
+    var fbZu = el('button', { type: 'button', class: 'btn soft', text: 'Abbrechen', onclick: zu });
+    var fbForm = el('form', { class: 'inline', hidden: true, novalidate: true }, [
+      el('label', { for: 'fb-' + id, text: 'Was soll anders werden?' }),
+      fbFeld, fbFehler,
+      el('div', { class: 'row' }, [fbSenden, fbZu])
+    ]);
+    var wegFeld = el('textarea', { id: 'weg-' + id, rows: 2, maxlength: 2000 });
+    var wegSenden = el('button', { type: 'submit', class: 'btn danger entscheid', text: 'Video verwerfen' });
+    var wegZu = el('button', { type: 'button', class: 'btn soft', text: 'Abbrechen', onclick: zu });
+    var wegForm = el('form', { class: 'inline', hidden: true, novalidate: true }, [
+      el('label', { for: 'weg-' + id, text: 'Warum verwirfst du das Video? (freiwillig)' }),
+      wegFeld,
+      el('div', { class: 'row' }, [wegSenden, wegZu])
+    ]);
+
+    // Was schon einmal getippt wurde, steht wieder im Feld, wenn die Karte neu
+    // gebaut wird (zum Beispiel nach "Anfrage zurückziehen").
+    var merk = S.entwurf.get(id);
+    if (merk) { fbFeld.value = merk.fb; wegFeld.value = merk.weg; }
+    function merke() { S.entwurf.set(id, { fb: fbFeld.value, weg: wegFeld.value }); }
+
+    function vorgang() { return aktuell ? aktuell.vorgang : null; }
+    function ruht() { var op = vorgang(); return !!op && beschaeftigt(op); }
+    function entwurf() {
+      var t = offen === 'fb' ? fbFeld.value.trim() : offen === 'weg' ? wegFeld.value.trim() : '';
+      return t && aktuell && t !== aktuell.feedback.trim() ? t : '';
+    }
+    // Eine Stelle entscheidet, was von der Karte zu sehen ist. Wichtig: ein
+    // offenes Formular bleibt offen, auch waehrend gespeichert wird und auch
+    // nach einem Fehler. Der getippte Text bleibt dabei im Feld.
+    function ordne() {
+      var op = vorgang();
+      var b = ruht();
+      if (S.readOnly && offen) {
+        var t = entwurf();
+        if (t) retteText(aktuell.titel, t, 'lesen');
+        offen = '';
+      }
+      show(fbForm, offen === 'fb');
+      show(wegForm, offen === 'weg');
+      show(actions, !S.readOnly && !offen && !b);
+      fbFeld.readOnly = b; wegFeld.readOnly = b;
+      fbSenden.disabled = b; fbZu.disabled = b; wegSenden.disabled = b; wegZu.disabled = b;
+      // Nach "Passt" nimmt die Zeile genau den Platz der Knoepfe ein: nichts
+      // darunter verrutscht, solange die Karte steht.
+      st.set(op, !offen && b ? platz : 0);
+    }
+    function zu() {
+      offen = ''; fbFehler.hidden = true;
+      if (vergiss(id)) renderVideos(); else ordne();
+    }
+    function auf(welches, feld) {
+      offen = welches;
+      if (vergiss(id)) renderVideos(); else ordne();
+      feld.focus();
+    }
+
+    btnOk.addEventListener('click', function () {
+      if (!aktuell || zuFrueh()) return;
+      platz = actions.offsetHeight;
+      starte(aktuell, 'freigeben', { status: 'freigegeben' });
+    });
+    btnAendern.addEventListener('click', function () { auf('fb', fbFeld); });
+    btnWeg.addEventListener('click', function () { auf('weg', wegFeld); });
+    fbForm.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (ruht()) return;
+      var text = fbFeld.value.trim();
+      if (!text) { fbFehler.hidden = false; fbFeld.focus(); return; }
+      if (!aktuell || zuFrueh()) return;
+      starte(aktuell, 'aendern', { status: 'aendern', feedback: text });
+    });
+    fbFeld.addEventListener('input', function () { merke(); if (fbFeld.value.trim()) fbFehler.hidden = true; });
+    wegFeld.addEventListener('input', merke);
+    wegForm.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (ruht() || !aktuell || zuFrueh()) return;
+      starte(aktuell, 'verwerfen', { status: 'verworfen', feedback: wegFeld.value.trim() });
+    });
+
+    var card = el('article', { class: 'card' }, [
+      el('div', { class: 'card-head' }, [k.eyebrow, k.title, hook]),
+      el('div', { class: 'card-media' }, player.el),
+      el('div', { class: 'card-body' }, [meta, antwort.el, mehr, quelle, actions, fbForm, wegForm, st.el])
+    ]);
+    return {
+      mode: 'neu', el: card, entwurf: entwurf,
+      titel: function () { return aktuell ? aktuell.titel : ''; },
+      update: function (v, platzNr) {
+        aktuell = v;
+        k.set(v);
+        var zeigHook = !!v.hook && !gleicherSatz(v.hook, v.titel);
+        setText(hook, zeigHook ? v.hook : ''); show(hook, zeigHook);
+        player.set(v, !(platzNr >= SOFORT_LADEN));
+        var m = metaText(v); setText(meta, m); show(meta, !!m);
+        antwort.set(v.antwort);
+        setText(spoken, v.text || 'Zu diesem Video ist kein Text hinterlegt.');
+        setText(quelleText, v.quelle); show(quelle, !!v.quelle);
+        ordne();
+      }
+    };
+  }
+
+  // --- Aenderung angefragt ---
+  function cardAendern(id) {
+    var k = kopf();
+    var aktuell = null;
+    var vomServer = null;
+    var st = zustand();
+    var feld = el('textarea', { id: 'wunsch-' + id, rows: 3, maxlength: 2000 });
+    var fehler = el('p', { class: 'field-error', role: 'alert', hidden: true, text: 'Der Änderungswunsch darf nicht leer sein. Wenn doch nichts geändert werden soll, zieh die Anfrage zurück.' });
+    var btnSave = el('button', { type: 'submit', class: 'btn primary', text: 'Speichern', disabled: true });
+    var nurLesen = beschriftet('Dein Änderungswunsch', 'mine');
+    var fold = makeFoldedPlayer();
+    var btnZurueck = el('button', { type: 'button', class: 'linkbtn entscheid', text: 'Anfrage zurückziehen' });
+    var naechster = el('p', { class: 'next-run' });
+    var form = el('form', { class: 'inline', novalidate: true }, [
+      el('label', { for: 'wunsch-' + id, text: 'Dein Änderungswunsch' }),
+      feld, fehler,
+      el('div', { class: 'row' }, [btnSave])
+    ]);
+    function ruht() { var op = aktuell ? aktuell.vorgang : null; return !!op && beschaeftigt(op); }
+    function pruefe() { btnSave.disabled = ruht() || feld.value.trim() === (vomServer || '').trim(); }
+    function entwurf() {
+      var t = feld.value.trim();
+      return aktuell && t && t !== (vomServer || '').trim() && t !== aktuell.feedback.trim() ? t : '';
+    }
+    feld.addEventListener('input', function () {
+      if (feld.value.trim()) fehler.hidden = true;
+      // "Gespeichert" stimmt nicht mehr, sobald weitergetippt wird.
+      var op = aktuell ? aktuell.vorgang : null;
+      if (op && op.phase === 'fertig' && !op.gehalten && vergiss(id)) renderVideos(); else pruefe();
+    });
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var text = feld.value.trim();
+      if (!text) { fehler.hidden = false; feld.focus(); return; }
+      if (!aktuell || ruht() || text === (vomServer || '').trim()) return;
+      starte(aktuell, 'text', { feedback: text });
+    });
+    btnZurueck.addEventListener('click', function () {
+      if (!aktuell || zuFrueh()) return;
+      starte(aktuell, 'zurueckziehen', { status: 'neu', feedback: '' });
+    });
+    var item = el('article', { class: 'item' }, [
+      el('div', { class: 'item-head' }, [k.eyebrow, k.title]),
+      form, nurLesen.el, st.el,
+      naechster,
+      el('div', { class: 'row' }, [fold.btn, btnZurueck]),
+      fold.slot
+    ]);
+    return {
+      mode: 'aendern', el: item, entwurf: entwurf,
+      titel: function () { return aktuell ? aktuell.titel : ''; },
+      update: function (v) {
+        aktuell = v;
+        k.set(v);
+        var op = v.vorgang;
+        // Solange ein eigener Schreibvorgang offen oder gescheitert ist, bleibt
+        // das Feld, wie der Nutzer es hinterlassen hat. Sonst wuerde ein
+        // abgelehntes "Speichern" den getippten Text durch den alten ersetzen.
+        var eingefroren = !!op && !(op.phase === 'fertig' && !op.gehalten);
+        if (!eingefroren) {
+          // Den Text im Feld nur dann ersetzen, wenn der Nutzer nicht gerade selbst daran schreibt.
+          if (vomServer === null || (v.feedback !== vomServer && feld.value.trim() === (vomServer || '').trim())) feld.value = v.feedback;
+          vomServer = v.feedback;
+        } else if (vomServer === null) {
+          feld.value = op.vorher.feedback; vomServer = op.vorher.feedback;
+        }
+        if (S.readOnly) {
+          var t = entwurf();
+          if (t) { retteText(v.titel, t, 'lesen'); feld.value = vomServer || ''; }
+        }
+        var b = ruht();
+        feld.readOnly = b; btnZurueck.disabled = b;
+        pruefe();
+        show(form, !S.readOnly); show(btnZurueck, !S.readOnly);
+        nurLesen.set(S.readOnly ? v.feedback : '');
+        st.set(op);
+        // Von einem "naechsten Lauf" spricht die Seite nur, wenn sich die
+        // Automation zuletzt auch gemeldet hat. Sonst waere das ein Versprechen,
+        // das niemand haelt.
+        setText(naechster, S.aktiv ? 'Der nächste Lauf kümmert sich darum.' : 'Bearbeitet wird das, sobald die Automation läuft.');
+        fold.set(v);
+        show(fold.btn, !!v.asset);
+      }
+    };
+  }
+
+  // --- Freigegeben ---
+  function cardFrei(id) {
+    var k = kopf();
+    var aktuell = null;
+    var st = zustand();
+    var antwort = beschriftet('Das wurde geändert');
+    var fold = makeFoldedPlayer();
+    var hinweis = el('p', { class: 'meta', hidden: true, 'aria-live': 'polite' });
+    var btnLaden = el('button', { type: 'button', class: 'btn soft', text: 'Herunterladen' });
+    var link = el('a', { class: 'btn soft', target: '_blank', rel: 'noopener', hidden: true, text: 'Video in neuem Tab öffnen' });
+    // Eine Freigabe laesst sich auch spaeter noch zuruecknehmen. "Rueckgaengig"
+    // in der Meldung unten gibt es nur ein paar Sekunden lang.
+    var btnNimm = el('button', { type: 'button', class: 'linkbtn entscheid', text: 'Freigabe zurücknehmen' });
+    function sag(text) { setText(hinweis, text); show(hinweis, !!text); }
+    // downloads.d.ts: "unavailable" heisst, Speichern geht in dieser Ansicht
+    // nicht, und unbekannte Codes sind genauso zu behandeln. Dann den eigenen
+    // Knopf wegnehmen und nur noch auf die Datei verweisen.
+    function nurLink(v, text) {
+      link.href = ASSET_BASE + v.asset; show(link, true); show(btnLaden, false);
+      sag(text || 'Speichern geht in dieser Ansicht nicht direkt. Öffne das Video und sichere es von dort.');
+    }
+    btnLaden.addEventListener('click', function () {
+      if (!aktuell || !aktuell.asset) return;
+      var v = aktuell;
+      btnLaden.disabled = true;
+      sag('Das Video wird vorbereitet …');
+      S.downloads.then(function (dl) {
+        if (!dl) { nurLink(v); return null; }
+        return fetch(ASSET_BASE + v.asset).then(function (res) {
+          if (!res.ok) throw 0;
+          return res.blob();
+        }).then(null, function () {
+          throw { code: 'datei' };
+        }).then(function (blob) {
+          return dl.save({ filename: dateiName(v), data: blob });
+        }).then(function () {
+          sag('Das Video wurde zum Speichern übergeben.');
+        });
+      }).catch(function (e) {
+        var code = e && e.code;
+        if (code === 'declined') sag('');
+        else if (code === 'rate_limited') sag('Es ist schon ein Speichern-Fenster offen. Bitte kurz warten.');
+        else if (code === 'datei') sag('Die Videodatei lässt sich gerade nicht laden.');
+        else if (code === 'too_large') nurLink(v, 'Die Datei ist für das Speichern hier zu groß. Öffne das Video und sichere es von dort.');
+        else nurLink(v);
+      }).then(function () { btnLaden.disabled = false; });
+    });
+    btnNimm.addEventListener('click', function () {
+      if (!aktuell || zuFrueh()) return;
+      starte(aktuell, 'zuruecknehmen', { status: 'neu' });
+    });
+    var item = el('article', { class: 'item' }, [
+      el('div', { class: 'item-head' }, [k.eyebrow, k.title]),
+      antwort.el,
+      el('div', { class: 'row' }, [fold.btn, btnLaden, link, btnNimm]),
+      st.el,
+      hinweis,
+      fold.slot
+    ]);
+    return {
+      mode: 'frei', el: item,
+      titel: function () { return aktuell ? aktuell.titel : ''; },
+      update: function (v) {
+        aktuell = v;
+        k.set(v);
+        antwort.set(v.antwort);
+        fold.set(v);
+        show(fold.btn, !!v.asset);
+        show(btnLaden, !!v.asset && link.hidden);
+        show(btnNimm, !S.readOnly);
+        btnNimm.disabled = !!v.vorgang && beschaeftigt(v.vorgang);
+        st.set(v.vorgang);
+        if (!v.asset) sag('Zu diesem Video ist keine Datei gespeichert.');
+        else if (hinweis.textContent === 'Zu diesem Video ist keine Datei gespeichert.') sag('');
+      }
+    };
+  }
+  function dateiName(v) {
+    var basis = v.id.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 90);
+    return 'stampit-' + (basis || 'video') + '.mp4';
+  }
+
+  // --- Verworfen, ersetzt und alles Unbekannte ---
+  function cardRest(id) {
+    var k = kopf();
+    var aktuell = null;
+    var st = zustand();
+    var pill = el('span', { class: 'pill' });
+    var meta = el('span', { class: 'meta' });
+    var feedback = beschriftet('Deine Notiz', 'mine');
+    var antwort = beschriftet('Antwort');
+    var fold = makeFoldedPlayer();
+    // Nur fuer verworfene Videos: "ersetzt" setzt die Automation, das nimmt der Nutzer nicht zurueck.
+    var btnDoch = el('button', { type: 'button', class: 'linkbtn entscheid', text: 'Doch nicht verwerfen', hidden: true });
+    btnDoch.addEventListener('click', function () {
+      if (!aktuell || aktuell.status !== 'verworfen' || zuFrueh()) return;
+      starte(aktuell, 'wiederholen', { status: 'neu', feedback: '' });
+    });
+    var item = el('article', { class: 'item' }, [
+      el('div', { class: 'item-head' }, [k.eyebrow, k.title, el('div', { class: 'pillrow' }, [pill, meta])]),
+      feedback.el, antwort.el,
+      el('div', { class: 'row' }, [fold.btn, btnDoch]),
+      st.el,
+      fold.slot
+    ]);
+    return {
+      mode: 'rest', el: item,
+      titel: function () { return aktuell ? aktuell.titel : ''; },
+      update: function (v) {
+        aktuell = v;
+        k.set(v);
+        var s = v.status;
+        // Ein Status, den diese Seite nicht kennt, wird als Text gezeigt statt zu verschwinden.
+        var text = s === 'verworfen' ? 'Verworfen' : s === 'ersetzt' ? 'Ersetzt durch eine neue Version' : s ? 'Unbekannter Status: ' + s : 'Ohne Status';
+        setText(pill, text);
+        pill.className = 'pill' + (s === 'verworfen' ? ' bad' : s === 'ersetzt' ? '' : ' warn');
+        setText(meta, metaText(v));
+        feedback.set(v.feedback, s === 'verworfen' ? 'Dein Grund' : s === 'ersetzt' ? 'Dein Änderungswunsch' : 'Deine Notiz');
+        antwort.set(v.antwort, s === 'ersetzt' ? 'Das wurde geändert' : 'Antwort');
+        fold.set(v);
+        show(fold.btn, !!v.asset);
+        var b = !!v.vorgang && beschaeftigt(v.vorgang);
+        show(btnDoch, !S.readOnly && (s === 'verworfen' || b));
+        btnDoch.disabled = b;
+        st.set(v.vorgang);
+      }
+    };
+  }
+
+  var BAUER = { neu: cardNeu, aendern: cardAendern, frei: cardFrei, rest: cardRest };
+
+  // ------------------------------------------------------------------
+  // Videos zeichnen
+  // ------------------------------------------------------------------
+  function sicht(id, d) {
+    d = d && typeof d === 'object' ? d : {};
+    return {
+      id: id,
+      datum: str(d.datum), titel: str(d.titel) || 'Ohne Titel', hook: str(d.hook), text: str(d.text), quelle: str(d.quelle),
+      asset: assetId(d.asset_id), poster: assetId(d.poster_asset_id),
+      dauer: num(d.dauer_s), version: num(d.version),
+      status: str(d.status), feedback: str(d.feedback), antwort: str(d.antwort),
+      erstellt: str(d.erstellt),
+      vorgang: null, ort: '', fest: ''
+    };
+  }
+  function vgl(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+  function neuesteZuerst(a, b) {
+    return vgl(b.datum, a.datum) || ((b.version || 0) - (a.version || 0)) || vgl(b.erstellt, a.erstellt) || vgl(a.id, b.id);
+  }
+  // Unter "Zur Freigabe" steht oben, was als Erstes erscheinen soll. Mit
+  // "neueste zuerst" stand das Video fuer heute unter dem fuer morgen.
+  function dringendZuerst(a, b) {
+    function tag(v) { return parseTag(v.datum) ? v.datum : '\uffff'; }
+    return vgl(tag(a), tag(b)) || ((b.version || 0) - (a.version || 0)) || vgl(b.erstellt, a.erstellt) || vgl(a.id, b.id);
+  }
+  function gruppe(status) { return status === 'neu' ? 'neu' : status === 'aendern' ? 'aendern' : status === 'freigegeben' ? 'frei' : 'rest'; }
+
+  // Zeigt der Schnappschuss noch genau den Stand von vor dem eigenen Schreiben?
+  function nochAlt(roh, b) {
+    if (passt(roh, b.patch)) return false;
+    for (var k in b.patch) if (roh[k] !== b.vor[k]) return false;
+    return true;
+  }
+
+  function aktuelleVideos() {
+    var out = [];
+    var da = new Set();
+    S.videos.forEach(function (d) {
+      da.add(d.id);
+      var roh = gespeichert(d.id, d.data, d.sicher);
+      var b = S.bekannt.get(d.id);
+      if (b && (Date.now() > b.bis || !nochAlt(roh, b))) { S.bekannt.delete(d.id); b = null; }
+      var v = sicht(d.id, b ? mische(roh, b.patch) : roh);
+      var op = S.vorgang.get(d.id) || null;
+      var natur = gruppe(v.status);
+      // Ein Fehler gehoert an die Stelle, an der getippt wurde. Ist das Video
+      // inzwischen woanders (jemand anderes hat es geaendert), ist er ueberholt.
+      // "natur" stammt aus dem gespeicherten Stand: die eigene, abgelehnte
+      // Aenderung im Schnappschuss zaehlt dabei nicht als Ortswechsel.
+      if (op && op.phase === 'fehler' && natur !== op.ort) { S.vorgang.delete(d.id); op = null; }
+      v.vorgang = op;
+      v.ort = op && beschaeftigt(op) ? op.ort : natur;
+      // Fuer die Stempelreihe zaehlt nur, was gespeichert ist. Die Laufzeit
+      // zeigt eigene Schreibvorgaenge schon vor der Bestaetigung (db.d.ts).
+      v.fest = op && op.phase !== 'fertig' ? op.vorher.status : v.status;
+      out.push(v);
+    });
+    // Vorgaenge zu Videos, die es nicht mehr gibt. Ein laufender meldet sich selbst.
+    S.vorgang.forEach(function (op, id) {
+      if (da.has(id) || op.phase === 'laeuft') return;
+      clearTimeout(op.timer); clearTimeout(op.halten);
+      S.vorgang.delete(id);
+    });
+    return out;
+  }
+
+  // Karten bleiben dieselben Elemente, solange ein Video in seinem Bereich
+  // bleibt: ein neuer Schnappschuss darf weder ein laufendes Video anhalten
+  // noch einen halb getippten Text loeschen.
+  function setze(container, liste, mode) {
+    var bewegt = false;
+    var gewollt = liste.map(function (v, i) {
+      var c = S.cards.get(v.id);
+      if (!c || c.mode !== mode) {
+        if (c) { rette(c); c.el.remove(); }
+        c = BAUER[mode](v.id);
+        S.cards.set(v.id, c);
+      }
+      c.update(v, i);
+      return c.el;
+    });
+    var ref = container.firstElementChild;
+    gewollt.forEach(function (node) {
+      if (node === ref) { ref = ref.nextElementSibling; return; }
+      container.insertBefore(node, ref);
+      bewegt = true;
+    });
+    while (ref) { var weiter = ref.nextElementSibling; ref.remove(); ref = weiter; bewegt = true; }
+    // Wechselt eine Karte den Platz, liegt danach etwas anderes unter dem
+    // Finger. Entscheidungs-Knoepfe zaehlen dann einen Moment lang nicht.
+    if (bewegt) verschobenJetzt();
+  }
+
+  // "Freigegeben" waechst jeden Tag um eine Zeile. Offen stehen nur die
+  // naechsten Tage und die letzten paar, der Rest liegt eingeklappt darunter.
+  function teileFrei(liste) {
+    var heute = isoTag(heuteInBerlin());
+    var kommend = [];
+    var vorbei = [];
+    liste.forEach(function (v) { (parseTag(v.datum) && v.datum >= heute ? kommend : vorbei).push(v); });
+    var oben = new Set();
+    // Die Liste ist nach Datum absteigend sortiert: die naechsten Tage stehen am Ende von "kommend".
+    kommend.slice(-FREI_KOMMEND).forEach(function (v) { oben.add(v.id); });
+    vorbei.slice(0, FREI_VORBEI).forEach(function (v) { oben.add(v.id); });
+    return {
+      oben: liste.filter(function (v) { return oben.has(v.id); }),
+      unten: liste.filter(function (v) { return !oben.has(v.id); })
+    };
+  }
+
+  var LEER = {
+    neu: 'Gerade wartet kein Video auf dich.',
+    aendern: 'Keine offenen Änderungswünsche.',
+    frei: 'Noch ist kein Video freigegeben.',
+    rest: 'Hier liegt noch nichts.'
+  };
+  function bereichsHinweis(name, anzahl, da) {
+    var p = $('hint-' + name);
+    var text = '';
+    var klasse = 'empty';
+    if (!da) { klasse = 'loading'; text = S.fristAbgelaufen || S.fatal ? 'Noch nicht erreichbar.' : (name === 'neu' ? 'Die Videos werden geladen …' : ''); }
+    else if (anzahl === 0) text = LEER[name];
+    p.className = klasse;
+    setText(p, text);
+    show(p, !!text);
+    setText($('n-' + name), da && anzahl > 0 ? String(anzahl) : '');
+  }
+
+  function renderVideos() {
+    var da = S.videos !== null;
+    var g = { neu: [], aendern: [], frei: [], rest: [] };
+    var alle = da ? aktuelleVideos() : [];
+    var ids = new Set();
+    var fremd = 0;
+    alle.forEach(function (v) {
+      g[v.ort].push(v);
+      ids.add(v.id);
+      if (STATUS.indexOf(v.status) === -1) fremd++;
+    });
+    Object.keys(g).forEach(function (name) { g[name].sort(name === 'neu' ? dringendZuerst : neuesteZuerst); });
+    var frei = teileFrei(g.frei);
+    setze($('list-neu'), g.neu, 'neu');
+    setze($('list-aendern'), g.aendern, 'aendern');
+    setze($('list-frei'), frei.oben, 'frei');
+    setze($('list-frei-alt'), frei.unten, 'frei');
+    setze($('list-rest'), g.rest, 'rest');
+    Object.keys(g).forEach(function (name) { bereichsHinweis(name, g[name].length, da); });
+    show($('fold-frei-alt'), frei.unten.length > 0);
+    setText($('n-frei-alt'), frei.unten.length > 0 ? String(frei.unten.length) : '');
+    S.cards.forEach(function (c, id) {
+      if (ids.has(id)) return;
+      rette(c);
+      S.cards.delete(id);
+    });
+    // Ein Video mit vertipptem Status ("Neu" statt "neu") laege sonst
+    // unbemerkt im eingeklappten Bereich und kaeme nie zur Freigabe.
+    if (fremd > 0 && S.fremd === 0) $('fold-rest').open = true;
+    S.fremd = fremd;
+    renderWoche(da ? alle : null);
+    renderNotice();
+  }
+
+  // Die Stempelreihe: sieben Tage ab heute. Ein voller Stempel heisst, fuer
+  // den Tag ist ein Video freigegeben und keines wartet mehr.
+  function renderWoche(alle) {
+    var box = $('week');
+    if (!alle) { box.hidden = true; return; }
+    var best = {};
+    alle.forEach(function (v) {
+      if (!parseTag(v.datum)) return;
+      var s = v.fest === 'freigegeben' ? 'frei' : (v.fest === 'neu' || v.fest === 'aendern') ? 'offen' : '';
+      // "Offen" gewinnt: wartet fuer den Tag noch eine Fassung, ist der Tag
+      // nicht erledigt, auch wenn eine andere schon freigegeben ist.
+      if (s === 'offen' || (s === 'frei' && best[v.datum] !== 'offen')) best[v.datum] = s;
+    });
+    var liste = $('week-list');
+    var start = heuteInBerlin();
+    var kinder = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(start.getTime() + i * 86400000);
+      var s = best[isoTag(d)] || 'leer';
+      var wort = s === 'frei' ? 'freigegeben' : s === 'offen' ? 'noch nicht freigegeben' : 'kein Video';
+      kinder.push(el('li', { 'data-s': s, 'aria-label': fmtTagLang.format(d) + ': ' + wort }, [
+        el('span', { class: 'wd', 'aria-hidden': 'true', text: fmtWochentag.format(d).replace('.', '') }),
+        el('span', { class: 'stamp', 'aria-hidden': 'true', text: String(d.getUTCDate()) })
+      ]));
+    }
+    liste.replaceChildren.apply(liste, kinder);
+    box.hidden = false;
+  }
+
+  // ------------------------------------------------------------------
+  // Stand
+  // ------------------------------------------------------------------
+  function renderStand() {
+    var s = S.stand;
+    var meldung = $('stand-meldung'), meta = $('stand-meta'), problem = $('stand-problem'), alt = $('stand-alt');
+    if (s === undefined) {
+      setText(meldung, S.fristAbgelaufen || S.fatal ? 'Der Stand ist noch nicht erreichbar.' : 'Der Stand wird geladen …');
+      show(meta, false); show(problem, false); show(alt, false);
+      renderKonten(null); renderStimme(null); renderWeiter(); setzeAktiv(false);
+      return;
+    }
+    if (s === null) {
+      setText(meldung, 'Die Automation hat sich noch nicht gemeldet.');
+      show(meta, false); show(problem, false); show(alt, false);
+      renderKonten(null); renderStimme(null); renderWeiter(); setzeAktiv(false);
+      return;
+    }
+    setText(meldung, str(s.meldung) || 'Kein Hinweis vom letzten Lauf.');
+    var teile = [];
+    var lauf = parseZeit(s.letzter_lauf);
+    if (lauf) teile.push('Letzter Lauf: ' + fmtZeit.format(lauf) + ' Uhr');
+    var naechstes = parseTag(s.naechstes_video);
+    if (naechstes) teile.push('Nächstes Video: ' + fmtTagKurz.format(naechstes));
+    if (modusText(s.modus)) teile.push('Modus: ' + modusText(s.modus));
+    meta.replaceChildren.apply(meta, teile.map(function (t) { return el('span', { text: t }); }));
+    show(meta, teile.length > 0);
+
+    var p = str(s.problem).trim();
+    problem.replaceChildren(el('b', { text: 'Problem' }), document.createTextNode(p));
+    show(problem, !!p);
+
+    // Bleibt die Automation ganz stehen, kann sie auch kein Problem mehr
+    // melden. Dann ist ein alter Zeitstempel das einzige Zeichen.
+    var zuAlt = !!lauf && (Date.now() - lauf.getTime() > ALT_NACH_MS);
+    setText(alt, zuAlt ? 'Der letzte Lauf ist mehr als anderthalb Tage her.' : '');
+    show(alt, zuAlt);
+    renderKonten(Array.isArray(s.konten) ? s.konten : null);
+    renderStimme(s);
+    renderWeiter();
+    setzeAktiv(!!lauf && !zuAlt);
+  }
+
+  // "Stimme: X von Y Zeichen in diesem Monat" mit Balken. Fehlt das Limit im
+  // Stand, gilt die Vorgabe des Vertrags (30.000).
+  function renderStimme(s) {
+    var box = $('stimme'), text = $('stimme-text'), bar = $('stimme-bar');
+    if (!s) { box.hidden = true; return; }
+    var limit = num(s.stimme_limit_monat);
+    if (limit == null || limit <= 0) limit = STIMME_LIMIT;
+    var z = num(s.stimme_zeichen_monat);
+    if (z == null || z < 0) {
+      // Ohne gemeldeten Verbrauch wird keiner erfunden: kein Balken, nur das Limit.
+      text.replaceChildren(document.createTextNode('Stimme: noch kein Verbrauch gemeldet, Limit ' + zahl(limit) + ' Zeichen im Monat'));
+      box.dataset.s = 'ok';
+      show(bar, false);
+      box.hidden = false;
+      return;
+    }
+    var anteil = z / limit;
+    var zustand = anteil >= 1 ? 'voll' : anteil >= STIMME_KNAPP ? 'knapp' : 'ok';
+    var kinder = [document.createTextNode('Stimme: ' + zahl(z) + ' von ' + zahl(limit) + ' Zeichen in diesem Monat')];
+    // Der Zustand steht als Wort da, nicht nur als Farbe des Balkens.
+    if (zustand !== 'ok') kinder.push(document.createTextNode('. '), el('b', { text: zustand === 'voll' ? 'Limit erreicht.' : 'Fast aufgebraucht.' }));
+    text.replaceChildren.apply(text, kinder);
+    box.dataset.s = zustand;
+    $('stimme-fill').style.width = Math.min(100, Math.max(z > 0 ? 2 : 0, anteil * 100)) + '%';
+    show(bar, true);
+    box.hidden = false;
+  }
+
+  // "Weiterarbeiten": der Satz, mit dem ein neuer Chat dort ansetzt, wo die
+  // Arbeit steht. Er kommt aus stand.start_satz, die Seite denkt sich keinen aus.
+  var startSatz = '';
+  function renderWeiter() {
+    var s = S.stand;
+    var satz = s ? str(s.start_satz).trim() : '';
+    if (satz !== startSatz) { startSatz = satz; $('start-status').textContent = ''; }
+    setText($('start-satz'), satz);
+    show($('start-satz'), !!satz); show($('start-reihe'), !!satz); show($('start-hint'), !!satz);
+    var leer = $('start-leer');
+    var text = satz ? '' : s === undefined ? (S.fristAbgelaufen || S.fatal ? 'Noch nicht erreichbar.' : 'Der Startsatz wird geladen …') : 'Die Automation hat noch keinen Startsatz hinterlegt.';
+    leer.className = s === undefined ? 'loading' : 'empty';
+    setText(leer, text); show(leer, !!text);
+  }
+  $('start-kopie').addEventListener('click', function () {
+    var p = $('start-satz'), status = $('start-status');
+    if (!startSatz) return;
+    function markiere() {
+      var r = document.createRange(); r.selectNodeContents(p);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      status.textContent = 'Kopieren ging hier nicht. Der Satz ist markiert, kopiere ihn von Hand.';
+    }
+    // Kopieren geht nur direkt im Tippen und wird in manchen Ansichten
+    // abgelehnt. Dann wird der Satz wenigstens markiert.
+    try { navigator.clipboard.writeText(startSatz).then(function () { status.textContent = 'Kopiert'; }, markiere); } catch (e) { markiere(); }
+  });
+
+  // Von einem "naechsten Lauf" spricht die Seite nur, wenn sich die Automation
+  // in den letzten 36 Stunden gemeldet hat. Die beiden Saetze standen frueher
+  // fest da, auch wenn gar kein Lauf eingerichtet war.
+  function setzeAktiv(on) {
+    setText($('eingang-hint'), S.stand === undefined ? 'Ideen für kommende Videos.'
+      : on ? 'Ideen für kommende Videos. Der nächste Lauf liest, was hier steht.'
+      : 'Ideen für kommende Videos. Gelesen wird das, sobald die Automation läuft.');
+    if (S.aktiv === on) return;
+    S.aktiv = on;
+    if (S.videos !== null) renderVideos();
+  }
+  function renderKonten(konten) {
+    var box = $('konten');
+    var namen = (konten || []).map(str).filter(Boolean).slice(0, 30);
+    if (!namen.length) { box.hidden = true; return; }
+    var kinder = [el('span', { text: 'Konten als Ideenquelle:' })];
+    namen.forEach(function (n) { kinder.push(el('span', { class: 'pill', text: n })); });
+    box.replaceChildren.apply(box, kinder);
+    box.hidden = false;
+  }
+
+  // ------------------------------------------------------------------
+  // Eingang
+  // ------------------------------------------------------------------
+  // Ein eigener Eintrag gilt erst als gespeichert, wenn set() bestaetigt hat
+  // oder ein bestaetigter Schnappschuss ihn enthaelt. Dass er in der Liste
+  // auftaucht, reicht nicht: die Laufzeit zeigt eigene Schreibvorgaenge sofort
+  // (db.d.ts: "hasPendingWrites: true until confirmed").
+  function eingangFertig(w) {
+    clearTimeout(w.timer);
+    w.phase = 'fertig';
+    w.bis = Date.now() + NACHLAUF_MS;
+    var feld = $('in-text');
+    if (feld.value.trim() === w.daten.text) { feld.value = ''; S.eingangGeleert = jetzt(); }
+    $('in-error').hidden = true;
+  }
+  function renderEingang() {
+    var da = S.eingang !== null;
+    var liste = $('list-eingang'), hint = $('hint-eingang'), feld = $('in-text');
+    // Ein eigener Eintrag, dessen Speichern abgelehnt wurde, kann im
+    // Schnappschuss noch unbestaetigt stehen (die Ablehnung kann vor dem
+    // Schnappschuss kommen, der ihn zuruecknimmt). Er stand dann als "Offen"
+    // in der Liste, obwohl es ihn nie gab. Zeigt ihn ein bestaetigter
+    // Schnappschuss doch, ist er angekommen.
+    var quelle = (S.eingang || []).filter(function (d) {
+      if (!S.eingangWeg.has(d.id)) return true;
+      if (!d.sicher) return false;
+      S.eingangWeg.delete(d.id);
+      return true;
+    });
+    var zeilen = quelle.map(function (d) { return { id: d.id, d: d.data && typeof d.data === 'object' ? d.data : {}, w: null }; });
+    var platz = {};
+    zeilen.forEach(function (z, i) { platz[z.id] = i; });
+    var laeuft = false;
+    S.wartend.forEach(function (w, id) {
+      var i = platz[id];
+      if (i != null) {
+        if (w.phase !== 'fertig' && quelle[i].sicher) eingangFertig(w);
+        if (w.phase === 'fertig') { S.wartend.delete(id); return; }
+        zeilen[i].w = w;
+      } else {
+        if (w.phase === 'fertig' && Date.now() > w.bis) { S.wartend.delete(id); return; }
+        zeilen.push({ id: id, d: w.daten, w: w.phase === 'fertig' ? null : w });
+      }
+      if (w.phase === 'laeuft') laeuft = true;
+    });
+    zeilen.sort(function (a, b) { return vgl(str(b.d.erstellt), str(a.d.erstellt)) || vgl(a.id, b.id); });
+    function zeile(z) {
+      var status = str(z.d.status);
+      var pill = el('span', {
+        class: 'pill' + (status === 'erledigt' ? ' ok' : status === 'offen' ? '' : ' warn'),
+        text: status === 'erledigt' ? 'Erledigt' : status === 'offen' ? 'Offen' : status ? 'Status: ' + status : 'Ohne Status'
+      });
+      var zeit = zeitText(z.d.erstellt);
+      var w = z.w;
+      var marke = !w ? null
+        : w.phase === 'laeuft' ? el('span', { class: 'wartet', text: 'wird gespeichert …' })
+        : w.phase === 'haengt' ? el('span', { class: 'offen', text: 'noch nicht gespeichert' })
+        : el('span', { class: 'kaputt', text: 'nicht gespeichert' });
+      var item = el('li', { class: 'in-item' }, [
+        el('p', { text: str(z.d.text) || '(leer)' }),
+        el('div', { class: 'in-meta' }, [pill, zeit ? el('span', { text: zeit }) : null, marke])
+      ]);
+      if (w && w.phase === 'haengt') {
+        item.append(el('p', { class: 'sec-hint', text: 'Die Datenbank antwortet gerade nicht.' }));
+        item.append(el('div', { class: 'row' }, [el('button', { type: 'button', class: 'btn soft', text: 'Noch einmal versuchen', onclick: function () { sendeEingang(w); } })]));
+      } else if (w && w.phase === 'fehler') {
+        item.append(el('p', { class: 'field-error', text: w.fehler }));
+        item.append(el('div', { class: 'row' }, [
+          el('button', { type: 'button', class: 'btn soft', text: 'Noch einmal versuchen', onclick: function () { sendeEingang(w); } }),
+          el('button', { type: 'button', class: 'linkbtn', text: 'Eintrag entfernen', onclick: function () { S.eingangWeg.add(w.id); S.wartend.delete(w.id); renderEingang(); } })
+        ]));
+      }
+      var antwort = str(z.d.antwort);
+      if (antwort) item.append(el('p', { class: 'in-answer' }, [el('b', { text: 'Antwort: ' }), document.createTextNode(antwort)]));
+      return item;
+    }
+    // Offen stehen die zehn neuesten. Aeltere liegen eingeklappt darunter:
+    // frueher fielen sie ohne ein Wort weg, samt der Antwort der Automation.
+    var oben = zeilen.slice(0, EINGANG_OFFEN), unten = zeilen.slice(EINGANG_OFFEN);
+    liste.replaceChildren.apply(liste, oben.map(zeile));
+    var altListe = $('list-eingang-alt');
+    altListe.replaceChildren.apply(altListe, unten.map(zeile));
+    show($('fold-eingang-alt'), unten.length > 0);
+    setText($('n-eingang-alt'), unten.length > 0 ? String(unten.length) : '');
+    show($('eingang-mehr'), (S.eingang || []).length >= EINGANG_FENSTER);
+    var text = '';
+    if (!da && !zeilen.length) text = S.fristAbgelaufen || S.fatal ? 'Noch nicht erreichbar.' : 'Der Eingang wird geladen …';
+    else if (!zeilen.length) text = 'Noch keine Einträge.';
+    hint.className = da ? 'empty' : 'loading';
+    setText(hint, text); show(hint, !!text);
+    // Wer nur lesen darf, verliert das Formular. Steht noch Text darin, kommt er nach oben.
+    if (S.readOnly && feld.value.trim()) { retteText('Eingang', feld.value.trim(), 'lesen'); feld.value = ''; }
+    show($('in-form'), !S.readOnly);
+    // Solange ein Eintrag unterwegs ist, kein zweiter. Antwortet die Datenbank
+    // 15 s lang nicht, ist der Knopf wieder frei.
+    $('in-add').disabled = laeuft;
+    renderNotice();
+  }
+
+  function sendeEingang(w) {
+    var versuch = ++w.versuch;
+    function gueltig() { return w.versuch === versuch && S.wartend.get(w.id) === w; }
+    w.phase = 'laeuft'; w.fehler = '';
+    clearTimeout(w.timer);
+    w.timer = setTimeout(function () {
+      if (!gueltig() || w.phase !== 'laeuft') return;
+      w.phase = 'haengt';
+      renderEingang();
+    }, WARTE_MS);
+    renderEingang();
+    // db.d.ts: ein wiederholter Versuch mit derselben Referenz legt hoechstens ein Dokument an.
+    einmalWiederholen(function () { return w.ref.set(w.daten); }, gueltig).then(function () {
+      if (S.wartend.get(w.id) !== w || w.phase === 'fertig') return;
+      eingangFertig(w);
+      setTimeout(renderEingang, NACHLAUF_MS + 100);
+      renderEingang();
+    }, function (e) {
+      if (!gueltig() || w.phase === 'fertig') return;
+      clearTimeout(w.timer);
+      var feld = $('in-text'), fehler = $('in-error');
+      var code = e && e.code;
+      // Ein neues Dokument kann nicht "fehlen": invalid_argument heisst hier, dass diese Person nicht schreiben darf.
+      if ((code === 'invalid_argument' || code === 'transform_error') && S.canWrite !== true) {
+        S.wartend.delete(w.id); S.eingangWeg.add(w.id);
+        if (feld.value.trim() !== w.daten.text) retteText('Eingang', w.daten.text, 'lesen');
+        S.readOnly = true;
+        showToast('Du kannst auf diesem Board nichts eintragen.', { fehler: true });
+        renderVideos(); renderEingang(); renderIdeen();
+        return;
+      }
+      if (feld.value.trim() === w.daten.text) {
+        // Der Text steht noch im Feld: dort bleibt er, mit dem Grund darunter.
+        S.wartend.delete(w.id); S.eingangWeg.add(w.id);
+        fehler.textContent = karteFehlerText(e);
+        fehler.hidden = false;
+      } else {
+        // Im Feld steht inzwischen etwas anderes. Dann bleibt der Eintrag als
+        // "nicht gespeichert" in der Liste, sonst waere sein Text weg.
+        w.phase = 'fehler';
+        w.fehler = karteFehlerText(e);
+      }
+      renderEingang();
+    });
+  }
+
+  $('in-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var feld = $('in-text'), fehler = $('in-error');
+    var text = feld.value.trim();
+    if (!text) {
+      // Ein Doppeltipp auf "Hinzufügen": der erste Tipp hat gespeichert und das
+      // Feld geleert, der zweite traf das leere Feld und bekam eine rote
+      // Fehlermeldung unter einen Eintrag, der gerade angekommen war.
+      if (jetzt() - S.eingangGeleert < 1500) return;
+      fehler.textContent = 'Schreib erst etwas hinein: einen Link, ein Konto oder eine Notiz.'; fehler.hidden = false; feld.focus(); return;
+    }
+    if (!S.db) { fehler.textContent = 'Die Datenbank ist noch nicht erreichbar. Dein Text bleibt im Feld stehen.'; fehler.hidden = false; return; }
+    fehler.hidden = true;
+    // Derselbe Text noch einmal: den offenen Eintrag wiederholen, keinen zweiten anlegen.
+    var gleich = null;
+    var laeuft = false;
+    S.wartend.forEach(function (w) {
+      if (w.phase === 'laeuft') laeuft = true;
+      if (w.phase !== 'fertig' && w.daten.text === text) gleich = w;
+    });
+    if (laeuft) return;
+    if (gleich) { sendeEingang(gleich); return; }
+    // db.d.ts: doc() ohne id vergibt eine neue id.
+    var ref;
+    try { ref = S.db.collection('eingang').doc(); } catch (e) { fehler.textContent = karteFehlerText(e); fehler.hidden = false; return; }
+    var w = { id: ref.id, ref: ref, daten: { text: text, erstellt: nowIso(), status: 'offen', antwort: '' }, phase: 'laeuft', fehler: '', versuch: 0, timer: 0, bis: 0 };
+    S.wartend.set(ref.id, w);
+    sendeEingang(w);
+  });
+  $('in-text').addEventListener('input', function () { $('in-error').hidden = true; });
+
+  $('zum-eingang').addEventListener('click', function () {
+    var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var ziel = $('sec-eingang');
+    ziel.scrollIntoView({ behavior: ruhig ? 'auto' : 'smooth', block: 'start' });
+    // Fuer Vorleseprogramme springt auch der Fokus mit, ohne dass die Tastatur aufgeht.
+    try { $('h-eingang').focus({ preventScroll: true }); } catch (e) {}
+  });
+
+  // ------------------------------------------------------------------
+  // Ideen
+  //
+  // Die Automation legt Ideen an und setzt "geplant" und "verwendet". Der
+  // Nutzer aendert nur den Status: "Nicht machen" setzt "gesperrt", "Doch
+  // machen" setzt "offen". Fuer das Speichern gelten dieselben Regeln wie bei
+  // den Videos: erst nach der Bestaetigung als gespeichert zeigen, die Zeile
+  // bleibt bis dahin an ihrem Platz, ein Fehler bleibt an der Zeile stehen.
+  // ------------------------------------------------------------------
+  var IDEE_WORTE = {
+    gesperrt: { laeuft: 'Wird gesperrt …', fertig: 'Gesperrt', toast: 'Wird nicht gemacht: ' },
+    offen: { laeuft: 'Wird wieder freigegeben …', fertig: 'Wieder bei den Ideen', toast: 'Wieder bei den Ideen: ' },
+    geplant: { laeuft: 'Wird rückgängig gemacht …', fertig: 'Rückgängig gemacht', toast: 'Rückgängig gemacht: ' }
+  };
+  function ideeWorte(op) { return IDEE_WORTE[op.rueck ? 'geplant' : op.neu] || IDEE_WORTE.geplant; }
+  function ideeRuht(op) { return op.phase === 'laeuft' || op.phase === 'haengt' || op.phase === 'fertig'; }
+
+  // Welcher Status als gespeichert gilt (wie "gespeichert" und "bekannt" bei den Videos).
+  function ideeStatus(d) {
+    var roh = str(d.data && d.data.status);
+    var z = S.ideeZurueck.get(d.id);
+    if (z) { if (d.sicher) S.ideeZurueck.delete(d.id); else if (roh === z.neu) roh = z.alt; }
+    var b = S.ideeBekannt.get(d.id);
+    if (b) { if (Date.now() <= b.bis && roh === b.alt) roh = b.neu; else S.ideeBekannt.delete(d.id); }
+    return roh;
+  }
+
+  function ideeSetzen(v, neu, rueck) {
+    if (!S.db || S.readOnly) return null;
+    var alt = S.ideeOp.get(v.id);
+    if (alt) {
+      if (alt.phase === 'laeuft' || alt.phase === 'haengt') return null;
+      // Waehrend die Zeile nach der Bestaetigung noch steht, geht nur "Rueckgaengig".
+      if (alt.phase === 'fertig' && !rueck) return null;
+      clearTimeout(alt.timer); clearTimeout(alt.halten);
+    }
+    var op = { id: v.id, titel: v.titel, alt: v.status, neu: neu, rueck: !!rueck, phase: 'laeuft', fehler: '', versuch: 0, start: jetzt(), timer: 0, halten: 0 };
+    S.ideeOp.set(v.id, op);
+    sendeIdee(op);
+    renderIdeen();
+    return op;
+  }
+
+  function sendeIdee(op) {
+    var versuch = ++op.versuch;
+    function gueltig() { return op.versuch === versuch && S.ideeOp.get(op.id) === op; }
+    op.phase = 'laeuft'; op.fehler = '';
+    clearTimeout(op.timer);
+    op.timer = setTimeout(function () {
+      if (!gueltig() || op.phase !== 'laeuft') return;
+      op.phase = 'haengt';
+      renderIdeen(); renderNotice();
+    }, WARTE_MS);
+    var ref, lesen;
+    try { ref = S.db.doc('ideen/' + op.id); } catch (e) { ideeScheitert(op, e); return; }
+    // Vor dem Schreiben einmal nachlesen, wie bei den Videos: ein Tippen auf
+    // eine Zeile, die noch den alten Stand zeigt, soll nicht ueberschreiben,
+    // was die Automation gerade gesetzt hat (aus "verwendet" wuerde "gesperrt").
+    try { lesen = Promise.resolve(ref.get()); } catch (e) { lesen = Promise.reject(e); }
+    lesen.then(function (snap) {
+      if (!snap || !snap.exists) throw { code: 'weg' };
+      var status = str((snap.data() || {}).status);
+      var m = snap.metadata || {};
+      var fest = m.hasPendingWrites === false && m.fromCache === false;
+      // Auch das Nachlesen kann noch den eigenen, abgelehnten Versuch zeigen.
+      var z = S.ideeZurueck.get(op.id);
+      if (z && !fest && status === z.neu) status = z.alt;
+      // Steht der Zielwert schon bestaetigt da, gibt es nichts zu schreiben.
+      if (status === op.neu) return fest;
+      if (status !== op.alt) throw { code: 'veraltet' };
+      return false;
+    }, function () {
+      return false;
+    }).then(function (schonDa) {
+      if (schonDa) return true;
+      if (!gueltig()) return false;
+      return einmalWiederholen(function () { return ref.update({ status: op.neu }); }, gueltig).then(function () { return true; });
+    }).then(function (ok) {
+      if (ok) ideeBestaetigt(op);
+    }, function (e) {
+      if (gueltig()) ideeAbgelehnt(op, e, versuch);
+    });
+  }
+
+  function ideeBestaetigt(op) {
+    if (S.ideeOp.get(op.id) !== op || op.phase === 'fertig') return;
+    clearTimeout(op.timer);
+    S.ideeBekannt.set(op.id, { alt: op.alt, neu: op.neu, bis: Date.now() + NACHLAUF_MS });
+    // Ein frueherer, abgelehnter Versuch ist damit erledigt. Bliebe er gemerkt,
+    // hielte die Seite den jetzt gespeicherten Wert fuer den abgelehnten: der
+    // Status allein ist nicht eindeutig (bei den Videos ist es der Zeitstempel).
+    S.ideeZurueck.delete(op.id);
+    setTimeout(renderIdeen, NACHLAUF_MS + 100);
+    op.phase = 'fertig';
+    // Die Zeile bleibt noch kurz stehen. Rutschte sie sofort weg, laege die
+    // naechste Idee unter dem Finger, und ein zweites Tippen wuerde sie sperren.
+    op.halten = setTimeout(function () {
+      if (S.ideeOp.get(op.id) !== op) return;
+      S.ideeOp.delete(op.id);
+      renderIdeen();
+    }, Math.max(ZEIGE_MS, HALTE_MS - (jetzt() - op.start)));
+    if (op.rueck) showToast(ideeWorte(op).toast + op.titel, { ms: 4000 });
+    else showToast(ideeWorte(op).toast + op.titel, { actionLabel: 'Rückgängig', action: function () { ideeRueck(op); } });
+    renderIdeen(); renderNotice();
+  }
+  function ideeRueck(erste) {
+    var op = ideeSetzen({ id: erste.id, titel: erste.titel, status: erste.neu }, erste.alt, true);
+    if (!op) showToast(S.readOnly ? 'Du kannst auf diesem Board nichts ändern.' : 'Für diese Idee wird gerade schon etwas gespeichert. Es wurde nichts rückgängig gemacht.', { fehler: true });
+  }
+  function ideeScheitert(op, e) {
+    clearTimeout(op.timer);
+    op.phase = 'fehler';
+    op.fehler = karteFehlerText(e);
+    showToast(schreibFehlerText(e), { fehler: true });
+    renderIdeen(); renderNotice();
+  }
+  function ideeAbgelehnt(op, e, versuch) {
+    if (S.ideeOp.get(op.id) !== op || op.phase === 'fertig') return;
+    var code = e && e.code;
+    if (code === 'weg' || code === 'veraltet') {
+      clearTimeout(op.timer);
+      S.ideeOp.delete(op.id);
+      showToast(code === 'weg' ? 'Diese Idee gibt es nicht mehr.' : 'Die Idee hat sich inzwischen geändert. Es wurde nichts gespeichert.', { fehler: true });
+      renderIdeen(); renderNotice();
+      return;
+    }
+    S.ideeZurueck.set(op.id, { alt: op.alt, neu: op.neu });
+    if (code !== 'invalid_argument' && code !== 'transform_error') { ideeScheitert(op, e); return; }
+    function nochDran() { return S.ideeOp.get(op.id) === op && op.versuch === versuch && op.phase !== 'fertig'; }
+    grundDerAblehnung('ideen/' + op.id).then(function (grund) {
+      if (!nochDran()) return;
+      if (grund === 'fehler') { ideeScheitert(op, e); return; }
+      clearTimeout(op.timer);
+      S.ideeOp.delete(op.id);
+      if (grund === 'weg') showToast('Diese Idee gibt es nicht mehr.', { fehler: true });
+      else { S.readOnly = true; showToast('Du kannst auf diesem Board nichts ändern.', { fehler: true }); renderVideos(); renderEingang(); }
+      renderIdeen(); renderNotice();
+    });
+  }
+
+  function ideeSicht(d) {
+    var x = d.data && typeof d.data === 'object' ? d.data : {};
+    var status = ideeStatus(d);
+    var op = S.ideeOp.get(d.id) || null;
+    // Ein Fehler gehoert zu dem Stand, bei dem getippt wurde. Hat sich die
+    // Idee inzwischen von anderer Seite geaendert, ist er ueberholt.
+    if (op && op.phase === 'fehler' && status !== op.alt) { S.ideeOp.delete(d.id); op = null; }
+    return {
+      id: d.id, titel: str(x.titel) || 'Ohne Titel', notiz: str(x.notiz), quelle: str(x.quelle), erstellt: str(x.erstellt),
+      // Solange gespeichert wird, zeigt die Zeile den Stand von vor dem Tippen.
+      status: op && ideeRuht(op) ? op.alt : status, op: op
+    };
+  }
+  function ideeOffen(status) { return status === 'offen' || status === 'geplant'; }
+
+  function ideeZeile(id, mode) {
+    var titel = el('p', { class: 'idea-title' });
+    var pill = el('span', { class: 'pill', hidden: true });
+    var notiz = el('p', { class: 'idea-note', hidden: true });
+    var quelle = el('span', { hidden: true });
+    var datum = el('span', { hidden: true });
+    var meta = el('p', { class: 'in-meta', hidden: true }, [quelle, datum]);
+    var stText = el('span', { class: 'state-text' });
+    var nochmal = el('button', { type: 'button', class: 'btn soft', hidden: true, text: 'Noch einmal versuchen' });
+    var st = el('div', { class: 'state', role: 'status', hidden: true }, [stText, nochmal]);
+    var knopf = el('button', { type: 'button', class: 'btn soft entscheid', text: mode === 'offen' ? 'Nicht machen' : 'Doch machen' });
+    var reihe = el('div', { class: 'row' }, [knopf]);
+    var aktuell = null;
+    knopf.addEventListener('click', function () {
+      if (!aktuell || zuFrueh()) return;
+      ideeSetzen(aktuell, mode === 'offen' ? 'gesperrt' : 'offen', false);
+    });
+    nochmal.addEventListener('click', function () {
+      var op = aktuell ? aktuell.op : null;
+      if (!op || op.phase !== 'haengt' || S.ideeOp.get(op.id) !== op) return;
+      sendeIdee(op);
+      renderIdeen();
+    });
+    return {
+      mode: mode,
+      el: el('li', { class: 'idea' }, [el('div', { class: 'idea-head' }, [titel, pill]), notiz, meta, st, reihe]),
+      update: function (v) {
+        aktuell = v;
+        setText(titel, v.titel);
+        var s = v.status;
+        var marke = mode === 'offen' ? (s === 'geplant' ? 'Eingeplant' : '')
+          : s === 'gesperrt' ? 'Gesperrt' : s === 'verwendet' ? 'Verwendet' : s ? 'Status: ' + s : 'Ohne Status';
+        setText(pill, marke); show(pill, !!marke);
+        pill.className = 'pill' + (mode === 'offen' ? '' : s === 'gesperrt' ? ' bad' : s === 'verwendet' ? ' ok' : ' warn');
+        setText(notiz, v.notiz); show(notiz, !!v.notiz);
+        var tag = parseZeit(v.erstellt);
+        setText(quelle, v.quelle ? 'Quelle: ' + v.quelle : ''); show(quelle, !!v.quelle);
+        setText(datum, tag ? fmtBerlinKurz.format(tag) : ''); show(datum, !!tag);
+        show(meta, !!v.quelle || !!tag);
+        var op = v.op;
+        if (op) {
+          setText(stText, op.phase === 'laeuft' ? ideeWorte(op).laeuft : op.phase === 'haengt' ? HAENGT_TEXT : op.phase === 'fehler' ? op.fehler : ideeWorte(op).fertig);
+          if (st.dataset.phase !== op.phase) st.dataset.phase = op.phase;
+        }
+        show(st, !!op);
+        show(nochmal, !!op && op.phase === 'haengt');
+        var ruht = !!op && ideeRuht(op);
+        // "Doch machen" gibt es nur fuer gesperrte Ideen: was schon verwendet
+        // wurde, holt der Nutzer nicht zurueck.
+        show(reihe, !S.readOnly && (mode === 'offen' || s === 'gesperrt' || ruht));
+        knopf.disabled = ruht;
+      }
+    };
+  }
+
+  // Wie "setze" bei den Videos: Zeilen bleiben dieselben Elemente, solange
+  // eine Idee in ihrer Liste bleibt, damit der Fokus auf einem Knopf einen
+  // neuen Schnappschuss ueberlebt.
+  function setzeIdeen(container, liste, mode) {
+    var bewegt = false;
+    var gewollt = liste.map(function (v) {
+      var z = S.ideeZeilen.get(v.id);
+      if (!z || z.mode !== mode) {
+        if (z) z.el.remove();
+        z = ideeZeile(v.id, mode);
+        S.ideeZeilen.set(v.id, z);
+      }
+      z.update(v);
+      return z.el;
+    });
+    var ref = container.firstElementChild;
+    gewollt.forEach(function (node) {
+      if (node === ref) { ref = ref.nextElementSibling; return; }
+      container.insertBefore(node, ref);
+      bewegt = true;
+    });
+    while (ref) { var weiter = ref.nextElementSibling; ref.remove(); ref = weiter; bewegt = true; }
+    return bewegt;
+  }
+
+  function renderIdeen() {
+    var da = S.ideen !== null;
+    var alle = (S.ideen || []).map(ideeSicht);
+    alle.sort(function (a, b) { return vgl(b.erstellt, a.erstellt) || vgl(a.id, b.id); });
+    var offen = alle.filter(function (v) { return ideeOffen(v.status); });
+    var zu = alle.filter(function (v) { return !ideeOffen(v.status); });
+    var gezeigt = offen.slice(0, IDEEN_OFFEN);
+    var ids = new Set();
+    gezeigt.concat(zu).forEach(function (v) { ids.add(v.id); });
+    var bewegt = setzeIdeen($('list-ideen'), gezeigt, 'offen');
+    bewegt = setzeIdeen($('list-ideen-zu'), zu, 'zu') || bewegt;
+    S.ideeZeilen.forEach(function (z, id) { if (!ids.has(id)) S.ideeZeilen.delete(id); });
+    if (bewegt) verschobenJetzt();
+    // Vorgaenge zu Ideen, die es nicht mehr gibt. Ein laufender meldet sich selbst.
+    if (da) {
+      var vorhanden = new Set();
+      alle.forEach(function (v) { vorhanden.add(v.id); });
+      S.ideeOp.forEach(function (op, id) {
+        if (vorhanden.has(id) || op.phase === 'laeuft') return;
+        clearTimeout(op.timer); clearTimeout(op.halten);
+        S.ideeOp.delete(id);
+      });
+    }
+    setText($('n-ideen'), da && offen.length > 0 ? String(offen.length) : '');
+    var hint = $('hint-ideen');
+    var text = '';
+    if (!da) text = S.fristAbgelaufen || S.fatal ? 'Noch nicht erreichbar.' : 'Die Ideen werden geladen …';
+    else if (!offen.length) text = 'Gerade liegt keine offene Idee vor.';
+    hint.className = da ? 'empty' : 'loading';
+    setText(hint, text); show(hint, !!text);
+    var mehr = offen.length - gezeigt.length;
+    setText($('ideen-mehr'), mehr > 0 ? (mehr === 1 ? 'Eine weitere offene Idee zeigt das Board hier nicht.' : mehr + ' weitere offene Ideen zeigt das Board hier nicht.') : '');
+    show($('ideen-mehr'), mehr > 0);
+    show($('fold-ideen-zu'), zu.length > 0);
+    setText($('n-ideen-zu'), zu.length > 0 ? String(zu.length) : '');
+  }
+
+  // ------------------------------------------------------------------
+  // Protokoll: was die Automation zuletzt getan hat (nur lesen)
+  // ------------------------------------------------------------------
+  // "sitzung" ist ein Text aus der Datenbank und wird zur Adresse eines Links.
+  // Deshalb nur https zulassen, nie javascript: oder data:.
+  function sichererLink(v) {
+    var t = str(v).trim();
+    if (!/^https:\/\//i.test(t)) return null;
+    try { var u = new URL(t); return u.protocol === 'https:' ? u : null; } catch (e) { return null; }
+  }
+  function dauerText(v) {
+    var n = num(v);
+    if (n == null || n < 0) return '';
+    if (n < 1) return n === 0 ? '' : 'unter 1 Minute';
+    var r = Math.round(n);
+    return r === 1 ? '1 Minute' : zahl(r) + ' Minuten';
+  }
+  function laufZeile(d) {
+    var x = d.data && typeof d.data === 'object' ? d.data : {};
+    var zeit = zeitText(x.zeit);
+    var modus = modusText(x.modus);
+    var dauer = dauerText(x.dauer_min);
+    var problem = str(x.problem).trim();
+    var link = sichererLink(x.sitzung);
+    var item = el('li', { class: 'log-item' }, [
+      el('div', { class: 'log-head' }, [
+        el('span', { class: 'log-time', text: zeit || 'Ohne Zeitangabe' }),
+        modus ? el('span', { class: 'pill', text: modus }) : null,
+        dauer ? el('span', { text: dauer }) : null
+      ]),
+      el('p', { class: 'log-text', text: str(x.ergebnis) || 'Kein Ergebnis eingetragen.' })
+    ]);
+    if (problem) item.append(el('p', { class: 'log-problem' }, [el('b', { text: 'Problem' }), document.createTextNode(problem)]));
+    if (link) {
+      // Der Link fuehrt in die Sitzung, die den Lauf gemacht hat. Bei einer
+      // fremden Adresse steht der Rechnername dabei, damit klar ist, wohin es geht.
+      var eigen = link.hostname === 'claude.ai';
+      item.append(el('div', { class: 'row' }, [el('a', { class: 'linkbtn', href: link.href, target: '_blank', rel: 'noopener noreferrer', text: eigen ? 'Sitzung öffnen' : 'Link öffnen (' + link.hostname + ')' })]));
+    }
+    return item;
+  }
+  function renderLaeufe() {
+    var da = S.laeufe !== null;
+    var zeilen = (S.laeufe || []).slice().sort(function (a, b) {
+      return vgl(str(b.data && b.data.zeit), str(a.data && a.data.zeit)) || vgl(a.id, b.id);
+    }).slice(0, LAEUFE_FENSTER);
+    var oben = zeilen.slice(0, LAEUFE_OFFEN), unten = zeilen.slice(LAEUFE_OFFEN);
+    var liste = $('list-laeufe'), alt = $('list-laeufe-alt');
+    liste.replaceChildren.apply(liste, oben.map(laufZeile));
+    alt.replaceChildren.apply(alt, unten.map(laufZeile));
+    show($('fold-laeufe-alt'), unten.length > 0);
+    setText($('n-laeufe-alt'), unten.length > 0 ? String(unten.length) : '');
+    var hint = $('hint-laeufe');
+    var text = '';
+    if (!da) text = S.fristAbgelaufen || S.fatal ? 'Noch nicht erreichbar.' : 'Das Protokoll wird geladen …';
+    else if (!zeilen.length) text = 'Noch ist kein Lauf eingetragen.';
+    hint.className = da ? 'empty' : 'loading';
+    setText(hint, text); show(hint, !!text);
+  }
+
+  // ------------------------------------------------------------------
+  // Hinweise oben: Fehler, veraltete Anzeige, nur lesen, Ungespeichertes
+  // ------------------------------------------------------------------
+  function rettungsHinweis(g) {
+    if (g.el) return g.el;
+    var text = el('p', { class: 'rescued', text: g.text });
+    var kopie = el('button', { type: 'button', class: 'btn soft', text: 'Text kopieren' });
+    kopie.addEventListener('click', function () {
+      function markiere() {
+        var r = document.createRange(); r.selectNodeContents(text);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        kopie.textContent = 'Text ist markiert';
+      }
+      // Kopieren geht nur direkt im Tippen und wird in manchen Ansichten
+      // abgelehnt. Dann wird der Text wenigstens markiert.
+      try { navigator.clipboard.writeText(g.text).then(function () { kopie.textContent = 'Kopiert'; }, markiere); } catch (e) { markiere(); }
+    });
+    var weg = el('button', { type: 'button', class: 'linkbtn', text: 'Hinweis schließen' });
+    weg.addEventListener('click', function () {
+      S.gerettet = S.gerettet.filter(function (x) { return x !== g; });
+      renderNotice();
+    });
+    var warum = g.warum === 'lesen'
+      ? 'Du kannst auf diesem Board nichts ändern. Hier ist dein Text, damit er nicht verloren geht:'
+      : '„' + g.titel + '“ hat sich geändert, während du geschrieben hast. Hier ist dein Text, damit er nicht verloren geht:';
+    g.el = el('div', { class: 'note warn' }, [
+      el('b', { text: 'Dein Text wurde nicht gespeichert' }),
+      el('span', { text: warum }),
+      text,
+      el('div', { class: 'row' }, [kopie, weg])
+    ]);
+    return g.el;
+  }
+
+  var noticeKey = null;
+  function renderNotice() {
+    var etwasDa = S.videos !== null || S.eingang !== null || S.stand !== undefined;
+    var offen = 0;
+    S.vorgang.forEach(function (op) { if (op.phase === 'haengt') offen++; });
+    S.wartend.forEach(function (w) { if (w.phase === 'haengt') offen++; });
+    S.ideeOp.forEach(function (op) { if (op.phase === 'haengt') offen++; });
+    // Nur neu aufbauen, wenn sich etwas geaendert hat: ein markierter Text im
+    // Hinweis soll nicht bei jedem Schnappschuss seine Markierung verlieren.
+    var key = [S.fatal, S.fristAbgelaufen, etwasDa, S.readOnly, offen, S.fremd, S.gerettet.map(function (g) { return g.n; }).join(',')].join('|');
+    document.body.dataset.state = (S.fatal === 'keine_db' || S.fatal === 'keine_laufzeit') ? 'fehler' : 'ok';
+    if (key === noticeKey) return;
+    noticeKey = key;
+    var box = $('notice');
+    var kinder = [];
+    if (S.fatal === 'keine_laufzeit') {
+      kinder.push(el('div', { class: 'note err', role: 'alert' }, [
+        el('b', { text: 'Das Board erreicht seine Daten nicht' }),
+        el('span', { text: 'Diese Seite zeigt ihre Daten nur, wenn sie als Artifact in Claude geöffnet ist.' })
+      ]));
+    } else if (S.fatal === 'keine_db') {
+      kinder.push(el('div', { class: 'note err', role: 'alert' }, [
+        el('b', { text: 'Das Board erreicht seine Daten nicht' }),
+        el('span', { text: 'Die Datenbank ist in dieser Ansicht nicht verfügbar. Öffne das Board in Claude, während du angemeldet bist. Hilft das nicht, lade die Seite neu.' })
+      ]));
+    } else if (S.fatal === 'ende') {
+      kinder.push(el('div', { class: 'note err', role: 'alert' }, [
+        el('b', { text: 'Die Daten sind hier nicht mehr verfügbar' }),
+        el('span', { text: etwasDa ? 'Was du siehst, ist der letzte bekannte Stand und wird nicht mehr aktualisiert.' : 'In dieser Ansicht lässt sich das Board gerade nicht laden.' })
+      ]));
+    } else if (S.fatal) {
+      kinder.push(el('div', { class: 'note err', role: 'alert' }, [
+        el('b', { text: 'Die Verbindung zur Datenbank ist abgebrochen' }),
+        el('span', { text: etwasDa ? 'Was du siehst, ist der letzte bekannte Stand. Änderungen kommen erst wieder an, wenn die Verbindung steht.' : 'Das Board konnte seine Daten nicht laden.' }),
+        el('button', { type: 'button', class: 'btn soft', text: 'Neu verbinden', onclick: verbinden })
+      ]));
+    } else if (S.fristAbgelaufen) {
+      kinder.push(el('div', { class: 'note warn' }, [
+        el('b', { text: etwasDa ? 'Die Anzeige ist möglicherweise nicht aktuell' : 'Die Daten sind noch nicht erreichbar' }),
+        el('span', { text: etwasDa ? 'Die Datenbank antwortet gerade nicht. Die Seite versucht es von selbst weiter.' : 'Die Datenbank antwortet gerade nicht. Die Seite versucht es von selbst weiter, du musst nichts tun.' })
+      ]));
+    }
+    if (offen > 0) {
+      kinder.push(el('div', { class: 'note warn' }, [
+        el('b', { text: offen === 1 ? 'Eine Eingabe ist noch nicht gespeichert' : offen + ' Eingaben sind noch nicht gespeichert' }),
+        el('span', { text: 'Die Datenbank antwortet gerade nicht. An der Stelle, an der du getippt hast, steht „Noch einmal versuchen“.' })
+      ]));
+    }
+    S.gerettet.forEach(function (g) { kinder.push(rettungsHinweis(g)); });
+    if (S.fremd > 0) {
+      kinder.push(el('div', { class: 'note warn' }, [
+        el('b', { text: S.fremd === 1 ? 'Ein Video hat einen Status, den das Board nicht kennt' : S.fremd + ' Videos haben einen Status, den das Board nicht kennt' }),
+        el('span', { text: (S.fremd === 1 ? 'Es steht' : 'Sie stehen') + ' unter „Verworfen und ersetzt“ und ' + (S.fremd === 1 ? 'kommt' : 'kommen') + ' so nicht zur Freigabe. Den Status muss die Automation richtigstellen.' })
+      ]));
+    }
+    if (S.readOnly && !S.fatal) {
+      kinder.push(el('div', { class: 'note info' }, [
+        el('span', { text: 'Du siehst dieses Board ohne Schreibrecht. Freigeben und eintragen kann nur, wem das Board gehört.' })
+      ]));
+    }
+    box.replaceChildren.apply(box, kinder);
+  }
+
+  // ------------------------------------------------------------------
+  // Datenbank: genau ein Abo je Sammlung (fuenf, erlaubt sind 64), 10 s Frist fuers Laden
+  // ------------------------------------------------------------------
+  function fristStarten() {
+    clearTimeout(S.timer);
+    S.timer = setTimeout(function () {
+      S.timer = 0; S.fristAbgelaufen = true;
+      allesZeichnen();
+    }, LADE_FRIST_MS);
+  }
+  // db.d.ts: der erste Schnappschuss mit fromCache false beendet Frist und Hinweis.
+  function geliefert(name, meta) {
+    S.frisch[name] = !(meta && meta.fromCache);
+    if (S.frisch.videos && S.frisch.eingang && S.frisch.stand && S.frisch.ideen && S.frisch.laeufe) {
+      clearTimeout(S.timer); S.timer = 0;
+      if (S.fristAbgelaufen) { S.fristAbgelaufen = false; renderNotice(); }
+    } else if (!S.timer && !S.fristAbgelaufen && !S.fatal) {
+      fristStarten();
+    }
+  }
+  function dbFehler(e) {
+    // Hoechstens ein Fehler je Abo, danach ist es tot (db.d.ts). Nicht von
+    // selbst neu abonnieren: das macht nur der Knopf "Neu verbinden".
+    var code = e && e.code;
+    clearTimeout(S.timer); S.timer = 0; S.fristAbgelaufen = false;
+    S.fatal = (code === 'revoked' || code === 'not_granted' || code === 'capability_disabled' || code === 'capability_removed') ? 'ende' : 'abbruch';
+    allesZeichnen();
+  }
+  // Ein Dokument gilt als bestaetigt gespeichert, wenn weder es selbst noch
+  // der Schnappschuss, der es bringt, etwas Unbestaetigtes enthaelt
+  // (db.d.ts: SnapshotMetadata). Fehlt die Angabe, gilt es als unbestaetigt.
+  function leseDocs(snap) {
+    var sm = snap.metadata || {};
+    var ruhig = sm.hasPendingWrites === false && sm.fromCache === false;
+    return snap.docs.map(function (d) {
+      var m = d.metadata || {};
+      return { id: d.id, data: d.data() || {}, sicher: ruhig && m.hasPendingWrites === false && m.fromCache === false };
+    });
+  }
+  function verbinden() {
+    S.subs.forEach(function (stop) { try { stop(); } catch (e) {} });
+    S.subs = [];
+    S.fatal = ''; S.fristAbgelaufen = false;
+    S.frisch = { videos: false, eingang: false, stand: false, ideen: false, laeufe: false };
+    fristStarten();
+    try {
+      // Neueste zuerst und gedeckelt: die Sammlung waechst jeden Tag um ein Video.
+      S.subs.push(S.db.collection('videos').orderBy('datum', 'desc').limit(500).onSnapshot(function (snap) {
+        S.videos = leseDocs(snap);
+        geliefert('videos', snap.metadata);
+        // Zweiter Weg zur Bestaetigung, falls das Versprechen von update() nie
+        // aufloest oder scheitert, obwohl der Schreibvorgang ankam: der
+        // bestaetigte Schnappschuss zeigt genau die eigenen Werte samt dem
+        // eigenen Zeitstempel.
+        S.videos.forEach(function (d) {
+          var op = S.vorgang.get(d.id);
+          if (op && d.sicher && op.phase !== 'fertig' && passt(d.data, op.patch)) bestaetigt(op);
+        });
+        renderVideos();
+      }, dbFehler));
+      S.subs.push(S.db.collection('eingang').orderBy('erstellt', 'desc').limit(EINGANG_FENSTER).onSnapshot(function (snap) {
+        S.eingang = leseDocs(snap);
+        geliefert('eingang', snap.metadata);
+        renderEingang();
+      }, dbFehler));
+      S.subs.push(S.db.doc('stand/aktuell').onSnapshot(function (snap) {
+        S.stand = snap.exists ? (snap.data() || {}) : null;
+        geliefert('stand', snap.metadata);
+        renderStand();
+      }, dbFehler));
+      S.subs.push(S.db.collection('ideen').orderBy('erstellt', 'desc').limit(IDEEN_FENSTER).onSnapshot(function (snap) {
+        S.ideen = leseDocs(snap);
+        geliefert('ideen', snap.metadata);
+        // Wie bei den Videos: zeigt ein bestaetigter Schnappschuss den
+        // Zielwert, ist der eigene Schreibvorgang angekommen.
+        S.ideen.forEach(function (d) {
+          var op = S.ideeOp.get(d.id);
+          if (op && d.sicher && op.phase !== 'fertig' && str(d.data.status) === op.neu) ideeBestaetigt(op);
+        });
+        renderIdeen();
+      }, dbFehler));
+      // Das Protokoll waechst mit jedem Lauf. Die Seite holt nur die letzten 15.
+      S.subs.push(S.db.collection('laeufe').orderBy('zeit', 'desc').limit(LAEUFE_FENSTER).onSnapshot(function (snap) {
+        S.laeufe = leseDocs(snap);
+        geliefert('laeufe', snap.metadata);
+        renderLaeufe();
+      }, dbFehler));
+    } catch (e) {
+      dbFehler({ code: 'unavailable' });
+    }
+    renderNotice();
+  }
+
+  // ------------------------------------------------------------------
+  // Speicher: nur auf Wunsch abfragen (assets.d.ts: list() ist fuers Aufraeumen)
+  // ------------------------------------------------------------------
+  var speicherGefragt = false;
+  $('fold-speicher').addEventListener('toggle', function () {
+    if (!this.open || speicherGefragt) return;
+    speicherGefragt = true;
+    var p = $('speicher-text');
+    var use = window.claude && typeof window.claude.use === 'function' ? window.claude.use('assets') : Promise.resolve(null);
+    use.then(function (assets) {
+      if (!assets) { p.textContent = 'Den Speicher sieht nur, wer das Board bearbeiten darf.'; return null; }
+      return assets.list().then(function (r) {
+        var u = r && r.usage ? r.usage : null;
+        if (!u) { p.textContent = 'Der Speicher lässt sich gerade nicht abfragen.'; return; }
+        var mb = function (b) { return (b / 1048576).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' MB'; };
+        p.textContent = u.files.toLocaleString('de-DE') + ' von höchstens ' + u.maxFiles.toLocaleString('de-DE') + ' Dateien, ' + mb(u.bytes) + ' von ' + mb(u.maxBytes) + ' belegt.';
+      });
+    }).catch(function () {
+      speicherGefragt = false;
+      p.textContent = 'Der Speicher lässt sich gerade nicht abfragen. Klapp den Bereich zu und wieder auf, um es noch einmal zu versuchen.';
+    });
+  });
+
+  // ------------------------------------------------------------------
+  // Start
+  // ------------------------------------------------------------------
+  function allesZeichnen() { renderNotice(); renderStand(); renderVideos(); renderEingang(); renderIdeen(); renderLaeufe(); }
+  allesZeichnen();
+
+  var claude = window.claude;
+  if (!claude || typeof claude.use !== 'function') {
+    S.fatal = 'keine_laufzeit';
+    S.downloads = Promise.resolve(null);
+    allesZeichnen();
+    return;
+  }
+  // claude.d.ts: Faehigkeiten gibt es nur ueber claude.use(name). Das
+  // Versprechen loest spaeter auf, mit null, wenn die Ansicht sie nicht hat.
+  S.downloads = claude.use('downloads').catch(function () { return null; });
+
+  claude.use('user').then(function (user) {
+    if (!user) return null;
+    // user.d.ts: can("data.write") sagt, ob diese Person geteilte Dokumente
+    // aendern darf. null heisst "nichts gesagt": Knoepfe behalten und einen
+    // abgelehnten Schreibversuch entscheiden lassen.
+    return Promise.all([user.can('data.write'), user.isOwner()]);
+  }).then(function (r) {
+    if (!r) return;
+    var darf = r[0];
+    // Die Regel in capabilities.json laesst nur den Besitzer schreiben. Ob
+    // can("data.write") bei der Stufe "owner" fuer den Besitzer true meldet,
+    // ist nirgends belegt. Dem Besitzer nimmt die Seite die Knoepfe deshalb
+    // nie vorab weg: bei einem "false" entscheidet der erste Schreibversuch.
+    if (darf === false && r[1] === true) darf = null;
+    S.canWrite = darf === true ? true : darf === false ? false : null;
+    if (S.canWrite === false) { S.readOnly = true; renderNotice(); renderVideos(); renderEingang(); renderIdeen(); }
+  }, function () {});
+
+  claude.use('db').then(function (db) {
+    if (!db) { S.fatal = 'keine_db'; allesZeichnen(); return; }
+    S.db = db;
+    verbinden();
+  }, function () { S.fatal = 'keine_db'; allesZeichnen(); });
+})();
+</script>
