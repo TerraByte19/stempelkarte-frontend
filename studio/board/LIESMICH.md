@@ -12,10 +12,15 @@ ist die private Übersicht des Nutzers über alles, was die Automation tut:
   Stimme, "Weiterarbeiten" den Satz, mit dem ein neuer Chat dort ansetzt, wo
   die Arbeit steht.
 
+**Für den unbeaufsichtigten täglichen Lauf gilt `../AUTOMATIK.md`.** Diese
+Datei beschreibt die Seite, den Datenvertrag und die einzelnen Schreibwege.
+Wo sie von `AUTOMATIK.md` abweicht, gilt für den Lauf `AUTOMATIK.md`; die
+Abweichungen stehen unten im Abschnitt "Erweiterungen durch die Automatik".
+
 **Adresse des Boards:** https://claude.ai/artifact/NN4DTD3LpysNVZ1YaziVXm
-(veröffentlicht am 15.11.2026 in Schritt 0, steht auch in `ADRESSE.txt`; diese
-Änderung ist noch nicht committet). Jede spätere Sitzung braucht
-sie für jeden Aufruf. **Ohne `url` zu veröffentlichen legt ein zweites Board
+(veröffentlicht am 15.11.2026 in Schritt 0, steht auch in `ADRESSE.txt`). Jede
+spätere Sitzung braucht sie für jeden Aufruf. Der unbeaufsichtigte Lauf nimmt
+sie allein aus seinem Auftragstext. **Ohne `url` zu veröffentlichen legt ein zweites Board
 mit leerer Datenbank an** ("Publishing without `url` creates a separate
 artifact"). [Werkzeug]
 
@@ -162,6 +167,36 @@ Ein einziges Dokument, nur die Automation schreibt es, die Seite liest es.
 | `stimme_limit_monat` | Zahl, Vorgabe 30000 | wie viele Zeichen im Monat zur Verfügung stehen |
 | `start_satz` | Text | der Satz, den der Nutzer in einen neuen Chat einfügt |
 | `konten` | Liste von Texten | Konten, von denen Ideen kommen |
+
+### Erweiterungen durch die Automatik
+
+Die Automatik hält sich an den Vertrag oben und fügt hinzu, was die Seite
+nicht anzeigt und nicht braucht. Die genaue Liste steht in `../AUTOMATIK.md`,
+Abschnitt 2.1; hier nur, was es gibt und wo es vom Text weiter unten abweicht:
+
+- **Zusätzliche Felder** an `videos` (`thema`, `branche`, `idee_id`,
+  `entwurf`, `pruefung`), an `ideen` (`thema`, `branche`, `hook`, `beleg`,
+  `stichwort`, `herkunft`, `reel_*`, `themen_nr`, `eingang_id`,
+  `geplant_fuer`, `video_id`), an `laeufe` (`push`, `stimme_zeichen`,
+  `video_id`) und an `stand/aktuell` (`probleme`, `push_fehlversuche`,
+  `metricool_leer`, `stimme_stufe`, `speicher_anteil`).
+- **Drei zusätzliche Sammlungen**, die nur die Automatik schreibt:
+  `gedaechtnis` (Kassenbuch der Stimme, verwendete Themen, Wünsche des
+  Nutzers), `reels` (schon bewertete Reels der Mitbewerber) und `quellen`
+  (Skript und Aufnahme je Fassung eines Videos). Die Zugriffsregel an der
+  Wurzel gilt auch für sie: nur der Besitzer sieht sie.
+- **Ein zusätzlicher Statuswechsel:** Kann die Automatik einen
+  Änderungswunsch nicht erfüllen, setzt sie das Video von `aendern` zurück
+  auf `neu`, und `antwort` beginnt mit "Nichts: ".
+- **Eingang:** Ein Eintrag mit einem Link bekommt eine `antwort` und bleibt
+  `offen`, bis eine begleitete Sitzung ihn angesehen hat.
+- **Verbrauch der Stimme:** `stimme_zeichen_monat` kommt aus dem Kassenbuch
+  (`tools/budget.mjs`), nicht aus "alter Wert plus neue Aufnahme" wie in
+  Schritt 10 unten beschrieben.
+- **Löschen:** Die Automatik löscht nichts, auch keine alten Läufe (anders
+  als der Vorschlag in Schritt 9 unten).
+- **Abgelöst:** `modus` ist beim täglichen Lauf immer `produktion`; einen
+  eigenen Lauf für die Ideensuche (`scout`) gibt es in Version 1 nicht.
 
 ### Wer was ändern darf
 
@@ -416,6 +451,10 @@ Artifact({ url: URL, file_path: "/home/user/stempelkarte-frontend/studio/board/i
   [Skill] [Werkzeug]
 
 ## Ein Lauf der Automation, Schritt für Schritt
+
+Dieser Abschnitt zeigt die einzelnen Schreibwege am Beispiel. Den ganzen
+unbeaufsichtigten Lauf, mit Reihenfolge, Grenzen und allem, was bei einem
+Fehler geschieht, beschreibt allein `../AUTOMATIK.md`.
 
 `URL` steht für die Adresse des Boards. Zeitstempel immer als ISO 8601 in UTC
 mit `Z`, zum Beispiel aus `date -u +%Y-%m-%dT%H:%M:%SZ`. [Vertrag]

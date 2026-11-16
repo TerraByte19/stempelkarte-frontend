@@ -864,7 +864,7 @@ Kostet nichts. Jeder Befehl mit `R=/home/user/stempelkarte-frontend;` davor.
 | Standbilder | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills <t1,t2,...>` mit je einem Zeitpunkt kurz nach jedem Anker (Zeiten aus `out/check.json`, `anchors[].t` und `scenes`) | PNGs in `out/stills/`. Jedes mit dem Read-Werkzeug ansehen | was nicht stimmt, im Skript ändern |
 | Entwurf bauen (rund 2 Minuten, `timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice; echo "Ende-Code $?"` | Ende-Code 0, `out/video.mp4`, `out/sheet.png`, `out/poster.png`, `out/report.json` mit `"ok": true` | Code 1: wie oben. Ein Fehler von Playwright oder ffmpeg: einmal wiederholen, dann Hindernis `studio-kaputt` |
 | ansehen | `out/sheet.png` und `out/poster.png` mit dem Read-Werkzeug | siehe Liste unten | ändern und neu bauen |
-| Kennzahlen | Befehl unten | `laenge_s` 45 bis 55, `bilder` ab 10, `laengstes_bild_s` bis 7, `ereignisse_pro_min` ab 15, `zeichen` bis 800 | einmal nachbessern (Text kürzen oder ergänzen, lange Szene in `parts` teilen), dann weitergehen: Richtwerte halten keinen Lauf auf. **Zwei Ausnahmen:** über 56 Sekunden oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
+| Kennzahlen | Befehl unten | `laenge_s` 45 bis 55, `bilder` ab 7, `laengstes_bild_s` bis 8, `ereignisse_pro_min` ab 15, `zeichen` bis 800 | einmal nachbessern (Text kürzen oder ergänzen, lange Szene in `parts` teilen), dann weitergehen: Richtwerte halten keinen Lauf auf. **Zwei Ausnahmen:** über 56 Sekunden oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
 
 ```bash
 R=/home/user/stempelkarte-frontend
@@ -933,7 +933,7 @@ Kennzahlen mit demselben Befehl lesen:
 | `laenge_s` | 45 bis 55 | bis 60 erlaubt; vermerken |
 
 Vermerken heißt: in `pruefung` am Video, bei deutlicher Abweichung auch in
-`meldung`. `pruefung` ist ein Satz, zum Beispiel: "51,2 s, 11 Bilder, Pausen
+`meldung`. `pruefung` ist ein Satz, zum Beispiel: "51,2 s, 8 Bilder, Pausen
 3,9 s, 172 Wörter je Minute, Spitze -1,0 dB."
 
 ### Schritt 19: aufs Board
@@ -1161,9 +1161,9 @@ ist, ohne Namen, Regel 12) und frei dazu `datum`, `thema`, `branche`,
 | Punkt | Vorgabe |
 |---|---|
 | Einstieg | Die erste Textzeile trägt `"instant": true` und ist eine Frage oder ein Moment, kein Vorspann. Sie steht ab Bild 0 und wird in der ersten Sekunde gesprochen |
-| Erzählform | Eine kleine Geschichte über **einen** Laden (den aus der Tabelle "Läden" in `THEMEN.md`), keine Liste von Funktionen. Höchstens zwei Aussagen über die App je Video |
+| Erzählform | Eine kleine Geschichte über **einen** Laden (den aus der Tabelle "Läden" in `THEMEN.md`), keine Liste von Funktionen. Eine Aussage über die App steht im Mittelpunkt (der Beleg der Idee); weitere kommen nur als kurze Station der Geschichte vor |
 | Länge | 45 bis 55 Sekunden, 105 bis 130 Wörter, höchstens 800 Zeichen (A1). Der Bau bricht unter 20 und über 60 Sekunden ab |
-| Bilder | Mindestens 10 Bilder (Szenen und Teile), keines länger als 7 Sekunden, und etwa alle 3,5 Sekunden geschieht im Bild etwas Neues: ein Wechsel oder ein Anker (Stempel trifft, Karte fällt, Nachricht erscheint). Lieber `parts` als lange Einzelszenen, jeder Anker auf einem Wort. Wie aus den Bausteinen eines Themas 10 Bilder werden, steht in `THEMEN.md` unter "Vom Kern zum Video" |
+| Bilder | Mindestens 7 Bilder (Szenen und Teile), besser 8 bis 10, keines länger als 8 Sekunden, und etwa alle 3,5 Sekunden geschieht im Bild etwas Neues: ein Wechsel oder ein Anker (Stempel trifft, Karte fällt, Nachricht erscheint). Lieber `parts` als lange Einzelszenen, jeder Anker auf einem Wort. Wie aus dem Kern eines Themas genug Bilder werden, steht in `THEMEN.md` unter "Vom Kern zum Video" |
 | Keine stillen Lücken | Jeder Punkt, jedes Fragezeichen und jede neue Textzeile ist eine Pause. Halbsätze mit Komma verbinden. Ziel nach der Aufnahme: zusammen höchstens 5 Sekunden Pausen, keine länger als 1 Sekunde |
 | Text im Bild | Kurze Textzeilen, `accent` auf dem einen Wort, auf das es ankommt |
 | Tempo | Die Stimme bleibt, wie sie ist (Liam, 1,05). Das ergibt rund 170 Wörter je Minute beim Sprechen |
@@ -1518,7 +1518,7 @@ Für diese Aufgabe erlaube ich genau das:
 - im Arbeitsordner Videos bauen (node, ffmpeg, Playwright) und dafür numpy mit pip installieren.
 - auf diesem Board Dokumente lesen und schreiben und Dateien hochladen (Video, Standbild, Quellen-Paket) und das eigene Quellen-Paket wieder herunterladen. Auf dem Board nichts löschen, die Seite nicht neu veröffentlichen.
 - über die Verbindung Metricool Zahlen lesen, nur mit getAnalyticsDataByMetrics (Marke 7969131).
-- die Stimme bei ElevenLabs aufnehmen, nur über studio/make.mjs und nur, wenn studio/tools/budget.mjs direkt davor zustimmt: eine volle Aufnahme am Tag, eine zweite nur für ein Video vom Vortag, das noch ohne Stimme ist, dazu höchstens zwei einzelne Sätze. Höchstens 1600 Zeichen am Tag und 27000 im Monat. Bleibt eine Aufnahme ohne Antwort: am selben Tag kein zweiter Versuch, am nächsten Tag einmal neu aufnehmen, auch wenn das im schlimmsten Fall doppelt kostet.
+- die Stimme bei ElevenLabs aufnehmen, nur über studio/make.mjs und nur, wenn studio/tools/budget.mjs direkt davor zustimmt: eine volle Aufnahme am Tag, eine zweite nur für ein Video vom Vortag, das noch ohne Stimme ist, dazu höchstens zwei einzelne Sätze. Höchstens 1600 Zeichen am Tag und 27000 im Monat. Bleibt eine Aufnahme ohne Antwort: am selben Tag kein zweiter Versuch, am nächsten Tag einmal neu aufnehmen, auch wenn das im schlimmsten Fall doppelt kostet. Dafür darf die alte Sperrdatei im Ordner dieses Videos entfernt werden.
 - studio/tools/eyes-setup.sh ausführen und damit das fertige eigene Video prüfen. Das Skript lädt das Prüfwerkzeug claude-eyes und whisper.cpp von GitHub und ein Sprachmodell von Hugging Face.
 - die Ordner der neuen oder geänderten Videos unter studio/videos und den Ordner studio/state/board committen und einmal auf den Branch ccr-816d9995-jhzqdq pushen. Ein npm run build ist davor nicht nötig, weil sich nur Dateien unter studio/ ändern. Lehnt die Sicherheitsprüfung den Push ab: nicht wiederholen, keinen anderen Weg suchen, vermerken. Nach einem Netzfehler höchstens ein zweiter Versuch.
 - mir am Ende eine Benachrichtigung schicken, und das Video als Datei, falls das Hochladen aufs Board scheitert.
@@ -1580,7 +1580,7 @@ erste begleitete Lauf (10.3) geht diese Liste durch:
 | ob `PushNotification`, `SendUserFile` und die Benachrichtigung der Aufgabe den Betreiber am Handy erreichen | unbekannt | Schritt 23 |
 | `tools/eyes-setup.sh` | die Befehle sind die am 15.11.2026 geprüften; die Datei mit ihren Kommentaren ist so nie gelaufen. Der Pfad des Modells setzt den Benutzer root voraus | Schritt 21 |
 | ob derselbe Baustein zweimal in einem Video läuft und wie viele Bilder die acht Bausteine wirklich hergeben | am Code gelesen (jede Szene hat ihren eigenen Bereich), nie gebaut | Schritt 16 |
-| die Richtwerte in Abschnitt 6 (10 Bilder, 15 Ereignisse je Minute, 5 s Pausen) und die Schätzung "800 Zeichen sind rund 55 Sekunden" | aus der Analyse abgeleitet, mit keinem gebauten Video belegt | nach den ersten drei Videos nachstellen |
+| die Richtwerte in Abschnitt 6 (7 Bilder, 15 Ereignisse je Minute, 5 s Pausen) und die Schätzung "800 Zeichen sind rund 55 Sekunden" | aus der Analyse abgeleitet, mit keinem gebauten Video belegt | nach den ersten drei Videos nachstellen |
 | ob die Texte `lp_price_*` irgendwo live zu sehen sind und die Funktionen dahinter stimmen | auf diesem Branch zeigt sie keine Seite an (A2) | der Betreiber bestätigt |
 | der Vortrag von 2.094 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
 

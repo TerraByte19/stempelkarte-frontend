@@ -129,7 +129,7 @@ function lage(buch, k, tag) {
     anteil: +(verbraucht / k.limit_monat).toFixed(4),
     stufe, frei_monat,
     heute: h, grenzen_heute,
-    // frei_heute beantwortet die Frage VOR einer Aenderung mit mehreren Saetzen: passen alle noch in den Tag?
+    // frei_heute sagt, was an diesem Tag noch ginge, ohne dass erst eine Aufnahme angefragt werden muss
     frei_heute: { satz: Math.max(0, grenzen_heute.satz - h.satz), zeichen: Math.max(0, Math.min(grenzen_heute.zeichen - h.zeichen, frei_monat)) },
     offen: buch.buchungen.filter(b => b.stand === 'geplant' || b.stand === 'unklar').map(b => ({ id: b.id, stand: b.stand, video: b.video }))
   }
@@ -142,7 +142,7 @@ function pruefe(buch, k, { tag, art, zeichen, video, zweck = 'neu', begleitet = 
   if (!ZWECKE.includes(zweck)) gruende.push(`unbekannter Zweck "${zweck}" (erlaubt: ${ZWECKE.join(', ')})`)
   if (!Number.isInteger(zeichen) || zeichen <= 0) gruende.push('die Zeichenzahl fehlt oder ist keine positive ganze Zahl')
   if (!gruende.length) {
-    if (!k.unbeaufsichtigt_erlaubt && !begleitet) gruende.push('die Stimme ist für unbeaufsichtigte Läufe noch nicht freigegeben ("stimme.unbeaufsichtigt_erlaubt" steht auf false): erst die begleitete Probe')
+    if (!k.unbeaufsichtigt_erlaubt && !begleitet) gruende.push('die Stimme ist für unbeaufsichtigte Läufe abgeschaltet ("stimme.unbeaufsichtigt_erlaubt" steht auf false): das stellt nur eine begleitete Sitzung um')
     // Gilt fuer jedes Video, nicht nur fuer das betroffene: der Grund war fast immer das Netz, und das ist fuer alle dasselbe.
     const ungeklaert = buch.buchungen.filter(b => b.stand === 'unklar' && b.tag === tag)
     if (ungeklaert.length) gruende.push(`heute blieb schon eine Aufnahme ohne Antwort (${ungeklaert.map(b => b.id).join(', ')}): an diesem Tag gibt es keinen zweiten Versuch, ab morgen darf einmal neu aufgenommen werden`)

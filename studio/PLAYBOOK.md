@@ -64,7 +64,7 @@ immer zu `report.json`; ob beide noch zum Skript passen, zeigt `script.sha256`
 ## Was nie passieren darf
 
 1. **Stimme ohne Freigabe.** Jede Aufnahme bei ElevenLabs kostet den Nutzer
-   Guthaben (1 Zeichen = 1 Credit, ein Video hat 500 bis 700 Zeichen). Wie
+   Guthaben (1 Zeichen = 1 Credit, ein Video hat 500 bis 800 Zeichen). Wie
    viel Guthaben da ist, kann das Studio nicht abfragen. `--allow-voice-spend`
    nur setzen, wenn der Nutzer das für dieses Video oder als Dauerregel
    erlaubt hat, und erst, wenn der Entwurf mit `--no-voice` geprüft und
@@ -113,8 +113,12 @@ immer zu `report.json`; ob beide noch zum Skript passen, zeigt `script.sha256`
    Der Ordnername ist frei, üblich ist Datum plus Kurzname. `_vorlage` selbst
    bleibt unverändert.
 3. **`script.json` schreiben.** Szenen wählen (Katalog unten), Texte setzen,
-   Parameter anpassen, Anker auf die richtigen Wörter legen. Ziel: 30 bis 45
-   Sekunden, das sind mit dieser Stimme etwa 65 bis 100 Wörter. In jeder
+   Parameter anpassen, Anker auf die richtigen Wörter legen. Ziel: 45 bis 65
+   Sekunden (siehe "Vorbild taggt_" unter den Erkenntnissen). Zwei Grenzen
+   gelten bis auf Weiteres: der Bau bricht über 60 Sekunden ab (Prüfung
+   `laenge`), und die Automatik gibt je Aufnahme höchstens 800 Zeichen aus.
+   Praktisch heißt das 45 bis 55 Sekunden, mit dieser Stimme etwa 105 bis
+   130 Wörter. In jeder
    Szene mit Laden den Ladennamen, die Stempelzahl und das Symbol setzen: fehlt
    eine Angabe, zeigt die Szene "Café Nordwind" (der Bau warnt dann).
 4. **Prüfen.** `node studio/make.mjs studio/videos/<ordner> --no-voice --check`
@@ -361,16 +365,19 @@ derselbe Fehler bei einem Anker aus dem Skript bricht den Bau ab.
    ```bash
    grep -n "lp_" src/i18n.js | sed -n '1,160p'
    ```
-   Was die App kann (Stand der Landing Page): Stempel-, Punkte-, Mitglieds- und
-   10er-Karte in Apple Wallet und Google Wallet (`lp_price_c_typen`,
-   `lp_price_c_wallet`); der Kunde scannt einmal einen QR-Code, kein Download,
-   keine App (`lp_how_2_b`, `lp_value_body`); das Personal stempelt mit der
-   Handy-Kamera, der Stempel ist sofort auf dem Kundenhandy (`lp_how_3_b`); ist
-   die Karte voll, meldet sie sich auf dem Sperrbildschirm in Ladennähe
-   (`lp_wallet_body`, `lp_how_4_b`); Design-Editor mit Farben, Logo, Symbol und
-   Stempelzahl (`lp_how_1_b`, `lp_feat_2_b`); Statistik (`lp_feat_3_b`);
-   Newsletter nur an Kunden mit Einwilligung (`lp_feat_4_b`); 14 Tage gratis
-   testen (`lp_price_trust_1`). Was dort nicht steht, wird nicht behauptet.
+   Die geordnete Liste ist `PRODUKT.md`; benutzt wird nur ihre Klasse 1
+   (Texte, die auf der Landing Page zu sehen sind). Das sind: die Stempelkarte
+   in Apple Wallet und Google Wallet (`lp_hero_body`); der Kunde scannt einmal
+   einen QR-Code, kein Download, keine App (`lp_how_2_b`, `lp_value_body`);
+   das Personal stempelt mit der Handy-Kamera, der Stempel ist sofort auf dem
+   Kundenhandy (`lp_how_3_b`); ist die Karte voll, meldet sie sich auf dem
+   Sperrbildschirm in Ladennähe (`lp_wallet_body`, `lp_how_4_b`);
+   Design-Editor mit Farben, Logo, Symbol und Stempelzahl (`lp_how_1_b`,
+   `lp_feat_2_b`); Statistik (`lp_feat_3_b`); Newsletter nur an Kunden mit
+   Einwilligung (`lp_feat_4_b`). Was nur unter `lp_price_*` steht (andere
+   Kartentypen, weitere Nachrichten, Tarife, "14 Tage gratis"), zeigt auf
+   diesem Branch keine Seite an und bleibt draußen, bis der Nutzer es
+   bestätigt hat. Was dort nicht steht, wird nicht behauptet.
    Auf der Landing Page standen einmal "Bestseller" und "30-Tage-Verlauf",
    beides gab es nicht.
 2. **Eine Aussage braucht ihr Bild.** Für Statistik, Newsletter und den
@@ -426,8 +433,10 @@ Skripte, keine harte Regel; keine Prüfung bricht deswegen ab.
   Lücke ergeben: jeder Punkt, jedes Fragezeichen und jede neue Textzeile ist
   eine Pause. Zwei Halbsätze mit Komma laufen durch, zwei Sätze mit Punkt
   nicht.
-- **Kürzer.** Unser Video dauert 50 s, das Vorbild 38 s. Ziel sind 30 bis
-  45 s.
+- **Die Länge allein entscheidet nicht.** Unser Video dauert 50 s, dieses
+  Vorbild 38 s, das stärkste Reel 47 s, die elf Videos von taggt_ 51 bis
+  81 s. Ziel sind jetzt 45 bis 65 s (siehe "Vorbild taggt_" und Schritt 3 im
+  Tagesablauf), dicht gesprochen und ohne stille Lücken.
 - **"Café" und "Kaffee" klingen bei dieser Stimme gleich.** Nicht beide nah
   beieinander verwenden (im ersten Video kommen beide vor).
 - **Zahlensätze mit mehreren Kommas werden als einzelne Sätze gehört**, so wie
@@ -457,8 +466,8 @@ unseres ersten Videos.
 
 | Merkmal | stärkstes Vorbild | unser erstes Video | was daraus für neue Videos folgt |
 |---|---|---|---|
-| Bildwechsel | ein Schnitt etwa alle 1,5 s, das sind 28 je Minute | rund 10 je Minute | **mehr Bildwechsel**: mehr Szenen und Teile (`parts`), keine lange Einzelszene, jeder Anker auf einem Wort. Richtwert der Automatik: mindestens 12 Wechsel je Minute, kein Bild länger als 7 s |
-| Sprache | deckt 100 % der Laufzeit, rund 168 Wörter je Minute | 8 bis 9 s stille Pausen, beim Sprechen rund 170 Wörter je Minute | **keine stillen Lücken**. Das Tempo stimmt schon; es sind die Pausen. Halbsätze mit Komma verbinden, weniger Punkte, weniger einzelne Textzeilen. Richtwert: zusammen höchstens 4 s Pausen, keine über 1 s |
+| Bildwechsel | ein Schnitt etwa alle 1,5 s, das sind 28 je Minute | rund 10 je Minute | **mehr Bildwechsel**: mehr Szenen und Teile (`parts`), keine lange Einzelszene, jeder Anker auf einem Wort. Richtwert der Automatik: mindestens 7 Bilder (Szenen und Teile), keines länger als 8 s, und mindestens 15 sichtbare Ereignisse je Minute (Bildwechsel und Anker zusammen) |
+| Sprache | deckt 100 % der Laufzeit, rund 168 Wörter je Minute | 8 bis 9 s stille Pausen, beim Sprechen rund 170 Wörter je Minute | **keine stillen Lücken**. Das Tempo stimmt schon; es sind die Pausen. Halbsätze mit Komma verbinden, weniger Punkte, weniger einzelne Textzeilen. Richtwert: zusammen höchstens 5 s Pausen, keine über 1 s |
 | Textzeilen | oben, etwa zwei Wörter auf einmal | oben, Wort für Wort, bis zu drei Zeilen | so lassen |
 | Lautheit der Mischung | etwa -14 LUFS | -18,6 LUFS | **lauter mischen** ist das Ziel, aber im Studio noch nicht abgehört: der Begrenzer müsste dafür deutlich stärker arbeiten. Bis der Nutzer eine lautere Mischung gehört und gewählt hat, bleibt `mix` bei den Vorgaben (`state/konfig.json`, `mix`) |
 | Einstieg | eine Frage, in der ersten Sekunde gesprochen und zu sehen | leerer Textbereich im ersten Bild, das erste Wort nach rund 0,4 s | **Hook ab dem ersten Bild sichtbar und gesprochen**: erste Textzeile mit `"instant": true`, als Frage oder als Moment |
@@ -474,6 +483,44 @@ unsere weichen Übergänge und zählt bei uns deshalb zu wenige Schnitte; die
 Zahl der Bildwechsel eines eigenen Videos kommt aus `report.json` (`scenes`
 mit ihren `parts`), nicht aus dem Werkzeug. Und die Lautheit eines fremden
 Reels ist an einer Bildschirmaufnahme gemessen, nicht an der Originaldatei.
+
+### Vorbild taggt_ (11 Videos, gemessen am 15.11.2026)
+
+Ein deutsches Konto, das dieselbe Art Produkt verkauft. Elf seiner Videos
+wurden in einer begleiteten Sitzung vermessen. Seine Szenen sind in 3D
+animiert, mit einfachen Gliederpuppen in einem Café und auf einer Straße.
+Unser Studio ist 2D: übertragen lassen sich vorerst nur Aufbau, Tempo,
+Umgang mit Text und Ton.
+
+| Merkmal | taggt_ | was daraus für neue Videos folgt |
+|---|---|---|
+| Länge | 51 bis 81 s, im Schnitt 63 s | Ziel 45 bis 65 s. Praktisch 45 bis 55 s, solange der Bau über 60 s abbricht und eine Aufnahme höchstens 800 Zeichen hat |
+| Bildwechsel | etwa alle 3,5 s ein neues Bild, 15 bis 26 je Minute | etwa alle 3,5 s soll im Bild etwas Neues geschehen: ein Wechsel oder ein Anker |
+| Sprache | füllt 81 bis 100 % der Laufzeit, 150 bis 190 Wörter je Minute | unser Tempo passt (rund 170); es sind die Pausen, die weg müssen |
+| Text | oben, meist **ein** Wort auf einmal in Grau, einzelne Schlüsselwörter groß und lila | Text bleibt oben und Wort für Wort; `accent` auf das eine Wort legen, auf das es ankommt |
+| Lautheit | jedes Video bei -14,1 LUFS | bestätigt den Wert des anderen Vorbilds. Lauter mischen bleibt eine Entscheidung des Nutzers (`state/konfig.json`, `mix`) |
+| Farben | hell und warm: Weiß, Beige, Braun | unser Aussehen ist dunkel. Das zu ändern ist eine Entscheidung des Nutzers, kein Lauf tut es von sich aus |
+| Erzählform | eine kleine Geschichte über **einen** Laden, keine Liste von Funktionen | jedes Video erzählt von einem Laden aus `THEMEN.md` und stellt eine Aussage in den Mittelpunkt |
+
+Das mit Abstand stärkste der elf Videos (2.339 Likes, die anderen 27 bis 112)
+beginnt mit: "Dieses Café hat einen Weg gefunden, wie seine Kunden kostenlos
+Werbung für es machen." Wiederkehrende erste Sätze:
+
+- "Dieses Café hat einen Trick gefunden, ..."
+- "Zwei Cafés, dieselbe Straße, gleiche Preise."
+- "Wusstest du, dass manche Restaurants dir eine Nachricht schicken können,
+  wenn du in der Nähe bist?"
+- "Dieses Café macht 30.000 Euro Umsatz im Monat. Und dieses hier? Gerade mal
+  8.000."
+
+Was sich daran lernen lässt: der erste Satz zeigt auf einen bestimmten Laden
+und verspricht eine kleine Enthüllung, oder er stellt zwei Läden
+nebeneinander. Die Regel bleibt: **Aufbau und Handwerk dürfen gelernt
+werden. Wortlaut, Bilder und der Laden "Coffee Dream" werden nie
+übernommen**, auch nicht leicht abgewandelt. Ein eigener erster Satz nach
+diesem Muster nennt den eigenen Laden und sagt nur, was `PRODUKT.md` deckt;
+Umsatzzahlen wie im letzten Beispiel sind bei uns ein Erfolgsversprechen und
+bleiben draußen.
 
 ### Geschmack des Nutzers (Stand 15.11.2026)
 
