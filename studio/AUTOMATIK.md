@@ -6,7 +6,7 @@ zu, niemand antwortet. Wer das hier liest, ist diese Sitzung. Es gibt genau
 eine Aufgabe und genau eine Art von Lauf. Stand: 16.11.2026.
 
 Lesen, immer in Teilen von höchstens 400 Zeilen: diese Datei bis zur Zeile
-`ENDE DER ANLEITUNG`. Danach `PRODUKT.md` und `THEMEN.md` ganz, in `START.md`
+`ENDE DER ANLEITUNG`. Danach `PRODUKT.md`, `THEMEN.md` und `HOOKS.md` ganz, in `START.md`
 den Abschnitt "Entscheidungen und Geschmack des Betreibers" und im
 `PLAYBOOK.md` die Abschnitte "Tagesablauf", "script.json", "Stil C",
 "Textregeln", "Erkenntnisse", "Bausteine" und "Prüfungen". Jedes neue Video
@@ -867,6 +867,10 @@ bei Schritt 22.
 
 ### Schritt 15: das Skript schreiben
 
+Vor der ersten Textzeile: `HOOKS.md` Abschnitt 0 abarbeiten (Meme-Tag ja
+oder nein nach 4.1, Meme nach 4.2, Hook-Muster nach 1.3 und 2, Prüfliste
+1.6) und in `meta` des Skripts `hook_muster` und `meme` eintragen.
+
 ```bash
 R=/home/user/stempelkarte-frontend; Z="$R/studio/videos/<ZIEL>-<slug>"; test -e "$Z" && echo SCHON-DA || { cp -r "$R/studio/videos/_vorlage" "$Z" && ls "$Z"; }
 ```
@@ -1358,7 +1362,7 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 
 | Aussage (`PRODUKT.md`) | Baustein | So |
 |---|---|---|
-| Einstieg, wenn der Hook vom Handy, vom Sperrbildschirm oder von der vollen Karte spricht (zum Beispiel T02, T16, T25) | `lock-notification` | `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Text der Benachrichtigung "<n> von <n>, dein <Artikel> wartet" |
+| Einstieg, wenn der Hook vom Handy, vom Sperrbildschirm oder von der vollen Karte spricht (zum Beispiel T02, T16, T25) | `lock-notification` | `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Text der Benachrichtigung mit dem Stand: "Noch <n> Stempel bis: <Belohnung>", nur bei voller Karte "<Belohnung> wartet auf dich" (C1 in `PRODUKT.md`). Wie der erste Satz klingt, steht in `HOOKS.md` 1.2 und 1.6 |
 | Einstieg, wenn der Hook von etwas anderem spricht: vom Papier, von einem fast verlorenen Kunden (zum Beispiel T01, T03, T15), vom Scannen ohne App (T04, T18) | der Baustein dieser Aussage: `paper-card`, `guest-ghost` oder `wallet-vanish`; beim Scannen `wallet-pass` mit `"rise": false` | Das Bild steht ab Bild 0, seine erste Bewegung liegt auf einem Anker kurz nach dem Anfang (`paper-card`: `hit` mit `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01 erprobt; `wallet-pass` als Einstieg ist nicht erprobt, Standbild bei 0 s ansehen). **Nie ein Bild, das dem Hook widerspricht:** unter "Den zehnten macht ein anderer" kein Sperrbildschirm mit "10 von 10". Der Sperrbildschirm kommt dann später, als Schnitt nach dem Bild für "in der Nähe" |
 | Die Kundin ist unterwegs, geht am Laden vorbei (Weg zu C1) | `shop-street` mit `"across": true`, `"circle": false`, `"shopAt": 0.7`, `"direction": "right"`, `"from": -0.08`, `"via": 0.13`, `"to": 0.15` | Sie geht auf der **anderen** Straßenseite, der Laden steht klein im Hintergrund. `to` höchstens 0,09 hinter `via`, sonst deckt die kleine Karte den Laden zu. Nie `shop-street` mit Passant ohne `across` |
 | **C1: "in der Nähe", die Karte erscheint von selbst auf dem Sperrbildschirm (immer, mit dem Stand; nicht erst, wenn sie voll ist)** | **`shop-map`**, Karte von oben: `"circle": true`, `"notify": true`, `"note": "Noch <n> Stempel bis: <Belohnung>"` (nur bei voller Karte: `"<Belohnung> wartet auf dich"`), `"path": [[-0.1, 1], [0.55, 1]]`, Anker `circle` und `walk` am Anfang, `buzz` auf das Wort "zeigt" oder "meldet" mit `"offset": -0.1`, `arrive` mit `{ "at": "end", "offset": -0.5 }`, Kamera nach 6.3 | **Immer**, wenn ein Satz von der Nähe des Ladens handelt. Die Kundin geht eine Straße hinter dem Laden, tritt in den Kreis, und dort, sichtbar entfernt von der Ortsnadel, zeigt ihr Handy die Karte. Es darf nie so aussehen, als müsse man vor der Tür stehen: das war die Korrektur des Betreibers am zweiten Video. Den Weg nicht ändern; einen eigenen Weg lehnt der Baustein ab, wenn er an der Tür vorbeiführt. Danach oft ein Schnitt auf `lock-notification` |

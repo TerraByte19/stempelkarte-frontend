@@ -174,7 +174,7 @@ Außerdem gilt:
 - Uhrzeit, Datum und Text der Benachrichtigung müssen zusammenpassen: ein
   Döner um 12 Uhr, ein Brötchen am Morgen. Das Datum ohne Jahr, der Wochentag
   muss zum Tag passen (Befehl dafür in `AUTOMATIK.md`, Schritt 2).
-- Die Benachrichtigung zeigt in Version 1 immer die **volle** Karte (C1).
+- Die Benachrichtigung zeigt die Karte mit dem **Stand** ("Noch 2 Stempel bis: ..."); nur bei voller Karte "... wartet auf dich" (C1, richtiggestellt am 16.11.2026).
   Jede andere Nachricht wartet (Klasse 2).
 - Zahlen, die die App nicht nennt, bleiben draußen: keine Meter, keine Wochen
   bis zur Erinnerung, keine Preise im Bild (`PRODUKT.md`, N3 und N6). Auch
