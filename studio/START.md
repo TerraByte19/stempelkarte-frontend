@@ -9,18 +9,51 @@ stattdessen zuerst `AUTOMATIK.md` und tut, was dort steht. Stand: 16.11.2026.
 ## Worum es geht
 
 Stampit sind digitale Stempelkarten in Apple und Google Wallet für kleine
-Läden. Der Betreiber will jeden Tag ein Werbevideo (hochkant, rund 45 bis 55
-Sekunden) für Instagram und TikTok, ohne dafür selbst arbeiten zu müssen:
+Läden. Der Betreiber will jeden Tag ein Werbevideo (hochkant, rund 40 bis 45
+Sekunden) für Instagram, Facebook und TikTok, ohne dafür selbst arbeiten zu
+müssen:
 
 - Eine Automatik läuft einmal am Tag, um 06:47 Uhr. Sie liest, was der
   Betreiber auf dem Board hinterlassen hat, sammelt Ideen (auch aus den
-  Zahlen beobachteter Konten bei Metricool) und baut ein Video im Stil des
-  ersten Videos.
+  Zahlen beobachteter Konten bei Metricool) und baut ein Video im **Stil C**
+  des zweiten Videos, dazu einen fertigen Beitragstext.
 - Das Video liegt am Vormittag vor dem Tag, an dem es gepostet wird, auf
   einer privaten Übersichtsseite (dem Board), also lange vor 19 Uhr am
   Vorabend. Der Betreiber tippt dort nur "Passt", "Ändern" oder "Verwerfen".
-- Gepostet wird um 10 Uhr deutscher Zeit (laut Metricool die beste Zeit auf
-  beiden Plattformen), vorerst von Hand.
+- **Gepostet wird vom Betreiber selbst**, mit Metricool, auf Instagram,
+  Facebook und TikTok zugleich, um 10 Uhr deutscher Zeit (laut Metricool die
+  beste Zeit). Den Text kopiert er vom Board ("Text kopieren"). Die Automatik
+  postet nie.
+
+## Stand am 16.11.2026
+
+- **Das zweite Video** (`videos/2026-11-16-ist-das-koscher`, "Ist das
+  koscher?") ist in Fassung 4 fertig: 41,9 s, 109 Wörter, 19 Bildwechsel,
+  -14,1 LUFS, mit zwei Sätzen, die außerhalb des Studios aufgenommen wurden.
+  Es wartet auf die Freigabe des Betreibers. Seinen Beitragstext hat er
+  selbst gewählt (`state/konfig.json`, `beitrag.beispiel`).
+- **Stil C ist der Standard für jedes neue Video:** ein Wort auf einmal oben,
+  Schlüsselwörter groß und lila, alle zwei bis dreieinhalb Sekunden ein neues
+  Bild (mindestens 12 Bildwechsel, keines länger als 5 s), kaum Pausen, laut
+  gemischt (-14 LUFS). Für "in der Nähe" die Karte von oben, nie eine Figur
+  vor der Tür. Beschrieben in `PLAYBOOK.md` ("Stil C") und `AUTOMATIK.md`
+  (Abschnitt 6); die Vorlage `videos/_vorlage` ist ein Beispiel in Stil C. Das
+  erste Video und die beiden Referenzvideos bleiben im alten Stil.
+- **Beitragstext je Video:** Hook, ein bis zwei Sätze, "Kommentiere
+  STICHWORT", genau 5 Hashtags (Instagram nimmt nicht mehr). Er steht am
+  Video auf dem Board (Feld `caption`); `tools/beitrag.mjs` prüft ihn. Die
+  Seite des Boards zeigt ihn mit "Text kopieren", aber erst, wenn sie neu
+  veröffentlicht ist (Inbetriebnahme, Punkt 1).
+- **Metricool:** beobachtet werden vier Mitbewerber, trytappi, gobonki,
+  evecoo.digital (am 16.11.2026 dazugekommen) und loyaltify.io. Der
+  Betreiber hat den **Gratis-Tarif: 20 Beiträge im Monat**. Mit einem Video
+  am Tag wird das ab Dezember knapp; was dann gilt, entscheidet er.
+- **Stimme:** im November bisher 4.874 Zeichen (geschätzt, so steht es in
+  `state/konfig.json`, `stimme.vortrag`, und auf dem Board).
+- **Die geplante Aufgabe** "Stampit Produktion" ist angelegt, mit Metricool,
+  und seit dem 16.11.2026, 23:01 Uhr, **pausiert**. Der Branch hat den Stil C
+  noch nicht (alles unter `studio/` ist nicht committet). Was offen ist:
+  "Inbetriebnahme" unten.
 
 ## Zu Beginn jeder begleiteten Sitzung
 
@@ -57,22 +90,25 @@ und schreibt das Kassenbuch zurück nach `gedaechtnis/stimme`.
 | Ort | Inhalt |
 |---|---|
 | `studio/make.mjs` | der eine Befehl: `node studio/make.mjs studio/videos/<ordner>` |
-| `studio/PLAYBOOK.md` | Anleitung zum Bauen eines Videos, Bausteine, Textregeln, Erkenntnisse (darunter die beiden vermessenen Vorbilder) |
+| `studio/PLAYBOOK.md` | Anleitung zum Bauen eines Videos, Stil C, Bausteine, Textregeln, Erkenntnisse (darunter die beiden vermessenen Vorbilder) |
 | `studio/AUTOMATIK.md` | Arbeitsanleitung für den unbeaufsichtigten täglichen Lauf: Regeln, Zustand, die 24 Schritte, Wahl der Idee, Quellen sichern, Grenzen der Stimme, Prüfung mit claude-eyes, der Auftragstext der einen Aufgabe, Liste des Ungeprüften |
 | `studio/PRODUKT.md` | was die App kann, in zwei Klassen: "gesichert" (auf der Landing Page zu sehen) und "nur im Tarifvergleich genannt, noch nicht bestätigt". Dazu, was ein Video nie sagt |
-| `studio/THEMEN.md` | 27 eigene Themen (Laden mal Blickwinkel, je ein erster Satz), davon 18 heute benutzbar; wie aus einem Thema ein Video mit genug Bildern wird |
-| `studio/state/` | `konfig.json` (alle Einstellungen der Automatik, auch die Grenzen der Stimme), `start/` (Startfassungen fürs Board), `LIESMICH.md`. Der Abzug vom Board (`board/`) entsteht beim ersten Lauf |
+| `studio/THEMEN.md` | 27 eigene Themen (Laden mal Blickwinkel, je ein erster Satz), davon 16 heute benutzbar; wie aus einem Thema ein Video in Stil C mit genug Bildwechseln wird |
+| `studio/state/` | `konfig.json` (alle Einstellungen der Automatik: Grenzen der Stimme, Kopf jedes Skripts in Stil C, Richtwerte, Mischung, Posten und Beitragstext mit Hashtags), `start/` (Startfassungen fürs Board), `LIESMICH.md`. Der Abzug vom Board (`board/`) entsteht beim ersten Lauf |
 | `studio/components/`, `studio/engine/`, `studio/tools/` | Bausteine, Zeitleiste, Stimme, Töne, Prüfungen |
 | `studio/tools/budget.mjs` | Kassenbuch der Stimme: rechnet vor jeder Aufnahme nach, ob sie erlaubt ist. Neu, noch nie gelaufen |
 | `studio/tools/quellen.mjs` | packt Skript und Aufnahme eines Videos in eine Datei fürs Board und holt sie zurück. Neu, noch nie gelaufen |
 | `studio/tools/eyes-setup.sh` | Einrichtung von claude-eyes aus den geprüften Befehlen. In dieser Form noch nie gelaufen |
-| `studio/videos/_vorlage/` | Kopiervorlage für ein neues Video |
-| `studio/videos/2026-11-15-kaffee-aufs-haus/` | das veröffentlichte erste Video (Fassung 10) |
+| `studio/tools/beitrag.mjs` | prüft den Beitragstext eines Videos (Länge, genau 5 Hashtags aus `konfig.json`, Stichwort, kein Gedankenstrich, höchstens 3 Emojis) und gibt die Hashtags je Branche aus. Neu am 16.11.2026, nur im Selbsttest und an einem Entwurf gelaufen |
+| `studio/tools/clip-in.py` | setzt einen Satz, der außerhalb des Studios aufgenommen wurde, in eine Aufnahme. Nur in begleiteten Sitzungen, nie in der Automatik |
+| `studio/videos/_vorlage/` | Kopiervorlage für ein neues Video, ein Beispiel in Stil C (Bäckerei) |
+| `studio/videos/2026-11-16-ist-das-koscher/` | das zweite Video, Fassung 4, Vorbild für Stil C. `NOTIZEN.md` beschreibt jede neue Angabe und die vier Fassungen |
+| `studio/videos/2026-11-15-kaffee-aufs-haus/` | das veröffentlichte erste Video (Fassung 10), alter Stil |
 | `studio/videos/2026-11-14-kaffee-aufs-haus/` | Fassung 7, nur noch Vergleichsbasis |
 | `studio/board/` | die Übersichtsseite: `index.html`, `LIESMICH.md` (Datenvertrag und Schreibwege), `ADRESSE.txt` |
 | `launch-video/` | Quellen des ersten, von Hand gebauten Videos; Vergleichsbasis für `studio/tools/regress.mjs` |
 
-Prüfen, ob alles heil ist: `node studio/tools/selftest.mjs` (etwa 30 s) und
+Prüfen, ob alles heil ist: `node studio/tools/selftest.mjs` (etwa 1 bis 1,5 min) und
 `node studio/tools/regress.mjs` (etwa 4 min, vergleicht Bild für Bild und Ton
 für Ton mit beiden Fassungen).
 
@@ -88,10 +124,18 @@ für Ton mit beiden Fassungen).
   hintereinander. Beispielrechnung mit wenigen Stammkunden, die öfter kommen,
   und ohne Kleingedrucktes darunter. Schluss nach dem Muster: "Klingt
   interessant? Dann kommentiere jetzt KARTE, und wir melden uns bei dir."
-- **Länge:** Der Betreiber hat 30 bis 50 Sekunden genannt. Die vermessenen
-  Vorbilder sind länger (Playbook, "Vorbild taggt_"); die Automatik baut
-  deshalb vorerst 45 bis 55 Sekunden. Ob das so bleiben soll, ist eine der
-  offenen Fragen unten.
+- **Stil:** Stil C (16.11.2026), wie das zweite Video. Lauter gemischt:
+  -14 LUFS, wahre Spitze höchstens -1 dBTP (entschieden mit dem zweiten
+  Video).
+- **Länge:** Der Betreiber hat 30 bis 50 Sekunden genannt. In Stil C werden
+  es mit 105 bis 115 Wörtern 40 bis 45 Sekunden (das zweite Video: 41,9 s).
+- **"In der Nähe" ist nicht "vor der Tür":** kein Bild darf so aussehen, als
+  müsse der Kunde vor dem Laden stehen. Dafür gibt es die Karte von oben
+  (`shop-map`). Das war seine Korrektur am zweiten Video.
+- **Beitragstext:** kurz. Hook, ein bis zwei Sätze, "👉 Kommentiere
+  STICHWORT und wir melden uns.", dann 5 Hashtags. Seine Wahl fürs zweite
+  Video: #baristalife #cafe #berlincity #kleinunternehmen #stempelkarte (die
+  ersten vier hat er selbst ausgesucht).
 - **Nur behaupten, was die App kann:** Aussagen kommen aus `PRODUKT.md`,
   Klasse 1. Keine Geviertstriche in sichtbarem Text.
 - **Vorbilder:** Aufbau und Handwerk lernen, nie ein Video eins zu eins
@@ -121,9 +165,10 @@ für Ton mit beiden Fassungen).
   `IGCR06` bis `IGCR08`), rund 30 je aktivem Konto und Monat. Beobachtet
   werden trytappi (3.091 Follower, im Schnitt 438 Likes, mit Abstand das
   stärkste), loyaltify.io und gobonki (größter geschäftlicher Mitbewerber,
-  auf Instagram klein). Geordnet wird nach Likes: Kommentare sind durch
-  "kommentiere CARD" aufgebläht. Voraussetzung bleibt die verbundene
-  Facebook-Seite.
+  auf Instagram klein); am 16.11.2026 hat der Betreiber evecoo.digital
+  dazugenommen (ob dafür schon Zeilen kommen, ist nicht nachgesehen).
+  Geordnet wird nach Likes: Kommentare sind durch "kommentiere CARD"
+  aufgebläht. Voraussetzung bleibt die verbundene Facebook-Seite.
 - **Instagram direkt** ruft ein unbeaufsichtigter Lauf nie ab: die
   Sicherheitsprüfung wertet das als unerlaubten Zugriff, und es verstößt gegen
   die Bedingungen von Instagram. Videodateien fremder Reels werden nur in
@@ -135,7 +180,9 @@ für Ton mit beiden Fassungen).
   alle 1,5 s, Sprache über die ganze Länge, etwa -14 LUFS) und elf Videos von
   taggt_ (51 bis 81 s, ein Bildwechsel etwa alle 3,5 s, -14,1 LUFS, eine
   kleine Geschichte über einen Laden). Unser erstes Video: rund 10
-  Bildwechsel je Minute, 8 bis 9 Sekunden stille Pausen, -18,6 LUFS.
+  Bildwechsel je Minute, 8 bis 9 Sekunden stille Pausen, -18,6 LUFS. Unser
+  zweites Video in Stil C: 19 Bildwechsel in 41,9 s, 1,2 s Pausen,
+  -14,1 LUFS.
 - **claude-eyes** (Video ansehen und messen, Stand `a540961`) ist geprüft und
   läuft mit lokalen Dateien: Einrichtung in einer frischen Maschine etwa 100
   Sekunden. Nie `--transcriber elevenlabs`, nie `--glossary`, immer
@@ -150,54 +197,88 @@ für Ton mit beiden Fassungen).
 `AUTOMATIK.md`, `PRODUKT.md`, `THEMEN.md`, `state/`, `tools/budget.mjs`,
 `tools/quellen.mjs` und `tools/eyes-setup.sh` wurden am 15. und 16.11.2026
 geschrieben, **ohne einen Befehl auszuführen**. Danach liefen nur die
-Selbsttests von `budget.mjs` und `quellen.mjs`. Der Weg, der Geld kostet und
+Selbsttests von `budget.mjs`, `quellen.mjs` und `beitrag.mjs`. Am 16.11.2026
+wurde ein Thema (T02) nach `AUTOMATIK.md`, Abschnitt 6, aus der Vorlage als
+Entwurf ohne Stimme gebaut, außerhalb des Repos; das ging ohne Fehler und
+ohne Warnung durch. Eine unabhängige Prüfung baute danach T01 genauso (106
+Wörter, 12 Bildwechsel, längstes Bild 4,8 s, Bau 3 min 53 s); was sie fand,
+ist in `AUTOMATIK.md` eingearbeitet (Einstieg zum Hook, Papier ohne Kamera,
+Länge, Pointe, Sicht des Ladens). Nach den Änderungen am Studio vom Abend
+des 16.11.2026 (Döner-Video: neue Bausteine, Klangbibliothek, Engine) liefen
+die Vorlage und derselbe Entwurf zu T01 noch einmal ohne Fehler und ohne
+Warnung durch (gleiche Zahlen, Bau 4 min 32 s neben anderen Prüfungen). Die
+Seite des Boards mit dem Beitragstext ist nur lokal geprüft und noch nicht
+veröffentlicht. Der Weg, der Geld kostet und
 nichts verlieren darf (Stimme aufnehmen, Video hochladen, Quellen auf dem
 Board sichern und zurückholen), ist auf der echten Plattform noch nie
 gelaufen. Der erste, begleitete Lauf der Aufgabe ist sein Test.
 
 ## Inbetriebnahme, in dieser Reihenfolge
 
+Stand 16.11.2026, abends. Die Aufgabe "Stampit Produktion" ist **schon
+angelegt** (id `trig_011PCW9NZ6wwaT178W3vtv2L`): täglich 06:47 Uhr, je
+Ausführung eine neue Sitzung, Benachrichtigung aufs Handy, die Verbindung
+Metricool zugewiesen, das Repo holt sie selbst. Ihr Text steht wörtlich in
+`AUTOMATIK.md`, 10.2. **Nicht noch einmal anlegen.** Eingeschaltet war sie
+zuerst nur, damit der Betreiber sie unter claude.ai/code/routines sieht. Seit
+dem 16.11.2026, 23:01 Uhr, ist sie **pausiert** (die Erinnerung in der
+begleitenden Sitzung hat sie ausgeschaltet, weil der begleitete Lauf noch
+nicht war). Ob sie an oder aus ist, zeigt claude.ai/code/routines. Offen ist:
+
 1. **Committen und pushen**, alles unter `studio/`, auf den Branch
-   `ccr-816d9995-jhzqdq`. Zuerst, weil eine frische Sitzung nur sieht, was
-   auf dem Branch liegt. Wer eine Shell hat, lässt davor einmal
-   `node studio/tools/budget.mjs selbsttest`,
-   `node studio/tools/quellen.mjs selbsttest` und
+   `ccr-816d9995-jhzqdq`, erst wenn der Betreiber danach fragt. Zuerst, weil
+   eine frische Sitzung nur sieht, was auf dem Branch liegt: am Abend des
+   16.11.2026 liegt dort noch der alte Stil (alte Vorlage, `"mix": null`).
+   Mit `git add studio` und vorher `git status`: `tools/beitrag.mjs` und die
+   Standbilder `docs/components/shop-map.png`, `shop-street.png` und
+   `stamp-check.png` sind neu, und ohne `beitrag.mjs` scheitert
+   `selftest.mjs` in jeder frischen Sitzung. Wer eine Shell hat, lässt davor
+   einmal `node studio/tools/budget.mjs selbsttest`,
+   `node studio/tools/quellen.mjs selbsttest`,
+   `node studio/tools/beitrag.mjs selbsttest` und
    `node studio/tools/selftest.mjs` laufen; das kostet nichts. Am 16.11.2026
-   bestanden: budget.mjs 54 Fälle, quellen.mjs 18 Prüfpunkte.
-2. **Die eine Aufgabe anlegen**, "Stampit Produktion", mit Zeitplan und Text
-   aus `AUTOMATIK.md`, Abschnitt 10. Am besten an einem Tag, an dem der
-   Betreiber gleich danach Zeit für Punkt 4 hat.
-3. **Der Betreiber weist der Aufgabe** unter claude.ai/code/routines das
-   Repository `stempelkarte-frontend` und die Verbindung "Metricool Social
-   Media Management" zu.
-4. **Der erste Lauf, begleitet:** der Betreiber tippt bei der Aufgabe auf
+   bestanden: budget.mjs 54 Fälle, quellen.mjs 18 Prüfpunkte, beitrag.mjs 37
+   Fälle, selftest.mjs 97 von 97. Im selben Zug, ebenfalls nur auf Wunsch:
+   die geänderte Seite des Boards veröffentlichen (`board/LIESMICH.md`, "Die
+   Seite später ändern"), sonst sieht der Betreiber den Beitragstext nicht.
+2. **Der Betreiber prüft** unter claude.ai/code/routines, dass die Aufgabe in
+   der Umgebung läuft, die ElevenLabs erreichen darf, und erlaubt
+   Benachrichtigungen der Claude-App am Handy.
+3. **Der erste Lauf, begleitet:** der Betreiber tippt bei der Aufgabe auf
    "Jetzt ausführen" und sieht zu. Eine begleitete Sitzung hakt dabei die
    Tabelle "Was ungeprüft ist" ab (`AUTOMATIK.md`, Abschnitt 11) und behebt,
-   was scheitert. Erst danach läuft die Aufgabe allein.
+   was scheitert.
+4. **Dann einschalten:** erst wenn der begleitete Lauf sauber durch ist,
+   läuft die Aufgabe jeden Morgen allein. Bis dahin bleibt sie pausiert.
 5. **Was der Betreiber noch entscheiden muss:**
-   - Ob die Videos 45 bis 55 Sekunden lang sein sollen (rund 750 Zeichen
-     Stimme je Video) oder bei 30 bis 45 bleiben.
    - Ob es die Funktionen aus dem Tarifvergleich so gibt und sie ins Video
      dürfen: Erinnerung nach langer Pause, Nachricht zum Geburtstag,
      Push-Kampagnen, Tagesangebot, Willkommensgeschenk, Kunde wirbt Kunde,
      Zugänge für Aushilfen (`PRODUKT.md`, Klasse 2). Neun eigene Themen
-     warten darauf.
+     warten darauf. Zwei weitere (T05, T19, Beispielrechnung) warten auf
+     eine Probe von `calc-panel` in Stil C in einer begleiteten Sitzung.
    - Das GitHub-Repo ist öffentlich (nachgesehen am 16.11.2026, das
      Backend-Repo ebenso). Der Betreiber entscheidet, ob er es privat
      stellt. Bis dahin kommt nichts Vertrauliches hinein.
    - Den wahren Verbrauch der Stimme im November bei ElevenLabs ablesen; in
-     `konfig.json` stehen dafür geschätzte 4.136 Zeichen.
-   - Ob lauter gemischt werden soll. Beide Vorbilder liegen bei -14 LUFS,
-     wir bei -18,6. Erst anhören, dann in `state/konfig.json` unter `mix`
-     eintragen.
+     `konfig.json` stehen dafür geschätzte 4.874 Zeichen.
+   - Was ab Dezember gilt, wenn der Gratis-Tarif von Metricool (20 Beiträge
+     im Monat) nicht für ein Video am Tag reicht.
+   - Ob die vorgeschlagenen Hashtags für Bäckerei, Friseur, Döner und
+     Eiscafé passen (`konfig.json`, `beitrag`; bisher nur seine eigenen fünf
+     fürs zweite Video bestätigt). Seine Wahl #baristalife kommt in keiner
+     Branche vor: die Branche `cafe` wird als Bäckerei gebaut und bekommt
+     #bäckerei #cafe.
    - Später: ob die Automatik alte Dateien vom Board löschen darf (der
      Speicher reicht für etwa 80 Videos), und was mit einem Tag geschieht,
      dessen Video am Vorabend verworfen wurde (bisher: er bleibt leer).
 6. Später: eigene kurze Aufgaben nur für die Ideensuche; neue Bausteine für
    die Themen auf der Warteliste (`THEMEN.md`: Statistik, Newsletter,
    Design-Editor, Datenschutz); auf der Seite des Boards die Antwort der
-   Automatik auch unter "Änderung angefragt" zeigen; automatisch posten über
-   Metricool; Einbau der Übersicht ins Admin-Panel der App, falls gewünscht.
+   Automatik auch unter "Änderung angefragt" zeigen; Beiträge über Metricool
+   vorbereiten statt von Hand (heute ausdrücklich nicht: die Automatik
+   postet und plant nie); Einbau der Übersicht ins Admin-Panel der App, falls
+   gewünscht.
 
 ## Was nie passieren darf
 

@@ -12,7 +12,7 @@ kann).
 
 | Datei | Was sie ist | Wer schreibt | Was auf dem Board dazu gehört |
 |---|---|---|---|
-| `konfig.json` | Einstellungen: Adresse des Boards, Branch, Uhrzeiten, Marke und Kennzahlen bei Metricool, Regeln für Ideen, alle Grenzen der Stimme, Richtwerte für Videos, Speicher, eyes, Abzug, Push | nur eine begleitete Sitzung mit dem Betreiber. Der unbeaufsichtigte Lauf liest sie und ändert sie nie | `stand/aktuell.stimme_limit_monat` trägt denselben Wert wie `stimme.limit_monat` |
+| `konfig.json` | Einstellungen: Adresse des Boards, Branch, Uhrzeiten, Marke und Kennzahlen bei Metricool, wer postet, Regeln für den Beitragstext mit Hashtags, Regeln für Ideen, alle Grenzen der Stimme, Kopf jedes Skripts in Stil C, Richtwerte für Videos, Mischung, Speicher, eyes, Abzug, Push | nur eine begleitete Sitzung mit dem Betreiber. Der unbeaufsichtigte Lauf liest sie und ändert sie nie | `stand/aktuell.stimme_limit_monat` trägt denselben Wert wie `stimme.limit_monat` |
 | `LIESMICH.md` | diese Seite | begleitete Sitzung | |
 | `start/stimme.json` | leeres Kassenbuch der Stimme | begleitete Sitzung | Startfassung von `gedaechtnis/stimme` |
 | `start/themen.json` | leere Liste der verwendeten Nummern aus `THEMEN.md` | begleitete Sitzung | Startfassung von `gedaechtnis/themen` |
@@ -55,13 +55,17 @@ leer: der Zustand gehört aufs Board.
 |---|---|
 | `repo.branch` | der einzige Branch, auf dem die Automatik arbeitet und auf den sie pushen darf, wenn der Auftragstext es erlaubt |
 | `board.adresse` | Adresse des Boards. Für den Lauf gilt allein die Adresse aus dem Auftragstext der Aufgabe; dieser Wert und `studio/board/ADRESSE.txt` müssen dieselbe nennen, sonst meldet der Lauf das und endet |
-| `zeit.lauf_um`, `zeit.posten_um` | der Lauf startet um 06:47 Uhr, gepostet wird um 10:00 Uhr deutscher Zeit, von Hand |
-| `metricool.brand_id` | die Marke bei Metricool. Die Automatik liest dort nur |
+| `zeit.lauf_um`, `zeit.posten_um` | der Lauf startet um 06:47 Uhr, gepostet wird um 10:00 Uhr deutscher Zeit, vom Betreiber selbst |
+| `metricool.brand_id` | die Marke bei Metricool. Die Automatik liest dort nur. Beobachtet werden seit dem 16.11.2026 vier Mitbewerber (trytappi, gobonki, evecoo.digital, loyaltify.io); welche, legt der Betreiber in Metricool fest |
+| `posten.*` | wer postet (der Betreiber, mit Metricool, auf Instagram, Facebook und TikTok zugleich) und sein Tarif (gratis, 20 Beiträge im Monat). Die Automatik postet und plant nie |
+| `beitrag.*` | Regeln für den Beitragstext je Video (Feld `caption` auf dem Board): höchstens 250 Zeichen und höchstens 3 Emojis (`max_emojis`) vor den Hashtags, genau 5 Hashtags, die Liste der erlaubten Hashtags (zuerst die fünf des Betreibers), die zwei je Branche und die drei festen, dazu sein Beispiel. `tools/beitrag.mjs` liest genau diesen Abschnitt |
 | `ideen.*` | ab wann ein Reel zur Idee wird, wie viele Ideen je Lauf entstehen und gleichzeitig offen sein dürfen, wie lange ein Blickwinkel ruht, wie oft ein Dauerwunsch drankommt |
 | `stimme.*` | alle Grenzen für Aufnahmen. `tools/budget.mjs` liest genau diesen Abschnitt und rechnet danach. Dieselben Obergrenzen stehen im Auftragstext; wer hier eine Zahl ändert, ändert sie auch dort |
 | `stimme.unbeaufsichtigt_erlaubt` | der Not-Aus: `false` schaltet die Stimme für die Automatik ab |
 | `stimme.vortrag` | geschätzter Verbrauch im November 2026 vor dem ersten Lauf. Der Betreiber kann die wahre Zahl bei ElevenLabs ablesen und hier eintragen lassen |
-| `video.*` | Richtwerte für Länge, Bilder und Pausen. `aufnahme_bis_s` ist die Sperre vor der Aufnahme |
-| `mix` | `null`: Vorgaben des Studios. Hier steht erst etwas, wenn der Betreiber eine lautere Mischung gehört und gewählt hat |
+| `skript.*` | der Kopf jedes neuen Skripts in Stil C: `captionStyle`, `timing` (mit `maxGap`), `pace`. Die Vorlage `videos/_vorlage/script.json` trägt genau diese Werte, `tools/selftest.mjs` prüft das |
+| `video.*` | Richtwerte für Länge (40 bis 55 s mit Stimme, 105 bis 115 Wörter), Bildwechsel (mindestens 12, keines länger als 5 s), Pausen und Lautheit, alle aus dem zweiten Video. `aufnahme_bis_s` ist die Sperre vor der Aufnahme (geschätzte Länge des Entwurfs) |
+| `mix` | `{ "lufs": -14, "truePeak": -1 }`: so laut wird jedes neue Video gemischt, vom Betreiber mit dem zweiten Video gewählt. Jedes neue Skript trägt genau dieses Objekt. Bis zum 16.11.2026 stand hier `null` (Vorgaben des Studios, -18,6 LUFS wie das erste Video) |
+| `eyes.lautheit_lufs` | was die zweite Prüfung bei einem Video in Stil C ungefähr messen soll; nur vermerken, nie nachmischen |
 | `speicher.loeschen_erlaubt` | `false`: die Automatik löscht nie Dateien vom Board |
 | `abzug.sammlungen` | was am Ende eines Laufs ins Repo kopiert wird |

@@ -15,13 +15,21 @@ ist ein eigenes Teilprojekt (siehe "Wohin mit dem Ergebnis").
 
 Das erste Video ist veröffentlicht: `launch-video/Stampit-Werbevideo-v10.mp4`
 (50,3 s), vom Nutzer freigegeben, dieselbe Datei für Instagram und TikTok. Es
-liegt als Skript in `videos/2026-11-15-kaffee-aufs-haus/` und ist das Maß für
-Ton, Tempo und Geschmack. Die Vorgaben des Studios sind seine Werte.
+liegt als Skript in `videos/2026-11-15-kaffee-aufs-haus/`. Die Vorgaben des
+Studios sind seine Werte, und es bleibt das Maß für Stimme, Töne und Schluss.
+
+**Seit dem 16.11.2026 entsteht jedes neue Video im Stil C** des zweiten Videos
+(`videos/2026-11-16-ist-das-koscher/`): ein Wort auf einmal, alle zwei bis
+dreieinhalb Sekunden ein neues Bild, kaum Pausen, -14 LUFS. Stil C steht im
+Skript (die Vorlage trägt ihn), nicht in den Vorgaben; siehe Abschnitt
+"Stil C". Alles Weitere in diesem Dokument, das von ganzen Textzeilen,
+`accent` oder der festen Mischung handelt, beschreibt den alten Stil des
+ersten Videos.
 
 ## Das Wichtigste zuerst
 
 ```bash
-# Entwurf: geschätzte Zeiten, nur Effekte, kostet nichts (rund 2 Minuten)
+# Entwurf: geschätzte Zeiten, nur Effekte, kostet nichts (rund 2 bis 4 Minuten)
 node studio/make.mjs studio/videos/<ordner> --no-voice
 
 # einzelne Standbilder, in Sekunden fertig
@@ -113,12 +121,13 @@ immer zu `report.json`; ob beide noch zum Skript passen, zeigt `script.sha256`
    Der Ordnername ist frei, üblich ist Datum plus Kurzname. `_vorlage` selbst
    bleibt unverändert.
 3. **`script.json` schreiben.** Szenen wählen (Katalog unten), Texte setzen,
-   Parameter anpassen, Anker auf die richtigen Wörter legen. Ziel: 45 bis 65
-   Sekunden (siehe "Vorbild taggt_" unter den Erkenntnissen). Zwei Grenzen
-   gelten bis auf Weiteres: der Bau bricht über 60 Sekunden ab (Prüfung
-   `laenge`), und die Automatik gibt je Aufnahme höchstens 800 Zeichen aus.
-   Praktisch heißt das 45 bis 55 Sekunden, mit dieser Stimme etwa 105 bis
-   130 Wörter. In jeder
+   Parameter anpassen, Anker auf die richtigen Wörter legen, alles nach
+   "Stil C". Ziel: 40 bis 55 Sekunden mit Stimme, 105 bis 115 Wörter (das
+   zweite Video: 109 Wörter, 41,9 s). Zwei Grenzen gelten bis auf Weiteres:
+   der Bau bricht über 60 Sekunden ab (Prüfung `laenge`, im Entwurf an der
+   zu langen Schätzung), und die Automatik gibt je Aufnahme höchstens 800
+   Zeichen aus und nimmt über 56 Sekunden Schätzung nicht auf (ab 110
+   Wörtern deshalb höchstens 18 Textzeilen, `AUTOMATIK.md`, 6). In jeder
    Szene mit Laden den Ladennamen, die Stempelzahl und das Symbol setzen: fehlt
    eine Angabe, zeigt die Szene "Café Nordwind" (der Bau warnt dann).
 4. **Prüfen.** `node studio/make.mjs studio/videos/<ordner> --no-voice --check`
@@ -196,7 +205,9 @@ Daraus folgt:
   aus `out/report.json`: Titel (`title`), gesprochener Text (`text.spoken`),
   Länge (`duration`), Zeichenzahl der Aufnahme (`elevenLabs.chars`), Ordner
   (`video`), dazu `video.mp4` und `poster.png` als Dateien. Ein Entwurf ohne
-  Stimme wird als solcher gekennzeichnet (`mode` ist dann `no-voice`).
+  Stimme wird als solcher gekennzeichnet (`mode` ist dann `no-voice`). Den
+  Beitragstext (`caption`) schreibt die Sitzung selbst, nach
+  `AUTOMATIK.md`, Abschnitt 6.6, geprüft mit `tools/beitrag.mjs`.
 - Gibt es das Board in der Sitzung noch nicht, bleibt als Übergabe die
   Datei selbst: `out/video.mp4` dem Nutzer schicken und die zwei Sätze dazu.
 
@@ -222,6 +233,10 @@ studio/
   components/<name>.js        ein Baustein je Datei: HTML, CSS, Bewegung und Töne zusammen
   tools/
     voice.py                  Stimme: Cache, Freigabe, Satz-Austausch
+    tighten.py                kürzt Pausen einer Kopie der Aufnahme (timing.maxGap, gapBefore)
+    clip-in.py                setzt einen Satz von außerhalb des Studios in die Aufnahme (nur begleitet)
+    beitrag.mjs               prüft den Beitragstext je Video (5 Hashtags, Stichwort, Schreibweise)
+    budget.mjs, quellen.mjs   Kassenbuch der Stimme und Quellen-Paket für die Automatik (AUTOMATIK.md)
     sfx.py                    alle Töne aus Sinus und Rauschen
     sheet.py                  Übersichtsbild
     times.mjs                 zeigt gesprochenen Text und Wort-Zeiten eines Videos
@@ -232,16 +247,22 @@ studio/
     regress.mjs               Bild-für-Bild- und Ton-Vergleich mit den beiden Fassungen des ersten Videos
     test_voice.py, psnr.py, audiocmp.py, gen-qr.mjs, fixtures/
   videos/
-    _vorlage/script.json           Kopiervorlage mit Hinweisen
+    _vorlage/script.json           Kopiervorlage in Stil C mit Hinweisen (Beispiel Bäckerei)
     2026-11-14-kaffee-aufs-haus/   Fassung 7 des ersten Videos (laute Wischer, Tempo 1,0): Vergleichsvideo
-    2026-11-15-kaffee-aufs-haus/   Fassung 10, das veröffentlichte Video: Vergleichsvideo und Maß für neue
-    beispiel-friseur/              zweites Beispiel: anderer Laden, 8 Stempel, andere Reihenfolge (nur Entwurf)
+    2026-11-15-kaffee-aufs-haus/   Fassung 10, das veröffentlichte Video im alten Stil: Vergleichsvideo, Maß nur noch für Stimme, Töne und Schluss
+    beispiel-friseur/              Beispiel im alten Stil: anderer Laden, 8 Stempel, andere Reihenfolge (nur Entwurf)
+    2026-11-16-ist-das-koscher/    das zweite Video, Vorbild für Stil C (NOTIZEN.md: alle neuen Angaben, vier Fassungen)
     <datum>-<slug>/script.json, voice/ (Aufnahmen, im Repo), out/ (Ergebnis, nicht im Repo)
   docs/components/<name>.png  ein Standbild je Baustein
   board/                      die Prüfseite für den Nutzer (eigenes Teilprojekt, nicht Teil des Studios)
 ```
 
 ## script.json
+
+Das kleinste Beispiel, **im alten Stil** des ersten Videos (ganze Zeilen,
+`accent`, ohne `captionStyle`, `maxGap`, `pace` und `mix`). Es zeigt nur,
+welche Schlüssel es gibt. Ein neues Video beginnt immer mit der Kopie von
+`videos/_vorlage` und dem Kopf aus "Stil C".
 
 ```json
 {
@@ -264,9 +285,12 @@ studio/
 ```
 
 Erlaubt sind oben genau `meta`, `voice`, `timing`, `say`, `poster`, `sound`,
-`mix`, `scenes`; in einer Szene `component`, `params`, `anchors`, `captions`
-(oder nur `parts`); in einer Textzeile `lines`, `accent`, `keep`, `role`,
-`instant`. **Jeder andere Name bricht den Bau ab** (Code 2): früher wurde ein
+`mix`, `captionStyle`, `pace`, `scenes`; in einer Szene oder einem Teil
+`component`, `params`, `anchors`, `captions`, `enter`, `camera` (oder nur
+`parts`); in einer Textzeile `lines`, `accent`, `keep`, `role`, `instant`,
+`mode`, `scale`, `gapBefore`. Was `captionStyle`, `pace`, `enter`, `camera`,
+`mode`, `scale` und `gapBefore` tun, steht unter "Stil C". **Jeder andere
+Name bricht den Bau ab** (Code 2): früher wurde ein
 Tippfehler wie `parms` still übergangen, und die Szene zeigte die Vorgaben
 eines anderen Ladens. Namen, die mit `_` beginnen (`_hinweis`), sind Notizen
 und werden überall ignoriert.
@@ -283,15 +307,16 @@ und werden überall ignoriert.
   neuen Cache-Schlüssel, also eine neue kostenpflichtige Aufnahme.
 - **`timing`**: `lead` = die Stimme setzt so viele Sekunden nach dem ersten Bild
   ein, `hold` = so lange bleibt das Schlussbild nach dem letzten Wort stehen.
-  Vorgaben nur mit Grund ändern.
+  Vorgaben nur mit Grund ändern. `maxGap` kürzt stille Lücken (Stil C).
 - **`say`**: Aussprache für das ganze Video, Schreibweise auf dem Bild →
   gesprochene Form. `Stampit` → `StampIt` ist eingebaut.
 - **`poster`**: Sekunde für `poster.png` (optional).
 - **`sound`**: `{ "sceneWhoosh": 0.35 }` ist die Lautstärke des Wisch-Tons beim
   Szenenwechsel (0 = keiner). Weglassen, die Vorgabe ist gewollt (siehe Töne).
-- **`mix`**: Mischung, `{ "voice": 1.5, "sfx": 0.45, "limit": 0.89, "level": false }`.
-  Weglassen. Nur die beiden Referenzvideos setzen `limit` und `level`, weil sie
-  noch anders gemischt wurden (siehe Töne).
+- **`mix`**: Mischung, `{ "voice": 1.5, "sfx": 0.45, "limit": 0.89, "level": false, "lufs": null, "truePeak": -1 }`.
+  Neue Videos setzen genau `{ "lufs": -14, "truePeak": -1 }` (Stil C). Die
+  beiden Referenzvideos setzen `limit` und `level`, weil sie noch anders
+  gemischt wurden (siehe Töne); das erste Video bleibt ohne `lufs`.
 - **`scenes`**: der Reihe nach. Die **letzte Szene ist die Schluss-Szene**; die
   Stempelreihe oben hat so viele Punkte wie Szenen davor, bei jedem
   Szenenwechsel füllt sich einer.
@@ -304,7 +329,11 @@ Bild zur Seite und es gibt einen Stempel mehr; zwischen Teilen wird nur
 die Zeit hängt an den Wörtern.
 
 **Textzeile (`captions`).** Ein Satz oder Halbsatz, der oben im Bild Wort für
-Wort zur Stimme erscheint.
+Wort zur Stimme erscheint. Die folgende Liste beschreibt den Modus "zeile"
+des ersten Videos (die Vorgabe des Studios). In Stil C stehen die Wörter
+einzeln auf Tafeln (`captionStyle`, siehe "Stil C"); dort gilt `lines` mit
+`*` und `|`, und `accent` und `keep` nur an der Schlussfrage mit
+`"mode": "zeile"`.
 
 - `lines`: die Zeilen genau so, wie sie auf dem Bild umbrechen sollen.
   Höchstens 3 Zeilen, jede höchstens 940 px breit (das sind bei dieser Schrift
@@ -357,6 +386,289 @@ Skript setzen** (die Vorlage tut das). Zeigt eine Vorgabe auf ein Wort, das es
 nicht gibt, nimmt der Bau das nächstliegende und schreibt eine Warnung;
 derselbe Fehler bei einem Anker aus dem Skript bricht den Bau ab.
 
+## Stil C: der Standard für neue Videos (seit 16.11.2026)
+
+Der Betreiber hat am 16.11.2026 den Stil des zweiten Videos gewählt
+(`videos/2026-11-16-ist-das-koscher`, Fassung 4, 41,9 s, 109 Wörter). Er gilt
+für **jedes neue Video**, in begleiteten Sitzungen wie im unbeaufsichtigten
+Lauf (`AUTOMATIK.md`, Abschnitt 6). Vorbild für das Tempo ist taggt_
+(Erkenntnisse unten): ein neues Bild etwa alle 3,5 s, kaum Pausen, etwa
+-14 LUFS.
+
+| | erstes Video (alter Stil) | Stil C (zweites Video) |
+|---|---|---|
+| Text oben | ganze Zeilen, Wort für Wort aufgebaut, `accent` | eine Tafel mit einem Wort (oder zwei kurzen), Schlüsselwörter groß und lila |
+| Bildwechsel | rund 10 je Minute, weiche Übergänge | 19 in 41,9 s: Szenen, harte Schnitte, Kamerafahrten; kein Bild länger als 5 s |
+| Pausen der Stimme ab 0,5 s | 11, zusammen 8,9 s | 2, zusammen 1,2 s (gekürzt auf 0,45 s, zwei gewollte) |
+| Lautheit | -18,6 LUFS, Spitze -1 dBFS | -14,1 LUFS, wahre Spitze -1,2 dBTP |
+| Länge | 50,3 s | 41,9 s |
+
+**Das erste Video und die beiden Referenzvideos bleiben im alten Stil.**
+Alles hier ist nur wirksam, wenn es im Skript steht; ohne diese Angaben baut
+das Studio wie vorher (`tools/regress.mjs` hält das Bild für Bild fest).
+Die Vorgaben des Studios (`engine/script.mjs`) sind deshalb weiter die Werte
+des ersten Videos: ein neues Video bekommt Stil C über seine Kopie der
+Vorlage, nicht über die Vorgaben.
+
+Wie dieser Stil entstand, steht in den vier Fassungen in
+`videos/2026-11-16-ist-das-koscher/NOTIZEN.md`.
+
+### Der Kopf
+
+Jedes neue Skript trägt oben genau diese Blöcke. Sie stehen so in
+`videos/_vorlage/script.json` und in `state/konfig.json` (`skript`, `mix`),
+und `tools/selftest.mjs` prüft, dass beide gleich sind:
+
+```json
+"voice":        { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05 },
+"timing":       { "lead": 0.35, "hold": 3.2, "maxGap": 0.45 },
+"captionStyle": { "mode": "wort" },
+"pace":         { "maxStill": 5, "minChanges": 12 },
+"mix":          { "lufs": -14, "truePeak": -1 },
+```
+
+### Textzeilen im Modus "wort" (`captionStyle`)
+
+Oben steht immer nur eine Tafel, jede löst die vorige im Takt der Stimme ab.
+
+```json
+{ "lines": ["Dein *Handy | meldet sich,"] }
+```
+
+- `*Wort`: Schlüsselwort, groß und lila. Bis zu drei in Folge bleiben auf
+  einer Tafel (`*vor *deiner *Tür.`). Eine Tafel darf gemischt sein:
+  `Dein *Handy` zeigt "Dein" klein und "Handy" groß.
+- `|`: Grenze zwischen zwei Tafeln. Steht ein `|` in der Zeile, gelten nur
+  die Grenzen aus dem Skript. Ohne `|` teilen sich zwei normale Wörter eine
+  Tafel, wenn sie zusammen höchstens `pair` Zeichen haben, nie über ein
+  Satzzeichen hinweg.
+- `*` und `|` werden nicht gesprochen und ändern den Schlüssel der Aufnahme
+  nicht. Wer nur sie ändert, braucht keine neue Aufnahme.
+- `"instant": true`: alle Zeilen der Textzeile als eine Tafel
+  untereinander; an der ersten Textzeile ab Bild 0.
+  `{ "lines": ["Ist das", "*koscher?"], "instant": true, "scale": 1.2 }`
+- `"scale": 1.2`: die Tafeln dieser Textzeile größer. Bei drei Zeilen mit
+  `instant` stößt schon 1,1 an das Bild darunter (Prüfung `textabstand`).
+- `"mode": "zeile"` an einer einzelnen Textzeile holt die alte Darstellung
+  zurück, nötig für die Schlussfrage:
+  `{ "lines": ["Klingt interessant?"], "accent": 1, "keep": true, "mode": "zeile" }`.
+  `accent` und `keep` gibt es im Modus "wort" nicht (der Bau bricht ab).
+- Weitere Angaben in `captionStyle`, nur mit Grund: `size` (70 px, normale
+  Wörter), `keySize` (136 px, Schlüsselwörter), `pair` (10), `minShow`
+  (0,16 s: eine kürzere Tafel wird mit der nächsten zusammengelegt, im
+  Bericht als `merged`).
+- Jede Tafel wird verkleinert, bis sie in 940 px passt. Würde ein
+  Schlüsselwort dabei kleiner als 72 px (normale Wörter 44 px), bricht der Bau
+  ab (Prüfung `wortgroesse`): Tafel mit `|` teilen. "Lieblingscafé" und
+  "Sperrbildschirm" passen.
+- `lesezeit` gilt im Modus "wort" nicht. Dafür warnt `tafelzeit` bei einer
+  Tafel unter 0,14 s. Einzelne Tafeln unter etwa 0,23 s blitzen nur auf:
+  kurze Wörter mit dem Nachbarn auf eine Tafel.
+
+### Bildwechsel: Schnitt, Kamera, Tempo
+
+- `"enter": "cut"` an einem Teil (nicht am ersten einer Szene): harter
+  Schnitt statt Überblendung. Der Teil beginnt 0,1 s vor seinem ersten Wort
+  statt 0,3 s.
+
+  ```json
+  { "component": "stamp-check", "enter": "cut", "params": { "icon": "check" }, "captions": [ ... ] }
+  ```
+
+- `"camera": [ ... ]` an einem Teil oder einer Szene:
+
+  ```json
+  "camera": [ { "cap": 1, "word": 0, "zoom": 1.32, "focus": [540, 1030] } ]
+  ```
+
+  Zeitpunkt wie bei einem Anker (`cap`, `word`, `offset` oder `at`). `zoom`
+  ist der Faktor, `focus` der Punkt im unvergrößerten Bild, um den es geht;
+  er bleibt stehen oder wandert nach `to`. `dur` ist die Dauer (Vorgabe
+  0,18 s, 0 = Sprung), `whoosh` ein leiser Wisch-Ton dazu (Vorgabe 0 = keiner).
+  `{ "at": "start", "dur": 0, "zoom": 1.3, ... }` zeigt den Teil von Anfang
+  an vergrößert. Ein Teil mit Kamera blendet zum Textbereich hin aus (ab
+  y = 580 voll sichtbar): ein vergrößertes Handy rutscht nie unter die Wörter.
+  Die Prüfungen messen die Ruhelage ohne Kamera; ob im vergrößerten Bild
+  etwas am Rand abgeschnitten ist, sieht nur das Auge (Standbild ansehen).
+  `knopfspalte` verfolgt die Kamera mit.
+- `"pace": { "maxStill": 5, "minChanges": 12 }`: Richtwerte, die Prüfung
+  `bildwechsel` warnt darunter, bricht aber nicht ab. Ein Bildwechsel ist
+  jede neue Szene, jeder weitere Teil und jede Kamerabewegung;
+  `report.json` nennt sie unter `pictures` mit Zeit (`pictureCount` ist ihre
+  Zahl). Das stehende Schlussbild nach dem letzten Wort zählt nicht.
+- Bewährte Kamerawerte (aus dem zweiten Video und der Vorlage):
+  Benachrichtigung `zoom` 1,3, `focus` [540, 1030]; QR-Code der Wallet-Karte
+  `zoom` 1,5, `focus` [540, 1343], `to` [540, 1150]; Karte von oben mit
+  Kreis höchstens `zoom` 1,2, `focus` [560, 1166], `to` [540, 1211]: bei
+  1,34 lief der Kreis rechts aus dem Bild.
+
+### Pausen der Stimme (`timing`)
+
+```json
+"timing": { "lead": 0.35, "hold": 3.2, "maxGap": 0.45 }
+```
+
+`tools/tighten.py` kürzt bei jedem Bau jede stille Stelle der Aufnahme
+(jeder Abtastwert unter -40 dB), die länger ist als `maxGap`, auf diese
+Länge. Die Aufnahme im Ordner `voice/` bleibt unverändert, gekürzt wird
+eine Kopie in `out/work`. Ein Atemholen bleibt stehen.
+
+`"gapBefore": 0.55` an einer Textzeile stellt die Pause vor ihrem ersten Wort
+genau ein, kürzer oder länger (verlängert mit eingefügter Stille). Nur
+zusammen mit `maxGap`, nie an der ersten Textzeile. Üblich: 0,55 nach der
+Pointe, 0,65 vor "Dann kommentiere jetzt".
+
+```json
+{ "role": "cta", "lines": ["Dann kommentiere jetzt KARTE,{Karte,}", "und wir melden uns bei dir."], "gapBefore": 0.65 }
+```
+
+### Laute Mischung (`mix`)
+
+```json
+"mix": { "lufs": -14, "truePeak": -1 }
+```
+
+`engine/mix.mjs`, `loudMix`: dieselbe Vormischung wie immer (Stimme 1,5,
+Effekte 0,45), dann ein Kompressor (2,5:1), Anhebung und ein Begrenzer bei
+vierfacher Abtastrate. Gemessen wird am kodierten Ton mit `ffmpeg ebur128`
+und nachgestellt, bis Ziel und Spitze stimmen. Das Ergebnis steht in
+`report.json` unter `audio.loudness` (`lufs`, `truePeakDb`, `ok`). Ohne Stimme
+(Entwurf) läuft die feste, leisere Mischung; der Wert gilt erst mit Stimme.
+Das zweite Video: -14,1 LUFS, wahre Spitze -1,2 dBTP.
+
+### Neue und erweiterte Bausteine
+
+Die vollständigen Tabellen stehen im Katalog unter "Bausteine"; hier, wofür
+sie da sind, und die Fallen.
+
+**`shop-map`: Karte von oben.** Das Bild für jeden Satz über "in der Nähe"
+(`PRODUKT.md`, C1). Der Betreiber hat am zweiten Video korrigiert: es muss
+klar sein, dass man nicht vor dem Laden stehen muss. Von der Seite liest jeder
+eine Figur vor einer Ladenfront als "vor dem Laden", auch mit Kreis; von oben
+reicht ein Block Abstand.
+
+```json
+{ "component": "shop-map", "enter": "cut",
+  "params": { "shop": "Café Nordwind", "icon": "cup", "circle": true, "notify": true, "note": "6 von 6, dein Kaffee wartet", "path": [[-0.1, 1], [0.55, 1]] },
+  "anchors": { "circle": { "at": "start", "offset": 0.05 }, "walk": { "at": "start" }, "buzz": { "cap": 1, "word": 0, "offset": -0.1 }, "arrive": { "at": "end", "offset": -0.5 } },
+  "camera": [ { "cap": 1, "word": 0, "zoom": 1.2, "focus": [560, 1166], "to": [540, 1211], "dur": 0.3 } ],
+  "captions": [ { "lines": ["und du | kommst | in die *Nähe,"] }, { "lines": ["zeigt | dein *Handy | sie | *von *selbst | an."] } ] }
+```
+
+- `path`: Punkte `[Spalte, Reihe]` im Straßennetz (Spalten 0 bis 3 von
+  links, Reihen 0 bis 3 von oben). Der Laden liegt zwischen Spalte 1 und 2,
+  seine Tür zeigt zur Reihe 2. Der Weg oben (Reihe 1, eine Straße hinter dem
+  Laden) ist erprobt. Der Baustein lehnt ab: einen Weg an der Ladentür vorbei,
+  quer durch einen Block, einen Weg, der nie in den Kreis kommt oder schon
+  drin beginnt, eine Benachrichtigung über Nadel, Schild oder im Textbereich.
+- Den Weg kurz hinter dem Rand des Kreises enden lassen; wer nach dem Brummen
+  weitergeht, steht am Ende doch wieder nah am Laden.
+- `"view": "owner"` mit `"phones": 4` und `"spread": true`: der Blick des
+  Betreibers, vier Kunden rund um den Laden, alle im Kreis, keiner vor der
+  Tür. Anker `phone1` bis `phone4` je auf ein Wort, mit `"offset"`. Nur in
+  einer begleiteten Sitzung: das Bild zeigt aus Sicht des Ladens, wo seine
+  Kunden sind, und `PRODUKT.md` schließt genau das aus (N2). Die Automatik
+  zeigt die Sicht des Ladens mit `lock-notification`.
+- `"track": true`: Auge an der Nadel mit Blicklinie, reißt auf den Anker `no`
+  ab. Nur für einen Satz, den der Betreiber freigegeben hat: "der Laden
+  verfolgt dich nicht" steht nicht in `PRODUKT.md` (N2).
+- Anker, die im Skript auf ein Wort gelegt werden, behalten den Versatz der
+  Vorgabe (`arrive` -0,2 s): `"offset"` immer dazuschreiben.
+- Ladennamen über etwa 22 Zeichen stoßen im Blick des Betreibers an die
+  Karten der unteren Kunden (`ueberdeckung`).
+
+**`shop-street`: Straße mit Laden.** Für "unterwegs, am Laden vorbei", nur
+noch mit `"across": true`: die Figur geht auf der anderen Straßenseite, der
+Laden steht klein im Hintergrund.
+
+```json
+{ "component": "shop-street", "enter": "cut",
+  "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "right", "across": true, "shopAt": 0.7, "circle": false, "notify": true, "note": "6 von 6", "from": -0.08, "via": 0.13, "to": 0.15 },
+  "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 5, "offset": -0.1 }, "arrive": { "cap": 0, "word": 6, "offset": 0.25 } },
+  "captions": [ { "lines": ["genau | wenn du | an deinem | *Lieblingscafé | vorbeigehst."] } ] }
+```
+
+- `across` geht nur mit Passant; `circle`, `track`, `card` und
+  `"view": "owner"` werden zusammen damit abgelehnt (`"circle": false`
+  dazuschreiben). `shopAt` (0,3 bis 0,7) legt fest, wo der Laden hinten
+  steht.
+- Die kleine Benachrichtigung wandert mit der Figur: nach dem Brummen nur ein
+  kurzes Stück gehen lassen (`to` höchstens etwa 0,09 hinter `via`), sonst
+  warnt der Bau ("verdeckt ihn").
+- `"privacy": true` zeigt zwei durchgestrichene Zeichen (Senden, Sehen),
+  zusammen mit `across` links und rechts neben dem Laden; `shopAt` dann
+  zwischen 0,38 und 0,62. Wie `track`: nur, wenn der Betreiber den Satz
+  freigibt (N2).
+- Ohne `across` geht die Figur direkt an der Ladentür vorbei, und
+  `"view": "owner"` zeigt Kunden vor der Tür. Beides zeigt genau, was der
+  Betreiber nicht will; das Standbild im Katalog zeigt diese Form, sie bleibt
+  für die Vorgaben stehen. In neuen Videos nur `"view": "owner"` mit
+  `"phones": 0` (der Betreiber in der Tür).
+- Die Anker `phone1` bis `phone3` haben in der Vorgabe einen Versatz:
+  `"offset": 0` dazuschreiben.
+
+**`stamp-check`: die Pointe.** Leeres Stempelfeld, auf den Anker `hit` der
+Schlag und ein Abdruck mit Haken. Bewusst kein Wort im Abdruck (sähe aus wie
+ein echtes Prüfzeichen). Als Teil mit Schnitt (so im zweiten Video) oder als
+eigene Szene (so in der Vorlage), die Pause danach mit
+`gapBefore` an der nächsten Textzeile. Der Satz der Pointe braucht seinen
+Beleg in `PRODUKT.md` wie jeder andere.
+
+```json
+{ "component": "stamp-check", "enter": "cut", "params": { "icon": "check" },
+  "anchors": { "hit": { "cap": 0, "word": 0, "offset": 0.3 } },
+  "captions": [ { "lines": ["*Natürlich | ist das | *koscher!"], "scale": 1.15 } ] }
+```
+
+**Erweitert, Vorgaben unverändert:**
+
+- `lock-notification`: `"rise": false` (das Handy steht ab dem ersten Bild,
+  für den Einstieg), `"buzzes": 2` (1 bis 3), `"waves": true` (Bögen neben
+  dem Handy). In Stil C `"pin": false`: die Nähe zeigt `shop-map`.
+  `{ "clock": "08:14", "date": "Donnerstag, 10. September", "title": "Café Nordwind", "body": "6 von 6, dein Kaffee wartet", "icon": "cup", "pin": false, "rise": false, "buzzes": 2, "waves": true }`
+- `wallet-pass`: `"rise": false` und `"drop": false` (die Karte liegt schon
+  in der Wallet, ohne Ton und ohne Anker `card`), für einen zweiten, kurzen
+  Teil nach einem Schnitt, in dem nur ein Stempel landet:
+  `{ "before": 5, "after": 6, "scan": false, "rise": false, "drop": false }`
+
+### Sätze von außerhalb des Studios (`tools/clip-in.py`)
+
+Nur in einer begleiteten Sitzung, **nie im unbeaufsichtigten Lauf**. Das
+Werkzeug setzt einen Satz, den der Betreiber außerhalb des Studios hat
+aufnehmen lassen (anderes Modell, andere Betonung), in die vorhandene
+Aufnahme, ohne etwas zu senden; der Text bleibt Wort für Wort derselbe.
+
+```bash
+python3 studio/tools/clip-in.py studio/videos/<ordner> "Ist das koscher?" <frage.mp3>
+STUDIO_VOICE_OFFLINE=1 node studio/make.mjs studio/videos/<ordner>
+```
+
+Weitere Schalter: `--check`, `--list`, `--original`, `--prune`, `--words`,
+`--alignment`. Danach muss der ganze Ordner `voice/` ins Repo, mit
+`.clip.mp3` und `<schlüssel>.use.json`; fehlt die `.use.json`, baut ein
+frischer Checkout still mit der alten Betonung. Die Einzelheiten stehen in
+`videos/2026-11-16-ist-das-koscher/NOTIZEN.md`, Fassung 3.
+
+### Was das zweite Video gelehrt hat
+
+- **Der Entwurf überschätzt die Zeit.** Er rechnet 0,36 s je Wort und 0,5 s
+  je Textzeile und kennt `maxGap` nicht: geschätzt 54,5 s, fertig 41,9 s. Ein
+  Teil, der im Entwurf 1,9 s stand, dauerte echt 0,87 s. Nach der Aufnahme
+  jeden kurzen Teil noch einmal ansehen. Für die Länge heißt das: 105 bis 115
+  Wörter, ab 110 Wörtern höchstens 18 Textzeilen (mehr schätzt der Entwurf
+  über 56 s, über 60 s bricht er ab). Die Schätzung: 3,2 s + 0,36 s je Wort
+  + 0,5 s je Textzeile nach der ersten + 0,35 s je Szene vor dem Schluss.
+- **Die Pointe braucht Luft.** Die Stimme sprach nach "koscher!" nach 0,18 s
+  weiter; die Pause danach ist mit `gapBefore` auf 0,55 s verlängert.
+- **Aufnahme zuerst mit `--check`.** `--allow-voice-spend --check` nimmt auf
+  und prüft mit echten Zeiten, rendert aber nicht.
+- **"In der Nähe" lässt sich von der Seite nicht zeigen,** nur von oben.
+- **Nach der Benachrichtigung bleibt die Figur stehen.** Das ist natürlicher,
+  und die kleine Karte über ihrem Kopf wandert nicht über das, worum es geht.
+- **Ein Bau mit Kamera war nicht immer bitgleich** (71 von 1221 Bildern,
+  mindestens 50,8 dB PSNR, mit dem Auge nicht zu sehen; Ursache offen). Die
+  Referenzvideos benutzen keine Kamera und bleiben bildgleich.
+
 ## Textregeln
 
 1. **Nur Aussagen, die die Landing Page macht.** Quelle ist `src/i18n.js`, im
@@ -370,8 +682,9 @@ derselbe Fehler bei einem Anker aus dem Skript bricht den Bau ab.
    in Apple Wallet und Google Wallet (`lp_hero_body`); der Kunde scannt einmal
    einen QR-Code, kein Download, keine App (`lp_how_2_b`, `lp_value_body`);
    das Personal stempelt mit der Handy-Kamera, der Stempel ist sofort auf dem
-   Kundenhandy (`lp_how_3_b`); ist die Karte voll, meldet sie sich auf dem
-   Sperrbildschirm in Ladennähe (`lp_wallet_body`, `lp_how_4_b`);
+   Kundenhandy (`lp_how_3_b`); in Ladennähe erscheint die Karte von selbst
+   auf dem Sperrbildschirm, immer und mit dem Stand, nicht erst voll (C1 in
+   `PRODUKT.md`; die Landing Page sagt nur "voll", `lp_wallet_body`);
    Design-Editor mit Farben, Logo, Symbol und Stempelzahl (`lp_how_1_b`,
    `lp_feat_2_b`); Statistik (`lp_feat_3_b`); Newsletter nur an Kunden mit
    Einwilligung (`lp_feat_4_b`). Was nur unter `lp_price_*` steht (andere
@@ -401,18 +714,25 @@ derselbe Fehler bei einem Anker aus dem Skript bricht den Bau ab.
    nicht hinein, auch wenn es auf der Landing Page steht (z. B. Preise oder
    "14 Tage gratis" im Schlussbild).
 7. **Schlusszeile, immer in dieser Form:** oben eine kurze Frage
-   ("Klingt interessant?", höchstens 2 Zeilen), dann
+   ("Klingt interessant?", höchstens 2 Zeilen, in Stil C mit
+   `"mode": "zeile"`), dann
    `Dann kommentiere jetzt STICHWORT, und wir melden uns bei dir.`
    Das Stichwort ist ein Wort in Großbuchstaben, passend zum Video (KARTE,
    SALON), gesprochen normal: `KARTE,{Karte,}`.
 8. **Schreibweise:** echte Umlaute, keine Gedankenstriche (weder der lange —
    noch der halblange –; die Prüfung `schreibweise` bricht sonst ab), normale
    Bindestriche. Du-Form, kurze Sätze. Ein Satz je Textzeile, lieber zwei kurze
-   als ein langer: jeder Text muss mindestens 0,3 Sekunden je Wort stehen.
+   als ein langer: im Modus "zeile" muss jeder Text mindestens 0,3 Sekunden je
+   Wort stehen.
 9. **Sagen, was wirklich passiert.** Die Uhrzeit auf dem Sperrbildschirm, der
    Ladenname, die Stempelzahl im Text und im Bild müssen zusammenpassen
    ("Der achte Haarschnitt" heißt `stamps: 8`). Das Datum auf dem
    Sperrbildschirm muss es geben (Wochentag passt zum Tag) und steht ohne Jahr.
+10. **Der Beitragstext** zu jedem Video (Instagram, Facebook, TikTok; der
+   Betreiber postet selbst mit Metricool) folgt denselben Regeln: nur
+   Aussagen aus `PRODUKT.md`, Klasse 1, keine Gedankenstriche, das Stichwort
+   des Videos, genau 5 Hashtags aus `state/konfig.json` (`beitrag`). Form und
+   Prüfung: `AUTOMATIK.md`, Abschnitt 6.6, und `tools/beitrag.mjs`.
 
 ## Erkenntnisse aus der Analyse des ersten Videos
 
@@ -435,8 +755,9 @@ Skripte, keine harte Regel; keine Prüfung bricht deswegen ab.
   nicht.
 - **Die Länge allein entscheidet nicht.** Unser Video dauert 50 s, dieses
   Vorbild 38 s, das stärkste Reel 47 s, die elf Videos von taggt_ 51 bis
-  81 s. Ziel sind jetzt 45 bis 65 s (siehe "Vorbild taggt_" und Schritt 3 im
-  Tagesablauf), dicht gesprochen und ohne stille Lücken.
+  81 s. Ziel sind jetzt 40 bis 55 s mit Stimme, in Stil C praktisch 40 bis
+  45 s (siehe "Stil C" und Schritt 3 im Tagesablauf), dicht gesprochen und
+  ohne stille Lücken.
 - **"Café" und "Kaffee" klingen bei dieser Stimme gleich.** Nicht beide nah
   beieinander verwenden (im ersten Video kommen beide vor).
 - **Zahlensätze mit mehreren Kommas werden als einzelne Sätze gehört**, so wie
@@ -455,7 +776,8 @@ Anfang und Ende) und das Tempo ohne diese Pausen (`wordsPerMinuteTalking`).
 Für das veröffentlichte Video misst das Studio so 11 Pausen, zusammen 8,86 s,
 und 170,5 Wörter je Minute beim Sprechen (138,5 über alles). Das
 Analysewerkzeug misst etwas anders (8,3 s und 178); die Größenordnung stimmt.
-Ein neues Video sollte deutlich unter 8 s Pausen bleiben. Im Entwurf ohne
+Ein neues Video in Stil C bleibt bei höchstens 2 s Pausen, keine über 0,7 s
+(`maxGap` und `gapBefore`, siehe "Stil C"). Im Entwurf ohne
 Stimme gibt es diese Zahlen nicht: dort sind alle Zeiten geschätzt.
 
 ### Machart des stärksten Vorbilds (gemessen am 15.11.2026)
@@ -466,10 +788,10 @@ unseres ersten Videos.
 
 | Merkmal | stärkstes Vorbild | unser erstes Video | was daraus für neue Videos folgt |
 |---|---|---|---|
-| Bildwechsel | ein Schnitt etwa alle 1,5 s, das sind 28 je Minute | rund 10 je Minute | **mehr Bildwechsel**: mehr Szenen und Teile (`parts`), keine lange Einzelszene, jeder Anker auf einem Wort. Richtwert der Automatik: mindestens 7 Bilder (Szenen und Teile), keines länger als 8 s, und mindestens 15 sichtbare Ereignisse je Minute (Bildwechsel und Anker zusammen) |
-| Sprache | deckt 100 % der Laufzeit, rund 168 Wörter je Minute | 8 bis 9 s stille Pausen, beim Sprechen rund 170 Wörter je Minute | **keine stillen Lücken**. Das Tempo stimmt schon; es sind die Pausen. Halbsätze mit Komma verbinden, weniger Punkte, weniger einzelne Textzeilen. Richtwert: zusammen höchstens 5 s Pausen, keine über 1 s |
-| Textzeilen | oben, etwa zwei Wörter auf einmal | oben, Wort für Wort, bis zu drei Zeilen | so lassen |
-| Lautheit der Mischung | etwa -14 LUFS | -18,6 LUFS | **lauter mischen** ist das Ziel, aber im Studio noch nicht abgehört: der Begrenzer müsste dafür deutlich stärker arbeiten. Bis der Nutzer eine lautere Mischung gehört und gewählt hat, bleibt `mix` bei den Vorgaben (`state/konfig.json`, `mix`) |
+| Bildwechsel | ein Schnitt etwa alle 1,5 s, das sind 28 je Minute | rund 10 je Minute | **umgesetzt in Stil C**: Szenen, Teile mit Schnitt und Kamerafahrten, mindestens 12 Bildwechsel, kein Bild länger als 5 s (`pace`). Das zweite Video: 19 in 41,9 s |
+| Sprache | deckt 100 % der Laufzeit, rund 168 Wörter je Minute | 8 bis 9 s stille Pausen, beim Sprechen rund 170 Wörter je Minute | **umgesetzt in Stil C**: `maxGap` 0,45 kürzt jede Lücke; das zweite Video hat noch 1,2 s Pausen ab 0,5 s. Richtwert: zusammen höchstens 2 s, keine über 0,7 s |
+| Textzeilen | oben, etwa zwei Wörter auf einmal | oben, Wort für Wort, bis zu drei Zeilen | **umgesetzt in Stil C**: eine Tafel mit einem Wort (oder zwei kurzen), Schlüsselwörter groß und lila |
+| Lautheit der Mischung | etwa -14 LUFS | -18,6 LUFS | **umgesetzt in Stil C**: `"mix": { "lufs": -14, "truePeak": -1 }`, vom Betreiber mit dem zweiten Video gewählt (-14,1 LUFS) |
 | Einstieg | eine Frage, in der ersten Sekunde gesprochen und zu sehen | leerer Textbereich im ersten Bild, das erste Wort nach rund 0,4 s | **Hook ab dem ersten Bild sichtbar und gesprochen**: erste Textzeile mit `"instant": true`, als Frage oder als Moment |
 | Schluss | "Schick das einem Freund, der einen Laden hat, kommentiere CARD" | "Klingt interessant? Dann kommentiere jetzt KARTE, und wir melden uns bei dir." | der Schluss des Nutzers bleibt, wie er ist |
 
@@ -479,9 +801,9 @@ widerspricht, was der Nutzer gewählt hat (nächster Abschnitt und
 `START.md`), gilt der Nutzer: Stimme, Tempo, Töne und Schlusszeile bleiben.
 
 Zwei Vorbehalte zu den Messwerten selbst: Das Analysewerkzeug übersieht
-unsere weichen Übergänge und zählt bei uns deshalb zu wenige Schnitte; die
-Zahl der Bildwechsel eines eigenen Videos kommt aus `report.json` (`scenes`
-mit ihren `parts`), nicht aus dem Werkzeug. Und die Lautheit eines fremden
+unsere weichen Übergänge und Kamerafahrten und zählt bei uns deshalb zu
+wenige Schnitte; die Zahl der Bildwechsel eines eigenen Videos kommt aus
+`report.json` (`pictures`, `pictureCount`), nicht aus dem Werkzeug. Und die Lautheit eines fremden
 Reels ist an einer Bildschirmaufnahme gemessen, nicht an der Originaldatei.
 
 ### Vorbild taggt_ (11 Videos, gemessen am 15.11.2026)
@@ -494,11 +816,11 @@ Umgang mit Text und Ton.
 
 | Merkmal | taggt_ | was daraus für neue Videos folgt |
 |---|---|---|
-| Länge | 51 bis 81 s, im Schnitt 63 s | Ziel 45 bis 65 s. Praktisch 45 bis 55 s, solange der Bau über 60 s abbricht und eine Aufnahme höchstens 800 Zeichen hat |
-| Bildwechsel | etwa alle 3,5 s ein neues Bild, 15 bis 26 je Minute | etwa alle 3,5 s soll im Bild etwas Neues geschehen: ein Wechsel oder ein Anker |
-| Sprache | füllt 81 bis 100 % der Laufzeit, 150 bis 190 Wörter je Minute | unser Tempo passt (rund 170); es sind die Pausen, die weg müssen |
-| Text | oben, meist **ein** Wort auf einmal in Grau, einzelne Schlüsselwörter groß und lila | Text bleibt oben und Wort für Wort; `accent` auf das eine Wort legen, auf das es ankommt |
-| Lautheit | jedes Video bei -14,1 LUFS | bestätigt den Wert des anderen Vorbilds. Lauter mischen bleibt eine Entscheidung des Nutzers (`state/konfig.json`, `mix`) |
+| Länge | 51 bis 81 s, im Schnitt 63 s | 40 bis 55 s mit Stimme, praktisch 40 bis 45 s (105 bis 115 Wörter), solange der Bau über 60 s abbricht und der Entwurf in Stil C rund ein Drittel zu lang schätzt |
+| Bildwechsel | etwa alle 3,5 s ein neues Bild, 15 bis 26 je Minute | Stil C: mindestens 12 Bildwechsel, keines länger als 5 s |
+| Sprache | füllt 81 bis 100 % der Laufzeit, 150 bis 190 Wörter je Minute | unser Tempo passt (rund 170); die Pausen kürzt `maxGap` |
+| Text | oben, meist **ein** Wort auf einmal in Grau, einzelne Schlüsselwörter groß und lila | Stil C: Modus "wort", Schlüsselwörter mit `*` |
+| Lautheit | jedes Video bei -14,1 LUFS | Stil C: `mix` mit `lufs` -14, vom Nutzer gewählt |
 | Farben | hell und warm: Weiß, Beige, Braun | unser Aussehen ist dunkel. Das zu ändern ist eine Entscheidung des Nutzers, kein Lauf tut es von sich aus |
 | Erzählform | eine kleine Geschichte über **einen** Laden, keine Liste von Funktionen | jedes Video erzählt von einem Laden aus `THEMEN.md` und stellt eine Aussage in den Mittelpunkt |
 
@@ -522,7 +844,7 @@ diesem Muster nennt den eigenen Laden und sagt nur, was `PRODUKT.md` deckt;
 Umsatzzahlen wie im letzten Beispiel sind bei uns ein Erfolgsversprechen und
 bleiben draußen.
 
-### Geschmack des Nutzers (Stand 15.11.2026)
+### Geschmack des Nutzers (Stand 16.11.2026)
 
 Das hat der Nutzer bisher gewählt oder gesagt. Nichts davon ohne Rückfrage
 umstoßen.
@@ -542,6 +864,13 @@ umstoßen.
 - **Beispielrechnung:** mit wenigen Stammkunden, die öfter kommen (im Video:
   50 Stammkunden, einmal mehr pro Woche), und **ohne Kleingedrucktes
   darunter**.
+- **Stil C** für jedes neue Video (16.11.2026), mit der lauten Mischung
+  (-14 LUFS).
+- **"In der Nähe" heißt nicht "vor der Tür".** Kein Bild darf so aussehen,
+  als müsse der Kunde vor dem Laden stehen (Korrektur am zweiten Video).
+- **Beitragstext kurz:** Hook, ein bis zwei Sätze, "Kommentiere STICHWORT",
+  5 Hashtags. Seine Wahl für das zweite Video steht in `state/konfig.json`,
+  `beitrag.beispiel`.
 
 ## Bausteine
 
@@ -567,6 +896,11 @@ Gemeinsam für alle:
   Becherregal). Für alles außer Café und Bäckerei setzen.
 - Für Statistik, Newsletter und Design-Editor gibt es keinen Baustein
   (Textregel 2).
+- Für "in der Nähe" (C1) gibt es seit dem zweiten Video die Karte von oben
+  (`shop-map`). `shop-street` und `shop-map` teilen Figur, Benachrichtigung,
+  Nadel, Auge und Kreis (`engine/parts.js`), damit die Kundin in beiden Bildern
+  dieselbe bleibt. Wann welcher Baustein, steht unter "Stil C" und in
+  `AUTOMATIK.md`, Abschnitt 6.4.
 
 <!-- KATALOG:ANFANG -->
 ### `paper-card` - Papier-Stempelkarte auf der Theke
@@ -673,6 +1007,8 @@ Textzeilen: mindestens 1. Datei: `components/wallet-pass.js`
 | `icon` | `"cup"` | Stempel-Symbol: cup, bread, scissors, star, heart, check |
 | `walletTitle` | `"Wallet"` | Überschrift auf dem Handy |
 | `scan` | `true` | Scan-Rahmen und Haken über dem QR-Code zeigen (false: nur Karte und Stempel) |
+| `rise` | `true` | Das Handy fährt von unten herein. false: es steht schon da (für einen kurzen Teil nach einem Schnitt) |
+| `drop` | `true` | Die Karte fällt auf den Anker "card" in die Wallet. false: sie liegt schon drin, ohne Ton und ohne Anker |
 
 | Anker | Vorgabe | Wann |
 |---|---|---|
@@ -700,6 +1036,10 @@ Textzeilen: mindestens 1. Datei: `components/lock-notification.js`
 | `when` | `"jetzt"` | Zeitangabe rechts oben in der Benachrichtigung |
 | `icon` | `"cup"` | Symbol im Absender-Feld: cup, bread, scissors, star, heart, check |
 | `pin` | `true` | Ortsnadel mit Wellen zeigen ("in Ladennähe") |
+| `rise` | `true` | Das Handy fährt von unten herein. false: es steht vom ersten Bild an da (für den Einstieg, wenn das allererste Bild schon alles zeigen soll) |
+| `buzzes` | `1` | Wie oft das Handy brummt, 1 bis 3 (je 0,75 s Abstand, jedes Mal Ton buzz) |
+| `waves` | `false` | Schwingungsbögen links und rechts neben dem Handy, solange es brummt |
+| `tones` | `true` | Eigene Töne (ding, buzz). false: ohne, wenn das Skript Klänge aus der Bibliothek setzt (z. B. "handy-vibriert") |
 
 | Anker | Vorgabe | Wann |
 |---|---|---|
@@ -720,6 +1060,7 @@ Textzeilen: mindestens 2. Datei: `components/calc-panel.js`
 | `result` | `{"big":"= 6.500 €","label":"mehr im Jahr"}` | Ergebnis: big (große Zahl, höchstens 9 Zeichen) und label (Zeile darunter) |
 | `coin` | `"€"` | Zeichen auf der Münze, die vor der Tafel erscheint. Leer lassen ("") für keine Münze |
 | `check` | `true` | Nachrechnen: Produkt aller big-Zahlen der Zeilen muss die Zahl in result.big ergeben. Nur auf false setzen, wenn die Tafel keine Multiplikation zeigt |
+| `gone` | `false` | Das Ergebnis wird auf den Anker "gone" durchgestrichen und fliegt mit ein paar Münzen davon (für "Weg."). Ohne: Tafel wie bisher |
 
 | Anker | Vorgabe | Wann |
 |---|---|---|
@@ -748,6 +1089,193 @@ Textzeilen: mindestens 1, davon eine mit `"role": "cta"`. Datei: `components/cta
 | Anker | Vorgabe | Wann |
 |---|---|---|
 | `logo` | `{"cap":-1,"word":-1}` | Bezugswort für das Logo: es steigt 0,5 s danach auf (Ton: chime), die Stempelreihe pulsiert. Vorgabe: letztes Wort |
+
+### `card-bin` - Papierkarte landet im Altpapier
+
+<img src="docs/components/card-bin.png" width="270" alt="Papierkarte landet im Altpapier">
+
+Die Papierkarte mit ihren Stempeln, die Stempel springen einzeln auf, dann wird sie zerknüllt und landet in der Papiertonne. Für "Seine Papierkarte ... liegt im Altpapier".
+
+Textzeilen: mindestens 1. Datei: `components/card-bin.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Nordwind"` | Name des Ladens oben rechts auf der Karte (höchstens etwa 24 Zeichen) |
+| `header` | `"Stempelkarte"` | Aufdruck oben links (wird in Großbuchstaben gesetzt) |
+| `stamps` | `8` | Felder auf der Karte, 4 bis 10. Das letzte ist das Gratis-Feld |
+| `filled` | `6` | Wie viele Stempel auf der Karte sind. Sie springen auf den Anker "stamps" nacheinander auf |
+| `freeLabel` | `"GRATIS"` | Aufschrift im Gratis-Feld |
+| `icon` | `"cup"` | Stempel-Symbol: cup, bread, scissors, star, heart, check, kebab |
+| `bin` | `"Altpapier"` | Aufschrift auf der Tonne (höchstens etwa 12 Zeichen) |
+| `tones` | `true` | Eigene Töne (tick je Stempel, crumple, drop). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `stamps` | `{"cap":0,"word":3}` | Die Stempel springen nacheinander auf, je 0,07 s (Ton: tick). Auf die gesprochene Zahl |
+| `crumple` | `{"cap":0,"word":-3}` | Die Karte knüllt sich zu einer Kugel (Ton: crumple) |
+| `land` | `{"cap":0,"word":-1}` | Die Kugel fällt in die Tonne, die Tonne wackelt (Ton: drop). Auf "Altpapier" |
+
+### `shop-counter` - Betreiber an der Theke, ahnungslos
+
+<img src="docs/components/shop-counter.png" width="270" alt="Betreiber an der Theke, ahnungslos">
+
+Der Betreiber hinter seiner Theke merkt nichts: Denkblase mit drei Punkten, die Uhr läuft, ein Steppenläufer rollt durchs leere Bild. Für "Du hast es nicht mal gemerkt".
+
+Textzeilen: mindestens 1. Datei: `components/shop-counter.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Nordwind"` | Name auf dem Schild an der Rückwand (höchstens etwa 20 Zeichen, längere werden kleiner gesetzt) |
+| `icon` | `"cup"` | Symbol auf dem Schild: cup, bread, scissors, star, heart, check, kebab |
+| `spit` | `true` | Dönerspieß links hinter der Theke (für Imbiss und Dönerladen; false für alle anderen Läden) |
+| `tumbleweed` | `true` | Ein Steppenläufer rollt vor der Theke durchs Bild (Anker "roll") |
+| `tones` | `true` | Eigene Töne (pop für die Denkblase). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `bubble` | `{"cap":-1,"word":2}` | Die Denkblase mit drei Punkten springt auf (Ton: pop). Auf "nicht" o. ä. |
+| `roll` | `{"cap":-1,"word":0}` | Der Steppenläufer rollt los und quert das Bild in 2,4 s |
+
+### `shop-duel` - Zwei Läden gegenüber: Herz bricht, Stammkunde geht rüber
+
+<img src="docs/components/shop-duel.png" width="270" alt="Zwei Läden gegenüber: Herz bricht, Stammkunde geht rüber">
+
+Der eigene Laden und der Laden gegenüber, Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Straße und verschwindet gegenüber durch die Tür. Für "Dein Stammkunde ... gegenüber".
+
+Textzeilen: mindestens 1. Datei: `components/shop-duel.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Nordwind"` | Name des eigenen Ladens auf dem linken Schild (höchstens etwa 18 Zeichen, längere werden kleiner gesetzt) |
+| `icon` | `"cup"` | Symbol des eigenen Ladens: cup, bread, scissors, star, heart, check, kebab |
+| `rival` | `"Café Südwind"` | Name des Ladens gegenüber, auf dem rechten Schild (höchstens etwa 18 Zeichen) |
+| `rivalIcon` | `"cup"` | Symbol des Ladens gegenüber |
+| `heart` | `true` | Herz über dem eigenen Laden, zerbricht auf den Anker "crack" |
+| `walker` | `true` | Der Stammkunde geht über die Straße zum Laden gegenüber und verschwindet auf den Anker "enter" durch dessen Tür |
+| `from` | `0` | Wo der Stammkunde auf den Anker "walk" steht, als Anteil des Weges: 0 = vor dem eigenen Laden, 1 = an der Tür gegenüber |
+| `smoke` | `true` | Rauch steigt über dem Laden gegenüber auf (Grill) |
+| `tones` | `true` | Eigene Töne des Bausteins (thud beim Zerbrechen, ding an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `crack` | `{"cap":0,"word":-1}` | Das Herz über dem eigenen Laden zerbricht (Ton: thud). Auf "betrogen" o. ä. |
+| `walk` | `{"at":"start","offset":0}` | Der Stammkunde geht los (von "from" aus) |
+| `enter` | `{"cap":-1,"word":-1}` | Er ist an der Tür gegenüber und verschwindet hinein, die Ladenglocke schwingt (Ton: ding) |
+
+### `shop-map` - Karte von oben: Laden, Kreis "in der Nähe", Kundin eine Straße weiter
+
+<img src="docs/components/shop-map.png" width="270" alt="Karte von oben: Laden, Kreis &quot;in der Nähe&quot;, Kundin eine Straße weiter">
+
+Zeigt, dass niemand vor dem Laden stehen muss: die Kundin geht eine Straße weiter, tritt in den Kreis "in der Nähe", und ihr Handy zeigt die Karte, sichtbar entfernt von der Ortsnadel. Mit "track" die Frage, ob der Laden einen verfolgt, mit "view": "owner" mehrere Kunden rund um den eigenen Laden. Nie eine Entfernung in Zahlen dazuschreiben.
+
+Textzeilen: mindestens 1. Datei: `components/shop-map.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Nordwind"` | Name am Schild unter der Ortsnadel und in der kleinen Karten-Benachrichtigung (höchstens etwa 22 Zeichen, längere werden kleiner gesetzt) |
+| `icon` | `"cup"` | Symbol in der Ortsnadel und in der Benachrichtigung: cup, bread, scissors, star, heart, check |
+| `view` | `"walker"` | "walker": eine Kundin geht ihren Weg ("path"). "owner": Blick des Betreibers, mehrere Kunden stehen rund um den Laden und ihre Handys leuchten auf ("phones") |
+| `path` | `[[-0.75,1],[0.55,1]]` | Weg der Kundin als Liste von Punkten [Spalte, Reihe] im Straßennetz: Spalten 0 bis 3 von links, Reihen 0 bis 3 von oben, Zwischenwerte zwischen zwei Kreuzungen, Werte unter 0 oder über 3 außerhalb des Bildes. Der Laden liegt zwischen Spalte 1 und 2 an Reihe 2, seine Tür zeigt zur Reihe 2. Jeder Abschnitt folgt einer Straße; ein Weg an der Tür vorbei wird abgelehnt. Den Weg kurz hinter dem Rand des Kreises enden lassen: wer nach dem Brummen weitergeht, steht am Ende doch wieder nah am Laden |
+| `via` | `-1` | Wo die Kundin auf den Anker "buzz" ist, als Anteil des Weges (0 bis 1). -1 = von selbst: dort, wo ihr Weg in den Kreis tritt (auch wenn der Kreis nicht gezeigt wird) |
+| `walker` | `true` | Kundin zeigen (false: nur Karte, Ortsnadel und Kreis) |
+| `circle` | `true` | Weichen Kreis um die Ortsnadel zeigen ("in der Nähe"). Steht nie mit einer Zahl im Bild |
+| `notify` | `true` | Das Handy der Kundin brummt und zeigt die kleine Karten-Benachrichtigung (Anker "buzz") |
+| `note` | `""` | Zweite Zeile in der kleinen Benachrichtigung, z. B. "6 von 6, dein Kaffee wartet" (höchstens etwa 30 Zeichen). Leer = nur der Ladenname |
+| `track` | `false` | Auge an der Ortsnadel mit Blicklinie zur Kundin und Fragezeichen; reißt auf den Anker "no" ab. Für die Frage, ob der Laden einen verfolgt |
+| `phones` | `4` | Nur bei "view": "owner": wie viele Kunden rund um den Laden stehen, 0 bis 4 (Anker phone1, phone2, ...). Alle stehen im Kreis, keiner vor der Tür |
+| `spread` | `false` | Nur bei "view": "owner": die beiden unteren Kunden stehen weiter außen, noch im Kreis. So verteilen sich alle vier rund um den Laden, statt dass zwei unten eng am Namensschild stehen |
+| `whoosh` | `0.16` | Lautstärke des Wisch-Tons, wenn der Kreis aufgeht (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise |
+| `rival` | `""` | Name eines zweiten Ladens auf der Karte (z. B. der gegenüber), orange Nadel mit Schild darüber. Dort passiert nichts: seine Karte hat die Kundin nicht. Leer = kein zweiter Laden (höchstens etwa 20 Zeichen) |
+| `rivalIcon` | `"cup"` | Symbol in der Nadel des zweiten Ladens |
+| `rivalAt` | `[2.5,0.8]` | Wo die Spitze der Nadel des zweiten Ladens sitzt, [Spalte, Reihe] mitten in einem Block (keine ganze Zahl). Vorgabe: der Block rechts oben, eine Straße hinter dem eigenen Laden |
+| `quiet` | `true` | Nur mit "rival": auf den Anker "quiet" erscheint an seiner Nadel eine durchgestrichene Glocke (keine Benachrichtigung dort) |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `walk` | `{"at":"start","offset":0}` | Die Kundin geht los |
+| `buzz` | `{"cap":0,"word":-1}` | Das Handy brummt, die kleine Karte springt auf (Töne: buzz, pop). Die Kundin ist dann am Punkt "via": von selbst genau dort, wo sie in den Kreis tritt |
+| `arrive` | `{"at":"end","offset":-0.2}` | Die Kundin kommt am Ende ihres Weges an und bleibt stehen |
+| `circle` | `{"at":"start","offset":0.1}` | Der Kreis "in der Nähe" geht auf (Ton: leiser whoosh) |
+
+### `shop-street` - Straße mit Laden, Passant und Kreis "in der Nähe"
+
+<img src="docs/components/shop-street.png" width="270" alt="Straße mit Laden, Passant und Kreis &quot;in der Nähe&quot;">
+
+Zeigt, wie die Erinnerung wirklich entsteht: jemand geht am Laden vorbei, tritt in den Kreis "in der Nähe", und das eigene Handy meldet sich. Mit "view": "owner" derselbe Ort aus Sicht des Betreibers. Nie eine Entfernung in Zahlen dazuschreiben.
+
+Textzeilen: mindestens 1. Datei: `components/shop-street.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Nordwind"` | Name auf dem Ladenschild und in der kleinen Karten-Benachrichtigung (höchstens etwa 22 Zeichen, längere werden kleiner gesetzt) |
+| `icon` | `"cup"` | Symbol im Schaufenster und in der Benachrichtigung: cup, bread, scissors, star, heart, check |
+| `view` | `"walker"` | "walker": ein Passant geht vorbei. "owner": Blick des Betreibers, er steht in der Tür und vor dem Laden leuchten Handys auf |
+| `direction` | `"right"` | Laufrichtung des Passanten: "right" (von links nach rechts) oder "left" |
+| `walker` | `true` | Passanten zeigen (false: nur die Straße, z. B. zusammen mit "card") |
+| `from` | `-0.1` | Start des Passanten als Anteil der Bildbreite in Laufrichtung: 0 = Bildrand, an dem er hereinkommt, 1 = gegenüberliegender Rand, die Tür liegt bei etwa 0,65 (von rechts kommend 0,35) |
+| `to` | `0.56` | Ziel des Passanten (Anteil der Bildbreite wie bei "from"). Dort bleibt er auf den Anker "arrive" stehen |
+| `via` | `-1` | Wo der Passant auf den Anker "buzz" ist (Anteil der Bildbreite). -1 = von selbst: mit Kreis genau am Rand des Kreises, ohne Kreis auf halbem Weg |
+| `circle` | `true` | Weichen Kreis um den Laden zeigen ("in der Nähe"). Steht nie mit einer Zahl im Bild |
+| `notify` | `true` | Das Handy des Passanten brummt und zeigt die kleine Karten-Benachrichtigung (Anker "buzz") |
+| `note` | `""` | Zweite Zeile in der kleinen Benachrichtigung, z. B. "6 von 6" (höchstens etwa 22 Zeichen). Leer = nur der Ladenname |
+| `track` | `false` | Auge über dem Laden mit Blicklinie zum Passanten und Fragezeichen; reißt auf den Anker "no" ab. Für die Frage, ob der Laden einen verfolgt |
+| `card` | `false` | Wallet-Karte im Vordergrund; auf den Anker "pin" erscheint eine Ortsnadel auf der Karte und eine auf dem Laden. Nur ohne Passanten ("walker": false) |
+| `privacy` | `false` | Zwei durchgestrichene Zeichen über dem Laden: Senden (Anker "nosend") und Sehen (Anker "nosee"). Zusammen mit "across" stehen sie links und rechts neben dem Laden im Hintergrund |
+| `phones` | `3` | Nur bei "view": "owner": wie viele Kunden mit Handy vor dem Laden stehen, 0 bis 3 (Anker phone1, phone2, ...) |
+| `across` | `false` | Der Passant geht auf der ANDEREN Straßenseite vorbei: der Laden steht klein im Hintergrund, dazwischen liegt die Fahrbahn. Zeigt, dass niemand vor der Tür stehen muss. Nur mit Passant; "circle", "track" und "card" gibt es in diesem Bild nicht ("circle": false dazuschreiben), "privacy" schon |
+| `shopAt` | `0.68` | Nur bei "across": wo die Mitte des Ladens im Hintergrund liegt, als Anteil der Bildbreite von links (0,3 bis 0,7). Den Passanten auf den Anker "buzz" auf die andere Bildhälfte legen ("via"), sonst deckt die Benachrichtigung den Laden zu |
+| `whoosh` | `0.16` | Lautstärke des Wisch-Tons, wenn der Kreis aufgeht (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `walk` | `{"at":"start","offset":0}` | Der Passant geht los |
+| `buzz` | `{"cap":0,"word":-1}` | Das Handy brummt, die kleine Karte springt auf (Töne: buzz, pop). Mit Kreis ist das genau der Moment, in dem der Passant in den Kreis tritt |
+| `arrive` | `{"at":"end","offset":-0.2}` | Der Passant kommt am Ziel ("to") an und bleibt stehen |
+| `circle` | `{"at":"start","offset":0.1}` | Der Kreis "in der Nähe" geht auf (Ton: leiser whoosh) |
+
+### `stamp-check` - Pointe: Stempel mit Haken
+
+<img src="docs/components/stamp-check.png" width="270" alt="Pointe: Stempel mit Haken">
+
+Der eine Satz, auf den das Video hinausläuft: ein großer Stempel trifft, ein Abdruck mit Haken bleibt stehen. Am besten als Teil mit "enter": "cut".
+
+Textzeilen: mindestens 1. Datei: `components/stamp-check.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `icon` | `"check"` | Zeichen im Abdruck: check, cup, bread, scissors, star, heart |
+| `tilt` | `-9` | Schräglage des Abdrucks in Grad (-20 bis 20). Ein gerader Abdruck sieht gedruckt aus |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `hit` | `{"cap":0,"word":-1}` | Der Stempel trifft (Töne: thud, ok), der Abdruck bleibt stehen. Auf das Wort der Pointe |
+
+### `week-strip` - Wochenleiste: Besuche des Stammkunden, eine Woche gegenüber
+
+<img src="docs/components/week-strip.png" width="270" alt="Wochenleiste: Besuche des Stammkunden, eine Woche gegenüber">
+
+Zeigt, wie oft der Stammkunde kommt (Stempel an seinen Tagen, Woche für Woche) und die eine Woche, in der er stattdessen gegenüber war. Für "Zweimal die Woche war er bei dir".
+
+Textzeilen: mindestens 1. Datei: `components/week-strip.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Nordwind"` | Name des eigenen Ladens im Kopf der Leiste (höchstens etwa 24 Zeichen) |
+| `icon` | `"cup"` | Symbol in den eigenen Stempeln: cup, bread, scissors, star, heart, check, kebab |
+| `rivalIcon` | `"cup"` | Symbol im fremden Stempel (Laden gegenüber) |
+| `weeks` | `4` | Wochen untereinander, 3 bis 5 |
+| `days` | `[1,4]` | Tage seiner Besuche je Woche (0 = Montag ... 6 = Sonntag), 1 bis 3 Tage |
+| `filled` | `3` | So viele Wochen (von oben) tragen seine Stempel. Jede braucht einen Anker (week1, week2, ...) |
+| `rivalWeek` | `4` | In dieser Woche (1 = oberste) war er gegenüber: dort landet der fremde Stempel, seine Tage bleiben leer. 0 = keine solche Woche |
+| `rivalDay` | `2` | Tag des Besuchs gegenüber (0 = Montag) |
+| `tones` | `true` | Eigene Töne (pop je Stempel). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `week1` | `{"cap":0,"word":0}` | Woche 1: seine Stempel landen (Ton: pop) |
+| `week2` | `{"cap":0,"word":1}` | Woche 2: seine Stempel landen (Ton: pop) |
+| `week3` | `{"cap":0,"word":2}` | Woche 3: seine Stempel landen (Ton: pop) |
+| `rival` | `{"cap":-1,"word":-2}` | Der fremde Stempel landet in der Woche gegenüber (Ton: pop, tiefer). Auf "gegenüber" |
 
 <!-- KATALOG:ENDE -->
 
@@ -795,8 +1323,10 @@ die Mischung. `sfx.py` normiert die Effektspur auf Spitze 0,7: ein einzelner
 sehr lauter Ton macht alle anderen leiser.
 
 Das veröffentlichte Video reicht mit seiner Spitze bis knapp 0 dBFS (gemessen
--0,2 dB, Fassung 7 genau 0,0 dB). **Neue Videos
-bleiben bei rund -1 dBFS** (Begrenzer 0,89, `"level": false`); gemessen an der
+-0,2 dB, Fassung 7 genau 0,0 dB). **Ohne `lufs` im Skript** (alter Stil,
+die Vorgabe des Studios) bleibt die Spitze bei rund -1 dBFS (Begrenzer 0,89,
+`"level": false`); neue Videos in Stil C mischen dagegen auf -14 LUFS
+("Laute Mischung" unten). Gemessen an der
 Mischung des veröffentlichten Videos: Spitze -1,0 dB statt -0,2 dB, mittlere
 Lautstärke -20,6 dB statt -20,2 dB. Die gemessene Spitze jedes Videos steht in
 `report.json` unter `audio.peakDb`. Eine Falle dabei: der Begrenzer von ffmpeg
@@ -806,6 +1336,12 @@ Mischung: Spitze -0,2 dB, genau wie mit 0,95);
 erst `level=disabled` lässt die Spitze unten. Die beiden Referenzvideos sind
 noch mit Begrenzer 0,95 und dieser Anhebung gemischt und setzen deshalb
 `"mix": { "limit": 0.95, "level": true }`.
+
+**Laute Mischung** (Stil C, `"mix": { "lufs": -14, "truePeak": -1 }`): nach
+derselben Vormischung arbeiten Kompressor, Anhebung und ein Begrenzer bei
+vierfacher Abtastrate, bis die gemessene Lautheit -14 LUFS trifft und die
+wahre Spitze unter -1 dBTP bleibt. Das Ergebnis steht in `report.json` unter
+`audio.loudness`. Gilt nur mit Stimme. Einzelheiten unter "Stil C".
 
 ## Stimme
 
@@ -853,6 +1389,11 @@ noch mit Begrenzer 0,95 und dieser Anhebung gemischt und setzen deshalb
     aufzunehmen
 - `STUDIO_VOICE_OFFLINE=1` sperrt die Schnittstelle ganz. Für Proben und Tests
   setzen.
+- **Pausen kürzen (`timing.maxGap`, Stil C):** `tools/tighten.py` kürzt bei
+  jedem Bau eine Kopie der Aufnahme; die Dateien in `voice/` bleiben, wie
+  geliefert. `report.json` nennt unter `voice.pauses` die Pausen danach.
+- **Sätze von außerhalb (`tools/clip-in.py`):** nur in begleiteten Sitzungen,
+  siehe "Stil C".
 - Eine vorhandene Aufnahme (mit ihren Zeichen-Zeiten) kommt ohne Kosten in den
   Cache: `node studio/tools/seed-voice.mjs <ordner> <aufnahme.mp3> <alignment.json>`.
   Die Einstellungen im Skript müssen die der Aufnahme sein.
@@ -880,7 +1421,8 @@ trotzdem, sendet aber nie eine Aufnahme für einen Entwurf mit Fehlern):
 | `ueberdeckung` | zwei Dinge stoßen aneinander: Absender und "jetzt" in der Benachrichtigung, Datum und Ortsnadel | Text kürzen (Datum ohne Jahr) |
 | `textabstand` | zwischen Textzeile oben und Bild darunter bleiben weniger als 40 px (dreizeilige Frage im Schlussbild) | eine Zeile weniger |
 | `schreibweise` | ein Gedankenstrich (— oder –) in einer Textzeile oder einem Parameter | Komma, Punkt oder normaler Bindestrich |
-| `lesezeit` | ein Text steht kürzer als 0,3 s je Wort | Satz kürzen oder teilen |
+| `lesezeit` | ein Text im Modus "zeile" steht kürzer als 0,3 s je Wort (im Modus "wort" gilt sie nicht) | Satz kürzen oder teilen |
+| `wortgroesse` | Modus "wort": eine Tafel müsste so klein gesetzt werden, dass ein Schlüsselwort unter 72 px oder ein normales Wort unter 44 px fiele, oder sie ist breiter als 940 px | Tafel mit `\|` teilen oder das Wort kürzen |
 | `laenge` | Video kürzer als 20 s oder länger als 60 s | Szenen ergänzen oder streichen |
 
 Schon beim Lesen des Skripts (Ende-Code 2): unbekannte Schlüssel, fehlende
@@ -892,6 +1434,8 @@ Warnungen (Ende-Code bleibt 0):
 |---|---|
 | `knopfspalte` | etwas Wichtiges reicht in die rechte Knopfspalte von TikTok (x über 950 px zwischen y 900 und 1540). Die Meldung nennt Element, Zeitraum und wie weit es reicht |
 | `sprechtempo` | über 190 Wörter pro Minute |
+| `tafelzeit` | Modus "wort": eine Tafel steht kürzer als 0,14 s | das kurze Wort mit dem Nachbarn auf eine Tafel (im Skript ohne `\|` dazwischen) |
+| `bildwechsel` | nur mit `pace`: ein Bild steht länger als `maxStill`, oder es gibt weniger als `minChanges` Bildwechsel | einen Teil, einen Schnitt oder eine Kamerabewegung ergänzen |
 | `hinweise` | Hinweise der Bausteine: ein Anker, dessen Vorgabe nicht zum Text passt; Ladenname, Stempelzahl oder Symbol nicht in allen Szenen gleich; ein Ladenname, der sehr klein gesetzt werden musste |
 
 **Frei bleiben müssen auf beiden Plattformen:** die oberen 220 px, die unteren
@@ -1076,8 +1620,9 @@ aufnehmen ist nie nötig.
 - **Python:** `sfx.py`, `voice.py`, `sheet.py`, `psnr.py` und `audiocmp.py`
   brauchen `numpy` und `pillow` (`pip install numpy pillow`), außerdem `ffmpeg`
   im Pfad.
-- **Der Bau dauert:** ein ganzes Video braucht rund 2 Minuten (etwa 90 ms je
-  Bild). Zum Probieren `--stills` und `--check` nehmen.
+- **Der Bau dauert:** ein ganzes Video braucht rund 2 bis 4 Minuten (90 bis
+  160 ms je Bild; ein Entwurf in Stil C mit 1503 Bildern brauchte am
+  16.11.2026 3 min 53 s). Zum Probieren `--stills` und `--check` nehmen.
 - **"Aufnahme und Skript laufen auseinander":** der Text wurde nach der
   Aufnahme geändert, oder eine gesprochene Form enthält ein Zeichen, das die
   Stimme anders zurückgibt. Nicht neu aufnehmen, bevor klar ist, welches Wort
@@ -1098,12 +1643,14 @@ aufnehmen ist nie nötig.
 - Sprache der Videos ist Deutsch. Arabisch (rechts nach links) ist nicht
   vorgesehen: Textzeilen und Bausteine sind auf links nach rechts gebaut.
 - Die Anker-Vorgaben passen zum ersten Video. Bei neuem Text immer setzen.
-- Die Prüfungen messen die Ruhelage (außer `knopfspalte`). Bewegungen prüft
-  das Auge.
+- Die Prüfungen messen die Ruhelage (außer `knopfspalte`), auch bei einer
+  Kamerafahrt. Bewegungen und vergrößerte Bilder prüft das Auge.
 - Die Längen-Angaben der Parameter sind Richtwerte, keine Zusage.
-- Acht Bausteine, alle aus dem ersten Video. Ein neuer Blickwinkel braucht
+- Elf Bausteine: acht aus dem ersten Video, drei aus dem zweiten
+  (`shop-street`, `shop-map`, `stamp-check`). Ein neuer Blickwinkel braucht
   meist einen neuen Baustein; das ist gewollt und oben beschrieben. Es fehlen
   Bilder für Statistik, Newsletter und Design-Editor.
+- `calc-panel` (Beispielrechnung) ist in Stil C noch nicht gebaut worden.
 - Die Becherreihe steht mit ihrem Preisschild in der Knopfspalte von TikTok.
   Das ist bekannt und im veröffentlichten Video so; für ein neues Video wäre
   es ein Grund, den Baustein nach links zu rücken (dann als neuer Parameter,

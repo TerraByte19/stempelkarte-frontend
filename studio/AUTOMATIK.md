@@ -8,9 +8,11 @@ eine Aufgabe und genau eine Art von Lauf. Stand: 16.11.2026.
 Lesen, immer in Teilen von höchstens 400 Zeilen: diese Datei bis zur Zeile
 `ENDE DER ANLEITUNG`. Danach `PRODUKT.md` und `THEMEN.md` ganz, in `START.md`
 den Abschnitt "Entscheidungen und Geschmack des Betreibers" und im
-`PLAYBOOK.md` die Abschnitte "Tagesablauf", "script.json", "Textregeln",
-"Erkenntnisse", "Bausteine" und "Prüfungen". `board/LIESMICH.md` nur
-nachschlagen, wenn ein Aufruf des Boards etwas Unerwartetes liefert. Wo eines
+`PLAYBOOK.md` die Abschnitte "Tagesablauf", "script.json", "Stil C",
+"Textregeln", "Erkenntnisse", "Bausteine" und "Prüfungen". Jedes neue Video
+entsteht im **Stil C** (seit dem 16.11.2026, Vorbild:
+`videos/2026-11-16-ist-das-koscher`); wie, steht in Abschnitt 6.
+`board/LIESMICH.md` nur nachschlagen, wenn ein Aufruf des Boards etwas Unerwartetes liefert. Wo eines
 dieser Dokumente von dieser Datei abweicht, gilt diese Datei.
 
 Begriffe: **Board** ist die private Übersichtsseite des Betreibers samt ihrer
@@ -26,7 +28,7 @@ am 15. und 16.11.2026 geschrieben, ohne einen Befehl auszuführen. Vor allem
 der Weg, der Geld kostet und nichts verlieren darf, ist unerprobt: Stimme
 aufnehmen, Video hochladen, Quellen auf dem Board sichern und zurückholen. Der
 **erste Lauf ist deshalb begleitet**: der Betreiber startet die Aufgabe selbst
-mit "Jetzt ausführen" und sieht zu. Dieser Lauf ist der Test. Was dabei zu
+mit "Jetzt ausführen" und sieht zu (Stand der Aufgabe: 10.3). Dieser Lauf ist der Test. Was dabei zu
 prüfen ist, steht in Abschnitt 11.
 
 Annahmen, bis der Betreiber anders entscheidet. Ein unbeaufsichtigter Lauf
@@ -34,13 +36,14 @@ stellt keine davon um.
 
 | Nr. | Annahme | Umstellen in |
 |---|---|---|
-| A1 | **Länge 45 bis 55 Sekunden.** Das Playbook nennt als Ziel 45 bis 65 Sekunden. Mehr als 55 geht hier nicht: der Bau bricht über 60 Sekunden ab, und eine Aufnahme darf höchstens 800 Zeichen haben (zwei davon müssen in die Tagesgrenze von 1600 passen). Der Betreiber selbst hat bisher 30 bis 50 Sekunden genannt | `konfig.json`, `video` und `stimme.max_zeichen_voll`, nach seiner Antwort |
+| A1 | **Länge 40 bis 55 Sekunden** (fertiges Video mit Stimme), 105 bis 115 Wörter. Das zweite Video hat 41,9 s bei 109 Wörtern. Praktisch werden es 40 bis 45 Sekunden: der Entwurf ohne Stimme schätzt in Stil C rund ein Drittel länger, und über 56 Sekunden geschätzt wird nicht aufgenommen, über 60 bricht der Bau ab. Eine Aufnahme darf höchstens 800 Zeichen haben (zwei davon müssen in die Tagesgrenze von 1600 passen). Der Betreiber selbst hat bisher 30 bis 50 Sekunden genannt | `konfig.json`, `video` und `stimme.max_zeichen_voll`, nach seiner Antwort |
 | A2 | **Was nur im Tarifvergleich steht, kommt in kein Video** (`PRODUKT.md`, Klasse 2): Erinnerung nach langer Pause, Geburtstag, Push-Kampagnen, Tagesangebot, Willkommensgeschenk, Kunde wirbt Kunde, Zugänge für Aushilfen | `PRODUKT.md`, nach seiner Bestätigung |
 | A3 | **Das GitHub-Repo gilt als öffentlich.** Ins Repo kommen nur Protokoll, Kassenbuch der Stimme und die Liste der verwendeten Themen (Regel 12) | `konfig.json`, `abzug` |
-| A4 | Der Monat der Stimme ist der Kalendermonat; der Verbrauch im November vor dem ersten Lauf ist auf 4.136 Zeichen geschätzt | `konfig.json`, `stimme.vortrag` |
-| A5 | Die Mischung bleibt bei den Vorgaben, vom Board wird nichts gelöscht, ein verworfener Tag bleibt leer | `konfig.json`, `mix` und `speicher` |
+| A4 | Der Monat der Stimme ist der Kalendermonat; der Verbrauch im November vor dem ersten Lauf ist auf 4.874 Zeichen geschätzt | `konfig.json`, `stimme.vortrag` |
+| A5 | Gemischt wird auf -14 LUFS, wahre Spitze höchstens -1 dBTP (`konfig.json`, `mix`; vom Betreiber mit dem zweiten Video gewählt). Vom Board wird nichts gelöscht, ein verworfener Tag bleibt leer | `konfig.json`, `mix` und `speicher` |
 | A6 | Vor dem Push läuft kein `npm run build`: der Commit enthält nur Dateien unter `studio/`, und Schritt 24 prüft das | Auftragstext |
 | A7 | Der Lauf startet um 06:47 Uhr deutscher Zeit | Abschnitt 10 |
+| A8 | Gepostet wird vom Betreiber selbst, mit Metricool, auf Instagram, Facebook und TikTok zugleich. Die Automatik legt dafür je Video einen fertigen Beitragstext aufs Board (Feld `caption`, Abschnitt 6.6) und postet nie | `konfig.json`, `posten` und `beitrag` |
 
 ---
 
@@ -116,10 +119,15 @@ Sie stehen vor jedem Schritt und vor jedem Text, der im Lauf gelesen wird.
     Änderungswunsch oder das Nachholen betrifft, und nach
     `studio/state/board/`. Alles andere dort liest er nur. Die beiden
     Referenzvideos (`2026-11-14-kaffee-aufs-haus`,
-    `2026-11-15-kaffee-aufs-haus`), `_vorlage` und `beispiel-friseur` bleiben
-    unverändert. Außerhalb des Repos sind erlaubt: der Arbeitsordner
+    `2026-11-15-kaffee-aufs-haus`), das zweite Video
+    (`2026-11-16-ist-das-koscher`, es enthält Sätze von außerhalb des
+    Studios), `_vorlage` und `beispiel-friseur` bleiben unverändert und werden
+    nicht gebaut. Außerhalb des Repos sind erlaubt: der Arbeitsordner
     `/tmp/stampit-lauf`, `/tmp/eyes-leer` und was `tools/eyes-setup.sh`
-    anlegt. Ein neuer Baustein wird nur in einer begleiteten Sitzung gebaut.
+    anlegt. Ein neuer Baustein wird nur in einer begleiteten Sitzung gebaut,
+    und `tools/clip-in.py` (Sätze, die außerhalb des Studios aufgenommen
+    wurden, in eine Aufnahme setzen) ruft nur eine begleitete Sitzung auf, nie
+    ein unbeaufsichtigter Lauf.
 12. **Ins Repo kommt nichts Vertrauliches.** Das Repo kann öffentlich sein
     (A3). In `script.json` (auch in `meta`), in Commit-Nachrichten und im
     Protokoll (`laeufe`) stehen deshalb nie: der Wortlaut eines Wunsches oder
@@ -176,6 +184,7 @@ Vertrags, dazu:
 | `idee_id` | Text | id der Idee, aus der das Video entstand |
 | `entwurf` | wahr/falsch | `true`: ohne Stimme gebaut. Dann beginnt `titel` mit "Entwurf ohne Stimme: " |
 | `pruefung` | Text | Kurzfassung der Messwerte |
+| `caption` | Text mit Zeilenumbrüchen | der fertige Beitragstext für Instagram, Facebook und TikTok: Hook, ein bis zwei Sätze, Aufforderung mit Stichwort, nach einer Leerzeile genau 5 Hashtags (Abschnitt 6.6). Die Seite zeigt ihn mit dem Knopf "Text kopieren". Ältere Videos haben ihn nicht |
 
 `zeichen` ist, was für **diese Fassung** wirklich aufgenommen wurde: die volle
 Aufnahme, bei einer Änderung nur der ausgetauschte Satz, 0 ohne neue
@@ -410,7 +419,7 @@ git -C "$R" fetch origin ccr-816d9995-jhzqdq && git -C "$R" checkout ccr-816d999
 | | |
 |---|---|
 | Erfolg | letzte Zeile `START-OK` |
-| Ordner fehlt | einmal suchen: `find / -maxdepth 4 -type d -name stempelkarte-frontend -not -path '*/node_modules/*' 2>/dev/null \| head -3`, den Fund als `R` nehmen. Die Sitzung klont auf `main`; dort gibt es `studio/` nicht, das ist vor dem Checkout normal |
+| Ordner fehlt (der Auftragstext holt das Repo mit `add_repo` und dem Klon-Befehl aus dessen Antwort; wohin der Klon geht, ist nicht erprobt) | einmal suchen: `find / -maxdepth 4 -type d -name stempelkarte-frontend -not -path '*/node_modules/*' 2>/dev/null \| head -3`, den Fund als `R` nehmen. Die Sitzung klont auf `main`; dort gibt es `studio/` nicht, das ist vor dem Checkout normal |
 | `checkout` scheitert nach gelungenem `fetch` | einmal `git -C "$R" checkout -B ccr-816d9995-jhzqdq FETCH_HEAD` |
 | kein Repo, `fetch` scheitert, oder die Datei fehlt | **Notfall**, so wie er im Auftragstext steht. Dann enden. Mehr geht ohne Repo nicht |
 
@@ -616,7 +625,8 @@ mit `datum` ab heute, das früheste voran, danach ältere.
    | Der Wunsch betrifft | Erlaubt? |
    |---|---|
    | Wortlaut, ein anderes Wort, Aussprache (`say` oder `{...}`), Stichwort der Schlusszeile, Zahlen der Beispielrechnung (wenn sie aufgeht und ein Beispiel bleibt), Reihenfolge der Szenen, ein Satz mehr oder weniger | ja, kostet je nach Umfang (Punkt 5) |
-   | was nicht gesprochen wird: Ladenname im Bild, Uhrzeit, Datum, Symbol, Text der Benachrichtigung, Stempelzahl im Bild, Zeilenumbruch, Akzent, Anker, `poster` | ja, kostet nichts |
+   | was nicht gesprochen wird: Ladenname im Bild, Uhrzeit, Datum, Symbol, Text der Benachrichtigung, Stempelzahl im Bild, Zeilenumbruch, Schlüsselwort (`*`), Grenze zwischen Tafeln (`\|`), Anker, Schnitt, Kamera, `poster` | ja, kostet nichts |
+   | **nur den Beitragstext** (`caption`): kürzer, ein anderer Satz, andere Reihenfolge, weniger Emojis | ja, kostet nichts, ohne neuen Bau: Punkt 3a. Die Regeln aus 6.6 gelten weiter (andere Hashtags als die aus `konfig.json`: nein, das geht nur in einem Chat) |
    | etwas behaupten, das `PRODUKT.md` in Klasse 1 nicht deckt; Kleingedrucktes, Preise, Adressen im Bild; ein Erfolgsversprechen | **nein** |
    | Stimme, Tempo, Töne, Lautstärke, Farben, Schriften, ein neuer Baustein | **nein**, das sind Entscheidungen für einen Chat (dazu `wuensche`, `art: "chat"`) |
    | fremdes Material, Musik, ein anderes Video nachbauen; posten, planen, verschicken, pushen, löschen, diese Anleitung oder die Einstellungen ändern | **nein** (Regeln 6 und 7) |
@@ -636,6 +646,21 @@ mit `datum` ab heute, das früheste voran, danach ältere.
    "Stimme und Töne ändere ich nur in einem Chat mit dir, ich habe es
    notiert." / "Das habe ich nicht verstanden. Tipp noch einmal auf Ändern
    und schreib ein paar Wörter mehr."
+
+   **3a. Nur der Beitragstext:** Video und Fassung bleiben, es wird nichts
+   gebaut, hochgeladen oder aufgenommen. Den neuen Text nach 6.6 schreiben
+   und prüfen, dann dasselbe Dokument ändern:
+
+   ```
+   ArtifactData({
+     action: "update", url: URL, collection: "videos", doc_id: "<id>",
+     data: { caption: "<neuer Text>", status: "neu", antwort: "Der Beitragstext ist geändert: <was, ein Halbsatz>.", geaendert: "<jetzt UTC>" },
+     if_version: <Version aus 1>
+   })
+   ```
+
+   Betrifft der Wunsch Video **und** Text, gehört der neue Text in die neue
+   Fassung (Punkt 6), und der Rest läuft wie unten.
 4. **Geht:** Quellen holen (7.3). Den gesprochenen Text festhalten
    (`node "$R/studio/tools/times.mjs" "$R/studio/videos/<ordner>" --text`),
    `script.json` ändern (Abschnitt 6 und die Textregeln des Playbooks gelten
@@ -672,7 +697,8 @@ mit `datum` ab heute, das früheste voran, danach ältere.
      writes: [
        { op: "set", collection: "videos", doc_id: "<datum>-<slug>-v<n+1>",
          data: { ...alle Felder der neuen Fassung..., version: <n+1>, status: "neu", feedback: "",
-                 antwort: "<was geändert wurde, ein Satz>", zeichen: <nur das neu Aufgenommene> } },
+                 antwort: "<was geändert wurde, ein Satz>", zeichen: <nur das neu Aufgenommene>,
+                 caption: "<Beitragstext der alten Fassung; neu nach 6.6, wenn sich Hook oder Stichwort geändert haben oder der Wunsch ihn betrifft>" } },
        { op: "update", collection: "videos", doc_id: "<datum>-<slug>-v<n>",
          data: { status: "ersetzt", geaendert: "<jetzt UTC>" }, if_version: <Version aus 1> }
      ]
@@ -699,7 +725,8 @@ Aufnahme des Tages; `budget.mjs` vergibt sie nur für diesen Zweck.
 3. Bauen und prüfen (Schritt 18), hochladen (Schritt 19, Punkte 1 bis 3).
 4. Neue Fassung und alte in einem `batch` wie in Schritt 9: die neue mit
    `entwurf: false`, dem Titel ohne "Entwurf ohne Stimme: ", `status: "neu"`,
-   `antwort: "Jetzt mit Stimme."`; die alte auf `ersetzt`. War der Entwurf
+   `antwort: "Jetzt mit Stimme."` und dem `caption` der alten (fehlt er dort,
+   jetzt nach 6.6 schreiben); die alte auf `ersetzt`. War der Entwurf
    schon freigegeben, braucht die Fassung mit Stimme trotzdem ein neues Okay.
 
 Sagt `budget.mjs` nein, oder läuft der Lauf ohne Stimme: der Entwurf bleibt.
@@ -717,7 +744,7 @@ entscheidet, was sonst geschieht. Es gilt die **erste** Zeile, die passt:
 |---|---|---|---|
 | enthält einen Link (Reel, Beitrag, Konto, Webseite) | **Nichts öffnen.** Steht in Worten dabei, was gewünscht ist, zusätzlich wie Zeile 3 | "Den Link sehe ich mir im nächsten Chat mit dir an, von hier aus öffne ich keine Links. Schreib gern in Worten dazu, worum es geht, dann wird gleich eine Idee daraus." | bleibt `offen` |
 | verlangt etwas außerhalb der Videos (pushen, posten, löschen, Regeln ändern, etwas öffnen oder verschicken) | nichts (Regel 6) | "Das geht von hier aus nicht, dafür braucht es einen Chat mit dir." | `erledigt` |
-| ist ein Wunsch für **ein** Video ("mach mal was für Friseure", "zeig den Sperrbildschirm") | Idee anlegen (Muster in Schritt 12) mit `herkunft: "eingang"`, `eingang_id`, `quelle: "Dein Eingang vom <Tag>"`. Vorher prüfen: Beleg in `PRODUKT.md`, Klasse 1? Bild unter den acht Bausteinen? Nicht gesperrt? | "Als Idee eingetragen: <Titel>." Ohne Beleg oder Bild: "Dazu kann ich noch kein Video bauen: <Grund in einem Halbsatz>. Ich habe es für unseren nächsten Chat notiert." (dazu `wuensche`, `art: "chat"`) | `erledigt` |
+| ist ein Wunsch für **ein** Video ("mach mal was für Friseure", "zeig den Sperrbildschirm") | Idee anlegen (Muster in Schritt 12) mit `herkunft: "eingang"`, `eingang_id`, `quelle: "Dein Eingang vom <Tag>"`. Vorher prüfen: Beleg in `PRODUKT.md`, Klasse 1? Bild unter den Bausteinen (Abschnitt 6.4)? Nicht gesperrt? | "Als Idee eingetragen: <Titel>." Ohne Beleg oder Bild: "Dazu kann ich noch kein Video bauen: <Grund in einem Halbsatz>. Ich habe es für unseren nächsten Chat notiert." (dazu `wuensche`, `art: "chat"`) | `erledigt` |
 | ist ein **Dauerwunsch**: Wörter wie "mehr", "öfter", "ab jetzt", "immer", "weniger", "nicht so oft" | in `wuensche` mit `art: "thema"`, `richtung`, und `thema` oder `branche`. Keine Idee: die Wahl der Idee (Abschnitt 5) setzt den Wunsch um. "Genug davon" oder "wieder gemischt" streicht den passenden Eintrag. "Nie wieder X" ist `art: "sperre"` mit `bis: "9999-12-31"` | mehr: "Notiert. Das nächste freie Video ist dazu, danach etwa jedes dritte, bis du etwas anderes sagst." weniger: "Notiert. Das kommt ab jetzt seltener." | `erledigt` |
 | nennt ein Konto, das beobachtet werden soll (ohne Link) | nichts einrichten. In `wuensche` mit `art: "chat"` | "Notiert. Trag das Konto in Metricool als Wettbewerber ein, dann sehe ich seine Reels ab dem nächsten Lauf." | `erledigt` |
 | ist ein Wunsch zur Wortwahl ("sag nicht Kundenbindung") | in `wuensche` mit `art: "text"` | "Notiert, gilt ab dem nächsten Video." | `erledigt` |
@@ -757,7 +784,7 @@ Entfällt, wenn Schritt 7 keine Zeilen hatte.
    hat das Reel (ein `thema`-Schlüssel aus `THEMEN.md`; passt keiner, ein
    neuer kurzer Schlüssel aus Kleinbuchstaben und Bindestrichen)? Kann
    Stampit dazu etwas sagen, das in `PRODUKT.md`, Klasse 1 steht? Gibt es ein
-   Bild dafür unter den acht Bausteinen?
+   Bild dafür unter den Bausteinen (Abschnitt 6.4)?
    - Kein Beleg, kein Bild, oder das Reel handelt von etwas anderem:
      `stand: "unpassend"`.
    - Thema und Laden gibt es schon als Idee mit Status `offen` oder
@@ -851,7 +878,11 @@ eines abgebrochenen Laufs im Repo): hat der Ordner eine Aufnahme in `voice/`,
 mit ihm weiterarbeiten statt neu zu schreiben, sonst einen anderen Slug
 nehmen.
 
-`script.json` nach dem Playbook und nach Abschnitt 6 schreiben.
+`script.json` nach Abschnitt 6 und dem Playbook schreiben. Die Vorlage ist ein
+fertiges Beispiel in Stil C (eine Bäckerei): die Blöcke `voice`, `timing`,
+`captionStyle`, `pace` und `mix` bleiben, wie sie sind; `meta`, alle Szenen,
+Texte, Parameter, Anker und Kamerafahrten werden für das neue Video
+geschrieben. Kein Satz der Vorlage bleibt stehen, nur weil er schon da war.
 
 ### Schritt 16: Entwurf ohne Stimme
 
@@ -862,35 +893,57 @@ Kostet nichts. Jeder Befehl mit `R=/home/user/stempelkarte-frontend;` davor.
 | prüfen | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --check; echo "Ende-Code $?"` | Ende-Code 0, alle Prüfungen `ok` | Code 2: Fehler im Skript, die Meldung nennt ihn. Code 1: eine Prüfung, Abhilfe steht im Playbook ("Prüfungen"). Beheben und wiederholen, höchstens fünf Runden; danach Hindernis `kein-video` |
 | Wörter und Anker | `node "$R/studio/tools/times.mjs" "$R/studio/videos/<ordner>"` | je Textzeile die Wörter mit Nummer: jeder Anker liegt auf dem gemeinten Wort | Anker im Skript berichtigen |
 | Standbilder | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills <t1,t2,...>` mit je einem Zeitpunkt kurz nach jedem Anker (Zeiten aus `out/check.json`, `anchors[].t` und `scenes`) | PNGs in `out/stills/`. Jedes mit dem Read-Werkzeug ansehen | was nicht stimmt, im Skript ändern |
-| Entwurf bauen (rund 2 Minuten, `timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice; echo "Ende-Code $?"` | Ende-Code 0, `out/video.mp4`, `out/sheet.png`, `out/poster.png`, `out/report.json` mit `"ok": true` | Code 1: wie oben. Ein Fehler von Playwright oder ffmpeg: einmal wiederholen, dann Hindernis `studio-kaputt` |
+| Entwurf bauen (rund 2 bis 4 Minuten, unter Last auch länger, `timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice; echo "Ende-Code $?"` | Ende-Code 0, `out/video.mp4`, `out/sheet.png`, `out/poster.png`, `out/report.json` mit `"ok": true` | Code 1: wie oben. Ein Fehler von Playwright oder ffmpeg: einmal wiederholen, dann Hindernis `studio-kaputt` |
 | ansehen | `out/sheet.png` und `out/poster.png` mit dem Read-Werkzeug | siehe Liste unten | ändern und neu bauen |
-| Kennzahlen | Befehl unten | `laenge_s` 45 bis 55, `bilder` ab 7, `laengstes_bild_s` bis 8, `ereignisse_pro_min` ab 15, `zeichen` bis 800 | einmal nachbessern (Text kürzen oder ergänzen, lange Szene in `parts` teilen), dann weitergehen: Richtwerte halten keinen Lauf auf. **Zwei Ausnahmen:** über 56 Sekunden oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
+| Kennzahlen | Befehl unten | `laenge_s` (geschätzt) höchstens 56, `woerter` 105 bis 115, `zeichen` bis 800, `bildwechsel` ab 12, `laengstes_bild_s` bis 5, `warnungen` leer | einmal nachbessern (Text kürzen oder ergänzen, eine Textzeile mit Kamera oder Schnitt teilen, Abschnitt 6.3), dann weitergehen: Richtwerte halten keinen Lauf auf. **Zwei Ausnahmen:** über 56 Sekunden geschätzt oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
+| Beitragstext | Abschnitt 6.6 | `beitrag.mjs pruefen` endet mit 0 | nach 6.6 |
 
 ```bash
 R=/home/user/stempelkarte-frontend
-node -e 'const r=require(process.argv[1]);const p=r.scenes.flatMap(s=>s.parts);const a=(r.anchors||[]).length;console.log(JSON.stringify({ok:r.ok,mode:r.mode,titel:r.title,laenge_s:r.duration,woerter:r.text.words,zeichen:r.elevenLabs.chars,schluessel:r.elevenLabs.key,skript_sha256:r.script&&r.script.sha256,bilder:p.length,laengstes_bild_s:+Math.max(...p.map(x=>x.e-x.s)).toFixed(1),ereignisse_pro_min:+((p.length-1+a)/r.duration*60).toFixed(1),pausen:r.voice&&r.voice.pauses,tempo_beim_sprechen:r.voice&&r.voice.wordsPerMinuteTalking,spitze_db:r.audio&&r.audio.peakDb,warnungen:r.warnings}))' "$R/studio/videos/<ordner>/out/report.json"
+node -e 'const fs=require("fs"),path=require("path");const f=path.resolve(process.argv[1]),r=require(f),s=JSON.parse(fs.readFileSync(path.join(path.dirname(f),"..","script.json"),"utf8"));const hold=(s.timing&&s.timing.hold!=null)?s.timing.hold:3.2,end=r.duration-hold,ts=[0,...(r.pictures||[]).map(x=>x.t).filter(t=>t<end),end];const lang=Math.max(...ts.slice(1).map((t,i)=>t-ts[i]));const L=r.audio&&r.audio.loudness;console.log(JSON.stringify({ok:r.ok,mode:r.mode,titel:r.title,laenge_s:r.duration,woerter:r.text.words,zeichen:r.elevenLabs.chars,schluessel:r.elevenLabs.key,skript_sha256:r.script&&r.script.sha256,bildwechsel:r.pictureCount,laengstes_bild_s:+lang.toFixed(1),pausen:r.voice&&r.voice.pauses,tempo_beim_sprechen:r.voice&&r.voice.wordsPerMinuteTalking,lufs:L?L.lufs:null,wahre_spitze_db:L?L.truePeakDb:null,lautheit_ok:L?L.ok:null,warnungen:r.warnings}))' "$R/studio/videos/<ordner>/out/report.json"
 ```
 
-`bilder` zählt Szenen und Teile. `ereignisse_pro_min` zählt Bildwechsel und
-Anker zusammen: wie oft im Bild etwas Neues geschieht.
+`bildwechsel` zählt jede neue Szene, jeden weiteren Teil und jede
+Kamerabewegung (`report.json`, `pictures`). `laengstes_bild_s` ist die
+längste Zeit ohne Bildwechsel bis zum letzten Wort, gerechnet wie die Prüfung
+`bildwechsel`; das stehende Schlussbild zählt nicht. Im Entwurf sind alle
+Zeiten geschätzt und rund ein Drittel zu lang: hält der Entwurf 5 s ein, hält
+es das fertige Video erst recht. `pausen` und `tempo_beim_sprechen` gibt es
+nur mit Stimme; `lufs` und `wahre_spitze_db` zeigt auch der Entwurf, dort
+sind sie ohne Bedeutung (feste, leise Mischung ohne Stimme, rund -30 LUFS). Für den Bericht eines Laufs mit
+`--check` steht `out/check.json` statt `out/report.json` im Befehl.
 
 Beim Ansehen von Übersicht und Titelbild achten auf:
 
 - Titelbild: zeigt den ersten Satz vollständig und ein fertiges Bild dazu.
   Sonst `"poster": <Sekunde>` setzen.
-- Jedes Bild der Übersicht: kein Text läuft über oder über ein Bild, kein
-  Wort ist abgeschnitten, Ladenname, Stempelzahl und Symbol stimmen mit dem
-  Text überein, das Schlussbild ist vollständig.
-- Der Satz über dem Bild passt sachlich zum Bild.
+- Jedes Bild der Übersicht: oben steht genau eine Tafel (ein bis drei
+  Wörter, beim Einstieg der ganze Hook), Schlüsselwörter groß und lila, kein
+  Wort abgeschnitten, kein Text über einem Bild. Ladenname, Stempelzahl und
+  Symbol stimmen mit dem Text überein, das Schlussbild ist vollständig.
+- Der Satz über dem Bild passt sachlich zum Bild, auch beim Einstieg: unter
+  einem Hook über Papier oder einen verlorenen Kunden steht kein
+  Sperrbildschirm mit voller Karte (6.4, Einstieg).
+- **"In der Nähe" ist nie "vor der Tür".** Jedes Bild zu einem Satz über die
+  Nähe des Ladens zeigt die Karte von oben (`shop-map`) mit sichtbarem
+  Abstand zwischen Kundin und Ortsnadel, oder die andere Straßenseite
+  (`shop-street` mit `across`). Keine Figur geht direkt an der Ladentür
+  vorbei oder steht davor (Abschnitt 6.4).
+- Nach jeder Kamerafahrt ein Standbild: ist im vergrößerten Bild etwas am
+  Rand abgeschnitten (Nadel, Benachrichtigung, Kreis)? Das prüft keine
+  Prüfung.
 - Kein Bild zeigt "Café Nordwind", wenn der Laden anders heißt (vergessener
   Parameter).
 - Jede Warnung in `warnungen` ist verstanden. `knopfspalte` und `hinweise`
-  dürfen stehen bleiben, wenn der Grund klar ist.
+  dürfen stehen bleiben, wenn der Grund klar ist. `bildwechsel` und
+  `tafelzeit` einmal beheben (Abschnitte 6.2 und 6.3), sonst in `pruefung`
+  vermerken.
 
 ### Schritt 17: die Stimme
 
 Nur wenn alles zutrifft: der Entwurf hat `"ok": true` und ist angesehen; er
-ist höchstens 56 Sekunden lang und hat höchstens 800 Zeichen; der
+ist höchstens 56 Sekunden lang geschätzt (`video.aufnahme_bis_s`) und hat
+höchstens 800 Zeichen; der
 Auftragstext erlaubt die Stimme; Schritt 5 endete ohne `stimme-werkzeug` und
 ohne `stimme-aus`.
 
@@ -918,23 +971,24 @@ R=/home/user/stempelkarte-frontend; node "$R/studio/make.mjs" "$R/studio/videos/
 |---|---|
 | Erfolg | Ende-Code 0. Die Ausgabe sagt "Stimme: im Cache", `out/report.json` hat `"mode": "voice"`, `"ok": true`, `elevenLabs.spent: 0` |
 | Ende-Code 3 | die Aufnahme fehlt im Cache: der Text hat sich nach der Aufnahme geändert. **Nicht** mit `--allow-voice-spend` wiederholen. `times.mjs --text` mit `text` in `voice/<schlüssel>.meta.json` vergleichen und das Skript auf den aufgenommenen Text zurückstellen |
-| Ende-Code 1 (eine Prüfung scheitert jetzt, weil die echten Zeiten anders sind, meist `lesezeit`) | nur ändern, was den gesprochenen Text nicht ändert: Zeilenumbruch, Aufteilung in Textzeilen, Anker, Parameter. Danach muss `times.mjs --text` denselben Text zeigen wie vorher. Nie `--force` |
+| Ende-Code 1 (eine Prüfung scheitert jetzt, weil die echten Zeiten anders sind, zum Beispiel `lesezeit` in der Schlussfrage mit `"mode": "zeile"`) | nur ändern, was den gesprochenen Text nicht ändert: Zeilenumbruch, Aufteilung in Textzeilen, Anker, Parameter. Danach muss `times.mjs --text` denselben Text zeigen wie vorher. Nie `--force` |
 | `laenge` scheitert (über 60 s) | lässt sich ohne neue Aufnahme nicht heilen. Der Entwurf ohne Stimme aus Schritt 16 geht aufs Board; `meldung`: "Die Aufnahme wurde zu lang, deshalb liegt nur ein Entwurf ohne Stimme da." Schritt 10 kürzt morgen zuerst |
 
 Dann wie in Schritt 16 `out/sheet.png` und `out/poster.png` ansehen (mit
 Stimme verschieben sich alle Bilder auf die echten Wort-Zeiten) und die
 Kennzahlen mit demselben Befehl lesen:
 
-| Wert | Erwartet | Wenn nicht |
+| Wert | Erwartet (`konfig.json`, `video`) | Wenn nicht |
 |---|---|---|
-| `spitze_db` | rund -1 (zwischen -2,5 und -0,5) | steht im Skript ein `mix`, der nicht aus `konfig.json` stammt: entfernen und neu bauen. Sonst vermerken |
-| `pausen.seconds` | höchstens 5,0; `longest` höchstens 1,0 | nichts neu aufnehmen. Vermerken und beim nächsten Skript enger schreiben |
+| `lufs`, `wahre_spitze_db`, `lautheit_ok` | -14,5 bis -13,5 LUFS, wahre Spitze höchstens -1,0 dBTP, `lautheit_ok` ist `true` | steht im Skript ein anderer `mix` als `{ "lufs": -14, "truePeak": -1 }`: auf diesen Wert setzen und neu bauen (kostet nichts). Sonst vermerken |
+| `pausen.seconds` | höchstens 2,0; `longest` höchstens 0,7 | nichts neu aufnehmen. Fehlt im Skript `"maxGap": 0.45`: setzen und neu bauen (kostet nichts). Sonst vermerken und beim nächsten Skript weniger Punkte schreiben |
 | `tempo_beim_sprechen` | 150 bis 190 | vermerken |
-| `laenge_s` | 45 bis 55 | bis 60 erlaubt; vermerken |
+| `bildwechsel`, `laengstes_bild_s` | ab 12, höchstens 5 | vermerken |
+| `laenge_s` | 40 bis 55 | bis 60 erlaubt; vermerken |
 
 Vermerken heißt: in `pruefung` am Video, bei deutlicher Abweichung auch in
-`meldung`. `pruefung` ist ein Satz, zum Beispiel: "51,2 s, 8 Bilder, Pausen
-3,9 s, 172 Wörter je Minute, Spitze -1,0 dB."
+`meldung`. `pruefung` ist ein Satz, zum Beispiel: "41,9 s, 19 Bildwechsel,
+längstes Bild 4,0 s, Pausen 1,2 s, 174 Wörter je Minute, -14,1 LUFS."
 
 ### Schritt 19: aufs Board
 
@@ -973,15 +1027,23 @@ Vermerken heißt: in `pruefung` am Video, bei deutlicher Abweichung auch in
    ArtifactData({
      action: "set", url: URL, collection: "videos", doc_id: "<ZIEL>-<slug>-v1",
      data: {
-       datum: "<ZIEL>", titel: "<title aus dem Bericht>", hook: "<erste Textzeile>", text: "<text.spoken aus dem Bericht>",
+       datum: "<ZIEL>", titel: "<title aus dem Bericht>", hook: "<captions[0].text aus dem Bericht>", text: "<text.spoken aus dem Bericht>",
        quelle: "<quelle der Idee, oder 'Eigene Idee'>",
        asset_id: "<id>", poster_asset_id: "<id>", dauer_s: <duration>, version: 1, status: "neu",
        feedback: "", antwort: "", ordner: "<ZIEL>-<slug>", zeichen: <aufgenommene Zeichen>,
        erstellt: "<jetzt UTC>", geaendert: "<jetzt UTC>",
-       thema: "<schlüssel>", branche: "<schlüssel>", idee_id: "<id>", entwurf: <true|false>, pruefung: "<ein Satz>"
+       thema: "<schlüssel>", branche: "<schlüssel>", idee_id: "<id>", entwurf: <true|false>, pruefung: "<ein Satz>",
+       caption: "<Beitragstext aus Abschnitt 6.6, Zeilenumbrüche als \n>"
      }
    })
    ```
+
+   `caption` ist der Text, den `beitrag.mjs pruefen` mit Ende-Code 0
+   bestanden hat, Zeichen für Zeichen. Bei einem Entwurf ohne Stimme gehört
+   er genauso dazu. `hook` ist `captions[0].text` aus `out/report.json`: die
+   erste Textzeile, wie sie zu lesen ist, ohne `*`, `|` und die gesprochenen
+   Formen in `{}`. Aus `script.json` abgeschrieben stünden diese Zeichen mit
+   auf dem Board.
 5. **Die Idee abhaken:**
    `update` auf `ideen/<id>` mit `{ status: "verwendet", video_id: "<id des Videos>" }`
    und `if_version`. Hat der Betreiber sie inzwischen gesperrt, bleibt
@@ -1111,7 +1173,8 @@ Eine Regel für die Schritte 13, 14 und 22.
 - Status nicht `gesperrt`; Thema und Laden nicht als geltende `sperre` in
   `wuensche`. **Was der Betreiber gesperrt hat, wird nie gebaut.**
 - Jede Aussage hat ihre Zeile in `PRODUKT.md`, Klasse 1, und in der Spalte
-  "Im Video" steht kein "kein Bild". Baubar mit den acht Bausteinen.
+  "Im Video" steht kein "kein Bild". Baubar mit den Bausteinen aus Abschnitt
+  6.4.
 - **Themenpause.** Das `thema` kommt in keinem Video der letzten 7 Tage vor
   (`ideen.thema_pause_tage`, verworfene mitgezählt). Erfüllt das keine Idee
   und keine Nummer, fällt diese Bedingung weg, und es kommt das Thema mit
@@ -1152,30 +1215,260 @@ Themenliste geht zur Neige."
 
 ## 6. Vorgaben für jedes Skript
 
-`script.json` entsteht nach dem Playbook (Abschnitte "Tagesablauf",
-"script.json", "Textregeln", "Erkenntnisse", "Bausteine"). In `meta` kommen
-`title`, `slug`, `idee` (ein Satz: was die Anregung war und was daran eigenes
-ist, ohne Namen, Regel 12) und frei dazu `datum`, `thema`, `branche`,
-`beleg`, `idee_id`. Zusätzlich gilt:
+Jedes neue Video entsteht im **Stil C**, seit dem 16.11.2026 der Standard.
+Vorbild ist das zweite Video, `videos/2026-11-16-ist-das-koscher` (41,9 s,
+109 Wörter, 19 Bildwechsel, -14,1 LUFS): oben immer nur ein Wort, wichtige
+Wörter groß und lila, alle zwei bis dreieinhalb Sekunden ein neues Bild,
+kaum Pausen, laute Mischung. Das erste Video
+(`2026-11-15-kaffee-aufs-haus`, ganze Textzeilen, rund 10 Bildwechsel je
+Minute, -18,6 LUFS) ist der alte Stil: Vorbild nur noch für Stimme, Töne und
+Schluss. Ein Lauf nimmt aus ihm keine Szene und keinen Wert.
+
+`script.json` entsteht aus der Kopie der Vorlage (Schritt 15) nach diesem
+Abschnitt und dem Playbook (Abschnitte "Stil C", "script.json",
+"Textregeln", "Bausteine"). In `meta` kommen `title`, `slug`, `idee` (ein
+Satz: was die Anregung war und was daran eigenes ist, ohne Namen, Regel 12)
+und frei dazu `datum`, `thema`, `branche`, `beleg`, `idee_id`. Zusätzlich
+gilt:
 
 | Punkt | Vorgabe |
 |---|---|
-| Einstieg | Die erste Textzeile trägt `"instant": true` und ist eine Frage oder ein Moment, kein Vorspann. Sie steht ab Bild 0 und wird in der ersten Sekunde gesprochen |
-| Erzählform | Eine kleine Geschichte über **einen** Laden (den aus der Tabelle "Läden" in `THEMEN.md`), keine Liste von Funktionen. Eine Aussage über die App steht im Mittelpunkt (der Beleg der Idee); weitere kommen nur als kurze Station der Geschichte vor |
-| Länge | 45 bis 55 Sekunden, 105 bis 130 Wörter, höchstens 800 Zeichen (A1). Der Bau bricht unter 20 und über 60 Sekunden ab |
-| Bilder | Mindestens 7 Bilder (Szenen und Teile), besser 8 bis 10, keines länger als 8 Sekunden, und etwa alle 3,5 Sekunden geschieht im Bild etwas Neues: ein Wechsel oder ein Anker (Stempel trifft, Karte fällt, Nachricht erscheint). Lieber `parts` als lange Einzelszenen, jeder Anker auf einem Wort. Wie aus dem Kern eines Themas genug Bilder werden, steht in `THEMEN.md` unter "Vom Kern zum Video" |
-| Keine stillen Lücken | Jeder Punkt, jedes Fragezeichen und jede neue Textzeile ist eine Pause. Halbsätze mit Komma verbinden. Ziel nach der Aufnahme: zusammen höchstens 5 Sekunden Pausen, keine länger als 1 Sekunde |
-| Text im Bild | Kurze Textzeilen, `accent` auf dem einen Wort, auf das es ankommt |
-| Tempo | Die Stimme bleibt, wie sie ist (Liam, 1,05). Das ergibt rund 170 Wörter je Minute beim Sprechen |
+| Einstieg | Die erste Textzeile trägt `"instant": true` und ist eine Frage oder ein Moment, kein Vorspann. Sie steht ab Bild 0 da und wird in der ersten Sekunde gesprochen. Das Bild darunter zeigt, wovon sie spricht (6.4, Einstieg): zum Papier das Papier, zum Handy das Handy |
+| Erzählform | Eine kleine Geschichte über **einen** Laden (den aus der Tabelle "Läden" in `THEMEN.md`), keine Liste von Funktionen. Eine Aussage über die App steht im Mittelpunkt (der Beleg der Idee) und bekommt die Pointe (6.2); weitere kommen nur als kurze Station der Geschichte vor |
+| Länge | 105 bis 115 Wörter, 15 bis 21 Textzeilen (die zwei des Schlusses mitgezählt), 5 bis 7 Szenen vor dem Schluss, höchstens 800 Zeichen (A1). **Ab 110 Wörtern höchstens 18 Textzeilen.** Der Entwurf schätzt 3,2 s + 0,36 s je Wort + 0,5 s je Textzeile nach der ersten + 0,35 s je Szene vor dem Schluss (die Vorlage: 108 Wörter, 15 Textzeilen, 5 Szenen, 50,8 s). Mit der Regel davor bleibt das unter 56 s; alle Höchstwerte zusammen (115 Wörter, 21 Textzeilen, 7 Szenen) ergäben rund 57 s. `--check` nennt den Wert in der Zeile "Länge". Fertig mit Stimme werden es rund 40 bis 45 s. Über 56 s geschätzt wird nicht aufgenommen, über 60 s bricht der Bau ab |
+| Tempo der Stimme | Die Stimme bleibt, wie sie ist (Liam, 1,05). Das ergibt rund 170 Wörter je Minute beim Sprechen |
 | Texte | Einfache, kurze Sätze, Du-Form. Nie "Café" und "Kaffee" nah beieinander. Rechnung mit wenigen Stammkunden, die öfter kommen, ohne Kleingedrucktes, mit möglichst wenigen Kommas |
-| Laden | Name, Stempelzahl und Symbol in jeder Szene gleich. Abweichung nur mit Absicht (Thema `stempelzahl`) |
-| Sperrbildschirm | Uhrzeit passt zum Laden, Datum ohne Jahr, Wochentag passt zum Tag (Befehl in Schritt 2). Ortsnadel nur, wenn der Satz von der Nähe des Ladens handelt |
-| Schluss | "Klingt interessant?" (oder eine andere kurze Frage), dann `Dann kommentiere jetzt STICHWORT,{Stichwort,}` und `und wir melden uns bei dir.` Nichts anderes, auch nicht "schick das einem Freund" wie bei den Vorbildern |
-| Stimme, Töne, Mischung, Farben | Die Blöcke `voice`, `sound` und `mix` bleiben bei den Vorgaben. `mix` kommt nur ins Skript, wenn `konfig.json` unter `mix` ein Objekt nennt. Das dunkle Aussehen bleibt |
+| Laden | Name, Stempelzahl und Symbol in jeder Szene und jedem Teil gleich. Abweichung nur mit Absicht (Thema `stempelzahl`) |
+| Sperrbildschirm | Uhrzeit passt zum Laden, Datum ohne Jahr, Wochentag passt zum Tag (Befehl in Schritt 2). `"pin": false`: die Nähe zeigt in Stil C die Karte von oben (6.4) |
+| Schluss | "Klingt interessant?" (oder eine andere kurze Frage), dann `Dann kommentiere jetzt STICHWORT,{Stichwort,}` und `und wir melden uns bei dir.` Nichts anderes, auch nicht "schick das einem Freund" wie bei den Vorbildern. Form in 6.2 |
+| Stimme, Töne, Farben | `voice` wie in der Vorlage, kein `sound`, kein `seed`. Das dunkle Aussehen bleibt |
+| Werkzeuge | Nie `tools/clip-in.py` (Sätze von außerhalb des Studios, nur in begleiteten Sitzungen, Regel 11), nie `--force`, nie ein neuer Baustein |
 | Wünsche | Alles aus `gedaechtnis/wuensche` mit `art: "text"` beachten, solange es keiner Regel widerspricht |
 
-Bilder, Pausen und Länge sind Richtwerte aus der Analyse der Vorbilder. Der
-Geschmack des Betreibers aus `START.md` schlägt jeden davon.
+### 6.1 Der Kopf des Skripts
+
+Oben im Skript stehen genau diese Blöcke mit genau diesen Werten. Sie kommen
+aus `state/konfig.json` (Abschnitte `skript` und `mix`), die Vorlage trägt
+sie schon, und `tools/selftest.mjs` prüft, dass Vorlage und Einstellungen
+gleich sind. Ein Lauf ändert sie nie, auch nicht auf einen Wunsch hin
+(Schritt 9: das ist eine Frage für einen Chat).
+
+```json
+"voice":        { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05 },
+"timing":       { "lead": 0.35, "hold": 3.2, "maxGap": 0.45 },
+"captionStyle": { "mode": "wort" },
+"pace":         { "maxStill": 5, "minChanges": 12 },
+"mix":          { "lufs": -14, "truePeak": -1 },
+```
+
+`say` nur, wenn die Stimme ein Wort falsch spricht ("Stampit" ist schon
+eingebaut), `poster` nur, wenn das Titelbild nicht stimmt (Schritt 16).
+
+### 6.2 Textzeilen und Schlüsselwörter
+
+Im Modus `"wort"` steht oben immer nur **eine Tafel**: ein Wort, oder zwei,
+wenn beide kurz sind. Jede löst die vorige im Takt der Stimme ab. Eine
+Textzeile (`captions[]`) ist ein Satz oder Halbsatz, meist in einer einzigen
+Zeichenkette in `lines`.
+
+| Zeichen, Angabe | Wirkung | So schreibt ein Lauf |
+|---|---|---|
+| `*Wort` | Schlüsselwort: groß und lila. Bis zu drei hintereinander bleiben zusammen (`*von *selbst`). Wird nicht gesprochen | Je Textzeile ein bis zwei, auf das Wort, das die Aussage trägt (`*voll`, `*Nähe`, `*Wallet`, `*selbst`, die Pointe). Nie ein ganzer Satz, nie mehr als drei in Folge |
+| `\|` | Grenze zwischen zwei Tafeln. Steht ein `\|` in der Zeile, gelten nur diese Grenzen. Wird nicht gesprochen | In jede Textzeile mit mehr als drei Wörtern: 1 bis 3 Wörter je Tafel, ein Schlüsselwort mit höchstens einem kleinen Wort davor (`Dein *Handy`). Kleine Wörter (der, die, ist, und) nie allein: sie blitzen nur auf (Warnung `tafelzeit`) |
+| `"instant": true` | alle Zeilen der Textzeile stehen als eine Tafel da; an der ersten Textzeile ab Bild 0 | Nur an der ersten Textzeile. Höchstens drei Zeilen, jede höchstens 940 px breit (rund 20 Zeichen), Schlüsselwort auf das Wort, um das es geht |
+| `"scale": 1.2` | macht die Tafeln dieser Textzeile größer | Am Einstieg 1,2, aber nur bei höchstens zwei Zeilen: drei vergrößerte Zeilen stoßen an das Handy darunter (Prüfung `textabstand`, in der Probe vom 16.11.2026 schon bei 1,1). An der Pointe 1,15 |
+| `"gapBefore": 0.55` | Pause vor dieser Textzeile genau so lang (6.5) | Nur an den zwei Stellen aus 6.5 |
+| `"mode": "zeile"` | eine einzelne Textzeile im alten Stil (ganze Zeilen, `accent`, `keep`) | Nur für die Schlussfrage |
+
+Der Schluss sieht immer so aus (Stichwort ändern, sonst nichts):
+
+```json
+"captions": [
+  { "lines": ["Klingt interessant?"], "accent": 1, "keep": true, "mode": "zeile" },
+  { "role": "cta", "lines": ["Dann kommentiere jetzt BROT,{Brot,}", "und wir melden uns bei dir."], "gapBefore": 0.65 }
+]
+```
+
+`accent` und `keep` gibt es nur in `"mode": "zeile"`; sonst bricht der Bau
+ab. Die Prüfung `lesezeit` gilt im Modus `"wort"` nicht, dafür `wortgroesse`
+(bricht ab, wenn eine Tafel zu klein gesetzt werden müsste: Tafel mit `|`
+teilen) und `tafelzeit` (warnt bei einer Tafel unter 0,14 s).
+
+**Die Pointe.** Der eine Satz, auf den das Video hinausläuft, steht mit
+`stamp-check` (6.4), `"scale": 1.15` und dem Anker `hit` auf seinem letzten
+Wort. Beides geht: als eigene Szene (so in der Vorlage; sie füllt dann einen
+Punkt der Stempelreihe) oder als weiterer Teil einer Szene mit
+`"enter": "cut"` (so im zweiten Video). Er ist selbst eine Aussage über die App und braucht
+seine Zeile in `PRODUKT.md`. Kein "Mit Stampit passiert das nicht!" nach
+einem Problem, das Stampit nicht löst.
+
+### 6.3 Bilder: Schnitte, Kamera, Tempo
+
+Richtwerte aus `pace` (die Prüfung `bildwechsel` warnt, bricht nicht ab):
+**mindestens 12 Bildwechsel, kein Bild länger als 5 s**, im Mittel alle zwei
+bis dreieinhalb Sekunden ein neues Bild. Ein Bildwechsel ist jede neue
+Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
+
+- **Aufbau:** 5 bis 7 Szenen vor dem Schluss (die Stempelreihe oben hat so
+  viele Punkte), jede mit 1 bis 3 Teilen (`parts`). Jeder Teil hat eine
+  bis drei Textzeilen und ein Bild, das zu ihnen passt.
+- **Schnitt:** jeder Teil nach dem ersten bekommt `"enter": "cut"` (harter
+  Schnitt, der Teil erscheint 0,1 s vor seinem ersten Wort). Überblenden nur
+  mit Grund. Der erste Teil einer Szene schiebt immer herein; dort steht kein
+  `enter`.
+- **Kamera:** `"camera": [ { "cap": 1, "word": 0, "zoom": 1.3, "focus": [540, 1030] } ]`
+  an einem Teil. Zeitpunkt wie bei einem Anker, `focus` ist der Punkt im
+  unvergrößerten Bild, `to` lässt ihn wandern, `dur` ist die Dauer (Vorgabe
+  0,18 s, 0 = Sprung). Eine Kamera mit `"at": "start", "dur": 0` zeigt den
+  Teil von Anfang an vergrößert. Ein Lauf nimmt nur Kamerawerte, die es in der
+  Vorlage oder im zweiten Video schon gibt, für denselben Baustein:
+
+  | Baustein | Kamera |
+  |---|---|
+  | `lock-notification` | auf die Benachrichtigung: `"zoom": 1.3`, `"focus": [540, 1030]` (auf ein Wort der zweiten Textzeile) |
+  | `wallet-pass`, Scan | auf den QR-Code: `"zoom": 1.5`, `"focus": [540, 1343]`, `"to": [540, 1150]` (auf das Wort "Einmal" oder "gescannt") |
+  | `wallet-pass`, nur Stempel | von Anfang an: `"at": "start", "dur": 0, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080]` |
+  | `shop-map` mit Kreis | höchstens `"zoom": 1.2`, `"focus": [560, 1166]`, `"to": [540, 1211]`, `"dur": 0.3`: mehr, und der Kreis läuft aus dem Bild |
+  | `shop-street` mit `across` | keine |
+  | `paper-card`, `guest-ghost`, `wallet-vanish`, `stamp-check` | keine erprobte: zu viel Text wird geteilt (übernächster Punkt) |
+
+- **Faustregel:** spricht eine Textzeile länger als etwa 3 s (mehr als rund
+  acht Wörter), bekommt ihr Teil eine Kamera auf eines ihrer Wörter, oder
+  sie wird auf zwei Teile mit Schnitt verteilt. Kein Bild (ein Teil oder eine
+  Kamerastellung) trägt mehr als zehn Wörter, mit zwei Textzeilen nicht mehr
+  als neun: jede weitere Textzeile kostet im Entwurf 0,5 s, ein
+  Szenenwechsel danach 0,35 s. So bleibt jedes Bild im Entwurf unter 5 s.
+- **Papier ohne Kamera:** für `paper-card`, `guest-ghost` und
+  `wallet-vanish` gibt es keinen erprobten Kamerawert. Mehr Text als im
+  Punkt davor wird dort geteilt, und der zweite Teil bekommt
+  mit `"enter": "cut"` einen anderen Baustein derselben Aussage (A4): nach
+  `paper-card` `guest-ghost` (wer fast am Ziel war) oder `wallet-vanish`
+  (zerknickt, vergessen, verloren), danach den dritten oder die Pointe mit
+  `stamp-check`. Jeder der drei Papier-Bausteine höchstens einmal im Video.
+  So ist der Entwurf zu T01 am 16.11.2026 auf 12 Bildwechsel und höchstens
+  4,8 s je Bild gekommen; im ersten Versuch mit 12 Wörtern auf `guest-ghost`
+  stand ein Bild 5,5 s, in der Probe zu T15 mit 12 Wörtern in zwei
+  Textzeilen auf `paper-card` ebenso.
+- **Anker:** jeder auf einem Wort, im Skript gesetzt. Die Vorgaben der
+  Bausteine passen zu keinem neuen Text. Anker, die nach einem Wort mit
+  `offset` liegen, behalten bei `shop-map` und `shop-street` den Versatz der
+  Vorgabe, wenn keiner dasteht: `"offset"` immer dazuschreiben.
+
+### 6.4 Welcher Baustein für welche Aussage
+
+| Aussage (`PRODUKT.md`) | Baustein | So |
+|---|---|---|
+| Einstieg, wenn der Hook vom Handy, vom Sperrbildschirm oder von der vollen Karte spricht (zum Beispiel T02, T16, T25) | `lock-notification` | `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Text der Benachrichtigung "<n> von <n>, dein <Artikel> wartet" |
+| Einstieg, wenn der Hook von etwas anderem spricht: vom Papier, von einem fast verlorenen Kunden (zum Beispiel T01, T03, T15), vom Scannen ohne App (T04, T18) | der Baustein dieser Aussage: `paper-card`, `guest-ghost` oder `wallet-vanish`; beim Scannen `wallet-pass` mit `"rise": false` | Das Bild steht ab Bild 0, seine erste Bewegung liegt auf einem Anker kurz nach dem Anfang (`paper-card`: `hit` mit `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01 erprobt; `wallet-pass` als Einstieg ist nicht erprobt, Standbild bei 0 s ansehen). **Nie ein Bild, das dem Hook widerspricht:** unter "Den zehnten macht ein anderer" kein Sperrbildschirm mit "10 von 10". Der Sperrbildschirm kommt dann später, als Schnitt nach dem Bild für "in der Nähe" |
+| Die Kundin ist unterwegs, geht am Laden vorbei (Weg zu C1) | `shop-street` mit `"across": true`, `"circle": false`, `"shopAt": 0.7`, `"direction": "right"`, `"from": -0.08`, `"via": 0.13`, `"to": 0.15` | Sie geht auf der **anderen** Straßenseite, der Laden steht klein im Hintergrund. `to` höchstens 0,09 hinter `via`, sonst deckt die kleine Karte den Laden zu. Nie `shop-street` mit Passant ohne `across` |
+| **C1: "in der Nähe", die Karte erscheint von selbst auf dem Sperrbildschirm (immer, mit dem Stand; nicht erst, wenn sie voll ist)** | **`shop-map`**, Karte von oben: `"circle": true`, `"notify": true`, `"note": "Noch <n> Stempel bis: <Belohnung>"` (nur bei voller Karte: `"<Belohnung> wartet auf dich"`), `"path": [[-0.1, 1], [0.55, 1]]`, Anker `circle` und `walk` am Anfang, `buzz` auf das Wort "zeigt" oder "meldet" mit `"offset": -0.1`, `arrive` mit `{ "at": "end", "offset": -0.5 }`, Kamera nach 6.3 | **Immer**, wenn ein Satz von der Nähe des Ladens handelt. Die Kundin geht eine Straße hinter dem Laden, tritt in den Kreis, und dort, sichtbar entfernt von der Ortsnadel, zeigt ihr Handy die Karte. Es darf nie so aussehen, als müsse man vor der Tür stehen: das war die Korrektur des Betreibers am zweiten Video. Den Weg nicht ändern; einen eigenen Weg lehnt der Baustein ab, wenn er an der Tür vorbeiführt. Danach oft ein Schnitt auf `lock-notification` |
+| Viele Stammkunden sehen den Laden auf dem Sperrbildschirm (C1, Sicht des Ladens) | `lock-notification` als Teil mit `"enter": "cut"`, Kamera auf die Benachrichtigung (6.3) | Der Satz sagt nur C1, zum Beispiel "Dann stehst du auf dem Sperrbildschirm deiner Stammkunden." Nie "sehen", "wissen, wo" oder "orten". Nicht `shop-map` mit `"view": "owner"` (unten) |
+| Papier geht verloren, zerknickt, wird vergessen (A4) | `paper-card`, `wallet-vanish`, `guest-ghost` | Als Teile einer Szene, Schlag auf Schlag mit `"enter": "cut"`. `wallet-vanish`: drei Anker auf drei `*`-Wörter ("*Zerknickt, \| *vergessen, \| *verloren."). `"mug": true` nur für die Bäckerei. Je Bild höchstens zehn Wörter, mit zwei Textzeilen neun, ohne Kamera (6.3) |
+| Karte in Apple und Google Wallet, einmal scannen, kein Download (A1, A2, A3) | `wallet-pass` mit Scan | Kamera auf den QR-Code (6.3), `location: ""` |
+| Stempel sofort auf dem Handy (B1, B2) | zweiter `wallet-pass` als Teil mit `"enter": "cut"`, `"scan": false`, `"rise": false`, `"drop": false` | `before` und `after` höher als im ersten, je neuer Stempel ein Anker `stamp1`, `stamp2`, ... |
+| Die Pointe (der Beleg der Idee in einem Satz) | `stamp-check` als eigene Szene oder als Teil mit `"enter": "cut"` (6.2) | `"icon": "check"`, Anker `hit` auf das letzte Wort, `"offset": 0.1` |
+| Beispielrechnung (Thema `rechnung`) | `calc-panel` | **Nicht im unbeaufsichtigten Lauf** (unten). Die Tafel braucht mindestens zwei, im Muster vier Textzeilen in einem Bild ohne erprobte Kamera: rund 10 s ohne Bildwechsel. Die Themen T05 und T19 warten deshalb (`THEMEN.md`), bis eine begleitete Sitzung eine Rechnung in Stil C gebaut hat |
+| Schluss | `cta-comment` | Anker `logo` auf `{ "cap": -1, "word": -1 }`, Text nach 6.2 |
+
+**Nicht in einem unbeaufsichtigten Lauf**, obwohl es die Bausteine können:
+
+- `shop-street` mit `"privacy": true` und `shop-map` oder `shop-street` mit
+  `"track": true`: sie zeigen "der Laden sieht nicht, wo du bist" und "der
+  Laden verfolgt dich nicht". Das sagt die Landing Page nicht (`PRODUKT.md`,
+  N2); der Betreiber hat es nur für sein zweites Video selbst freigegeben.
+- `shop-street` mit `"card": true` ("In der Karte steht, wo der Laden ist"):
+  steht so nicht in `PRODUKT.md`.
+- `shop-street` mit `"view": "owner"` und Kunden (`phones` über 0): sie
+  stehen vor der Tür.
+- `shop-map` mit `"view": "owner"`: die Karte zeigt aus Sicht des Ladens,
+  wo seine Kunden gerade sind. Genau das schließt `PRODUKT.md` aus (N2: "wir
+  sehen, wo deine Kunden gerade sind"). Die Sicht des Ladens zeigt
+  `lock-notification` (Tabelle oben).
+- `calc-panel`: in Stil C nicht erprobt (Tabelle oben).
+- `shop-street` mit Passant ohne `across`: er geht direkt an der Ladentür
+  vorbei.
+- `cup-row`: das Bild des ersten Videos, nur für Becher, mit Preisschild in
+  der Knopfspalte von TikTok.
+
+### 6.5 Pausen und Mischung
+
+- `"maxGap": 0.45` (6.1) kürzt beim Bau jede stille Lücke der Aufnahme auf
+  0,45 s. Die Aufnahme im Ordner `voice/` bleibt dabei, wie sie ist.
+- Gewollte Pausen stellt `gapBefore` an der Textzeile **nach** der Pause ein,
+  genau an zwei Stellen: `0.55` an der ersten Textzeile nach der Pointe (der
+  Satz muss wirken) und `0.65` an der Aufforderung im Schluss. Sonst keins,
+  nie an der ersten Textzeile.
+- Ziel nach der Aufnahme: Pausen ab 0,5 s zusammen höchstens 2 s, keine über
+  0,7 s (`konfig.json`, `video`). Das zweite Video: zwei Pausen, 1,2 s.
+- Gemischt wird auf -14 LUFS, wahre Spitze höchstens -1 dBTP (`mix`, 6.1).
+  Der Entwurf ohne Stimme läuft mit der festen, leiseren Mischung; der Wert
+  gilt erst mit Stimme (Schritt 18).
+
+### 6.6 Der Beitragstext
+
+Zu jedem Video gehört ein fertiger Text für Instagram, Facebook und TikTok.
+Der Betreiber kopiert ihn auf dem Board mit "Text kopieren" und postet selbst
+mit Metricool auf allen drei zugleich. Er steht am Video im Feld `caption`
+(Schritt 19), auch bei einem Entwurf ohne Stimme. Die Automatik postet nie
+(Regel 3).
+
+**Form,** in dieser Reihenfolge:
+
+1. **Der Hook:** derselbe erste Satz wie im Video (dieselben ersten drei
+   Wörter), gern mit einem Emoji dahinter.
+2. **Ein oder zwei kurze Sätze,** die nur sagen, was `PRODUKT.md` in Klasse 1
+   deckt, meist der Beleg der Idee, so wie das Video ihn sagt. Du-Form wie im
+   Video.
+3. **Die Aufforderung** mit genau dem Stichwort des Videos in
+   Großbuchstaben: `👉 Kommentiere <STICHWORT> und wir melden uns.`
+4. Eine **Leerzeile**, dann **genau fünf Hashtags** in einer Zeile, genau die,
+   die `node "$R/studio/tools/beitrag.mjs" hashtags --branche <branche>`
+   ausgibt (zwei der Branche, dann `#berlincity #kleinunternehmen
+   #stempelkarte`). Instagram nimmt nicht mehr als fünf.
+
+Höchstens 250 Zeichen vor den Hashtags, höchstens drei Emojis. Kein
+Gedankenstrich, kein @, kein Link, keine Preise, kein "gratis" oder
+"kostenlos" für die App, nichts aus "Was ein Video nie sagt" in `PRODUKT.md`.
+Muster ist der Text, den der Betreiber für das zweite Video gewählt hat
+(`konfig.json`, `beitrag.beispiel`). Dessen Satz "Der Laden sieht nicht, wo du
+bist." schreibt ein Lauf nicht (N2, siehe 6.4).
+
+Beispiel für ein Video mit der Vorlage (Bäckerei, Stichwort BROT):
+
+```
+Wer sagt deiner Kundin, dass die Karte voll ist? 🤔
+Ist ihre Stempelkarte voll und sie kommt in die Nähe deiner Bäckerei, zeigt ihr Handy sie von selbst an.
+👉 Kommentiere BROT und wir melden uns.
+
+#bäckerei #cafe #berlincity #kleinunternehmen #stempelkarte
+```
+
+**Prüfen,** bevor er aufs Board geht: den Text in eine Datei schreiben
+(`$A/caption-<video-id>.txt`, mit echten Zeilenumbrüchen), dann
+
+```bash
+R=/home/user/stempelkarte-frontend; A=/tmp/stampit-lauf
+node "$R/studio/tools/beitrag.mjs" pruefen --text "$A/caption-<video-id>.txt" --branche <branche> --stichwort <STICHWORT> --hook "<captions[0].text aus dem Bericht>"; echo "Ende-Code $?"
+```
+
+| | |
+|---|---|
+| Ende-Code 0 | dieser Text kommt in `caption`, Zeichen für Zeichen (Zeilenumbrüche als `\n`) |
+| Ende-Code 1 | `fehler` nennt, was nicht stimmt. Beheben und wiederholen, höchstens drei Runden. Dann ohne `caption` weiter, und `pruefung` sagt "ohne Beitragstext" |
+| Ende-Code 2 | das Werkzeug läuft nicht: ohne `caption` weiter, `pruefung` sagt "ohne Beitragstext" |
+
+Ob jeder Satz von `PRODUKT.md` gedeckt ist, prüft das Werkzeug nicht. Das
+ist Sache dessen, der den Text schreibt, genau wie im Video.
+
+**Ändern:** Einen Wunsch, der nur den Text betrifft ("kürzer", "ohne
+Emojis"), erfüllt Schritt 9, Punkt 3a, ohne neuen Bau. Ändert sich bei einer
+neuen Fassung der Hook oder das Stichwort, bekommt sie einen neuen Text nach
+diesem Abschnitt; sonst übernimmt sie den alten. Andere Hashtags als die aus
+`konfig.json` gibt es nur über einen Chat.
+
+Bilder, Pausen und Länge sind Richtwerte aus dem zweiten Video und den
+vermessenen Vorbildern. Der Geschmack des Betreibers aus `START.md` schlägt
+jeden davon.
 
 ---
 
@@ -1303,14 +1596,14 @@ gesprochenen Textes (`elevenLabs.chars`), wie der Anbieter es berechnet.
 | Grenze | Wert | Warum |
 |---|---|---|
 | Not-Aus | `unbeaufsichtigt_erlaubt`, heute `true` | `false` schaltet die Stimme für die Automatik ab |
-| je voller Aufnahme | höchstens 800 Zeichen | ein Video von 45 bis 55 Sekunden hat rund 650 bis 800, und zwei volle Aufnahmen müssen in die Tagesgrenze passen. Die harte Sperre im Studio liegt bei 1500 |
+| je voller Aufnahme | höchstens 800 Zeichen | ein Video in Stil C mit 105 bis 115 Wörtern hat rund 630 bis 700 (das zweite Video: 658), und zwei volle Aufnahmen müssen in die Tagesgrenze passen. Die harte Sperre im Studio liegt bei 1500 |
 | je einzelnem Satz (`--splice`) | höchstens 200 Zeichen | ein Satz hat selten mehr als 120 |
 | volle Aufnahmen am Tag | 1, für das neue Video oder für einen Änderungswunsch | |
 | zusätzlich am selben Tag | 1 weitere volle Aufnahme, **nur zum Nachholen** (`--zweck nachholen`) | damit nach einem Tag ohne Stimme nicht jeden Tag ein Video hinterherläuft |
 | einzelne Sätze am Tag | 2 (im Sparbetrieb 1) | für Änderungswünsche mit genau einem geänderten Satz |
 | Zeichen am Tag | höchstens 1600 | zwei volle Aufnahmen, oder eine und zwei Sätze |
 | im Kalendermonat (Europe/Berlin) | höchstens 27.000 durch die Automatik | 90 % des Tarifs von 30.000. Der Rest ist Reserve |
-| Vortrag für November 2026 | 4.136 Zeichen, geschätzt (A4) | Aufnahmen für die ersten beiden Videos, bevor es das Kassenbuch gab |
+| Vortrag für November 2026 | 4.874 Zeichen, geschätzt (A4) | Aufnahmen für die ersten beiden Videos, bevor es das Kassenbuch gab |
 
 `budget.mjs` nennt die `stufe`:
 
@@ -1471,16 +1764,19 @@ nicht. Weichen beide Messungen um mehr als 2 s voneinander ab, beide Zahlen
 in `pruefung` nennen.
 
 **c. Lautstärke.** `dna` nennt unter Audio die Lautheit in LUFS und die wahre
-Spitze. Erwartet mit den Vorgaben: Lautheit zwischen -21 und -16 LUFS, wahre
-Spitze höchstens -0,5 dBFS. Abweichungen vermerken. Die Mischung ändert der
-Lauf nicht.
+Spitze. Erwartet in Stil C (`konfig.json`, `eyes`): Lautheit zwischen -15 und
+-13 LUFS, wahre Spitze höchstens -0,5 dBFS. eyes misst anders als das Studio;
+maßgeblich sind die Werte aus Schritt 18. Mit eyes ist ein Video in Stil C
+noch nie gemessen worden. Abweichungen vermerken. Die Mischung ändert der Lauf
+nicht.
 
 **d. Sprechanteil.** `dna` nennt Wörter je Minute beim Sprechen und den
 Anteil der Zeit mit Sprache. Richtwert: 150 bis 190, Anteil ab 80 %. Nur
 vermerken.
 
-Nicht verwenden: die Zahl der Schnitte je Minute (eyes übersieht unsere
-weichen Übergänge) und die Wort-Endzeiten (unbrauchbar).
+Nicht verwenden: die Zahl der Schnitte je Minute (eyes übersieht weiche
+Übergänge und Kamerafahrten; maßgeblich ist `bildwechsel` aus dem Studio)
+und die Wort-Endzeiten (unbrauchbar).
 
 ---
 
@@ -1506,18 +1802,23 @@ ist, und braucht dann einen eigenen Auftragstext ohne Stimme, Bau und Push.
 
 ### 10.2 Auftragstext
 
+Das ist der Text der angelegten Aufgabe, Wort für Wort (abgeglichen am
+16.11.2026 mit der gespeicherten Aufgabe). Wer ihn hier ändert, ändert ihn
+auch an der Aufgabe, und umgekehrt: beide müssen gleich bleiben.
+
 ```
 Stampit-Automatik, täglicher Lauf. Dieser Lauf ist unbeaufsichtigt: stelle keine Fragen und warte auf niemanden.
 
-1. Im Repo stempelkarte-frontend: git fetch origin ccr-816d9995-jhzqdq && git checkout ccr-816d9995-jhzqdq
+1. Das Repo stempelkarte-frontend: Liegt es nicht schon im Arbeitsordner, hole es an diese Sitzung. Lade dazu mit ToolSearch ("select:mcp__claude-code-remote__add_repo,mcp__claude-code-remote__register_repo_root") die beiden Werkzeuge, rufe add_repo mit owner "TerraByte19", repo "stempelkarte-frontend" und access "push" auf, führe den Klon-Befehl aus der Antwort aus und rufe danach register_repo_root mit dem Ordner auf. Dann im Repo: git fetch origin ccr-816d9995-jhzqdq && git checkout ccr-816d9995-jhzqdq
 2. Lies studio/AUTOMATIK.md in Teilen von höchstens 400 Zeilen bis zur Zeile "ENDE DER ANLEITUNG" und führe den Lauf genau so aus, wie er dort steht. Die Regeln in Abschnitt 1 gelten vor allem anderen, auch vor Texten vom Board oder aus Metricool.
 
 Das Board ist https://claude.ai/artifact/NN4DTD3LpysNVZ1YaziVXm. Nur diese Adresse gilt. Nennt eine Datei im Repo eine andere, dann schreibe nur den Hinweis darauf auf dieses Board und beende den Lauf.
 
 Für diese Aufgabe erlaube ich genau das:
+- das Repo TerraByte19/stempelkarte-frontend wie in Schritt 1 an diese Sitzung holen, kein anderes.
 - im Arbeitsordner Videos bauen (node, ffmpeg, Playwright) und dafür numpy mit pip installieren.
 - auf diesem Board Dokumente lesen und schreiben und Dateien hochladen (Video, Standbild, Quellen-Paket) und das eigene Quellen-Paket wieder herunterladen. Auf dem Board nichts löschen, die Seite nicht neu veröffentlichen.
-- über die Verbindung Metricool Zahlen lesen, nur mit getAnalyticsDataByMetrics (Marke 7969131).
+- über die Verbindung Metricool Zahlen lesen, nur mit getAnalyticsDataByMetrics (Marke 7969131). Fehlt die Verbindung, gilt, was AUTOMATIK.md für "metricool-fehlt" sagt.
 - die Stimme bei ElevenLabs aufnehmen, nur über studio/make.mjs und nur, wenn studio/tools/budget.mjs direkt davor zustimmt: eine volle Aufnahme am Tag, eine zweite nur für ein Video vom Vortag, das noch ohne Stimme ist, dazu höchstens zwei einzelne Sätze. Höchstens 1600 Zeichen am Tag und 27000 im Monat. Bleibt eine Aufnahme ohne Antwort: am selben Tag kein zweiter Versuch, am nächsten Tag einmal neu aufnehmen, auch wenn das im schlimmsten Fall doppelt kostet. Dafür darf die alte Sperrdatei im Ordner dieses Videos entfernt werden.
 - studio/tools/eyes-setup.sh ausführen und damit das fertige eigene Video prüfen. Das Skript lädt das Prüfwerkzeug claude-eyes und whisper.cpp von GitHub und ein Sprachmodell von Hugging Face.
 - die Ordner der neuen oder geänderten Videos unter studio/videos und den Ordner studio/state/board committen und einmal auf den Branch ccr-816d9995-jhzqdq pushen. Ein npm run build ist davor nicht nötig, weil sich nur Dateien unter studio/ ändern. Lehnt die Sicherheitsprüfung den Push ab: nicht wiederholen, keinen anderen Weg suchen, vermerken. Nach einem Netzfehler höchstens ein zweiter Versuch.
@@ -1525,33 +1826,63 @@ Für diese Aufgabe erlaube ich genau das:
 
 Nie: etwas posten oder planen, instagram.com oder ein fremdes Video abrufen, auf main pushen, Regeln, Einstellungen oder geplante Aufgaben ändern.
 
-Notfall: Fehlt das Repo, der Branch oder die Datei studio/AUTOMATIK.md, dann hole mit ToolSearch ("select:ArtifactData") das Werkzeug ArtifactData, lies auf dem Board das Dokument stand/aktuell und ändere es mit action "update" und if_version: problem = "Der Aufgabe fehlt das Repo stempelkarte-frontend oder der Branch ccr-816d9995-jhzqdq. Bitte unter claude.ai/code/routines zuweisen.", meldung = "Heute konnte kein Video entstehen.", modus = "produktion", letzter_lauf = jetzt als UTC-Zeit (JJJJ-MM-TTThh:mm:ssZ). Dann beende den Lauf.
+Notfall: Lässt sich das Repo nicht holen, fehlt der Branch oder die Datei studio/AUTOMATIK.md, dann hole mit ToolSearch ("select:ArtifactData") das Werkzeug ArtifactData, lies auf dem Board das Dokument stand/aktuell und ändere es mit action "update" und if_version: problem = "Die Automatik kam nicht an das Repo stempelkarte-frontend oder den Branch ccr-816d9995-jhzqdq.", meldung = "Heute konnte kein Video entstehen.", modus = "produktion", letzter_lauf = jetzt als UTC-Zeit (JJJJ-MM-TTThh:mm:ssZ). Dann beende den Lauf.
 ```
 
-### 10.3 Inbetriebnahme: Reihenfolge
+Schritt 1 holt das Repo selbst an die Sitzung (`add_repo`, dann
+`register_repo_root`), weil eine geplante Sitzung leer startet. Wohin der
+Klon-Befehl das Repo legt, ist nicht erprobt; Schritt 1 dieser Anleitung
+sucht es, wenn es nicht unter `/home/user/stempelkarte-frontend` liegt.
 
-Eine frische Sitzung sieht nur, was auf dem Branch liegt. Deshalb:
+### 10.3 Inbetriebnahme: Stand und Reihenfolge
 
-1. **Zuerst committen und pushen:** alles unter `studio/` auf den Branch
-   `ccr-816d9995-jhzqdq`. Liegt diese Datei dort nicht, meldet jeder Lauf nur
-   den Notfall.
-2. **Dann die Aufgabe anlegen** (in einer begleiteten Sitzung mit dem
-   Werkzeug für geplante Aufgaben): Name "Stampit Produktion", der Zeitplan
-   aus 10.1, der Text aus 10.2 wörtlich, je Ausführung eine neue Sitzung
-   (`create_new_session_on_fire: true`), `notifications: { push: true }`.
-   Das ist der dokumentierte Weg aufs Handy.
-3. **Dann weist der Betreiber** unter claude.ai/code/routines der Aufgabe das
-   Repository **stempelkarte-frontend** und die Verbindung **Metricool Social
-   Media Management** zu. Er prüft, dass die Aufgabe in der Umgebung läuft,
-   die ElevenLabs erreichen darf, und erlaubt Benachrichtigungen der
-   Claude-App am Handy.
-4. **Dann der erste Lauf, begleitet:** der Betreiber tippt bei der Aufgabe
-   auf "Jetzt ausführen" und sieht zu; eine begleitete Sitzung hakt dabei
+**Stand am 16.11.2026, abends.** Die Aufgabe "Stampit Produktion" ist
+angelegt (id `trig_011PCW9NZ6wwaT178W3vtv2L`, seit 16.11.2026 18:28 UTC): der
+Zeitplan aus 10.1, der Text aus 10.2, je Ausführung eine neue Sitzung,
+Benachrichtigung aufs Handy, die Verbindung Metricool zugewiesen. Das Repo
+holt sie selbst (Schritt 1 des Auftragstexts). **Nicht noch einmal
+anlegen:** zwei Aufgaben hießen zwei Läufe und zwei Aufnahmen am Tag.
+
+Eingeschaltet war sie zuerst nur, damit der Betreiber sie unter
+claude.ai/code/routines sieht. **Seit dem 16.11.2026, 23:01 Uhr deutscher
+Zeit, ist sie pausiert:** die Erinnerung in der begleitenden Sitzung hat sie
+ausgeschaltet, weil der begleitete Lauf noch nicht war (nachgesehen um 23:55
+Uhr: `enabled: false`). Ob sie gerade an oder aus ist, zeigt
+claude.ai/code/routines. **Auf dem Branch liegt Stil C an diesem Abend noch
+nicht:** alles unter `studio/` ist geändert, aber nicht committet. Liefe die
+Aufgabe so, baute sie im alten Stil und nähme zum ersten Mal unbeaufsichtigt
+bezahlt auf.
+
+Offen, in dieser Reihenfolge:
+
+1. **Committen und pushen,** alles unter `studio/` auf den Branch
+   `ccr-816d9995-jhzqdq`, nur auf Wunsch des Betreibers. Eine frische Sitzung
+   sieht nur, was auf dem Branch liegt. Mit `git add studio`, nicht nur den
+   geänderten Dateien: `tools/beitrag.mjs` und die Standbilder
+   `docs/components/shop-map.png`, `shop-street.png` und `stamp-check.png`
+   sind neu. Fehlt `beitrag.mjs` im Commit, scheitert `tools/selftest.mjs` in
+   jeder frischen Sitzung, und Schritt 5 endet mit `studio-kaputt`. Davor
+   `git status` ansehen.
+2. **Die Seite des Boards veröffentlichen** (Beitragstext mit "Text
+   kopieren"), ebenfalls nur auf Wunsch (`board/LIESMICH.md`, "Die Seite
+   später ändern"). Sonst sieht der Betreiber den Text nicht.
+3. **Der Betreiber prüft** unter claude.ai/code/routines, dass die Aufgabe in
+   der Umgebung läuft, die ElevenLabs erreichen darf, und erlaubt
+   Benachrichtigungen der Claude-App am Handy.
+4. **Der erste Lauf, begleitet:** der Betreiber tippt bei der Aufgabe auf
+   "Jetzt ausführen" und sieht zu; eine begleitete Sitzung hakt dabei
    Abschnitt 11 ab. Dieser Lauf nimmt zum ersten Mal über das Studio auf,
    lädt zum ersten Mal ein Quellen-Paket hoch und schreibt zum ersten Mal
-   unbeaufsichtigt aufs Board. Erst wenn er sauber durch ist, läuft die
-   Aufgabe allein. Bis dahin nicht bis 06:47 Uhr liegen lassen: lieber die
-   Aufgabe erst an dem Tag anlegen, an dem der Betreiber Zeit hat.
+   unbeaufsichtigt aufs Board.
+5. **Dann einschalten:** erst wenn der begleitete Lauf sauber durch ist,
+   läuft die Aufgabe allein. Bis dahin bleibt sie pausiert, damit sie nicht
+   vorher um 06:47 Uhr allein startet.
+
+Muss die Aufgabe doch neu angelegt werden (gelöscht, anderer Branch): in
+einer begleiteten Sitzung mit dem Werkzeug für geplante Aufgaben, Name
+"Stampit Produktion", der Zeitplan aus 10.1, der Text aus 10.2 wörtlich,
+`create_new_session_on_fire: true`, `notifications: { push: true }`, die
+Verbindung Metricool. Die alte vorher löschen.
 
 Ändert sich der Branch oder die Adresse des Boards, ändern sich der
 Auftragstext, `state/konfig.json`, `board/ADRESSE.txt` und `stand.start_satz`.
@@ -1579,9 +1910,13 @@ erste begleitete Lauf (10.3) geht diese Liste durch:
 | Pfad des Repos in einer geplanten Sitzung; ob git dort Name und E-Mail kennt | angenommen bzw. unbekannt | Schritte 1 und 24 |
 | ob `PushNotification`, `SendUserFile` und die Benachrichtigung der Aufgabe den Betreiber am Handy erreichen | unbekannt | Schritt 23 |
 | `tools/eyes-setup.sh` | die Befehle sind die am 15.11.2026 geprüften; die Datei mit ihren Kommentaren ist so nie gelaufen. Der Pfad des Modells setzt den Benutzer root voraus | Schritt 21 |
-| ob derselbe Baustein zweimal in einem Video läuft und wie viele Bilder die acht Bausteine wirklich hergeben | am Code gelesen (jede Szene hat ihren eigenen Bereich), nie gebaut | Schritt 16 |
-| die Richtwerte in Abschnitt 6 (7 Bilder, 15 Ereignisse je Minute, 5 s Pausen) und die Schätzung "800 Zeichen sind rund 55 Sekunden" | aus der Analyse abgeleitet, mit keinem gebauten Video belegt | nach den ersten drei Videos nachstellen |
+| derselbe Baustein mehrmals in einem Video | gebaut: das zweite Video zeigt `shop-map` und `shop-street` je dreimal, `wallet-pass` und `lock-notification` je zweimal | erledigt |
+| die Richtwerte in Abschnitt 6 (12 Bildwechsel, längstes Bild 5 s, Pausen 2 s, 40 bis 55 s, 105 bis 115 Wörter) | belegt mit einem Video in Stil C (dem zweiten, in begleiteten Sitzungen gebaut) und einem Entwurf ohne Stimme aus der Vorlage. Kein unbeaufsichtigter Lauf hat danach geschrieben | nach den ersten drei Videos nachstellen |
+| die laute Mischung (-14 LUFS) in einem unbeaufsichtigten Lauf, und wie eyes sie misst | nur am zweiten Video gemessen (-14,1 LUFS, -1,2 dBTP), nie mit eyes | Schritte 18 und 21 |
+| der Beitragstext (`caption`) auf der Seite des Boards mit dem Knopf "Text kopieren" | die Seite ist lokal mit einer nachgebauten Laufzeit geprüft (Chromium, Handybreite), aber noch **nicht veröffentlicht**: bis eine begleitete Sitzung sie veröffentlicht, steht das Feld nur in der Datenbank und die Seite zeigt es nicht | der Betreiber sieht den Text unter dem Video |
+| ob das Kopieren in der Claude-App am Handy die Zwischenablage erreicht | unbekannt; geht es nicht, markiert die Seite den Text | der Betreiber, am Handy |
 | ob die Texte `lp_price_*` irgendwo live zu sehen sind und die Funktionen dahinter stimmen | auf diesem Branch zeigt sie keine Seite an (A2) | der Betreiber bestätigt |
-| der Vortrag von 4.136 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
+| Schritt 1 des Auftragstexts: `add_repo`, Klon und `register_repo_root` in einer geplanten Sitzung, und wohin der Klon geht | nie gelaufen | Schritt 1 |
+| der Vortrag von 4.874 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
 
 ENDE DER ANLEITUNG

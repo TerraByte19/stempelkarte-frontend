@@ -422,11 +422,22 @@ textarea[readonly] { opacity: 0.75; }
 .log-problem b { display: block; font: 700 12px/1.2 var(--font-head); letter-spacing: 0.08em; text-transform: uppercase; color: var(--danger); margin-bottom: 3px; }
 
 /* ---------- Weiterarbeiten ---------- */
-.startsatz {
+.startsatz, .beitrag-text {
   background: var(--inset); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px;
   padding: 11px 12px; font-size: 16px; line-height: 1.45; white-space: pre-wrap;
   -webkit-user-select: text; user-select: text;
 }
+/* ---------- Beitragstext je Video ----------
+   Der Betreiber postet selbst (Metricool) und kopiert den Text von hier. Er
+   steht offen da, damit er ihn vor dem Kopieren lesen kann. overflow-wrap,
+   weil ein langer Hashtag sonst ueber den Rand der Karte hinauslaeuft. */
+.beitrag { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* display:flex oben schlaegt sonst das hidden-Attribut: ohne diese Zeile hinge
+   bei Videos ohne Beitragstext ein leerer Kasten mit Knopf "Text kopieren" da,
+   sobald die Plattform keine eigene [hidden]-Regel mitliefert. */
+.beitrag[hidden] { display: none; }
+.beitrag-label { font: 700 12px/1.2 var(--font-head); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); }
+.beitrag-text { font-size: 15.5px; max-width: 62ch; overflow-wrap: anywhere; }
 .copy-status { font-size: 14.5px; color: var(--ink-soft); }
 
 /* ---------- eingeklappte Bereiche ---------- */
@@ -619,7 +630,7 @@ textarea[readonly] { opacity: 0.75; }
   // "ideen", "laeufe" und das eine Dokument "stand/aktuell". Diese Seite
   // schreibt nur videos.status, videos.feedback, videos.geaendert und
   // ideen.status und legt eingang-Dokumente an. Alles andere schreibt die
-  // Automation.
+  // Automation, auch videos.caption (Beitragstext), den die Seite nur zeigt.
   // ------------------------------------------------------------------
   var ASSET_BASE = '/_blob/';      // laut assets.d.ts: eine gespeicherte id liegt unter "/_blob/" + id
   var LADE_FRIST_MS = 10000;       // laut db.d.ts: Laden nach etwa 10 s als "nicht erreichbar" melden
@@ -1199,6 +1210,42 @@ textarea[readonly] { opacity: 0.75; }
     var box = el('p', { class: 'said' + (extraClass ? ' ' + extraClass : ''), hidden: true }, [b, t]);
     return { el: box, set: function (text, neuesLabel) { if (neuesLabel) setText(b, neuesLabel); setText(t, text); show(box, !!text); } };
   }
+  // Beitragstext (Feld "caption", seit 16.11.2026): fertig zum Einfuegen in
+  // Metricool. Aeltere Videos haben das Feld nicht, dann bleibt der Kasten
+  // ganz weg. Kopieren wie unter "Weiterarbeiten": geht es in der Ansicht
+  // nicht, wird der Text markiert, statt still nichts zu tun.
+  function beitragKasten() {
+    var text = el('p', { class: 'beitrag-text' });
+    var status = el('span', { class: 'copy-status', role: 'status' });
+    var knopf = el('button', { type: 'button', class: 'btn soft', text: 'Text kopieren' });
+    var box = el('div', { class: 'beitrag', hidden: true }, [
+      el('p', { class: 'beitrag-label', text: 'Beitragstext' }),
+      text,
+      el('div', { class: 'row' }, [knopf, status])
+    ]);
+    var aktuell = '';
+    knopf.addEventListener('click', function () {
+      var t = aktuell;
+      if (!t) return;
+      function markiere() {
+        var r = document.createRange(); r.selectNodeContents(text);
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        setText(status, 'Kopieren ging hier nicht. Der Text ist markiert, kopiere ihn von Hand.');
+      }
+      // "Kopiert" nur, wenn noch derselbe Text dasteht: kam inzwischen eine
+      // neue Fassung, waere die Meldung falsch.
+      try { navigator.clipboard.writeText(t).then(function () { if (aktuell === t) setText(status, 'Kopiert'); }, markiere); } catch (e) { markiere(); }
+    });
+    return {
+      el: box,
+      set: function (c) {
+        if (c !== aktuell) { aktuell = c; setText(status, ''); }
+        setText(text, c);
+        show(box, !!c);
+      }
+    };
+  }
+
   // Die Zeile, die an der Karte sagt, was mit der letzten Entscheidung ist.
   function zustand() {
     var text = el('span', { class: 'state-text' });
@@ -1245,6 +1292,7 @@ textarea[readonly] { opacity: 0.75; }
     var player = makePlayer();
     var meta = el('p', { class: 'meta' });
     var antwort = beschriftet('Das wurde geändert');
+    var beitrag = beitragKasten();
     var spoken = el('p', { class: 'spoken' });
     var mehr = el('details', { class: 'more' }, [el('summary', { text: 'Gesprochener Text' }), spoken]);
     var quelle = el('p', { class: 'quelle', hidden: true });
@@ -1346,7 +1394,7 @@ textarea[readonly] { opacity: 0.75; }
     var card = el('article', { class: 'card' }, [
       el('div', { class: 'card-head' }, [k.eyebrow, k.title, hook]),
       el('div', { class: 'card-media' }, player.el),
-      el('div', { class: 'card-body' }, [meta, antwort.el, mehr, quelle, actions, fbForm, wegForm, st.el])
+      el('div', { class: 'card-body' }, [meta, antwort.el, beitrag.el, mehr, quelle, actions, fbForm, wegForm, st.el])
     ]);
     return {
       mode: 'neu', el: card, entwurf: entwurf,
@@ -1359,6 +1407,7 @@ textarea[readonly] { opacity: 0.75; }
         player.set(v, !(platzNr >= SOFORT_LADEN));
         var m = metaText(v); setText(meta, m); show(meta, !!m);
         antwort.set(v.antwort);
+        beitrag.set(v.caption);
         setText(spoken, v.text || 'Zu diesem Video ist kein Text hinterlegt.');
         setText(quelleText, v.quelle); show(quelle, !!v.quelle);
         ordne();
@@ -1376,6 +1425,7 @@ textarea[readonly] { opacity: 0.75; }
     var fehler = el('p', { class: 'field-error', role: 'alert', hidden: true, text: 'Der Änderungswunsch darf nicht leer sein. Wenn doch nichts geändert werden soll, zieh die Anfrage zurück.' });
     var btnSave = el('button', { type: 'submit', class: 'btn primary', text: 'Speichern', disabled: true });
     var nurLesen = beschriftet('Dein Änderungswunsch', 'mine');
+    var beitrag = beitragKasten();
     var fold = makeFoldedPlayer();
     var btnZurueck = el('button', { type: 'button', class: 'linkbtn entscheid', text: 'Anfrage zurückziehen' });
     var naechster = el('p', { class: 'next-run' });
@@ -1411,6 +1461,7 @@ textarea[readonly] { opacity: 0.75; }
       el('div', { class: 'item-head' }, [k.eyebrow, k.title]),
       form, nurLesen.el, st.el,
       naechster,
+      beitrag.el,
       el('div', { class: 'row' }, [fold.btn, btnZurueck]),
       fold.slot
     ]);
@@ -1446,6 +1497,7 @@ textarea[readonly] { opacity: 0.75; }
         // Automation zuletzt auch gemeldet hat. Sonst waere das ein Versprechen,
         // das niemand haelt.
         setText(naechster, S.aktiv ? 'Der nächste Lauf kümmert sich darum.' : 'Bearbeitet wird das, sobald die Automation läuft.');
+        beitrag.set(v.caption);
         fold.set(v);
         show(fold.btn, !!v.asset);
       }
@@ -1458,6 +1510,7 @@ textarea[readonly] { opacity: 0.75; }
     var aktuell = null;
     var st = zustand();
     var antwort = beschriftet('Das wurde geändert');
+    var beitrag = beitragKasten();
     var fold = makeFoldedPlayer();
     var hinweis = el('p', { class: 'meta', hidden: true, 'aria-live': 'polite' });
     var btnLaden = el('button', { type: 'button', class: 'btn soft', text: 'Herunterladen' });
@@ -1506,6 +1559,7 @@ textarea[readonly] { opacity: 0.75; }
     var item = el('article', { class: 'item' }, [
       el('div', { class: 'item-head' }, [k.eyebrow, k.title]),
       antwort.el,
+      beitrag.el,
       el('div', { class: 'row' }, [fold.btn, btnLaden, link, btnNimm]),
       st.el,
       hinweis,
@@ -1518,6 +1572,7 @@ textarea[readonly] { opacity: 0.75; }
         aktuell = v;
         k.set(v);
         antwort.set(v.antwort);
+        beitrag.set(v.caption);
         fold.set(v);
         show(fold.btn, !!v.asset);
         show(btnLaden, !!v.asset && link.hidden);
@@ -1543,6 +1598,7 @@ textarea[readonly] { opacity: 0.75; }
     var meta = el('span', { class: 'meta' });
     var feedback = beschriftet('Deine Notiz', 'mine');
     var antwort = beschriftet('Antwort');
+    var beitrag = beitragKasten();
     var fold = makeFoldedPlayer();
     // Nur fuer verworfene Videos: "ersetzt" setzt die Automation, das nimmt der Nutzer nicht zurueck.
     var btnDoch = el('button', { type: 'button', class: 'linkbtn entscheid', text: 'Doch nicht verwerfen', hidden: true });
@@ -1552,7 +1608,7 @@ textarea[readonly] { opacity: 0.75; }
     });
     var item = el('article', { class: 'item' }, [
       el('div', { class: 'item-head' }, [k.eyebrow, k.title, el('div', { class: 'pillrow' }, [pill, meta])]),
-      feedback.el, antwort.el,
+      feedback.el, antwort.el, beitrag.el,
       el('div', { class: 'row' }, [fold.btn, btnDoch]),
       st.el,
       fold.slot
@@ -1571,6 +1627,7 @@ textarea[readonly] { opacity: 0.75; }
         setText(meta, metaText(v));
         feedback.set(v.feedback, s === 'verworfen' ? 'Dein Grund' : s === 'ersetzt' ? 'Dein Änderungswunsch' : 'Deine Notiz');
         antwort.set(v.antwort, s === 'ersetzt' ? 'Das wurde geändert' : 'Antwort');
+        beitrag.set(v.caption);
         fold.set(v);
         show(fold.btn, !!v.asset);
         var b = !!v.vorgang && beschaeftigt(v.vorgang);
@@ -1594,6 +1651,7 @@ textarea[readonly] { opacity: 0.75; }
       asset: assetId(d.asset_id), poster: assetId(d.poster_asset_id),
       dauer: num(d.dauer_s), version: num(d.version),
       status: str(d.status), feedback: str(d.feedback), antwort: str(d.antwort),
+      caption: str(d.caption).trim(),
       erstellt: str(d.erstellt),
       vorgang: null, ort: '', fest: ''
     };

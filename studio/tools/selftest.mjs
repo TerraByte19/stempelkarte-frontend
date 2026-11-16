@@ -20,6 +20,9 @@
 //     prueft den Entwurf, BEVOR es um eine Aufnahme geht
 //   - ein Satz von ausserhalb des Studios (tools/clip-in.py) kommt in die Aufnahme,
 //     ohne dass sie angefasst oder etwas gesendet wird (tools/test_clip_in.py)
+//   - der Beitragstext je Video haelt die Regeln aus state/konfig.json ein: genau 5
+//     Hashtags (Grenze von Instagram), kein Gedankenstrich, das Stichwort des Videos
+//     (tools/beitrag.mjs selbsttest)
 import { readFileSync, existsSync, mkdtempSync, writeFileSync, rmSync, readdirSync, cpSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -183,8 +186,20 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
   const ex = load(path.join(vd, 'beispiel-friseur'))
   const a = await page(tpl, null, { motion: true }), b = await page(ex, null, { motion: true })
   const first = s => (s.scenes[0].parts || [s.scenes[0]])[0].captions[0]
-  check('Vorlage besteht alle Prüfungen (einzige Warnung: Preisschild in der Knopfspalte) und setzt "instant" an der ersten Textzeile',
-    a.res.ok && a.res.warnings.length === 1 && /knopfspalte/.test(a.res.warnings[0]) && first(tpl).instant === true, a.res.errors.concat(a.res.warnings).join(' | ').slice(0, 160))
+  // Seit dem 16.11.2026 ist die Vorlage im Stil C (wie das zweite Video). Vorher verlangte diese
+  // Pruefung genau die eine Warnung "knopfspalte" der Becherreihe aus dem ersten Video; die Vorlage
+  // hat keine Becherreihe mehr. Neu festgenagelt: die Vorlage traegt Modus "wort", "maxGap", "pace"
+  // und "mix" genau so, wie sie in state/konfig.json stehen (Abschnitte "skript" und "mix"). Der
+  // unbeaufsichtigte Lauf kopiert die Vorlage und liest die Einstellungen; laufen beide
+  // auseinander, baute er still ein Video im falschen Stil.
+  const konfig = JSON.parse(readFileSync(path.join(STUDIO_ROOT, 'state', 'konfig.json'), 'utf8'))
+  const ks = konfig.skript || {}, km = konfig.mix || {}
+  const stilWieKonfig = !!ks.captionStyle && tpl.captionStyle && tpl.captionStyle.mode === ks.captionStyle.mode &&
+    tpl.timing && tpl.timing.maxGap === ks.timing.maxGap && tpl.timing.lead === ks.timing.lead && tpl.timing.hold === ks.timing.hold &&
+    tpl.pace && tpl.pace.maxStill === ks.pace.maxStill && tpl.pace.minChanges === ks.pace.minChanges &&
+    tpl.mix && tpl.mix.lufs === km.lufs && tpl.mix.truePeak === km.truePeak
+  check('Vorlage (Stil C) besteht alle Prüfungen ohne Warnung, setzt "instant" an der ersten Textzeile und trägt Modus "wort", "maxGap", "pace" und "mix" wie state/konfig.json',
+    a.res.ok && a.res.warnings.length === 0 && first(tpl).instant === true && stilWieKonfig, a.res.errors.concat(a.res.warnings).join(' | ').slice(0, 160) + (stilWieKonfig ? '' : ' Stil weicht von state/konfig.json ab'))
   check('Beispiel Friseur besteht alle Prüfungen ohne Warnung und setzt "instant" an der ersten Textzeile', b.res.ok && b.res.warnings.length === 0 && first(ex).instant === true, b.res.errors.concat(b.res.warnings).join(' | ').slice(0, 160))
 }
 
@@ -402,6 +417,18 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
 const py = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'test_voice.py')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
 process.stdout.write(py.out.split('\n').filter(l => l.startsWith('ok') || l.startsWith('FEHLER')).map(l => '  [voice] ' + l).join('\n') + '\n')
 check('tools/test_voice.py', py.code === 0, py.out.trim().split('\n').pop() + (py.code ? ' ' + py.err.trim().split('\n').pop() : ''))
+
+// ---- Beitragstext (tools/beitrag.mjs): seit dem 16.11.2026 schreibt die Automatik zu jedem Video
+// einen Text fuer Instagram, Facebook und TikTok. Vorher gab es keinen, und niemand zaehlte die
+// Hashtags: Instagram nimmt hoechstens 5.
+const bt = await run('node', [path.join(STUDIO_ROOT, 'tools', 'beitrag.mjs'), 'selbsttest'])
+check('tools/beitrag.mjs: Regeln für den Beitragstext (5 Hashtags, kein Gedankenstrich, Stichwort)', bt.code === 0, (bt.out.trim() || bt.err.trim()).split('\n').pop())
+
+// ---- Sound-Sammlung (studio/sounds, tools/test_sounds.mjs): seit dem 16.11.2026 kommen echte
+// Effekte aus einer eigenen Sammlung dazu. Ohne diesen Test fiele ein kaputter Fingerabdruck,
+// ein fremder Klang ohne Herkunft oder eine geaenderte alte Effektspur erst beim Anhoeren auf.
+const ts = await run('node', [path.join(STUDIO_ROOT, 'tools', 'test_sounds.mjs')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
+check('tools/test_sounds.mjs: Sound-Sammlung, Absenkung unter Wörtern, alte Effektspuren unverändert', ts.code === 0, (ts.out.trim() || ts.err.trim()).split('\n').pop())
 
 // ---- Satz von ausserhalb des Studios (tools/clip-in.py): kuenstlicher Clip, kein Netz
 const pc = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'test_clip_in.py')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })

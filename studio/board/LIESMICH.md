@@ -46,7 +46,9 @@ Hinter jeder Aussage steht eine Marke:
 - **[Vertrag]** ist der Datenvertrag des Boards (unten). Er ist unsere eigene
   Festlegung, keine Vorgabe der Plattform.
 - **[Seite]** ist Verhalten von `index.html`, lokal mit einer nachgebauten
-  Laufzeit geprüft (zuletzt am 15.11.2026, 150 Prüfpunkte, Chromium).
+  Laufzeit geprüft (am 15.11.2026, 150 Prüfpunkte, Chromium; der
+  Beitragstext am 16.11.2026, 18 Prüfpunkte, Chromium bei 390 px Breite, hell
+  und dunkel).
 - **[ungeprüft]** steht in keiner der Quellen oder ist eine Annahme.
 
 Wichtig: **Stand 15.11.2026: Das Board ist veröffentlicht, das erste Video und sein Standbild sind hochgeladen, die ersten Dokumente geschrieben. Was dabei an der echten Plattform bestätigt wurde, steht im Abschnitt "An der echten Plattform bestätigt" am Ende. Alles andere in dieser Datei mit dem Vermerk "ungeprüft" ist es weiterhin.
@@ -78,6 +80,7 @@ Dokument-id: `<datum>-<slug>-v<version>`, zum Beispiel
 | `zeichen` | Zahl | verbrauchte Zeichen der Stimme | Automation |
 | `erstellt` | Text, ISO 8601 UTC | angelegt am | Automation |
 | `geaendert` | Text, ISO 8601 UTC | zuletzt geändert | Automation und Nutzer |
+| `caption` | Text mit Zeilenumbrüchen (`\n`), freiwillig | der fertige Beitragstext für Instagram, Facebook und TikTok: Hook, ein bis zwei Sätze, "👉 Kommentiere STICHWORT und wir melden uns.", Leerzeile, genau 5 Hashtags. Regeln: `../AUTOMATIK.md`, Abschnitt 6.6, geprüft mit `../tools/beitrag.mjs`. Seit dem 16.11.2026; ältere Dokumente haben das Feld nicht | Automation |
 
 `status` hat genau fünf Werte:
 
@@ -175,7 +178,8 @@ nicht anzeigt und nicht braucht. Die genaue Liste steht in `../AUTOMATIK.md`,
 Abschnitt 2.1; hier nur, was es gibt und wo es vom Text weiter unten abweicht:
 
 - **Zusätzliche Felder** an `videos` (`thema`, `branche`, `idee_id`,
-  `entwurf`, `pruefung`), an `ideen` (`thema`, `branche`, `hook`, `beleg`,
+  `entwurf`, `pruefung`; `caption` steht oben im Vertrag, weil die Seite es
+  zeigt), an `ideen` (`thema`, `branche`, `hook`, `beleg`,
   `stichwort`, `herkunft`, `reel_*`, `themen_nr`, `eingang_id`,
   `geplant_fuer`, `video_id`), an `laeufe` (`push`, `stimme_zeichen`,
   `video_id`) und an `stand/aktuell` (`probleme`, `push_fehlversuche`,
@@ -218,8 +222,12 @@ Reihenfolge auf dem Handy, von oben nach unten:
    nächstes Video, Modus in Worten, ein deutlicher Kasten bei `problem`,
    "Stimme: X von Y Zeichen in diesem Monat" mit Balken, die Stempelreihe der
    nächsten sieben Tage.
-2. "Zur Freigabe": Karten mit Video, das dringendste Datum zuerst.
-3. "Änderung angefragt".
+2. "Zur Freigabe": Karten mit Video, das dringendste Datum zuerst. Unter
+   Länge und Antwort steht der **Beitragstext** (`caption`) mit dem Knopf
+   "Text kopieren"; ohne `caption` fehlt der Kasten ganz.
+3. "Änderung angefragt". Auch hier und unter "Freigegeben" (dort wird
+   gepostet) und "Verworfen und ersetzt" steht der Beitragstext, wenn es ihn
+   gibt.
 4. "Eingang": die zehn neuesten Einträge offen, bis zu 30 ältere eingeklappt.
 5. "Ideen": `offen` und `geplant`, neueste zuerst, höchstens 20, je ein Knopf
    "Nicht machen". Darunter eingeklappt "Gesperrt und verwendet": gesperrte
@@ -266,7 +274,7 @@ Lauf in Betrieb nehmen.
 | `"/_blob/" + asset_id` als `<video src>`, `poster` und für `fetch` | gespeicherte Datei anzeigen | `assets.d.ts` ("build `"/_blob/" + id`") |
 | `assets.list()` und daraus `usage.files`, `usage.bytes`, `usage.maxFiles`, `usage.maxBytes` | Speicheranzeige, erst wenn der Nutzer den Bereich "Speicher für Videos" aufklappt | `assets.d.ts`, `Assets.list`, `Usage` |
 | `downloads.save({ filename, data })` | mp4 zum Speichern anbieten | `downloads.d.ts`, `save` |
-| `navigator.clipboard.writeText(...)` im Tippen, sonst Text markieren | "Kopieren" unter "Weiterarbeiten" | `artifact-design`, "What the viewer's frame allows" |
+| `navigator.clipboard.writeText(...)` im Tippen, sonst Text markieren | "Kopieren" unter "Weiterarbeiten" und "Text kopieren" am Beitragstext jedes Videos | `artifact-design`, "What the viewer's frame allows" |
 
 Regeln aus der Dokumentation, an die sich die Seite hält:
 
@@ -845,9 +853,22 @@ Regeln:
   oben), und ob ein Nachlesen mit `get()` eigene unbestätigte Änderungen
   enthält. Die Seite kommt mit beidem zurecht, geprüft ist das nur gegen die
   nachgebaute Laufzeit. [ungeprüft]
-- Ob "Kopieren" in der Claude-App auf dem Handy die Zwischenablage erreicht.
-  `artifact-design` sagt, dass manche Ansichten es ablehnen. Die Seite
-  markiert den Satz dann. [ungeprüft]
+- Ob "Kopieren" und "Text kopieren" in der Claude-App auf dem Handy die
+  Zwischenablage erreichen. `artifact-design` sagt, dass manche Ansichten es
+  ablehnen. Die Seite markiert den Text dann und sagt "Kopieren ging hier
+  nicht. Der Text ist markiert, kopiere ihn von Hand." [ungeprüft]
+- **Die Seite mit dem Beitragstext ist noch nicht veröffentlicht** (Stand
+  16.11.2026). Die veröffentlichte Fassung kennt `caption` nicht und zeigt
+  den Text deshalb nicht; die Daten stören sie nicht (unbekannte Felder liest
+  sie nicht). Veröffentlichen nur in einer begleiteten Sitzung, wenn der
+  Betreiber es will, mit `url` (Abschnitt "Die Seite später ändern").
+  Lokal geprüft: der Text steht Zeichen für Zeichen da, auch mit Emojis und
+  Umlauten; ein altes Dokument ohne `caption` und eines mit einer Zahl in
+  `caption` brechen nichts; "Text kopieren" legt genau den Text in die
+  Zwischenablage und schreibt nichts in die Datenbank; lehnt die
+  Zwischenablage ab oder fehlt sie, ist der Text markiert; kommt ein neuer
+  Text, verschwindet "Kopiert"; kein waagrechtes Rollen bei 390 px; dunkle
+  Farben im dunklen Thema. [Seite]
 - Ob der Link "Sitzung öffnen" aus der App heraus die Sitzung öffnet. Links
   auf andere Seiten öffnen laut `artifact-design` in einem neuen Tab.
   [ungeprüft]

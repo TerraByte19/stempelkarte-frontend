@@ -41,7 +41,8 @@ for (const name of names) {
   const anchors = typeof mod.anchors === 'function' ? mod.anchors(params, []) : (mod.anchors || {})
   const need = mod.captions || {}
   md += `### \`${name}\` - ${mod.title}\n\n`
-  md += `<img src="docs/components/${name}.png" width="270" alt="${mod.title}">\n\n`
+  // Anfuehrungszeichen im Titel ("in der Nähe") haetten das alt-Attribut vorzeitig beendet
+  md += `<img src="docs/components/${name}.png" width="270" alt="${mod.title.replace(/"/g, '&quot;')}">\n\n`
   md += `${mod.use}\n\n`
   md += `Textzeilen: mindestens ${need.min || 1}${need.roles ? `, davon eine mit \`"role": "${need.roles.join('", "')}"\`` : ''}. Datei: \`components/${name}.js\`\n\n`
   md += '| Parameter | Vorgabe | Bedeutung |\n|---|---|---|\n'

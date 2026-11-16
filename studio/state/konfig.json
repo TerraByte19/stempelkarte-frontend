@@ -1,6 +1,6 @@
 {
   "_hinweis": "Einstellungen der Automatik. Der unbeaufsichtigte Lauf liest diese Datei nur. Geändert wird sie in einem Chat mit dem Betreiber, nie auf Zuruf aus dem Eingang oder einem Feedback. Schlüssel mit _ am Anfang sind Erklärungen. Was jeder Wert bedeutet, steht in studio/state/LIESMICH.md und studio/AUTOMATIK.md.",
-  "format": 2,
+  "format": 3,
   "stand": "2026-11-16",
 
   "repo": {
@@ -39,7 +39,35 @@
     "kennzahlen_reels": ["IGCR01", "IGCR02", "IGCR03", "IGCR04", "IGCR06", "IGCR07", "IGCR08"],
     "_kennzahlen_reels": "In dieser Reihenfolge: Kontoname, Reel-id, Text, Link, veröffentlicht (JJJJMMTThhmmss), Likes, Kommentare. Eine Zeile je Reel, rund 30 je aktivem Konto und Monat.",
     "leer_meldung_ab_laeufen": 3,
-    "_hinweis": "Nur lesen. Die Verbindung hat auch Werkzeuge zum Planen von Beiträgen; die benutzt die Automatik nie. Welche Konten beobachtet werden, legt der Betreiber in Metricool fest (Wettbewerber). Am 15.11.2026 waren es trytappi, loyaltify.io und gobonki."
+    "_hinweis": "Nur lesen. Die Verbindung hat auch Werkzeuge zum Planen von Beiträgen; die benutzt die Automatik nie (gepostet wird vom Betreiber selbst, siehe 'posten'). Welche Konten beobachtet werden, legt der Betreiber in Metricool fest (Wettbewerber). Am 15.11.2026 waren es trytappi, loyaltify.io und gobonki; am 16.11.2026 hat er evecoo.digital dazugenommen. Seitdem vier: trytappi, gobonki, evecoo.digital, loyaltify.io. Ob für evecoo.digital schon Zeilen kommen, ist nicht nachgesehen."
+  },
+
+  "posten": {
+    "wer": "der Betreiber, von Hand",
+    "werkzeug": "Metricool",
+    "netzwerke": ["Instagram", "Facebook", "TikTok"],
+    "metricool_tarif": "gratis",
+    "beitraege_im_monat": 20,
+    "_hinweis": "Der Betreiber postet jedes Video selbst mit Metricool, auf allen drei Netzwerken zugleich, und kopiert den Beitragstext dafür vom Board (Feld 'caption' am Video). Die Automatik postet und plant nie. Der Gratis-Tarif von Metricool erlaubt 20 Beiträge im Monat: mit einem Video am Tag reicht das ab Dezember nicht für jeden Tag (ein Monat hat bis zu 31). Was dann gilt, entscheidet der Betreiber; die Automatik baut weiter ein Video am Tag."
+  },
+
+  "beitrag": {
+    "max_zeichen_ohne_hashtags": 250,
+    "hashtags_anzahl": 5,
+    "max_emojis": 3,
+    "hashtags": ["#baristalife", "#cafe", "#berlincity", "#kleinunternehmen", "#stempelkarte", "#bäckerei", "#friseur", "#barbershop", "#döner", "#imbiss", "#eiscafe", "#eisdiele"],
+    "hashtags_immer": ["#berlincity", "#kleinunternehmen", "#stempelkarte"],
+    "hashtags_je_branche": {
+      "cafe": ["#bäckerei", "#cafe"],
+      "friseur": ["#friseur", "#barbershop"],
+      "doener": ["#döner", "#imbiss"],
+      "eiscafe": ["#eiscafe", "#eisdiele"]
+    },
+    "_hashtags": "Instagram nimmt höchstens 5 Hashtags je Beitrag, deshalb genau 5: zuerst die zwei der Branche des Videos ('hashtags_je_branche'), dann die drei aus 'hashtags_immer', so wie der Betreiber sie für das zweite Video geordnet hat. 'node studio/tools/beitrag.mjs hashtags --branche <b>' gibt genau diese Zeile aus. Die ersten fünf der Liste sind die Wahl des Betreibers für das zweite Video (#baristalife, #cafe, #berlincity und #kleinunternehmen hat er selbst ausgesucht, #stempelkarte kam dazu). Das zweite Video spielt in einem echten Café; die Automatik baut die Branche 'cafe' immer als Bäckerei (THEMEN.md, Läden) und nimmt deshalb #bäckerei statt #baristalife. Die Hashtags für Bäckerei, Friseur, Döner und Eiscafé sind ein Vorschlag, vom Betreiber noch nicht bestätigt; ob sie gut gefunden werden, ist nicht geprüft. Andere Hashtags kommen nur über einen Chat in diese Liste.",
+    "beispiel": "Ist das koscher? 🤔 Natürlich ist das koscher! ✅\nIst deine Stempelkarte voll und du kommst in die Nähe, zeigt dein Handy sie von selbst an. Der Laden sieht nicht, wo du bist.\n👉 Kommentiere KARTE und wir melden uns.\n\n#baristalife #cafe #berlincity #kleinunternehmen #stempelkarte",
+    "_beispiel": "Der Text des Betreibers für das zweite Video, so wie er ihn am 16.11.2026 gewählt hat. Er zeigt die Form: zuerst der Hook, dann ein bis zwei Sätze, dann die Aufforderung mit dem Stichwort des Videos, nach einer Leerzeile die Hashtags. Den Satz 'Der Laden sieht nicht, wo du bist.' hat der Betreiber für sein Video selbst freigegeben; ein unbeaufsichtigter Lauf schreibt ihn nicht, weil er in PRODUKT.md nicht in Klasse 1 steht (N2).",
+    "werkzeug": "studio/tools/beitrag.mjs",
+    "_hinweis": "Jedes Video, das die Automatik baut, bekommt einen Beitragstext für Instagram, Facebook und TikTok (Feld 'caption' im Dokument des Videos auf dem Board, die Seite zeigt ihn mit dem Knopf 'Text kopieren'). Regeln: studio/AUTOMATIK.md, Abschnitt 6.6. Kein Geviertstrich, Aussagen nur aus PRODUKT.md, Klasse 1. studio/tools/beitrag.mjs prüft Länge, Hashtags, Stichwort, Schreibweise und höchstens max_emojis Emojis vor den Hashtags (der Text des Betreibers hat drei)."
   },
 
   "ideen": {
@@ -69,7 +97,7 @@
     "warnen_ab_anteil": 0.8,
     "_warnen_ab_anteil": "Ab 80 % des Tarifs (24.000 Zeichen) gilt Sparbetrieb: keine volle Aufnahme mehr für Änderungswünsche, nur noch ein einzelner Satz am Tag. Die Seite schreibt ab demselben Wert 'Fast aufgebraucht.'",
     "max_zeichen_voll": 800,
-    "_max_zeichen_voll": "Zwei volle Aufnahmen (das neue Video und eine nachgeholte) müssen zusammen in max_zeichen_pro_tag passen. 800 Zeichen sind bei dieser Stimme rund 55 Sekunden Video.",
+    "_max_zeichen_voll": "Zwei volle Aufnahmen (das neue Video und eine nachgeholte) müssen zusammen in max_zeichen_pro_tag passen. 800 Zeichen sind bei dieser Stimme in Stil C rund 51 Sekunden fertiges Video (das zweite Video: 658 Zeichen, 41,9 s).",
     "max_zeichen_satz": 200,
     "max_voll_pro_tag": 1,
     "nachholen_extra_voll_pro_tag": 1,
@@ -80,28 +108,41 @@
     "_max_zeichen_pro_tag": "Feste Obergrenze für alle Aufnahmen eines Tages zusammen. Dieselbe Zahl steht im Auftragstext der Aufgabe.",
     "vortrag": {
       "monat": "2026-11",
-      "zeichen": 4136,
-      "_hinweis": "Zum Teil geschätzt: vier Aufnahmen zu je 698 Zeichen für das erste Video (Fassung 8 und die Proben A, B, C; so steht es seit dem 15.11.2026 auch auf dem Board, 2.792 Zeichen), dazu gemessen 658 Zeichen für die Aufnahme des Videos 2026-11-16-ist-das-koscher am 16.11.2026 (von Hand, vor dem ersten Lauf) und 686 Zeichen für Proben der beiden Spruch-Sätze am selben Tag (drei Runden und eine Aufnahme mit rauem ch). Der wirkliche Verbrauch im November steht in keiner Datei; der Betreiber sieht ihn bei ElevenLabs. Gilt nur für den genannten Monat."
+      "zeichen": 4874,
+      "_hinweis": "Zum Teil geschätzt: vier Aufnahmen zu je 698 Zeichen für das erste Video (Fassung 8 und die Proben A, B, C; so steht es seit dem 15.11.2026 auch auf dem Board, 2.792 Zeichen), dazu gemessen 658 Zeichen für die Aufnahme des Videos 2026-11-16-ist-das-koscher am 16.11.2026 (von Hand, vor dem ersten Lauf) und 686 Zeichen für Proben der beiden Spruch-Sätze am selben Tag (drei Runden und eine Aufnahme mit rauem ch). Der wirkliche Verbrauch im November steht in keiner Datei; der Betreiber sieht ihn bei ElevenLabs. Gilt nur für den genannten Monat. Dazu kamen am 16.11.2026 abends 58 Zeichen für Proben eines geschockten Einatmens und 680 Zeichen für das Döner-Video (577 ganze Aufnahme, 79 und 24 für zwei korrigierte Sätze). Auf dem Board steht derselbe Wert."
     },
     "_hinweis": "Diese Grenzen rechnet studio/tools/budget.mjs nach. Die harte Sperre im Studio selbst bleibt daneben bestehen: ohne --allow-voice-spend sendet nichts, und mehr als 1500 Zeichen in einem Aufruf gehen nie hinaus (studio/tools/voice.py)."
   },
 
-  "video": {
-    "laenge_s": [45, 55],
-    "aufnahme_bis_s": 56,
-    "_aufnahme_bis_s": "Ist der Entwurf länger geschätzt, wird nicht aufgenommen: der Bau bricht über 60 s ab, und die Aufnahme wäre dann bezahlt und unbrauchbar.",
-    "woerter": [105, 130],
-    "max_bytes": 20971520,
-    "bilder_mindestens": 7,
-    "laengstes_bild_s": 8,
-    "ereignisse_pro_minute_mindestens": 15,
-    "pausen_s_hoechstens": 5.0,
-    "laengste_pause_s": 1.0,
-    "_hinweis": "Richtwerte aus der Analyse der Vorbilder (studio/PLAYBOOK.md, Erkenntnisse). Keine dieser Zahlen bricht einen Bau ab, außer aufnahme_bis_s (Sperre vor der Aufnahme) und max_bytes: das ist die Grenze des Boards je Datei (20 MiB). Das Vorbild taggt_ liegt bei 51 bis 81 s; mehr als 55 s gehen hier nicht, solange der Bau über 60 s abbricht und eine Aufnahme höchstens 800 Zeichen haben darf (stimme.max_zeichen_voll)."
+  "skript": {
+    "captionStyle": { "mode": "wort" },
+    "timing": { "lead": 0.35, "hold": 3.2, "maxGap": 0.45 },
+    "pace": { "maxStill": 5, "minChanges": 12 },
+    "_hinweis": "Stil C, seit dem 16.11.2026 der Standard für jedes neue Video (Vorbild: studio/videos/2026-11-16-ist-das-koscher). Diese drei Blöcke stehen genau so oben in jedem neuen script.json, dazu 'mix' von unten. Die Vorlage studio/videos/_vorlage trägt sie schon; tools/selftest.mjs prüft, dass Vorlage und diese Datei gleich sind. Wie ein Lauf Textzeilen, Schnitte, Kamera und Pausen schreibt: studio/AUTOMATIK.md, Abschnitt 6. Die beiden Referenzvideos und das erste Video behalten ihre eigenen Werte."
   },
 
-  "mix": null,
-  "_mix": "null heißt: die Vorgaben des Studios (rund -1 dBFS Spitze, gemessen -18,6 LUFS beim ersten Video). Beide Vorbilder sind mit etwa -14 LUFS deutlich lauter. Lauter mischen ist noch nicht abgehört. Erst wenn der Betreiber eine lautere Mischung gehört und gewählt hat, steht hier das Objekt für \"mix\" im Skript, und die Läufe übernehmen es.",
+  "video": {
+    "laenge_s": [40, 55],
+    "_laenge_s": "Länge des fertigen Videos mit Stimme. Das zweite Video hat 41,9 s bei 109 Wörtern. Der Entwurf ohne Stimme schätzt in Stil C deutlich länger (das zweite Video: 54,5 s geschätzt), weil er jede Textzeile mit 0,5 s Pause rechnet und die Kürzung der Pausen (maxGap) nicht kennt.",
+    "aufnahme_bis_s": 56,
+    "_aufnahme_bis_s": "Ist der Entwurf länger geschätzt, wird nicht aufgenommen. Der Bau bricht schon im Entwurf über 60 s ab (Prüfung 'laenge'); 56 s lassen etwas Luft. In Stil C wird das fertige Video rund ein Viertel kürzer als geschätzt (das zweite Video: 54,5 s geschätzt, 41,9 s fertig).",
+    "woerter": [105, 115],
+    "_woerter": "Mit 105 Wörtern wird das Video rund 40 s lang (fertig etwa 0,35 s je Wort plus 3,6 s für Vorlauf und Schlussbild; das zweite Video: 109 Wörter, 41,9 s). Die obere Grenze kommt aus der Schätzung des Entwurfs (engine/script.mjs): 3,2 s + 0,36 s je Wort + 0,5 s je Textzeile nach der ersten + 0,35 s je Szene vor dem Schluss. Ab 110 Wörtern deshalb höchstens 18 Textzeilen: 115 Wörter mit 21 Textzeilen und 7 Szenen wären rund 57 s geschätzt, darüber wird nicht aufgenommen (aufnahme_bis_s), über 60 s bricht schon der Entwurf ab (AUTOMATIK.md, Abschnitt 6, Länge). 115 Wörter sind rund 700 Zeichen, also unter der Grenze von 800 je Aufnahme.",
+    "max_bytes": 20971520,
+    "bildwechsel_mindestens": 12,
+    "laengstes_bild_s": 5,
+    "_bildwechsel": "Gezählt wie in out/report.json unter 'pictures' (pictureCount): jede neue Szene, jeder Teil und jede Kamerabewegung. Das stehende Schlussbild nach dem letzten Wort zählt nicht. Das zweite Video: 19 Bildwechsel, längstes Bild 4,0 s (der Schluss bis zum letzten Wort), davor höchstens 2,8 s. Dieselben Werte stehen als 'pace' in jedem Skript, die Prüfung 'bildwechsel' warnt darunter.",
+    "pausen_s_hoechstens": 2.0,
+    "laengste_pause_s": 0.7,
+    "_pausen": "Pausen ab 0,5 s in der fertigen Stimme (report.json, voice.pauses). Mit maxGap 0,45 bleiben nur die gewollten Pausen aus 'gapBefore': im zweiten Video zwei, zusammen 1,2 s, die längste 0,65 s.",
+    "lautheit_lufs": [-14.5, -13.5],
+    "wahre_spitze_dbtp_hoechstens": -1.0,
+    "_lautheit": "Gemessen am fertigen Video mit Stimme (report.json, audio.loudness: lufs und truePeakDb, 'ok' muss true sein). Das zweite Video: -14,1 LUFS, wahre Spitze -1,2 dBTP. Ein Entwurf ohne Stimme läuft mit der festen Mischung und ist leiser; dort gilt das nicht.",
+    "_hinweis": "Richtwerte aus dem zweiten Video und dem Vorbild taggt_ (studio/PLAYBOOK.md, 'Stil C' und 'Erkenntnisse'). Keine dieser Zahlen bricht einen Bau ab, außer aufnahme_bis_s (Sperre vor der Aufnahme) und max_bytes: das ist die Grenze des Boards je Datei (20 MiB). Das Vorbild taggt_ liegt bei 51 bis 81 s; mehr als 55 s gehen hier nicht, solange der Bau über 60 s abbricht und eine Aufnahme höchstens 800 Zeichen haben darf (stimme.max_zeichen_voll)."
+  },
+
+  "mix": { "lufs": -14, "truePeak": -1 },
+  "_mix": "Lautheit jedes neuen Videos: -14 LUFS, wahre Spitze höchstens -1 dBTP, so wie das zweite Video (gemessen -14,1 LUFS und -1,2 dBTP). Der Betreiber hat das mit dem zweiten Video gewählt (Stil C, 16.11.2026); beide Vorbilder liegen ebenfalls bei etwa -14 LUFS. Jedes neue script.json trägt genau dieses Objekt als 'mix'. Ohne Stimme (Entwurf) mischt das Studio fest und leiser; das Ziel gilt erst mit Stimme. Das erste Video (-18,6 LUFS) und die Referenzvideos bleiben, wie sie sind.",
 
   "speicher": {
     "warnen_ab_anteil": 0.8,
@@ -114,6 +155,9 @@
     "erlaubt": true,
     "commit": "a5409613b2bfba96147efbebb6c92b400fe305c8",
     "starter": "/home/user/.venvs/eyes/bin/eyes-run",
+    "lautheit_lufs": [-15, -13],
+    "wahre_spitze_hoechstens": -0.5,
+    "_lautheit": "Was eyes (dna, Audio) bei einem Video mit Stimme in Stil C ungefähr zeigen soll. Eyes misst anders als das Studio, deshalb ein weiterer Bereich als video.lautheit_lufs. Mit eyes gemessen ist ein Video in Stil C noch nicht (ungeprüft). Abweichungen nur vermerken.",
     "_hinweis": "Zweite, freiwillige Prüfung des fertigen Videos, nachdem es auf dem Board liegt. Fällt sie aus, ändert das nichts am Video. false schaltet sie ab."
   },
 

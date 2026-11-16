@@ -64,11 +64,18 @@ heißen, aber nicht "ohne Anmeldung".
 
 | Nr. | Aussage | Wortlaut der Landing Page | Schlüssel | Im Video |
 |---|---|---|---|---|
-| C1 | Ist die Karte voll, meldet sie sich von selbst auf dem Sperrbildschirm, in der Nähe des Ladens. | "Ist die Karte voll, meldet sie sich auf dem Sperrbildschirm, in der Nähe deines Ladens, ohne dass du etwas tust." | `lp_wallet_body`, `lp_wallet_title`, `lp_how_4_b`, `lp_proof_app_b` | ja (`lock-notification`) |
+| C1 | Kommt der Kunde in die Nähe des Ladens, zeigt sein Handy die Karte von selbst auf dem Sperrbildschirm, mit dem Stand als Text (zum Beispiel "Noch 2 Stempel bis: Gratis-Kaffee"). Ist sie voll, steht dort "Gratis-Kaffee wartet auf dich". | "Ist die Karte voll, meldet sie sich auf dem Sperrbildschirm, in der Nähe deines Ladens, ohne dass du etwas tust." (sagt nur "voll", siehe unten) | `lp_wallet_body`, `lp_wallet_title`, `lp_how_4_b`, `lp_proof_app_b` | ja (`lock-notification`, `shop-map`) |
 
-Zu C1: Die Landing Page nennt keine Entfernung und nicht, wie oft eine
-Nachricht kommt. Ein Video nennt sie also auch nicht. Gesichert ist nur die
-Meldung der **vollen** Karte in der Nähe des Ladens. Jede andere Nachricht
+Zu C1: Die Karte meldet sich in Ladennähe **immer**, nicht erst, wenn sie
+voll ist. Das hat der Betreiber am 16.11.2026 richtiggestellt, und so steht
+es im Backend (`stempelkarte-backend`, `wallet/ApplePassService.java`,
+`sperrbildschirmOrte`: Text "Noch {n} {Einheit} bis: {Belohnung}", voll
+"{Belohnung} wartet auf dich", offenes Willkommensgeschenk "{Geschenk} -
+wartet auf dich"). Die Landing Page und ein alter Kommentar in `Shop.java`
+sagen nur "voll"; das ist zu wenig, nicht falsch. Ein Video sagt "in der
+Nähe" ohne Entfernung und ohne, wie oft. Der Laden kann die Funktion
+abschalten, sie braucht seine Adresse. Dass das Handy dabei vibriert, zeigen
+die Videos auf Wunsch des Betreibers als Stilmittel. Jede andere Nachricht
 (nach langer Pause, zum Geburtstag, ein Angebot) ist Klasse 2.
 
 ### Gestalten
@@ -170,12 +177,12 @@ entscheiden muss").
 | N6 | Preise in Euro | In den `lp_`-Texten steht kein Betrag. Und nach Textregel 6 kommen Preise ohnehin nicht ins Bild. |
 | N7 | "kostenlos" oder "gratis" für die App selbst, "14 Tage gratis testen" | Der Test steht nur im Tarifvergleich (G1, Klasse 2). |
 | N8 | "Lade die Stampit-App", "im App Store" | Es gibt keine App für Kunden. Genau das ist die Aussage A2. |
-| N9 | SMS, WhatsApp, Anrufe | Belegt sind die Meldung der vollen Karte (C1) und Newsletter per E-Mail (E2). |
+| N9 | SMS, WhatsApp, Anrufe | Belegt sind die Karte auf dem Sperrbildschirm in Ladennähe (C1) und Newsletter per E-Mail (E2). |
 | N10 | Anbindung an eine Kasse, an Lieferdienste, an Buchungs- oder Terminsysteme, Bezahlen mit der Karte | Steht nirgends. |
 | N11 | Weitere Sprachen, zum Beispiel Türkisch | `lp_feat_5_b` nennt Deutsch, Englisch und Arabisch. `branchen.json` nennt zusätzlich Türkisch; solange das nicht unter einem `lp_`-Schlüssel steht, bleibt es draußen. |
 | N12 | Zahl der Läden oder Kunden, die Stampit nutzen, Kundenstimmen, "Marktführer", "Nummer 1", Vergleiche mit Mitbewerbern beim Namen | Nichts davon ist belegt. |
 | N13 | "Funktioniert ohne Internet", "auf jedem Handy", "kein eigenes Gerät nötig" | Belegt sind Apple Wallet und Google Wallet (A1) und das Scannen mit der Handy-Kamera (B1). Mehr zum Gerät steht nur in Klasse 2 (B3). |
-| N14 | Dass die Karte sich meldet, wenn ein Kunde lange nicht da war, Geburtstag hat oder ein Angebot läuft; dass der Laden selbst Nachrichten schickt | Klasse 2 (C2 bis C5). Gesichert ist allein die Meldung der vollen Karte in der Nähe des Ladens (C1). |
+| N14 | Dass die Karte sich meldet, wenn ein Kunde lange nicht da war, Geburtstag hat oder ein Angebot läuft; dass der Laden selbst Nachrichten schickt | Klasse 2 (C2 bis C5). Gesichert ist allein, dass die Karte in der Nähe des Ladens auf dem Sperrbildschirm erscheint (C1). |
 | N15 | Willkommensgeschenk, Kunde wirbt Kunde, Stufen, Punkte-, Mitglieds- oder 10er-Karte, Zugänge für Aushilfen | Klasse 2 (A5, B4, D3 bis D5). |
 
 Ist ein Satz weder in Klasse 1 erlaubt noch hier verboten: er ist nicht
