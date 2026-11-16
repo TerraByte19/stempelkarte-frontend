@@ -37,7 +37,7 @@ stellt keine davon um.
 | A1 | **Länge 45 bis 55 Sekunden.** Das Playbook nennt als Ziel 45 bis 65 Sekunden. Mehr als 55 geht hier nicht: der Bau bricht über 60 Sekunden ab, und eine Aufnahme darf höchstens 800 Zeichen haben (zwei davon müssen in die Tagesgrenze von 1600 passen). Der Betreiber selbst hat bisher 30 bis 50 Sekunden genannt | `konfig.json`, `video` und `stimme.max_zeichen_voll`, nach seiner Antwort |
 | A2 | **Was nur im Tarifvergleich steht, kommt in kein Video** (`PRODUKT.md`, Klasse 2): Erinnerung nach langer Pause, Geburtstag, Push-Kampagnen, Tagesangebot, Willkommensgeschenk, Kunde wirbt Kunde, Zugänge für Aushilfen | `PRODUKT.md`, nach seiner Bestätigung |
 | A3 | **Das GitHub-Repo gilt als öffentlich.** Ins Repo kommen nur Protokoll, Kassenbuch der Stimme und die Liste der verwendeten Themen (Regel 12) | `konfig.json`, `abzug` |
-| A4 | Der Monat der Stimme ist der Kalendermonat; der Verbrauch im November vor dem ersten Lauf ist auf 3.708 Zeichen geschätzt | `konfig.json`, `stimme.vortrag` |
+| A4 | Der Monat der Stimme ist der Kalendermonat; der Verbrauch im November vor dem ersten Lauf ist auf 3.825 Zeichen geschätzt | `konfig.json`, `stimme.vortrag` |
 | A5 | Die Mischung bleibt bei den Vorgaben, vom Board wird nichts gelöscht, ein verworfener Tag bleibt leer | `konfig.json`, `mix` und `speicher` |
 | A6 | Vor dem Push läuft kein `npm run build`: der Commit enthält nur Dateien unter `studio/`, und Schritt 24 prüft das | Auftragstext |
 | A7 | Der Lauf startet um 06:47 Uhr deutscher Zeit | Abschnitt 10 |
@@ -1310,7 +1310,7 @@ gesprochenen Textes (`elevenLabs.chars`), wie der Anbieter es berechnet.
 | einzelne Sätze am Tag | 2 (im Sparbetrieb 1) | für Änderungswünsche mit genau einem geänderten Satz |
 | Zeichen am Tag | höchstens 1600 | zwei volle Aufnahmen, oder eine und zwei Sätze |
 | im Kalendermonat (Europe/Berlin) | höchstens 27.000 durch die Automatik | 90 % des Tarifs von 30.000. Der Rest ist Reserve |
-| Vortrag für November 2026 | 3.708 Zeichen, geschätzt (A4) | Aufnahmen für die ersten beiden Videos, bevor es das Kassenbuch gab |
+| Vortrag für November 2026 | 3.825 Zeichen, geschätzt (A4) | Aufnahmen für die ersten beiden Videos, bevor es das Kassenbuch gab |
 
 `budget.mjs` nennt die `stufe`:
 
@@ -1582,6 +1582,6 @@ erste begleitete Lauf (10.3) geht diese Liste durch:
 | ob derselbe Baustein zweimal in einem Video läuft und wie viele Bilder die acht Bausteine wirklich hergeben | am Code gelesen (jede Szene hat ihren eigenen Bereich), nie gebaut | Schritt 16 |
 | die Richtwerte in Abschnitt 6 (7 Bilder, 15 Ereignisse je Minute, 5 s Pausen) und die Schätzung "800 Zeichen sind rund 55 Sekunden" | aus der Analyse abgeleitet, mit keinem gebauten Video belegt | nach den ersten drei Videos nachstellen |
 | ob die Texte `lp_price_*` irgendwo live zu sehen sind und die Funktionen dahinter stimmen | auf diesem Branch zeigt sie keine Seite an (A2) | der Betreiber bestätigt |
-| der Vortrag von 3.708 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
+| der Vortrag von 3.825 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
 
 ENDE DER ANLEITUNG
