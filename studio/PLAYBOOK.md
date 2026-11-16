@@ -77,7 +77,10 @@ immer zu `report.json`; ob beide noch zum Skript passen, zeigt `script.sha256`
    einer Cloud-Sitzung ist danach weg. Eine Aufnahme ist erst sicher, wenn der
    Ordner `voice/` des Videos im Repo liegt (siehe "Wohin mit dem Ergebnis").
    Darf die Sitzung nicht committen und pushen, nimmt sie nichts auf: der
-   Entwurf ohne Stimme ist dann das Ergebnis.
+   Entwurf ohne Stimme ist dann das Ergebnis. Für die unbeaufsichtigten
+   täglichen Läufe regelt das `AUTOMATIK.md` (Abschnitte 7 und 8): dort gilt
+   eine Aufnahme als sicher, sobald ihr Paket auf dem Board liegt, auch wenn
+   der Push abgelehnt wird.
 3. **Ein fremdes Video 1:1 nachbauen.** Anregung heißt: Aufbau, Tempo, ein
    Kniff. Text, Bildfolge, Figuren und Töne eines Mitbewerbers werden nicht
    übernommen. In `meta.idee` steht in einem Satz, was die Anregung war und was
@@ -445,6 +448,32 @@ und 170,5 Wörter je Minute beim Sprechen (138,5 über alles). Das
 Analysewerkzeug misst etwas anders (8,3 s und 178); die Größenordnung stimmt.
 Ein neues Video sollte deutlich unter 8 s Pausen bleiben. Im Entwurf ohne
 Stimme gibt es diese Zahlen nicht: dort sind alle Zeiten geschätzt.
+
+### Machart des stärksten Vorbilds (gemessen am 15.11.2026)
+
+Später wurde noch das stärkste Reel der beobachteten Konten vermessen (47 s,
+ein anderes als das Vorbild von 38 s weiter oben). Daneben stehen die Werte
+unseres ersten Videos.
+
+| Merkmal | stärkstes Vorbild | unser erstes Video | was daraus für neue Videos folgt |
+|---|---|---|---|
+| Bildwechsel | ein Schnitt etwa alle 1,5 s, das sind 28 je Minute | rund 10 je Minute | **mehr Bildwechsel**: mehr Szenen und Teile (`parts`), keine lange Einzelszene, jeder Anker auf einem Wort. Richtwert der Automatik: mindestens 12 Wechsel je Minute, kein Bild länger als 7 s |
+| Sprache | deckt 100 % der Laufzeit, rund 168 Wörter je Minute | 8 bis 9 s stille Pausen, beim Sprechen rund 170 Wörter je Minute | **keine stillen Lücken**. Das Tempo stimmt schon; es sind die Pausen. Halbsätze mit Komma verbinden, weniger Punkte, weniger einzelne Textzeilen. Richtwert: zusammen höchstens 4 s Pausen, keine über 1 s |
+| Textzeilen | oben, etwa zwei Wörter auf einmal | oben, Wort für Wort, bis zu drei Zeilen | so lassen |
+| Lautheit der Mischung | etwa -14 LUFS | -18,6 LUFS | **lauter mischen** ist das Ziel, aber im Studio noch nicht abgehört: der Begrenzer müsste dafür deutlich stärker arbeiten. Bis der Nutzer eine lautere Mischung gehört und gewählt hat, bleibt `mix` bei den Vorgaben (`state/konfig.json`, `mix`) |
+| Einstieg | eine Frage, in der ersten Sekunde gesprochen und zu sehen | leerer Textbereich im ersten Bild, das erste Wort nach rund 0,4 s | **Hook ab dem ersten Bild sichtbar und gesprochen**: erste Textzeile mit `"instant": true`, als Frage oder als Moment |
+| Schluss | "Schick das einem Freund, der einen Laden hat, kommentiere CARD" | "Klingt interessant? Dann kommentiere jetzt KARTE, und wir melden uns bei dir." | der Schluss des Nutzers bleibt, wie er ist |
+
+Gemessen ist das an zwei einzelnen Videos, nicht an vielen. Es ist
+Richtschnur für neue Skripte und bricht keinen Bau ab. Wo ein Wert dem
+widerspricht, was der Nutzer gewählt hat (nächster Abschnitt und
+`START.md`), gilt der Nutzer: Stimme, Tempo, Töne und Schlusszeile bleiben.
+
+Zwei Vorbehalte zu den Messwerten selbst: Das Analysewerkzeug übersieht
+unsere weichen Übergänge und zählt bei uns deshalb zu wenige Schnitte; die
+Zahl der Bildwechsel eines eigenen Videos kommt aus `report.json` (`scenes`
+mit ihren `parts`), nicht aus dem Werkzeug. Und die Lautheit eines fremden
+Reels ist an einer Bildschirmaufnahme gemessen, nicht an der Originaldatei.
 
 ### Geschmack des Nutzers (Stand 15.11.2026)
 
@@ -1035,4 +1064,5 @@ aufnehmen ist nie nötig.
 - Der Weg über die echte Schnittstelle von ElevenLabs ist aus dem Studio
   heraus noch nie gelaufen (siehe Stimme).
 - Wie ein Entwurf aufs Board kommt und wo die Sitzung committen darf, legt
-  der Auftrag der täglichen Sitzung fest, nicht dieses Dokument.
+  der Auftrag der täglichen Sitzung fest, nicht dieses Dokument. Den Ablauf
+  dazu beschreibt `AUTOMATIK.md`.

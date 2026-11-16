@@ -1,0 +1,129 @@
+{
+  "_hinweis": "Einstellungen der Automatik. Der unbeaufsichtigte Lauf liest diese Datei nur. Geändert wird sie in einem Chat mit dem Betreiber, nie auf Zuruf aus dem Eingang oder einem Feedback. Schlüssel mit _ am Anfang sind Erklärungen. Was jeder Wert bedeutet, steht in studio/state/LIESMICH.md und studio/AUTOMATIK.md.",
+  "format": 2,
+  "stand": "2026-11-16",
+
+  "repo": {
+    "name": "stempelkarte-frontend",
+    "branch": "ccr-816d9995-jhzqdq",
+    "pfad_ueblich": "/home/user/stempelkarte-frontend",
+    "nie_anfassen": ["main"],
+    "_hinweis": "Ein Push auf main löst ein Deploy der App aus. Die Automatik arbeitet nur auf dem genannten Branch."
+  },
+
+  "board": {
+    "adresse": "https://claude.ai/artifact/NN4DTD3LpysNVZ1YaziVXm",
+    "adresse_datei": "studio/board/ADRESSE.txt",
+    "titel": "Stampit Studio",
+    "_hinweis": "Für den unbeaufsichtigten Lauf gilt allein die Adresse aus seinem Auftragstext. Dieser Wert und studio/board/ADRESSE.txt müssen dieselbe nennen; weicht einer ab, meldet der Lauf das auf dem Board aus dem Auftragstext und endet (studio/AUTOMATIK.md, Schritt 3)."
+  },
+
+  "zeit": {
+    "zone": "Europe/Berlin",
+    "lauf_um": "06:47",
+    "posten_um": "10:00",
+    "video_auf_dem_board_bis": "19:00 am Vorabend",
+    "videos_pro_tag": 1,
+    "_hinweis": "Ein Lauf am Tag. Er baut das Video für den nächsten Tag; es liegt damit schon am Vormittag auf dem Board."
+  },
+
+  "metricool": {
+    "verbindung": "Metricool Social Media Management",
+    "werkzeug": "mcp__Metricool_Social_Media_Management__getAnalyticsDataByMetrics",
+    "brand_id": "7969131",
+    "zeitzone": "Europe/Berlin",
+    "eigenes_konto": "stampit2026",
+    "fenster_tage": 30,
+    "kennzahlen_konten": ["IGCO02", "IGCO03", "IGCO07", "IGCO08", "IGCO12", "IGCO09", "IGCO06"],
+    "_kennzahlen_konten": "In dieser Reihenfolge: Kontoname, Anzeigename, Follower, Beiträge, Reels, Likes im Schnitt, Kommentare im Schnitt. Eine Zeile je beobachtetem Konto.",
+    "kennzahlen_reels": ["IGCR01", "IGCR02", "IGCR03", "IGCR04", "IGCR06", "IGCR07", "IGCR08"],
+    "_kennzahlen_reels": "In dieser Reihenfolge: Kontoname, Reel-id, Text, Link, veröffentlicht (JJJJMMTThhmmss), Likes, Kommentare. Eine Zeile je Reel, rund 30 je aktivem Konto und Monat.",
+    "leer_meldung_ab_laeufen": 3,
+    "_hinweis": "Nur lesen. Die Verbindung hat auch Werkzeuge zum Planen von Beiträgen; die benutzt die Automatik nie. Welche Konten beobachtet werden, legt der Betreiber in Metricool fest (Wettbewerber). Am 15.11.2026 waren es trytappi, loyaltify.io und gobonki."
+  },
+
+  "ideen": {
+    "rang_nach": "likes",
+    "_rang_nach": "Kommentare sind durch Aufrufe wie 'kommentiere CARD' aufgebläht und sagen nichts über die Stärke eines Reels.",
+    "max_neu_pro_lauf": 3,
+    "max_offen": 12,
+    "min_offen": 3,
+    "min_alter_stunden": 20,
+    "min_likes": 30,
+    "likes_faktor_schnitt": 1.0,
+    "thema_pause_tage": 7,
+    "_thema_pause_tage": "Derselbe Blickwinkel möglichst erst nach so vielen Tagen wieder. Erfüllt das keine Idee, kommt der Blickwinkel mit der längsten Pause dran. So bleibt kein Tag leer, nur weil die Liste kurz ist.",
+    "wunsch_jedes_n_te_video": 3,
+    "_wunsch_jedes_n_te_video": "Ein Dauerwunsch des Betreibers ('mehr über Friseure') bekommt den nächsten freien Tag und danach etwa jedes dritte Video, bis er etwas anderes sagt.",
+    "sperre_nach_verwerfen_tage": 30,
+    "_hinweis": "Ein Reel wird zur Idee, wenn es mindestens min_alter_stunden alt ist und mindestens so viele Likes hat wie das Größere aus min_likes und (Likes im Schnitt des Kontos mal likes_faktor_schnitt). Je Lauf entstehen höchstens max_neu_pro_lauf neue Ideen, egal woher. Die Seite zeigt höchstens 20 offene Ideen; mehr als max_offen legt die Automatik nicht an. Sind weniger als min_offen da, kommt eine aus studio/THEMEN.md dazu."
+  },
+
+  "stimme": {
+    "unbeaufsichtigt_erlaubt": true,
+    "_unbeaufsichtigt_erlaubt": "Der Not-Aus für die Stimme. false heißt: budget.mjs sagt dem unbeaufsichtigten Lauf nein, alle Videos entstehen als Entwurf ohne Stimme, bis eine begleitete Sitzung den Schalter zurückstellt. Achtung: der bezahlte Weg ist bis zum ersten begleiteten Lauf nie gelaufen (AUTOMATIK.md, Abschnitt 0).",
+    "limit_monat": 30000,
+    "_limit_monat": "Zeichen im Tarif (ElevenLabs Starter). Derselbe Wert steht auf dem Board in stand/aktuell.stimme_limit_monat.",
+    "automatik_max_monat": 27000,
+    "_automatik_max_monat": "Mehr nimmt die Automatik in einem Kalendermonat nie auf (90 % des Tarifs). Der Rest ist Reserve für Aufnahmen von Hand und dafür, dass der Abrechnungsmonat des Anbieters nicht am Ersten beginnen muss.",
+    "warnen_ab_anteil": 0.8,
+    "_warnen_ab_anteil": "Ab 80 % des Tarifs (24.000 Zeichen) gilt Sparbetrieb: keine volle Aufnahme mehr für Änderungswünsche, nur noch ein einzelner Satz am Tag. Die Seite schreibt ab demselben Wert 'Fast aufgebraucht.'",
+    "max_zeichen_voll": 800,
+    "_max_zeichen_voll": "Zwei volle Aufnahmen (das neue Video und eine nachgeholte) müssen zusammen in max_zeichen_pro_tag passen. 800 Zeichen sind bei dieser Stimme rund 55 Sekunden Video.",
+    "max_zeichen_satz": 200,
+    "max_voll_pro_tag": 1,
+    "nachholen_extra_voll_pro_tag": 1,
+    "_nachholen_extra_voll_pro_tag": "Eine zweite volle Aufnahme am selben Tag, aber nur zum Nachholen: wenn ein Video vom Vortag bloß als Entwurf ohne Stimme da ist. So läuft nach einem Tag ohne Stimme nicht jeden Tag ein Video hinterher.",
+    "max_satz_pro_tag": 2,
+    "sparbetrieb_max_satz_pro_tag": 1,
+    "max_zeichen_pro_tag": 1600,
+    "_max_zeichen_pro_tag": "Feste Obergrenze für alle Aufnahmen eines Tages zusammen. Dieselbe Zahl steht im Auftragstext der Aufgabe.",
+    "vortrag": {
+      "monat": "2026-11",
+      "zeichen": 2094,
+      "_hinweis": "Geschätzt, nicht gemessen: drei Aufnahmen zu je 698 Zeichen für Fassung 10 des ersten Videos (studio/board/seed.json). Der wirkliche Verbrauch im November steht in keiner Datei; der Betreiber sieht ihn bei ElevenLabs. Gilt nur für den genannten Monat."
+    },
+    "_hinweis": "Diese Grenzen rechnet studio/tools/budget.mjs nach. Die harte Sperre im Studio selbst bleibt daneben bestehen: ohne --allow-voice-spend sendet nichts, und mehr als 1500 Zeichen in einem Aufruf gehen nie hinaus (studio/tools/voice.py)."
+  },
+
+  "video": {
+    "laenge_s": [45, 55],
+    "aufnahme_bis_s": 56,
+    "_aufnahme_bis_s": "Ist der Entwurf länger geschätzt, wird nicht aufgenommen: der Bau bricht über 60 s ab, und die Aufnahme wäre dann bezahlt und unbrauchbar.",
+    "woerter": [105, 130],
+    "max_bytes": 20971520,
+    "bilder_mindestens": 10,
+    "laengstes_bild_s": 7,
+    "ereignisse_pro_minute_mindestens": 15,
+    "pausen_s_hoechstens": 5.0,
+    "laengste_pause_s": 1.0,
+    "_hinweis": "Richtwerte aus der Analyse der Vorbilder (studio/PLAYBOOK.md, Erkenntnisse). Keine dieser Zahlen bricht einen Bau ab, außer aufnahme_bis_s (Sperre vor der Aufnahme) und max_bytes: das ist die Grenze des Boards je Datei (20 MiB). Das Vorbild taggt_ liegt bei 51 bis 81 s; mehr als 55 s gehen hier nicht, solange der Bau über 60 s abbricht und eine Aufnahme höchstens 800 Zeichen haben darf (stimme.max_zeichen_voll)."
+  },
+
+  "mix": null,
+  "_mix": "null heißt: die Vorgaben des Studios (rund -1 dBFS Spitze, gemessen -18,6 LUFS beim ersten Video). Beide Vorbilder sind mit etwa -14 LUFS deutlich lauter. Lauter mischen ist noch nicht abgehört. Erst wenn der Betreiber eine lautere Mischung gehört und gewählt hat, steht hier das Objekt für \"mix\" im Skript, und die Läufe übernehmen es.",
+
+  "speicher": {
+    "warnen_ab_anteil": 0.8,
+    "reserve_bytes": 31457280,
+    "loeschen_erlaubt": false,
+    "_hinweis": "Das Board fasst 1 GiB und 5000 Dateien, das sind etwa 80 Videos mit Standbild und Quellen-Paket. Die Automatik löscht nie von sich aus. Ob alte Dateien weg dürfen, entscheidet der Betreiber."
+  },
+
+  "eyes": {
+    "erlaubt": true,
+    "commit": "a5409613b2bfba96147efbebb6c92b400fe305c8",
+    "starter": "/home/user/.venvs/eyes/bin/eyes-run",
+    "_hinweis": "Zweite, freiwillige Prüfung des fertigen Videos, nachdem es auf dem Board liegt. Fällt sie aus, ändert das nichts am Video. false schaltet sie ab."
+  },
+
+  "abzug": {
+    "sammlungen": ["laeufe", "gedaechtnis/stimme", "gedaechtnis/themen"],
+    "_hinweis": "Was der Lauf am Ende vom Board ins Repo kopiert: das Protokoll, das Kassenbuch der Stimme und die Liste der verwendeten Themen. Mehr nicht, weil das GitHub-Repo öffentlich sein kann: Wünsche des Betreibers, Texte aus dem Eingang, Ideen und alles über Mitbewerber bleiben allein auf dem Board."
+  },
+
+  "push": {
+    "problem_ab_fehlversuchen": 3,
+    "_hinweis": "Ein abgelehnter Push ist normal und kein Problem für den Betreiber. Erst nach so vielen abgelehnten Pushes in Folge steht es als Hinweis im Stand, weil die Kopie im Repo dann veraltet ist."
+  }
+}
