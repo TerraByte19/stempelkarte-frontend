@@ -624,6 +624,35 @@
    "sha256Original": "514248013aa7c81a998c01a701e19e7180a765cac7a562908474b8f4c4bcd03e",
    "sha256": "23b8593273f68cb09255b96112e6bc24b311fb244acc5f8b517f57bf85209e9b",
    "pcmSha256": "4b16b6647eddf383877ffe8bf2ca4966eb43b7bd5ecca39ca756176d2d8ee785"
+  },
+  {
+   "name": "herz-zerspringt",
+   "file": "herz-zerspringt.flac",
+   "original": "original/herz-zerspringt.mp3",
+   "what": "zerbrechliches Glasherz zerspringt in Stücke (für ein zerbrechendes Herz, vom Betreiber gewählt)",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "fragile glass heart breaking and shattering into pieces",
+   "request": {
+    "duration_seconds": 1.2,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.2,
+   "duration": 1.2,
+   "trim": [
+    0.0,
+    1.2
+   ],
+   "gainDb": -4.41,
+   "peakDb": -1.0,
+   "rmsDb": -21.25,
+   "lufs": -17.0,
+   "truePeakDb": -0.3,
+   "sha256Original": "96c74c5606fe8f806decc63d6d6fe22dfe8a880e518e16827ce80e059a51d23b",
+   "sha256": "24a058e1e8933ed0a5c997558dcae1037589d861a38c5f737fa00d41dabce88e",
+   "pcmSha256": "cf7ce7f928074ddde239c8d84d993dbb0325ed12a2fd0ed4a639a732b58e6479"
   }
  ],
  "format": {

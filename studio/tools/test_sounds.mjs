@@ -40,11 +40,16 @@ const lib = JSON.parse(readFileSync(path.join(STUDIO_ROOT, 'sounds', 'sounds.jso
 // ---- 1. Die Bibliothek
 const WANT = ['vine-boom', 'plattenkratzer', 'publikum-keucht', 'publikum-ooh', 'drama-stoss', 'grillen-stille', 'kasse', 'muenzen', 'ladenglocke', 'grill-brutzeln', 'papier-knuellen', 'muelleimer', 'trauriger-trompeter', 'erfolg-pling', 'wischer', 'handy-vibriert', 'herzschlag', 'applaus', 'keuchen-1', 'keuchen-2', 'keuchen-3']
 const names = lib.sounds.map(s => s.name)
-check('Bibliothek: genau die 21 Klänge', names.length === 21 && WANT.every(n => names.includes(n)), names.join(', '))
+// Die Sammlung waechst (z. B. kam am 16.11.2026 "herz-zerspringt" auf Wunsch des Betreibers
+// dazu). Festgenagelt wird deshalb nur: die ersten 21 sind alle da, kein Name doppelt.
+check('Bibliothek: die ersten 21 Klänge sind da, kein Name doppelt', names.length >= 21 && new Set(names).size === names.length && WANT.every(n => names.includes(n)), names.join(', '))
 const incomplete = lib.sounds.filter(s => !(s.file && s.original && s.source && ('prompt' in s) && s.date === '2026-11-16' && /kommerzielle Nutzung/.test(s.licence || '') && s.duration > 0 && typeof s.lufs === 'number' && s.sha256 && s.pcmSha256 && s.sha256Original))
 check('Bibliothek: jeder Klang mit Herkunft, Anweisung, Datum, Lizenz, Länge, Lautheit und Fingerabdrücken', !incomplete.length, incomplete.map(s => s.name).join(', '))
-check('Bibliothek: Quellen sind ElevenLabs Sound Effects (18) und ElevenLabs TTS eleven_v3 mit Liam (3)',
-  lib.sounds.filter(s => s.source === 'ElevenLabs Sound Effects').length === 18 && lib.sounds.filter(s => s.source === 'ElevenLabs TTS eleven_v3, Stimme Liam').length === 3)
+// Fremde Aufnahmen gehoeren nie in die Sammlung: nur was mit dem Tarif des Betreibers
+// erzeugt wurde (Soundeffekte oder unsere eigene Stimme).
+check('Bibliothek: nur eigene Quellen (ElevenLabs Sound Effects oder ElevenLabs TTS mit Liam)',
+  lib.sounds.every(s => s.source === 'ElevenLabs Sound Effects' || s.source === 'ElevenLabs TTS eleven_v3, Stimme Liam'),
+  lib.sounds.filter(s => s.source !== 'ElevenLabs Sound Effects' && s.source !== 'ElevenLabs TTS eleven_v3, Stimme Liam').map(s => s.name).join(', '))
 check('Bibliothek: gemeinsame Spitze -1 dBFS, bearbeitet nie länger als das Original',
   lib.sounds.every(s => Math.abs(s.peakDb - -1) <= 0.1 && s.duration <= s.durationOriginal + 0.001), lib.sounds.map(s => s.peakDb).filter(p => Math.abs(p + 1) > 0.1).join(', '))
 {
