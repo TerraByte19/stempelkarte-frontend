@@ -147,7 +147,7 @@
           "params": { "shop": "Döner Nordwind", "icon": "kebab", "circle": false, "notify": true, "note": "Noch 2 Stempel bis: Gratis-Döner", "path": [[3.7, 1], [1.5, 1]], "via": 0.915, "rival": "Döner Südwind", "rivalIcon": "kebab", "rivalAt": [2.5, 0.8], "quiet": false },
           "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 6, "offset": 0.05 }, "arrive": { "cap": 0, "word": 6, "offset": 0.45 } },
           "sounds": [
-            { "sound": "handy-vibriert", "anchor": "buzz", "offset": 0.05, "vol": 0.6 }
+            { "sound": "handy-vibriert", "anchor": "buzz", "offset": 0.05, "vol": 0.3 }
           ],
           "captions": [
             { "lines": ["Und kommt er | an *deinem *Laden | *vorbei,"] }
