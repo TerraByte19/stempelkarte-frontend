@@ -123,7 +123,11 @@ export default {
     track: { default: false, doc: 'Auge an der Ortsnadel mit Blicklinie zur Kundin und Fragezeichen; reißt auf den Anker "no" ab. Für die Frage, ob der Laden einen verfolgt' },
     phones: { default: 4, doc: 'Nur bei "view": "owner": wie viele Kunden rund um den Laden stehen, 0 bis 4 (Anker phone1, phone2, ...). Alle stehen im Kreis, keiner vor der Tür' },
     spread: { default: false, doc: 'Nur bei "view": "owner": die beiden unteren Kunden stehen weiter außen, noch im Kreis. So verteilen sich alle vier rund um den Laden, statt dass zwei unten eng am Namensschild stehen' },
-    whoosh: { default: 0.16, doc: 'Lautstärke des Wisch-Tons, wenn der Kreis aufgeht (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise' }
+    whoosh: { default: 0.16, doc: 'Lautstärke des Wisch-Tons, wenn der Kreis aufgeht (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise' },
+    rival: { default: '', doc: 'Name eines zweiten Ladens auf der Karte (z. B. der gegenüber), orange Nadel mit Schild darüber. Dort passiert nichts: seine Karte hat die Kundin nicht. Leer = kein zweiter Laden (höchstens etwa 20 Zeichen)' },
+    rivalIcon: { default: 'cup', doc: 'Symbol in der Nadel des zweiten Ladens' },
+    rivalAt: { default: [2.5, 0.8], doc: 'Wo die Spitze der Nadel des zweiten Ladens sitzt, [Spalte, Reihe] mitten in einem Block (keine ganze Zahl). Vorgabe: der Block rechts oben, eine Straße hinter dem eigenen Laden' },
+    quiet: { default: true, doc: 'Nur mit "rival": auf den Anker "quiet" erscheint an seiner Nadel eine durchgestrichene Glocke (keine Benachrichtigung dort)' }
   },
   captions: { min: 1 },
   anchors: p => {
@@ -137,6 +141,7 @@ export default {
       a.arrive = { at: 'end', offset: -0.2, doc: 'Die Kundin kommt am Ende ihres Weges an und bleibt stehen' }
     }
     if (p.circle) a.circle = { at: 'start', offset: 0.1, doc: 'Der Kreis "in der Nähe" geht auf (Ton: leiser whoosh)' }
+    if (p.rival && p.quiet) a.quiet = { cap: -1, word: -1, doc: 'An der Nadel des zweiten Ladens erscheint eine durchgestrichene Glocke: dort meldet sich nichts (Töne: pop, tick). Auf "nicht an dem gegenüber" o. ä.' }
     if (p.track) {
       a.eye = { cap: 0, word: 0, doc: 'Das Auge an der Ortsnadel geht auf, die Blicklinie folgt der Kundin (Ton: pop). Auf "Verfolgt"' }
       a.no = { cap: -1, word: 0, doc: 'Die Blicklinie reißt ab, das Auge wird durchgestrichen (Ton: drop). Auf "Nein"' }
@@ -177,6 +182,12 @@ ${chipCss('sm')}
     background: #fff; display: grid; place-items: center; box-shadow: 0 12px 22px rgba(0,0,0,.5), 0 0 0 5px rgba(185,176,255,.55); }
   .sm-mini svg { width: 40px; }
   .sm-box { position: absolute; inset: 0; }
+  .sm-rpin { width: ${PIN}px; height: ${PIN}px; z-index: 6; transform-origin: 50% 92%; filter: drop-shadow(0 14px 16px rgba(0,0,0,.55)); }
+  .sm-rpin > svg { display: block; }
+  /* durchgestrichene Glocke: duennerer Strich als vorn am Auge, sonst ist die Glocke darunter nicht mehr zu erkennen */
+  .sm-map .sm-quiet .sm-slash { height: 9px; margin-top: -4.5px; border-radius: 5px; box-shadow: 0 0 0 3px var(--paper); }
+  .sm-rlabel { z-index: 6; padding: 8px 20px 10px; border-radius: 14px; background: var(--paper); color: var(--ink); translate: -50% 0;
+    font: 700 34px/1.15 var(--display); letter-spacing: -.01em; white-space: nowrap; box-shadow: 0 10px 22px rgba(0,0,0,.45); border-bottom: 6px solid #E58A45; }
 ${badgeCss('sm')}
   /* auf der Karte etwas kleiner als an der Ladenfront: neben der Nadel soll das Auge nicht groesser wirken als der Laden */
   .sm-map .sm-badge { width: 108px; height: 108px; }
@@ -207,6 +218,36 @@ ${badgeCss('sm')}
     // Was die Benachrichtigung nie verdecken darf: Nadel und Schild (mit etwas Luft)
     const lw = label.offsetWidth, lh = label.offsetHeight
     const KEEP = [{ l: SHOP.x - 54, t: SHOP.y - PIN * 0.92 + 6, r: SHOP.x + 54, b: SHOP.y + 4 }, { l: SHOP.x - lw / 2, t: LABEL_TOP, r: SHOP.x + lw / 2, b: LABEL_TOP + lh }]
+
+    // ---- Ein zweiter Laden (z. B. der gegenueber): orange Nadel, Schild darueber. Dort passiert nichts,
+    // auch wenn die Kundin direkt vorbeigeht: ihre Karte ist die des eigenen Ladens. Nur mit "rival".
+    if (p.rival) {
+      const q = p.rivalAt
+      if (!Array.isArray(q) || q.length !== 2 || q.some(v => typeof v !== 'number' || !Number.isFinite(v))) ctx.fail('"rivalAt" erwartet [Spalte, Reihe] als zwei Zahlen')
+      if (whole(q[0]) || whole(q[1]) || q[0] < 0 || q[0] > 3 || q[1] < 0 || q[1] > 3) ctx.fail('"rivalAt" muss mitten in einem Block liegen (Spalte und Reihe keine ganzen Zahlen, beide zwischen 0 und 3)')
+      const RV = { x: gx(q[0]), y: gy(q[1]) }
+      if (Math.hypot(RV.x - SHOP.x, RV.y - SHOP.y) < 240) ctx.fail('"rivalAt" liegt zu nah am eigenen Laden: die beiden Nadeln würden sich überdecken')
+      const rcup = `<circle cx="75" cy="56" r="29" fill="#fff"/><svg class="ico" x="56" y="37" width="38" height="38" viewBox="0 0 24 24" style="color:#B8662E"><use href="#ico-${p.rivalIcon}"/></svg>`
+      const rpin = `<svg width="${PIN}" height="${PIN}" viewBox="0 0 150 150"><path fill="#E58A45" d="M75 8 C47 8 26 29 26 56 C26 92 75 138 75 138 C75 138 124 92 124 56 C124 29 103 8 75 8 Z"/>${rcup}</svg>`
+      add(`<div class="abs sm-rpin" data-safe="Ortsnadel des zweiten Ladens" data-apart="karte" data-label="Ortsnadel des zweiten Ladens" style="left:${RV.x - PIN / 2}px;top:${Math.round(RV.y - PIN * 0.92)}px">${rpin}</div>
+        <div class="abs sm-rlabel" data-safe="Name des zweiten Ladens" data-oneline="Name des zweiten Ladens"></div>`)
+      const rl = ctx.$('.sm-rlabel'); rl.textContent = p.rival
+      rl.insertAdjacentHTML('beforeend', '<u class="sm-box" data-apart="karte" data-label="Name des zweiten Ladens"></u>')
+      if (ctx.fit(rl, 360, 22) < 26) ctx.warn(`der Name "${p.rival}" steht über der Nadel sehr klein. Namen kürzen.`)
+      const rh = rl.offsetHeight, rw = rl.offsetWidth, rTop = Math.round(RV.y - PIN * 0.92 - 10 - rh)
+      rl.style.left = RV.x + 'px'; rl.style.top = rTop + 'px'
+      if (rTop < FADE) ctx.fail('"rivalAt": das Schild des zweiten Ladens hinge im Textbereich. Eine Reihe tiefer legen')
+      KEEP.push({ l: RV.x - 54, t: RV.y - PIN * 0.92 + 6, r: RV.x + 54, b: RV.y + 4 }, { l: RV.x - rw / 2, t: rTop, r: RV.x + rw / 2, b: rTop + rh })
+      if (p.quiet) {
+        // Durchgestrichene Glocke links neben der Nadel: hier meldet sich nichts
+        const BELL = '<svg viewBox="0 0 24 24"><path d="M12 2.5v1.8"/><path d="M6.2 16.8V11a5.8 5.8 0 0 1 11.6 0v5.8l1.6 1.7H4.6Z"/><path d="M10.2 20.6a1.9 1.9 0 0 0 3.6 0"/></svg>'
+        add(`<div class="abs sm-badge sm-quiet" data-safe="Durchgestrichene Glocke am zweiten Laden" style="left:${RV.x - 75 - 112}px;top:${Math.round(RV.y - PIN * 0.6 - 54)}px">${BELL}<i class="sm-slash"></i></div>`)
+        const tq = ctx.at('quiet')
+        pop('.sm-quiet', tq - 0.2, 0.36); cue(tq - 0.2, 'pop', 0.75, 0.8)
+        key('.sm-quiet .sm-slash', [[tq, { scale: '0 1' }, OUT], [tq + 0.16, { scale: '1 1' }]])
+        cue(tq, 'tick', 0.9)
+      }
+    }
 
     // ---- Kreis "in der Naehe": weich, ohne Zahl
     if (p.circle) {

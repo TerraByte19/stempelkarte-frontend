@@ -13,7 +13,8 @@ export default {
     pin: { default: true, doc: 'Ortsnadel mit Wellen zeigen ("in Ladennähe")' },
     rise: { default: true, doc: 'Das Handy fährt von unten herein. false: es steht vom ersten Bild an da (für den Einstieg, wenn das allererste Bild schon alles zeigen soll)' },
     buzzes: { default: 1, doc: 'Wie oft das Handy brummt, 1 bis 3 (je 0,75 s Abstand, jedes Mal Ton buzz)' },
-    waves: { default: false, doc: 'Schwingungsbögen links und rechts neben dem Handy, solange es brummt' }
+    waves: { default: false, doc: 'Schwingungsbögen links und rechts neben dem Handy, solange es brummt' },
+    tones: { default: true, doc: 'Eigene Töne (ding, buzz). false: ohne, wenn das Skript Klänge aus der Bibliothek setzt (z. B. "handy-vibriert")' }
   },
   captions: { min: 1 },
   anchors: p => ({
@@ -68,14 +69,14 @@ export default {
     const s0 = ctx.s, tn = ctx.at('notify') - 0.1
     if (p.rise) key('.phone', [[s0, { translate: '0px 520px' }, OUT], [s0 + 0.7, { translate: '0px 0px' }]])
     key('.notif', [[tn, { opacity: 0, translate: '0px -150px', scale: 0.9 }, BACK], [tn + 0.5, { opacity: 1, translate: '0px 0px', scale: 1 }]])
-    cue(ctx.at('notify') - 0.05, 'ding')
+    if (p.tones) cue(ctx.at('notify') - 0.05, 'ding')
     // das Handy brummt kurz. Mehrere Male ("buzzes") stehen in EINER Bewegung hintereinander:
     // zwei getrennte Bewegungen auf derselben Eigenschaft wuerden sich ueberschreiben.
     const GAP = 0.75, shake = []
     for (let b = 0; b < p.buzzes; b++) {
       const t = tn + b * GAP
       shake.push([t + 0.1, { rotate: '0deg' }], [t + 0.17, { rotate: '-1.6deg' }], [t + 0.24, { rotate: '1.6deg' }], [t + 0.31, { rotate: '-1.1deg' }], [t + 0.38, { rotate: '1.1deg' }], [t + 0.46, { rotate: '0deg' }])
-      cue(ctx.at('notify') + 0.05 + b * GAP, 'buzz', 0.6)
+      if (p.tones) cue(ctx.at('notify') + 0.05 + b * GAP, 'buzz', 0.6)
     }
     key('.phone', shake)
     if (p.waves) {

@@ -34,8 +34,9 @@ const DASHES = /[\u2012-\u2015]/
  * @param problems Seitenfehler (pageerror, Konsole, fehlgeschlagene Anfragen)
  * @param voice    { words, seconds, chars } oder null
  * @param motion   Ergebnis von sampleMotion() fuer die Knopfspalte, oder null (dann entfaellt die Pruefung)
+ * @param sounds   nur bei Klaengen aus der Bibliothek: { speech: [[anfang, ende]], length: { name: s }, maxOverlap }
  */
-export function runChecks({ state, measured, problems, voice, motion = null }) {
+export function runChecks({ state, measured, problems, voice, motion = null, sounds = null }) {
   const checks = []
   const add = (name, what, fails, level = 'error') => checks.push({ name, what, ok: fails.length === 0, level: fails.length ? level : 'ok', details: fails })
 
@@ -124,6 +125,21 @@ export function runChecks({ state, measured, problems, voice, motion = null }) {
     const col = LIMITS.column, sec = t => t.toFixed(1).replace('.', ',')
     add('knopfspalte', `Nichts Wichtiges in der rechten Knopfspalte von TikTok (x über ${col.left} px zwischen y ${col.top} und ${col.bottom})`,
       motion.filter(m => m.right > col.left).map(m => `Szene ${m.scene}: "${m.what}" reicht von ${sec(m.from)} bis ${sec(m.to)} s bis x = ${m.right} px (y ${m.top} bis ${m.bottom}). Auf TikTok liegen dort die Knöpfe darüber.`), 'warn')
+  }
+  // ---- nur mit Klaengen aus der Bibliothek ("sounds" im Skript): kein Klang soll ein Wort zudecken.
+  // Abgesenkte Klaenge ("duck", die Vorgabe) duerfen ueber Woertern liegen, sie sind dort leiser; wie
+  // weit die Stimme darueber liegt, misst der Bau mit Stimme (Bericht: soundLib, Pruefung "effekt-abstand").
+  // Ein Klang ohne Absenkung darf nur kurz in ein Wort reichen.
+  const libCues = (state.cues || []).filter(c => c.lib)
+  if (sounds && libCues.length) {
+    const sec = t => t.toFixed(2).replace('.', ','), loud = []
+    for (const c of libCues) {
+      const len = sounds.length[c.name] ?? 0, end = c.t + len
+      c.seconds = +len.toFixed(3)
+      c.overlapWords = +sounds.speech.reduce((n, [s, e]) => n + Math.max(0, Math.min(end, e) - Math.max(c.t, s)), 0).toFixed(3)
+      if (!c.duck && c.overlapWords > sounds.maxOverlap) loud.push(`"${c.name}" bei ${sec(c.t)} s (Szene ${c.scene}) liegt ${sec(c.overlapWords)} s über gesprochenen Wörtern, ohne Absenkung ("duck": false). In eine Pause legen, kürzer wählen oder "duck" weglassen.`)
+    }
+    add('effekte', `Klänge aus der Bibliothek ohne Absenkung liegen höchstens ${sounds.maxOverlap} s über Wörtern`, loud, 'warn')
   }
   add('hinweise', 'Hinweise der Bausteine (z. B. Anker, die nicht zum Text passen)', state.warnings || [], 'warn')
 

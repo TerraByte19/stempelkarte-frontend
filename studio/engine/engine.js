@@ -69,6 +69,15 @@ async function build(state) {
     state.cues.push({ t: +t.toFixed(3), name, vol, pitch, ...meta })
   }
   const engineCue = cue({ scene: 0, by: 'engine' })
+  // Klaenge aus der Bibliothek (studio/sounds/, im Skript "sounds"). Die Namensliste wird nur geladen,
+  // wenn ein Skript sie braucht: aeltere Videos fragen den Server nichts Neues und bauen wie vorher.
+  // Im Ereignis steht "lib": true; tools/sfx.py mischt sie getrennt von den berechneten Toenen.
+  let lib = null
+  const loadLib = async () => {
+    const r = await fetch('/sounds/sounds.json')
+    if (!r.ok) throw new Error('Die Klangbibliothek studio/sounds/sounds.json lässt sich nicht laden (HTTP ' + r.status + ')')
+    return (await r.json()).sounds.map(x => x.name)
+  }
 
   // ---- Szenen: alte Szene schiebt nach links weg, neue kommt von rechts
   const sceneEls = S.map((sc, n) => {
@@ -359,6 +368,27 @@ async function build(state) {
         }
         key(root, fr)
       }
+      // "sounds": Klaenge aus der Bibliothek. Erst nach build(), weil ein Klang an einem Anker des
+      // Bausteins haengen darf ("anchor": "hit") und der dann aufgeloest ist.
+      for (const [i, m] of (part.sounds || []).entries()) {
+        if (!lib) lib = await loadLib()
+        const w = `${by}, Klang ${i + 1}`
+        if (!lib.includes(m.sound)) throw new Error(`${w}: "${m.sound}" gibt es nicht in studio/sounds/sounds.json. Erlaubt: ${lib.join(', ')}`)
+        let t
+        if (m.anchor != null) {
+          if (!(m.anchor in adecl)) throw new Error(`${w}: Anker "${m.anchor}" gibt es in diesem Baustein nicht. Erlaubt: ${Object.keys(adecl).join(', ') || '(keine)'}`)
+          t = at(m.anchor) + m.offset
+        } else if (m.at) t = (m.at === 'start' ? part.s : part.e) + m.offset
+        else {
+          let ci = m.cap ?? 0; if (ci < 0) ci += caps.length
+          const c = caps[ci]; if (!c) throw new Error(`${w} zeigt auf Text ${(m.cap ?? 0) + 1}, den gibt es in diesem Teil nicht`)
+          let wi = m.word ?? 0; if (wi < 0) wi += c.t.length
+          if (c.t[wi] == null) throw new Error(`${w} zeigt auf Wort ${(m.word ?? 0) + 1} in Text ${ci + 1}, das gibt es nicht`)
+          t = c.t[wi] + m.offset
+        }
+        if (!(t >= 0) || t > DUR) { state.warnings.push(`${w}: "${m.sound}" liegt bei ${t.toFixed(2)} s außerhalb des Videos und entfällt`); continue }
+        state.cues.push({ t: +t.toFixed(3), name: m.sound, vol: m.vol, pitch: 1, lib: true, duck: m.duck, scene: n + 1, by: 'skript (sounds)' })
+      }
       // Jeder deklarierte Anker soll im Bericht stehen, auch wenn der Baustein ihn (noch) nicht benutzt
       for (const k of Object.keys(adecl)) if (!(k in resolved)) { try { at(k) } catch (e) { state.errors.push(e.message) } }
     }
@@ -379,7 +409,8 @@ async function build(state) {
   state.pace = norm.pace
   state.hold = norm.timing.hold
   const hook = TL.caps.find(c => !c.role) || TL.caps[0]
-  window.CUES = { duration: DUR, events: state.cues.map(({ t, name, vol, pitch }) => ({ t, name, vol, pitch })) }
+  // Bibliotheksklaenge tragen zusaetzlich "lib" und "duck"; alle anderen Ereignisse sehen aus wie immer
+  window.CUES = { duration: DUR, events: state.cues.map(({ t, name, vol, pitch, lib, duck }) => lib ? { t, name, vol, pitch, lib: true, duck } : { t, name, vol, pitch }) }
   Object.assign(state, {
     duration: DUR, rest,
     scenes: S.map((sc, n) => ({ index: n + 1, s: +sc.s.toFixed(3), e: +sc.e.toFixed(3), parts: sc.parts.map(p => ({ component: p.component, s: +p.s.toFixed(3), e: +p.e.toFixed(3) })) })),

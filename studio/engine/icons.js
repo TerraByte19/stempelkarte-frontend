@@ -8,7 +8,10 @@ export const ICONS = {
   scissors: '<circle cx="6.2" cy="6.6" r="2.7"/><circle cx="6.2" cy="17.4" r="2.7"/><path d="M8.4 8.3 20 18.6"/><path d="M8.4 15.7 20 5.4"/>',
   star: '<path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8Z"/>',
   heart: '<path d="M12 19.5S4.5 15 4.5 9.6A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7.5 1.6c0 5.4-7.5 9.9-7.5 9.9Z"/>',
-  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>'
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  // Doenerspiess: Stange, Fleischkegel mit zwei Schnittlinien, Fuss. Fuer Imbiss und Doenerladen
+  // (dazugekommen mit dem Doener-Video am 17.11.2026; eine Tasse waere dort ein Cafe)
+  kebab: '<path d="M12 2.4v2.8"/><path d="M7 5.2h10l-1.5 11c-.3 1.7-1.6 2.6-3.5 2.6s-3.2-.9-3.5-2.6Z"/><path d="M7.8 9.1h8.4"/><path d="M8.5 12.9h7"/><path d="M12 18.8v2.6"/><path d="M8.6 21.4h6.8"/>'
 }
 
 /** Die <symbol>-Sammlung, einmal oben in der Seite. */

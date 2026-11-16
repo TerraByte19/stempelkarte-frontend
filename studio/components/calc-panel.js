@@ -31,7 +31,8 @@ export default {
     },
     result: { default: { big: '= 6.500 €', label: 'mehr im Jahr' }, doc: 'Ergebnis: big (große Zahl, höchstens 9 Zeichen) und label (Zeile darunter)' },
     coin: { default: '€', doc: 'Zeichen auf der Münze, die vor der Tafel erscheint. Leer lassen ("") für keine Münze' },
-    check: { default: true, doc: 'Nachrechnen: Produkt aller big-Zahlen der Zeilen muss die Zahl in result.big ergeben. Nur auf false setzen, wenn die Tafel keine Multiplikation zeigt' }
+    check: { default: true, doc: 'Nachrechnen: Produkt aller big-Zahlen der Zeilen muss die Zahl in result.big ergeben. Nur auf false setzen, wenn die Tafel keine Multiplikation zeigt' },
+    gone: { default: false, doc: 'Das Ergebnis wird auf den Anker "gone" durchgestrichen und fliegt mit ein paar Münzen davon (für "Weg."). Ohne: Tafel wie bisher' }
   },
   captions: { min: 2 },
   anchors: p => {
@@ -40,6 +41,8 @@ export default {
     a.panel = { cap: 1, word: 0, doc: 'Die Münze weicht, die Tafel erscheint. Erstes Wort des Satzes, der die Rechnung beginnt' }
     p.rows.forEach((r, i) => { a['row' + (i + 1)] = { ...(ROW_ANCHORS[i] || { cap: -1, word: 0 }), doc: `Zeile ${i + 1} ("${r.big}") erscheint (Ton: tick). Auf das Wort legen, das diese Zahl nennt` } })
     a.result = { cap: 3, word: 2, doc: 'Das Ergebnis springt auf (Ton: kaching). Auf die gesprochene Ergebniszahl' }
+    // Nur auf Wunsch: ein Anker mehr im Bericht jedes alten Videos waere eine Aenderung ohne Grund
+    if (p.gone) a.gone = { cap: -1, word: 0, doc: 'Das Ergebnis wird durchgestrichen und fliegt mit Münzen davon (Ton: drop). Auf "Weg."' }
     return a
   },
   demo: { captions: [{ lines: ['Und das lohnt sich!'], accent: 99 }, { lines: ['Bleiben dir pro Kaffee', 'zwei Euro fünfzig,'], accent: 4 }, { lines: ['und fünfzig', 'Stammkunden kommen', 'einmal mehr pro Woche,'], accent: 3 }, { lines: ['sind das 6.500 Euro', 'mehr im Jahr.'], accent: 2 }] },
@@ -52,6 +55,9 @@ export default {
   .cres { padding-top: 34px; text-align: center; opacity: 0; }
   .cres b { display: block; font: 700 156px/1.05 var(--display); color: var(--lilac); letter-spacing: -.03em; text-shadow: 0 0 70px rgba(142,130,245,.65); white-space: nowrap; }
   .cres span { font: 600 48px var(--display); }
+  .cgone { position: absolute; left: 60px; right: 60px; top: 104px; height: 18px; border-radius: 9px; background: #FF6B8B; scale: 0 1; transform-origin: 0 50%; rotate: -6deg; box-shadow: 0 0 0 5px rgba(14,10,36,.5); }
+  .ccoin { position: absolute; left: 50%; top: 90px; width: 64px; height: 64px; margin-left: -32px; border-radius: 50%; background: var(--lilac); color: var(--brand); opacity: 0;
+    display: grid; place-items: center; font: 700 40px var(--display); box-shadow: 0 0 30px rgba(142,130,245,.6); }
   .coin { left: 390px; top: 810px; width: 300px; height: 300px; border-radius: 50%; background: var(--lilac); color: var(--brand); opacity: 0;
     display: grid; place-items: center; font: 700 190px var(--display); box-shadow: 0 0 110px rgba(142,130,245,.7); }
   `,
@@ -95,5 +101,23 @@ export default {
     key(cres, [[tr - 0.05, { opacity: 0, scale: 0.7 }, BACK], [tr + 0.5, { opacity: 1, scale: 1 }]])
     loop(rb, [{ scale: 1 }, { scale: 1.03 }, { scale: 1 }], 1.8)
     cue(tr, 'kaching')
+    // "Weg.": Strich durch das Ergebnis, dann fliegt es samt ein paar Muenzen nach oben aus dem Bild
+    if (p.gone) {
+      const tg = ctx.at('gone')
+      if (!(tg > tr + 0.2)) ctx.fail('Anker "gone" muss mindestens 0,2 s nach "result" liegen')
+      // Strich und Muenzen sitzen am Ergebnis; nur hier wird es dafuer zum Bezugsrahmen (alte Videos: unveraendert)
+      cres.style.position = 'relative'
+      const strike = el('i', 'cgone'); cres.append(strike)
+      key(strike, [[tg - 0.02, { scale: '0 1' }, OUT], [tg + 0.16, { scale: '1 1' }]])
+      key(cres, [[tr - 0.05, { opacity: 0, scale: 0.7 }, BACK], [tr + 0.5, { opacity: 1, scale: 1, translate: '0px 0px', rotate: '0deg' }], [tg + 0.28, { opacity: 1, scale: 1, translate: '0px 0px', rotate: '0deg' }, IN], [tg + 0.8, { opacity: 0, scale: 0.6, translate: '160px -420px', rotate: '14deg' }]])
+      const DIRS = [[-300, -260], [-170, -380], [-40, -440], [110, -400], [250, -300], [330, -180]]
+      DIRS.forEach(([dx, dy], i) => {
+        const c = el('div', 'ccoin'); c.textContent = '€'; cres.parentNode.append(c)
+        c.style.top = (cres.offsetTop + 90) + 'px'
+        const t = tg + 0.1 + i * 0.03
+        key(c, [[t, { opacity: 0, translate: '0px 0px', rotate: '0deg' }, OUT], [t + 0.08, { opacity: 1, translate: `${dx * 0.2}px ${dy * 0.2}px`, rotate: '0deg' }], [t + 0.7, { opacity: 0, translate: `${dx}px ${dy}px`, rotate: `${(i % 2 ? 1 : -1) * 200}deg` }]])
+      })
+      cue(tg + 0.1, 'drop', 0.5)
+    }
   }
 }

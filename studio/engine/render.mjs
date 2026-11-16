@@ -25,8 +25,9 @@ export async function openStudio(data) {
       }
       const rel = url.pathname === '/' ? '/engine/page.html' : decodeURIComponent(url.pathname)
       const p = path.join(STUDIO_ROOT, rel)
-      // nur engine/ und components/ ausliefern, nichts ausserhalb des Studios
-      if (!/^\/(engine|components)\//.test(rel) || !p.startsWith(STUDIO_ROOT + path.sep)) { res.writeHead(403); return res.end() }
+      // nur engine/ und components/ ausliefern, nichts ausserhalb des Studios; aus sounds/ nur die
+      // Liste der Klaenge (die Seite prueft daran die Namen im Skript, die Klaenge selbst mischt sfx.py)
+      if (!(/^\/(engine|components)\//.test(rel) || rel === '/sounds/sounds.json') || !p.startsWith(STUDIO_ROOT + path.sep)) { res.writeHead(403); return res.end() }
       // Erst lesen, dann antworten: fehlt die Datei (falscher Baustein-Name), gibt es ein
       // sauberes 404 und die Seite meldet "Baustein laesst sich nicht laden", statt dass
       // der Server mit "headers already sent" abstuerzt.

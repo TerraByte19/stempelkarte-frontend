@@ -33,6 +33,16 @@ export const TIMING = {
 // Entwurfs: dem Nutzer waren die Wischer zu laut. 0 schaltet ihn ab.
 export const SOUND = { sceneWhoosh: 0.35 }
 
+// Klaenge aus der Bibliothek (studio/sounds/, Skript: "sounds" an einer Szene oder einem Teil).
+// Nur wirksam, wenn ein Skript sie benutzt; deshalb stehen die Vorgaben NICHT in SOUND, sonst
+// stuenden sie im Bericht jedes alten Videos. Im Skript unter "sound" einstellbar:
+//   duck        so weit (dB) werden Bibliotheksklaenge abgesenkt, solange gesprochen wird
+//   maxOverlap  ein Klang ohne Absenkung ("duck": false), der laenger als so viele Sekunden
+//               ueber Woertern liegt, ergibt eine Warnung (Pruefung "effekte")
+//   minMargin   die Stimme soll mindestens so viele dB ueber jedem Klang liegen, wo beide zu
+//               hoeren sind (gemessen beim Bau mit Stimme; darunter Warnung)
+export const LIBSOUND = { duck: -10, maxOverlap: 0.3, minMargin: 8 }
+
 // Mischung: Stimme vorn, Effekte deutlich darunter. limit ist die Obergrenze des
 // Begrenzers (0,89 = rund -1 dBFS). level: true laesst ffmpeg danach wieder auf
 // 0 dBFS anheben - so waren die ersten Videos gemischt (limit 0,95), ihre
@@ -63,10 +73,11 @@ const KEYS = {
   captionStyle: Object.keys(CAPTION),
   pace: ['maxStill', 'minChanges'],
   camera: ['cap', 'word', 'offset', 'at', 'zoom', 'focus', 'to', 'dur', 'whoosh'],
-  sound: Object.keys(SOUND),
+  sound: [...Object.keys(SOUND), ...Object.keys(LIBSOUND)],
+  sounds: ['sound', 'cap', 'word', 'offset', 'at', 'anchor', 'vol', 'duck'],
   mix: Object.keys(MIX),
   voice: ['voice_id', 'model_id', 'language_code', 'output_format', 'seed', 'voice_settings', 'stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost'],
-  scene: ['component', 'params', 'anchors', 'captions', 'enter', 'camera'],
+  scene: ['component', 'params', 'anchors', 'captions', 'enter', 'camera', 'sounds'],
   parts: ['parts'],
   caption: ['lines', 'accent', 'keep', 'role', 'instant', 'mode', 'scale', 'gapBefore']
 }
@@ -184,6 +195,31 @@ function parseCamera(list, where) {
   })
 }
 
+// Klaenge aus der Bibliothek an einem Teil: welcher Klang, wann, wie laut. Zeitpunkt wie ein Anker
+// ({cap, word, offset} oder {at, offset}) oder an einem Anker des Bausteins ({anchor, offset}), damit
+// ein Klang dort sitzt, wo die Bewegung passiert (der Stempel trifft, die Karte faellt in den Eimer).
+// Ob es den Namen gibt, prueft die Seite gegen studio/sounds/sounds.json; hier nur die Form.
+function parseSounds(list, where) {
+  if (list == null) return []
+  if (!Array.isArray(list)) fail(`${where}: "sounds" muss eine Liste sein ([ { "sound": "vine-boom", ... } ])`)
+  return list.map((m, i) => {
+    const w = `${where}, Klang ${i + 1}`
+    if (!m || typeof m !== 'object' || Array.isArray(m)) fail(`${w} muss ein Objekt sein`)
+    onlyKeys(m, KEYS.sounds, w)
+    if (typeof m.sound !== 'string' || !/^[a-z0-9-]+$/.test(m.sound)) fail(`${w}: "sound" fehlt oder ist kein Name aus der Bibliothek (Kleinbuchstaben, Ziffern, Bindestriche)`)
+    const kinds = [m.anchor != null, m.at != null, m.cap != null || m.word != null].filter(Boolean).length
+    if (kinds !== 1) fail(`${w}: Zeitpunkt genau EINMAL angeben: "anchor" (Anker des Bausteins), "at" ("start"/"end") oder "cap" und "word"`)
+    if (m.at != null && m.at !== 'start' && m.at !== 'end') fail(`${w}: "at" muss "start" oder "end" sein`)
+    if (m.anchor != null && typeof m.anchor !== 'string') fail(`${w}: "anchor" muss der Name eines Ankers sein`)
+    for (const k of ['cap', 'word']) if (m[k] != null && !Number.isInteger(m[k])) fail(`${w}: "${k}" muss eine ganze Zahl sein`)
+    if (m.offset != null) num(m.offset, -5, 5, `${w}: "offset"`)
+    if (m.duck != null && typeof m.duck !== 'boolean') fail(`${w}: "duck" muss true oder false sein`)
+    const out = { sound: m.sound, vol: m.vol == null ? 1 : num(m.vol, 0, 3, `${w}: "vol"`), duck: m.duck !== false, offset: m.offset || 0 }
+    for (const k of ['cap', 'word', 'at', 'anchor']) if (m[k] != null) out[k] = m[k]
+    return out
+  })
+}
+
 /** Macht aus script.json die flache Form, mit der alle rechnen. Wirft bei Fehlern. */
 export function normalize(script) {
   if (!script || typeof script !== 'object') fail('script.json ist leer')
@@ -206,6 +242,9 @@ export function normalize(script) {
   if (script.pace) pace = { maxStill: script.pace.maxStill == null ? null : num(script.pace.maxStill, 0.5, 60, '"pace.maxStill"'), minChanges: script.pace.minChanges == null ? null : num(script.pace.minChanges, 0, 200, '"pace.minChanges"') }
   const sound = { ...SOUND, ...(script.sound || {}) }
   num(sound.sceneWhoosh, 0, 1, '"sound.sceneWhoosh"')
+  if (sound.duck != null) num(sound.duck, -40, 0, '"sound.duck"')
+  if (sound.maxOverlap != null) num(sound.maxOverlap, 0, 10, '"sound.maxOverlap"')
+  if (sound.minMargin != null) num(sound.minMargin, -20, 40, '"sound.minMargin"')
   const mix = { ...MIX, ...(script.mix || {}) }
   num(mix.voice, 0, 4, '"mix.voice"'); num(mix.sfx, 0, 4, '"mix.sfx"'); num(mix.limit, 0.0625, 1, '"mix.limit"')
   if (typeof mix.level !== 'boolean') fail('"mix.level" muss true oder false sein')
@@ -229,6 +268,7 @@ export function normalize(script) {
       if (!['fade', 'cut'].includes(enter)) fail(`${where}: "enter" muss "fade" oder "cut" sein (bekam ${JSON.stringify(p.enter)})`)
       if (p.enter != null && pi === 0) fail(`${where}: "enter" gilt nur für Teile nach dem ersten. Der erste Teil einer Szene schiebt immer herein`)
       const camera = parseCamera(p.camera, where)
+      const sounds = parseSounds(p.sounds, where)
       const idx = p.captions.map((c, ci) => {
         const cap = parseCaption(c, sayMap, `${where}, Text ${ci + 1}`, captionStyle)
         // "gapBefore": die Pause vor dieser Textzeile bekommt genau diese Laenge (gekuerzt oder
@@ -242,7 +282,7 @@ export function normalize(script) {
         cap.scene = si; cap.part = pi; cap.k = ci; cap.id = `s${si + 1}${rawParts.length > 1 ? 'abcdefgh'[pi] : ''}.${ci + 1}`
         caps.push(cap); return caps.length - 1
       })
-      return { component: p.component, params: p.params || {}, anchors: p.anchors || {}, caps: idx, enter, camera }
+      return { component: p.component, params: p.params || {}, anchors: p.anchors || {}, caps: idx, enter, camera, ...(sounds.length ? { sounds } : {}) }
     })
     scenes.push({ parts })
   })

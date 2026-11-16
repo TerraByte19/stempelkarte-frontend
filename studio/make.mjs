@@ -22,7 +22,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync, renameSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
-import { normalize, estimateTimes, timesFromAlignment, voiceCost, TIMING, STAGE } from './engine/script.mjs'
+import { normalize, estimateTimes, timesFromAlignment, alignmentWords, voiceCost, TIMING, STAGE, LIBSOUND } from './engine/script.mjs'
 import { openStudio, still, renderVideo, sampleMotion, run, STUDIO_ROOT } from './engine/render.mjs'
 import { runChecks } from './engine/checks.mjs'
 import { mixFilter, loudness, pauses, silences, ebur128, loudMix, AUDIO } from './engine/mix.mjs'
@@ -69,6 +69,16 @@ report.title = norm.meta.title
 report.text = { words: norm.words, spoken: norm.spoken }
 log(`${norm.meta.title}: ${norm.scenes.length} Szenen, ${norm.words} Wörter, ${chars} Zeichen gesprochener Text`)
 
+// Klaenge aus der Bibliothek (studio/sounds/): nur wenn das Skript irgendwo "sounds" setzt. Dann
+// braucht der Bau die Laenge jedes Klangs (Pruefung "effekte") und die Zeiten, in denen gesprochen
+// wird (darunter senkt tools/sfx.py die Klaenge ab). Ohne "sounds" bleibt alles wie vorher.
+const usesLib = norm.scenes.some(sc => sc.parts.some(p => p.sounds))
+const libSound = { ...LIBSOUND, ...Object.fromEntries(Object.entries(norm.sound).filter(([k]) => k in LIBSOUND)) }
+const libLength = usesLib ? Object.fromEntries(JSON.parse(readFileSync(path.join(STUDIO_ROOT, 'sounds', 'sounds.json'), 'utf8')).sounds.map(x => [x.name, x.duration])) : null
+// Gesprochene Stellen im Video: mit Stimme aus den Zeichen-Zeiten (Anfang und Ende jedes Wortes),
+// im Entwurf geschaetzt (jedes Wort 0,3 s ab seinem geschaetzten Anfang)
+const speechOf = (times, voice) => voice && voice.speech ? voice.speech : times.flat().map(t => [+t.toFixed(3), +(t + 0.3).toFixed(3)])
+
 // Baut die Seite mit diesen Wort-Zeiten auf und laesst alle Pruefungen laufen.
 async function inspect(times, voice) {
   const studio = await openStudio({ script, times })
@@ -79,7 +89,8 @@ async function inspect(times, voice) {
   const main = await studio.page(), state = await studio.state(main)
   if (!state.duration) return { studio, main, state, res: null, errors: [...new Set([...state.errors, ...studio.problems])].map(e => '[seite] ' + e) }
   const motion = await sampleMotion(main, state.duration, { band: STAGE.column })
-  const res = runChecks({ state, measured, problems: studio.problems, voice, motion })
+  const sounds = usesLib ? { speech: speechOf(times, voice), length: libLength, maxOverlap: libSound.maxOverlap } : null
+  const res = runChecks({ state, measured, problems: studio.problems, voice, motion, sounds })
   return { studio, main, state, res, errors: res.errors }
 }
 const showChecks = res => { for (const c of res.checks) log(`  ${c.ok ? 'ok    ' : c.level === 'warn' ? 'WARNUNG' : 'FEHLER'} ${c.name}: ${c.what}${c.ok ? '' : '\n      - ' + c.details.join('\n      - ')}`) }
@@ -162,6 +173,8 @@ if (noVoice) {
     const r = timesFromAlignment(norm, al)
     times = r.times
     voice = { audio, key: got.key, source: got.source, words: norm.words, seconds: r.voiceLength, voiceEnd: r.voiceEnd, chars, tight, extern: got.extern || null }
+    // Nur fuer Klaenge aus der Bibliothek: wann wirklich gesprochen wird (Anfang bis Ende jedes Wortes)
+    if (usesLib) voice.speech = alignmentWords(al).map(w => [+(w.s + norm.timing.lead).toFixed(3), +(w.e + norm.timing.lead).toFixed(3)])
     if (voice.extern) log(`Stimme: ${voice.extern.length} ${voice.extern.length === 1 ? 'Satz' : 'Sätze'} von außerhalb des Studios: ${voice.extern.map(x => `"${x.sentence}" (${x.file})`).join(', ')}. Pausen in diesen Sätzen bleiben, wie sie aufgenommen wurden.`)
   } catch (e) { console.error('Stimme: ' + e.message); report.errors = ['[stimme] ' + e.message]; finish(2) }
 }
@@ -236,8 +249,26 @@ try {
     })
     // ------------------------------------------------------------ 5. Toene
     const sfx = path.join(work, 'sfx.wav')
-    const sx = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'sfx.py'), path.join(out, 'cues.json'), sfx])
+    // Mit Klaengen aus der Bibliothek bekommt sfx.py die gesprochenen Stellen (zum Absenken) und, mit
+    // Stimme, die Aufnahme selbst (zum Messen, wie weit die Stimme ueber jedem Klang liegt)
+    const libArgs = []
+    if (usesLib) {
+      const sp = path.join(work, 'speech.json'); writeFileSync(sp, JSON.stringify(speechOf(times, voice)))
+      libArgs.push('--speech', sp, '--duck', String(libSound.duck))
+      if (voice) libArgs.push('--voice', voice.audio, '--lead', String(norm.timing.lead), '--gains', `${norm.mix.voice},${norm.mix.sfx}`)
+    }
+    const sx = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'sfx.py'), path.join(out, 'cues.json'), sfx, ...libArgs])
     if (sx.code !== 0) throw new Error('sfx.py: ' + (sx.err || sx.out))
+    if (usesLib) {
+      const li = JSON.parse(readFileSync(sfx + '.lib.json', 'utf8')); rmSync(sfx + '.lib.json', { force: true })
+      report.soundLib = { duckDb: li.duckDb, minMarginDb: libSound.minMargin, voiceTypicalDb: li.voiceTypicalDb, sounds: li.sounds }
+      // Liegt die Stimme irgendwo nicht klar ueber einem Klang, sagen statt still mischen
+      const thin = li.sounds.filter(x => x.marginDb && x.marginDb.min < libSound.minMargin)
+        .map(x => `"${x.name}" bei ${x.t.toFixed(2).replace('.', ',')} s: die Stimme liegt dort nur ${String(x.marginDb.min).replace('.', ',')} dB darüber (Richtwert ${libSound.minMargin} dB). "vol" senken, den Klang in eine Pause legen oder "sound.duck" tiefer stellen.`)
+      report.checks.push({ name: 'effekt-abstand', what: `Die Stimme liegt mindestens ${libSound.minMargin} dB über jedem Klang aus der Bibliothek (gemessen nur mit Stimme)`, ok: thin.length === 0, level: thin.length ? 'warn' : 'ok', details: thin })
+      if (thin.length) { report.warnings = [...(report.warnings || []), ...thin.map(x => '[effekt-abstand] ' + x)]; thin.forEach(x => log('  WARNUNG effekt-abstand: ' + x)) }
+      else log(`  Klänge aus der Bibliothek: ${li.sounds.length}, abgesenkt um ${li.duckDb} dB unter Wörtern${voice ? `, Stimme überall mindestens ${libSound.minMargin} dB darüber` : ' (Abstand zur Stimme wird erst mit Stimme gemessen)'}`)
+    }
     // ------------------------------------------------------------ 6. Mischung
     // Die Aufnahme geht so in die Mischung, wie der Anbieter sie geliefert hat (.mp3);
     // nur ein Satz-Austausch kommt als zusammengesetzte .wav aus dem Arbeitsordner.

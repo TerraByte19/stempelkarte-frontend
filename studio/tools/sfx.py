@@ -10,6 +10,17 @@
 #   - Am Ende wird auf Spitze 0,7 normiert. Ein einzelner sehr lauter Ton macht
 #     also alle anderen leiser.
 # Neue Namen muessen auch in engine/engine.js (SOUNDS) stehen.
+#
+# Seit dem Doener-Video (17.11.2026) gibt es daneben echte Klaenge aus der
+# Bibliothek studio/sounds/ (Skript: "sounds" an einer Szene). Sie kommen als
+# Ereignisse mit "lib": true und laufen NICHT durch die Schleife unten: sie
+# verbrauchen keinen Zufall und aendern die Normierung der berechneten Toene
+# nicht. Gibt es keine solchen Ereignisse (alle aelteren Skripte), laeuft
+# genau der alte Weg und die Datei bleibt bytegleich. Weitere, freiwillige
+# Angaben nur fuer diesen Fall (tools/soundlib.py):
+#   --speech <json>   Wortzeiten [[anfang, ende], ...] im Video: darunter werden die Klaenge abgesenkt
+#   --duck <dB>       wie weit (Vorgabe -10)
+#   --voice <datei> --lead <s> --gains <stimme>,<effekte>   misst, wie weit die Stimme ueber jedem Klang liegt
 import json, sys, wave
 import numpy as np
 SR = 48000
@@ -95,17 +106,38 @@ def pad():
     return x * 0.022 * np.minimum(t / 1.5, 1) * np.minimum((t[-1] - t) / 2.0, 1)
 MAKE = dict(sparkle=sparkle, riser=riser, impact=impact, wtick=wtick, pad=pad, pop=pop, thud=thud, whoosh=whoosh, drop=drop, chime=chime, ding=ding, buzz=buzz, tick=tick, scan=scan, ok=ok, crumple=crumple, kaching=kaching)
 data = json.load(open(sys.argv[1])); total = int((data['duration'] + 0.05) * SR)
-unknown = sorted({e['name'] for e in data['events']} - set(MAKE))
+lib = [e for e in data['events'] if e.get('lib')]
+events = [e for e in data['events'] if not e.get('lib')]
+unknown = sorted({e['name'] for e in events} - set(MAKE))
 if unknown: sys.exit('sfx.py: unbekannte Töne ' + ', '.join(unknown) + ' - erlaubt: ' + ', '.join(sorted(MAKE)))
 mix = np.zeros(total); cache = {}
-for e in data['events']:
+for e in events:
     k = (e['name'], e['pitch'])
     if k not in cache: cache[k] = MAKE[e['name']](e['pitch']) if e['name'] == 'pop' else MAKE[e['name']]()
     s = cache[k] * e['vol']; o = int(e['t'] * SR)
     if o >= total: continue
     s = s[:total - o]; mix[o:o + len(s)] += s
 mix = mix / max(1e-9, np.abs(mix).max()) * 0.7
-pcm = (np.stack([mix, mix], 1) * 32767).astype('<i2')
-with wave.open(sys.argv[2], 'wb') as f:
-    f.setnchannels(2); f.setsampwidth(2); f.setframerate(SR); f.writeframes(pcm.tobytes())
+if lib:
+    # Klaenge aus der Bibliothek: nach der Normierung dazu, damit "vol" 1 so laut ist wie der lauteste
+    # berechnete Ton (Spitze 0,7), egal welche anderen Toene das Video hat
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import soundlib
+    arg = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
+    speech = json.load(open(arg('--speech'))) if arg('--speech') else []
+    duck = float(arg('--duck', -10))
+    track, parts, info = soundlib.render(lib, total, speech, duck)
+    mix = mix + track
+    typical = None
+    if arg('--voice'):
+        gv, gs = (float(v) for v in arg('--gains', '1.5,0.45').split(','))
+        typical = soundlib.margins(parts, info, arg('--voice'), float(arg('--lead', 0)), speech, gv, gs)
+    soundlib.write_float_wav(sys.argv[2], mix)
+    json.dump({'duckDb': duck, 'speechWindows': len(speech), 'voiceTypicalDb': None if typical is None else round(typical, 1), 'peak': round(float(np.abs(mix).max()), 3), 'sounds': info},
+              open(sys.argv[2] + '.lib.json', 'w'), ensure_ascii=False, indent=1)
+else:
+    pcm = (np.stack([mix, mix], 1) * 32767).astype('<i2')
+    with wave.open(sys.argv[2], 'wb') as f:
+        f.setnchannels(2); f.setsampwidth(2); f.setframerate(SR); f.writeframes(pcm.tobytes())
 print(len(data['events']), 'Töne,', round(total / SR, 2), 's')
