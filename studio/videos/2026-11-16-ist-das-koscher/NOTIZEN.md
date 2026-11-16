@@ -667,3 +667,24 @@ Gebaut in einer Kopie des Ordners außerhalb des Repos, mit
   weiter nicht gelaufen (`shop-map`, `stamp-check` und die neuen Parameter
   fehlen im Katalog).
 - `videos/GEPLANT-benachrichtigung.md` nennt noch Fassung 1.
+
+## Fassung 4: welche Aufnahmen gelten (16.11.2026)
+
+Der Betreiber hat Probe J gewählt und wollte das ch in "Natürlich" wie "khh".
+
+- Satz "Ist das koscher?": `koscher-frage-verwundert.mp3` (Liam, Modell
+  eleven_v3, Text "[astonished] Ist das koscher?").
+- Satz "Natürlich ist das koscher!": `koscher-antwort-G-rachen-ch.mp3`. Das ist
+  die Antwort aus Probe G (eleven_v3, "[joyful, sing-song, drawn out]
+  Natüüürlich ist das koscher!"), in der das weiche ch von Hand durch das
+  Rachen-ch ersetzt wurde, das dieselbe Stimme in "Ach!" gesprochen hat
+  (eigene kurze Aufnahme, 47 Zeichen). Gemessen: der Laut dauert jetzt 0,17 s
+  statt 0,085 s, liegt 15 dB höher und hat seinen Schwerpunkt bei 2,4 kHz
+  statt 3,7 kHz. Über die Schreibweise ließ sich das nicht erreichen, das
+  Modell spricht nach einem i immer das weiche ch.
+- Der Stempel fällt 0,3 s nach dem Wortanfang, auf die betonte Silbe.
+- Bewusst nicht gemacht: ein nachgeahmter Akzent und die Originalaufnahme des
+  Spruchs. Beides hat der Betreiber angefragt; es bleibt bei eigener Stimme
+  und eigener Betonung.
+- Angehört hat das Ergebnis nur der Betreiber. Gemessen sind Text
+  (Mitschrift), Länge 41,9 s, Lautheit -14,1 LUFS, Spitze -1,2 dBTP.

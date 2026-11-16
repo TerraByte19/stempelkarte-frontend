@@ -80,8 +80,8 @@
     "_max_zeichen_pro_tag": "Feste Obergrenze für alle Aufnahmen eines Tages zusammen. Dieselbe Zahl steht im Auftragstext der Aufgabe.",
     "vortrag": {
       "monat": "2026-11",
-      "zeichen": 4089,
-      "_hinweis": "Zum Teil geschätzt: vier Aufnahmen zu je 698 Zeichen für das erste Video (Fassung 8 und die Proben A, B, C; so steht es seit dem 15.11.2026 auch auf dem Board, 2.792 Zeichen), dazu gemessen 658 Zeichen für die Aufnahme des Videos 2026-11-16-ist-das-koscher am 16.11.2026 (von Hand, vor dem ersten Lauf) und 639 Zeichen für Proben der beiden Spruch-Sätze am selben Tag (drei Runden). Der wirkliche Verbrauch im November steht in keiner Datei; der Betreiber sieht ihn bei ElevenLabs. Gilt nur für den genannten Monat."
+      "zeichen": 4136,
+      "_hinweis": "Zum Teil geschätzt: vier Aufnahmen zu je 698 Zeichen für das erste Video (Fassung 8 und die Proben A, B, C; so steht es seit dem 15.11.2026 auch auf dem Board, 2.792 Zeichen), dazu gemessen 658 Zeichen für die Aufnahme des Videos 2026-11-16-ist-das-koscher am 16.11.2026 (von Hand, vor dem ersten Lauf) und 686 Zeichen für Proben der beiden Spruch-Sätze am selben Tag (drei Runden und eine Aufnahme mit rauem ch). Der wirkliche Verbrauch im November steht in keiner Datei; der Betreiber sieht ihn bei ElevenLabs. Gilt nur für den genannten Monat."
     },
     "_hinweis": "Diese Grenzen rechnet studio/tools/budget.mjs nach. Die harte Sperre im Studio selbst bleibt daneben bestehen: ohne --allow-voice-spend sendet nichts, und mehr als 1500 Zeichen in einem Aufruf gehen nie hinaus (studio/tools/voice.py)."
   },
