@@ -136,49 +136,51 @@
             { "lines": ["Mit *Stampit | hat er | deine *Karte | im *Handy."], "gapBefore": 0.55 },
             { "lines": ["Jeder | *Besuch | ein *Stempel, | sofort | *sichtbar."] }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "_hinweis": "Satz 6 nach Korrektur des Betreibers (16.11.2026): die Karte meldet sich in Ladennähe IMMER, nicht erst voll, mit dem Stand als Text. Karte von oben: er geht eine Straße hinter deinem Laden vorbei, kurz bevor er ankommt brummt das Handy. Schnitt: Sperrbildschirm mit 'Noch 2 Stempel bis: Gratis-Döner'. Schnitt: wieder die Karte, nur die beiden Läden, am Laden gegenüber erscheint eine durchgestrichene Glocke.",
+      "parts": [
         {
-          "component": "wallet-pass",
-          "enter": "cut",
-          "params": { "shop": "Döner Nordwind", "location": "", "reward": "8 Stempel = 1 Döner gratis", "stamps": 8, "before": 7, "after": 8, "icon": "kebab", "scan": false, "rise": false, "drop": false },
-          "anchors": { "stamp1": { "cap": 0, "word": 3 } },
-          "camera": [ { "at": "start", "dur": 0, "zoom": 1.45, "focus": [540, 1060], "to": [540, 1040] } ],
+          "component": "shop-map",
+          "params": { "shop": "Döner Nordwind", "icon": "kebab", "circle": false, "notify": true, "note": "Noch 2 Stempel bis: Gratis-Döner", "path": [[3.7, 1], [1.5, 1]], "via": 0.915, "rival": "Döner Südwind", "rivalIcon": "kebab", "rivalAt": [2.5, 0.8], "quiet": false },
+          "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 6, "offset": 0.05 }, "arrive": { "cap": 0, "word": 6, "offset": 0.45 } },
           "sounds": [
-            { "sound": "erfolg-pling", "anchor": "stamp1", "offset": 0.05, "vol": 0.7 }
+            { "sound": "handy-vibriert", "anchor": "buzz", "offset": 0.05, "vol": 0.6 }
           ],
           "captions": [
-            { "lines": ["Und ist | sie *voll,"] }
+            { "lines": ["Und kommt er | an *deinem *Laden | *vorbei,"] }
+          ]
+        },
+        {
+          "component": "lock-notification",
+          "enter": "cut",
+          "params": { "clock": "12:41", "date": "Freitag, 20. November", "title": "Döner Nordwind", "body": "Noch 2 Stempel bis: Gratis-Döner", "icon": "kebab", "pin": false, "rise": false, "buzzes": 2, "waves": true, "tones": false },
+          "anchors": { "notify": { "cap": 0, "word": 0, "offset": -0.05 } },
+          "camera": [ { "cap": 0, "word": 5, "zoom": 1.3, "focus": [540, 1030] } ],
+          "sounds": [
+            { "sound": "erfolg-pling", "anchor": "notify", "offset": 0.1, "vol": 0.6 }
+          ],
+          "captions": [
+            { "lines": ["zeigt | sein *Handy | ihm die *Karte | *von *selbst."] }
           ]
         }
       ]
     },
     {
-      "_hinweis": "Die volle Karte meldet sich von selbst (Sperrbildschirm). Schnitt: Karte von oben mit beiden Läden. Er geht eine Straße hinter deinem Laden, kommt erst am Laden gegenüber vorbei (nichts passiert), dann meldet sich dein Laden. Auf 'Nicht an dem gegenüber' fährt die Kamera zum anderen Laden, dort erscheint eine durchgestrichene Glocke.",
+      "_hinweis": "Eigene Szene, weil zwei Karten von oben in einer Szene sich in der Prüfung gegenseitig überdecken würden: nur die beiden Läden, am Laden gegenüber erscheint eine durchgestrichene Glocke.",
       "parts": [
         {
-          "component": "lock-notification",
-          "params": { "clock": "12:41", "date": "Freitag, 20. November", "title": "Döner Nordwind", "body": "8 von 8, dein Döner wartet", "icon": "kebab", "pin": false, "rise": false, "buzzes": 2, "waves": true, "tones": false },
-          "anchors": { "notify": { "cap": 0, "word": 0, "offset": -0.05 } },
-          "camera": [ { "cap": 0, "word": 3, "zoom": 1.3, "focus": [540, 1030] } ],
-          "sounds": [
-            { "sound": "handy-vibriert", "anchor": "notify", "offset": 0.05, "vol": 0.7 }
-          ],
-          "captions": [
-            { "lines": ["meldet | sie sich | *von *selbst,"] }
-          ]
-        },
-        {
           "component": "shop-map",
-          "enter": "cut",
-          "params": { "shop": "Döner Nordwind", "icon": "kebab", "circle": false, "notify": true, "note": "8 von 8, dein Döner wartet", "path": [[3.7, 1], [1.5, 1]], "via": 0.915, "rival": "Döner Südwind", "rivalIcon": "kebab", "rivalAt": [2.5, 0.8], "quiet": true },
-          "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 3, "offset": 0.05 }, "arrive": { "cap": 0, "word": 5, "offset": 0.45 }, "quiet": { "cap": 1, "word": 3 } },
-          "camera": [ { "cap": 1, "word": 0, "zoom": 1.15, "focus": [700, 900], "to": [640, 960], "dur": 0.3 } ],
+          "params": { "shop": "Döner Nordwind", "icon": "kebab", "circle": false, "walker": false, "notify": false, "rival": "Döner Südwind", "rivalIcon": "kebab", "rivalAt": [2.5, 0.8], "quiet": true },
+          "anchors": { "quiet": { "cap": 0, "word": 0 } },
+          "camera": [ { "cap": 0, "word": 0, "zoom": 1.15, "focus": [700, 900], "to": [640, 960], "dur": 0.3 } ],
           "sounds": [
-            { "sound": "applaus", "cap": 1, "word": 3, "offset": 0.3, "vol": 0.45 }
+            { "sound": "applaus", "cap": 0, "word": 2, "offset": 0.3, "vol": 0.3 }
           ],
           "captions": [
-            { "lines": ["wenn er an | *deinem *Laden | vorbeikommt."] },
-            { "lines": ["*Nicht | an dem | *gegenüber."], "gapBefore": 0.5 }
+            { "lines": ["*Nicht | die von | *gegenüber."], "gapBefore": 0.5 }
           ]
         }
       ]
