@@ -450,3 +450,220 @@ Zuschauer es sieht (Bühne 1080 px breit):
 - `videos/GEPLANT-benachrichtigung.md` nennt noch Fassung 1.
 - Auf der Karte gibt es die zwei durchgestrichenen Zeichen (`privacy`) noch
   nicht.
+
+---
+
+# Fassung 3 in Vorbereitung (16.11.2026): Bilder nachgezogen, Werkzeug für Sätze von außerhalb
+
+Alles oberhalb dieser Linie beschreibt die Fassungen 1 und 2 und bleibt als
+Verlauf stehen.
+
+**Stand:** `out/video.mp4` zeigt die neuen Bilder mit der **unveränderten**
+Stimme (Aufnahme `593a18385cf458fa`, 40,7 s, 0 Zeichen ausgegeben). Die beiden
+koscher-Sätze sind noch **nicht** ersetzt: der Betreiber wählt gerade zwischen
+Proben. Im Ordner `voice/` liegen weiter nur die drei Dateien der Aufnahme.
+**Nichts davon ist committet**: `script.json`, `components/shop-street.js`,
+`components/shop-map.js`, `make.mjs`, `tools/voice.py`, `tools/tighten.py`,
+`tools/times.mjs`, `tools/selftest.mjs`, neu `tools/clip-in.py` und
+`tools/test_clip_in.py`, und diese Datei.
+
+## Warum
+
+1. Die unabhängige Prüfung von Fassung 2 fand drei Bilder, die den Wunsch des
+   Betreibers ("man muss nur in der NÄHE sein, nicht vor dem Laden") noch nicht
+   ganz trugen.
+2. Der Betreiber will die beiden Sätze des Spruchs anders gesprochen. In
+   seinen Worten: die Frage "Ist das koscher?" soll wirklich wie eine Frage
+   klingen, verwundert; danach kommt "Natürlich ist das koscher!", und das
+   nicht als Frage; das ch soll mehr kratzen. Solche Aufnahmen entstehen
+   außerhalb des Studios mit einem anderen Modell des Anbieters, ein Satz je
+   Datei. Der Text bleibt Wort für Wort derselbe. Welche Probe das trifft,
+   entscheidet das Ohr des Betreibers; das Werkzeug unten misst nur.
+
+## Was sich im Bild geändert hat
+
+Gemessen im Bild, wie der Zuschauer es sieht (Bühne 1080 px breit).
+
+| Zeit | Satz | bis Fassung 2 | jetzt |
+|---|---|---|---|
+| 2,60 bis 5,13 s | "genau wenn du an deinem Lieblingscafé vorbeigehst." | die Benachrichtigung endete 22 px vor der Markise und 40 px vor der Hauswand | die Figur bleibt früher stehen (`via` 0.13, `to` 0.15, `from` -0.08), der Laden steht ganz rechts (`shopAt` 0.7). Luft zur Markise 71 px, zur Hauswand 89 px |
+| 21,68 bis 24,68 s | "und du kommst in die Nähe, zeigt dein Handy sie von selbst an." | nach der Kamerafahrt (Faktor 1,34) reichte der Kreis von x = 142 bis 1218, rechts lief er aus dem Bild | Kamera nur noch Faktor 1,2 (`focus` [560, 1166], `to` [540, 1211]). Der Kreis reicht von x = 58 bis 1022 und liegt damit ganz in der Bildbreite, mit Nadel, Schild, Kundin und Benachrichtigung (ab y = 602). Sein unterer Rand (bis y = 1693) liegt wie vorher im Bereich, den Instagram und TikTok unten überdecken |
+| 24,68 bis 27,74 s | "Der Laden schickt nichts. Und sieht nicht, wo du bist." | die Figur ging direkt an der Ladentür vorbei | `shop-street` mit `"across": true` und `"privacy": true`: der Laden steht klein im Hintergrund, die zwei durchgestrichenen Zeichen links und rechts daneben, die Figur geht vorn auf der anderen Straßenseite (Füße rund 490 px unter der Türschwelle, nach der Kamerafahrt 595 px). Auf "Und sieht" fährt die Kamera auf Laden und Zeichen (Faktor 1,22) |
+| 32,27 bis 33,53 s | "Genau vor deiner Tür." | die beiden unteren Kunden standen 200 und 193 px neben der Nadel, ihre Karten 33 und 26 px neben dem Namensschild | `"spread": true`: 223 und 222 px neben der Nadel, 386 und 385 px von ihr entfernt (Halbmesser des Kreises 400). Zwischen ihren Karten und dem Schild bleiben 56 und 55 px |
+
+Warum bei Satz 7 die Straße und nicht die Karte: davor steht 3 s lang die
+Karte von oben. Eine zweite Karte direkt danach wäre eintönig, und das Bild
+von der anderen Straßenseite kennt der Zuschauer schon aus Satz 2.
+
+Alles andere ist Bild für Bild wie in Fassung 2. Länge, Töne (44) und Mischung
+(-14,0 LUFS, wahre Spitze -1,2 dBTP) sind unverändert, 19 Bildwechsel, 17 von
+17 Prüfungen, keine Warnung.
+
+### Neu in den Bausteinen, beides nur auf Wunsch
+
+- `shop-street`: `"across"` geht jetzt zusammen mit `"privacy"`. Die Zeichen
+  stehen dann neben dem Laden (108 px, dünnerer Strich, damit das Auge unter
+  dem Strich ein Auge bleibt), nicht über dem Dach: dort beginnt bei dem
+  kleinen Laden gleich der Textbereich. `shopAt` muss dafür zwischen 0.38 und
+  0.62 liegen, sonst ragt ein Zeichen aus dem Bild (der Bau bricht ab).
+- `shop-map`: `"spread": true` stellt im Blick des Betreibers die beiden
+  unteren Kunden weiter außen. Sie gehen dafür nur 16 statt 34 px auf ihren
+  Platz zu: in Reihe 3 ist der Kreis schmal, und im Kreis müssen sie von
+  Anfang an stehen.
+
+## Werkzeug `tools/clip-in.py`: ein Satz von außerhalb des Studios
+
+```bash
+# aus dem Ordner stempelkarte-frontend. Sendet nichts, kostet 0 Zeichen.
+python3 studio/tools/clip-in.py studio/videos/2026-11-16-ist-das-koscher "Ist das koscher?" <frage.mp3>
+python3 studio/tools/clip-in.py studio/videos/2026-11-16-ist-das-koscher "Natürlich ist das koscher!" <antwort.mp3>
+STUDIO_VOICE_OFFLINE=1 node studio/make.mjs studio/videos/2026-11-16-ist-das-koscher
+```
+
+Die Reihenfolge der beiden ersten Befehle ist gleich. Weitere Schalter:
+`--check` (nur messen, nichts ablegen), `--list` (Sätze mit Nummern, und
+welche Fassung gilt), `--original` (zurück zur Aufnahme ohne fremde Sätze),
+`--prune` (abgelegte Fassungen löschen, die nicht mehr gebraucht werden),
+`--words 0.38,0.68` (Wortanfänge von Hand, Sekunden der Clip-Datei, ab dem
+zweiten Wort), `--alignment <json>` (Zeiten des Anbieters, wenn sie nicht als
+`<clip>.alignment.json` neben dem Clip liegen).
+
+**Achtung, Zählung:** der Satz wird am sichersten als Text angegeben. Als
+Nummer zählt das Werkzeug wie `voice.py`, an jedem `. ! ? : ;`. "Natürlich ist
+das koscher!" ist so Satz **6** (nicht 4): "Verfolgt dich das Café?", "Nein."
+und "Dein Handy sendet die Benachrichtigung selbst." sind drei Sätze.
+
+Was es tut:
+
+1. **Zuschnitt.** Stille am Anfang und Ende des Clips fällt weg, 40 ms vor dem
+   ersten Laut bleiben (wie beim Satz-Austausch von `voice.py`).
+2. **Wortanfänge aus dem Ton.** Der Clip wird mit demselben Satz der
+   vorhandenen Aufnahme verglichen, Laut für Laut (Klangfarbe je 10 ms,
+   dehnbare Zuordnung), auch wenn ein Wort gedehnt ist. Jeder Wortanfang rückt
+   dann auf den nächsten deutlichen Einsatz im Pegel (höchstens 0,1 s weit);
+   fällt er in eine Pause, gilt deren Ende. Die Zeiten des Anbieters sind nur
+   Notlösung, danach eine gleichmäßige Verteilung. Die Regieanweisung in
+   eckigen Klammern und Schreibweisen wie "Natüüürlich" oder "koscher??"
+   stören nicht: in die Zeiten kommen die freigegebenen Wörter.
+3. **Lautstärke.** Gleiche mittlere Lautstärke der gesprochenen Stellen wie in
+   den 4 s Aufnahme davor und danach, höchstens 6 dB in jede Richtung, nie bis
+   zur Übersteuerung. Der Wert steht in der Ausgabe und in der meta.
+4. **Pause danach.** Die Stille nach dem Satz bleibt so lang, wie sie in der
+   Aufnahme war (gemessen am Ton; was fehlt, folgt dem Clip als Stille).
+   `timing.maxGap` und `gapBefore` stellen sie beim Bau ein wie immer.
+5. **Ablage** im Ordner `voice/`, wie beim Satz-Austausch: `<neu>.clip.mp3`
+   (der Clip, Byte für Byte wie geliefert), `<neu>.clip.alignment.json`,
+   `<neu>.alignment.json`, `<neu>.meta.json` mit `"source": "extern"`,
+   Dateiname und sha256 des Clips, `"spent": 0`. Die Aufnahme selbst bleibt
+   unverändert.
+6. **Verweis** `voice/593a18385cf458fa.use.json`. Der Text ändert sich nicht,
+   also auch nicht sein Schlüssel. Erst der Verweis sagt dem Bau, welche
+   Fassung gilt. Zeigt er ins Leere, bricht der Bau ab, statt still die alte
+   Betonung zu nehmen.
+
+Beim Bau: `make.mjs` meldet "Fassung der Aufnahme ... mit Sätzen von außerhalb"
+und kürzt Pausen **in** einem solchen Satz nicht (`tighten.py --keep`): eine
+Kunstpause wie in "Ist das ... koscher?" gehört zu dem Vortrag, den der
+Betreiber ausgesucht hat. `report.json` nennt die Sätze unter `voice.extern`
+(Zeiten der ungekürzten Fassung) und die Aufnahme unter `elevenLabs.takeOf`.
+
+Ein Satz lässt sich noch einmal ersetzen (der Betreiber wählt doch eine andere
+Probe): derselbe Befehl mit dem anderen Clip. Die Kette entsteht dann neu, die
+alte Fassung bleibt liegen, bis `--prune` sie löscht.
+
+### Wie die Tafeln der Pointe zu ihren Zeiten kommen
+
+Die Tafeln "Natürlich", "ist das", "koscher!" stehen jeweils 0,03 s vor dem
+Anfang ihres ersten Wortes. Die Wortanfänge stehen in den Zeichen-Zeiten der
+Fassung, und dorthin schreibt das Werkzeug, was es im Ton gemessen hat. Der
+Stempel hängt am Anfang von "Natürlich" plus 0,22 s (Anker `hit`), er bleibt
+also am ersten Laut des Satzes, wie lang das Wort auch gedehnt ist.
+
+Die Ausgabe des Werkzeugs zeigt zu jedem Wort den Pegel in den 0,1 s davor und
+danach. Dort einmal nachsehen: ein Wortanfang soll am Fuß eines Anstiegs
+sitzen. Steht bei einem Wort nicht "+einsatz", ist es nur geschätzt (das
+Werkzeug warnt), dann mit `--words` von Hand setzen.
+
+**Offene Entscheidung, Stempel:** bei einem gedehnten "Natüüürlich" trifft der
+Stempel 0,22 s nach dem ersten Laut noch auf "Na". Soll er auf "tür" treffen,
+den Versatz im Skript anpassen (`"hit": { "cap": 0, "word": 0, "offset": ... }`):
+das t von "tür" beginnt bei G-a und A3 nach 0,30 s, bei A1 nach 0,39 s, bei A2
+nach 0,49 s. Die Ausgabe nennt den Wert als "weitere Einsätze im Wort".
+
+### Die sieben Proben, gemessen (nichts abgelegt, `--check`)
+
+Wortanfänge in Sekunden der Clip-Datei. Alle sitzen auf einem Einsatz im
+Pegel und stimmen mit dem überein, was der Pegelverlauf von Hand zeigt.
+
+| Probe | Satz | Länge, zugeschnitten | Wortanfänge | Lautstärke |
+|---|---|---|---|---|
+| Q1 | Frage | 1,21 s (bisher 0,99 s) | Ist 0,115, das 0,38, koscher? 0,68 | -1,8 dB |
+| Q2 | Frage | 1,15 s | 0,11, 0,37, 0,65 | -2,9 dB |
+| Q3 | Frage | 2,68 s | 0,14, 0,665, 2,065 (0,78 s Kunstpause vor "koscher?", bleibt beim Bau stehen) | +1,0 dB |
+| G-a | Antwort | 2,31 s (bisher 1,49 s) | Natürlich 0,05, ist 1,18, das 1,425, koscher! 1,755 | -3,5 dB |
+| A1 | Antwort | 2,83 s | 0,095, 1,625, 1,87, 2,16 | -2,6 dB |
+| A2 | Antwort | 2,66 s | 0,105, 1,62, 1,865, 2,14 | -0,3 dB |
+| A3 | Antwort | 2,33 s | 0,05, 1,21, 1,445, 1,77 (ohne Zeiten des Anbieters, das Werkzeug weist darauf hin) | -2,9 dB |
+
+Die Zeiten des Anbieters lagen bei diesen Proben bis zu 0,16 s daneben (erstes
+Wort von Q1) und sonst bis zu 0,11 s zu früh.
+
+### Probe in einer Kopie (Q1 für die Frage, G-a für die Antwort)
+
+Gebaut in einer Kopie des Ordners außerhalb des Repos, mit
+`STUDIO_VOICE_OFFLINE=1`. Der echte Ordner wurde dafür nicht angefasst.
+
+| | |
+|---|---|
+| Zeichen ausgegeben | 0 (`elevenLabs.spent` 0, aus dem Cache, Fassung `712d6f4207808f7f` der Aufnahme `593a18385cf458fa`) |
+| Länge | 41,833 s (1255 Bilder), 1,13 s mehr als mit der Aufnahme |
+| Lautheit | -14,1 LUFS, wahre Spitze -1,2 dBTP, Bereich 2,2 LU |
+| Frage | erster Laut im Video bei 0,40 s (Vorlauf 0,35 s), Stille danach 0,45 s (`maxGap`) |
+| Antwort | Stille davor 0,45 s, danach 0,55 s (`gapBefore`) |
+| Tafeln | "Natürlich" 10,84 bis 11,97 s, "ist das" 11,97 bis 12,545 s, "koscher!" 12,545 bis 13,589 s; Stempel bei 11,09 s |
+| Mitschrift | 109 von 109 Wörtern wie freigegeben. Einzige Abweichung in der Schreibweise: "Kaffee" statt "Café" in "Verfolgt dich das Café?" (unveränderter Teil der Aufnahme, beide Wörter klingen bei dieser Stimme gleich) |
+| Prüfungen | 17 von 17, keine Warnung |
+
+## Selbstprüfung und Vergleich
+
+- `node studio/tools/selftest.mjs`: 96 von 96 Prüfungen bestanden (vorher 88).
+  Neu: Fassung 3 des zweiten Videos (keine Figur mehr an der Ladenfront, der
+  ganze Kreis in der Bildbreite), `spread`, `across` mit `privacy` und sein
+  Fehlerfall, `tools/test_clip_in.py` (31 Prüfungen mit einem künstlichen
+  Clip, ohne Netz), und der ganze Weg an echter Sprache in einer Kopie des
+  ersten Videos (Satz einsetzen, `make.mjs` nimmt die Fassung, `--original`).
+- `node studio/tools/regress.mjs`: BESTANDEN: v7 gut, v10 gut. Je 130 von 130
+  Standbildern bildgleich, Effektspur bytegleich, Aufnahme und Mischung gleich
+  (0 Abtastwerte verschieden). In `tools/voice.py`, `tools/tighten.py` und
+  `make.mjs` ist alles Neue nur wirksam, wenn eine Fassung von `clip-in.py` im
+  Ordner `voice/` liegt.
+
+## Fallen
+
+- **Reihenfolge beim Abgeben:** der Ordner `voice/` gehört nach dem Einsetzen
+  ganz ins Repo, mit `.clip.mp3`, den Zeiten, der meta und der `.use.json`.
+  Fehlt die `.use.json`, baut ein frischer Checkout wieder mit der alten
+  Betonung, ohne Fehlermeldung.
+- **Kassenbuch:** `"spent": 0` heißt nur, dass dieses Werkzeug nichts sendet.
+  Was die Proben beim Anbieter gekostet haben, steht nicht hier.
+- **Die Mischung gleicht mit.** Der Angleich im Werkzeug bringt den Clip auf
+  die Lautstärke der Nachbarsätze, danach arbeitet der Kompressor der lauten
+  Mischung über alles. Ob ein Satz mit anderem Modell im Klang heraussticht,
+  zeigt nur das Anhören.
+- **Q1 endet ohne Ausklang** (die Datei hört mitten im letzten Laut auf, bei
+  rund -25 dB). Die 12 ms Blende am Schnitt fängt das ab; hören muss man es.
+- **Ändert sich später der Text,** gilt der Verweis nicht mehr (neuer
+  Schlüssel), und die Sätze von außerhalb müssen neu eingesetzt werden.
+- Der Clip muss eine `.mp3` sein (so liegt er unverändert im Repo).
+
+## Offen
+
+- **Nicht abgehört.** Weder die neuen Bilder als laufendes Video noch die
+  Probe mit Q1 und G-a hat jemand gehört. Gemessen sind Länge, Lautheit,
+  Pausen, Wortanfänge und die Mitschrift.
+- Der Betreiber wählt Frage und Antwort, dann die drei Befehle oben, ansehen,
+  anhören, und über den Versatz des Stempels entscheiden.
+- `PLAYBOOK.md` nennt das Werkzeug noch nicht, und `tools/catalog.mjs` ist
+  weiter nicht gelaufen (`shop-map`, `stamp-check` und die neuen Parameter
+  fehlen im Katalog).
+- `videos/GEPLANT-benachrichtigung.md` nennt noch Fassung 1.

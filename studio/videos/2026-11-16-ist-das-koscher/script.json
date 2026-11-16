@@ -4,7 +4,7 @@
     "slug": "ist-das-koscher",
     "language": "de",
     "date": "2026-11-16",
-    "fassung": 2,
+    "fassung": 3,
     "idee": "Viele fragen sich, ob ein Laden sie verfolgt, wenn sich das Handy genau vor der Tür meldet. Das Video sagt, wie es wirklich ist: das Handy zeigt die volle Karte von selbst an, der Laden schickt nichts und sieht nichts. Anregung: die Machart des stärksten Vorbilds (ein Wort auf einmal, schnelle Bildwechsel, kaum Pausen, laute Mischung) und der bekannte Spruch 'Ist das koscher? Natürlich ist das koscher!' als Rahmen. Text, Bilder, Stimme und Töne sind eigene; es wird keine fremde Aufnahme verwendet.",
     "_hinweis": "Der gesprochene Text ist vom Betreiber Wort für Wort freigegeben (videos/GEPLANT-benachrichtigung.md). Kein Wort ändern, ergänzen oder streichen: das wäre eine neue, kostenpflichtige Aufnahme und ein anderer Text als der freigegebene. Die Zeichen * und | stehen nur für das Bild (Schlüsselwort, Grenze zwischen zwei Tafeln) und werden nicht gesprochen."
   },
@@ -27,7 +27,7 @@
   },
   "scenes": [
     {
-      "_hinweis": "Einstieg. Die Frage steht ab dem allerersten Bild groß da ('instant'), das Handy steht schon ('rise': false) und brummt zweimal. Auf 'Handy' springt die Kamera auf die Benachrichtigung. Danach harter Schnitt auf die Straße. Fassung 2: die Figur geht auf der ANDEREN Straßenseite vorbei ('across'), der Laden steht klein im Hintergrund. In Fassung 1 ging sie direkt an der Ladenfront entlang, und das sah aus, als müsse man vor der Tür stehen.",
+      "_hinweis": "Einstieg. Die Frage steht ab dem allerersten Bild groß da ('instant'), das Handy steht schon ('rise': false) und brummt zweimal. Auf 'Handy' springt die Kamera auf die Benachrichtigung. Danach harter Schnitt auf die Straße. Fassung 2: die Figur geht auf der ANDEREN Straßenseite vorbei ('across'), der Laden steht klein im Hintergrund. In Fassung 1 ging sie direkt an der Ladenfront entlang, und das sah aus, als müsse man vor der Tür stehen. Fassung 3: sie bleibt früher stehen ('via' 0.13, 'to' 0.15) und der Laden steht ganz rechts ('shopAt' 0.7), damit zwischen Benachrichtigung und Laden deutlich Luft bleibt (vorher rund 50 px bis zur Hauswand).",
       "parts": [
         {
           "component": "lock-notification",
@@ -42,7 +42,7 @@
         {
           "component": "shop-street",
           "enter": "cut",
-          "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "right", "across": true, "shopAt": 0.68, "circle": false, "notify": true, "note": "6 von 6", "from": -0.05, "via": 0.2, "to": 0.29 },
+          "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "right", "across": true, "shopAt": 0.7, "circle": false, "notify": true, "note": "6 von 6", "from": -0.08, "via": 0.13, "to": 0.15 },
           "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 5, "offset": -0.1 }, "arrive": { "cap": 0, "word": 6, "offset": 0.25 } },
           "captions": [
             { "lines": ["genau | wenn du | an deinem | *Lieblingscafé | vorbeigehst."] }
@@ -68,7 +68,7 @@
           "component": "stamp-check",
           "enter": "cut",
           "params": { "icon": "check" },
-          "anchors": { "hit": { "cap": 0, "word": 0, "offset": 0.22 } },
+          "anchors": { "hit": { "cap": 0, "word": 0, "offset": 0.3 } },
           "captions": [
             { "lines": ["*Natürlich | ist das | *koscher!"], "scale": 1.15 }
           ]
@@ -91,7 +91,7 @@
       ]
     },
     {
-      "_hinweis": "Das Schlüsselbild. Erst: in der Karte steht der Ort (Nadel auf der Karte, Nadel auf dem Laden). Dann: die Karte wird voll. Dann die Karte von oben: der Kreis 'in der Nähe' um die Ortsnadel, die Kundin geht eine Straße weiter (nicht an der Tür vorbei), tritt in den Kreis, und dort, sichtbar entfernt von der Nadel, zeigt ihr Handy die Karte. Die Kamera fährt heran, Nadel und Kundin bleiben beide im Bild. Nirgends eine Entfernung in Zahlen.",
+      "_hinweis": "Das Schlüsselbild. Erst: in der Karte steht der Ort (Nadel auf der Karte, Nadel auf dem Laden). Dann: die Karte wird voll. Dann die Karte von oben: der Kreis 'in der Nähe' um die Ortsnadel, die Kundin geht eine Straße weiter (nicht an der Tür vorbei), tritt in den Kreis, und dort, sichtbar entfernt von der Nadel, zeigt ihr Handy die Karte. Die Kamera fährt nur leicht heran (Fassung 3: 1,2 statt 1,34), damit der ganze Kreis im Bild bleibt, mit Nadel, Rand des Kreises und Kundin. Nirgends eine Entfernung in Zahlen.",
       "parts": [
         {
           "component": "shop-street",
@@ -116,7 +116,7 @@
           "enter": "cut",
           "params": { "shop": "Café Nordwind", "icon": "cup", "circle": true, "notify": true, "note": "6 von 6, dein Kaffee wartet", "path": [[-0.1, 1], [0.55, 1]] },
           "anchors": { "circle": { "at": "start", "offset": 0.05 }, "walk": { "at": "start" }, "buzz": { "cap": 1, "word": 0, "offset": -0.1 }, "arrive": { "at": "end", "offset": -0.5 } },
-          "camera": [ { "cap": 1, "word": 0, "zoom": 1.34, "focus": [456, 985], "to": [540, 1066], "dur": 0.3 } ],
+          "camera": [ { "cap": 1, "word": 0, "zoom": 1.2, "focus": [560, 1166], "to": [540, 1211], "dur": 0.3 } ],
           "captions": [
             { "lines": ["und du | kommst | in die *Nähe,"] },
             { "lines": ["zeigt | dein *Handy | sie | *von *selbst | an."] }
@@ -125,18 +125,18 @@
       ]
     },
     {
-      "_hinweis": "Was NICHT passiert: zwei durchgestrichene Zeichen über dem Laden (Senden, Sehen), die Figur geht unbehelligt vorbei. Keine Zahl, keine Behauptung über Daten, die über den Text hinausgeht.",
+      "_hinweis": "Was NICHT passiert: zwei durchgestrichene Zeichen am Laden (Senden, Sehen), die Figur geht unbehelligt vorbei. Fassung 3: sie geht auf der ANDEREN Straßenseite ('across'), der Laden steht klein im Hintergrund, die Zeichen links und rechts daneben. Bis Fassung 2 ging sie hier noch direkt an der Ladentür vorbei. Auf 'Und sieht' fährt die Kamera auf Laden und Zeichen, die Figur bleibt vorn im Bild. Keine Zahl, keine Behauptung über Daten, die über den Text hinausgeht.",
       "component": "shop-street",
-      "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "left", "circle": false, "notify": false, "privacy": true, "from": 0.12, "to": 0.9 },
+      "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "left", "across": true, "shopAt": 0.4, "circle": false, "notify": false, "privacy": true, "from": 0.1, "to": 0.9 },
       "anchors": { "walk": { "at": "start" }, "arrive": { "at": "end", "offset": 0 }, "nosend": { "cap": 0, "word": 3 }, "nosee": { "cap": 1, "word": 2 } },
-      "camera": [ { "cap": 1, "word": 0, "zoom": 1.26, "focus": [540, 700], "to": [540, 745], "dur": 0.25 } ],
+      "camera": [ { "cap": 1, "word": 0, "zoom": 1.22, "focus": [432, 690], "to": [540, 770], "dur": 0.25 } ],
       "captions": [
         { "lines": ["Der Laden | schickt | *nichts."] },
         { "lines": ["Und sieht | *nicht, | wo du | bist."] }
       ]
     },
     {
-      "_hinweis": "Seitenwechsel: der Zuschauer ist jetzt der Betreiber. Erst sein Laden (er tritt in die Tür), dann der Sperrbildschirm eines Stammkunden, dann die Karte von oben: rund um seinen Laden leuchten vier Handys auf, alle im Kreis, keines vor der Tür.",
+      "_hinweis": "Seitenwechsel: der Zuschauer ist jetzt der Betreiber. Erst sein Laden (er tritt in die Tür), dann der Sperrbildschirm eines Stammkunden, dann die Karte von oben: rund um seinen Laden leuchten vier Handys auf, alle im Kreis, keines vor der Tür. Fassung 3: die beiden unteren Kunden stehen weiter außen ('spread').",
       "parts": [
         {
           "component": "shop-street",
@@ -160,7 +160,7 @@
         {
           "component": "shop-map",
           "enter": "cut",
-          "params": { "shop": "Café Nordwind", "icon": "cup", "view": "owner", "phones": 4, "circle": true },
+          "params": { "shop": "Café Nordwind", "icon": "cup", "view": "owner", "phones": 4, "circle": true, "spread": true },
           "anchors": { "circle": { "at": "start", "offset": 0.05 }, "shine": { "at": "start", "offset": 0.02 }, "phone1": { "cap": 0, "word": 0, "offset": 0.1 }, "phone2": { "cap": 0, "word": 1, "offset": 0 }, "phone3": { "cap": 0, "word": 2, "offset": 0 }, "phone4": { "cap": 0, "word": 3, "offset": -0.06 } },
           "captions": [
             { "lines": ["Genau | *vor *deiner *Tür."] }

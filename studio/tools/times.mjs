@@ -19,11 +19,15 @@ if (process.argv.includes('--text')) { process.stdout.write(norm.spoken); proces
 // Aufnahme suchen, deren Text genau der gesprochene Text ist (die Einstellungen prueft make.mjs ueber den Schluessel)
 let times = estimateTimes(norm), source = 'geschätzt (0,36 s je Wort)'
 const vdir = path.join(dir, 'voice')
-if (existsSync(vdir)) for (const f of readdirSync(vdir).filter(f => f.endsWith('.meta.json'))) {
+// Hat tools/clip-in.py einen Satz von ausserhalb eingesetzt, liegen mehrere Fassungen mit demselben
+// Text im Ordner. Es gilt die, auf die <schluessel>.use.json zeigt: nur ihre Zeiten sind die des Baus.
+const used = existsSync(vdir) ? readdirSync(vdir).filter(f => f.endsWith('.use.json')).map(f => JSON.parse(readFileSync(path.join(vdir, f), 'utf8')).use) : []
+if (existsSync(vdir)) for (const f of readdirSync(vdir).filter(f => f.endsWith('.meta.json')).sort((a, b) => used.includes(b.slice(0, -10)) - used.includes(a.slice(0, -10)))) {
   const meta = JSON.parse(readFileSync(path.join(vdir, f), 'utf8'))
-  if (meta.text !== norm.spoken) continue
+  // eine abgelegte Fassung, auf die nichts zeigt, gilt nicht (nach "clip-in.py --original" bleibt sie liegen)
+  if (meta.text !== norm.spoken || (meta.source === 'extern' && !used.includes(meta.key))) continue
   times = timesFromAlignment(norm, JSON.parse(readFileSync(path.join(vdir, meta.key + '.alignment.json'), 'utf8'))).times
-  source = `Aufnahme ${meta.key}`; break
+  source = `Aufnahme ${meta.key}${meta.source === 'extern' ? ' (Fassung mit Sätzen von außerhalb, tools/clip-in.py)' : ''}`; break
 }
 console.log(`${norm.meta.title}: ${norm.words} Wörter, ${norm.spoken.length} Zeichen gesprochener Text. Zeiten: ${source}\n`)
 // Mit "timing.maxGap" kuerzt der Bau die Pausen der Aufnahme: die Zeiten hier sind dann die der

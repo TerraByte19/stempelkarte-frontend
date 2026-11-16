@@ -100,6 +100,9 @@ if (noVoice) {
   if (pl.code !== 0) { console.error(pl.err || pl.out); report.errors = ['[stimme] ' + (pl.err || pl.out).trim()]; finish(2) }
   const plan = JSON.parse(pl.out)
   Object.assign(report.elevenLabs, { cached: plan.cached, wouldSpend: plan.would_spend, how: plan.how, key: plan.key })
+  // Nur wenn tools/clip-in.py einen Satz von ausserhalb eingesetzt hat: der Bau nimmt dann nicht die
+  // Aufnahme zum Schluessel des Textes, sondern die Fassung, auf die voice/<schluessel>.use.json zeigt.
+  if (plan.take_of) { report.elevenLabs.takeOf = plan.take_of; log(`Stimme: es gilt eine Fassung der Aufnahme ${plan.take_of} mit Sätzen von außerhalb des Studios (tools/clip-in.py).`) }
   if (plan.cached) log(`Stimme: im Cache (${plan.key}), dieser Lauf kostet 0 Zeichen.`)
   else {
     // Erst der Entwurf, dann das Geld. Frueher wurde mit --allow-voice-spend zuerst
@@ -145,6 +148,8 @@ if (noVoice) {
       // (der Atemzug nach der Pointe, die Pause zwischen Schlussfrage und Aufforderung).
       const extra = [], t0 = timesFromAlignment(norm, al).times
       norm.caps.forEach((c, i) => { if (c.gapBefore != null) extra.push('--set', `${(t0[i][0] - norm.timing.lead).toFixed(3)}=${c.gapBefore}`) })
+      // Saetze von ausserhalb (tools/clip-in.py): der Nutzer hat ihren Vortrag ausgesucht, eine Pause darin bleibt
+      for (const x of got.extern || []) extra.push('--keep', `${x.from}-${x.to}`)
       const tg = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'tighten.py'), got.audio, got.alignment, String(norm.timing.maxGap), tw, ta, ...extra])
       if (tg.code !== 0) throw new Error('Lücken kürzen (tools/tighten.py): ' + (tg.err || tg.out).trim().slice(-400))
       const info = JSON.parse(tg.out.trim().split('\n').pop())
@@ -156,7 +161,8 @@ if (noVoice) {
     }
     const r = timesFromAlignment(norm, al)
     times = r.times
-    voice = { audio, key: got.key, source: got.source, words: norm.words, seconds: r.voiceLength, voiceEnd: r.voiceEnd, chars, tight }
+    voice = { audio, key: got.key, source: got.source, words: norm.words, seconds: r.voiceLength, voiceEnd: r.voiceEnd, chars, tight, extern: got.extern || null }
+    if (voice.extern) log(`Stimme: ${voice.extern.length} ${voice.extern.length === 1 ? 'Satz' : 'Sätze'} von außerhalb des Studios: ${voice.extern.map(x => `"${x.sentence}" (${x.file})`).join(', ')}. Pausen in diesen Sätzen bleiben, wie sie aufgenommen wurden.`)
   } catch (e) { console.error('Stimme: ' + e.message); report.errors = ['[stimme] ' + e.message]; finish(2) }
 }
 writeFileSync(path.join(out, 'times.json'), JSON.stringify({ estimated: noVoice, lead: norm.timing.lead, hold: norm.timing.hold, voiceEnd: voice ? voice.voiceEnd : null, times: Object.fromEntries(norm.caps.map((c, i) => [c.id, times[i]])) }))
@@ -177,6 +183,7 @@ try {
   }
   if (full) reportName = 'report.json'
   const voiceInfo = voice ? { source: voice.source, key: voice.key, seconds: +voice.seconds.toFixed(3), words: voice.words, wordsPerMinute: res.wpm } : null
+  if (voice && voice.extern) voiceInfo.extern = voice.extern
   if (voice) {
     // Pausen und Tempo beim Sprechen: Vergleichszahlen fuer das naechste Skript (siehe PLAYBOOK, Erkenntnisse)
     const p = await pauses(voice.audio)

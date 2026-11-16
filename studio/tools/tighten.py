@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# tighten.py <aufnahme> <alignment.json> <max_luecke_s> <out.wav> <out.alignment.json> [--set <sekunde>=<luecke_s> ...]
+# tighten.py <aufnahme> <alignment.json> <max_luecke_s> <out.wav> <out.alignment.json> [--set <sekunde>=<luecke_s> ...] [--keep <von>-<bis> ...]
 #
 # Kuerzt die stillen Luecken einer Aufnahme auf hoechstens <max_luecke_s> und
 # schiebt die Zeichen-Zeiten passend nach. Sendet nichts, kostet nichts, und
@@ -27,6 +27,12 @@
 #                    bekommt die Pointe ihren Atemzug, auch wenn die Stimme
 #                    gleich weitergeredet hat. Gibt es vor dem Wort gar keine
 #                    Stille, bleibt die Stelle, wie sie ist (steht im Ergebnis).
+# --keep 0.04-2.72   zwischen diesen Sekunden der Aufnahme wird keine Pause gekuerzt.
+#                    Fuer Saetze, die ausserhalb des Studios aufgenommen und mit
+#                    tools/clip-in.py eingesetzt wurden: der Nutzer hat diesen Vortrag
+#                    ausgesucht, eine Kunstpause darin ("Ist das ... koscher?") gehoert
+#                    dazu. Die Pausen davor und danach liegen nicht IN dem Abschnitt und
+#                    werden behandelt wie alle anderen. Ein Wunsch mit --set geht vor.
 import json, subprocess, sys, wave
 import numpy as np
 
@@ -50,7 +56,7 @@ def silent_runs(x):
     return [(int(a), int(b)) for a, b in zip(edges[0::2], edges[1::2])]
 
 
-def tighten(x, max_gap, wishes=()):
+def tighten(x, max_gap, wishes=(), protect=()):
     """
     Gibt (ton, aenderungen, pausen, offene_wuensche) zurueck.
     aenderungen = [(stelle_s, bis_s, eingefuegt_s)] in der Zeit der ALTEN Aufnahme:
@@ -69,6 +75,8 @@ def tighten(x, max_gap, wishes=()):
         length = (b - a) / SR
         if length >= 0.3: pauses.append({'at': round(a / SR, 3), 'seconds': round(length, 3)})
         want = target.get(i, min(length, max_gap))
+        # eine Pause, die ganz in einem geschuetzten Abschnitt liegt, bleibt (ausser ein Wunsch nennt sie)
+        if i not in target and any(k0 < a / SR and b / SR < k1 for k0, k1 in protect): continue
         if abs(want - length) <= SLACK: continue
         if want < length:
             keep = int(want * SR / 2); c0, c1 = a + keep, b - keep
@@ -106,14 +114,16 @@ def shift_times(times, edits):
 def main(argv):
     if len(argv) < 5: sys.exit('Aufruf: tighten.py <aufnahme> <alignment.json> <max_luecke_s> <out.wav> <out.alignment.json> [--set <sekunde>=<luecke_s> ...]')
     audio, al_path, max_gap, out_wav, out_al = argv[0], argv[1], float(argv[2]), argv[3], argv[4]
-    wishes = []; rest = argv[5:]
+    wishes = []; protect = []; rest = argv[5:]
     for i, a in enumerate(rest):
         if a == '--set' and i + 1 < len(rest):
             t, gap = rest[i + 1].split('='); wishes.append((float(t), float(gap)))
+        if a == '--keep' and i + 1 < len(rest):
+            k0, k1 = rest[i + 1].split('-'); protect.append((float(k0), float(k1)))
     if not 0.15 <= max_gap <= 3: sys.exit('tighten.py: die erlaubte Lücke muss zwischen 0.15 und 3 s liegen')
     x = decode(audio)
     with open(al_path, encoding='utf-8') as f: al = json.load(f)
-    y, edits, pauses, missed = tighten(x, max_gap, wishes)
+    y, edits, pauses, missed = tighten(x, max_gap, wishes, protect)
     new = {'characters': al['characters'],
            'character_start_times_seconds': shift_times(al['character_start_times_seconds'], edits),
            'character_end_times_seconds': shift_times(al['character_end_times_seconds'], edits)}
@@ -127,6 +137,7 @@ def main(argv):
     cuts = [{'at': round(a, 3), 'removed': round(b - a, 3)} for a, b, ins in edits if not ins]
     added = [{'at': round(a, 3), 'added': round(ins, 3)} for a, b, ins in edits if ins]
     print(json.dumps({'audio': out_wav, 'alignment': out_al, 'maxGap': max_gap, 'wishes': [{'at': t, 'gap': g} for t, g in wishes], 'missed': missed,
+                      **({'kept': [{'from': k0, 'to': k1} for k0, k1 in protect]} if protect else {}),
                       'cuts': cuts, 'removed': round(sum(c['removed'] for c in cuts), 3), 'inserts': added, 'added': round(sum(c['added'] for c in added), 3),
                       'secondsBefore': round(len(x) / SR, 3), 'secondsAfter': round(len(y) / SR, 3),
                       'pausesBefore': pauses}, ensure_ascii=False))

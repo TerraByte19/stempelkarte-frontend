@@ -29,6 +29,10 @@
 #   beim Satz-Austausch statt der .mp3: <schluessel>.clip.mp3 und
 #   .clip.alignment.json (nur der neue Satz) plus der Verweis auf die Aufnahme
 #   davor. Der fertige Ton wird daraus jedes Mal gleich neu zusammengesetzt.
+#   Nur wenn tools/clip-in.py einen ausserhalb des Studios aufgenommenen Satz
+#   eingesetzt hat: dieselbe Ablage mit "source": "extern", und daneben
+#   <schluessel>.use.json. Der Text aendert sich dabei nicht, also auch nicht
+#   sein Schluessel; der Verweis sagt, welche Fassung der Bau nehmen soll.
 # Bewusst KEINE .wav im Cache: .wav ist von Git ausgenommen, ein frischer
 # Checkout haette die Aufnahme nicht mehr und muesste sie neu bezahlen. Eine
 # .wav entsteht nur noch als Zwischenergebnis im Arbeitsordner (out/work).
@@ -54,6 +58,10 @@ MAX_CHARS = 1500  # ein Video hat 500 bis 700 Zeichen; mehr in EINEM Aufruf ist 
 PAD = 0.04     # ein Satz wird 40 ms vor seinem ersten Laut geschnitten, mitten in der Atempause
 FADE = 0.012   # 12 ms Blende an jeder Schnittkante, sonst knackt es
 CONTEXT = 300  # so viele Zeichen Umgebung bekommt die Stimme beim Satz-Austausch mit
+# Beide werden aus "Aufnahme davor + ein Satz" zusammengesetzt. "splice": der Satz kam ueber
+# --splice vom Anbieter. "extern": der Satz wurde ausserhalb des Studios aufgenommen und mit
+# tools/clip-in.py eingesetzt (anderes Modell, andere Betonung), der Text blieb derselbe.
+SPLICED = ('splice', 'extern')
 # curl-Ende-Codes, bei denen sicher nichts beim Anbieter ankam (Aufruf falsch,
 # Name nicht aufloesbar, keine Verbindung, TLS scheitert). Alles andere ist unklar.
 CURL_NOT_SENT = (2, 3, 5, 6, 7, 35, 60, 77)
@@ -113,7 +121,7 @@ def paths(d, key):
     return {k: os.path.join(d, f'{key}.{ext}') for k, ext in [
         ('alignment', 'alignment.json'), ('meta', 'meta.json'), ('mp3', 'mp3'),
         ('clip', 'clip.mp3'), ('clip_alignment', 'clip.alignment.json'),
-        ('response', 'response.json'), ('clip_response', 'clip.response.json')]}
+        ('response', 'response.json'), ('clip_response', 'clip.response.json'), ('use', 'use.json')]}
 
 
 def load_json(path):
@@ -129,7 +137,7 @@ def cached(d, key, seen=()):
     """Liegt alles da, um den Ton dieser Aufnahme ohne Netz herzustellen?"""
     m = load_meta(d, key); p = paths(d, key)
     if not m or not os.path.exists(p['alignment']): return False
-    if m.get('source') == 'splice':
+    if m.get('source') in SPLICED:
         return (key not in seen and os.path.exists(p['clip']) and os.path.exists(p['clip_alignment'])
                 and cached(d, m.get('base', ''), seen + (key,)))
     return os.path.exists(os.path.join(d, m.get('audio') or f'{key}.mp3'))
@@ -183,7 +191,7 @@ def one_sentence_diff(old_text, new_text):
 
 
 # ---------------------------------------------------------------- Satz-Austausch (reine Funktion, getestet)
-def splice_merge(old, old_al, i0, i1, clip, clip_al):
+def splice_merge(old, old_al, i0, i1, clip, clip_al, gain=None):
     """
     Ersetzt in der Aufnahme `old` die Zeichen i0..i1 (ein Satz, einschliesslich
     Satzzeichen) durch die neue Aufnahme `clip`. Gibt (ton, alignment) zurueck.
@@ -195,6 +203,11 @@ def splice_merge(old, old_al, i0, i1, clip, clip_al):
       - die Pause nach dem Satz bleibt so lang wie vorher (Stille)
       - 12 ms Blende an allen vier Kanten
       - alle Zeichen-Zeiten danach verschieben sich um den Laengenunterschied
+
+    gain: fester Faktor statt des Angleichs an den alten Satz. Den setzt nur tools/clip-in.py:
+    ein gedehnter Satz mit langen Vokalen hat ein anderes Verhaeltnis von Laut zu Pause als der
+    alte, der Vergleich ueber den ganzen Abschnitt laege daneben. Dort wird an den gesprochenen
+    Stellen der Saetze davor und danach gemessen.
     """
     old = np.asarray(old, dtype=np.float32); clip = np.asarray(clip, dtype=np.float32)
     ch, st, en = old_al['characters'], old_al['character_start_times_seconds'], old_al['character_end_times_seconds']
@@ -202,8 +215,10 @@ def splice_merge(old, old_al, i0, i1, clip, clip_al):
     nxt = next((j for j in range(i1 + 1, len(ch)) if not ch[j].isspace()), None)
     c_t = max(b_t, st[nxt] - PAD) if nxt is not None else None
     a, b = int(a_t * SR), int(b_t * SR)
-    old_rms = np.sqrt(np.mean(old[a:b] ** 2)); clip_rms = np.sqrt(np.mean(clip ** 2))
-    gain = old_rms / clip_rms if clip_rms > 0 and old_rms > 0 else np.float32(1)
+    if gain is None:
+        old_rms = np.sqrt(np.mean(old[a:b] ** 2)); clip_rms = np.sqrt(np.mean(clip ** 2))
+        gain = old_rms / clip_rms if clip_rms > 0 and old_rms > 0 else np.float32(1)
+    else: gain = np.float32(gain)
     n = int(FADE * SR); up = np.linspace(0, 1, n, dtype=np.float32); down = up[::-1]
     head = old[:a].copy()
     if len(head) >= n: head[-n:] *= down
@@ -226,13 +241,31 @@ def splice_merge(old, old_al, i0, i1, clip, clip_al):
     return audio, al, {'gain': float(gain), 'shift': round(shift, 3), 'cut_from': round(a_t, 3), 'cut_to': round(b_t, 3)}
 
 
+def clip_array(d, key, m):
+    """
+    Der eingesetzte Satz als Zahlenreihe. "clip_cut" in der meta (nur bei "extern") nennt den
+    Ausschnitt der Datei, der gilt: ein Clip von ausserhalb hat Stille am Anfang und am Ende,
+    liegt aber unveraendert im Cache, damit sein sha256 der der gelieferten Datei bleibt.
+    """
+    x = decode(paths(d, key)['clip']); cut = m.get('clip_cut'); pad = int(m.get('clip_pad') or 0)
+    if cut: x = x[cut[0]:cut[1]]
+    if pad > 0:
+        # "clip_pad": so viele stille Abtastwerte folgen dem Ausschnitt, damit die Pause nach dem Satz so lang
+        # bleibt, wie sie in der Aufnahme war. Die Blende von splice_merge laege dann in dieser Stille, also
+        # wird das Ende des Ausschnitts hier ausgeblendet.
+        x = x.copy(); n = int(FADE * SR)
+        if len(x) >= n: x[-n:] *= np.linspace(1, 0, n, dtype=np.float32)
+        x = np.concatenate([x, np.zeros(pad, np.float32)])
+    return x
+
+
 def audio_array(d, key):
     """Der Ton einer Aufnahme als Zahlenreihe. Ein Satz-Austausch wird hier aus seinen Teilen zusammengesetzt."""
     m = load_meta(d, key); p = paths(d, key)
-    if m.get('source') == 'splice':
+    if m.get('source') in SPLICED:
         i0, i1 = m['cut']
         return splice_merge(audio_array(d, m['base']), load_json(paths(d, m['base'])['alignment']), i0, i1,
-                            decode(p['clip']), load_json(p['clip_alignment']))[0]
+                            clip_array(d, key, m), load_json(p['clip_alignment']), m.get('clip_gain'))[0]
     return decode(os.path.join(d, m.get('audio') or f'{key}.mp3'))
 
 
@@ -244,7 +277,7 @@ def materialize(d, key, work):
     braucht eine zusammengesetzte .wav; die liegt im Arbeitsordner, nie im Cache.
     """
     m = load_meta(d, key)
-    if m.get('source') != 'splice': return os.path.join(d, m.get('audio') or f'{key}.mp3')
+    if m.get('source') not in SPLICED: return os.path.join(d, m.get('audio') or f'{key}.mp3')
     os.makedirs(work, exist_ok=True); out = os.path.join(work, f'voice-{key}.wav')
     write_wav(out, audio_array(d, key))
     return out
@@ -311,10 +344,26 @@ def synthesize(text, settings, raw_path, allow=False, previous_text=None, next_t
 
 
 # ---------------------------------------------------------------- Befehle
+def extern_spans(d, key, al):
+    """
+    Welche Abschnitte dieser Fassung von ausserhalb des Studios stammen: [{from, to, sentence, file}],
+    Zeiten in Sekunden der zusammengesetzten Aufnahme. Leer bei jeder Aufnahme ohne fremde Saetze.
+    make.mjs gibt sie an tighten.py weiter: eine Pause IN so einem Satz ("Ist das ... koscher?")
+    gehoert zu dem Vortrag, den der Nutzer ausgesucht hat, und wird nicht gekuerzt.
+    """
+    out = []; m = load_meta(d, key); st, en = al['character_start_times_seconds'], al['character_end_times_seconds']
+    while m and m.get('source') == 'extern':
+        i0, i1 = m['cut']; out.append({'from': st[i0], 'to': en[i1], 'sentence': m.get('sentence'), 'file': m.get('from')})
+        m = load_meta(d, m.get('base', ''))
+    return sorted(out, key=lambda x: x['from'])
+
+
 def info(d, key, text, source, spent, work=None, extra=None):
     p = paths(d, key); al = load_json(p['alignment'])
     out = {'key': key, 'alignment': p['alignment'], 'source': source, 'chars': len(text), 'spent': spent,
            'seconds': round(al['character_end_times_seconds'][-1], 3), **(extra or {})}
+    ext = extern_spans(d, key, al)
+    if ext: out['extern'] = ext
     if work: out['audio'] = materialize(d, key, work)
     return out
 
@@ -327,17 +376,20 @@ def store(d, key, text, settings, al, source, extra=None):
         json.dump({'key': key, 'text': text, 'settings': canon(settings), 'source': source, 'chars': len(text), **(extra or {})}, f, ensure_ascii=False, indent=1)
 
 
-def store_splice(d, key, text, settings, base_key, i, clip_al, extra):
-    """Legt den Satz-Austausch als Bauanleitung ab: Aufnahme davor + neuer Satz. Prueft, dass das Ergebnis zum Text passt."""
+def store_splice(d, key, text, settings, base_key, i, clip_al, extra, source='splice'):
+    """
+    Legt den Satz-Austausch als Bauanleitung ab: Aufnahme davor + neuer Satz. Prueft, dass das Ergebnis zum Text passt.
+    source "extern" (tools/clip-in.py): extra traegt dann "clip_cut" (Ausschnitt der Datei), "clip_pad" (Stille danach) und "clip_gain" (fester Faktor).
+    """
     base = load_meta(d, base_key); p = paths(d, key)
     s_old = sentences(base['text'])[i]; s_new = sentences(text)[i]
     if ''.join(clip_al['characters']) != s_new[2]:
         raise RuntimeError(f'Satz-Austausch: die Zeichen des neuen Satzes passen nicht zu "{s_new[2]}"')
     cut = [s_old[0], s_old[1] - 1]
-    _, al, how = splice_merge(audio_array(d, base_key), load_json(paths(d, base_key)['alignment']), cut[0], cut[1], decode(p['clip']), clip_al)
+    _, al, how = splice_merge(audio_array(d, base_key), load_json(paths(d, base_key)['alignment']), cut[0], cut[1], clip_array(d, key, extra), clip_al, extra.get('clip_gain'))
     if ''.join(al['characters']) != text: raise RuntimeError('Satz-Austausch: zusammengesetzter Text stimmt nicht mit dem Skript überein')
     with open(p['clip_alignment'], 'w', encoding='utf-8') as f: json.dump(clip_al, f, ensure_ascii=False)
-    store(d, key, text, settings, al, 'splice', {'base': base_key, 'cut': cut, 'sentence': s_new[2], 'clip': os.path.basename(p['clip']),
+    store(d, key, text, settings, al, source, {'base': base_key, 'cut': cut, 'sentence': s_new[2], 'clip': os.path.basename(p['clip']),
                                                  'clip_sha256': sha256_file(p['clip']), **how, **extra})
     return how
 
@@ -345,20 +397,48 @@ def store_splice(d, key, text, settings, base_key, i, clip_al, extra):
 def find_splice_base(d, text, settings):
     """Sucht im Cache eine Aufnahme mit gleichen Einstellungen, die sich in genau einem Satz unterscheidet."""
     if not os.path.isdir(d): return None
-    want = canon(settings)
+    want = canon(settings); found = []
     for name in sorted(os.listdir(d)):
         if not name.endswith('.meta.json'): continue
         try: m = load_json(os.path.join(d, name))
         except ValueError: continue
         if canon(m.get('settings')) != want or not cached(d, m['key']): continue
         i = one_sentence_diff(m['text'], text)
-        if i is not None: return m, i
-    return None
+        if i is not None: found.append((m, i))
+    if len(found) < 2: return found[0] if found else None
+    # Mehrere passen nur, wenn tools/clip-in.py Fassungen desselben Textes daneben gelegt hat. Dann gilt die,
+    # auf die ein Verweis zeigt (sie hat der Nutzer zuletzt gehoert); eine Fassung ohne Verweis zuletzt.
+    used = set()
+    for name in os.listdir(d):
+        if name.endswith('.use.json'):
+            try: used.add(load_json(os.path.join(d, name)).get('use'))
+            except ValueError: pass
+    return min(found, key=lambda f: 0 if f[0]['key'] in used else 2 if f[0].get('source') == 'extern' else 1)
+
+
+def active_key(d, text, settings):
+    """
+    Welche Aufnahme der Bau fuer diesen Text nimmt: (schluessel, schluessel_des_textes oder None).
+    Normalerweise der Schluessel aus Text und Einstellungen. Liegt daneben <schluessel>.use.json
+    (tools/clip-in.py legt sie an), gilt die dort genannte Fassung: dieselbe Aufnahme mit einzelnen
+    Saetzen von ausserhalb. Ohne diese Datei aendert sich nichts.
+    Zeigt der Verweis ins Leere, wird abgebrochen und nicht still die Aufnahme genommen: sonst
+    kaeme ein Video mit der alten Betonung heraus, und niemand merkte es.
+    """
+    key = cache_key(text, settings); p = paths(d, key)['use']
+    if not os.path.exists(p): return key, None
+    try: use = load_json(p).get('use')
+    except ValueError: use = None
+    m = load_meta(d, use) if use else None
+    if not m or m.get('text') != text or canon(m.get('settings')) != canon(settings) or not cached(d, use):
+        raise SystemExit(f'voice: {os.path.basename(p)} verweist auf die Fassung "{use}", aber die liegt nicht vollständig im Ordner voice/ oder gehört zu einem anderen Text. '
+                         'Es wurde nichts gesendet. Entweder die Fassung neu ablegen (tools/clip-in.py) oder die Datei löschen: dann gilt wieder die Aufnahme ohne fremde Sätze.')
+    return use, key
 
 
 def plan(d, text, settings, splice=False):
-    key = cache_key(text, settings); p = paths(d, key)
-    if cached(d, key): return {'key': key, 'cached': True, 'chars': len(text), 'would_spend': 0, 'how': 'cache'}
+    key, own = active_key(d, text, settings); p = paths(d, key)
+    if cached(d, key): return {'key': key, 'cached': True, 'chars': len(text), 'would_spend': 0, 'how': 'cache', **({'take_of': own} if own else {})}
     out = {'key': key, 'cached': False, 'chars': len(text)}
     if splice:
         base = find_splice_base(d, text, settings)

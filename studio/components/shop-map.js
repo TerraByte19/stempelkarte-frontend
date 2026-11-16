@@ -60,6 +60,10 @@ const FADE = 640               // ab hier ist die Karte voll sichtbar, darueber 
 // DRIFT px auf seinen Platz zu; auch am Anfang dieses Stuecks muss er schon im Kreis stehen.
 const SPOTS = [{ c: 0.58, r: 1, face: 1 }, { c: 2.58, r: 1, face: -1 }, { c: 0.86, r: 3, face: 1 }, { c: 2.3, r: 3, face: -1 }]
 const DRIFT = 34
+// "spread": die beiden unteren stehen weiter aussen. Mit den Plaetzen oben stehen sie eng neben dem
+// Namensschild, und die vier wirken wie zwei oben, zwei am Schild statt wie "rund um den Laden".
+// In Reihe 3 ist der Kreis schmal: weiter aussen passt nur, wer waehrend des Bildes weniger weit geht.
+const SPOTS_WIDE = [SPOTS[0], SPOTS[1], { c: 0.77, r: 3, face: 1, drift: 16 }, { c: 2.41, r: 3, face: -1, drift: 16 }]
 const whole = v => Math.abs(v - Math.round(v)) < 1e-6
 
 // ---- Der Stadtplan als SVG: Strassen sind die helle Flaeche, darauf dunkle Bloecke mit Haeusern.
@@ -118,6 +122,7 @@ export default {
     note: { default: '', doc: 'Zweite Zeile in der kleinen Benachrichtigung, z. B. "6 von 6, dein Kaffee wartet" (höchstens etwa 30 Zeichen). Leer = nur der Ladenname' },
     track: { default: false, doc: 'Auge an der Ortsnadel mit Blicklinie zur Kundin und Fragezeichen; reißt auf den Anker "no" ab. Für die Frage, ob der Laden einen verfolgt' },
     phones: { default: 4, doc: 'Nur bei "view": "owner": wie viele Kunden rund um den Laden stehen, 0 bis 4 (Anker phone1, phone2, ...). Alle stehen im Kreis, keiner vor der Tür' },
+    spread: { default: false, doc: 'Nur bei "view": "owner": die beiden unteren Kunden stehen weiter außen, noch im Kreis. So verteilen sich alle vier rund um den Laden, statt dass zwei unten eng am Namensschild stehen' },
     whoosh: { default: 0.16, doc: 'Lautstärke des Wisch-Tons, wenn der Kreis aufgeht (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise' }
   },
   captions: { min: 1 },
@@ -367,12 +372,12 @@ ${badgeCss('sm')}
       key(label, [[ts, { scale: 1 }, OUT], [ts + 0.16, { scale: 1.08 }, OUT], [ts + 0.55, { scale: 1 }]])
       cue(ts, 'pop', 0.85, 0.8)
       for (let i = 0; i < p.phones; i++) {
-        const s = SPOTS[i], g = customer(gx(s.c), gy(s.r), s.face), body = g.querySelector('.sm-body')
+        const s = (p.spread ? SPOTS_WIDE : SPOTS)[i], drift = s.drift ?? DRIFT, g = customer(gx(s.c), gy(s.r), s.face), body = g.querySelector('.sm-body')
         const mini = el('div', 'sm-mini', ctx.icon(p.icon) + `<u class="sm-box" data-apart="karte" data-label="Karte über Kunde ${i + 1}"></u>`)
         // die kleine Karte sitzt ueber dem Kopf, einen Hauch vom Laden weggerueckt
         mini.style.left = (-32 - s.face * 12) + 'px'; g.append(mini)
         // jeder geht langsam seine Strasse entlang: ein Bild, in dem alle stillstehen, wirkt wie ein Standfoto
-        key(g, [[ctx.s, { translate: `${-s.face * DRIFT}px 0px` }, 'linear'], [ctx.e, { translate: '0px 0px' }]])
+        key(g, [[ctx.s, { translate: `${-s.face * drift}px 0px` }, 'linear'], [ctx.e, { translate: '0px 0px' }]])
         walkerSteps(key, body, 'sm', ctx.s, ctx.e + 0.3)
         const t = ctx.at('phone' + (i + 1))
         walkerBuzz(key, body, 'sm', t, OUT, false)

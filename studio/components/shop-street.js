@@ -17,7 +17,9 @@
 //            leuchten mehrere Handys auf
 //   across   der Passant geht auf der ANDEREN Strassenseite vorbei, der Laden steht
 //            klein im Hintergrund. Dazugekommen, weil in der ersten Fassung des
-//            zweiten Videos jedes Bild so aussah, als muesse man vor der Tuer stehen
+//            zweiten Videos jedes Bild so aussah, als muesse man vor der Tuer stehen.
+//            Geht auch zusammen mit privacy: die zwei Zeichen stehen dann neben dem
+//            Laden, und der Passant geht vorn auf der anderen Strassenseite vorbei
 //
 // Figur, Karten-Benachrichtigung, Ortsnadel, Zeichen und Kreis kommen aus
 // engine/parts.js: die Karte von oben (shop-map) zeigt dieselben, und beide
@@ -53,6 +55,7 @@ const inX = x => CX + (x - CX) / SCALE
 const FAR_K = 0.6     // so klein steht die Haeuserzeile hinten
 const FAR_GROUND = 1000 // dort liegt hinten die Kante zwischen Haus und Gehweg (eigenes Mass)
 const FAR_WALK = 44   // Tiefe des hinteren Gehwegs
+const BADGE_FAR = 108 // Groesse der zwei Zeichen ("privacy") neben dem kleinen Laden hinten; vorn ueber dem Dach sind es 128
 
 const PLANE = '<svg viewBox="0 0 24 24"><path d="M21 3.5 3 10.6l6.8 2.7L12.6 20 21 3.5Z"/><path d="M9.8 13.3 21 3.5"/></svg>'
 const figure = (extra = '') => walkerFigure('ss', extra)
@@ -81,9 +84,9 @@ export default {
     note: { default: '', doc: 'Zweite Zeile in der kleinen Benachrichtigung, z. B. "6 von 6" (höchstens etwa 22 Zeichen). Leer = nur der Ladenname' },
     track: { default: false, doc: 'Auge über dem Laden mit Blicklinie zum Passanten und Fragezeichen; reißt auf den Anker "no" ab. Für die Frage, ob der Laden einen verfolgt' },
     card: { default: false, doc: 'Wallet-Karte im Vordergrund; auf den Anker "pin" erscheint eine Ortsnadel auf der Karte und eine auf dem Laden. Nur ohne Passanten ("walker": false)' },
-    privacy: { default: false, doc: 'Zwei durchgestrichene Zeichen über dem Laden: Senden (Anker "nosend") und Sehen (Anker "nosee")' },
+    privacy: { default: false, doc: 'Zwei durchgestrichene Zeichen über dem Laden: Senden (Anker "nosend") und Sehen (Anker "nosee"). Zusammen mit "across" stehen sie links und rechts neben dem Laden im Hintergrund' },
     phones: { default: 3, doc: 'Nur bei "view": "owner": wie viele Kunden mit Handy vor dem Laden stehen, 0 bis 3 (Anker phone1, phone2, ...)' },
-    across: { default: false, doc: 'Der Passant geht auf der ANDEREN Straßenseite vorbei: der Laden steht klein im Hintergrund, dazwischen liegt die Fahrbahn. Zeigt, dass niemand vor der Tür stehen muss. Nur mit Passant; "circle", "track", "card" und "privacy" gibt es in diesem Bild nicht ("circle": false dazuschreiben)' },
+    across: { default: false, doc: 'Der Passant geht auf der ANDEREN Straßenseite vorbei: der Laden steht klein im Hintergrund, dazwischen liegt die Fahrbahn. Zeigt, dass niemand vor der Tür stehen muss. Nur mit Passant; "circle", "track" und "card" gibt es in diesem Bild nicht ("circle": false dazuschreiben), "privacy" schon' },
     shopAt: { default: 0.68, doc: 'Nur bei "across": wo die Mitte des Ladens im Hintergrund liegt, als Anteil der Bildbreite von links (0,3 bis 0,7). Den Passanten auf den Anker "buzz" auf die andere Bildhälfte legen ("via"), sonst deckt die Benachrichtigung den Laden zu' },
     whoosh: { default: 0.16, doc: 'Lautstärke des Wisch-Tons, wenn der Kreis aufgeht (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise' }
   },
@@ -145,6 +148,9 @@ ${zoneCss('ss')}
   .ss-walker { top: ${FEET - FIG_H}px; width: ${FIG_W}px; height: ${FIG_H}px; z-index: 6; }
 ${walkerCss('ss')}${chipCss('ss')}  .ss-chip { bottom: ${FIG_H + 26}px; }
 ${badgeCss('ss')}
+  /* kleiner als vorn: der Strich wird duenner, sonst deckt er das Auge zu und es liest sich nicht mehr als Auge */
+  .ss-badge.far svg { width: 68px; height: 68px; }
+  .ss-badge.far .ss-slash { height: 10px; margin-top: -5px; border-radius: 5px; box-shadow: 0 0 0 3px var(--paper); }
   .ss-card { left: 132px; top: 1136px; width: 430px; padding: 26px 28px 30px; border-radius: 30px; rotate: -5deg; opacity: 0; z-index: 7;
     background: linear-gradient(163deg, var(--card-from), var(--card-to)); box-shadow: 0 26px 50px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.16); }
   .ss-chead { display: flex; align-items: center; gap: 16px; }
@@ -178,9 +184,11 @@ ${badgeCss('ss')}
     if (!Number.isInteger(p.phones) || p.phones < 0 || p.phones > 3) ctx.fail('"phones" muss zwischen 0 und 3 liegen, mehr Figuren passen nicht vor die Ladenfront')
     if (p.card && p.walker && !owner) ctx.fail('"card" steht im Vordergrund, wo sonst der Passant geht: nur zusammen mit "walker": false')
     if (p.across) {
-      const no = [owner && '"view": "owner"', !p.walker && '"walker": false', p.circle && '"circle"', p.track && '"track"', p.card && '"card"', p.privacy && '"privacy"'].filter(Boolean)
-      if (no.length) ctx.fail(`"across" zeigt nur den Passanten auf der anderen Straßenseite, mit oder ohne Benachrichtigung. Nicht zusammen mit ${no.join(', ')} (für den Kreis "in der Nähe" aus der Ferne gibt es den Baustein shop-map)`)
+      const no = [owner && '"view": "owner"', !p.walker && '"walker": false', p.circle && '"circle"', p.track && '"track"', p.card && '"card"'].filter(Boolean)
+      if (no.length) ctx.fail(`"across" zeigt nur den Passanten auf der anderen Straßenseite, mit oder ohne Benachrichtigung, auf Wunsch mit den zwei Zeichen am Laden ("privacy"). Nicht zusammen mit ${no.join(', ')} (für den Kreis "in der Nähe" aus der Ferne gibt es den Baustein shop-map)`)
       if (typeof p.shopAt !== 'number' || p.shopAt < 0.3 || p.shopAt > 0.7) ctx.fail('"shopAt" muss zwischen 0.3 und 0.7 liegen, sonst ragt der Laden aus dem Bild oder in die Knopfspalte von TikTok')
+      // Die Zeichen stehen neben dem Laden und brauchen dort Platz bis zum Bildrand
+      if (p.privacy && (p.shopAt < 0.38 || p.shopAt > 0.62)) ctx.fail('"across" mit "privacy": "shopAt" muss zwischen 0.38 und 0.62 liegen, sonst ragt eines der beiden Zeichen neben dem Laden aus dem Bild')
     }
     const dir = p.direction === 'right' ? 1 : -1
     // Anteil der Bildbreite (in Laufrichtung) -> x im Mass der Strasse
@@ -318,8 +326,18 @@ ${badgeCss('ss')}
 
     // ---- Zwei durchgestrichene Zeichen ueber dem Laden: nichts gesendet, nichts gesehen
     if (p.privacy) {
-      add(`<div class="abs ss-badge ss-send" data-safe="Zeichen: nichts gesendet" style="left:${CX - 214}px;top:604px">${PLANE}<i class="ss-slash"></i></div>
-        <div class="abs ss-badge ss-see" data-safe="Zeichen: nichts gesehen" style="left:${CX + 86}px;top:604px">${EYE}<i class="ss-slash"></i></div>`)
+      // Vorgabe: ueber dem Dach. Bei "across" steht der Laden klein im Hintergrund, und ueber seinem
+      // Dach beginnt gleich der Textbereich: dort stehen die Zeichen links und rechts NEBEN dem Laden,
+      // auf Hoehe von Dach und Schild, etwas kleiner (BADGE_FAR), mit 16 px Luft zur Markise.
+      let sendAt = { x: CX - 214, y: 604 }, seeAt = { x: CX + 86, y: 604 }, far = ''
+      if (p.across) {
+        const sx = CX + Math.round(inX(p.shopAt * ctx.STAGE.w) - CX), edge = 286 * FAR_K + 16
+        const y = Math.round(FAR_GROUND + (764 - GROUND) * FAR_K - BADGE_FAR / 2)   // Mitte der Zeichen = Oberkante des Schildes
+        sendAt = { x: Math.round(sx - edge - BADGE_FAR), y }; seeAt = { x: Math.round(sx + edge), y }
+        far = `width:${BADGE_FAR}px;height:${BADGE_FAR}px;`
+      }
+      add(`<div class="abs ss-badge ss-send${far ? ' far' : ''}" data-safe="Zeichen: nichts gesendet" style="${far}left:${sendAt.x}px;top:${sendAt.y}px">${PLANE}<i class="ss-slash"></i></div>
+        <div class="abs ss-badge ss-see${far ? ' far' : ''}" data-safe="Zeichen: nichts gesehen" style="${far}left:${seeAt.x}px;top:${seeAt.y}px">${EYE}<i class="ss-slash"></i></div>`)
       for (const [sel, name, pitch] of [['.ss-send', 'nosend', 0.8], ['.ss-see', 'nosee', 0.95]]) {
         const t = ctx.at(name)
         pop(sel, t - 0.22, 0.36); cue(t - 0.22, 'pop', 0.75, pitch)

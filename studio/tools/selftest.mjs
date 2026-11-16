@@ -18,7 +18,9 @@
 //     Tippfehler "parms", dreizeilige Schlussfrage
 //   - voice.py sendet nie ohne Freigabe (tools/test_voice.py), und make.mjs
 //     prueft den Entwurf, BEVOR es um eine Aufnahme geht
-import { readFileSync, existsSync, mkdtempSync, writeFileSync, rmSync, readdirSync } from 'node:fs'
+//   - ein Satz von ausserhalb des Studios (tools/clip-in.py) kommt in die Aufnahme,
+//     ohne dass sie angefasst oder etwas gesendet wird (tools/test_clip_in.py)
+import { readFileSync, existsSync, mkdtempSync, writeFileSync, rmSync, readdirSync, cpSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 import { normalize, estimateTimes, timesFromAlignment, timeline, STAGE, MIX, SOUND } from '../engine/script.mjs'
@@ -228,6 +230,13 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
     const atDoor = comps.filter(c => c.component === 'shop-street' && c.params.notify !== false && c.params.walker !== false && c.params.view !== 'owner' && !c.params.across && !c.params.privacy)
     check('Zweites Video, Fassung 2: drei Bilder zeigen die Karte von oben (Auge, Kreis, Blick des Betreibers), und kein Bild lässt die Benachrichtigung mehr direkt vor der Ladenfront aufspringen',
       maps.length === 3 && maps.some(m => m.params.track) && maps.some(m => m.params.circle && m.params.view !== 'owner') && maps.some(m => m.params.view === 'owner') && atDoor.length === 0, `${maps.length} Karten, ${atDoor.length} Bilder mit Benachrichtigung vor der Tür`)
+    // Fassung 3: auch im Bild zu "Der Laden schickt nichts" geht niemand mehr an der Ladentuer vorbei (bis Fassung 2 tat
+    // die Figur das noch), und die Kamera auf der Karte mit Kreis laesst den ganzen Kreis im Bild.
+    const walkers = comps.filter(c => c.component === 'shop-street' && c.params.walker !== false && c.params.view !== 'owner')
+    const ring = maps.find(m => m.params.circle && m.params.view !== 'owner'), cam = (ring.camera || []).find(c => c.zoom > 1)
+    const span = cam ? [cam.to[0] + cam.zoom * (560 - 400 - cam.focus[0]), cam.to[0] + cam.zoom * (560 + 400 - cam.focus[0])] : [160, 960]   // Kreis: Mitte x = 560, Halbmesser 400 (shop-map)
+    check('Zweites Video, Fassung 3: jede Figur auf der Straße geht auf der anderen Straßenseite, und nach der Kamerafahrt liegt der ganze Kreis "in der Nähe" in der Bildbreite',
+      walkers.length === 2 && walkers.every(c => c.params.across === true) && span[0] >= 0 && span[1] <= STAGE.w, `${walkers.length} Bilder mit Figur, Kreis von x = ${Math.round(span[0])} bis ${Math.round(span[1])}`)
     // Ein Schluesselwort, das auch verkleinert nicht lesbar bleibt, bricht den Bau ab
     const long = await page(variant(s => { s.scenes[0].parts[0].captions[1].lines = ['Dein | *Sperrbildschirmbenachrichtigungseinstellungen | meldet sich,'] }, s2))
     const hit = long.res.checks.find(c => c.name === 'wortgroesse' && !c.ok)
@@ -288,6 +297,18 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
       nearest: Math.round(Math.min(...[...document.querySelectorAll('.sm-puck')].map(p => Math.hypot(mid(p).x - dot.x, mid(p).y - (label.top - 20))))) }
   } })
   check('Karte, Blick des Betreibers: vier Kunden rund um den Laden, alle im Kreis, alle Handys leuchten, keiner steht vor der Tür', clean(own) && !!own.probed && own.probed.n === 4 && own.probed.lit === 4 && own.probed.inside && own.probed.nearest >= 170, why(own) || JSON.stringify(own.probed))
+  {
+    // "spread" (Fassung 3 des zweiten Videos): die beiden unteren Kunden stehen weiter aussen, damit die vier nicht wie
+    // "zwei oben, zwei am Namensschild" aussehen. Sie muessen trotzdem von Anfang an im Kreis stehen.
+    const lower = () => { window.seek(window.STUDIO.scenes[0].e - 0.05); const dot = document.querySelector('.sm-dot').getBoundingClientRect(); return [...document.querySelectorAll('.sm-puck')].map(p => p.getBoundingClientRect()).filter(r => r.top > dot.bottom).map(r => Math.round(Math.abs((r.left + r.right) / 2 - (dot.left + dot.right) / 2))) }
+    const inCircle = () => { const mid = e => { const r = e.getBoundingClientRect(); return { x: (r.left + r.right) / 2, y: (r.top + r.bottom) / 2 } }
+      return [window.STUDIO.anchors.find(x => x.name === 'phone1').t, window.STUDIO.scenes[0].e - 0.05].every(t => { window.seek(t); const d = document.querySelector('.sm-dot'), dot = mid(d), k = d.getBoundingClientRect().width / d.offsetWidth, R = document.querySelector('.sm-zone').offsetWidth / 2 * k; return [...document.querySelectorAll('.sm-puck')].every(p => Math.hypot(mid(p).x - dot.x, mid(p).y - dot.y) < R) }) }
+    const owner = spread => mini({ component: 'shop-map', params: { view: 'owner', phones: 4, ...(spread ? { spread: true } : {}) }, captions: [{ lines: ['Genau vor', 'deiner Tür.'] }] })
+    const probe = `(() => { const lower = ${lower}, inCircle = ${inCircle}; return { inside: inCircle(), lower: lower() } })()`
+    const narrow = await page(owner(false), null, { probe }), wide = await page(owner(true), null, { motion: true, probe })
+    check('Karte, Blick des Betreibers mit "spread": die beiden unteren Kunden stehen mindestens 20 px weiter außen und trotzdem von Anfang an im Kreis',
+      clean(wide) && wide.probed.inside && narrow.probed.inside && narrow.probed.lower.length === 2 && wide.probed.lower.length === 2 && wide.probed.lower.every((x, i) => x >= narrow.probed.lower[i] + 20), why(wide) || `ohne ${narrow.probed.lower.join(' und ')} px, mit ${wide.probed.lower.join(' und ')} px neben der Ortsnadel`)
+  }
   const many = await rejects(mini({ component: 'shop-map', params: { view: 'owner', phones: 5 }, captions: [{ lines: ['Genau vor deiner Tür.'] }] }), /"phones" muss zwischen 0 und 4/)
   check('Prüfung schlägt an: Karte mit mehr Kunden, als in den Kreis passen', many.ok, many.msg)
   {
@@ -311,6 +332,23 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
   check('Warnung: "across", die Benachrichtigung verdeckte den Laden, weil der Passant unter ihm durchgeht', under.res.warnings.some(w => /verdeckt/.test(w)), (under.res.warnings[0] || 'keine Warnung').slice(0, 130))
   const ring = await rejects(across({ circle: true }), /"across" zeigt nur den Passanten/)
   check('Prüfung schlägt an: "across" zusammen mit dem Kreis (dafür gibt es die Karte von oben)', ring.ok, ring.msg)
+  {
+    // Fassung 3 des zweiten Videos: "Der Laden schickt nichts. Und sieht nicht, wo du bist." Bis Fassung 2 ging die Figur
+    // dabei direkt an der Ladentuer vorbei. Jetzt: andere Strassenseite, die zwei durchgestrichenen Zeichen neben dem Laden.
+    const priv = (params = {}) => mini({ component: 'shop-street', params: { across: true, shopAt: 0.4, circle: false, notify: false, privacy: true, direction: 'left', from: 0.1, to: 0.9, ...params }, anchors: { nosend: { cap: 0, word: 3 }, nosee: { cap: 1, word: 2 } }, captions: [{ lines: ['Der Laden', 'schickt nichts.'] }, { lines: ['Und sieht nicht,', 'wo du bist.'] }] })
+    const r = await page(priv(), null, { motion: true, probe: () => {
+      window.seek(window.STUDIO.scenes[0].e - 0.05)
+      const b = s => document.querySelector(s).getBoundingClientRect(), hit = (p, q) => p.left < q.right && q.left < p.right && p.top < q.bottom && q.top < p.bottom
+      const send = b('.ss-send'), see = b('.ss-see'), shop = b('.ss-shop'), sign = b('.ss-sign'), w = b('.ss-walker'), door = b('.ss-door'), slash = s => new DOMMatrix(getComputedStyle(document.querySelector(s + ' .ss-slash')).scale === 'none' ? '' : 'scale(' + getComputedStyle(document.querySelector(s + ' .ss-slash')).scale.split(' ')[0] + ')').a
+      return { shown: +getComputedStyle(document.querySelector('.ss-send')).opacity === 1 && +getComputedStyle(document.querySelector('.ss-see')).opacity === 1, struck: slash('.ss-send') === 1 && slash('.ss-see') === 1,
+        beside: send.right <= shop.left && see.left >= shop.right, free: !hit(send, sign) && !hit(see, sign) && !hit(send, w) && !hit(see, w), inFrame: send.left >= 40 && see.right <= 1040 && send.top >= 580,
+        size: Math.round(send.width), down: Math.round(w.bottom - door.bottom), door: Math.round(door.height), walker: Math.round(w.height) }
+    } })
+    check('Straße, andere Seite mit "privacy": beide durchgestrichenen Zeichen stehen neben dem kleinen Laden, im Bild und unter dem Textbereich, die Figur geht vorn auf der anderen Straßenseite',
+      clean(r) && !!r.probed && r.probed.shown && r.probed.struck && r.probed.beside && r.probed.free && r.probed.inFrame && r.probed.size >= 110 && r.probed.down >= 300 && r.probed.door <= 0.6 * r.probed.walker, why(r) || JSON.stringify(r.probed))
+    const edge = await rejects(priv({ shopAt: 0.68 }), /"across" mit "privacy": "shopAt"/)
+    check('Prüfung schlägt an: "across" mit "privacy", der Laden steht so weit am Rand, dass ein Zeichen aus dem Bild ragte', edge.ok, edge.msg)
+  }
 
   // Die Strasse von der Seite, wie Fassung 1 sie brauchte (Kreis, Auge, Betreiber mit drei Handys), wird von
   // keinem Video mehr benutzt. Damit sie nicht still kaputtgeht, baut sie hier weiter mit.
@@ -364,6 +402,36 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
 const py = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'test_voice.py')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
 process.stdout.write(py.out.split('\n').filter(l => l.startsWith('ok') || l.startsWith('FEHLER')).map(l => '  [voice] ' + l).join('\n') + '\n')
 check('tools/test_voice.py', py.code === 0, py.out.trim().split('\n').pop() + (py.code ? ' ' + py.err.trim().split('\n').pop() : ''))
+
+// ---- Satz von ausserhalb des Studios (tools/clip-in.py): kuenstlicher Clip, kein Netz
+const pc = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'test_clip_in.py')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
+process.stdout.write(pc.out.split('\n').filter(l => l.startsWith('ok') || l.startsWith('FEHLER')).map(l => '  [clip-in] ' + l).join('\n') + '\n')
+check('tools/test_clip_in.py', pc.code === 0, pc.out.trim().split('\n').pop() + (pc.code ? ' ' + pc.err.trim().split('\n').pop() : ''))
+{
+  // Der ganze Weg an echter Sprache, in einer Kopie des ersten Videos: der damals neu aufgenommene Satz
+  // "Und das lohnt sich!" (liegt als .mp3 in tools/fixtures) kommt als Clip von ausserhalb in die Aufnahme.
+  // Danach muss make.mjs die Fassung nehmen, 0 Zeichen ausgeben und die Aufnahme darf sich nicht geaendert haben.
+  const d = path.join(tmp, 'clip-in-video'), fxd = path.join(STUDIO_ROOT, 'tools', 'fixtures'), clip = path.join(tmp, 'neuer-satz.mp3')
+  mkdirSync(d, { recursive: true }); cpSync(path.join(refDir, 'script.json'), path.join(d, 'script.json')); cpSync(path.join(refDir, 'voice'), path.join(d, 'voice'), { recursive: true })
+  cpSync(path.join(fxd, 'satz-austausch-neuer-satz.mp3'), clip); cpSync(path.join(fxd, 'satz-austausch-neuer-satz.alignment.json'), path.join(tmp, 'neuer-satz.alignment.json'))
+  const sums = () => readdirSync(path.join(refDir, 'voice')).map(f => f + ':' + readFileSync(path.join(d, 'voice', f)).equals(readFileSync(path.join(refDir, 'voice', f)))).join()
+  const tool = (...a) => run('python3', [path.join(STUDIO_ROOT, 'tools', 'clip-in.py'), d, ...a], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
+  const put = await tool('Und das lohnt sich!', clip), info = put.code === 0 ? JSON.parse(put.out.trim().split('\n').pop()) : null
+  const words = info ? info.words.map(w => w.how).join(' ') : ''
+  check('clip-in.py an echter Sprache: Satz erkannt, Wortanfänge aus dem Vergleich mit der Aufnahme, 0 Zeichen, die Aufnahme bleibt Byte für Byte',
+    !!info && info.written && info.spent === 0 && info.root === v7.key && info.sentence === 'Und das lohnt sich!' && info.words.length === 4 && info.words.slice(1).every(w => /^vergleich\+einsatz/.test(w.how)) && !sums().includes('false') && info.warnings.length === 0,
+    info ? `Satz ${info.number}, Fassung ${info.key}, ${words}, Lautstärke ${info.loudness.gain_db} dB` : (put.err || put.out).trim().split('\n').pop().slice(0, 160))
+  const mk = await run('node', [path.join(STUDIO_ROOT, 'make.mjs'), d, '--check'], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
+  const rep = existsSync(path.join(d, 'out', 'check.json')) ? JSON.parse(readFileSync(path.join(d, 'out', 'check.json'), 'utf8')) : {}
+  // Der Clip ist derselbe Satz, der schon in der Aufnahme steckt: das Video muss praktisch gleich lang bleiben. Vor dem
+  // Ausgleich der Pause (clip_pad) war es 0,9 s kuerzer, und "Und das lohnt sich!" stand zu kurz im Bild (Pruefung lesezeit).
+  check('make.mjs nimmt die Fassung mit dem Satz von außerhalb: aus dem Cache, 0 Zeichen, alle Prüfungen bestanden, die Pause nach dem Satz ist geblieben (Länge wie vorher auf 0,15 s)',
+    mk.code === 0 && !!info && rep.ok === true && rep.elevenLabs.key === info.key && rep.elevenLabs.takeOf === v7.key && rep.elevenLabs.cached === true && rep.elevenLabs.spent === 0 && /von außerhalb des Studios/.test(mk.out) && Math.abs(rep.duration - t7.tl.duration) < 0.15 && info.silence_added > 0.5,
+    `Länge ${rep.duration} s statt ${t7.tl.duration} s, ${info ? info.silence_added : '?'} s Stille nach dem Clip; ` + ((mk.err || mk.out).trim().split('\n').filter(l => /^Stimme|FEHLER/.test(l)).pop() || '').slice(0, 120))
+  const back = await tool('--original'), mk2 = await run('node', [path.join(STUDIO_ROOT, 'make.mjs'), d, '--check'], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
+  const rep2 = existsSync(path.join(d, 'out', 'check.json')) ? JSON.parse(readFileSync(path.join(d, 'out', 'check.json'), 'utf8')) : {}
+  check('clip-in.py --original: make.mjs nimmt wieder die Aufnahme, ohne Hinweis auf eine Fassung', back.code === 0 && mk2.code === 0 && rep2.elevenLabs.key === v7.key && rep2.elevenLabs.takeOf === undefined && !sums().includes('false'))
+}
 
 // ---- make.mjs: erst der Entwurf, dann die Frage nach der Aufnahme (eigene Ordner, damit nichts im Cache liegt)
 {
