@@ -31,8 +31,11 @@ PEAK = 10 ** (PEAK_DB / 20)
 # vol 1 im Skript = so laut (Spitze) wie der lauteste Ton der berechneten Spur: sfx.py
 # normiert sie auf Spitze 0,7. So bedeutet "vol" fuer beide Arten Ton dasselbe.
 LEVEL = 0.7
-TRIM_REL_DB = -40.0            # Stille = leiser als 40 dB unter der Spitze des Klangs ...
-TRIM_ABS_DB = -50.0            # ... oder leiser als -50 dBFS (was davon hoeher liegt)
+# Bewusst tief angesetzt: bei -40 dB fehlten dem Drama-Ton und dem keuchenden
+# Publikum hoerbar ein Stueck Nachhall, nach der lauten Abmischung (-14 LUFS)
+# klang das wie abgeschnitten (Rueckmeldung des Betreibers, 16.11.2026).
+TRIM_REL_DB = -60.0            # Stille = leiser als 60 dB unter der Spitze des Klangs ...
+TRIM_ABS_DB = -70.0            # ... oder leiser als -70 dBFS (was davon hoeher liegt)
 PRE, POST = 0.005, 0.020       # so viel bleibt vor dem ersten und nach dem letzten hoerbaren Abtastwert, mit Blende
 
 

@@ -16,19 +16,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.2,
-   "duration": 0.907,
+   "duration": 1.2,
    "trim": [
     0.0,
-    0.9065
+    1.2
    ],
    "gainDb": 3.78,
    "peakDb": -1.0,
-   "rmsDb": -15.53,
-   "lufs": -22.5,
+   "rmsDb": -16.75,
+   "lufs": -23.4,
    "truePeakDb": -1.0,
    "sha256Original": "8580f914eab91cde63cac258908040c02518d5a370637f8916a0148c65180a4d",
-   "sha256": "9f5953960d0fbde16034b936deb1e76766b90b2aa423a658ca340a61052e07e0",
-   "pcmSha256": "f699f4ba437f993d8201bb5592454874ab6c00df988e5e64049873b533c94122"
+   "sha256": "1792ab7aee31500d1b8b7f370635bcfd5cd808e40e1bea56a38b5ae815dc5a95",
+   "pcmSha256": "95b6254a66696a45f06b64557928ad35ccfede971a177e7af2168c89987537df"
   },
   {
    "name": "plattenkratzer",
@@ -45,19 +45,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.0,
-   "duration": 0.457,
+   "duration": 1.0,
    "trim": [
     0.0,
-    0.4569
+    1.0
    ],
    "gainDb": -4.46,
    "peakDb": -1.0,
-   "rmsDb": -10.6,
+   "rmsDb": -14.0,
    "lufs": -12.0,
    "truePeakDb": -0.8,
    "sha256Original": "5293755a706d2a01eef6421f23be41ea0d710450ee81e825fd7fa24f4efc3db3",
-   "sha256": "cbbc574222e9fef18100a9f6847fa9846efc8463fe0240ce99d817fb2268525d",
-   "pcmSha256": "ae8ccb284de5cdcfa7db4daf870c34ab0df2152c1d95a56541a9a670512fc7d3"
+   "sha256": "ad3cf7d29a10732d8037981e849f7d71ccc96029b8ac41c38c4de2ff6639935c",
+   "pcmSha256": "8348d084126d45b71f9c25db61370874b57d60e4dd14dc02c28fed09fdb87d44"
   },
   {
    "name": "publikum-keucht",
@@ -74,19 +74,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.48,
-   "duration": 1.072,
+   "duration": 1.328,
    "trim": [
     0.0,
-    1.0719
+    1.3277
    ],
    "gainDb": -4.1,
    "peakDb": -1.0,
-   "rmsDb": -12.97,
+   "rmsDb": -13.9,
    "lufs": -11.7,
    "truePeakDb": -1.0,
    "sha256Original": "122397c9365448c4c0d0dcddf31c49b960f255fc01287e9cb3f21574d039d263",
-   "sha256": "d9a70695a46a09e53184d83132a8767e79e9c76df5967b118b546d77d263073d",
-   "pcmSha256": "6604600bdc78d80d597de09020e3192495926dd78c4d5fd9c6003b4ab6364d47"
+   "sha256": "a0e211f4ffad88c3290937a41bb936d8352163bf75b9cd695b571ca00797e0ec",
+   "pcmSha256": "3441ec2d55483f16f33e114312b6727fb8411e9d812fb56d547b15020f863833"
   },
   {
    "name": "publikum-ooh",
@@ -103,19 +103,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.76,
-   "duration": 1.648,
+   "duration": 1.76,
    "trim": [
     0.0,
-    1.6478
+    1.76
    ],
    "gainDb": -4.31,
    "peakDb": -1.0,
-   "rmsDb": -10.68,
+   "rmsDb": -10.97,
    "lufs": -10.3,
    "truePeakDb": -1.0,
    "sha256Original": "b312cc989cbc13d3c6d0bdd18b68ae1f48ecb22df3ed344b7d7fe9fec865f175",
-   "sha256": "a04012b7809782bd4755e46df2274d0092868d5368e6194effcf38c386ab7460",
-   "pcmSha256": "44dc8b503f1de30bb17cac6b1d26445d65ea24ae6764e09a4cafdff04b0a369f"
+   "sha256": "82375fed00b8ca76f240c4627527538b04a835a4495ba3e4577843d5a1d8a8f0",
+   "pcmSha256": "187dd5c2ef18d2b56c948ec6dc813f39c70be71c3a5c9c16164c1f5083087964"
   },
   {
    "name": "drama-stoss",
@@ -132,19 +132,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 2.48,
-   "duration": 1.707,
+   "duration": 2.48,
    "trim": [
     0.0,
-    1.7066
+    2.48
    ],
    "gainDb": -3.74,
    "peakDb": -1.0,
-   "rmsDb": -14.1,
+   "rmsDb": -15.72,
    "lufs": -13.0,
    "truePeakDb": -1.0,
    "sha256Original": "1b607b700e486ce57748955459152f1e75f8b3bc0fc51ef3d25efc5f18960a71",
-   "sha256": "e535feac283ada94534b8149c99cb96d472cca66d8db47a41cfda0b4e0b170ae",
-   "pcmSha256": "a3dfdd7db4a126e85c45f217b0f04f20e0dcfc444b82383054d65cf0fdf8322f"
+   "sha256": "27f5e2171be50dc2c69d0338b79bd2f414542f664e52c59fafa4a4329d517e0c",
+   "pcmSha256": "73877bb107917e68e752571484643d78d114e6c3f950ba8c80503d5ca9883531"
   },
   {
    "name": "grillen-stille",
@@ -161,19 +161,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 2.48,
-   "duration": 2.414,
+   "duration": 2.479,
    "trim": [
-    0.006,
-    2.4198
+    0.0007,
+    2.4795
    ],
    "gainDb": -0.08,
    "peakDb": -1.0,
-   "rmsDb": -18.68,
+   "rmsDb": -18.79,
    "lufs": -15.4,
    "truePeakDb": -0.8,
    "sha256Original": "c8d35aba9246a8e50ef58aa926190946804461420427dc95158068a23bd19131",
-   "sha256": "5d41ba186ab83e68ddc00f8d1f4bdf76739b723712923a461e2e865422a93951",
-   "pcmSha256": "c72f4bbff73f7d756721c4bef8d976c5690d008a1acc29738eeaf834c50733a6"
+   "sha256": "f48be158a25af25af798f075202a04d6b5543f754078394889019ceefac5ef07",
+   "pcmSha256": "bf168f2fc2436a1438524dcfdec6659580fe997097ea2435cdb8512d04586003"
   },
   {
    "name": "kasse",
@@ -190,19 +190,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.2,
-   "duration": 0.508,
+   "duration": 1.2,
    "trim": [
     0.0,
-    0.5078
+    1.2
    ],
    "gainDb": -2.81,
    "peakDb": -1.0,
-   "rmsDb": -25.54,
-   "lufs": -24.7,
+   "rmsDb": -29.28,
+   "lufs": -26.4,
    "truePeakDb": -0.8,
    "sha256Original": "39b5c3e0789d8263970bfd6a597833502ad07860ed70468d3117135fcc738c95",
-   "sha256": "dba36c88ce729bf0c407ff57414040c4b141b8e40913e30c20782adae475e109",
-   "pcmSha256": "38709a8e9295c8753706f6215fb76d9e86801ed707677b09ace70fb0c2e503c6"
+   "sha256": "0f350557ccea6b6879e35f5a276900e1f702452e1bfa337425836f9810f20c79",
+   "pcmSha256": "78b107f1d630cccc358c19cb69ed2993f6e9b77944822e192697a5ebd99d1a30"
   },
   {
    "name": "muenzen",
@@ -219,19 +219,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.48,
-   "duration": 1.233,
+   "duration": 1.259,
    "trim": [
     0.0,
-    1.2329
+    1.259
    ],
    "gainDb": -4.95,
    "peakDb": -1.0,
-   "rmsDb": -24.08,
+   "rmsDb": -24.18,
    "lufs": -21.9,
    "truePeakDb": -1.0,
    "sha256Original": "fcf923cdfefb293904a09a4b560889b638da3921452212d83070850266c4af17",
-   "sha256": "065b7e196da69a84dd56a21acea330df77a448958e35253b8448b047e28e568e",
-   "pcmSha256": "3a436e960b7c96819df93ab449922316406a370aa0df40343c0716288431eebe"
+   "sha256": "395923fdccae55c6cc8cde3ac985e39a1ea57fb969b374bfb38cf358928acfc7",
+   "pcmSha256": "1c52b99a3fb3a99ae7e5dd45d4ff9270529d264788b0a987053295005b25476f"
   },
   {
    "name": "ladenglocke",
@@ -259,8 +259,8 @@
    "lufs": -12.5,
    "truePeakDb": -1.0,
    "sha256Original": "c68314312ebba048bc9d1d05e96bb2d8454a73831d4950e6af4c26976f1561e2",
-   "sha256": "4eaa162bbc940307a32ec1c4ac84bd3a94e8740ea550149388de2b022faed3ee",
-   "pcmSha256": "2dc01a5afdaf31a41ac282dc4bb681475fb567a935a6ccedb297b55506d02dff"
+   "sha256": "97e2ce40626f2bf5f41cc831c30fe679ad8cd77481f6468cd341f8483b33b09f",
+   "pcmSha256": "db9dfe7055233dca10fc6231c02e3fcb106f4e4af64496e94928f8c41613d5a0"
   },
   {
    "name": "grill-brutzeln",
@@ -306,19 +306,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.2,
-   "duration": 1.144,
+   "duration": 1.2,
    "trim": [
     0.0,
-    1.1441
+    1.2
    ],
    "gainDb": 3.52,
    "peakDb": -1.0,
-   "rmsDb": -24.9,
+   "rmsDb": -25.11,
    "lufs": -22.5,
    "truePeakDb": -0.9,
    "sha256Original": "ccc41d6298fc505971765b8a6e8a9da0dc10c70935e942edd47b40759ef42dee",
-   "sha256": "7ed31e9a58cbdffdf9803a18319fe8c2bef475fc366e44d5761872565b8d2a05",
-   "pcmSha256": "140ee214af8f82212bdb70a66c3294001b71200421e6416769aaf2481b819ffa"
+   "sha256": "53f169d5b2c18e925014a21073f07cd194c8b1892feea63342d9875b20ffd5bc",
+   "pcmSha256": "327081d1343604f4c4ac6c5b42902cba8d461c2d5219cc51dd6933792e38e59b"
   },
   {
    "name": "muelleimer",
@@ -335,19 +335,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 0.8,
-   "duration": 0.269,
+   "duration": 0.512,
    "trim": [
-    0.0468,
-    0.316
+    0.0413,
+    0.5538
    ],
    "gainDb": -0.62,
    "peakDb": -1.0,
-   "rmsDb": -19.17,
-   "lufs": -21.8,
+   "rmsDb": -21.96,
+   "lufs": -24.7,
    "truePeakDb": -1.0,
    "sha256Original": "ab291ec31cf2c562cc04dfde13b9ebd4ce35c644099b94327b89a269ae8726d9",
-   "sha256": "2dee33fd7b77ff8f0af54ff78c5819673d74e183c41e43199ab17b482e96f0eb",
-   "pcmSha256": "84cb3ed159c7bd2597d8b909f8ea384870e60de81d6e1cce5bd14319aa5e058f"
+   "sha256": "9dae291c1e973e9e4f2a1098a4465d99e5ee311e4b96217cffec4b3fdf9e439a",
+   "pcmSha256": "cd64799ea25d559aee52fa3f59535f3a6d95df01de20f9dec2d7328669279c60"
   },
   {
    "name": "trauriger-trompeter",
@@ -364,19 +364,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 2.48,
-   "duration": 2.006,
+   "duration": 2.243,
    "trim": [
-    0.0278,
-    2.0342
+    0.0222,
+    2.2653
    ],
    "gainDb": -3.96,
    "peakDb": -1.0,
-   "rmsDb": -13.9,
-   "lufs": -13.3,
+   "rmsDb": -14.39,
+   "lufs": -13.2,
    "truePeakDb": -0.9,
    "sha256Original": "16be22f34e37b4eb43304f8edb337a5d51d02c0a249216380db8f825e942aaec",
-   "sha256": "faebff55880530545bc7cdad23694c59cf322a7ca56f37eb4f0c09a3787f4026",
-   "pcmSha256": "03bc7c3b2ec4218e29b683aa6b4521fc51eaa38bdf1b20a0351244d7f29ffd9e"
+   "sha256": "656e8b59236d329c1c101657bc6a0528f5cf52290e03e72e9ab2274b748d30d6",
+   "pcmSha256": "5b231360d6ef7d0edfff850658e04e781c61bd71223b8707e801026ec5859c94"
   },
   {
    "name": "erfolg-pling",
@@ -393,19 +393,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 0.8,
-   "duration": 0.427,
+   "duration": 0.8,
    "trim": [
     0.0,
-    0.4268
+    0.8
    ],
    "gainDb": 8.6,
    "peakDb": -1.0,
-   "rmsDb": -14.27,
+   "rmsDb": -17.0,
    "lufs": -17.1,
    "truePeakDb": -1.0,
    "sha256Original": "6b59c7359e610eecc3ce05b9a3444cd5c7a5da46d9e95e484dda1510a4b9ae48",
-   "sha256": "8614d46695a1f0bbed7e9a36e10feacf711e48557b1c7aecd1c0fdf25c0efd83",
-   "pcmSha256": "bc0ec64ebb6bb324cfc555771a0baab74399ed65b6634a8c3f19ebf5d847302e"
+   "sha256": "39c16bc6de675639f9e9e22361af4d4036e3e9913bcf64fab3262404fe2d2470",
+   "pcmSha256": "90801ed9f659ce512b67180a71985f1e7cb3448fba22ce99abbd9675a787598c"
   },
   {
    "name": "wischer",
@@ -451,19 +451,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.0,
-   "duration": 0.965,
+   "duration": 1.0,
    "trim": [
     0.0,
-    0.9647
+    1.0
    ],
    "gainDb": -4.01,
    "peakDb": -1.0,
-   "rmsDb": -6.29,
+   "rmsDb": -6.44,
    "lufs": -7.5,
    "truePeakDb": -0.9,
    "sha256Original": "ee4e175df350c29153b152e976aad2f567806f35c5bf349afe0399a3e71d487b",
-   "sha256": "3c808ecf4f828d40ce4acea1e8c4047abe0aca3ccf0c530f4d01465a8d650f28",
-   "pcmSha256": "12100a40440c890b31e66377efbef2c9e83ef488e3b7b1c1b83fe53cdf2f96f3"
+   "sha256": "313008c7f50b01e8ceff8d636344841fefc76fae6c76c007b7717e04018bdecf",
+   "pcmSha256": "8743a6db12472c5badd6eb48d8fcf4b3e2e854350106f6829b102cade4f382ce"
   },
   {
    "name": "herzschlag",
@@ -480,19 +480,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 1.0,
-   "duration": 0.614,
+   "duration": 1.0,
    "trim": [
     0.0,
-    0.6136
+    1.0
    ],
    "gainDb": 9.74,
    "peakDb": -1.0,
-   "rmsDb": -17.79,
+   "rmsDb": -19.91,
    "lufs": -21.5,
    "truePeakDb": -1.0,
    "sha256Original": "a7fbd9afcd1bbad10ddacfdad48ac367525fbd2a2f85f7c93210f94432db44f7",
-   "sha256": "438f770a2b16acc2916c4d965901b5bebf2daa5aa13fa0b016fc76b6521bd308",
-   "pcmSha256": "1357c11cdaef02baa7ce19a894753cfbdd4df143e3eb6e7f04cbdd61cbed12e3"
+   "sha256": "b81d62346c20f487ca3653f443c84c06de921251e5cf81e372cadb90fd4fd855",
+   "pcmSha256": "3622e78242bd54f24404e18d562f15e732f080363a874c44ea6073b0f3e2ce6c"
   },
   {
    "name": "applaus",
@@ -509,19 +509,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 2.0,
-   "duration": 1.913,
+   "duration": 2.0,
    "trim": [
     0.0,
-    1.9127
+    2.0
    ],
    "gainDb": -3.85,
    "peakDb": -1.0,
-   "rmsDb": -12.15,
+   "rmsDb": -12.35,
    "lufs": -10.3,
    "truePeakDb": -1.0,
    "sha256Original": "a11fc2b40fc6741596e3db2041a7f478f67f51b33b404ada40080fe7b1348a3e",
-   "sha256": "192b220a8bdbe21c67e8c34b2f80b9433f314998d2fd21e66e278afaacdbe168",
-   "pcmSha256": "10488de3ff0d50dd02217f6c805c25a78c5376ecacfacc7755f11d492fa06a83"
+   "sha256": "435df0fcec09dbbc48616e8391a73d7d80b407368d2d7daeb2685f16355a93eb",
+   "pcmSha256": "100fcda179bf3627c0cc541857c1e41ba639e8f648b0a2233a542f29338e44ee"
   },
   {
    "name": "keuchen-1",
@@ -543,19 +543,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 0.56,
-   "duration": 0.545,
+   "duration": 0.56,
    "trim": [
-    0.0004,
-    0.5454
+    0.0,
+    0.56
    ],
    "gainDb": 0.27,
    "peakDb": -1.0,
-   "rmsDb": -16.04,
+   "rmsDb": -16.16,
    "lufs": -17.2,
    "truePeakDb": -1.0,
    "sha256Original": "b0dfd4c9997d56705afe916a7589f7d3e6dbe78fcfb85e603de0064caa53918e",
-   "sha256": "655d54f4800ee45adf3d835e6e3008fc4fa001f0f7c18541c2c16577aa180fcd",
-   "pcmSha256": "3d6b307a92cbcb5f881d7201455ce79ee3140eeacfeb7c55f6a1fe576360a54a"
+   "sha256": "c3332f25c63591cb957612400e319d7087f4dc78254f27f98f5a12d4421c603f",
+   "pcmSha256": "e10a94eeff7553951a795c2aeee88fc9887c6f0cc143c368442b332fdf3c6f7a"
   },
   {
    "name": "keuchen-2",
@@ -588,8 +588,8 @@
    "lufs": -16.3,
    "truePeakDb": -1.0,
    "sha256Original": "0c6d8299d069bf2ff36c31aa55f19add75845088990a918a2069882d877fc9b0",
-   "sha256": "a864ad76f1281ce288c0384ccb03ed978563a4f32ea957fc863a3e8d5a5fc580",
-   "pcmSha256": "d3dede22c9cfa6cee4505395acb04ff4930c5d49f3f8dfdf001368160f57c5cc"
+   "sha256": "0c473f875c5f8aa816567b41a113f5cca2f1495aa7745b4fa46e427775e96659",
+   "pcmSha256": "37c8e4eba110e21d921c35f53c9bd1a8fc67be31d8372b0babcf186632ae50fb"
   },
   {
    "name": "keuchen-3",
@@ -611,19 +611,19 @@
    "date": "2026-11-16",
    "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
    "durationOriginal": 0.341,
-   "duration": 0.322,
+   "duration": 0.341,
    "trim": [
-    0.0053,
-    0.327
+    0.0,
+    0.3407
    ],
    "gainDb": 0.11,
    "peakDb": -1.0,
-   "rmsDb": -17.38,
-   "lufs": -19.4,
+   "rmsDb": -17.62,
+   "lufs": -19.3,
    "truePeakDb": -1.0,
    "sha256Original": "514248013aa7c81a998c01a701e19e7180a765cac7a562908474b8f4c4bcd03e",
-   "sha256": "87e16f81e2e45c6cbaacd176f8e099be2deff2b7edf81477f4c42e1e0b2dc6cf",
-   "pcmSha256": "6a78e474996b94c5bb6274b92c67a577b9d6a30c73ed32d96168dfe5824c87c1"
+   "sha256": "23b8593273f68cb09255b96112e6bc24b311fb244acc5f8b517f57bf85209e9b",
+   "pcmSha256": "4b16b6647eddf383877ffe8bf2ca4966eb43b7bd5ecca39ca756176d2d8ee785"
   }
  ],
  "format": {
@@ -632,6 +632,6 @@
   "bits": 16,
   "codec": "flac",
   "peakDb": -1.0,
-  "trim": "Stille = leiser als -40 dB unter der Spitze oder -50 dBFS; 5 ms davor und 20 ms danach bleiben, mit Blende"
+  "trim": "Stille = leiser als -60 dB unter der Spitze oder -70 dBFS; 5 ms davor und 20 ms danach bleiben, mit Blende"
  }
 }
