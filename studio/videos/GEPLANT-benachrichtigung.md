@@ -1,6 +1,8 @@
 # Geplantes Video: Benachrichtigung in Ladennähe
 
-Vom Betreiber am 16.11.2026 so freigegeben. Noch nicht gebaut.
+Vom Betreiber am 16.11.2026 so freigegeben. Gebaut am selben Tag als
+`2026-11-16-ist-das-koscher` (Fassung 1, wartet auf die Freigabe des Betreibers).
+Was dabei neu entstand, steht dort in `NOTIZEN.md`.
 
 ## Gesprochener Text
 

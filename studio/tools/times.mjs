@@ -26,6 +26,9 @@ if (existsSync(vdir)) for (const f of readdirSync(vdir).filter(f => f.endsWith('
   source = `Aufnahme ${meta.key}`; break
 }
 console.log(`${norm.meta.title}: ${norm.words} Wörter, ${norm.spoken.length} Zeichen gesprochener Text. Zeiten: ${source}\n`)
+// Mit "timing.maxGap" kuerzt der Bau die Pausen der Aufnahme: die Zeiten hier sind dann die der
+// ungekuerzten Aufnahme und liegen spaeter als im Video. Wer danach Anker setzt, liegt daneben.
+if (norm.timing.maxGap != null && source.startsWith('Aufnahme')) console.log('Achtung: dieses Skript kürzt die Pausen der Aufnahme ("timing.maxGap"). Die Zeiten unten gelten für die ungekürzte Aufnahme; die Zeiten des Videos stehen nach einem Bau in out/times.json und im Bericht unter "captions".\n')
 norm.caps.forEach((c, i) => {
   console.log(`${c.id.padEnd(6)} ${c.role ? `[${c.role}] ` : ''}${c.words.join(' ')}`)
   console.log('       ' + c.words.map((w, k) => `${k}:${w}${c.say[k] !== w ? `{${c.say[k]}}` : ''}@${times[i][k].toFixed(2)}`).join('  '))

@@ -19,7 +19,14 @@ export const TIMING = {
   capGap: 0.12,    // eine Textzeile verschwindet so viel vor der naechsten
   step: 0.36,      // geschaetzte Sekunden pro Wort, solange es keine Stimme gibt
   capPause: 0.5,   // geschaetzte Pause zwischen zwei Textzeilen (nur Entwurf)
-  scenePause: 0.35 // zusaetzliche Pause vor einer neuen Szene (nur Entwurf)
+  scenePause: 0.35, // zusaetzliche Pause vor einer neuen Szene (nur Entwurf)
+  // Ein Teil mit "enter": "cut" erscheint so viel vor seinem ersten Wort. Ein harter
+  // Schnitt sitzt knapp vor dem Wort; die 0,3 s einer Ueberblendung waeren hier ein
+  // Bild, das stumm dasteht.
+  cutLead: 0.1,
+  // "timing.maxGap": laengste stille Luecke der Stimme in Sekunden. Laengere werden
+  // beim Bau gekuerzt (tools/tighten.py). null = die Aufnahme bleibt, wie sie ist.
+  maxGap: null
 }
 
 // Lautstaerke des Wisch-Tons beim Szenenwechsel. 0,35 ist die Haelfte des ersten
@@ -30,21 +37,38 @@ export const SOUND = { sceneWhoosh: 0.35 }
 // Begrenzers (0,89 = rund -1 dBFS). level: true laesst ffmpeg danach wieder auf
 // 0 dBFS anheben - so waren die ersten Videos gemischt (limit 0,95), ihre
 // Skripte setzen das ausdruecklich, damit der Vergleich mit ihnen genau bleibt.
-export const MIX = { voice: 1.5, sfx: 0.45, limit: 0.89, level: false }
+export const MIX = { voice: 1.5, sfx: 0.45, limit: 0.89, level: false, lufs: null, truePeak: -1 }
+// lufs: Ziel-Lautheit der fertigen Mischung (z. B. -14, so laut sind die Reels der
+// Vorbilder). null = die feste Mischung oben, wie bei den ersten Videos. truePeak ist
+// die Obergrenze der wahren Spitze in dBTP und gilt nur zusammen mit lufs.
+
+// Textzeilen im Modus "wort": oben steht immer nur EIN Wort (zwei, wenn beide sehr
+// kurz sind), jedes loest das vorige im Takt der Stimme ab. Normale Woerter klein und
+// hell, Schluesselwoerter (im Skript mit * davor) gross und lila.
+//   pair     zwei normale Woerter teilen sich eine Tafel, wenn sie zusammen hoechstens so viele Zeichen haben (0 = nie)
+//   size     Schriftgroesse normaler Woerter, keySize die der Schluesselwoerter (px)
+//   minShow  eine Tafel, die kuerzer stuende, wird mit der naechsten zusammengelegt (s)
+export const CAPTION = { mode: 'zeile', pair: 10, size: 70, keySize: 136, minShow: 0.16 }
+export const CAPTION_MODES = ['zeile', 'wort']
+// Bis zu drei Schluesselwoerter hintereinander bleiben zusammen ("vor deiner Tür")
+const KEY_RUN = 3
 
 // Was script.json enthalten darf. Alles andere ist fast immer ein Tippfehler
 // ("parms" statt "params") und fiel frueher still auf die Vorgaben zurueck:
 // ein Baeckerei-Video zeigte dann "Café Nordwind". Namen mit "_" am Anfang
 // sind Hinweise und werden ueberall ignoriert.
 const KEYS = {
-  script: ['meta', 'voice', 'timing', 'say', 'poster', 'sound', 'mix', 'scenes'],
-  timing: ['lead', 'hold'],
+  script: ['meta', 'voice', 'timing', 'say', 'poster', 'sound', 'mix', 'scenes', 'captionStyle', 'pace'],
+  timing: ['lead', 'hold', 'maxGap'],
+  captionStyle: Object.keys(CAPTION),
+  pace: ['maxStill', 'minChanges'],
+  camera: ['cap', 'word', 'offset', 'at', 'zoom', 'focus', 'to', 'dur', 'whoosh'],
   sound: Object.keys(SOUND),
   mix: Object.keys(MIX),
   voice: ['voice_id', 'model_id', 'language_code', 'output_format', 'seed', 'voice_settings', 'stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost'],
-  scene: ['component', 'params', 'anchors', 'captions'],
+  scene: ['component', 'params', 'anchors', 'captions', 'enter', 'camera'],
   parts: ['parts'],
-  caption: ['lines', 'accent', 'keep', 'role', 'instant']
+  caption: ['lines', 'accent', 'keep', 'role', 'instant', 'mode', 'scale', 'gapBefore']
 }
 
 // Die Marke wird "Stampit" geschrieben, aber "Stamp It" gesprochen. Ohne
@@ -83,9 +107,53 @@ function parseWord(raw, sayMap, where) {
   return { show, say }
 }
 
-function parseCaption(c, sayMap, where) {
+// Eine Textzeile im Modus "wort". Zwei Zeichen kommen dazu, beide nur hier, damit ein
+// Stern oder Strich in einem alten Skript weiter so auf dem Bild steht wie bisher:
+//   *Wort   Schluesselwort (gross, lila)
+//   |       Grenze zwischen zwei Tafeln. Steht in einer Zeile ein |, gelten dort NUR
+//           die Grenzen aus dem Skript; ohne | teilt die Zeile sich von selbst auf.
+// Jede Zeile in "lines" ist ausserdem eine Grenze. Mit "instant" stehen alle Zeilen
+// als EINE Tafel untereinander da (der Einstieg: die ganze Frage ab dem ersten Bild).
+function parseWortCaption(c, sayMap, where, style) {
+  if (c.accent != null) fail(`${where}: "accent" gibt es im Modus "wort" nicht. Schlüsselwörter bekommen einen Stern davor: *Handy`)
+  if (c.keep) fail(`${where}: "keep" gibt es im Modus "wort" nicht (dort steht immer nur eine Tafel). Für eine Zeile, die stehen bleibt: "mode": "zeile"`)
+  const scale = c.scale == null ? 1 : num(c.scale, 0.5, 2, `${where}: "scale"`)
+  const words = [], say = [], key = [], lines = [], groups = []
+  c.lines.forEach((line, li) => {
+    const raw = Array.isArray(line) ? line : String(line).trim().split(/\s+/)
+    if (!raw.length || raw[0] === '') fail(`${where}: Zeile ${li + 1} ist leer`)
+    const explicit = raw.includes('|'), row = []
+    let cur = null
+    for (const x of raw) {
+      if (x === '|') { cur = null; continue }
+      const star = typeof x === 'string' && x.startsWith('*')
+      const w = parseWord(star ? x.slice(1) : x, sayMap, `${where}, Zeile ${li + 1}`), isKey = star || !!(x && typeof x === 'object' && x.key)
+      const k = words.length; words.push(w.show); say.push(w.say); key.push(isKey); row.push(w)
+      // Von selbst zusammen: zwei kurze normale Woerter, oder Schluesselwoerter in Folge.
+      // Nie ueber ein Satzzeichen hinweg: dort macht die Stimme eine Pause.
+      const prev = cur && words[cur[cur.length - 1]]
+      const joins = cur && !explicit && !PUNCT.test(prev) && key[cur[0]] === isKey &&
+        (isKey ? cur.length < KEY_RUN : cur.length < 2 && prev.length + 1 + w.show.length <= style.pair)
+      if (cur && (explicit || joins)) cur.push(k)
+      else { cur = [k]; groups.push(cur) }
+    }
+    if (!row.length) fail(`${where}: Zeile ${li + 1} enthält kein Wort`)
+    lines.push(row)
+  })
+  // "instant": alle Zeilen als eine Tafel, jede Zeile eine Reihe
+  let k = 0
+  const rows = lines.map(l => l.map(() => k++))
+  return { lines, words, say, accent: words.length, keep: false, role: null, instant: !!c.instant, mode: 'wort', scale, key, groups: c.instant ? null : groups, rows }
+}
+
+function parseCaption(c, sayMap, where, style = CAPTION) {
   if (!c || !Array.isArray(c.lines) || !c.lines.length) fail(`${where}: braucht "lines" (Liste von Zeilen)`)
   onlyKeys(c, KEYS.caption, where)
+  const mode = c.mode ?? style.mode
+  if (!CAPTION_MODES.includes(mode)) fail(`${where}: "mode" muss ${CAPTION_MODES.map(m => `"${m}"`).join(' oder ')} sein (bekam ${JSON.stringify(mode)})`)
+  // Zeilen mit "role" zeichnet der Baustein selbst: fuer sie gibt es keinen Modus
+  if (mode === 'wort' && !c.role) return parseWortCaption(c, sayMap, where, style)
+  if (c.scale != null) fail(`${where}: "scale" gibt es nur im Modus "wort"`)
   const lines = c.lines.map((line, li) => {
     const raw = Array.isArray(line) ? line : String(line).trim().split(/\s+/)
     if (!raw.length || raw[0] === '') fail(`${where}: Zeile ${li + 1} ist leer`)
@@ -94,7 +162,26 @@ function parseCaption(c, sayMap, where) {
   const words = lines.flat()
   const accent = c.accent == null ? words.length : Number(c.accent)
   if (!Number.isInteger(accent) || accent < 0) fail(`${where}: "accent" muss ein Wort-Index >= 0 sein`)
-  return { lines, words: words.map(x => x.show), say: words.map(x => x.say), accent, keep: !!c.keep, role: c.role || null, instant: !!c.instant }
+  return { lines, words: words.map(x => x.show), say: words.map(x => x.say), accent, keep: !!c.keep, role: c.role || null, instant: !!c.instant, mode: 'zeile' }
+}
+
+// Kamerabewegungen eines Teils: Zeitpunkt wie ein Anker ({cap, word, offset} oder {at, offset}),
+// dazu wohin. Geprueft wird hier, damit ein Tippfehler nicht erst im Browser auffaellt.
+function parseCamera(list, where) {
+  if (list == null) return []
+  if (!Array.isArray(list)) fail(`${where}: "camera" muss eine Liste sein ([ { ... } ])`)
+  const pair = (v, what) => { if (!Array.isArray(v) || v.length !== 2 || v.some(n => typeof n !== 'number')) fail(`${where}: "${what}" muss [x, y] in Pixeln sein`); return v }
+  return list.map((m, i) => {
+    const w = `${where}, Kamera ${i + 1}`
+    onlyKeys(m, KEYS.camera, w)
+    if (!m || typeof m !== 'object') fail(`${w} muss ein Objekt sein`)
+    if (m.at != null && m.at !== 'start' && m.at !== 'end') fail(`${w}: "at" muss "start" oder "end" sein`)
+    const out = { zoom: m.zoom == null ? 1 : num(m.zoom, 0.5, 3, `${w}: "zoom"`), dur: m.dur == null ? 0.18 : num(m.dur, 0, 3, `${w}: "dur"`), whoosh: m.whoosh == null ? 0 : num(m.whoosh, 0, 1, `${w}: "whoosh"`) }
+    if (m.focus != null) out.focus = pair(m.focus, 'focus')
+    if (m.to != null) out.to = pair(m.to, 'to')
+    for (const k of ['cap', 'word', 'offset', 'at']) if (m[k] != null) out[k] = m[k]
+    return out
+  })
 }
 
 /** Macht aus script.json die flache Form, mit der alle rechnen. Wirft bei Fehlern. */
@@ -105,14 +192,24 @@ export function normalize(script) {
   if (!Array.isArray(script.scenes) || !script.scenes.length) fail('scenes fehlt oder ist leer')
   onlyKeys(script, KEYS.script, 'script.json'); onlyKeys(script.timing, KEYS.timing, '"timing"')
   onlyKeys(script.sound, KEYS.sound, '"sound"'); onlyKeys(script.mix, KEYS.mix, '"mix"'); onlyKeys(script.voice, KEYS.voice, '"voice"')
+  onlyKeys(script.captionStyle, KEYS.captionStyle, '"captionStyle"'); onlyKeys(script.pace, KEYS.pace, '"pace"')
   const sayMap = { ...SAY_DEFAULT, ...(script.say || {}) }
   const t = script.timing || {}
   const timing = { ...TIMING, ...(t.lead != null ? { lead: +t.lead } : {}), ...(t.hold != null ? { hold: +t.hold } : {}) }
+  if (t.maxGap != null) timing.maxGap = num(t.maxGap, 0.15, 3, '"timing.maxGap"')
+  const captionStyle = { ...CAPTION, ...Object.fromEntries(Object.entries(script.captionStyle || {}).filter(([k]) => !k.startsWith('_'))) }
+  if (!CAPTION_MODES.includes(captionStyle.mode)) fail(`"captionStyle.mode" muss ${CAPTION_MODES.map(m => `"${m}"`).join(' oder ')} sein (bekam ${JSON.stringify(captionStyle.mode)})`)
+  num(captionStyle.pair, 0, 40, '"captionStyle.pair"'); num(captionStyle.size, 30, 140, '"captionStyle.size"')
+  num(captionStyle.keySize, 40, 260, '"captionStyle.keySize"'); num(captionStyle.minShow, 0, 1, '"captionStyle.minShow"')
+  // "pace": Richtwerte fuer den Bildwechsel (nur Warnungen): laengstes stehendes Bild und Mindestzahl der Wechsel
+  let pace = null
+  if (script.pace) pace = { maxStill: script.pace.maxStill == null ? null : num(script.pace.maxStill, 0.5, 60, '"pace.maxStill"'), minChanges: script.pace.minChanges == null ? null : num(script.pace.minChanges, 0, 200, '"pace.minChanges"') }
   const sound = { ...SOUND, ...(script.sound || {}) }
   num(sound.sceneWhoosh, 0, 1, '"sound.sceneWhoosh"')
   const mix = { ...MIX, ...(script.mix || {}) }
   num(mix.voice, 0, 4, '"mix.voice"'); num(mix.sfx, 0, 4, '"mix.sfx"'); num(mix.limit, 0.0625, 1, '"mix.limit"')
   if (typeof mix.level !== 'boolean') fail('"mix.level" muss true oder false sein')
+  if (mix.lufs != null) { num(mix.lufs, -30, -8, '"mix.lufs"'); num(mix.truePeak, -9, 0, '"mix.truePeak"') }
   const caps = [], scenes = []
   script.scenes.forEach((sc, si) => {
     if (!sc || typeof sc !== 'object') fail(`Szene ${si + 1} muss ein Objekt sein`)
@@ -126,18 +223,32 @@ export function normalize(script) {
       onlyKeys(p, KEYS.scene, where)
       if (!p.component || !/^[a-z0-9-]+$/.test(p.component)) fail(`${where}: "component" fehlt oder hat unerlaubte Zeichen`)
       if (!Array.isArray(p.captions) || !p.captions.length) fail(`${where}: braucht mindestens eine Textzeile in "captions" (die Zeit hängt an den Wörtern)`)
+      // "enter": wie ein Teil erscheint. "fade" (Vorgabe) blendet ueber, "cut" schneidet hart.
+      // Der erste Teil einer Szene schiebt immer von der Seite herein, dort gibt es nichts zu waehlen.
+      const enter = p.enter ?? 'fade'
+      if (!['fade', 'cut'].includes(enter)) fail(`${where}: "enter" muss "fade" oder "cut" sein (bekam ${JSON.stringify(p.enter)})`)
+      if (p.enter != null && pi === 0) fail(`${where}: "enter" gilt nur für Teile nach dem ersten. Der erste Teil einer Szene schiebt immer herein`)
+      const camera = parseCamera(p.camera, where)
       const idx = p.captions.map((c, ci) => {
-        const cap = parseCaption(c, sayMap, `${where}, Text ${ci + 1}`)
+        const cap = parseCaption(c, sayMap, `${where}, Text ${ci + 1}`, captionStyle)
+        // "gapBefore": die Pause vor dieser Textzeile bekommt genau diese Laenge (gekuerzt oder
+        // verlaengert, tools/tighten.py). Nur zusammen mit "timing.maxGap": ohne das wird die
+        // Aufnahme gar nicht angefasst, und die Angabe bliebe still ohne Wirkung.
+        if (c.gapBefore != null) {
+          if (timing.maxGap == null) fail(`${where}, Text ${ci + 1}: "gapBefore" gilt nur zusammen mit "timing.maxGap"`)
+          if (!caps.length) fail(`${where}, Text ${ci + 1}: "gapBefore" an der ersten Textzeile des Videos geht nicht, davor wird nichts gesprochen`)
+          cap.gapBefore = num(c.gapBefore, 0.15, 1.5, `${where}, Text ${ci + 1}: "gapBefore"`)
+        }
         cap.scene = si; cap.part = pi; cap.k = ci; cap.id = `s${si + 1}${rawParts.length > 1 ? 'abcdefgh'[pi] : ''}.${ci + 1}`
         caps.push(cap); return caps.length - 1
       })
-      return { component: p.component, params: p.params || {}, anchors: p.anchors || {}, caps: idx }
+      return { component: p.component, params: p.params || {}, anchors: p.anchors || {}, caps: idx, enter, camera }
     })
     scenes.push({ parts })
   })
   const spoken = caps.flatMap(c => c.say).join(' ')
   return {
-    meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, sound, mix, poster: script.poster ?? null,
+    meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, sound, mix, poster: script.poster ?? null, captionStyle, pace,
     scenes, caps, spoken, words: caps.reduce((n, c) => n + c.words.length, 0)
   }
 }
@@ -177,6 +288,27 @@ export function timesFromAlignment(norm, al) {
   return { times, voiceEnd: +(words[words.length - 1].e + lead).toFixed(3), voiceLength: words[words.length - 1].e }
 }
 
+/**
+ * Tafeln einer Textzeile im Modus "wort": welche Woerter zusammen dastehen, von wann
+ * bis wann. Die Aufteilung kommt aus dem Skript (groups); hier kommt nur die Zeit dazu.
+ * Eine Tafel, die kuerzer als minShow stuende (die Stimme verschluckt "sie" oder "die"
+ * in einer Zehntelsekunde), wird mit der folgenden zusammengelegt: ein Wort, das nur
+ * drei Bilder lang aufblitzt, liest niemand. Die letzte Tafel bleibt bis zum Ende der
+ * Textzeile stehen und haengt sich notfalls an die davor.
+ */
+export function wortChunks(c, minShow = CAPTION.minShow) {
+  const LEAD = 0.03 // wie bei den Textzeilen bisher: das Wort ist einen Hauch vor dem Laut da
+  if (!c.groups) return [{ rows: c.rows, words: c.rows.flat(), s: +(c.t[0] - LEAD).toFixed(3), e: +c.e.toFixed(3), merged: false }]
+  const list = c.groups.map(g => ({ words: [...g], merged: false }))
+  const start = x => c.t[x.words[0]]
+  for (let i = 0; i < list.length - 1;) {
+    if (start(list[i + 1]) - start(list[i]) < minShow) { list[i].words.push(...list[i + 1].words); list[i].merged = true; list.splice(i + 1, 1) }
+    else i++
+  }
+  if (list.length > 1 && c.e - start(list[list.length - 1]) < minShow) { const last = list.pop(); list[list.length - 1].words.push(...last.words); list[list.length - 1].merged = true }
+  return list.map((x, i) => ({ rows: [x.words], words: x.words, s: +(start(x) - LEAD).toFixed(3), e: +(i + 1 < list.length ? start(list[i + 1]) - LEAD : c.e).toFixed(3), merged: x.merged }))
+}
+
 /** Der Zeitplan: wann jede Textzeile, jeder Teil und jede Szene beginnt und endet. */
 export function timeline(norm, times) {
   const T = norm.timing
@@ -186,10 +318,11 @@ export function timeline(norm, times) {
     return { ...c, t, last: t[t.length - 1] }
   })
   caps.forEach((c, i) => { c.e = i + 1 < caps.length ? caps[i + 1].t[0] - T.capGap : c.last + T.hold })
+  for (const c of caps) if (c.mode === 'wort') c.chunks = wortChunks(c, (norm.captionStyle || CAPTION).minShow)
   const scenes = norm.scenes.map((sc, n) => ({
     index: n,
     s: n === 0 ? 0 : caps[sc.parts[0].caps[0]].t[0] - T.sceneLead,
-    parts: sc.parts.map((p, j) => ({ ...p, s: j === 0 ? null : caps[p.caps[0]].t[0] - T.sceneLead }))
+    parts: sc.parts.map((p, j) => ({ ...p, s: j === 0 ? null : caps[p.caps[0]].t[0] - (p.enter === 'cut' ? T.cutLead : T.sceneLead) }))
   }))
   scenes.forEach((sc, n) => {
     sc.e = n + 1 < scenes.length ? scenes[n + 1].s : caps[caps.length - 1].e

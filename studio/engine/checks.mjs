@@ -20,6 +20,8 @@ export const LIMITS = {
   wpmWarn: 190,
   capGap: 40,    // so viel Luft braucht eine Textzeile nach unten bis zum Bild
   apartGap: 12,  // so viel Luft zwischen Elementen, die sich nicht beruehren duerfen
+  wordMin: 44, keyMin: 72, // Modus "wort": kleiner wird ein Wort beim Einpassen nicht, ohne dass der Bau abbricht
+  chunkSeconds: 0.14,      // Modus "wort": so lange steht eine Tafel mindestens (vier Bilder), sonst Warnung
   column: STAGE.column
 }
 
@@ -42,7 +44,9 @@ export function runChecks({ state, measured, problems, voice, motion = null }) {
   const wide = [], many = []
   for (const c of measured.caps) {
     for (const r of c.rows) if (r.width > LIMITS.capWidth || r.wrapped) wide.push(`${c.id}: "${r.text}" ist ${r.width} px breit (erlaubt ${LIMITS.capWidth}). Zeile im Skript früher umbrechen.`)
-    if (c.rows.length > LIMITS.capLines) many.push(`${c.id}: ${c.rows.length} Zeilen (erlaubt ${LIMITS.capLines}). Satz kürzen oder in zwei Textzeilen teilen.`)
+    // Im Modus "wort" zaehlt die hoechste Tafel (c.lines), nicht die Summe aller Tafeln
+    const n = c.lines ?? c.rows.length
+    if (n > LIMITS.capLines) many.push(`${c.id}: ${n} Zeilen (erlaubt ${LIMITS.capLines}). Satz kürzen oder in zwei Textzeilen teilen.`)
   }
   add('textbreite', `Keine Textzeile breiter als ${LIMITS.capWidth} px (Bühne minus 70 px Rand je Seite)`, wide)
   add('textzeilen', `Höchstens ${LIMITS.capLines} Zeilen je Text`, many)
@@ -81,9 +85,31 @@ export function runChecks({ state, measured, problems, voice, motion = null }) {
   for (const c of state.caps || []) {
     const visible = ((c.keep || c.role) ? state.duration : c.end) - c.start, per = visible / c.words
     c.visible = +visible.toFixed(3); c.secondsPerWord = +per.toFixed(3)
+    // Im Modus "wort" steht nie ein ganzer Satz da: dort zaehlt die einzelne Tafel (Pruefung "tafelzeit")
+    if (c.mode === 'wort') continue
     if (per < LIMITS.secondsPerWord) short.push(`${c.id}: "${c.text}" steht nur ${visible.toFixed(2)} s für ${c.words} Wörter (${per.toFixed(2)} s je Wort, nötig ${LIMITS.secondsPerWord}). Satz kürzen oder teilen.`)
   }
   add('lesezeit', `Jeder Text ist mindestens ${LIMITS.secondsPerWord} s je Wort zu sehen`, short)
+
+  // ---- nur im Modus "wort" (Skripte ohne ihn bekommen diese Pruefungen gar nicht erst)
+  const wort = (state.caps || []).filter(c => c.mode === 'wort')
+  if (wort.length) {
+    // Eine Tafel, die zum Passen stark verkleinert werden musste, ist auf dem Handy nicht mehr zu lesen
+    add('wortgroesse', `Wörter im Modus "wort" bleiben lesbar (normale mindestens ${LIMITS.wordMin} px, Schlüsselwörter mindestens ${LIMITS.keyMin} px, Breite höchstens ${LIMITS.capWidth} px)`,
+      (state.capFit || []).filter(f => f.width > LIMITS.capWidth || (f.word != null && f.word < LIMITS.wordMin) || (f.keyWord != null && f.keyWord < LIMITS.keyMin))
+        .map(f => `${f.id}: "${f.text}" steht nur noch in ${[f.word, f.keyWord].filter(x => x != null).join(' / ')} px (${f.width} px breit). Tafel im Skript mit | teilen oder das Wort kürzen.`))
+    const flash = []
+    for (const c of wort) for (const ch of c.chunks) if (ch.seconds < LIMITS.chunkSeconds) flash.push(`${c.id}: "${ch.text}" steht nur ${ch.seconds.toFixed(2)} s. Mit dem Nachbarwort zu einer Tafel verbinden (im Skript ohne | dazwischen).`)
+    add('tafelzeit', `Jede Tafel im Modus "wort" steht mindestens ${LIMITS.chunkSeconds} s`, flash, 'warn')
+  }
+  // ---- nur mit "pace" im Skript: Richtwerte fuer den Bildwechsel
+  if (state.pace) {
+    const end = state.duration - (state.hold || 0), ts = [0, ...(state.pictures || []).map(x => x.t).filter(t => t < end), end], slow = []
+    for (let i = 1; i < ts.length; i++) if (state.pace.maxStill != null && ts[i] - ts[i - 1] > state.pace.maxStill + 0.005) slow.push(`Von ${ts[i - 1].toFixed(1)} bis ${ts[i].toFixed(1)} s steht dasselbe Bild ${(ts[i] - ts[i - 1]).toFixed(1)} s lang (Richtwert höchstens ${state.pace.maxStill} s). Einen Teil, einen Schnitt oder eine Kamerabewegung ergänzen.`)
+    const count = (state.pictures || []).length
+    if (state.pace.minChanges != null && count < state.pace.minChanges) slow.push(`Nur ${count} Bildwechsel (Richtwert mindestens ${state.pace.minChanges}).`)
+    add('bildwechsel', 'Bildwechsel nach den Richtwerten aus "pace" (Szenen, Teile, Kamera; ohne das stehende Schlussbild)', slow, 'warn')
+  }
 
   const d = state.duration
   add('laenge', `Gesamtlänge zwischen ${LIMITS.minDuration} und ${LIMITS.maxDuration} s`,

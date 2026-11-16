@@ -25,7 +25,7 @@ import path from 'node:path'
 import { normalize, estimateTimes, timesFromAlignment, voiceCost, TIMING, STAGE } from './engine/script.mjs'
 import { openStudio, still, renderVideo, sampleMotion, run, STUDIO_ROOT } from './engine/render.mjs'
 import { runChecks } from './engine/checks.mjs'
-import { mixFilter, loudness, pauses, AUDIO } from './engine/mix.mjs'
+import { mixFilter, loudness, pauses, silences, ebur128, loudMix, AUDIO } from './engine/mix.mjs'
 
 const FPS = 30
 
@@ -135,9 +135,28 @@ if (noVoice) {
   const got = JSON.parse(en.out.trim().split('\n').pop())
   report.elevenLabs.spent = got.spent
   try {
-    const al = JSON.parse(readFileSync(got.alignment, 'utf8')), r = timesFromAlignment(norm, al)
+    let al = JSON.parse(readFileSync(got.alignment, 'utf8')), audio = got.audio, tight = null
+    // "timing.maxGap": stille Luecken der Aufnahme kuerzen. Die Aufnahme im Ordner voice/ bleibt,
+    // wie sie geliefert wurde; gekuerzt wird eine Kopie im Arbeitsordner, bei jedem Bau gleich.
+    // Ohne maxGap im Skript (alle bisherigen Videos) passiert hier nichts.
+    if (norm.timing.maxGap != null) {
+      const tw = path.join(work, `voice-${got.key}-tight.wav`), ta = path.join(work, `voice-${got.key}-tight.alignment.json`)
+      // "gapBefore" an einer Textzeile: die Pause vor ihrem ersten Wort bekommt genau diese Laenge
+      // (der Atemzug nach der Pointe, die Pause zwischen Schlussfrage und Aufforderung).
+      const extra = [], t0 = timesFromAlignment(norm, al).times
+      norm.caps.forEach((c, i) => { if (c.gapBefore != null) extra.push('--set', `${(t0[i][0] - norm.timing.lead).toFixed(3)}=${c.gapBefore}`) })
+      const tg = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'tighten.py'), got.audio, got.alignment, String(norm.timing.maxGap), tw, ta, ...extra])
+      if (tg.code !== 0) throw new Error('Lücken kürzen (tools/tighten.py): ' + (tg.err || tg.out).trim().slice(-400))
+      const info = JSON.parse(tg.out.trim().split('\n').pop())
+      tight = { maxGap: norm.timing.maxGap, cuts: info.cuts.length, removedSeconds: info.removed, inserts: info.inserts.length, addedSeconds: info.added, set: info.wishes, notFound: info.missed, secondsBefore: info.secondsBefore, secondsAfter: info.secondsAfter, pausesBefore: info.pausesBefore }
+      al = JSON.parse(readFileSync(ta, 'utf8')); audio = tw
+      log(`Stimme: ${info.cuts.length} stille Lücken auf höchstens ${norm.timing.maxGap} s gekürzt (zusammen ${info.removed} s)${info.inserts.length ? `, ${info.inserts.length} Pause(n) verlängert (zusammen ${info.added} s)` : ''}: ${info.secondsBefore} s -> ${info.secondsAfter} s. Die Aufnahme im Ordner voice/ bleibt unverändert.`)
+      // Ein Wunsch, der nicht ging, soll nicht still verschwinden
+      for (const m of info.missed) log(`  WARNUNG "gapBefore" ${m.gap} s: vor dem Wort bei ${m.at} s der Aufnahme gibt es keine Stille, die Stelle bleibt, wie sie ist.`)
+    }
+    const r = timesFromAlignment(norm, al)
     times = r.times
-    voice = { audio: got.audio, key: got.key, source: got.source, words: norm.words, seconds: r.voiceLength, voiceEnd: r.voiceEnd, chars }
+    voice = { audio, key: got.key, source: got.source, words: norm.words, seconds: r.voiceLength, voiceEnd: r.voiceEnd, chars, tight }
   } catch (e) { console.error('Stimme: ' + e.message); report.errors = ['[stimme] ' + e.message]; finish(2) }
 }
 writeFileSync(path.join(out, 'times.json'), JSON.stringify({ estimated: noVoice, lead: norm.timing.lead, hold: norm.timing.hold, voiceEnd: voice ? voice.voiceEnd : null, times: Object.fromEntries(norm.caps.map((c, i) => [c.id, times[i]])) }))
@@ -162,12 +181,20 @@ try {
     // Pausen und Tempo beim Sprechen: Vergleichszahlen fuer das naechste Skript (siehe PLAYBOOK, Erkenntnisse)
     const p = await pauses(voice.audio)
     voiceInfo.pauses = p; voiceInfo.wordsPerMinuteTalking = +(voice.words / Math.max(1, voice.seconds - p.seconds) * 60).toFixed(1)
+    if (voice.tight) {
+      // Nach dem Kuerzen genauer hinsehen: jede stille Stelle ab 0,3 s zwischen erstem und letztem Wort
+      const gaps = (await silences(voice.audio, 0.3)).filter(g => g.at > 0.05 && g.seconds != null)
+      voiceInfo.tighten = voice.tight
+      voiceInfo.gapsFrom03 = { count: gaps.length, seconds: +gaps.reduce((s, g) => s + g.seconds, 0).toFixed(2), longest: +Math.max(0, ...gaps.map(g => g.seconds)).toFixed(3) }
+    }
   }
   Object.assign(report, {
     duration: state.duration, fps: FPS, frames: Math.round(state.duration * FPS),
     voice: voiceInfo, sound: norm.sound, mix: norm.mix,
     checks: res.checks, errors: res.errors, warnings: res.warnings,
     scenes: state.scenes, captions: state.caps, anchors: state.anchors,
+    // Bildwechsel der Reihe nach: Szenen, Teile, Kamerabewegungen (was innerhalb eines Bildes passiert, steht bei den Ankern)
+    pictures: state.pictures, pictureCount: (state.pictures || []).length,
     cues: state.cues, cueCount: state.cues.length
   })
   log(`Länge ${state.duration} s, ${state.scenes.length} Szenen, ${state.cues.length} Töne${res.wpm ? `, Stimme ${res.wpm} Wörter/Minute` : ''}${voiceInfo && voiceInfo.pauses ? `, ${voiceInfo.pauses.count} Pausen ab 0,5 s (zusammen ${voiceInfo.pauses.seconds} s)` : ''}`)
@@ -212,8 +239,21 @@ try {
     const graph = mixFilter({ voiceIn: voice ? 1 : null, sfxIn: voice ? 2 : 1, lead: norm.timing.lead, len, mix: norm.mix })
     // Erst unter anderem Namen schreiben: ein abgebrochener Lauf hinterlaesst so kein halbes video.mp4
     const video = path.join(out, 'video.mp4'), videoTmp = path.join(work, 'video.mp4')
-    const mx = await run('ffmpeg', ['-v', 'error', '-y', '-i', silent, ...inputs, '-filter_complex', graph, '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', AUDIO.codec, '-b:a', AUDIO.bitrate, '-movflags', '+faststart', videoTmp])
-    if (mx.code !== 0) throw new Error('ffmpeg (Mischung): ' + mx.err)
+    // "mix.lufs": Mischung auf eine Ziel-Lautheit (engine/mix.mjs, loudMix). Nur mit Stimme: ein
+    // Entwurf hat bloss Effekte, und die auf -14 LUFS zu ziehen hiesse, einzelne Pops zu bruellen.
+    // Ohne "mix.lufs" (alle bisherigen Videos) laeuft die feste Mischung wie immer.
+    let loud = null
+    if (voice && norm.mix.lufs != null) {
+      const m4a = path.join(work, 'mix.m4a')
+      log(`Mischung auf ${norm.mix.lufs} LUFS, wahre Spitze höchstens ${norm.mix.truePeak} dBTP ...`)
+      loud = await loudMix({ voiceFile: voice.audio, sfxFile: sfx, lead: norm.timing.lead, len, mix: norm.mix, out: m4a, work, log })
+      const mx = await run('ffmpeg', ['-v', 'error', '-y', '-i', silent, '-i', m4a, '-map', '0:v', '-map', '1:a', '-c', 'copy', '-movflags', '+faststart', videoTmp])
+      if (mx.code !== 0) throw new Error('ffmpeg (Ton ans Bild): ' + mx.err)
+      for (const f of [m4a, path.join(work, 'premix.wav')]) rmSync(f, { force: true })
+    } else {
+      const mx = await run('ffmpeg', ['-v', 'error', '-y', '-i', silent, ...inputs, '-filter_complex', graph, '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', AUDIO.codec, '-b:a', AUDIO.bitrate, '-movflags', '+faststart', videoTmp])
+      if (mx.code !== 0) throw new Error('ffmpeg (Mischung): ' + mx.err)
+    }
     // ------------------------------------------------------------ 7. Uebersicht
     const sheetTmp = path.join(work, 'sheet.png')
     const sh = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'sheet.py'), sheetDir, sheetTmp])
@@ -222,13 +262,22 @@ try {
     report.streams = JSON.parse(probe.out).streams
     // Gemessene Spitze des fertigen Tons. Erwartet: rund -1 dBFS (bei "mix.level": true rund 0).
     report.audio = { ...(await loudness(videoTmp)), limit: norm.mix.limit, level: norm.mix.level }
+    if (norm.mix.lufs != null) {
+      // Gemessen wird am fertigen video.mp4, nicht am Zwischenergebnis: das ist die Datei, die gepostet wird
+      const m = await ebur128(videoTmp)
+      report.audio.loudness = loud
+        ? { lufs: m.lufs, truePeakDb: m.truePeak, rangeLu: m.range, target: loud.target, ok: Math.abs(m.lufs - norm.mix.lufs) <= 0.5 && m.truePeak <= norm.mix.truePeak + 0.05, before: loud.before, gainDb: loud.gainDb, ceilingDb: loud.ceilingDb, compressor: loud.compressor, passes: loud.passes, steps: loud.steps }
+        : { lufs: m.lufs, truePeakDb: m.truePeak, skipped: 'Entwurf ohne Stimme: feste Mischung, das Ziel aus "mix.lufs" gilt erst mit Stimme' }
+      if (loud && !report.audio.loudness.ok) { const w = `[lautheit] Ziel ${norm.mix.lufs} LUFS / ${norm.mix.truePeak} dBTP nicht erreicht: gemessen ${m.lufs} LUFS, wahre Spitze ${m.truePeak} dBTP`; report.warnings = [...(report.warnings || []), w]; log('  WARNUNG ' + w) }
+      else if (loud) log(`  Lautheit des fertigen Videos: ${m.lufs} LUFS, wahre Spitze ${m.truePeak} dBTP (${loud.passes} Durchgänge)`)
+    }
     await still(main, state.poster, path.join(out, 'poster.png'))
     renameSync(sheetTmp, path.join(out, 'sheet.png')); renameSync(videoTmp, video)
     Object.assign(report.files, { video: 'out/video.mp4', poster: 'out/poster.png', sheet: 'out/sheet.png' })
     report.posterAt = +state.poster.toFixed(3)
     // Zwischenergebnisse wegraeumen (nur die Dateien, die dieser Lauf selbst angelegt hat)
     if (!flag('--keep-work')) {
-      for (const f of [silent, sfx, ...(voice && voice.audio.startsWith(work + path.sep) ? [voice.audio] : [])]) rmSync(f, { force: true })
+      for (const f of [silent, sfx, ...(voice && voice.audio.startsWith(work + path.sep) ? [voice.audio, voice.audio.replace(/\.wav$/, '.alignment.json')] : [])]) rmSync(f, { force: true })
       for (const f of readdirSync(sheetDir)) if (/^\d+\.jpg$/.test(f)) rmSync(path.join(sheetDir, f))
     }
     report.ok = res.ok; code = res.ok ? 0 : 1

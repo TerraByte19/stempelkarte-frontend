@@ -21,12 +21,14 @@ export default {
     after: { default: 5, doc: 'Stempel am Ende der Szene. Jeder neue Stempel braucht einen Anker (stamp1, stamp2, ...)' },
     icon: { default: 'cup', doc: 'Stempel-Symbol: cup, bread, scissors, star, heart, check', same: 'Symbol' },
     walletTitle: { default: 'Wallet', doc: 'Überschrift auf dem Handy' },
-    scan: { default: true, doc: 'Scan-Rahmen und Haken über dem QR-Code zeigen (false: nur Karte und Stempel)' }
+    scan: { default: true, doc: 'Scan-Rahmen und Haken über dem QR-Code zeigen (false: nur Karte und Stempel)' },
+    rise: { default: true, doc: 'Das Handy fährt von unten herein. false: es steht schon da (für einen kurzen Teil nach einem Schnitt)' },
+    drop: { default: true, doc: 'Die Karte fällt auf den Anker "card" in die Wallet. false: sie liegt schon drin, ohne Ton und ohne Anker' }
   },
   captions: { min: 1 },
   anchors: p => {
     const a = {
-      card: { cap: 0, word: 4, doc: 'Die Karte fällt in die Wallet (Ton: pop). Auf "Karte" o. ä.' },
+      ...(p.drop ? { card: { cap: 0, word: 4, doc: 'Die Karte fällt in die Wallet (Ton: pop). Auf "Karte" o. ä.' } } : {}),
       ...(p.scan ? {
         scan: { cap: 1, word: 0, doc: 'Scan-Rahmen und Scan-Linie starten (Ton: scan). Auf "scannen"' },
         ok: { cap: 1, word: 2, doc: 'Haken am QR-Code (Ton: ok). Auf "kein Download" o. ä.' }
@@ -123,10 +125,14 @@ export default {
 
     // Handy faehrt hoch, die Karte faellt in die Wallet
     const s0 = ctx.s
-    key('.phone', [[s0, { translate: '0px 520px' }, OUT], [s0 + 0.7, { translate: '0px 0px' }]])
-    const tc = ctx.at('card') - 0.1
-    key('.scard', [[tc, { opacity: 0, translate: '0px -160px', scale: 0.92 }, BACK], [tc + 0.5, { opacity: 1, translate: '0px 0px', scale: 1 }]])
-    cue(ctx.at('card') - 0.05, 'pop', 0.9, 0.7)
+    if (p.rise) key('.phone', [[s0, { translate: '0px 520px' }, OUT], [s0 + 0.7, { translate: '0px 0px' }]])
+    // "drop": false - die Karte liegt schon in der Wallet. Ein Anker in der Vergangenheit ginge
+    // dafuer nicht: sein Pop waere im Teil davor zu hoeren.
+    if (p.drop) {
+      const tc = ctx.at('card') - 0.1
+      key('.scard', [[tc, { opacity: 0, translate: '0px -160px', scale: 0.92 }, BACK], [tc + 0.5, { opacity: 1, translate: '0px 0px', scale: 1 }]])
+      cue(ctx.at('card') - 0.05, 'pop', 0.9, 0.7)
+    }
 
     // "Einmal scannen": Rahmen und Scan-Linie ueber dem QR-Code, dann der Haken
     if (p.scan) {

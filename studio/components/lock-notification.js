@@ -10,7 +10,10 @@ export default {
     body: { default: '6 von 6, dein Kaffee wartet', doc: 'Text der Benachrichtigung, höchstens zwei Zeilen, zusammen etwa 50 Zeichen' },
     when: { default: 'jetzt', doc: 'Zeitangabe rechts oben in der Benachrichtigung' },
     icon: { default: 'cup', doc: 'Symbol im Absender-Feld: cup, bread, scissors, star, heart, check', same: 'Symbol' },
-    pin: { default: true, doc: 'Ortsnadel mit Wellen zeigen ("in Ladennähe")' }
+    pin: { default: true, doc: 'Ortsnadel mit Wellen zeigen ("in Ladennähe")' },
+    rise: { default: true, doc: 'Das Handy fährt von unten herein. false: es steht vom ersten Bild an da (für den Einstieg, wenn das allererste Bild schon alles zeigen soll)' },
+    buzzes: { default: 1, doc: 'Wie oft das Handy brummt, 1 bis 3 (je 0,75 s Abstand, jedes Mal Ton buzz)' },
+    waves: { default: false, doc: 'Schwingungsbögen links und rechts neben dem Handy, solange es brummt' }
   },
   captions: { min: 1 },
   anchors: p => ({
@@ -33,6 +36,9 @@ export default {
   .pin svg { position: absolute; inset: 0; filter: drop-shadow(0 14px 20px rgba(0,0,0,.45)); }
   .pring { position: absolute; left: 75px; top: 132px; width: 0; height: 0; }
   .pring s { position: absolute; left: -110px; top: -40px; width: 220px; height: 80px; border-radius: 50%; border: 5px solid var(--lilac); opacity: 0; }
+  .lwave { top: 880px; width: 70px; height: 300px; border: 10px solid transparent; border-radius: 50%; opacity: 0; }
+  .lwave.l { border-left-color: var(--lilac); }
+  .lwave.r { border-right-color: var(--lilac); }
   `,
   build(ctx) {
     const { p, key, loop, cue } = ctx, { BACK, OUT } = ctx.ease
@@ -44,6 +50,7 @@ export default {
         <div class="lclock" data-safe="Uhr"></div>
         <div class="notif" data-safe="Benachrichtigung"><span class="nsw">${ctx.icon(p.icon)}</span><span><b data-oneline="Absender der Benachrichtigung" data-apart="kopf" data-label="Absender"></b><i data-maxlines="Text der Benachrichtigung" data-max="2"></i></span><em data-apart="kopf" data-label="Zeitangabe"></em></div>
       </div></div>
+      ${p.waves ? '<div class="abs lwave l" style="left:196px"></div><div class="abs lwave l" style="left:138px;top:850px;height:360px"></div><div class="abs lwave r" style="left:814px"></div><div class="abs lwave r" style="left:872px;top:850px;height:360px"></div>' : ''}
       ${p.pin ? `<div class="abs pin"><div class="pring"><s data-apart="datum-nadel" data-label="Ortsnadel (Wellen)"></s><s></s></div>
         <svg viewBox="0 0 150 150"><path fill="${ctx.B.lilac}" d="M75 8 C47 8 26 29 26 56 C26 92 75 138 75 138 C75 138 124 92 124 56 C124 29 103 8 75 8 Z"/><circle cx="75" cy="56" r="20" fill="${ctx.B.night2}"/></svg>
       </div>` : ''}`)
@@ -57,13 +64,31 @@ export default {
     const b = ctx.$('.notif b'), em = ctx.$('.notif em')
     ctx.fit(b, em.offsetLeft - b.offsetLeft - 16, 20)
 
+    if (!Number.isInteger(p.buzzes) || p.buzzes < 1 || p.buzzes > 3) ctx.fail('"buzzes" muss 1, 2 oder 3 sein')
     const s0 = ctx.s, tn = ctx.at('notify') - 0.1
-    key('.phone', [[s0, { translate: '0px 520px' }, OUT], [s0 + 0.7, { translate: '0px 0px' }]])
+    if (p.rise) key('.phone', [[s0, { translate: '0px 520px' }, OUT], [s0 + 0.7, { translate: '0px 0px' }]])
     key('.notif', [[tn, { opacity: 0, translate: '0px -150px', scale: 0.9 }, BACK], [tn + 0.5, { opacity: 1, translate: '0px 0px', scale: 1 }]])
     cue(ctx.at('notify') - 0.05, 'ding')
-    // das Handy brummt kurz
-    key('.phone', [[tn + 0.1, { rotate: '0deg' }], [tn + 0.17, { rotate: '-1.6deg' }], [tn + 0.24, { rotate: '1.6deg' }], [tn + 0.31, { rotate: '-1.1deg' }], [tn + 0.38, { rotate: '1.1deg' }], [tn + 0.46, { rotate: '0deg' }]])
-    cue(ctx.at('notify') + 0.05, 'buzz', 0.6)
+    // das Handy brummt kurz. Mehrere Male ("buzzes") stehen in EINER Bewegung hintereinander:
+    // zwei getrennte Bewegungen auf derselben Eigenschaft wuerden sich ueberschreiben.
+    const GAP = 0.75, shake = []
+    for (let b = 0; b < p.buzzes; b++) {
+      const t = tn + b * GAP
+      shake.push([t + 0.1, { rotate: '0deg' }], [t + 0.17, { rotate: '-1.6deg' }], [t + 0.24, { rotate: '1.6deg' }], [t + 0.31, { rotate: '-1.1deg' }], [t + 0.38, { rotate: '1.1deg' }], [t + 0.46, { rotate: '0deg' }])
+      cue(ctx.at('notify') + 0.05 + b * GAP, 'buzz', 0.6)
+    }
+    key('.phone', shake)
+    if (p.waves) {
+      // Boegen neben dem Handy: bei jedem Brummen einmal nach aussen und wieder weg
+      ctx.$$('.lwave').forEach((w, i) => {
+        const dir = w.classList.contains('l') ? -1 : 1, late = i % 2 ? 0.07 : 0, fr = []
+        for (let b = 0; b < p.buzzes; b++) {
+          const t = tn + b * GAP + 0.08 + late
+          fr.push([t, { opacity: 0, translate: '0px 0px' }, OUT], [t + 0.14, { opacity: 0.9, translate: `${dir * 10}px 0px` }], [t + 0.36, { opacity: 0.9, translate: `${dir * 16}px 0px` }], [t + 0.56, { opacity: 0, translate: `${dir * 26}px 0px` }])
+        }
+        key(w, fr)
+      })
+    }
     if (p.pin) {
       const tp = ctx.at('pin') - 0.1
       key('.pin', [[tp, { opacity: 0, translate: '0px -90px' }, BACK], [tp + 0.5, { opacity: 1, translate: '0px 0px' }]])

@@ -18,7 +18,7 @@ export const SOUNDS = ['pop', 'thud', 'whoosh', 'drop', 'chime', 'ding', 'buzz',
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; return e }
 
 export async function boot() {
-  const state = window.STUDIO = { ready: false, errors: [], warnings: [], anchors: [], cues: [] }
+  const state = window.STUDIO = { ready: false, errors: [], warnings: [], anchors: [], cues: [], pictures: [] }
   try { await build(state) }
   // Fehler landen in STUDIO.errors (und damit im Bericht), nicht zusaetzlich in der Konsole - sonst stehen sie doppelt da
   catch (e) { state.errors.push(String(e && e.message || e)) }
@@ -83,6 +83,7 @@ async function build(state) {
     key(ill, [[s, { scale: 1.05 }, 'linear'], [e + 0.3, { scale: 1 }]])
     // Wisch-Ton zum Szenenwechsel. Lautstaerke aus "sound.sceneWhoosh" (Vorgabe 0,35; 0 = keiner).
     if (n > 0 && norm.sound.sceneWhoosh > 0) engineCue(s - 0.05, 'whoosh', norm.sound.sceneWhoosh)
+    if (n > 0) state.pictures.push({ t: +s.toFixed(3), kind: 'szene', how: 'schieben', scene: n + 1, part: null, component: sc.parts[0].component })
     return { scene, ill }
   })
 
@@ -96,8 +97,59 @@ async function build(state) {
   const progressPulse = t => dots.forEach((p, i) => key(p, [[t + i * 0.08, { scale: 1 }, EASE.OUT], [t + 0.18 + i * 0.08, { scale: 1.35 }, EASE.OUT], [t + 0.5 + i * 0.08, { scale: 1 }]]))
 
   // ---- Textzeilen oben. Zeilen mit "role" zeichnet der Baustein selbst.
+  // Modus "wort": oben steht immer nur EINE Tafel (ein Wort, zwei kurze, oder bei "instant"
+  // der ganze Satz in Reihen). Jede loest die vorige im Takt der Stimme ab. Welche Woerter
+  // zusammengehoeren und wann, steht schon im Zeitplan (script.mjs, wortChunks); hier
+  // entsteht nur das Bild dazu. Jede Tafel wird so weit verkleinert, dass sie in die
+  // Breite passt: "Benachrichtigung" oder "Sperrbildschirm" in voller Groesse liefen
+  // sonst links und rechts aus dem Bild.
+  const capRoom = STAGE.w - 2 * STAGE.capMargin
+  state.capFit = []
+  function wortCaption(c, first) {
+    const st = norm.captionStyle, box = el('div', 'capw'); box.dataset.cap = c.id
+    capsEl.append(box)
+    c.chunks.forEach((ch, i) => {
+      const chunk = el('div', 'chunk'), spans = []
+      for (const rowWords of ch.rows) {
+        const row = el('div', 'row')
+        for (const k of rowWords) {
+          const sp = el('span', 'w' + (c.key[k] ? ' key' : '')); sp.textContent = c.words[k]
+          sp.dataset.size = (c.key[k] ? st.keySize : st.size) * c.scale
+          sp.style.fontSize = sp.dataset.size + 'px'; row.append(sp); spans.push(sp)
+        }
+        chunk.append(row)
+      }
+      box.append(chunk)
+      // Breite der breitesten Reihe messen (Schrift ist geladen) und alle Woerter der
+      // Tafel im selben Verhaeltnis verkleinern, bis sie passt
+      const width = () => Math.max(...[...chunk.children].map(row => [...row.children].reduce((w, sp) => { const m = getComputedStyle(sp); return w + sp.offsetWidth + parseFloat(m.marginLeft) + parseFloat(m.marginRight) }, 0)))
+      let f = 1, w = width()
+      for (let n = 0; w > capRoom && n < 30; n++) {
+        f = Math.floor(f * Math.min(0.98, capRoom / w) * 1000) / 1000
+        for (const sp of spans) sp.style.fontSize = (sp.dataset.size * f).toFixed(1) + 'px'
+        w = width()
+      }
+      const text = ch.rows.map(r => r.map(k => c.words[k]).join(' ')).join(' / ')
+      ch.fit = f; ch.text = text
+      // kleinste Schrift getrennt nach normalem Wort und Schluesselwort: fuer beide gilt eine eigene Untergrenze
+      const least = cls => { const v = spans.filter(sp => sp.classList.contains('key') === cls).map(sp => parseFloat(sp.style.fontSize)); return v.length ? +Math.min(...v).toFixed(1) : null }
+      state.capFit.push({ id: c.id, text, factor: f, width: Math.round(w), word: least(false), keyWord: least(true) })
+      // Die Tafel springt auf ihr erstes Wort herein und ist weg, sobald die naechste kommt.
+      // Die letzte einer Textzeile blendet aus, und zwar in 0,07 s: die Textzeile endet 0,12 s
+      // vor der naechsten, deren erste Tafel 0,03 s vor ihrem Wort erscheint. Mit den 0,1 s der
+      // Textzeilen bisher laegen beide ein Bild lang uebereinander.
+      const last = i === c.chunks.length - 1, out = last ? 0.07 : 0.001
+      // Hereinspringen in 0,12 s, bei einer sehr kurzen Tafel entsprechend schneller: sonst laege
+      // das Ende des Hereinspringens hinter dem Verschwinden, und die Tafel tauchte wieder auf.
+      const up = Math.min(0.12, Math.max(0.02, (ch.e - ch.s) * 0.6))
+      if (c.instant && first) { chunk.style.opacity = 1; key(chunk, [[ch.e, { opacity: 1 }], [ch.e + out, { opacity: 0 }]]) }
+      else key(chunk, [[ch.s, { opacity: 0, scale: 0.84 }, EASE.OUT], [ch.s + up, { opacity: 1, scale: 1 }], [ch.e, { opacity: 1, scale: 1 }], [ch.e + out, { opacity: 0, scale: 1 }]])
+    })
+  }
+
   for (const c of TL.caps) {
     if (c.role) continue
+    if (c.mode === 'wort') { wortCaption(c, c === TL.caps.find(x => !x.role)); continue }
     const box = el('div', 'cap'); box.dataset.cap = c.id; let k = 0
     // "instant": der ganze Satz steht auf einmal da statt Wort fuer Wort. Bei der
     // allerersten Textzeile schon im ersten Bild: dort entscheidet sich, ob jemand
@@ -151,10 +203,24 @@ async function build(state) {
       let root = ill
       if (multi) {
         root = el('div', 'part'); ill.append(root)
-        // Teile blenden ineinander ueber, kurz bevor der erste Satz des neuen Teils beginnt
-        if (j > 0) key(root, [[part.s + 0.1, { opacity: 0 }], [part.s + 0.5, { opacity: 1 }]])
-        if (j + 1 < sc.parts.length) { const t2 = sc.parts[j + 1].s; key(root, [[t2, { opacity: 1 }], [t2 + 0.3, { opacity: 0 }]]) }
+        // Teile blenden ineinander ueber, kurz bevor der erste Satz des neuen Teils beginnt.
+        // Mit "enter": "cut" am neuen Teil wird stattdessen hart geschnitten (part.s liegt
+        // dann schon knapp vor dem Wort, siehe script.mjs).
+        // Ein- und Ausblenden stehen in EINER Bewegung: zwei getrennte auf derselben
+        // Eigenschaft ueberschreiben sich, und ein mittlerer von drei Teilen waere dann
+        // von Anfang an sichtbar gewesen (bei zwei Teilen fiel das nie auf).
+        const fr = []
+        if (j > 0) fr.push(...(part.enter === 'cut' ? [[part.s - 0.001, { opacity: 0 }], [part.s, { opacity: 1 }]] : [[part.s + 0.1, { opacity: 0 }], [part.s + 0.5, { opacity: 1 }]]))
+        if (j + 1 < sc.parts.length) { const nx = sc.parts[j + 1], t2 = nx.s; fr.push(...(nx.enter === 'cut' ? [[t2 - 0.001, { opacity: 1 }], [t2, { opacity: 0 }]] : [[t2, { opacity: 1 }], [t2 + 0.3, { opacity: 0 }]])) }
+        if (fr.length) key(root, fr)
+        if (j > 0) state.pictures.push({ t: +(part.enter === 'cut' ? part.s : part.s + 0.1).toFixed(3), kind: 'teil', how: part.enter === 'cut' ? 'schnitt' : 'blende', scene: n + 1, part: j + 1, component: part.component })
       }
+      // "camera": Kamerabewegungen in diesem Teil (Hineinspringen auf ein Wort). Das Bild des
+      // Bausteins sitzt dafuer in einer eigenen Ebene, die vergroessert und verschoben wird;
+      // die Ebene darueber blendet es zum Textbereich hin aus, damit ein vergroessertes Handy
+      // nie unter die Woerter oben rutscht. Ohne "camera" bleibt alles, wie es war.
+      const camRoot = root
+      if (part.camera.length) { camRoot.classList.add('camview'); root = el('div', 'cam'); camRoot.append(root) }
       // Parameter: Vorgaben des Bausteins + Angaben im Skript. Unbekannte Namen
       // sind fast immer Tippfehler und sollen nicht still ignoriert werden.
       const decl = mod.params || {}, p = {}
@@ -266,6 +332,33 @@ async function build(state) {
       }
       try { await mod.build(ctx) }
       catch (e) { throw new Error(e.message.startsWith('Szene') ? e.message : `${by}: ${e.message}`) }
+      if (part.camera.length) {
+        // Zeitpunkt wie bei einem Anker: {cap, word, offset} oder {at, offset}
+        const when = (m, i) => {
+          if (m.at) return (m.at === 'start' ? part.s : part.e) + (m.offset || 0)
+          let ci = m.cap ?? 0; if (ci < 0) ci += caps.length
+          const c = caps[ci]; if (!c) throw new Error(`${by}: Kamera ${i + 1} zeigt auf Text ${(m.cap ?? 0) + 1}, den gibt es in diesem Teil nicht`)
+          let wi = m.word ?? 0; if (wi < 0) wi += c.t.length
+          if (c.t[wi] == null) throw new Error(`${by}: Kamera ${i + 1} zeigt auf Wort ${(m.word ?? 0) + 1} in Text ${ci + 1}, das gibt es nicht`)
+          return c.t[wi] + (m.offset || 0)
+        }
+        // Drehpunkt ist die Buehnenmitte. "focus" ist der Punkt im unvergroesserten Bild, um den
+        // es geht; er bleibt stehen, oder wandert nach "to". Daraus folgt die Verschiebung.
+        const C = [STAGE.w / 2, STAGE.h / 2], moves = part.camera.map((m, i) => ({ ...m, t: when(m, i) })).sort((a, b) => a.t - b.t)
+        let cur = { scale: 1, translate: '0px 0px' }
+        const fr = [[Math.min(part.s, moves[0].t) - 0.002, cur]]
+        for (const m of moves) {
+          const f = m.focus || C, to = m.to || f
+          const next = { scale: m.zoom, translate: `${(to[0] - C[0] - m.zoom * (f[0] - C[0])).toFixed(1)}px ${(to[1] - C[1] - m.zoom * (f[1] - C[1])).toFixed(1)}px` }
+          if (m.dur > 0) fr.push([m.t, cur, EASE.OUT], [m.t + m.dur, next])
+          else fr.push([m.t - 0.001, cur], [m.t, next])
+          cur = next
+          if (m.whoosh > 0) engineCue(m.t, 'whoosh', m.whoosh)
+          // Eine Kamera, die schon mit dem Teil beginnt, ist kein eigener Bildwechsel
+          if (m.t > part.s + 0.05) state.pictures.push({ t: +m.t.toFixed(3), kind: 'kamera', how: m.dur > 0 ? 'fahrt' : 'sprung', zoom: m.zoom, scene: n + 1, part: multi ? j + 1 : null, component: part.component })
+        }
+        key(root, fr)
+      }
       // Jeder deklarierte Anker soll im Bericht stehen, auch wenn der Baustein ihn (noch) nicht benutzt
       for (const k of Object.keys(adecl)) if (!(k in resolved)) { try { at(k) } catch (e) { state.errors.push(e.message) } }
     }
@@ -280,12 +373,19 @@ async function build(state) {
   }
 
   state.cues.sort((a, b) => a.t - b.t)
+  // Bildwechsel: Szenen, Teile und Kamerabewegungen der Reihe nach (was INNERHALB eines Bildes
+  // passiert, steht bei den Ankern). Fuer den Bericht und die Richtwerte aus "pace".
+  state.pictures.sort((a, b) => a.t - b.t)
+  state.pace = norm.pace
+  state.hold = norm.timing.hold
   const hook = TL.caps.find(c => !c.role) || TL.caps[0]
   window.CUES = { duration: DUR, events: state.cues.map(({ t, name, vol, pitch }) => ({ t, name, vol, pitch })) }
   Object.assign(state, {
     duration: DUR, rest,
     scenes: S.map((sc, n) => ({ index: n + 1, s: +sc.s.toFixed(3), e: +sc.e.toFixed(3), parts: sc.parts.map(p => ({ component: p.component, s: +p.s.toFixed(3), e: +p.e.toFixed(3) })) })),
-    caps: TL.caps.map(c => ({ id: c.id, scene: c.scene + 1, text: c.words.join(' '), lines: c.lines.map(l => l.map(w => w.show).join(' ')), words: c.words.length, role: c.role, keep: c.keep, start: c.t[0], last: c.last, end: +c.e.toFixed(3) })),
+    caps: TL.caps.map(c => ({ id: c.id, scene: c.scene + 1, text: c.words.join(' '), lines: c.lines.map(l => l.map(w => w.show).join(' ')), words: c.words.length, role: c.role, keep: c.keep, start: c.t[0], last: c.last, end: +c.e.toFixed(3),
+      // nur im Modus "wort": die Tafeln mit ihrer Zeit (fuer Bericht und Pruefung "tafelzeit")
+      ...(c.chunks ? { mode: 'wort', chunks: c.chunks.map(ch => ({ text: ch.text, start: ch.s, end: ch.e, seconds: +(ch.e - ch.s).toFixed(3), fit: ch.fit, merged: ch.merged })) } : {}) })),
     // Titelbild: der Moment, in dem die ERSTE Textzeile des Videos vollstaendig dasteht (der
     // Aufhaenger), bevor sie verschwindet und bevor ueberblendet oder weggeschoben wird.
     // Frueher zaehlte der letzte Satz des letzten Teils der ersten Szene: bei "Papierkarte +
@@ -299,6 +399,20 @@ async function build(state) {
   function measure() {
     const sr = stage.getBoundingClientRect(), rect = e => { const r = e.getBoundingClientRect(); return { left: Math.round(r.left - sr.left), top: Math.round(r.top - sr.top), right: Math.round(r.right - sr.left), bottom: Math.round(r.bottom - sr.top) } }
     const caps = [...capsEl.children].map(box => {
+      if (box.classList.contains('capw')) {
+        // Modus "wort": jede Reihe jeder Tafel zaehlt fuer die Breite, fuer die Zeilenzahl
+        // die hoechste Tafel, und der Kasten ist die Flaeche, die die Tafeln wirklich belegen
+        const rows = [], rects = []; let lines = 0
+        for (const chunk of box.children) {
+          lines = Math.max(lines, chunk.children.length); rects.push(rect(chunk))
+          for (const row of chunk.children) {
+            let w = 0
+            for (const sp of row.children) { const m = getComputedStyle(sp); w += sp.offsetWidth + parseFloat(m.marginLeft) + parseFloat(m.marginRight) }
+            rows.push({ text: [...row.children].map(s => s.textContent).join(' '), width: Math.round(w), wrapped: false })
+          }
+        }
+        return { id: box.dataset.cap, rows, lines, maxWidth: box.clientWidth, box: { left: Math.min(...rects.map(r => r.left)), top: Math.min(...rects.map(r => r.top)), right: Math.max(...rects.map(r => r.right)), bottom: Math.max(...rects.map(r => r.bottom)) } }
+      }
       const cs = getComputedStyle(box), lh = parseFloat(cs.lineHeight)
       const rows = [...box.children].map(row => {
         let w = 0

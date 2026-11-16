@@ -186,7 +186,7 @@ gelaufen. Der erste, begleitete Lauf der Aufgabe ist sein Test.
      Backend-Repo ebenso). Der Betreiber entscheidet, ob er es privat
      stellt. Bis dahin kommt nichts Vertrauliches hinein.
    - Den wahren Verbrauch der Stimme im November bei ElevenLabs ablesen; in
-     `konfig.json` stehen dafür geschätzte 2.094 Zeichen.
+     `konfig.json` stehen dafür geschätzte 2.752 Zeichen.
    - Ob lauter gemischt werden soll. Beide Vorbilder liegen bei -14 LUFS,
      wir bei -18,6. Erst anhören, dann in `state/konfig.json` unter `mix`
      eintragen.

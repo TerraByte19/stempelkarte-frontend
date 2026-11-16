@@ -27,6 +27,20 @@ svg.ico { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: rou
 .cap .w { display: inline-block; opacity: 0; margin: 0 .11em; }
 .cap .acc { color: var(--lilac); }
 
+/* Textzeile im Modus "wort": immer nur EINE Tafel, mittig im Textbereich. Normale
+   Woerter klein und hell, Schluesselwoerter (.key) gross und lila. Alle Tafeln einer
+   Textzeile liegen im selben Rasterfeld uebereinander; sichtbar ist immer nur eine. */
+.capw { position: absolute; left: 70px; right: 70px; top: 236px; height: 272px; display: grid; place-items: center;
+  text-align: center; font-family: var(--display); letter-spacing: -0.02em; }
+.capw .chunk { grid-area: 1 / 1; opacity: 0; }
+.capw .row { white-space: nowrap; line-height: 1.06; }
+.capw .w { display: inline-block; margin: 0 .1em; font-weight: 500; color: #E8E5F3; text-shadow: 0 4px 24px rgba(14,10,36,.8); }
+.capw .w.key { font-weight: 700; color: var(--lilac); text-shadow: 0 6px 30px rgba(14,10,36,.85), 0 0 70px rgba(142,130,245,.4); }
+/* Kamera: .cam traegt Vergroesserung und Verschiebung eines Teils, .camview (die Ebene
+   darueber, unbewegt) blendet zum Textbereich hin aus. */
+.cam { position: absolute; inset: 0; transform-origin: 540px 960px; }
+.camview { -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 522px, #000 580px); mask-image: linear-gradient(180deg, transparent 0, transparent 522px, #000 580px); }
+
 /* ---------- Kulisse: Lichtschein und Theke ---------- */
 .glow { border-radius: 50%; background: radial-gradient(closest-side, rgba(185,176,255,.24), rgba(185,176,255,0)); }
 .counter { left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #2C2269 0%, #1A1345 70%); border-top: 7px solid #4A40A8; }
