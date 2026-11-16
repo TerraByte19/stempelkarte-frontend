@@ -269,7 +269,7 @@ welche Schlüssel es gibt. Ein neues Video beginnt immer mit der Kopie von
   "meta":   { "title": "...", "slug": "...", "language": "de", "idee": "..." },
   "voice":  { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05 },
   "timing": { "lead": 0.35, "hold": 3.2 },
-  "say":    { "Stampit": "StampIt" },
+  "say":    { "Stampit": "Stämp-it" },
   "poster": 3.4,
   "scenes": [
     {
@@ -309,7 +309,9 @@ und werden überall ignoriert.
   ein, `hold` = so lange bleibt das Schlussbild nach dem letzten Wort stehen.
   Vorgaben nur mit Grund ändern. `maxGap` kürzt stille Lücken (Stil C).
 - **`say`**: Aussprache für das ganze Video, Schreibweise auf dem Bild →
-  gesprochene Form. `Stampit` → `StampIt` ist eingebaut.
+  gesprochene Form. `Stampit` → `Stämp-it` ist eingebaut (vom Betreiber am
+  16.11.2026 gewählt, damit die Stimme den Namen englisch sagt; die beiden
+  Referenzvideos setzen noch `StampIt`).
 - **`poster`**: Sekunde für `poster.png` (optional).
 - **`sound`**: `{ "sceneWhoosh": 0.35 }` ist die Lautstärke des Wisch-Tons beim
   Szenenwechsel (0 = keiner). Weglassen, die Vorgabe ist gewollt (siehe Töne).
@@ -703,7 +705,7 @@ frischer Checkout still mit der alten Betonung. Die Einzelheiten stehen in
    (`small`, z. B. "3,50 € − 1,00 €") rechnet er nicht nach: selbst prüfen.
    Keine Erfolgsversprechen ("garantiert", "verdoppelt"). Wie der Nutzer die
    Rechnung mag, steht unter "Geschmack des Nutzers".
-4. **Marke:** geschrieben "Stampit", gesprochen "StampIt" (passiert von selbst).
+4. **Marke:** geschrieben "Stampit", gesprochen englisch "Stamp It"; für die Stimme steht "Stämp-it" (passiert von selbst).
 5. **Zahlen:** im Bild als Ziffern, gesprochen als Wort in `{...}`.
 6. **Kein Kleingedrucktes.** Keine Fußnoten, Sternchen, Preisangaben oder
    Internetadressen im Bild; das Schlussbild trägt nur Stichwort und Logo.

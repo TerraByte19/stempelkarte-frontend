@@ -61,7 +61,7 @@ check('Referenz: gesprochener Text = Text der Aufnahme', norm.spoken === meta.te
 check('Marke wird "StampIt" gesprochen, "Stampit" gezeigt', norm.spoken.includes('Mit StampIt liegt') && norm.caps.some(c => c.words.includes('Stampit')))
 const tiny = (lines, extra = {}) => normalize({ meta: { title: 't', slug: 't' }, scenes: [{ component: 'x', captions: [{ lines }], ...extra }] })
 check('Schreibweise wort{gesprochen}', tiny(['sind 6.500{sechstausendfünfhundert} Euro']).spoken === 'sind sechstausendfünfhundert Euro')
-check('Satzzeichen bleiben an der gesprochenen Marke', tiny(['Das ist Stampit.']).spoken === 'Das ist StampIt.')
+check('Satzzeichen bleiben an der gesprochenen Marke (Vorgabe seit 16.11.2026: Stämp-it)', tiny(['Das ist Stampit.']).spoken === 'Das ist Stämp-it.')
 check('Objekt-Form {show, say}', tiny([[{ show: 'KARTE,', say: 'Karte,' }, 'jetzt']]).spoken === 'Karte, jetzt')
 check('gesprochene Form mit Leerzeichen wird abgelehnt', /genau ein Wort/.test(throws(() => tiny([[{ show: '2,50', say: 'zwei Euro fünfzig' }]])) || ''))
 check('gesprochene Form mit Leerzeichen in Klammern wird abgelehnt', /geschweifte Klammer/.test(throws(() => tiny(['Kostet 28{acht und zwanzig} Euro'])) || ''))

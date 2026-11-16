@@ -82,9 +82,12 @@ const KEYS = {
   caption: ['lines', 'accent', 'keep', 'role', 'instant', 'mode', 'scale', 'gapBefore']
 }
 
-// Die Marke wird "Stampit" geschrieben, aber "Stamp It" gesprochen. Ohne
-// diese Vorgabe liest die Stimme "Stampit" wie ein deutsches Wort.
-export const SAY_DEFAULT = { Stampit: 'StampIt' }
+// Die Marke wird "Stampit" geschrieben, aber englisch "Stamp It" gesprochen.
+// Ohne diese Vorgabe liest die Stimme "Stampit" wie ein deutsches Wort. Auch
+// "StampIt" kam nicht verlaesslich englisch heraus (Doener-Video, 16.11.2026);
+// von vier Proben hat der Betreiber "Staemp-it" gewaehlt (Probe C). Die beiden
+// Referenzvideos setzen "StampIt" selbst im Skript und bleiben dadurch gleich.
+export const SAY_DEFAULT = { Stampit: 'Stämp-it' }
 
 const PUNCT = /[.,!?:;]+$/
 

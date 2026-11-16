@@ -1754,7 +1754,7 @@ Die stillen Stellen stehen in `/root/.cache/eyes/<id>/audio.json` unter
 **a. Mitschrift gegen Skript.** Die Mitschrift (`segments`) Wort für Wort
 neben den gesprochenen Text aus `times.mjs --text` legen. Kein Befund ist:
 Groß- und Kleinschreibung, Satzzeichen, Zahlen als Ziffern statt als Wort,
-"Stampit" für "StampIt", "Kaffee" für "Café" oder umgekehrt. Text der
+"Stampit", "Stamp it" oder "Stemp it" für den Namen (gesprochen wird "Stämp-it"), "Kaffee" für "Café" oder umgekehrt. Text der
 Mitschrift, der in eine stille Stelle fällt (meist am Ende), ist erfunden
 und zählt nicht. Ein Befund ist: ein Wort fehlt, ein Wort ist ein anderes,
 ein Wort ist doppelt. Dann: **nicht neu aufnehmen.** In `pruefung` und in
