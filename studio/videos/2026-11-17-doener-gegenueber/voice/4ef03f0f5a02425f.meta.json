@@ -1,0 +1,22 @@
+{
+ "key": "4ef03f0f5a02425f",
+ "text": "Dein Stammkunde hat dich betrogen. Mit dem Dönerladen gegenüber. Zweimal die Woche war er bei dir. Dann hat er einmal gegenüber probiert. Und tschüss. Das sind über achthundert Euro Umsatz im Jahr. Weg. Und das Schlimmste: Du hast es nicht mal gemerkt. Seine Papierkarte mit sechs Stempeln liegt im Altpapier. Mit StampIt hat er deine Karte im Handy. Jeder Besuch ein Stempel, sofort sichtbar. Und ist sie voll, meldet sie sich von selbst, wenn er an deinem Laden vorbeikommt. Nicht an dem gegenüber. Willst du deine Stammkunden behalten? Kommentiere Karte, und wir melden uns.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 577,
+ "audio": "4ef03f0f5a02425f.mp3",
+ "audio_sha256": "10e2cf59143b500f66d4621de11f0d5dbfd0ea769d4db14e23ffda25c218b577",
+ "spent": 577
+}
