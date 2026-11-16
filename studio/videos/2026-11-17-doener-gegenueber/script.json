@@ -32,6 +32,7 @@
         { "sound": "drama-stoss", "anchor": "crack", "offset": 0.02, "vol": 0.6 },
         { "sound": "publikum-keucht", "cap": 0, "word": 4, "offset": 0.42, "vol": 0.75 },
         { "sound": "grill-brutzeln", "cap": 1, "word": 0, "vol": 0.35 },
+        { "sound": "ladenglocke", "anchor": "enter", "vol": 0.8 },
         { "sound": "vine-boom", "cap": 1, "word": 3, "offset": 0.45, "vol": 1.0 }
       ],
       "captions": [
