@@ -40,7 +40,7 @@ export default {
     at: { cap: -1, word: -1, offset: 0.6 }
   },
   css: `
-  .wk { left: 90px; top: 600px; width: 760px; padding: 26px 13px 24px; border-radius: 36px; background: rgba(255,255,255,.06); border: 1.5px solid rgba(185,176,255,.3); }
+  .wk { left: 160px; top: 600px; width: 760px; padding: 26px 13px 24px; border-radius: 36px; background: rgba(255,255,255,.06); border: 1.5px solid rgba(185,176,255,.3); }
   .wk-head { display: flex; align-items: center; gap: 16px; padding: 0 14px 18px; border-bottom: 1.5px solid rgba(255,255,255,.12); }
   .wk-head span { flex: none; width: 66px; height: 66px; border-radius: 17px; background: var(--brand); color: #fff; display: grid; place-items: center; }
   .wk-head span svg { width: 42px; }
