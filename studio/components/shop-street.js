@@ -15,6 +15,13 @@
 //   privacy  zwei durchgestrichene Zeichen am Laden: nichts gesendet, nichts gesehen
 //   view     "owner": Blick des Betreibers - er steht in der Tuer, vor dem Laden
 //            leuchten mehrere Handys auf
+//   across   der Passant geht auf der ANDEREN Strassenseite vorbei, der Laden steht
+//            klein im Hintergrund. Dazugekommen, weil in der ersten Fassung des
+//            zweiten Videos jedes Bild so aussah, als muesse man vor der Tuer stehen
+//
+// Figur, Karten-Benachrichtigung, Ortsnadel, Zeichen und Kreis kommen aus
+// engine/parts.js: die Karte von oben (shop-map) zeigt dieselben, und beide
+// Bilder sollen nie auseinanderlaufen.
 //
 // Alle Klassen beginnen mit "ss-": eine Szene aus mehreren Teilen traegt die
 // Klassen aller ihrer Bausteine, und ".pin" oder ".chip" gibt es dort schon.
@@ -26,25 +33,29 @@
 // Buehnen-Pixeln gedacht ist (Wegpunkte als Anteil der Bildbreite, die Grenze
 // vor der Knopfspalte), wird mit inX() in dieses Mass umgerechnet.
 
+import { WALKER, walkerFigure, walkerCss, walkerSteps, walkerBuzz, chipCss, noteChip, pinSvg, EYE_SVG as EYE, badgeCss, zoneCss } from '../engine/parts.js'
+
 // Tonhoehe der Pops, wenn mehrere Handys nacheinander aufleuchten
 const PITCH = i => +(2 ** (i * 2 / 12)).toFixed(2)
 const GROUND = 1300   // Oberkante Gehweg (eigenes Mass)
 const FEET = 1418     // dort stehen die Figuren: etwas vor der Hauswand
 const CX = 540        // Mitte des Ladens = Mitte des Kreises
 const DOOR = 685      // Mitte der Tuer
-const FIG_W = 160, FIG_H = 340
+const FIG_W = WALKER.w, FIG_H = WALKER.h
 const SCALE = 1.16, DROP = 86
 const R = 400         // Halbmesser des Kreises (eigenes Mass)
 const CY = 1130       // Mitte des Kreises: mitten in der Ladenfront, so umschliesst er den ganzen Laden
 // Wo die Figur (Koerpermitte) den Rand des Kreises kreuzt, gemessen von der Kreismitte aus
 const EDGE = Math.sqrt(R * R - (FEET - FIG_H / 2 - CY) ** 2)
 const inX = x => CX + (x - CX) / SCALE
+// "across": der Laden samt Haeuserzeile rueckt als Ganzes nach hinten - kleiner und hoeher im
+// Bild. Dazwischen liegt die Fahrbahn, vorn bleibt der Gehweg, auf dem der Passant geht.
+const FAR_K = 0.6     // so klein steht die Haeuserzeile hinten
+const FAR_GROUND = 1000 // dort liegt hinten die Kante zwischen Haus und Gehweg (eigenes Mass)
+const FAR_WALK = 44   // Tiefe des hinteren Gehwegs
 
-const pinSvg = (B, size) => `<svg width="${size}" height="${size}" viewBox="0 0 150 150"><path fill="${B.lilac}" d="M75 8 C47 8 26 29 26 56 C26 92 75 138 75 138 C75 138 124 92 124 56 C124 29 103 8 75 8 Z"/><circle cx="75" cy="56" r="20" fill="${B.night2}"/></svg>`
-const EYE = '<svg viewBox="0 0 24 24"><path d="M2.5 12C5 7.6 8.2 5.6 12 5.6s7 2 9.5 6.4c-2.5 4.4-5.7 6.4-9.5 6.4S5 16.4 2.5 12Z"/><circle cx="12" cy="12" r="3.1" fill="currentColor"/></svg>'
 const PLANE = '<svg viewBox="0 0 24 24"><path d="M21 3.5 3 10.6l6.8 2.7L12.6 20 21 3.5Z"/><path d="M9.8 13.3 21 3.5"/></svg>'
-// Figur von der Seite, Blick nach rechts: zwei Beine, Rumpf, Kopf, ein Arm, der das Handy haelt
-const figure = (extra = '') => `<div class="ss-fig ${extra}"><i class="ss-leg ss-lb"></i><i class="ss-leg ss-lf"></i><div class="ss-up"><i class="ss-torso"></i><i class="ss-head"></i><i class="ss-arm"></i><div class="ss-ph"><b></b><i></i></div><s class="ss-bz ss-bz1"></s><s class="ss-bz ss-bz2"></s></div></div>`
+const figure = (extra = '') => walkerFigure('ss', extra)
 // Haus im Hintergrund: Fensterraster aus einem festen Muster (kein Zufall, jedes Bild muss gleich sein)
 const house = (left, top, width, cols, lit, cls = '') => {
   let w = ''
@@ -72,6 +83,8 @@ export default {
     card: { default: false, doc: 'Wallet-Karte im Vordergrund; auf den Anker "pin" erscheint eine Ortsnadel auf der Karte und eine auf dem Laden. Nur ohne Passanten ("walker": false)' },
     privacy: { default: false, doc: 'Zwei durchgestrichene Zeichen über dem Laden: Senden (Anker "nosend") und Sehen (Anker "nosee")' },
     phones: { default: 3, doc: 'Nur bei "view": "owner": wie viele Kunden mit Handy vor dem Laden stehen, 0 bis 3 (Anker phone1, phone2, ...)' },
+    across: { default: false, doc: 'Der Passant geht auf der ANDEREN Straßenseite vorbei: der Laden steht klein im Hintergrund, dazwischen liegt die Fahrbahn. Zeigt, dass niemand vor der Tür stehen muss. Nur mit Passant; "circle", "track", "card" und "privacy" gibt es in diesem Bild nicht ("circle": false dazuschreiben)' },
+    shopAt: { default: 0.68, doc: 'Nur bei "across": wo die Mitte des Ladens im Hintergrund liegt, als Anteil der Bildbreite von links (0,3 bis 0,7). Den Passanten auf den Anker "buzz" auf die andere Bildhälfte legen ("via"), sonst deckt die Benachrichtigung den Laden zu' },
     whoosh: { default: 0.16, doc: 'Lautstärke des Wisch-Tons, wenn der Kreis aufgeht (0 bis 1, 0 = aus). Die Vorgabe ist bewusst leise' }
   },
   captions: { min: 1 },
@@ -125,43 +138,13 @@ export default {
   .ss-knob { position: absolute; right: 12px; top: 172px; width: 14px; height: 14px; border-radius: 50%; background: var(--lilac); }
   .ss-doorglow { position: absolute; left: 250px; top: 200px; width: 310px; height: 420px; border-radius: 50%; opacity: 0;
     background: radial-gradient(closest-side, rgba(185,176,255,.6), rgba(185,176,255,0)); }
-  .ss-zone { border-radius: 50%; opacity: 0; z-index: 3;
-    background: radial-gradient(closest-side, rgba(185,176,255,.2) 0%, rgba(185,176,255,.13) 72%, rgba(185,176,255,.3) 97%, rgba(185,176,255,0) 100%); }
-  .ss-zone u { position: absolute; inset: 0; border-radius: 50%; border: 5px solid rgba(185,176,255,.7); opacity: 0; }
-
+  .ss-far { position: absolute; inset: 0; transform-origin: ${CX}px ${GROUND}px; }
+  .ss-road { left: -200px; right: -200px; background: linear-gradient(180deg, #0F0A2A, #150F38); }
+  .ss-road i { position: absolute; left: 0; right: 0; top: 46%; height: 9px; background: repeating-linear-gradient(90deg, rgba(185,176,255,.34) 0 74px, transparent 74px 132px); }
+${zoneCss('ss')}
   .ss-walker { top: ${FEET - FIG_H}px; width: ${FIG_W}px; height: ${FIG_H}px; z-index: 6; }
-  .ss-fig { position: absolute; inset: 0; }
-  .ss-fig.flip { transform: scaleX(-1); }
-  .ss-leg { position: absolute; top: 194px; width: 28px; height: 146px; border-radius: 14px; transform-origin: 50% 12px; }
-  .ss-lb { left: 58px; background: #6A5EDB; }
-  .ss-lf { left: 74px; background: #9488F2; }
-  .ss-up { position: absolute; inset: 0; }
-  .ss-torso { position: absolute; left: 38px; top: 82px; width: 84px; height: 152px; border-radius: 38px 38px 28px 28px; background: var(--lilac); }
-  .ss-head { position: absolute; left: 46px; top: 6px; width: 68px; height: 68px; border-radius: 50%; background: #EDE6FF; }
-  .ss-arm { position: absolute; left: 84px; top: 114px; width: 60px; height: 22px; border-radius: 11px; background: #EDE6FF; transform-origin: 11px 50%; transform: rotate(34deg); }
-  .ss-ph { position: absolute; left: 118px; top: 102px; width: 44px; height: 76px; border-radius: 10px; background: #06041A; border: 3px solid #EDE6FF; transform: rotate(9deg); transform-origin: 50% 100%; }
-  .ss-ph i { position: absolute; inset: 4px; border-radius: 5px; background: #3C3489; }
-  .ss-ph b { position: absolute; inset: -26px; border-radius: 50%; opacity: 0; background: radial-gradient(closest-side, rgba(255,255,255,.85), rgba(185,176,255,0)); }
-  .ss-bz { position: absolute; top: 96px; width: 26px; height: 84px; border: 6px solid transparent; border-radius: 50%; opacity: 0; }
-  .ss-bz1 { left: 92px; border-left-color: #fff; }
-  .ss-bz2 { left: 164px; border-right-color: #fff; }
-  .ss-chip { position: absolute; bottom: ${FIG_H + 26}px; display: flex; align-items: center; gap: 16px; padding: 14px 24px 14px 14px; border-radius: 26px; opacity: 0;
-    background: linear-gradient(163deg, var(--card-from), var(--card-to)); box-shadow: 0 18px 36px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.28); white-space: nowrap; }
-  .ss-chip span { flex: none; width: 62px; height: 62px; border-radius: 16px; background: #fff; color: var(--card-to); display: grid; place-items: center; }
-  .ss-chip span svg { width: 38px; }
-  .ss-chip b { display: block; font: 700 31px var(--body); }
-  .ss-chip em { display: block; font: 500 24px var(--body); font-style: normal; opacity: .9; margin-top: 2px; }
-  .ss-chip::after { content: ''; position: absolute; left: var(--tail, 60px); bottom: -20px; border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 22px solid var(--card-to); }
-
-  .ss-badge { width: 128px; height: 128px; border-radius: 50%; background: var(--paper); color: var(--ink); display: grid; place-items: center; opacity: 0; z-index: 8;
-    box-shadow: 0 16px 30px rgba(0,0,0,.45); }
-  .ss-badge svg { width: 78px; height: 78px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .ss-slash { position: absolute; left: -8px; right: -8px; top: 50%; height: 14px; margin-top: -7px; border-radius: 7px; background: #6A5EDB; rotate: -38deg; scale: 0 1;
-    box-shadow: 0 0 0 5px var(--paper); }
-  .ss-q { width: 84px; height: 84px; border-radius: 50%; background: var(--lilac); color: var(--night); display: grid; place-items: center; font: 700 60px var(--display); opacity: 0; z-index: 8; }
-  .ss-sight { height: 8px; overflow: hidden; transform-origin: 0 50%; opacity: 0; z-index: 5; }
-  .ss-sight i { display: block; width: 1400px; height: 8px; background: repeating-linear-gradient(90deg, var(--lilac) 0 18px, transparent 18px 34px); }
-
+${walkerCss('ss')}${chipCss('ss')}  .ss-chip { bottom: ${FIG_H + 26}px; }
+${badgeCss('ss')}
   .ss-card { left: 132px; top: 1136px; width: 430px; padding: 26px 28px 30px; border-radius: 30px; rotate: -5deg; opacity: 0; z-index: 7;
     background: linear-gradient(163deg, var(--card-from), var(--card-to)); box-shadow: 0 26px 50px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.16); }
   .ss-chead { display: flex; align-items: center; gap: 16px; }
@@ -194,6 +177,11 @@ export default {
     if (!['right', 'left'].includes(p.direction)) ctx.fail(`"direction" muss "right" oder "left" sein (bekam "${p.direction}")`)
     if (!Number.isInteger(p.phones) || p.phones < 0 || p.phones > 3) ctx.fail('"phones" muss zwischen 0 und 3 liegen, mehr Figuren passen nicht vor die Ladenfront')
     if (p.card && p.walker && !owner) ctx.fail('"card" steht im Vordergrund, wo sonst der Passant geht: nur zusammen mit "walker": false')
+    if (p.across) {
+      const no = [owner && '"view": "owner"', !p.walker && '"walker": false', p.circle && '"circle"', p.track && '"track"', p.card && '"card"', p.privacy && '"privacy"'].filter(Boolean)
+      if (no.length) ctx.fail(`"across" zeigt nur den Passanten auf der anderen Straßenseite, mit oder ohne Benachrichtigung. Nicht zusammen mit ${no.join(', ')} (für den Kreis "in der Nähe" aus der Ferne gibt es den Baustein shop-map)`)
+      if (typeof p.shopAt !== 'number' || p.shopAt < 0.3 || p.shopAt > 0.7) ctx.fail('"shopAt" muss zwischen 0.3 und 0.7 liegen, sonst ragt der Laden aus dem Bild oder in die Knopfspalte von TikTok')
+    }
     const dir = p.direction === 'right' ? 1 : -1
     // Anteil der Bildbreite (in Laufrichtung) -> x im Mass der Strasse
     const xOf = f => Math.round(inX(dir > 0 ? f * ctx.STAGE.w : (1 - f) * ctx.STAGE.w))
@@ -201,7 +189,7 @@ export default {
     // ---- Kulisse: Haeuser hinten, Nachbarn, Ladenfront, Gehweg. Alles haengt in .ss-world.
     ctx.html('<div class="ss-world"></div>')
     const world = ctx.$('.ss-world'), add = h => world.insertAdjacentHTML('beforeend', h)
-    add(`
+    const row = `
       ${house(-70, 900, 250, 2, [1, 4])}${house(880, 820, 270, 2, [0, 3, 6])}
       ${house(-40, 1010, 300, 3, [2, 3], 'near')}${house(820, 960, 300, 3, [1, 5], 'near')}
       <div class="abs ss-shop">
@@ -211,7 +199,21 @@ export default {
         <div class="ss-win">${ctx.icon(p.icon)}</div>
         <div class="ss-doorglow"></div>
         <div class="ss-door"><i class="ss-glass"></i><i class="ss-knob"></i></div>
+      </div>`
+    if (p.across) {
+      // Andere Strassenseite: dieselbe Haeuserzeile, als Ganzes verkleinert und nach oben gerueckt,
+      // davor ihr Gehweg, dann die Fahrbahn mit Mittelstrich. Verkleinert reicht die Zeile nicht
+      // mehr ueber die Bildbreite, deshalb kommen links und rechts Haeuser dazu (festes Muster).
+      const dx = Math.round(inX(p.shopAt * ctx.STAGE.w) - CX)
+      add(`<div class="ss-far" style="transform:translate(${dx}px,${FAR_GROUND - GROUND}px) scale(${FAR_K})">
+        ${house(-700, 930, 290, 2, [1])}${house(-420, 870, 280, 2, [0, 3])}${house(1140, 900, 270, 2, [1, 2])}${house(1420, 850, 290, 2, [0, 5])}
+        ${house(-640, 990, 320, 3, [2, 3], 'near')}${house(-330, 1040, 300, 3, [1, 5], 'near')}${house(1110, 1020, 300, 3, [0, 4], 'near')}${house(1400, 970, 330, 3, [2, 6], 'near')}
+        ${row}
+        <div class="abs counter" style="top:${GROUND}px;left:-1400px;right:-1400px;bottom:auto;height:${Math.round(FAR_WALK / FAR_K)}px"></div>
       </div>
+      <div class="abs ss-road" style="top:${FAR_GROUND + FAR_WALK}px;height:${GROUND - FAR_GROUND - FAR_WALK}px"><i></i></div>`)
+    } else add(row)
+    add(`
       <div class="abs counter" style="top:${GROUND}px;left:-200px;right:-200px;bottom:-400px"></div>`)
     const sign = ctx.$('.ss-sign'), signText = sign.firstChild; signText.textContent = p.shop
     // Langer Ladenname: kleiner setzen statt ueber das Schild hinaus. Unter 32 px ist er im Video kaum noch zu lesen.
@@ -246,44 +248,37 @@ export default {
       // Ruhelage = am Ziel: dort messen die Pruefungen, und dort steht die Figur am laengsten
       w.style.left = xTo - FIG_W / 2 + 'px'
       key(w, pts.map(([t, x]) => [t, { translate: `${x - xTo}px 0px` }, 'linear']))
-      // Schritte nur solange die Figur geht. Eigene Stuetzpunkte statt Dauerschleife: eine
-      // Schleife liefe im Stehen weiter, und die Figur traete auf der Stelle.
-      const STEP = 0.3, la = [], lb = [], bob = []
-      for (let k = 0; tW + k * STEP < tA - 0.05; k++) {
-        const t = tW + k * STEP, a = (k % 2 ? -24 : 24)
-        la.push([t, { rotate: a + 'deg' }, 'ease-in-out']); lb.push([t, { rotate: -a + 'deg' }, 'ease-in-out'])
-        bob.push([t, { translate: '0px 0px' }, 'ease-out'], [t + STEP / 2, { translate: '0px -9px' }, 'ease-in'])
-      }
-      la.push([tA, { rotate: '0deg' }]); lb.push([tA, { rotate: '0deg' }]); bob.push([tA, { translate: '0px 0px' }])
-      key(w.querySelector('.ss-lf'), la); key(w.querySelector('.ss-lb'), lb); key(w.querySelector('.ss-up'), bob)
+      // Schritte nur solange die Figur geht (engine/parts.js)
+      walkerSteps(key, w, 'ss', tW, tA)
 
       if (p.notify) {
-        const chip = el('div', 'ss-chip', `<span>${ctx.icon(p.icon)}</span><div><b data-oneline="Ladenname in der Karten-Benachrichtigung"></b>${p.note ? '<em data-oneline="Zweite Zeile der Karten-Benachrichtigung"></em>' : ''}</div>`)
-        chip.dataset.safe = 'Karten-Benachrichtigung'
-        chip.querySelector('b').textContent = p.shop
-        if (p.note) chip.querySelector('em').textContent = p.note
-        w.append(chip)
-        ctx.fit(chip.querySelector('b'), 330, 20)
-        if (p.note) ctx.fit(chip.querySelector('em'), 330, 18)
+        const chip = noteChip(ctx, 'ss', w, p)
         // Die Karte haengt ueber dem Kopf und zeigt mit ihrer Spitze aufs Handy. Sie darf auf dem
         // ganzen Weg von "via" bis "to" nicht aus dem Bild laufen: lieber gegen die Figur verschieben.
         // Rechts endet der Platz vor der Knopfspalte von TikTok, links 40 px vor dem Rand.
         const cw = chip.offsetWidth, phone = dir > 0 ? 140 : FIG_W - 140
         let left = dir > 0 ? 34 : FIG_W - 34 - cw
         const lo = Math.min(xVia, xTo) - FIG_W / 2, hi = Math.max(xVia, xTo) - FIG_W / 2
-        const maxRight = inX(ctx.STAGE.column.left - 14), minLeft = inX(40)
+        let maxRight = inX(ctx.STAGE.column.left - 14), minLeft = inX(40)
+        if (p.across) {
+          // Hinten steht der Laden, und um den geht es: die Karte bleibt auf der Seite, auf der der
+          // Passant geht. Geht er unter dem Laden durch, ist kein Platz daneben, dann lieber warnen.
+          const sx = inX(p.shopAt * ctx.STAGE.w), half = 286 * FAR_K + 18
+          if (Math.max(xVia, xTo) <= sx) maxRight = Math.min(maxRight, sx - half)
+          else if (Math.min(xVia, xTo) >= sx) minLeft = Math.max(minLeft, sx + half)
+          else ctx.warn('"across": der Passant geht unter dem Laden durch, die Benachrichtigung verdeckt ihn dann. "via" und "to" auf dieselbe Seite des Ladens legen ("shopAt").')
+        }
         if (hi + left + cw > maxRight) left = maxRight - cw - hi
         if (lo + left < minLeft) left = minLeft - lo
+        // Beide Grenzen zugleich gehen nur, wenn der Passant nach dem Brummen nicht mehr weit geht:
+        // die Karte wandert mit ihm, und zwischen Bildrand und Laden ist wenig Platz.
+        if (p.across && (hi + left + cw > maxRight + 1 || lo + left < minLeft - 1)) ctx.warn('"across": neben dem Laden ist kein Platz für die Benachrichtigung, sie verdeckt ihn. Den Passanten nach dem Brummen nur noch ein kurzes Stück gehen lassen ("to" näher an "via"), ihn weiter weg vom Laden halten oder den Laden verschieben ("shopAt").')
         chip.style.left = left.toFixed(1) + 'px'
         chip.style.setProperty('--tail', Math.max(20, Math.min(cw - 52, phone - left - 16)).toFixed(1) + 'px')
         chip.style.transformOrigin = `${Math.max(20, Math.min(cw - 20, phone - left)).toFixed(1)}px 100%`
 
         // das Handy brummt, der Bildschirm wird hell, die Karte springt auf
-        const ph = w.querySelector('.ss-ph')
-        key(ph, [[tB, { rotate: '0deg' }], [tB + 0.06, { rotate: '-11deg' }], [tB + 0.13, { rotate: '11deg' }], [tB + 0.2, { rotate: '-8deg' }], [tB + 0.27, { rotate: '8deg' }], [tB + 0.34, { rotate: '-4deg' }], [tB + 0.42, { rotate: '0deg' }]])
-        key(ph.querySelector('i'), [[tB, { backgroundColor: '#3C3489' }], [tB + 0.12, { backgroundColor: '#FFFFFF' }]])
-        key(ph.querySelector('b'), [[tB, { opacity: 0 }, OUT], [tB + 0.25, { opacity: 1 }]])
-        for (const z of w.querySelectorAll('.ss-bz')) key(z, [[tB, { opacity: 0, scale: 0.7 }, OUT], [tB + 0.12, { opacity: 0.95, scale: 1 }], [tB + 0.42, { opacity: 0.95, scale: 1.1 }], [tB + 0.62, { opacity: 0, scale: 1.25 }]])
+        walkerBuzz(key, w, 'ss', tB, OUT)
         key(chip, [[tB + 0.04, { opacity: 0, scale: 0.3 }, BACK], [tB + 0.46, { opacity: 1, scale: 1 }]])
         cue(tB, 'buzz', 0.6)
         cue(tB + 0.08, 'pop', 0.85, 1.2)
@@ -312,8 +307,10 @@ export default {
         key('.ss-sight', fr)
         key('.ss-sight', [[te + 0.2, { opacity: 0 }, OUT], [te + 0.5, { opacity: 0.95 }], [tn, { opacity: 0.95 }, OUT], [tn + 0.22, { opacity: 0 }]])
         loop('.ss-sight i', [{ translate: '0px 0px' }, { translate: '-34px 0px' }], 0.5)
-        pop('.ss-q', te + 0.3, 0.4); cue(te + 0.3, 'pop', 0.7, 1.3)
-        key('.ss-q', [[tn, { opacity: 1, scale: 1 }, OUT], [tn + 0.2, { opacity: 0, scale: 0.4 }]])
+        // Aufspringen und Verschwinden stehen in EINER Bewegung: zwei getrennte auf denselben
+        // Eigenschaften ueberschreiben sich, und das Fragezeichen stand dann schon da, bevor das Auge aufging.
+        key('.ss-q', [[te + 0.3, { opacity: 0, scale: 0.4 }, BACK], [te + 0.7, { opacity: 1, scale: 1 }], [tn, { opacity: 1, scale: 1 }, OUT], [tn + 0.2, { opacity: 0, scale: 0.4 }]])
+        cue(te + 0.3, 'pop', 0.7, 1.3)
         key('.ss-eye .ss-slash', [[tn, { scale: '0 1' }, OUT], [tn + 0.18, { scale: '1 1' }]])
         cue(tn, 'drop', 0.5)
       }
@@ -368,10 +365,8 @@ export default {
         const s = SPOTS[i], g = el('div', 'abs ss-guest', figure(s.flip ? 'flip' : '') + `<div class="ss-mini">${ctx.icon(p.icon)}</div>`)
         g.style.left = s.x - FIG_W / 2 + 'px'; world.append(g)
         if (s.flip) g.querySelector('.ss-mini').style.left = '34px'
-        const t = ctx.at('phone' + (i + 1)), ph = g.querySelector('.ss-ph')
-        key(ph, [[t, { rotate: '0deg' }], [t + 0.06, { rotate: '-11deg' }], [t + 0.13, { rotate: '11deg' }], [t + 0.2, { rotate: '-7deg' }], [t + 0.28, { rotate: '0deg' }]])
-        key(ph.querySelector('i'), [[t, { backgroundColor: '#3C3489' }], [t + 0.12, { backgroundColor: '#FFFFFF' }]])
-        key(ph.querySelector('b'), [[t, { opacity: 0 }, OUT], [t + 0.25, { opacity: 1 }]])
+        const t = ctx.at('phone' + (i + 1))
+        walkerBuzz(key, g, 'ss', t, OUT, false)
         pop(g.querySelector('.ss-mini'), t + 0.04, 0.4)
         cue(t + 0.04, 'pop', 0.85, PITCH(i))
         if (i === 0) cue(t, 'buzz', 0.45)

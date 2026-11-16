@@ -4,6 +4,7 @@
     "slug": "ist-das-koscher",
     "language": "de",
     "date": "2026-11-16",
+    "fassung": 2,
     "idee": "Viele fragen sich, ob ein Laden sie verfolgt, wenn sich das Handy genau vor der Tür meldet. Das Video sagt, wie es wirklich ist: das Handy zeigt die volle Karte von selbst an, der Laden schickt nichts und sieht nichts. Anregung: die Machart des stärksten Vorbilds (ein Wort auf einmal, schnelle Bildwechsel, kaum Pausen, laute Mischung) und der bekannte Spruch 'Ist das koscher? Natürlich ist das koscher!' als Rahmen. Text, Bilder, Stimme und Töne sind eigene; es wird keine fremde Aufnahme verwendet.",
     "_hinweis": "Der gesprochene Text ist vom Betreiber Wort für Wort freigegeben (videos/GEPLANT-benachrichtigung.md). Kein Wort ändern, ergänzen oder streichen: das wäre eine neue, kostenpflichtige Aufnahme und ein anderer Text als der freigegebene. Die Zeichen * und | stehen nur für das Bild (Schlüsselwort, Grenze zwischen zwei Tafeln) und werden nicht gesprochen."
   },
@@ -26,7 +27,7 @@
   },
   "scenes": [
     {
-      "_hinweis": "Einstieg. Die Frage steht ab dem allerersten Bild groß da ('instant'), das Handy steht schon ('rise': false) und brummt zweimal. Auf 'Handy' springt die Kamera auf die Benachrichtigung. Danach harter Schnitt auf die Straße.",
+      "_hinweis": "Einstieg. Die Frage steht ab dem allerersten Bild groß da ('instant'), das Handy steht schon ('rise': false) und brummt zweimal. Auf 'Handy' springt die Kamera auf die Benachrichtigung. Danach harter Schnitt auf die Straße. Fassung 2: die Figur geht auf der ANDEREN Straßenseite vorbei ('across'), der Laden steht klein im Hintergrund. In Fassung 1 ging sie direkt an der Ladenfront entlang, und das sah aus, als müsse man vor der Tür stehen.",
       "parts": [
         {
           "component": "lock-notification",
@@ -41,8 +42,8 @@
         {
           "component": "shop-street",
           "enter": "cut",
-          "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "right", "circle": false, "notify": true, "note": "6 von 6", "from": -0.05, "via": 0.42, "to": 0.62 },
-          "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 5, "offset": -0.1 }, "arrive": { "at": "end", "offset": -0.1 } },
+          "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "right", "across": true, "shopAt": 0.68, "circle": false, "notify": true, "note": "6 von 6", "from": -0.05, "via": 0.2, "to": 0.29 },
+          "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 5, "offset": -0.1 }, "arrive": { "cap": 0, "word": 6, "offset": 0.25 } },
           "captions": [
             { "lines": ["genau | wenn du | an deinem | *Lieblingscafé | vorbeigehst."] }
           ]
@@ -50,13 +51,13 @@
       ]
     },
     {
-      "_hinweis": "Die Sorge und ihre Auflösung. Auge über dem Laden mit Blicklinie, auf 'Nein.' reißt sie ab. Auf 'Dein Handy' springt die Kamera zur Figur: das Handy meldet sich selbst. Dann harter Schnitt auf die Pointe.",
+      "_hinweis": "Die Sorge und ihre Auflösung, jetzt auf der Karte von oben: 'verfolgt werden' ist ein Punkt auf einer Karte, dem jemand zusieht. Auge an der Ortsnadel, Blicklinie zur Kundin, die eine Straße weiter von rechts kommt. Auf 'Nein.' reißt die Linie ab. Auf 'Dein Handy' fährt die Kamera heran, auf 'sendet' brummt das Handy: weit weg von der Nadel, beide bleiben im Bild. Dann harter Schnitt auf die Pointe.",
       "parts": [
         {
-          "component": "shop-street",
-          "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "left", "circle": false, "notify": true, "note": "6 von 6", "track": true, "from": 0.03, "via": 0.47, "to": 0.56 },
-          "anchors": { "walk": { "at": "start" }, "eye": { "cap": 0, "word": 0 }, "no": { "cap": 1, "word": 0 }, "buzz": { "cap": 2, "word": 2 }, "arrive": { "at": "end", "offset": -0.1 } },
-          "camera": [ { "cap": 2, "word": 0, "zoom": 1.4, "focus": [430, 1130], "to": [520, 1090] } ],
+          "component": "shop-map",
+          "params": { "shop": "Café Nordwind", "icon": "cup", "circle": false, "notify": true, "note": "6 von 6, dein Kaffee wartet", "track": true, "path": [[3.7, 1], [2.68, 1]] },
+          "anchors": { "walk": { "at": "start" }, "eye": { "cap": 0, "word": 0 }, "no": { "cap": 1, "word": 0 }, "buzz": { "cap": 2, "word": 2 }, "arrive": { "cap": 2, "word": 4, "offset": 0.2 } },
+          "camera": [ { "at": "start", "dur": 0, "zoom": 1.1, "focus": [792, 1040], "to": [540, 1060] }, { "cap": 2, "word": 0, "zoom": 1.36, "focus": [664, 985], "to": [540, 1066], "dur": 0.3 } ],
           "captions": [
             { "lines": ["Verfolgt | dich das | *Café?"] },
             { "lines": ["*Nein."] },
@@ -90,7 +91,7 @@
       ]
     },
     {
-      "_hinweis": "Das Schlüsselbild. Erst: in der Karte steht der Ort (Nadel auf der Karte, Nadel auf dem Laden). Dann: die Karte wird voll. Dann: der Kreis 'in der Nähe', die Figur tritt hinein, das Handy zeigt die Karte. Nirgends eine Entfernung in Zahlen.",
+      "_hinweis": "Das Schlüsselbild. Erst: in der Karte steht der Ort (Nadel auf der Karte, Nadel auf dem Laden). Dann: die Karte wird voll. Dann die Karte von oben: der Kreis 'in der Nähe' um die Ortsnadel, die Kundin geht eine Straße weiter (nicht an der Tür vorbei), tritt in den Kreis, und dort, sichtbar entfernt von der Nadel, zeigt ihr Handy die Karte. Die Kamera fährt heran, Nadel und Kundin bleiben beide im Bild. Nirgends eine Entfernung in Zahlen.",
       "parts": [
         {
           "component": "shop-street",
@@ -111,11 +112,11 @@
           ]
         },
         {
-          "component": "shop-street",
+          "component": "shop-map",
           "enter": "cut",
-          "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "right", "circle": true, "notify": true, "note": "6 von 6", "from": -0.06, "to": 0.5 },
+          "params": { "shop": "Café Nordwind", "icon": "cup", "circle": true, "notify": true, "note": "6 von 6, dein Kaffee wartet", "path": [[-0.1, 1], [0.55, 1]] },
           "anchors": { "circle": { "at": "start", "offset": 0.05 }, "walk": { "at": "start" }, "buzz": { "cap": 1, "word": 0, "offset": -0.1 }, "arrive": { "at": "end", "offset": -0.5 } },
-          "camera": [ { "cap": 1, "word": 4, "zoom": 1.34, "focus": [658, 1130], "to": [560, 1090] } ],
+          "camera": [ { "cap": 1, "word": 0, "zoom": 1.34, "focus": [456, 985], "to": [540, 1066], "dur": 0.3 } ],
           "captions": [
             { "lines": ["und du | kommst | in die *Nähe,"] },
             { "lines": ["zeigt | dein *Handy | sie | *von *selbst | an."] }
@@ -135,7 +136,7 @@
       ]
     },
     {
-      "_hinweis": "Seitenwechsel: der Zuschauer ist jetzt der Betreiber. Erst sein Laden (er tritt in die Tür), dann der Sperrbildschirm eines Stammkunden, dann leuchten vor der Tür drei Handys auf.",
+      "_hinweis": "Seitenwechsel: der Zuschauer ist jetzt der Betreiber. Erst sein Laden (er tritt in die Tür), dann der Sperrbildschirm eines Stammkunden, dann die Karte von oben: rund um seinen Laden leuchten vier Handys auf, alle im Kreis, keines vor der Tür.",
       "parts": [
         {
           "component": "shop-street",
@@ -157,10 +158,10 @@
           ]
         },
         {
-          "component": "shop-street",
+          "component": "shop-map",
           "enter": "cut",
-          "params": { "shop": "Café Nordwind", "icon": "cup", "view": "owner", "phones": 3, "circle": true },
-          "anchors": { "circle": { "at": "start", "offset": 0.05 }, "shine": { "at": "start", "offset": 0.02 }, "phone1": { "cap": 0, "word": 0, "offset": 0.12 }, "phone2": { "cap": 0, "word": 1, "offset": 0 }, "phone3": { "cap": 0, "word": 2, "offset": 0 } },
+          "params": { "shop": "Café Nordwind", "icon": "cup", "view": "owner", "phones": 4, "circle": true },
+          "anchors": { "circle": { "at": "start", "offset": 0.05 }, "shine": { "at": "start", "offset": 0.02 }, "phone1": { "cap": 0, "word": 0, "offset": 0.1 }, "phone2": { "cap": 0, "word": 1, "offset": 0 }, "phone3": { "cap": 0, "word": 2, "offset": 0 }, "phone4": { "cap": 0, "word": 3, "offset": -0.06 } },
           "captions": [
             { "lines": ["Genau | *vor *deiner *Tür."] }
           ]

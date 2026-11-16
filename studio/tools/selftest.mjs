@@ -223,6 +223,11 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
     check('Zweites Video: die Frage steht im allerersten Bild vollständig da (zwei Reihen, ein Schlüsselwort)', r.probed.opacity === 1 && r.probed.rows === 2 && r.probed.keys === 1, JSON.stringify(r.probed))
     const kinds = r.state.pictures.reduce((m, x) => { m[x.kind] = (m[x.kind] || 0) + 1; return m }, {})
     check('Zweites Video: Bildwechsel stehen im Zustand (Szenen, Teile, Kamera) und jede Tafel passt in die Breite', r.state.pictures.length >= 12 && kinds.szene === 6 && kinds.teil >= 6 && kinds.kamera >= 5 && r.state.capFit.every(f => f.width <= 940), `${r.state.pictures.length} Wechsel: ${JSON.stringify(kinds)}, breiteste Tafel ${Math.max(...r.state.capFit.map(f => f.width))} px`)
+    // Fassung 2: wo das Video die Erinnerung zeigt, steht niemand mehr vor der Tuer. Satz 6 ist die Karte von oben.
+    const comps = s2.scenes.flatMap(sc => (sc.parts || [sc])), maps = comps.filter(c => c.component === 'shop-map')
+    const atDoor = comps.filter(c => c.component === 'shop-street' && c.params.notify !== false && c.params.walker !== false && c.params.view !== 'owner' && !c.params.across && !c.params.privacy)
+    check('Zweites Video, Fassung 2: drei Bilder zeigen die Karte von oben (Auge, Kreis, Blick des Betreibers), und kein Bild lässt die Benachrichtigung mehr direkt vor der Ladenfront aufspringen',
+      maps.length === 3 && maps.some(m => m.params.track) && maps.some(m => m.params.circle && m.params.view !== 'owner') && maps.some(m => m.params.view === 'owner') && atDoor.length === 0, `${maps.length} Karten, ${atDoor.length} Bilder mit Benachrichtigung vor der Tür`)
     // Ein Schluesselwort, das auch verkleinert nicht lesbar bleibt, bricht den Bau ab
     const long = await page(variant(s => { s.scenes[0].parts[0].captions[1].lines = ['Dein | *Sperrbildschirmbenachrichtigungseinstellungen | meldet sich,'] }, s2))
     const hit = long.res.checks.find(c => c.name === 'wortgroesse' && !c.ok)
@@ -233,6 +238,89 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
     const bad = await page(variant(s => { s.scenes[4].params.phones = 7 }, s2))
     check('Prüfung schlägt an: Straße mit mehr Kunden, als vor die Ladenfront passen', !bad.res.ok && /"phones" muss zwischen 0 und 3/.test(bad.res.errors.join(' ')), String(bad.res.errors[0] || '').slice(0, 120))
   } else check('Zweites Video liegt im Repo (videos/2026-11-16-ist-das-koscher)', false)
+}
+// ---- Seit Fassung 2 des zweiten Videos (16.11.2026): Karte von oben (shop-map) und die andere Strassenseite
+// ("across" in shop-street). Der Betreiber hatte die erste Fassung so gelesen, als muesse man vor dem Laden
+// stehen. Festgenagelt wird deshalb nicht nur, dass die Bilder bauen, sondern die Aussage selbst: die
+// Benachrichtigung kommt mit Abstand zur Ortsnadel, und kein Weg fuehrt an der Tuer vorbei.
+{
+  const cta = { component: 'cta-comment', captions: [{ lines: ['Klingt interessant?'], keep: true }, { role: 'cta', lines: ['Dann kommentiere jetzt KARTE,{Karte,}', 'und wir melden uns bei dir.'] }] }
+  const mini = (...scenes) => ({ meta: { title: 't', slug: 't' }, scenes: [...scenes, cta] })
+  const map = (params = {}, extra = {}) => mini({ component: 'shop-map', params: { note: '6 von 6, dein Kaffee wartet', ...params }, captions: [{ lines: ['Kommst du in die Nähe,', 'meldet sich dein Handy.'] }], ...extra })
+  // sauber heisst hier: die Seite baut und kein Baustein meldet einen Hinweis (die Laenge so kurzer Skripte zaehlt nicht)
+  const clean = r => r.state.duration > 0 && r.res.checks.filter(c => ['seite', 'sperrzonen', 'einzeiler', 'ueberdeckung', 'hinweise', 'knopfspalte'].includes(c.name)).every(c => c.ok)
+  const why = r => r.res.checks.filter(c => !c.ok && c.name !== 'laenge').flatMap(c => c.details).concat(r.state.duration ? [] : r.res.errors).join(' | ').slice(0, 200)
+  const rejects = async (scr, re) => { const r = await page(scr); return { ok: !r.res.ok && re.test(r.res.errors.join(' ')), msg: String(r.res.errors[0] || 'kein Fehler').slice(0, 130) } }
+  // Geometrie im Bild messen, 0,7 s nach dem Brummen: dann steht die Karten-Benachrichtigung
+  const mapProbe = () => {
+    const a = window.STUDIO.anchors.find(x => x.component === 'shop-map' && x.name === 'buzz'); window.seek(a.t + 0.7)
+    const b = s => document.querySelector(s).getBoundingClientRect(), mid = r => ({ x: (r.left + r.right) / 2, y: (r.top + r.bottom) / 2 })
+    const hit = (p, q) => p.left < q.right && q.left < p.right && p.top < q.bottom && q.top < p.bottom
+    const puck = mid(b('.sm-puck')), dot = mid(b('.sm-dot')), zone = document.querySelector('.sm-zone')
+    return { dist: Math.round(Math.hypot(puck.x - dot.x, puck.y - dot.y)), radius: zone ? Math.round(zone.getBoundingClientRect().width / 2) : null, chip: +getComputedStyle(document.querySelector('.sm-chip')).opacity, covers: hit(b('.sm-chip'), b('.sm-pin')) || hit(b('.sm-chip'), b('.sm-label')), text: document.querySelector('.sm-map').textContent }
+  }
+  const a = await page(map(), null, { motion: true, probe: mapProbe })
+  check('Karte von oben (shop-map): baut mit den Vorgaben ohne Fehler und ohne Hinweis', clean(a), why(a))
+  check('Karte von oben: beim Brummen steht die Kundin im Kreis, aber mindestens ein Viertel der Bildbreite von der Ortsnadel entfernt, und ihre Benachrichtigung verdeckt weder Nadel noch Namensschild',
+    !!a.probed && a.probed.chip === 1 && a.probed.dist >= 0.25 * STAGE.w && a.probed.dist < a.probed.radius && !a.probed.covers, JSON.stringify({ ...a.probed, text: undefined }))
+  check('Karte von oben: keine Entfernung in Zahlen im Bild (kein "m", keine Meterangabe)', !!a.probed && !/\d\s*(m|Meter|km)\b/.test(a.probed.text) && /Café Nordwind/.test(a.probed.text), a.probed ? a.probed.text.replace(/\s+/g, ' ').trim().slice(0, 80) : '')
+  const door = await rejects(map({ path: [[-0.75, 2], [2.5, 2]] }), /an der Ladentür vorbei/)
+  check('Prüfung schlägt an: Karte, der Weg der Kundin führt an der Ladentür vorbei', door.ok, door.msg)
+  const block = await rejects(map({ path: [[0, 1], [1, 2]] }), /quer durch einen Häuserblock/), inner = await rejects(map({ path: [[0, 1], [1.5, 1.5]] }), /mitten in einem Häuserblock/)
+  check('Prüfung schlägt an: Karte, ein Weg quer durch einen Häuserblock oder mit einem Punkt mitten im Block', block.ok && inner.ok, block.msg)
+  const far = await rejects(map({ path: [[-0.75, 0], [0, 0]] }), /kommt nie in die Nähe/), cover = await rejects(map({ path: [[-0.75, 3], [1.2, 3]] }), /verdeckt Ortsnadel oder Namensschild/)
+  const high = await rejects(map({ path: [[1, -0.6], [1, 0.9]] }), /hinge im Textbereich/)
+  check('Prüfung schlägt an: Karte, ein Weg, der nie in den Kreis kommt, einer, bei dem die Benachrichtigung die Nadel verdeckte, und einer, bei dem sie im Textbereich hinge', far.ok && cover.ok && high.ok, `${far.msg} | ${cover.msg} | ${high.msg}`.slice(0, 260))
+  // Ein Weg um die Ecke: erst eine Querstrasse hoch, dann abbiegen. Die Kundin kommt an, die Figur dreht sich nicht falsch herum.
+  const corner = await page(map({ path: [[0, 2.9], [0, 1], [0.55, 1]], circle: false }), null, { probe: mapProbe })
+  check('Karte von oben: ein Weg über eine Ecke baut, und "via" liegt von selbst am Rand des Kreises, auch wenn der Kreis nicht gezeigt wird', clean(corner) && !!corner.probed && corner.probed.radius === null && corner.probed.dist >= 0.25 * STAGE.w && corner.probed.dist < 400, why(corner) || JSON.stringify({ ...corner.probed, text: undefined }))
+  // Blick des Betreibers: mehrere Kunden rund um den Laden, alle im Kreis, keiner vor der Tuer
+  const own = await page(mini({ component: 'shop-map', params: { view: 'owner', phones: 4 }, captions: [{ lines: ['Genau vor', 'deiner Tür.'] }] }), null, { motion: true, probe: () => {
+    const mid = e => { const r = e.getBoundingClientRect(); return { x: (r.left + r.right) / 2, y: (r.top + r.bottom) / 2 } }
+    // im Kreis stehen muessen sie schon, wenn das erste Handy aufleuchtet (die Kunden gehen noch ein Stueck), und am Ende
+    // (der Kreis geht dann noch auf: gerechnet wird mit seinem vollen Halbmesser, im Massstab des Bildes in diesem Moment)
+    const within = t => { window.seek(t); const d = document.querySelector('.sm-dot'), dot = mid(d), k = d.getBoundingClientRect().width / d.offsetWidth, R = document.querySelector('.sm-zone').offsetWidth / 2 * k; return [...document.querySelectorAll('.sm-puck')].every(p => Math.hypot(mid(p).x - dot.x, mid(p).y - dot.y) < R) }
+    const early = within(window.STUDIO.anchors.find(x => x.name === 'phone1').t)
+    window.seek(window.STUDIO.scenes[0].e - 0.05)
+    const dot = mid(document.querySelector('.sm-dot')), label = document.querySelector('.sm-label').getBoundingClientRect(), R = document.querySelector('.sm-zone').getBoundingClientRect().width / 2
+    return { n: document.querySelectorAll('.sm-cust').length, lit: [...document.querySelectorAll('.sm-mini')].filter(m => +getComputedStyle(m).opacity === 1).length,
+      inside: early && [...document.querySelectorAll('.sm-puck')].every(p => Math.hypot(mid(p).x - dot.x, mid(p).y - dot.y) < R),
+      nearest: Math.round(Math.min(...[...document.querySelectorAll('.sm-puck')].map(p => Math.hypot(mid(p).x - dot.x, mid(p).y - (label.top - 20))))) }
+  } })
+  check('Karte, Blick des Betreibers: vier Kunden rund um den Laden, alle im Kreis, alle Handys leuchten, keiner steht vor der Tür', clean(own) && !!own.probed && own.probed.n === 4 && own.probed.lit === 4 && own.probed.inside && own.probed.nearest >= 170, why(own) || JSON.stringify(own.probed))
+  const many = await rejects(mini({ component: 'shop-map', params: { view: 'owner', phones: 5 }, captions: [{ lines: ['Genau vor deiner Tür.'] }] }), /"phones" muss zwischen 0 und 4/)
+  check('Prüfung schlägt an: Karte mit mehr Kunden, als in den Kreis passen', many.ok, many.msg)
+  {
+    // Ein langer Ladenname macht das Schild unter der Nadel breit: es stiesse an die Karten ueber den Kunden unten
+    const r = await page(mini({ component: 'shop-map', params: { view: 'owner', phones: 4, shop: 'Bäckerei Sonnenkorn am Markt' }, captions: [{ lines: ['Genau vor', 'deiner Tür.'] }] })), hit = r.res.checks.find(c => c.name === 'ueberdeckung' && !c.ok)
+    check('Prüfung schlägt an: Karte, Blick des Betreibers, das Schild eines langen Ladennamens stößt an die Karte über einem Kunden', !!hit && /Ladenname an der Ortsnadel/.test(hit.details[0]), hit ? hit.details[0].slice(0, 130) : 'kein Fehler')
+  }
+
+  // Die andere Strassenseite: der Laden klein im Hintergrund, die Fahrbahn dazwischen
+  const across = (params = {}) => mini({ component: 'shop-street', params: { across: true, circle: false, note: '6 von 6', from: -0.05, via: 0.2, to: 0.29, ...params }, captions: [{ lines: ['Dein Handy meldet sich,', 'wenn du vorbeigehst.'] }] })
+  const st = await page(across(), null, { motion: true, probe: () => {
+    const a = window.STUDIO.anchors.find(x => x.name === 'buzz'); window.seek(a.t + 0.7)
+    const b = s => document.querySelector(s).getBoundingClientRect(), shop = b('.ss-shop'), door = b('.ss-door'), w = b('.ss-walker'), chip = b('.ss-chip'), road = b('.ss-road')
+    return { door: Math.round(door.height), walker: Math.round(w.height), down: Math.round(w.bottom - door.bottom), side: Math.round(Math.abs((w.left + w.right) / 2 - (door.left + door.right) / 2)),
+      road: road.top >= door.bottom - 1 && road.bottom <= w.bottom, covers: chip.left < shop.right && shop.left < chip.right && chip.top < shop.bottom && shop.top < chip.bottom, chip: +getComputedStyle(document.querySelector('.ss-chip')).opacity }
+  } })
+  check('Straße, andere Seite ("across"): baut ohne Fehler und ohne Hinweis', clean(st), why(st))
+  check('Straße, andere Seite: die Tür hinten ist höchstens 60 % so hoch wie die Figur vorn, die Fahrbahn liegt dazwischen, und die Benachrichtigung verdeckt den Laden nicht',
+    !!st.probed && st.probed.chip === 1 && st.probed.door <= 0.6 * st.probed.walker && st.probed.road && st.probed.down >= 300 && st.probed.side >= 0.25 * STAGE.w && !st.probed.covers, JSON.stringify(st.probed))
+  const under = await page(across({ via: 0.3, to: 0.62 }))
+  check('Warnung: "across", die Benachrichtigung verdeckte den Laden, weil der Passant unter ihm durchgeht', under.res.warnings.some(w => /verdeckt/.test(w)), (under.res.warnings[0] || 'keine Warnung').slice(0, 130))
+  const ring = await rejects(across({ circle: true }), /"across" zeigt nur den Passanten/)
+  check('Prüfung schlägt an: "across" zusammen mit dem Kreis (dafür gibt es die Karte von oben)', ring.ok, ring.msg)
+
+  // Die Strasse von der Seite, wie Fassung 1 sie brauchte (Kreis, Auge, Betreiber mit drei Handys), wird von
+  // keinem Video mehr benutzt. Damit sie nicht still kaputtgeht, baut sie hier weiter mit.
+  const old = await page(mini(
+    { component: 'shop-street', params: { note: '6 von 6', track: true }, anchors: { eye: { cap: 0, word: 0 }, no: { cap: 1, word: 0 }, buzz: { cap: 2, word: 1 } }, captions: [{ lines: ['Verfolgt dich das Café?'] }, { lines: ['Nein.'] }, { lines: ['Dein Handy meldet', 'sich ganz von selbst.'] }] },
+    { component: 'shop-street', params: { view: 'owner', phones: 3 }, captions: [{ lines: ['Genau vor deiner Tür', 'stehen sie dann.'] }] }), null, { probe: () => {
+    const eye = window.STUDIO.anchors.find(x => x.name === 'eye').t, q = t => { window.seek(t); return +getComputedStyle(document.querySelector('.ss-q')).opacity }
+    return { before: q(eye - 0.05), after: q(eye + 0.8), guests: document.querySelectorAll('.ss-guest').length }
+  } })
+  check('Straße von der Seite wie in Fassung 1 (Kreis, Auge mit Blicklinie, Betreiber mit drei Handys) baut weiter; das Fragezeichen erscheint erst nach dem Auge', clean(old) && !!old.probed && old.probed.before === 0 && old.probed.after === 1 && old.probed.guests === 3, why(old) || JSON.stringify(old.probed))
 }
 {
   // Drei Teile in einer Szene: der mittlere darf nicht von Anfang an sichtbar sein. Frueher
