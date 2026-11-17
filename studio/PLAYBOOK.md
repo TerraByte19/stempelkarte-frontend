@@ -502,7 +502,33 @@ Oben steht immer nur eine Tafel, jede löst die vorige im Takt der Stimme ab.
   Benachrichtigung `zoom` 1,3, `focus` [540, 1030]; QR-Code der Wallet-Karte
   `zoom` 1,5, `focus` [540, 1343], `to` [540, 1150]; Karte von oben mit
   Kreis höchstens `zoom` 1,2, `focus` [560, 1166], `to` [540, 1211]: bei
-  1,34 lief der Kreis rechts aus dem Bild.
+  1,34 lief der Kreis rechts aus dem Bild. Wochenleiste (`week-strip`)
+  `zoom` 1,15, `focus` [580, 600], `to` [540, 610]: sie wächst von ihrer
+  Kopfzeile aus nach unten.
+- **Zoom nur auf Bausteine, die dafür gezeichnet sind.** Einwand des
+  Betreibers am Döner-Video (17.11.2026): "wenn du zoomst bei dem
+  Klinge-Soundeffekt, sieht man, dass du nur einen Teil animiert hast und der
+  Rest ist leer". Ein Bild für die Totale (Straße, Läden, Karte) hat zwischen
+  seinen Figuren große flache Flächen: dunkle Straße, leere Wand, das Ende der
+  Straße. Vergrößert zeigt die Kamera fast nur noch diese.
+  - `shop-duel` und `shop-street`: höchstens ein sanftes Heranfahren. Gemessen
+    am Döner-Video: `"zoom": 1.08, "focus": [540, 600], "to": [540, 600], "dur": 1.4`
+    (an der Schildlinie verankert, beide Schilder bleiben ganz im Bild, es
+    kommt nichts Leeres dazu). Mit demselben Punkt schneidet schon 1,15 das
+    linke Schild an; 1,5 und 1,6 auf die Tür gegenüber zeigten nur noch
+    Straße und Wand. Nie auf ein Detail zoomen (Tür, Glocke, Figur). Für
+    `shop-street` gibt es keinen gemessenen Wert: dort keine Kamera.
+  - Nahaufnahme einer Ladentür: `shop-door` als eigener Teil mit
+    `"enter": "cut"`, ohne Kamera. Er ist bis zum Bildrand gezeichnet; in
+    einer Probe (nicht im Video) blieb ein Heranfahren bis 1,12 mit `focus` =
+    `to` = [540, 700] ganz im gezeichneten Bild.
+  - Eine Kamera, die einen Baustein nach oben schiebt, schiebt seinen Kopf in
+    den Textbereich: `week-strip` mit `focus` [580, 1270], `to` [540, 1240]
+    ließ die Kopfzeile halb im Ausblenden stehen und unten 600 px leer.
+    Besser vom oberen Rand aus vergrößern (Wert oben).
+  - Jede Kamerafahrt am Ende der Fahrt im Standbild ansehen
+    (`--stills`). Steht eine große Fläche ohne Zeichnung im Bild oder ist
+    ein Rand angeschnitten: weniger Zoom, anderer Punkt oder keine Kamera.
 
 ### Pausen der Stimme (`timing`)
 
@@ -621,6 +647,33 @@ Beleg in `PRODUKT.md` wie jeder andere.
   "anchors": { "hit": { "cap": 0, "word": 0, "offset": 0.3 } },
   "captions": [ { "lines": ["*Natürlich | ist das | *koscher!"], "scale": 1.15 } ] }
 ```
+
+**`shop-door`: Ladentür nah.** Die Nahaufnahme, für die früher in
+`shop-duel` hineingezoomt wurde (siehe "Zoom nur auf Bausteine, die dafür
+gezeichnet sind"). Schild mit Namen und Symbol, Glastür mit "Offen"-Schild,
+Ladenglocke am Ausleger, Schaufenster mit drehendem Dönerspieß
+(`"spit": false`: Regal mit Gläsern und Kuchen), Wandlaterne, Ziegelwand,
+Stufe, Gehweg mit Aufsteller. Die Tür steht offen, der Stammkunde geht von
+hinten hinein; auf `close` fällt sie zu, er bleibt als Schatten hinter dem
+Milchglas, die Glocke klingelt, das Licht flackert einmal, auf `sign` wackelt
+das Schild. Im Döner-Video der Schnitt auf "Und tschüss":
+
+```json
+{ "component": "shop-door", "enter": "cut",
+  "params": { "shop": "Döner Südwind", "icon": "kebab", "accent": "#E58A45", "spit": true, "guest": true, "tones": false },
+  "anchors": { "close": { "cap": 0, "word": 1, "offset": -0.05 }, "sign": { "cap": 0, "word": 1, "offset": 0.01 } },
+  "sounds": [ { "sound": "ladenglocke", "anchor": "close", "vol": 0.8 }, { "sound": "wischer", "anchor": "close", "offset": 0.3, "vol": 0.8 } ],
+  "captions": [ { "lines": ["Und | *tschüss."] } ] }
+```
+
+- `accent` ist die Farbe des Ladens (Markise, Symbolfeld, Rand des
+  "Offen"-Schilds): Orange `#E58A45` für den Laden gegenüber wie in
+  `shop-duel`, `#5A4FCF` für den eigenen.
+- Die Tür beginnt sich 0,22 s vor `close` zu schließen. Steht der Teil nur
+  kurz (im Döner-Video 0,2 s bis `close`), sieht man sie beim Schnitt offen
+  und gleich zufallen; das ist gewollt.
+- Kein `same` am Namen: das Bild zeigt meist den Laden gegenüber, der Bau
+  warnt deshalb nicht, wenn er anders heißt als der eigene.
 
 **Erweitert, Vorgaben unverändert:**
 
@@ -1137,6 +1190,29 @@ Textzeilen: mindestens 1. Datei: `components/shop-counter.js`
 |---|---|---|
 | `bubble` | `{"cap":-1,"word":2}` | Die Denkblase mit drei Punkten springt auf (Ton: pop). Auf "nicht" o. ä. |
 | `roll` | `{"cap":-1,"word":0}` | Der Steppenläufer rollt los und quert das Bild in 2,4 s |
+
+### `shop-door` - Ladentür nah: Tür fällt zu, Glocke klingelt
+
+<img src="docs/components/shop-door.png" width="270" alt="Ladentür nah: Tür fällt zu, Glocke klingelt">
+
+Die Tür eines Ladens in Nahaufnahme, voll gezeichnet: Schild, Glastür mit "Offen"-Schild, Ladenglocke, Schaufenster mit drehendem Dönerspieß, Wandlaterne. Der Stammkunde ist gerade hinein, die Tür fällt zu, die Glocke klingelt. Für "Und tschüss" und jede Nahaufnahme einer Ladentür (statt in shop-duel hineinzuzoomen).
+
+Textzeilen: mindestens 1. Datei: `components/shop-door.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Südwind"` | Name auf dem Schild über der Tür (höchstens etwa 18 Zeichen, längere werden kleiner gesetzt) |
+| `icon` | `"cup"` | Symbol auf dem Schild und auf dem Aufsteller: cup, bread, scissors, star, heart, check, kebab |
+| `accent` | `"#E58A45"` | Farbe des Ladens als #RRGGBB: Markise, Symbolfeld, Rand des "Offen"-Schilds. Orange wie der Laden gegenüber in shop-duel; "#5A4FCF" für den eigenen Laden |
+| `guest` | `true` | Der Stammkunde ist gerade hinein: hinter der offenen Tür von hinten, nach dem Zufallen als Schatten hinter dem Milchglas |
+| `spit` | `true` | Drehender Dönerspieß vor dem Grill im Schaufenster (Imbiss, Dönerladen); false zeigt ein Regal mit Gläsern und Kuchen |
+| `wobble` | `true` | Das Schild über der Tür wackelt kurz (Anker "sign") |
+| `tones` | `true` | Eigene Töne (thud beim Zufallen, ding der Glocke). false, wenn das Skript Klänge aus der Bibliothek setzt ("ladenglocke") |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `close` | `{"cap":-1,"word":-1}` | Die Tür fällt zu: Glocke schwingt und klingelt, das Licht flackert einmal (Töne: thud, ding). Davor steht sie offen |
+| `sign` | `{"cap":-1,"word":-1,"offset":0.06}` | Das Schild wackelt. Vorgabe: mit dem Zufallen; liegt "close" auf einem anderen Wort, "sign" mit offset 0.06 dazulegen |
 
 ### `shop-duel` - Zwei Läden gegenüber: Herz bricht, Stammkunde geht rüber
 

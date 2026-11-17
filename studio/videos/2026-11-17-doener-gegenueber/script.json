@@ -23,11 +23,11 @@
   },
   "scenes": [
     {
-      "_hinweis": "Einstieg: beide Läden, Fronten zueinander. Der Satz steht ab dem ersten Bild da, das Herz über unserem Laden zerbricht auf 'betrogen', der Stammkunde geht schon über die Straße und verschwindet auf 'gegenüber' durch die Tür. Kamera auf den Laden gegenüber.",
+      "_hinweis": "Einstieg: beide Läden, Fronten zueinander. Der Satz steht ab dem ersten Bild da, das Herz über unserem Laden zerbricht auf 'betrogen', der Stammkunde geht schon über die Straße und verschwindet auf 'gegenüber' durch die Tür, die Glocke dort schwingt. Die Totale bleibt stehen: nur ein sanftes Heranfahren (1,08, an der Schildlinie verankert). Früher fuhr die Kamera mit 1,5 auf die Tür gegenüber, und vergrößert sah man nur noch leere Flächen (Einwand des Betreibers, 17.11.2026).",
       "component": "shop-duel",
       "params": { "shop": "Döner Nordwind", "icon": "kebab", "rival": "Döner Südwind", "rivalIcon": "kebab", "heart": true, "walker": true, "from": 0.12, "tones": false },
       "anchors": { "crack": { "cap": 0, "word": 4, "offset": 0.08 }, "walk": { "at": "start" }, "enter": { "cap": 1, "word": 3, "offset": 0.05 } },
-      "camera": [ { "cap": 1, "word": 0, "zoom": 1.5, "focus": [860, 980], "to": [600, 1300], "dur": 0.3 } ],
+      "camera": [ { "cap": 1, "word": 0, "zoom": 1.08, "focus": [540, 600], "to": [540, 600], "dur": 1.4 } ],
       "sounds": [
         { "sound": "herz-zerspringt", "anchor": "crack", "offset": 0.0, "vol": 0.8 },
         { "sound": "publikum-keucht", "anchor": "crack", "offset": 0.55, "vol": 0.7 },
@@ -41,13 +41,13 @@
       ]
     },
     {
-      "_hinweis": "Wie es dazu kam: zwei Stempel je Woche bei dir, dann ein fremder Stempel in der Woche gegenüber (Kamera auf diese Woche). Schnitt: er geht gegenüber hinein, die Ladenglocke schwingt, 'Und tschüss.'",
+      "_hinweis": "Wie es dazu kam: zwei Stempel je Woche bei dir, dann ein fremder Stempel in der Woche gegenüber (Kamera vergrößert die Leiste von ihrer Kopfzeile aus nach unten, die Kopfzeile bleibt ganz im Bild). Schnitt: die Tür gegenüber in Nahaufnahme (shop-door), sie fällt hinter ihm zu, die Ladenglocke klingelt auf 'tschüss'.",
       "parts": [
         {
           "component": "week-strip",
           "params": { "shop": "Döner Nordwind", "icon": "kebab", "rivalIcon": "kebab", "weeks": 4, "days": [1, 4], "filled": 3, "rivalWeek": 4, "rivalDay": 2 },
           "anchors": { "week1": { "cap": 0, "word": 0 }, "week2": { "cap": 0, "word": 2 }, "week3": { "cap": 0, "word": 5 }, "rival": { "cap": 1, "word": 4, "offset": 0.05 } },
-          "camera": [ { "cap": 1, "word": 0, "zoom": 1.15, "focus": [580, 1270], "to": [540, 1240], "dur": 0.3 } ],
+          "camera": [ { "cap": 1, "word": 0, "zoom": 1.15, "focus": [580, 600], "to": [540, 610], "dur": 0.3 } ],
           "sounds": [
             { "sound": "plattenkratzer", "cap": 1, "word": 3, "offset": -0.05, "vol": 0.55 }
           ],
@@ -57,14 +57,13 @@
           ]
         },
         {
-          "component": "shop-duel",
+          "component": "shop-door",
           "enter": "cut",
-          "params": { "shop": "Döner Nordwind", "icon": "kebab", "rival": "Döner Südwind", "rivalIcon": "kebab", "heart": false, "walker": true, "from": 0.6, "tones": false },
-          "anchors": { "walk": { "at": "start" }, "enter": { "cap": 0, "word": 1, "offset": -0.05 } },
-          "camera": [ { "at": "start", "dur": 0, "zoom": 1.6, "focus": [850, 1020], "to": [600, 1330] } ],
+          "params": { "shop": "Döner Südwind", "icon": "kebab", "accent": "#E58A45", "spit": true, "guest": true, "tones": false },
+          "anchors": { "close": { "cap": 0, "word": 1, "offset": -0.05 }, "sign": { "cap": 0, "word": 1, "offset": 0.01 } },
           "sounds": [
-            { "sound": "ladenglocke", "anchor": "enter", "vol": 0.8 },
-            { "sound": "wischer", "anchor": "enter", "offset": 0.3, "vol": 0.8 }
+            { "sound": "ladenglocke", "anchor": "close", "vol": 0.8 },
+            { "sound": "wischer", "anchor": "close", "offset": 0.3, "vol": 0.8 }
           ],
           "captions": [
             { "lines": ["Und | *tschüss."] }

@@ -1325,7 +1325,8 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
   unvergrößerten Bild, `to` lässt ihn wandern, `dur` ist die Dauer (Vorgabe
   0,18 s, 0 = Sprung). Eine Kamera mit `"at": "start", "dur": 0` zeigt den
   Teil von Anfang an vergrößert. Ein Lauf nimmt nur Kamerawerte, die es in der
-  Vorlage oder im zweiten Video schon gibt, für denselben Baustein:
+  Vorlage, im zweiten oder im dritten Video (Döner) schon gibt, für denselben
+  Baustein:
 
   | Baustein | Kamera |
   |---|---|
@@ -1334,7 +1335,21 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
   | `wallet-pass`, nur Stempel | von Anfang an: `"at": "start", "dur": 0, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080]` |
   | `shop-map` mit Kreis | höchstens `"zoom": 1.2`, `"focus": [560, 1166]`, `"to": [540, 1211]`, `"dur": 0.3`: mehr, und der Kreis läuft aus dem Bild |
   | `shop-street` mit `across` | keine |
+  | `shop-duel` | höchstens ein sanftes Heranfahren: `"zoom": 1.08, "focus": [540, 600], "to": [540, 600], "dur": 1.4` (an der Schildlinie verankert, gemessen am Döner-Video). Nie auf Tür, Glocke oder Figur |
+  | `shop-door` | keine: er ist schon die Nahaufnahme |
+  | `week-strip` | `"zoom": 1.15, "focus": [580, 600], "to": [540, 610]` (wächst von der Kopfzeile nach unten) |
   | `paper-card`, `guest-ghost`, `wallet-vanish`, `stamp-check` | keine erprobte: zu viel Text wird geteilt (übernächster Punkt) |
+
+- **Zoom nur auf Bausteine, die dafür gezeichnet sind.** Der Betreiber am
+  Döner-Video (17.11.2026): beim Zoom auf die Tür mit der Ladenglocke "sieht
+  man, dass du nur einen Teil animiert hast und der Rest ist leer". Straße
+  und Läden (`shop-duel`, `shop-street`) sind für die Totale gezeichnet;
+  vergrößert bleiben dunkle Straße, leere Wand und das Ende der Straße.
+  Dort höchstens das sanfte Heranfahren aus der Tabelle (1,08; schon 1,15
+  schneidet das linke Schild an), nie auf ein Detail. Für die Nahaufnahme
+  einer Tür gibt es `shop-door` (6.4), als Teil mit `"enter": "cut"`, ohne
+  Kamera. Einen Kamerawert, der nicht in der Tabelle steht, nimmt ein Lauf
+  nicht; jede Kamerafahrt wird am Ende der Fahrt als Standbild angesehen.
 
 - **Faustregel:** spricht eine Textzeile länger als etwa 3 s (mehr als rund
   acht Wörter), bekommt ihr Teil eine Kamera auf eines ihrer Wörter, oder
@@ -1370,6 +1385,7 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 | Papier geht verloren, zerknickt, wird vergessen (A4) | `paper-card`, `wallet-vanish`, `guest-ghost` | Als Teile einer Szene, Schlag auf Schlag mit `"enter": "cut"`. `wallet-vanish`: drei Anker auf drei `*`-Wörter ("*Zerknickt, \| *vergessen, \| *verloren."). `"mug": true` nur für die Bäckerei. Je Bild höchstens zehn Wörter, mit zwei Textzeilen neun, ohne Kamera (6.3) |
 | Karte in Apple und Google Wallet, einmal scannen, kein Download (A1, A2, A3) | `wallet-pass` mit Scan | Kamera auf den QR-Code (6.3), `location: ""` |
 | Stempel sofort auf dem Handy (B1, B2) | zweiter `wallet-pass` als Teil mit `"enter": "cut"`, `"scan": false`, `"rise": false`, `"drop": false` | `before` und `after` höher als im ersten, je neuer Stempel ein Anker `stamp1`, `stamp2`, ... |
+| Ein Kunde geht in einen Laden, die Tür fällt hinter ihm zu (zum Beispiel "Und tschüss", er ist beim Laden gegenüber) | `shop-door` als Teil mit `"enter": "cut"`, nach `shop-duel` oder einem anderen Bild der Szene | `"shop"` ist der Laden, in den er geht; `"accent": "#E58A45"` für den Laden gegenüber (wie in `shop-duel`), `"#5A4FCF"` für den eigenen. Anker `close` auf das Wort (im Döner-Video "tschüss" mit `"offset": -0.05`), `sign` 0,06 s danach auf dasselbe Wort (dort `"offset": 0.01`). Mit Klängen aus der Bibliothek `"tones": false` und `ladenglocke` am Anker `close`. **Keine Kamera**, und nie stattdessen in `shop-duel` oder `shop-street` auf die Tür zoomen (6.3). `"spit": true` nur für Imbiss und Dönerladen |
 | Die Pointe (der Beleg der Idee in einem Satz) | `stamp-check` als eigene Szene oder als Teil mit `"enter": "cut"` (6.2) | `"icon": "check"`, Anker `hit` auf das letzte Wort, `"offset": 0.1` |
 | Beispielrechnung (Thema `rechnung`) | `calc-panel` | **Nicht im unbeaufsichtigten Lauf** (unten). Die Tafel braucht mindestens zwei, im Muster vier Textzeilen in einem Bild ohne erprobte Kamera: rund 10 s ohne Bildwechsel. Die Themen T05 und T19 warten deshalb (`THEMEN.md`), bis eine begleitete Sitzung eine Rechnung in Stil C gebaut hat |
 | Schluss | `cta-comment` | Anker `logo` auf `{ "cap": -1, "word": -1 }`, Text nach 6.2 |

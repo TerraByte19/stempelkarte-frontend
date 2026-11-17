@@ -46,6 +46,33 @@ der Stimme zu jedem Klang lesen (`marginDb`, Prüfung `effekt-abstand`).
 Erwartung nach dem zweiten Video: rund 38 s statt der geschätzten 47,6 s
 (der Entwurf schätzt in Stil C etwa ein Viertel zu lang).
 
+## Änderung vom 17.11.2026: kein Zoom ins Leere
+
+Einwand des Betreibers: "wenn du zoomst bei dem Klinge-Soundeffekt sieht man,
+dass du nur einen Teil animiert hast und der Rest ist leer". Zweimal fuhr die
+Kamera in `shop-duel` auf die Tür gegenüber (1,5 in Satz 1, 1,6 von Anfang an
+auf "Und tschüss"); vergrößert blieben dunkle Straße, leere Wand und das Ende
+der Straße. Geändert (Text, Aufnahme und alle Klangzeiten unverändert,
+`cues.json` bytegleich mit der Fassung davor):
+
+| Stelle | vorher | jetzt |
+|---|---|---|
+| Satz 1, `shop-duel` | `zoom` 1,5, `focus` [860, 980] nach [600, 1300] | sanftes Heranfahren `zoom` 1,08, `focus` = `to` = [540, 600], `dur` 1,4 (an der Schildlinie verankert, beide Schilder bleiben ganz, nichts Leeres kommt dazu) |
+| Satz 2, `week-strip` | `zoom` 1,15, `focus` [580, 1270] nach [540, 1240]: Kopfzeile halb im Ausblenden, unten 600 px leer | `zoom` 1,15, `focus` [580, 600] nach [540, 610]: die Leiste wächst von der Kopfzeile nach unten |
+| "Und tschüss", 8,88 bis 9,66 s | `shop-duel` mit `zoom` 1,6 auf die Tür | neuer Baustein `shop-door` (Schnitt, ohne Kamera): Tür offen, er geht hinein, auf "tschüss" fällt sie zu (9,09 s), Glocke klingelt, Licht flackert, Schild wackelt; `ladenglocke` und `wischer` wie vorher |
+
+Die übrigen Kamerafahrten sind geprüft und bleiben: `calc-panel` 1,2,
+`wallet-pass` 1,35, `lock-notification` 1,3, `shop-map` 1,15. Sie zeigen
+vergrößert nichts, was in der Totale nicht schon da ist (Tafel, Handy,
+Karte bis zum Rand). Die Regel steht jetzt im Playbook (Stil C, Kamera) und
+in `AUTOMATIK.md` 6.3 und 6.4.
+
+Bau mit der Aufnahme aus dem Cache (0 Zeichen): 38,415 s, 1152 Bilder,
+16 Bildwechsel, -14 LUFS, wahre Spitze -1,2 dBTP, alle Prüfungen ok. Drei
+Warnungen `effekt-abstand` (vine-boom 4,1 dB bei 4,46 s, ladenglocke 6,1 dB
+bei 9,09 s, handy-vibriert 5,4 dB bei 27,14 s, Richtwert 8 dB) gehören zur
+unveränderten Tonspur, nicht zu dieser Änderung.
+
 ## Idee und Aufbau
 
 Anregung: ein Mitbewerber-Reel mit dem Aufbau "ein Laden gegenüber, ein
@@ -59,8 +86,8 @@ gesprochen "über 800 Euro".
 
 | Satz | Bild |
 |---|---|
-| 1 Dein Stammkunde hat dich betrogen. Mit dem Dönerladen gegenüber. | `shop-duel`: beide Läden, Fronten zueinander. Satz steht ab Bild 0, Herz über dem eigenen Laden zerbricht auf "betrogen", der Stammkunde geht über die Straße, Kamera auf den Laden gegenüber, er verschwindet durch die Tür |
-| 2 Zweimal die Woche war er bei dir. Dann hat er einmal gegenüber probiert. Und tschüss. | `week-strip`: drei Wochen mit je zwei Stempeln, Kamera auf Woche 4 mit dem orangen Stempel von gegenüber. Schnitt: `shop-duel` nah an der Tür gegenüber, Ladenglocke auf "tschüss" |
+| 1 Dein Stammkunde hat dich betrogen. Mit dem Dönerladen gegenüber. | `shop-duel`: beide Läden, Fronten zueinander. Satz steht ab Bild 0, Herz über dem eigenen Laden zerbricht auf "betrogen", der Stammkunde geht über die Straße und verschwindet durch die Tür gegenüber, die Glocke schwingt. Kamera nur sanft heran (1,08) |
+| 2 Zweimal die Woche war er bei dir. Dann hat er einmal gegenüber probiert. Und tschüss. | `week-strip`: drei Wochen mit je zwei Stempeln, Kamera vergrößert die Leiste von der Kopfzeile aus, Woche 4 mit dem orangen Stempel von gegenüber. Schnitt: `shop-door`, die Tür gegenüber in Nahaufnahme fällt zu, Ladenglocke auf "tschüss" |
 | 3 Das sind über 800 Euro Umsatz im Jahr. Weg. | `calc-panel` mit `"gone": true`: Rechnung, auf "Weg." Strich durch 832 €, Münzen fliegen, Kamera näher |
 | 4 Und das Schlimmste: Du hast es nicht mal gemerkt. Seine Papierkarte mit sechs Stempeln liegt im Altpapier. | `shop-counter`: Betreiber wischt die Theke, Denkblase mit drei Punkten, Steppenläufer. Schnitt: `card-bin`, sechs Stempel springen auf, die Karte wird zerknüllt und landet in der Papiertonne |
 | 5 Mit StampIt hat er deine Karte im Handy. Jeder Besuch ein Stempel, sofort sichtbar. | `wallet-pass` (8 Felder, Döner-Symbol), drei Stempel landen, Kamera auf die Stempel |
