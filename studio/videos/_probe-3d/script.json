@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "title": "Probe 3D: Stammkunde geht rüber",
+    "slug": "probe-3d",
+    "language": "de",
+    "_hinweis": "Kein Video zum Posten: Probe für den ersten 3D-Baustein (iso-street), ohne Stimme gebaut. Zeigt, ob die 3D-Szene im Studio rendert, wie sie neben Stil C aussieht und wie lange ein Bild braucht. Läden und Namen sind eigene Beispiele."
+  },
+  "timing": {
+    "lead": 0.35,
+    "hold": 3.0,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "mode": "wort"
+  },
+  "scenes": [
+    {
+      "_hinweis": "Herz bricht auf 'betrogen', er kommt ab dem ersten Bild aus der eigenen Tür, geht gleichmäßig über die Kreuzung und ist auf 'gegenüber' drüben in der Tür.",
+      "component": "iso-street",
+      "params": {
+        "shop": "Döner Palast",
+        "icon": "kebab",
+        "rival": "Imbiss Sonne",
+        "rivalIcon": "kebab",
+        "heart": true,
+        "walker": true,
+        "from": 0
+      },
+      "anchors": {
+        "crack": {
+          "cap": 0,
+          "word": 4,
+          "offset": 0.08
+        },
+        "walk": {
+          "at": "start",
+          "offset": 0.2
+        },
+        "enter": {
+          "cap": 1,
+          "word": 3,
+          "offset": 0.1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Dein *Stammkunde",
+            "hat dich *betrogen."
+          ],
+          "instant": true
+        },
+        {
+          "lines": [
+            "Mit dem | *Dönerladen | *gegenüber."
+          ],
+          "gapBefore": 1.5
+        }
+      ]
+    }
+  ]
+}

@@ -79,7 +79,8 @@ export const seek = (pg, t) => pg.evaluate(t => new Promise(r => { window.seek(t
 export async function sampleMotion(pg, duration, { step = 0.25, band = null } = {}) {
   const seen = new Map()
   for (let t = 0; t < duration; t = +(t + step).toFixed(3)) {
-    const items = await pg.evaluate(t => { window.seek(t); return window.STUDIO.probe() }, t)
+    // ohne zu zeichnen: die Probe braucht nur Positionen, ein 3D-Baustein braucht je Bild ueber eine Sekunde
+    const items = await pg.evaluate(t => { window.seek(t, { paint: false }); return window.STUDIO.probe() }, t)
     for (const it of items) {
       if (band && !(it.right > band.left && it.bottom > band.top && it.top < band.bottom)) continue
       const k = it.scene + '|' + it.what, o = seen.get(k) || { scene: it.scene, what: it.what, from: t, to: t, right: it.right, top: it.top, bottom: it.bottom }
@@ -87,7 +88,7 @@ export async function sampleMotion(pg, duration, { step = 0.25, band = null } = 
       seen.set(k, o)
     }
   }
-  await pg.evaluate(() => window.seek(0))
+  await pg.evaluate(() => window.seek(0, { paint: false }))
   return [...seen.values()]
 }
 

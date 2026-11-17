@@ -60,7 +60,14 @@ async function build(state) {
   }
   const pop = (e, t, d = 0.42) => key(e, [[t, { opacity: 0, scale: 0.4 }, EASE.BACK], [t + d, { opacity: 1, scale: 1 }]])
   const rise = (e, t, d = 0.45, dy = 26) => key(e, [[t, { opacity: 0, translate: `0px ${dy}px` }, EASE.OUT], [t + d, { opacity: 1, translate: '0px 0px' }]])
-  window.seek = t => { for (const a of anims) a.currentTime = t * 1000 }
+  // Bausteine, die ihr Bild selbst zeichnen (3D mit WebGL, iso-street), melden sich mit ctx.frame(fn) an.
+  // seek(t) ruft sie NACH den Web-Animationen mit demselben t auf und zeichnet sofort: so haengt auch ein
+  // 3D-Bild nur an t und nie an der Uhr, und Bild N sieht in jedem Lauf und auf jeder Seite gleich aus.
+  // Auch in der Ruhelage wird gezeichnet (dann eben unbewegt), sonst messen die Pruefungen ein leeres Bild.
+  // seek(t, { paint: false }) stellt nur die Zeit ein, ohne zu zeichnen: die Bewegungsprobe (sampleMotion in
+  // render.mjs) fragt nur Positionen ab, und ein 3D-Bild kostet je Aufruf eine Sekunde und mehr.
+  const drawers = []
+  window.seek = (t, o) => { for (const a of anims) a.currentTime = t * 1000; if (!o || o.paint !== false) for (const d of drawers) d(t) }
 
   // ---- Toene: jeder meldet seinen Ton dort an, wo die Bewegung entsteht
   const cue = (meta) => (t, name, vol = 1, pitch = 1) => {
@@ -319,6 +326,8 @@ async function build(state) {
         key: (x, frames) => key(res(x), frames), loop: (x, frames, period, phase) => loop(res(x), frames, period, phase),
         pop: (x, t, d) => pop(res(x), t, d), rise: (x, t, d, dy) => rise(res(x), t, d, dy),
         cue: cue({ scene: n + 1, by: part.component }),
+        // fn(t) zeichnet das Bild dieses Bausteins zum Zeitpunkt t (siehe drawers oben)
+        frame: fn => { if (typeof fn !== 'function') throw new Error(`${by}: frame() braucht eine Funktion`); drawers.push(fn) },
         el, $, $$: sel => [...root.querySelectorAll(sel)],
         html: h => { root.insertAdjacentHTML('beforeend', h) },
         // Hintergrund hinter der Kamerafahrt: liegt in der Szene, nicht in .ill
