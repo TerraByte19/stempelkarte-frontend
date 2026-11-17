@@ -66,8 +66,16 @@ async function build(state) {
   // Auch in der Ruhelage wird gezeichnet (dann eben unbewegt), sonst messen die Pruefungen ein leeres Bild.
   // seek(t, { paint: false }) stellt nur die Zeit ein, ohne zu zeichnen: die Bewegungsprobe (sampleMotion in
   // render.mjs) fragt nur Positionen ab, und ein 3D-Bild kostet je Aufruf eine Sekunde und mehr.
-  const drawers = []
-  window.seek = (t, o) => { for (const a of anims) a.currentTime = t * 1000; if (!o || o.paint !== false) for (const d of drawers) d(t) }
+  // ctx.place(fn) laeuft dagegen bei JEDEM seek, auch ohne Zeichnen, und vor den Zeichenfunktionen: dort
+  // stellt ein 3D-Baustein Kamera und Figuren und legt unsichtbare Kaesten mit data-safe auf Schilder und
+  // Figuren. Ohne das sahen die Pruefungen (Sperrzonen, Knopfspalte) nicht in die Leinwand hinein, und ein
+  // Ladenschild unter den TikTok-Knoepfen ging am 17.11.2026 als "ok" durch.
+  const drawers = [], placers = []
+  window.seek = (t, o) => {
+    for (const a of anims) a.currentTime = t * 1000
+    for (const f of placers) f(t)
+    if (!o || o.paint !== false) for (const d of drawers) d(t)
+  }
 
   // ---- Toene: jeder meldet seinen Ton dort an, wo die Bewegung entsteht
   const cue = (meta) => (t, name, vol = 1, pitch = 1) => {
@@ -328,6 +336,8 @@ async function build(state) {
         cue: cue({ scene: n + 1, by: part.component }),
         // fn(t) zeichnet das Bild dieses Bausteins zum Zeitpunkt t (siehe drawers oben)
         frame: fn => { if (typeof fn !== 'function') throw new Error(`${by}: frame() braucht eine Funktion`); drawers.push(fn) },
+        // fn(t) stellt alles auf den Zeitpunkt t, ohne zu zeichnen (siehe placers oben); billig halten
+        place: fn => { if (typeof fn !== 'function') throw new Error(`${by}: place() braucht eine Funktion`); placers.push(fn) },
         el, $, $$: sel => [...root.querySelectorAll(sel)],
         html: h => { root.insertAdjacentHTML('beforeend', h) },
         // Hintergrund hinter der Kamerafahrt: liegt in der Szene, nicht in .ill

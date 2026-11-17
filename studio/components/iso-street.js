@@ -24,6 +24,17 @@
 // wird EINMAL geworfen (nur Dinge, die stillstehen, werfen ihn; die Figur hat einen weichen
 // Fleck), Lichtkegel und Kontaktschatten sind in eine Bodentextur gemalt, die Stadt hat
 // einfache Materialien. Kanten glaettet 4-faches Multisampling.
+//
+// Pruefungen: die Leinwand ist fuer die Pruefungen des Studios nur eine Flaeche. Deshalb legt der
+// Baustein bei jedem seek(t) (ctx.place, auch ohne Zeichnen) unsichtbare Kaesten mit data-safe auf beide
+// Schilder, das Herz und den Stammkunden, genau dorthin, wo die Kamera sie hinwirft. So sehen Sperrzonen,
+// Knopfspalte und Textabstand auch in 3D, was sie in 2D sehen. Vorher stand das Schild rechts bis x = 1069
+// unter den TikTok-Knoepfen, und make.mjs meldete "ok knopfspalte" (Review 17.11.2026).
+//
+// Bildausschnitt: die Kamera endet immer im selben, vermessenen Ausschnitt (beide Fronten, Schilder und Herz
+// mit Rand, rechts frei von der Knopfspalte) und faehrt von weiter weg heran. "push" bestimmt also nur, wie
+// weit sie VORHER weg war, und kann nichts mehr abschneiden; frueher fuhr sie ueber den Ausschnitt hinaus,
+// und bei push 0,25 waren "...sse Sonne" und "Café M..." angeschnitten.
 import { BRAND } from '../engine/brand.js'
 import { ICONS } from '../engine/icons.js'
 
@@ -36,16 +47,20 @@ const B = RH + 1.25     // Hauskante, von der Strassenmitte aus (Fahrbahn + Gehw
 const P = 24            // Abstand der Strassen
 const CURB = 0.15       // Hoehe der Gehwege
 const SHOP = { w: 5.6, d: 6, h: 9, door: 1.25 }   // Laden: Breite der Front, Tiefe, Hoehe, Tuermitte ab Ecke
+const LIGHT = 18        // Staerke des Lichts vor jedem Laden (Punktlicht)
 // Bodentextur: deckt x und z von GO bis GO + GS ab (weiter hinten liegt Dunst)
 const GO = -72, GS = 144, GN = 1024
 
 // Farben. Die Stadt bleibt bewusst grau-lila und dunkel: nur die beiden Laeden duerfen leuchten,
 // sonst sucht das Auge auf dem Handy, worum es geht.
 const C = {
-  fog: BRAND.night, road: '#1A1638', walk: '#2C2852', curb: '#453F78', mark: '#4F4987', zebra: '#9590C4',
-  city: ['#2D2A47', '#33304F', '#2A2742', '#383457', '#302C4B'],
-  winWarm: ['#FFD58A', '#FFC56E', '#FFB55A'], winCool: '#B9B0FF', winOff: '#1C1640',
-  tree: ['#4E6390', '#5C5A98', '#3F6A7C', '#70608F'], trunk: '#2A1F45', lamp: '#FFD9A0', pole: '#221B4A',
+  // Stadt eine Stufe heller als in der ersten Probe: dort verschwammen die Hauswaende mit dem Nachthimmel,
+  // und die Fenster schwebten als lose Rechtecke im Dunkel (Review 17.11.2026)
+  fog: BRAND.night, road: '#1D1940', walk: '#302C5A', curb: '#4A4480', mark: '#4F4987', zebra: '#9590C4',
+  pave: '#3A356A', lawn: '#283A5E',
+  city: ['#3B375F', '#433E69', '#37335A', '#4A4572', '#3F3A63'],
+  winWarm: ['#FFD58A', '#FFC56E', '#FFB55A'], winCool: '#B9B0FF', winOff: '#221B4A',
+  tree: ['#6077AA', '#706CB2', '#4F8094', '#8471A8'], trunk: '#2A1F45', lamp: '#FFD9A0', pole: '#2A2258',
   skin: '#F2C29B', hair: '#2A1A2E', coat: BRAND.paper, legs: '#2B2457', heart: '#FF6B8B', bell: '#F4C56A',
   cars: ['#5B4E9A', '#8C3F5E', '#3E6A7A']
 }
@@ -75,8 +90,9 @@ export default {
     back: { default: false, doc: 'true: er kommt vom Laden gegenüber zurück in den eigenen Laden (Schluss "so bleibt er bei dir"); das Herz zerbricht dann nicht, es pocht' },
     from: { default: 0, doc: 'Wo der Stammkunde auf "walk" steht, als Anteil des Weges (0 = drinnen hinter der eigenen Tür, 0,5 = mitten auf der Kreuzung)' },
     smoke: { default: true, doc: 'Rauch steigt aus dem Schornstein des Ladens gegenüber (Grill)' },
-    push: { default: 0.05, doc: 'Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25; mehr schneidet die Läden am Rand an)' },
+    push: { default: 0.05, doc: 'Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25). Sie endet immer im selben Ausschnitt, in dem beide Läden ganz zu sehen sind; mehr "push" heißt nur, dass sie weiter weg anfängt' },
     orbit: { default: 7, doc: 'Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12)' },
+    after: { default: true, doc: 'Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf. false, wenn die Szene gleich danach endet' },
     tones: { default: true, doc: 'Eigene Töne (thud beim Zerbrechen, ding an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt' }
   },
   captions: { min: 1 },
@@ -94,12 +110,19 @@ export default {
     at: { cap: 0, word: -1, offset: 0.3 }
   },
   css: `
+  /* .is-wrap hebt die langsame 2D-Kamerafahrt der Szene (.ill, 1,05 auf 1) wieder auf: die 3D-Kamera faehrt
+     selbst. Beide zusammen hoben sich vorher fast auf (die 3D-Fahrt heran, .ill heraus), und am Szenenanfang
+     ragte das Bild um 5 % ueber den vermessenen Ausschnitt hinaus. */
+  .is-wrap { position: absolute; inset: 0; transform-origin: 50% 62%; }
   .is-canvas { position: absolute; left: 0; top: 0; width: ${W}px; height: ${H}px; }
+  /* Unsichtbare Kaesten ueber Schildern, Herz und Figur, nur fuer die Pruefungen (siehe oben) */
+  .is-box { position: absolute; visibility: hidden; pointer-events: none; }
   /* Oben laufen die Textzeilen: die Stadt dort im Dunst ausblenden, damit die Woerter auf ruhigem Grund stehen */
   .is-calm { position: absolute; left: 0; right: 0; top: 0; height: 760px; pointer-events: none;
     background: linear-gradient(180deg, ${BRAND.night} 0%, rgba(14,10,36,.94) 20%, rgba(14,10,36,.7) 40%, rgba(14,10,36,.25) 68%, rgba(14,10,36,0) 100%); }
   /* Ecken leicht abdunkeln: haelt den Blick in der Mitte, wie bei einer Linse */
-  .is-vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 85% 60% at 50% 52%, rgba(14,10,36,0) 58%, rgba(14,10,36,.6) 100%), linear-gradient(180deg, rgba(14,10,36,0) 72%, rgba(14,10,36,.5) 100%); }
+  /* Schwaecher als in der ersten Probe: dort lag der Platz unten bei Helligkeit 10 bis 19 von 255 */
+  .is-vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 90% 64% at 50% 52%, rgba(14,10,36,0) 62%, rgba(14,10,36,.42) 100%), linear-gradient(180deg, rgba(14,10,36,0) 80%, rgba(14,10,36,.3) 100%); }
   `,
   async build(ctx) {
     const { p } = ctx
@@ -113,8 +136,10 @@ export default {
     const THREE = await import('../engine/vendor/three.module.min.js')
     const { RoundedBoxGeometry } = await import('../engine/vendor/RoundedBoxGeometry.js')
 
-    const canvas = ctx.el('canvas', 'is-canvas'); canvas.width = W * SS; canvas.height = H * SS
-    ctx.root.append(canvas, ctx.el('div', 'is-vig'), ctx.el('div', 'is-calm'))
+    const wrap = ctx.el('div', 'is-wrap'), canvas = ctx.el('canvas', 'is-canvas'); canvas.width = W * SS; canvas.height = H * SS
+    wrap.append(canvas)
+    ctx.root.append(wrap, ctx.el('div', 'is-vig'), ctx.el('div', 'is-calm'))
+    const illEl = ctx.root.closest('.ill')
     let renderer
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' })
@@ -252,19 +277,38 @@ export default {
     // Platz vorn (suedwestlicher Block): kleine Baeume, Baenke, Laternen
     // Mitte des Platzes: ein runder Brunnen; Baeume locker drumherum, nicht als Wand
     const FOUNT = [-12.4, 12.4]
-    const plaza = [[-6.2, 6.4], [-10.4, 6.1], [-16.8, 6.6], [-6.3, 11.2], [-6.6, 17.8], [-18.2, 12], [-17.4, 18.2], [-11.6, 19.2]]
+    // Baeume auf den vier Rasenstuecken zwischen den Wegen (die Wege laufen ueber Kreuz zum Brunnen)
+    const plaza = [[-6.2, 6.4], [-9.6, 5.9], [-17.3, 6.4], [-5.9, 9.8], [-6.4, 18.0], [-18.6, 11.4], [-17.6, 18.3], [-10.6, 19.4]]
     plaza.forEach(([x, z], k) => trees.push([x, z, 0.5 + ((k * 37) % 10) / 45, k % 4]))
-    // Keine Laterne an der Ecke zur Kamera: im Bild stand ihr Mast mitten auf dem Weg des Stammkunden
-    const lamps = [[-B - 5.5, B - 0.45], [B - 0.45, -B + 0.45], [-B + 0.45, -B - 12], [-B - 12.5, B - 0.45], [B + 12, -B + 0.45], [B - 0.45, B + 12.5], [-B + 0.45, -B - 34], [-B - 34, -B + 0.45], [B + 34, B - 0.45], [-B - 24, B - 0.45], [B - 0.45, B + 34], [B + 24, -B + 0.45]]
+    // Keine Laterne an der Ecke zur Kamera: im Bild stand ihr Mast mitten auf dem Weg des Stammkunden.
+    // Auch keine am Gehweg vor dem Platz bei x = -8,65: ihr leuchtender Kopf lag im Bild genau vor der eigenen
+    // Tuer und deckte die Beine des Stammkunden, als er herauskam (Review 17.11.2026).
+    const lamps = [[B - 0.45, -B + 0.45], [-B + 0.45, -B - 12], [-B - 12.5, B - 0.45], [B + 12, -B + 0.45], [B - 0.45, B + 12.5], [-B + 0.45, -B - 34], [-B - 34, -B + 0.45], [B + 34, B - 0.45], [-B - 24, B - 0.45], [B - 0.45, B + 34], [B + 24, -B + 0.45]]
+    // Laternen auf dem Platz, an den Wegen zum Brunnen: ihre warmen Lichtkreise geben dem unteren Bilddrittel
+    // etwas zu sehen. In der ersten Probe war es dort fast schwarz, der Brunnen las sich wie ein Pilz.
+    // Am Rand des Pflasterrings, nicht naeher zur Kreuzung: naeher lag der Schein im Bild auf den Fuessen des
+    // Stammkunden, wenn er ueber die Kreuzung geht
+    const plazaLamps = [[FOUNT[0] + 1.0, FOUNT[1] - 4.4], [FOUNT[0] - 1.0, FOUNT[1] + 4.4], [FOUNT[0] + 4.4, FOUNT[1] + 1.0], [FOUNT[0] - 4.4, FOUNT[1] - 1.0]]
+    lamps.push(...plazaLamps)
 
     // ---------------------------------------------------------------- Boden malen
     // Grundfarben, Bordsteinkanten und Kontaktschatten in die Farbtextur, Lichtkegel in die Leuchttextur.
     const shopGlow = { [oursSide]: '185,176,255', [rivalSide]: '255,180,106' }
     const groundTex = canvasTex(GN, GN, g => {
       g.fillStyle = C.road; g.fillRect(0, 0, GN, GN)
+      // Gehwege mit eckigen Ecken: die Platten darauf (slabs) sind eckig. Gemalt waren sie gerundet, und an
+      // jeder Ecke stand die eckige Platte ueber den runden Rand hinaus.
       for (const b of blocks) {
-        g.fillStyle = C.walk; g.beginPath(); g.roundRect(gx(b.x0), gx(b.z0), gx(b.x1) - gx(b.x0), gx(b.z1) - gx(b.z0), 0.9 * GN / GS); g.fill()
-        g.strokeStyle = C.curb; g.lineWidth = 0.2 * GN / GS; g.beginPath(); g.roundRect(gx(b.x0 + 0.12), gx(b.z0 + 0.12), gx(b.x1) - gx(b.x0) - 0.24 * GN / GS, gx(b.z1) - gx(b.z0) - 0.24 * GN / GS, 0.8 * GN / GS); g.stroke()
+        g.fillStyle = C.walk; g.fillRect(gx(b.x0), gx(b.z0), gx(b.x1) - gx(b.x0), gx(b.z1) - gx(b.z0))
+        g.strokeStyle = C.curb; g.lineWidth = 0.2 * GN / GS; g.strokeRect(gx(b.x0 + 0.12), gx(b.z0 + 0.12), gx(b.x1) - gx(b.x0) - 0.24 * GN / GS, gx(b.z1) - gx(b.z0) - 0.24 * GN / GS)
+      }
+      // Platz: vier Rasenstuecke, dazwischen helle Wege ueber Kreuz und ein gepflasterter Ring um den Brunnen
+      {
+        const [fx, fz] = FOUNT, m = GN / GS
+        g.fillStyle = C.lawn
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const x0 = sx < 0 ? fx - 8.8 : fx + 0.8, z0 = sz < 0 ? fz - 8.8 : fz + 0.8; g.beginPath(); g.roundRect(gx(x0), gx(z0), 8 * m, 8 * m, 1.2 * m); g.fill() }
+        g.fillStyle = C.pave; g.beginPath(); g.arc(gx(fx), gx(fz), 4.4 * m, 0, Math.PI * 2); g.fill()
+        g.strokeStyle = C.curb; g.lineWidth = 0.14 * m; g.beginPath(); g.arc(gx(fx), gx(fz), 4.4 * m, 0, Math.PI * 2); g.stroke()
       }
       // Kontaktschatten: weiche dunkle Flaeche um jede Grundflaeche. Liest sich wie Umgebungsverdeckung.
       g.filter = `blur(${Math.round(0.55 * GN / GS)}px)`; g.fillStyle = 'rgba(6,3,20,.62)'
@@ -278,6 +322,9 @@ export default {
       g.fillStyle = '#000'; g.fillRect(0, 0, GN, GN); g.globalCompositeOperation = 'lighter'
       const spot = (x, z, r, rgb, a) => { const gr = g.createRadialGradient(gx(x), gx(z), 0, gx(x), gx(z), r * GN / GS); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(0.45, `rgba(${rgb},${a * 0.45})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = gr; g.fillRect(gx(x - r), gx(z - r), 2 * r * GN / GS, 2 * r * GN / GS) }
       for (const [x, z] of lamps) spot(x, z, 3.6, '255,190,120', 0.4)
+      for (const [x, z] of plazaLamps) spot(x, z, 3.2, '255,196,130', 0.22)
+      // Schein des Brunnens auf dem Pflaster (Lila wie das Wasser)
+      spot(FOUNT[0], FOUNT[1], 4.6, '150,138,255', 0.24)
       // Licht aus Schaufenster und Tuer faellt vor dem Laden auf den Gehweg
       for (const side of ['left', 'right']) {
         const along = side === 'left' ? [[-B - 1.3, -B + 1.2], [-B - 3.8, -B + 1.3]] : [[B - 1.2, B + 1.3], [B - 1.3, B + 3.8]]
@@ -300,8 +347,10 @@ export default {
       if (m < RH + 1.6 || m > P - RH - 1.6) continue // nicht in Kreuzungen
       stripes.push([k * P, s + 0.8, 0.14, 1.5, C.mark], [s + 0.8, k * P, 1.5, 0.14, C.mark])
     }
+    // Fuenf Streifen mittig auf der Fahrbahn, 0,25 m Abstand zum Bordstein. Vorher reichte der aeussere
+    // Streifen 0,13 m unter die Gehwegplatte und endete dort zackig.
     for (let k = 0; k < 5; k++) {
-      const o = -RH + 0.45 + k * 0.82
+      const o = (k - 2) * (RH - 0.45) / 2
       stripes.push([o, -RH - 0.95, 0.4, 1.3, C.zebra], [o, RH + 0.95, 0.4, 1.3, C.zebra], [-RH - 0.95, o, 1.3, 0.4, C.zebra], [RH + 0.95, o, 1.3, 0.4, C.zebra])
     }
     const stripeMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.02, 1), worldMapped(lam('#FFFFFF', { emissive: '#FFFFFF', emissiveMap: glowTex })), stripes.length)
@@ -344,7 +393,7 @@ export default {
     lamps.forEach(([x, z], k) => {
       m4.compose(v3.set(x, CURB + 2.2, z), q.identity(), s3.set(1, 1, 1)); poleMesh.setMatrixAt(k, m4)
       m4.compose(v3.set(x, CURB + 4.5, z), q.identity(), s3.set(1, 1, 1)); headMesh.setMatrixAt(k, m4)
-      if (k < 6) glow('#FFC98A', 2.6, new THREE.Vector3(x, CURB + 4.5, z), 0.55)
+      if (k < 5 || k >= lamps.length - plazaLamps.length) glow('#FFC98A', 2.6, new THREE.Vector3(x, CURB + 4.5, z), 0.55)
     })
     poleMesh.castShadow = true; scene.add(poleMesh, headMesh)
     // Baenke auf dem Platz und drei geparkte Autos: Kleinkram, an dem man die Groesse abliest
@@ -362,14 +411,20 @@ export default {
     }
     car(-17, 1.15, Math.PI / 2, C.cars[0]); car(1.15, -15.5, 0, C.cars[1]); car(15.5, -1.15, Math.PI / 2, C.cars[2])
     {
-      // Brunnen: Becken, Rand, leuchtendes Wasser (Lila), Saeule in der Mitte
+      // Brunnen: Becken mit hellem Rand, leuchtendes Wasser (Lila), schmale Saeule mit Schale und Wasserstrahl.
+      // In der ersten Probe (breite Schale auf dicker Saeule, dunkles Wasser) las er sich wie ein Pilz auf
+      // einer Scheibe; der Strahl und das helle Wasser sagen "Brunnen".
       const [fx, fz] = FOUNT
-      const rim = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.35, 0.55, 28), lam('#4A4475')); rim.position.set(fx, CURB + 0.27, fz); kit.add(rim)
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.35, 0.55, 28), lam('#5A5490')); rim.position.set(fx, CURB + 0.27, fz); kit.add(rim)
+      const lip = new THREE.Mesh(new THREE.TorusGeometry(2.06, 0.15, 6, 36), lam('#7A73B4')); lip.rotation.x = -Math.PI / 2; lip.position.set(fx, CURB + 0.55, fz); kit.add(lip)
       // Wasser knapp ueber dem Rand: der Deckel des Zylinders laege sonst darueber
-      const water = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.9, 0.04, 28), new THREE.MeshBasicMaterial({ color: '#5F56B4' })); water.position.set(fx, CURB + 0.57, fz); kit.add(water)
-      const col1 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 1.3, 10), lam('#5A5488')); col1.position.set(fx, CURB + 1.1, fz); kit.add(col1)
-      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.35, 0.3, 18), lam('#5A5488')); bowl.position.set(fx, CURB + 1.75, fz); kit.add(bowl)
-      glow('#9C92FF', 4, new THREE.Vector3(fx, CURB + 0.8, fz), 0.12)
+      const water = new THREE.Mesh(new THREE.CylinderGeometry(1.92, 1.92, 0.04, 28), new THREE.MeshBasicMaterial({ color: '#7A6FDC' })); water.position.set(fx, CURB + 0.57, fz); kit.add(water)
+      const col1 = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 1.2, 10), lam('#6A64A0')); col1.position.set(fx, CURB + 1.15, fz); kit.add(col1)
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.3, 0.26, 18), lam('#6A64A0')); bowl.position.set(fx, CURB + 1.8, fz); kit.add(bowl)
+      const bowlWater = new THREE.Mesh(new THREE.CylinderGeometry(0.54, 0.54, 0.03, 18), new THREE.MeshBasicMaterial({ color: '#A79EFF' })); bowlWater.position.set(fx, CURB + 1.94, fz); kit.add(bowlWater)
+      const jet = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.09, 0.95, 8), new THREE.MeshBasicMaterial({ color: '#D9D3FF' })); jet.position.set(fx, CURB + 2.4, fz); kit.add(jet)
+      glow('#B3AAFF', 3.2, new THREE.Vector3(fx, CURB + 2.3, fz), 0.3)
+      glow('#9C92FF', 5, new THREE.Vector3(fx, CURB + 0.8, fz), 0.13)
     }
     kit.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true } })
 
@@ -386,7 +441,8 @@ export default {
       const put = (mesh, x, y, z, cast = true) => { mesh.position.set(x, y, z); mesh.castShadow = cast; mesh.receiveShadow = true; g.add(mesh); return mesh }
       const { w, d, h } = SHOP, flip = lots[side].flip
       // a = Abstand von der Ecke zur Kreuzung, entlang der Front -> x im Laden
-      const ax = a => flip ? -w + a : -a, dx = ax(SHOP.door), open = flip ? 1 : -1
+      // open: Drehrichtung des Tuerblatts nach aussen (das Blatt reicht von der Angel weg von der Ecke)
+      const ax = a => flip ? -w + a : -a, dx = ax(SHOP.door), open = flip ? -1 : 1
       // Haus: abgerundeter Block; Erdgeschoss ist der Laden, darueber zwei Etagen Wohnungen
       put(new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, 0.16), std(wallC)), -w / 2, h / 2, -d / 2)
       // Gesims oben, Band ueber dem Laden, Sockel: liest sich wie ein gebautes Haus, nicht wie eine Kiste
@@ -410,7 +466,8 @@ export default {
         c2.fillRect(cw * 0.62, chh * 0.44, cw * 0.16, chh * 0.28)                                // Kasse
         c2.fillStyle = 'rgba(255,255,255,.35)'; c2.beginPath(); c2.moveTo(cw * 0.5, 0); c2.lineTo(cw * 0.62, 0); c2.lineTo(cw * 0.42, chh); c2.lineTo(cw * 0.3, chh); c2.fill() // Spiegelung im Glas
       })
-      put(new THREE.Mesh(new THREE.PlaneGeometry(winW, 1.9), new THREE.MeshBasicMaterial({ map: winTex })), winX, 1.55, 0.14, false)
+      const winMat = new THREE.MeshBasicMaterial({ map: winTex })
+      put(new THREE.Mesh(new THREE.PlaneGeometry(winW, 1.9), winMat), winX, 1.55, 0.14, false)
       // Das Symbol des Ladens gross auf der Scheibe, in der Ladenfarbe (wie ein Aufkleber)
       const ico = await iconImage(icon, '#' + acc.clone().multiplyScalar(ours ? 0.75 : 0.85).getHexString())
       const icoTex = canvasTex(256, 256, (c2, cw) => { c2.drawImage(ico, 0, 0, cw, cw) }, { sharp: true })
@@ -418,9 +475,14 @@ export default {
       // Tuer: Rahmen, dahinter das Licht des Ladens, davor das Tuerblatt (dreht auf, wenn jemand kommt)
       put(new THREE.Mesh(new RoundedBoxGeometry(1.42, 2.6, 0.22, 2, 0.06), std('#140F33')), dx, 1.3, 0.02, false)
       put(new THREE.Mesh(new THREE.PlaneGeometry(1.14, 2.36), new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(1.1) })), dx, 1.2, 0.135, false)
-      // Angel an der Seite weg von der Ecke; das Blatt reicht zur Ecke hin und schwingt nach aussen auf
-      const hinge = new THREE.Group(); hinge.position.set(ax(SHOP.door + 0.57), 0, 0.17); g.add(hinge)
-      const lx = flip ? -0.56 : 0.56
+      // Angel an der Seite ZUR Ecke, das Blatt reicht von der Ecke weg und schwingt nach aussen auf, bis es quer
+      // zur Front steht. Warum: der Stammkunde kommt immer von der Kreuzung, also von der Ecke her, und geht
+      // ueber die Fahrbahn gerade auf die Tuer zu. In der ersten Probe sass die Angel auf der anderen Seite: das
+      // Blatt schwang in seinen Weg, sein Arm steckte bei "enter" im Glas, und von der Kamera aus verdeckte das
+      // offene Blatt genau den Moment, in dem er hineingeht. Jetzt steht es im Bild neben der Tuer, nicht davor.
+      const hingeA = SHOP.door - 0.57
+      const hinge = new THREE.Group(); hinge.position.set(ax(hingeA), 0, 0.17); g.add(hinge)
+      const lx = flip ? 0.56 : -0.56
       const leaf = new THREE.Mesh(new RoundedBoxGeometry(1.12, 2.32, 0.08, 2, 0.03), std(wallC.clone().multiplyScalar(0.55))); leaf.position.set(lx, 1.2, 0); hinge.add(leaf)
       const pane = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.2), new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(0.92) })); pane.position.set(lx, 1.45, 0.05); hinge.add(pane)
       // Markise in Streifen, nur ueber dem Schaufenster (ueber der Tuer haengt die Glocke)
@@ -447,21 +509,33 @@ export default {
         signs.push({ name, size: +(size / chh).toFixed(2), fits: c2.measureText(name).width <= room })
       }, { sharp: true })
       put(new THREE.Mesh(new RoundedBoxGeometry(signW + 0.18, signH + 0.18, 0.24, 2, 0.07), std('#1A1440')), -w / 2, 3.95, 0.12, false)
-      put(new THREE.Mesh(new THREE.PlaneGeometry(signW, signH), new THREE.MeshBasicMaterial({ map: signTex, toneMapped: false })), -w / 2, 3.95, 0.25, false)
+      const signMat = new THREE.MeshBasicMaterial({ map: signTex, toneMapped: false })
+      put(new THREE.Mesh(new THREE.PlaneGeometry(signW, signH), signMat), -w / 2, 3.95, 0.25, false)
       // Schein um das Schild (wie ein Leuchtkasten): weiche Flaeche hinter dem Schild, additiv
       const halo = put(new THREE.Mesh(new THREE.PlaneGeometry(signW + 2.2, signH + 1.6), new THREE.MeshBasicMaterial({ map: blobTex, color: ours ? '#9F95FF' : '#FFB46A', transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false })), -w / 2, 3.95, 0.2, false)
       halo.receiveShadow = false
       // Schornstein (beim Grill gegenueber steigt dort Rauch auf)
       put(new THREE.Mesh(new RoundedBoxGeometry(0.7, 1.3, 0.7, 2, 0.08), std(wallC.clone().multiplyScalar(0.8))), ax(w - 1.1), h + 0.75, -d + 1.2)
       // Licht vor dem Laden: eine echte Punktlichtquelle (faerbt Markise, Figur, Glocke)
-      const pl = new THREE.PointLight(lightC, 18, 8, 1.6); pl.position.set(-w / 2, 2.1, 1.7); g.add(pl)
+      const pl = new THREE.PointLight(lightC, LIGHT, 8, 1.6); pl.position.set(-w / 2, 2.1, 1.7); g.add(pl)
       g.updateMatrixWorld(true)
       const world = (x, y, z) => g.localToWorld(new THREE.Vector3(x, y, z))
-      glow(ours ? '#B9B0FF' : '#FFB46A', 5.5, world(-w / 2, 1.6, 1.0), 0.28)
+      const front = glow(ours ? '#B9B0FF' : '#FFB46A', 5.5, world(-w / 2, 1.6, 1.0), 0.28)
+      // Weg durch diese Tuer: etwas von der Angel weg versetzt, damit Schulter und Arm am offenen Blatt
+      // vorbeigehen (die Figur ist fast so breit wie die Tuer)
+      const walkA = SHOP.door + 0.14
       return {
-        g, hinge, open, light: pl, rot: lots[side].rot,
-        inWorld: world(dx, 0, -0.9), outWorld: world(dx, 0, 1.15),
-        top: world(ax(1.7), h + 1.75, -0.5), chimney: world(ax(w - 1.1), h + 1.5, -d + 1.2), bellPos: world(ax(0.35), 2.95, 0.2)
+        g, hinge, leaf, open, light: pl, rot: lots[side].rot, name,
+        // fuer das Schlussbild (Licht geht aus bzw. an)
+        signMat, winMat, halo, front,
+        // Ecken des Schildes in der Welt (fuer den Pruefkasten)
+        signCorners: [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => world(-w / 2 + sx * (signW + 0.18) / 2, 3.95 + sy * (signH + 0.18) / 2, 0.25)),
+        hingeWorld: world(ax(hingeA), 0, 0.17),
+        // Punkte vor der Tuer, gerade heraus: innen, Schwelle, auf der Fahrbahn (2,3 m vor der Front)
+        at: out => world(ax(walkA), 0, out),
+        // Herz ueber dem Dach, zur Ecke hin geschoben: weiter aussen flogen die Haelften beim Bruch bis
+        // 19 px an den Bildrand (gemessen mit den Pruefkaesten, tools/test_3d.mjs)
+        top: world(ax(0.7), h + 1.75, -0.5), chimney: world(ax(w - 1.1), h + 1.5, -d + 1.2), bellPos: world(ax(0.35), 2.95, 0.2)
       }
     }
     const S = {}
@@ -551,7 +625,7 @@ export default {
       const blob = new THREE.Mesh(new THREE.PlaneGeometry(1.15 * scale, 1.15 * scale), new THREE.MeshBasicMaterial({ color: '#05030F', alphaMap: blobTex, transparent: true, opacity: 0.7, depthWrite: false }))
       blob.rotation.x = -Math.PI / 2; blob.renderOrder = 3; scene.add(blob)
       const at = (x, z, ry) => { fig.position.set(x, CURB, z); fig.rotation.y = ry; blob.position.set(x, CURB + 0.02, z) }
-      return { fig, body, legL, legR, armL, armR, blob, at }
+      return { fig, body, torso, head, legL, legR, armL, armR, blob, at }
     }
     // Zwei Leute am Brunnen, im Gespraech: die Stadt lebt, ohne dass sie vom Stammkunden ablenken
     const chat = [person({ coat: '#8C6BC8', scale: 1.2 }), person({ coat: '#C9786A', hair: '#5A3A2A', scale: 1.15 })]
@@ -559,17 +633,19 @@ export default {
     // Der Stammkunde: hell gekleidet (Papierfarbe), damit er auf dem dunklen Platz sofort zu sehen ist
     let walker = null
     if (p.walker) {
-      const { fig, body, legL, legR, armL, armR, blob } = person({ coat: C.coat, scale: 1.35 })
-      // Weg: aus der Tuer auf den Gehweg, quer ueber die Kreuzung, auf den Gehweg drueben, durch die Tuer
-      const a = origin.inWorld, a1 = origin.outWorld, b1 = goal.outWorld, b = goal.inWorld
-      const path = new THREE.CatmullRomCurve3([a, a1, a1.clone().lerp(b1, 0.33), a1.clone().lerp(b1, 0.66), b1, b], false, 'centripetal')
+      const fig = person({ coat: C.coat, scale: 1.35 })
+      // Weg: aus der Tuer gerade heraus, vom Bordstein auf die Fahrbahn, quer ueber die Kreuzung, und drueben
+      // wieder gerade auf die Tuer zu. Die geraden Stuecke vor den Tueren sind Absicht: das offene Blatt steht
+      // auf der Seite zur Ecke quer zur Front, und wer schraeg von der Kreuzung kaeme, liefe hinein (so war es
+      // in der ersten Probe, mit der Angel auf der anderen Seite: das Blatt schwang in ihn hinein).
+      const path = new THREE.CatmullRomCurve3([origin.at(-0.9), origin.at(0.6), origin.at(2.3), goal.at(2.3), goal.at(0.6), goal.at(-0.9)], false, 'centripetal')
       const len = path.getLength()
       const tW = ctx.at('walk'), tE = ctx.at('enter'), tC = ctx.at('cross')
       if (!(tE > tW + 0.6)) ctx.fail('Anker "enter" muss mindestens 0,6 s nach "walk" liegen')
-      // Wo auf dem Weg die Fahrbahn beginnt (fuer "cross")
-      let uRoad = 0.3
-      for (let i = 0; i <= 400; i++) { const pt = path.getPointAt(i / 400); if (Math.abs(pt.x) < B - 0.05 && Math.abs(pt.z) < B - 0.05) { uRoad = i / 400; break } }
-      walker = { fig, body, legL, legR, armL, armR, blob, path, len, tW, tE, tC, uRoad }
+      // Wo auf dem Weg die Fahrbahn beginnt (fuer "cross"): erster Punkt, der nicht mehr auf einem Gehweg liegt
+      let uRoad = 0.15
+      for (let i = 0; i <= 400; i++) { const pt = path.getPointAt(i / 400); if (Math.min(Math.abs(pt.x), Math.abs(pt.z)) < RH - 0.05) { uRoad = i / 400; break } }
+      walker = { ...fig, path, len, tW, tE, tC, uRoad }
       if (p.tones) ctx.cue(tE, 'ding', 0.6)
     }
     // Wo er zur Zeit t auf dem Weg ist (0 = drinnen hinter der eigenen Tuer, 1 = drinnen drueben). Zu "enter"
@@ -590,29 +666,99 @@ export default {
       }
       return 1
     }
+    // Ab wann er drueben verschwunden ist (dann faellt die Tuer hinter ihm zu)
+    const HIDE_U = walker ? 1 - 0.6 / walker.len : 1
+    if (walker) {
+      const uHide = HIDE_U
+      let lo = walker.tE - 0.5, hi = walker.tE + 0.4
+      for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; if (walkU(mid) < uHide) lo = mid; else hi = mid }
+      walker.tHide = hi
+    }
 
     // ---------------------------------------------------------------- Kamera
     // Langes Objektiv aus grosser Entfernung: Hauskanten bleiben fast senkrecht, das wirkt wie die
     // isometrischen Spielzeugstaedte der Vorbilder. Mit 30 Grad kippten die Haeuser am Rand nach aussen.
-    const camera = new THREE.PerspectiveCamera(22, W / H, 20, 500)
-    // Die Mitte der Szene liegt etwas unter der Bildmitte (oben stehen die Woerter): Bild nach unten verschieben
-    camera.setViewOffset(W, H, 0, -H * 0.05, W, H)
-    const target = new THREE.Vector3(0, 1.6, 0)
+    // FRAME ist der vermessene Endausschnitt (tools/test_3d.mjs prueft ihn an den Grenzen von push und orbit):
+    // beide Fronten mit Schild und das Herz bleiben mindestens 60 px vom Bildrand, und rechts endet das
+    // Schild vor x = 940, also vor der Knopfspalte von TikTok und Reels (ab x = 950). dist: Abstand der Kamera
+    // am Ende der Fahrt; dx: Bild um so viele Pixel nach links (weg von der Knopfspalte); dy: nach unten (oben
+    // stehen die Woerter, das Herz soll mit Luft darunter bleiben).
+    const FRAME = { dist: 100, dx: 46, dy: 108 }
+    const camera = new THREE.PerspectiveCamera(22, W / H, 20, 600)
+    camera.setViewOffset(W, H, FRAME.dx, -FRAME.dy, W, H)
+    const target = new THREE.Vector3()
     const placeCamera = t => {
       const u = smooth((t - ctx.s) / Math.max(0.1, ctx.e - ctx.s))
-      const dist = 86 * (1 - p.push * u), az = THREE.MathUtils.degToRad(45 + p.orbit / 2 - p.orbit * u), el = THREE.MathUtils.degToRad(34 - 1.5 * u)
+      // Die Kamera faehrt von (1 + push) * dist auf dist heran, endet also immer im vermessenen Ausschnitt
+      const dist = FRAME.dist * (1 + p.push * (1 - u)), az = THREE.MathUtils.degToRad(45 + p.orbit / 2 - p.orbit * u), el = THREE.MathUtils.degToRad(34 - 1.5 * u)
+      // Ziel: die Mitte zwischen den beiden Fronten, quer zur Blickrichtung gemessen. Bei 45 Grad liegt sie auf
+      // der Kreuzung; dreht die Kamera, wandert sie mit, sonst laeuft ein Laden zum Bildrand hinaus.
+      const c = SHOP.w * (Math.sin(az) - Math.cos(az)) / 2
+      target.set(c * Math.cos(az), 1.6, c * Math.sin(az))
       camera.position.set(target.x - dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az))
       camera.lookAt(target)
+      // Dunst beginnt hinter der Szene, so dass die Haeuser dahinter noch als Formen zu lesen sind
+      scene.fog.near = dist + 24; scene.fog.far = dist + 118
       return az
     }
 
-    // ---------------------------------------------------------------- Ein Bild zum Zeitpunkt t
-    // Gezeichnet wird nur, solange die Szene zu sehen sein kann (mit Luft fuer Ein- und Ausblenden)
+    // ---------------------------------------------------------------- Pruefkaesten (siehe Kopf der Datei)
+    // Ein unsichtbarer Kasten je wichtigem Ding. Ist das Ding nicht zu sehen, verliert der Kasten data-safe,
+    // dann zaehlt er fuer keine Pruefung. Schilder und Herz bilden eine data-apart-Gruppe: sie duerfen sich
+    // im Bild nicht ueberdecken.
+    const boxes = {}
+    const mkBox = (key, label, apart) => { const e = ctx.el('div', 'is-box'); wrap.append(e); boxes[key] = { e, label, apart } }
+    mkBox('ourSign', 'Schild ' + our.name, true); mkBox('rivSign', 'Schild ' + riv.name, true)
+    if (p.heart) mkBox('heart', 'Herz', true)
+    if (p.walker) mkBox('walker', 'Stammkunde', false)
+    const pv = new THREE.Vector3(), bb = new THREE.Box3()
+    const project = pts => {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
+      for (const q0 of pts) {
+        pv.copy(q0).project(camera)
+        const x = (pv.x + 1) / 2 * W, y = (1 - pv.y) / 2 * H
+        x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y)
+      }
+      return [x0, y0, x1, y1]
+    }
+    const corners = box => { const a = box.min, b = box.max, out = []; for (const x of [a.x, b.x]) for (const y of [a.y, b.y]) for (const z of [a.z, b.z]) out.push(new THREE.Vector3(x, y, z)); return out }
+    const meshBox = meshes => { bb.makeEmpty(); for (const m of meshes) bb.expandByObject(m); return bb.isEmpty() ? null : project(corners(bb)) }
+    const setBox = (key, r) => {
+      const b = boxes[key]; if (!b) return
+      if (!r) { b.e.removeAttribute('data-safe'); b.e.removeAttribute('data-apart'); b.e.style.display = 'none'; return }
+      b.e.dataset.safe = b.label
+      if (b.apart) { b.e.dataset.apart = 'iso-street'; b.e.dataset.label = b.label }
+      const [x0, y0, x1, y1] = r.map(v => Math.round(v * 10) / 10)
+      b.e.style.cssText = `display:block;left:${x0}px;top:${y0}px;width:${Math.max(1, x1 - x0)}px;height:${Math.max(1, y1 - y0)}px`
+    }
+
+    // Tuerblatt: wie weit offen (0 bis 1) und wie weit die Figur von seiner Angel weg ist
+    const SWING = Math.PI / 2 + 0.06 // etwas ueber quer: das Blatt neigt sich von der Tuer weg
+    const fromHinge = (shop, pos) => Math.hypot(pos.x - shop.hingeWorld.x, pos.z - shop.hingeWorld.z)
+    // Schlussbild: Licht des Ladens, den er verlassen hat, geht zurueck; der andere leuchtet auf
+    const shine = (shop, k, flash = 0) => {
+      shop.signMat.color.setScalar(1 - 0.42 * Math.max(0, -k))
+      shop.winMat.color.setScalar(1 - 0.45 * Math.max(0, -k))
+      shop.halo.material.opacity = 0.32 * (1 + (k < 0 ? 0.7 * k : 0.7 * k))
+      shop.front.material.opacity = 0.28 * (1 + (k < 0 ? 0.7 * k : 0.6 * k))
+      shop.light.intensity = LIGHT * (1 + (k < 0 ? 0.6 * k : 0.5 * k)) + 26 * flash
+    }
+
+    // ---------------------------------------------------------------- Zustand zum Zeitpunkt t (ohne Zeichnen)
+    // Gezeichnet wird nur, solange die Szene zu sehen sein kann (mit Luft fuer Ein- und Ausblenden).
+    // In der Ruhelage (?rest=1, fuer die Pruefungen) steht die Szene auf ihrem Anfang.
     const visibleFrom = ctx.sceneStart - 0.8, visibleTo = ctx.sceneEnd + 0.8
     const opening = (t, t0, t1) => smooth((t - t0) / 0.35) * (1 - smooth((t - t1) / 0.5))
-    function draw(t) {
-      if (t < visibleFrom || t > visibleTo) return
+    let shown = false
+    function place(t0) {
+      const t = ctx.rest ? ctx.s : t0
+      shown = t >= visibleFrom && t <= visibleTo
+      if (!shown) { for (const k of Object.keys(boxes)) setBox(k, null); return }
+      // 2D-Kamerafahrt der Szene aufheben (siehe .is-wrap)
+      const illScale = illEl ? parseFloat(getComputedStyle(illEl).scale) : 1
+      wrap.style.scale = illScale > 0 ? String(1 / illScale) : ''
       const az = placeCamera(t)
+      let heartMeshes = []
       if (heart) {
         const h = heart, tc = h.tc
         h.grp.rotation.y = -az // immer zur Kamera
@@ -622,23 +768,28 @@ export default {
         h.grp.position.copy(our.top).add(v3.set(0, 0.16 * Math.sin(t * 1.8), 0))
         const broken = tc != null && t >= tc
         h.wholeM.visible = !broken; h.pivL.visible = h.pivR.visible = broken
-        if (!broken) { h.grp.scale.setScalar(1 + (stress ? 0.1 * beat((t - tc) * 16) : 0.05 * beat(t * 5.5))); h.halo.material.opacity = 0.3 }
+        h.shards.forEach(m => { m.visible = false })
+        if (!broken) { h.grp.scale.setScalar(1 + (stress ? 0.1 * beat((t - tc) * 16) : 0.05 * beat(t * 5.5))); h.halo.material.opacity = 0.3; heartMeshes = [h.wholeM] }
         else {
           const k = t - tc, e = 1 - Math.pow(1 - clamp01(k / 0.55), 3), fall = Math.max(0, k - 0.22)
           h.grp.scale.setScalar(1 + 0.12 * Math.max(0, 1 - k / 0.15))
-          h.pivL.rotation.z = 0.55 * e; h.pivR.rotation.z = -0.55 * e
-          h.pivL.position.x = X0L - 0.45 * e; h.pivR.position.x = X0R + 0.45 * e
+          h.pivL.rotation.z = 0.38 * e; h.pivR.rotation.z = -0.38 * e
+          h.pivL.position.x = X0L - 0.3 * e; h.pivR.position.x = X0R + 0.3 * e
           h.pivL.position.y = h.pivR.position.y = Y0 - 2.4 * fall * fall
           const fade = 1 - clamp01((k - 0.45) / 0.6)
           h.hl.material.opacity = h.hr.material.opacity = fade; h.pivL.visible = h.pivR.visible = fade > 0.01
           h.halo.material.opacity = 0.3 * fade
           h.shards.forEach(m => { const d = m.userData; m.visible = k < 0.9; m.position.set(d.v.x * k, d.v.y * k - 6 * k * k, d.v.z * k); m.rotation.set(d.spin.x * k, d.spin.y * k, d.spin.z * k); m.material.opacity = 1 - clamp01(k / 0.9) })
+          // Fuer die Pruefung zaehlen die Haelften, solange sie mindestens halb zu sehen sind (wie im DOM)
+          if (fade >= 0.5) heartMeshes = [h.hl, h.hr]
         }
       }
       if (walker) {
         const w = walker, u = walkU(t), pos = w.path.getPointAt(clamp01(u)), tan = w.path.getTangentAt(Math.min(0.999, Math.max(0.001, u)))
-        // Drinnen ist er nicht mehr zu sehen: ab der Schwelle steckt er in der Wand, also ausblenden
-        const inside = u <= 0.6 / w.len || u >= 1 - 0.3 / w.len
+        // Drinnen ist er nicht mehr zu sehen: ab der Schwelle steckt er in der Wand, also ausblenden. Drueben
+        // schon 0,3 m hinter der Front: blieb er bis 0,6 m sichtbar, stach der vordere Fuss beim Schritt als
+        // dunkler Tropfen unten aus dem Tuerlicht.
+        const inside = u <= 0.6 / w.len || u >= HIDE_U
         w.fig.visible = w.blob.visible = !inside
         w.fig.position.set(pos.x, CURB, pos.z); w.fig.rotation.y = Math.atan2(tan.x, tan.z)
         // Schrittfolge aus der zurueckgelegten Strecke: so rutschen die Fuesse nicht, egal wie schnell er geht
@@ -647,15 +798,21 @@ export default {
         w.legL.rotation.x = sw; w.legR.rotation.x = -sw; w.armL.rotation.x = -sw * 0.8; w.armR.rotation.x = sw * 0.8
         w.body.position.y = moving ? Math.abs(Math.cos(ph)) * 0.05 : 0
         w.blob.position.set(pos.x, CURB + 0.02, pos.z)
-        // Tueren: drueben geht sie auf, kurz bevor er ankommt, und faellt hinter ihm zu; die eigene, als er herauskommt
-        goal.hinge.rotation.y = goal.open * 1.25 * opening(t, w.tE - 0.6, w.tE + 0.25)
-        origin.hinge.rotation.y = p.from < 0.05 ? origin.open * 1.25 * opening(t, w.tW - 0.35, w.tW + 0.45) : 0
+        // Tueren. Eigene: geht auf, kurz bevor er herauskommt, und erst zu, wenn er 2 m von der Angel weg ist
+        // (das Blatt ist 1,12 m lang, die Figur 0,55 m breit von der Mitte: so streift es ihn nie). Drueben:
+        // geht auf, wenn er noch 3 m weg ist, und faellt zu, sobald er verschwunden ist.
+        const oOpen = p.from < 0.05 ? smooth((t - (w.tW - 0.4)) / 0.35) * (1 - smooth((fromHinge(origin, pos) - 2.0) / 0.6)) : 0
+        const gOpen = (1 - smooth((fromHinge(goal, pos) - 2.6) / 0.6)) * (1 - smooth((t - w.tHide - 0.05) / 0.5))
+        origin.hinge.rotation.y = origin.open * SWING * oOpen
+        goal.hinge.rotation.y = goal.open * SWING * gOpen
         // Ladenglocke: gedaempfte Schwingung ab "enter", dazu zwei Schallringe
         const k = t - w.tE
         bellSwing.rotation.x = k > 0 ? 0.6 * Math.exp(-k * 3) * Math.sin(k * 19) : 0
         rings.forEach((r, i) => { const kk = k - i * 0.16, on = kk > 0 && kk < 0.6; r.visible = on; if (on) { r.scale.setScalar(0.6 + kk * 2.2); r.material.opacity = 0.75 * (1 - kk / 0.6) } })
-        // Licht in der Tuer drueben leuchtet auf, wenn er hineingeht
-        goal.light.intensity = 18 + 26 * opening(t, w.tE - 0.25, w.tE + 0.35)
+        // Licht in der Tuer drueben leuchtet auf, wenn er hineingeht; danach (Schlussbild, "after") wird
+        // der verlassene Laden dunkler und der andere bleibt heller. Vorher stand das Bild nach "enter" still.
+        const fin = p.after ? smooth((t - w.tE - 0.3) / 1.5) : 0
+        shine(origin, -fin); shine(goal, fin, opening(t, w.tE - 0.25, w.tE + 0.35))
       }
       // Die zwei am Brunnen wiegen sich leicht und gestikulieren abwechselnd
       chat.forEach((c, i) => { const ph = t * 2.2 + i * 2; c.body.rotation.z = 0.04 * Math.sin(ph); c.armR.rotation.x = -0.5 * Math.max(0, Math.sin(ph * 0.9 + i * 3)); c.armR.rotation.z = 0.2 * Math.max(0, Math.sin(ph * 0.9 + i * 3)) })
@@ -665,10 +822,56 @@ export default {
         const sz = 0.9 + ph * 2.4; pf.s.scale.set(sz, sz, 1)
         pf.s.material.opacity = 0.4 * Math.sin(ph * Math.PI)
       }
-      renderer.render(scene, camera)
+      // Pruefkaesten: wo die Kamera Schilder, Herz und Figur in diesem Bild hinwirft
+      scene.updateMatrixWorld(); camera.updateMatrixWorld()
+      setBox('ourSign', project(our.signCorners)); setBox('rivSign', project(riv.signCorners))
+      setBox('heart', heartMeshes.length ? meshBox(heartMeshes) : null)
+      setBox('walker', walker && walker.fig.visible ? meshBox([walker.fig]) : null)
     }
     // Ruhelage der Herzhaelften (fuer das Auseinanderfallen)
     const X0L = heart ? heart.pivL.position.x : 0, X0R = heart ? heart.pivR.position.x : 0, Y0 = heart ? heart.pivL.position.y : 0
-    ctx.frame(draw)
+    ctx.place(place)
+    ctx.frame(() => { if (shown) renderer.render(scene, camera) })
+
+    // Nur fuer tools/test_3d.mjs. doorGap: kleinster Abstand zwischen Stammkunde und den Tuerblaettern in diesem
+    // Bild (in Metern; negativ = er steckt im Blatt), so prueft der Test die Tuer in 0,05-s-Schritten ohne
+    // Bilder. drawnBox: rechnet das Bild einmal mit und einmal ohne Figur bzw. Herz und gibt zurueck, wo sich
+    // Pixel aendern; der Test vergleicht das mit dem Pruefkasten (liegt der Kasten wirklich auf dem Ding?).
+    canvas.isoDebug = {
+      drawnBox(what) {
+        const obj = what === 'walker' ? walker && walker.fig : what === 'heart' ? heart && heart.grp : null
+        if (!obj || !obj.visible) return null
+        const gl = renderer.getContext(), cw = canvas.width, chh = canvas.height
+        const grab = () => { renderer.render(scene, camera); const px = new Uint8Array(cw * chh * 4); gl.readPixels(0, 0, cw, chh, gl.RGBA, gl.UNSIGNED_BYTE, px); return px }
+        const with1 = grab(); obj.visible = false; const without = grab(); obj.visible = true; renderer.render(scene, camera)
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, n = 0
+        for (let row = 0; row < chh; row++) for (let x = 0; x < cw; x++) {
+          const i = (row * cw + x) * 4
+          if (Math.abs(with1[i] - without[i]) + Math.abs(with1[i + 1] - without[i + 1]) + Math.abs(with1[i + 2] - without[i + 2]) < 30) continue
+          const y = chh - 1 - row // readPixels liest von unten nach oben
+          n++; x0 = Math.min(x0, x); x1 = Math.max(x1, x + 1); y0 = Math.min(y0, y); y1 = Math.max(y1, y + 1)
+        }
+        return n ? { left: x0 / SS, top: y0 / SS, right: x1 / SS, bottom: y1 / SS, pixels: n } : null
+      },
+      doorGap() {
+        if (!walker || !walker.fig.visible) return null
+        scene.updateMatrixWorld()
+        const w = walker, s = w.fig.scale.x
+        // Kapseln der Figur: Mesh, Radius, Laenge der Achse (wie in person() gebaut)
+        const parts = [[w.torso, 0.27, 0.42], [w.armL.children[0], 0.075, 0.42], [w.armR.children[0], 0.075, 0.42], [w.legL.children[0], 0.1, 0.5], [w.legR.children[0], 0.1, 0.5], [w.head, 0.22, 0]]
+        let best = Infinity
+        const inv = new THREE.Matrix4(), q1 = new THREE.Vector3()
+        for (const shop of [our, riv]) {
+          if (Math.abs(shop.hinge.rotation.y) < 1e-3) continue // zu: dann liegt es in der Front, nicht im Weg
+          inv.copy(shop.leaf.matrixWorld).invert()
+          for (const [mesh, r, l] of parts) for (let i = 0; i <= 8; i++) {
+            q1.set(0, -l / 2 + l * i / 8, 0).applyMatrix4(mesh.matrixWorld).applyMatrix4(inv)
+            const d = Math.hypot(Math.max(0, Math.abs(q1.x) - 0.56), Math.max(0, Math.abs(q1.y) - 1.16), Math.max(0, Math.abs(q1.z) - 0.04)) - r * s
+            best = Math.min(best, d)
+          }
+        }
+        return best === Infinity ? null : +best.toFixed(3)
+      }
+    }
   }
 }
