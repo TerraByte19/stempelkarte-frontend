@@ -39,7 +39,7 @@ stellt keine davon um.
 | A1 | **Länge 40 bis 55 Sekunden** (fertiges Video mit Stimme), 105 bis 115 Wörter. Das zweite Video hat 41,9 s bei 109 Wörtern. Praktisch werden es 40 bis 45 Sekunden: der Entwurf ohne Stimme schätzt in Stil C rund ein Drittel länger, und über 56 Sekunden geschätzt wird nicht aufgenommen, über 60 bricht der Bau ab. Eine Aufnahme darf höchstens 800 Zeichen haben (zwei davon müssen in die Tagesgrenze von 1600 passen). Der Betreiber selbst hat bisher 30 bis 50 Sekunden genannt | `konfig.json`, `video` und `stimme.max_zeichen_voll`, nach seiner Antwort |
 | A2 | **Was nur im Tarifvergleich steht, kommt in kein Video** (`PRODUKT.md`, Klasse 2): Erinnerung nach langer Pause, Geburtstag, Push-Kampagnen, Tagesangebot, Willkommensgeschenk, Kunde wirbt Kunde, Zugänge für Aushilfen | `PRODUKT.md`, nach seiner Bestätigung |
 | A3 | **Das GitHub-Repo gilt als öffentlich.** Ins Repo kommen nur Protokoll, Kassenbuch der Stimme und die Liste der verwendeten Themen (Regel 12) | `konfig.json`, `abzug` |
-| A4 | Der Monat der Stimme ist der Kalendermonat; der Verbrauch im November vor dem ersten Lauf ist auf 4.874 Zeichen geschätzt | `konfig.json`, `stimme.vortrag` |
+| A4 | Der Monat der Stimme ist der Kalendermonat; der Verbrauch im November vor dem ersten Lauf ist auf 5.080 Zeichen geschätzt | `konfig.json`, `stimme.vortrag` |
 | A5 | Gemischt wird auf -14 LUFS, wahre Spitze höchstens -1 dBTP (`konfig.json`, `mix`; vom Betreiber mit dem zweiten Video gewählt). Vom Board wird nichts gelöscht, ein verworfener Tag bleibt leer | `konfig.json`, `mix` und `speicher` |
 | A6 | Vor dem Push läuft kein `npm run build`: der Commit enthält nur Dateien unter `studio/`, und Schritt 24 prüft das | Auftragstext |
 | A7 | Der Lauf startet um 06:47 Uhr deutscher Zeit | Abschnitt 10 |
@@ -1607,7 +1607,7 @@ gesprochenen Textes (`elevenLabs.chars`), wie der Anbieter es berechnet.
 | einzelne Sätze am Tag | 2 (im Sparbetrieb 1) | für Änderungswünsche mit genau einem geänderten Satz |
 | Zeichen am Tag | höchstens 1600 | zwei volle Aufnahmen, oder eine und zwei Sätze |
 | im Kalendermonat (Europe/Berlin) | höchstens 27.000 durch die Automatik | 90 % des Tarifs von 30.000. Der Rest ist Reserve |
-| Vortrag für November 2026 | 4.874 Zeichen, geschätzt (A4) | Aufnahmen für die ersten beiden Videos, bevor es das Kassenbuch gab |
+| Vortrag für November 2026 | 5.080 Zeichen, geschätzt (A4) | Aufnahmen für die ersten beiden Videos, bevor es das Kassenbuch gab |
 
 `budget.mjs` nennt die `stufe`:
 
@@ -1921,6 +1921,6 @@ erste begleitete Lauf (10.3) geht diese Liste durch:
 | ob das Kopieren in der Claude-App am Handy die Zwischenablage erreicht | unbekannt; geht es nicht, markiert die Seite den Text | der Betreiber, am Handy |
 | ob die Texte `lp_price_*` irgendwo live zu sehen sind und die Funktionen dahinter stimmen | auf diesem Branch zeigt sie keine Seite an (A2) | der Betreiber bestätigt |
 | Schritt 1 des Auftragstexts: `add_repo`, Klon und `register_repo_root` in einer geplanten Sitzung, und wohin der Klon geht | nie gelaufen | Schritt 1 |
-| der Vortrag von 4.874 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
+| der Vortrag von 5.080 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
 
 ENDE DER ANLEITUNG

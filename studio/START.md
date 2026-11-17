@@ -48,7 +48,7 @@ müssen:
   evecoo.digital (am 16.11.2026 dazugekommen) und loyaltify.io. Der
   Betreiber hat den **Gratis-Tarif: 20 Beiträge im Monat**. Mit einem Video
   am Tag wird das ab Dezember knapp; was dann gilt, entscheidet er.
-- **Stimme:** im November bisher 4.874 Zeichen (geschätzt, so steht es in
+- **Stimme:** im November bisher 5.080 Zeichen (geschätzt, so steht es in
   `state/konfig.json`, `stimme.vortrag`, und auf dem Board).
 - **Die geplante Aufgabe** "Stampit Produktion" ist angelegt, mit Metricool,
   und seit dem 16.11.2026, 23:01 Uhr, **pausiert**. Der Branch hat den Stil C
@@ -261,7 +261,7 @@ nicht war). Ob sie an oder aus ist, zeigt claude.ai/code/routines. Offen ist:
      Backend-Repo ebenso). Der Betreiber entscheidet, ob er es privat
      stellt. Bis dahin kommt nichts Vertrauliches hinein.
    - Den wahren Verbrauch der Stimme im November bei ElevenLabs ablesen; in
-     `konfig.json` stehen dafür geschätzte 4.874 Zeichen.
+     `konfig.json` stehen dafür geschätzte 5.080 Zeichen.
    - Was ab Dezember gilt, wenn der Gratis-Tarif von Metricool (20 Beiträge
      im Monat) nicht für ein Video am Tag reicht.
    - Ob die vorgeschlagenen Hashtags für Bäckerei, Friseur, Döner und
