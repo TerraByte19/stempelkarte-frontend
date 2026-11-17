@@ -37,8 +37,17 @@ müssen:
   Bild (mindestens 12 Bildwechsel, keines länger als 5 s), kaum Pausen, laut
   gemischt (-14 LUFS). Für "in der Nähe" die Karte von oben, nie eine Figur
   vor der Tür. Beschrieben in `PLAYBOOK.md` ("Stil C") und `AUTOMATIK.md`
-  (Abschnitt 6); die Vorlage `videos/_vorlage` ist ein Beispiel in Stil C. Das
-  erste Video und die beiden Referenzvideos bleiben im alten Stil.
+  (Abschnitt 6); die Vorlage `videos/_vorlage` ist seit dem 17.11.2026 ein
+  Gerüst ohne Geschichte. Das erste Video und die beiden Referenzvideos
+  bleiben im alten Stil.
+- **Formate statt eines Bogens (17.11.2026):** Der Betreiber merkte, dass alle
+  Videos gleich liefen (Papier, Handy, Stempel, Karte von oben,
+  Sperrbildschirm). Seitdem hat jedes Video eins von zehn Formaten
+  (`FORMATE.md`: Tipps, Satz-Tausch, Einwand, Rechnung, Tag im Laden, Duell,
+  Meme, Nähe, Quiz, Studienzahl) und hält Regeln der Abwechslung ein (Format,
+  Nähe, zerknickte Papierkarte, Einstieg, Laden, Schlussfrage). Dafür gibt es
+  fünf neue Bausteine: `tip-cards`, `comment-thread`, `versus-split`,
+  `day-clock`, `big-number`.
 - **Beitragstext je Video:** Hook, ein bis zwei Sätze, "Kommentiere
   STICHWORT", genau 5 Hashtags (Instagram nimmt nicht mehr). Er steht am
   Video auf dem Board (Feld `caption`); `tools/beitrag.mjs` prüft ihn. Die
@@ -93,7 +102,8 @@ und schreibt das Kassenbuch zurück nach `gedaechtnis/stimme`.
 | `studio/PLAYBOOK.md` | Anleitung zum Bauen eines Videos, Stil C, Bausteine, Textregeln, Erkenntnisse (darunter die beiden vermessenen Vorbilder) |
 | `studio/AUTOMATIK.md` | Arbeitsanleitung für den unbeaufsichtigten täglichen Lauf: Regeln, Zustand, die 24 Schritte, Wahl der Idee, Quellen sichern, Grenzen der Stimme, Prüfung mit claude-eyes, der Auftragstext der einen Aufgabe, Liste des Ungeprüften |
 | `studio/PRODUKT.md` | was die App kann, in zwei Klassen: "gesichert" (auf der Landing Page zu sehen) und "nur im Tarifvergleich genannt, noch nicht bestätigt". Dazu, was ein Video nie sagt |
-| `studio/THEMEN.md` | 27 eigene Themen (Laden mal Blickwinkel, je ein erster Satz), davon 16 heute benutzbar; wie aus einem Thema ein Video in Stil C mit genug Bildwechseln wird |
+| `studio/FORMATE.md` | zehn Formate (F01 bis F10) mit Takten, Hook, Bausteinen, Verboten, Schluss und je einem Beispielskript; die Regeln der Abwechslung (V1 bis V7) und wie ein Format gewählt wird |
+| `studio/THEMEN.md` | 39 eigene Themen (Laden mal Blickwinkel, je ein erster Satz und die passenden Formate), davon 30 heute benutzbar |
 | `studio/state/` | `konfig.json` (alle Einstellungen der Automatik: Grenzen der Stimme, Kopf jedes Skripts in Stil C, Richtwerte, Mischung, Posten und Beitragstext mit Hashtags), `start/` (Startfassungen fürs Board), `LIESMICH.md`. Der Abzug vom Board (`board/`) entsteht beim ersten Lauf |
 | `studio/components/`, `studio/engine/`, `studio/tools/` | Bausteine, Zeitleiste, Stimme, Töne, Prüfungen |
 | `studio/tools/budget.mjs` | Kassenbuch der Stimme: rechnet vor jeder Aufnahme nach, ob sie erlaubt ist. Neu, noch nie gelaufen |
@@ -255,8 +265,9 @@ nicht war). Ob sie an oder aus ist, zeigt claude.ai/code/routines. Offen ist:
      dürfen: Erinnerung nach langer Pause, Nachricht zum Geburtstag,
      Push-Kampagnen, Tagesangebot, Willkommensgeschenk, Kunde wirbt Kunde,
      Zugänge für Aushilfen (`PRODUKT.md`, Klasse 2). Neun eigene Themen
-     warten darauf. Zwei weitere (T05, T19, Beispielrechnung) warten auf
-     eine Probe von `calc-panel` in Stil C in einer begleiteten Sitzung.
+     warten darauf. T05 und T19 (Beispielrechnung) gehen seit dem
+     17.11.2026 im Format F04, mit `calc-panel` so wie im Döner-Video; ob
+     der Lauf Rechnungen bauen soll, kann der Betreiber zurücknehmen.
    - Das GitHub-Repo ist öffentlich (nachgesehen am 16.11.2026, das
      Backend-Repo ebenso). Der Betreiber entscheidet, ob er es privat
      stellt. Bis dahin kommt nichts Vertrauliches hinein.

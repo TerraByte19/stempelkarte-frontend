@@ -413,6 +413,30 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
   check('Laute Mischung ("mix.lufs"): trifft -14 LUFS auf ein halbes LU und bleibt unter -1 dBTP', !!r && r.ok && Math.abs(r.lufs + 14) <= 0.5 && r.truePeak <= -1, r ? `${r.lufs} LUFS, wahre Spitze ${r.truePeak} dBTP, ${r.passes} Durchgänge (vorher ${r.before.lufs} LUFS)` : sx.err.slice(0, 120))
 }
 
+// ---- Bausteine der Formate (17.11.2026): FORMATE.md erzaehlt zehn Formate, damit nicht jedes Video denselben
+// Bogen laeuft (Papier, Handy, Stempel, Karte von oben, Sperrbildschirm). Dafuer gibt es fuenf Bilder, die weder
+// Papierkarte noch Handy sind. Festgenagelt: jedes baut mit seinem Katalog-Beispiel ohne Fehler und ohne Hinweis,
+// nichts Wichtiges liegt in Sperrzone oder Knopfspalte, und jedes lehnt seine haeufigste falsche Angabe mit einer
+// klaren Meldung ab, statt still ein falsches Bild zu zeigen.
+{
+  const cta = { component: 'cta-comment', captions: [{ lines: ['Klingt interessant?'], keep: true }, { role: 'cta', lines: ['Dann kommentiere jetzt KARTE,{Karte,}', 'und wir melden uns bei dir.'] }] }
+  const one = (component, params, captions) => ({ meta: { title: 't', slug: 't' }, scenes: [{ component, params, captions }, cta] })
+  const sauber = r => r.state.duration > 0 && r.res.checks.filter(c => ['seite', 'sperrzonen', 'einzeiler', 'ueberdeckung', 'ueberlauf', 'hinweise', 'knopfspalte', 'textabstand'].includes(c.name)).every(c => c.ok)
+  const warum = r => r.res.checks.filter(c => !c.ok && c.name !== 'laenge').flatMap(c => c.details).concat(r.state.duration ? [] : r.res.errors).join(' | ').slice(0, 200)
+  for (const name of ['tip-cards', 'comment-thread', 'versus-split', 'day-clock', 'big-number']) {
+    const mod = (await import(path.join(STUDIO_ROOT, 'components', name + '.js'))).default
+    const r = await page(one(name, (mod.demo && mod.demo.params) || {}, mod.demo.captions), null, { motion: true })
+    check(`Baustein ${name} (Formate): Katalog-Beispiel baut ohne Fehler und ohne Hinweis, nichts in Sperrzone oder Knopfspalte`, sauber(r), warum(r))
+  }
+  const lehnt = async (label, scr, re) => { const r = await page(scr); check(label, !r.res.ok && re.test(r.res.errors.join(' ')), String(r.res.errors[0] || 'kein Fehler').slice(0, 130)) }
+  const satz = [{ lines: ['Ein Satz', 'für das Bild.'] }]
+  await lehnt('Prüfung schlägt an: Tipp-Karte mit einem Satz über 60 Zeichen', one('tip-cards', { items: [{ title: 'Sprich deine Stammkunden immer mit ihrem Namen an, auch wenn viel los ist.' }] }, satz), /höchstens 60/)
+  await lehnt('Prüfung schlägt an: Kommentar mit unbekanntem Urteil (nur "stimmt" oder "falsch")', one('comment-thread', { verdict: 'vielleicht', typed: false }, satz), /"verdict"/)
+  await lehnt('Prüfung schlägt an: Duell mit einem Spielstand, der keine zwei Zahlen hat', one('versus-split', { score: [1], winner: 'right' }, [{ lines: ['Runde eins:', 'Regen.'] }]), /"score"/)
+  await lehnt('Prüfung schlägt an: Tagesuhr läuft rückwärts ("from" nach "time")', one('day-clock', { time: '07:10', from: '09:00' }, satz), /nur vorwärts/)
+  await lehnt('Prüfung schlägt an: Fallblatt-Tafel mit mehr als 7 Zeichen', one('big-number', { value: '12.345,67 €' }, satz), /höchstens 7 Zeichen/)
+}
+
 // ---- Stimme (Python)
 const py = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'test_voice.py')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
 process.stdout.write(py.out.split('\n').filter(l => l.startsWith('ok') || l.startsWith('FEHLER')).map(l => '  [voice] ' + l).join('\n') + '\n')

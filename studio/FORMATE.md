@@ -107,7 +107,10 @@ Für alle gilt Stil C (`AUTOMATIK.md` 6): 105 bis 115 Wörter, fertig rund 40
 bis 45 s (Zeiten unten sind fertige Sekunden, der Entwurf schätzt ein Drittel
 mehr), mindestens 12 Bildwechsel, kein Bild über 5 s, Hook ab Bild 0, ein
 Laden aus `THEMEN.md`, Schluss = Frage des Formats, dann
-`Dann kommentiere jetzt STICHWORT,` / `und wir melden uns bei dir.`
+`Dann kommentiere jetzt STICHWORT,` / `und wir melden uns bei dir.` Die
+Schlussfrage hat **höchstens zwei Wörter** (wie "Klingt interessant?"): mit drei
+und mehr stand das Schlussbild in jedem Entwurf über 5 s, und lange Fragen
+passen in `"mode": "zeile"` nicht in eine Zeile (Proben vom 17.11.2026).
 
 **"Handy spät"** heißt: kein Bild der Karte im Handy (`wallet-pass`,
 `lock-notification`, `versus-split`) vor den letzten 10 s vor dem letzten
@@ -126,23 +129,23 @@ Drei echte Tipps für Stammkunden, nummeriert; das Produkt ist erst der letzte S
 |---|---|
 | Takte | Hook mit Pinnwand, Zettel noch leer (0 bis 4 s) · Tipp 1, Karte und ein Bild dazu (4 bis 13 s) · Tipp 2 genauso (13 bis 22 s) · Tipp 3 (22 bis 30 s) · das Produkt als Folge von Tipp 3 (30 bis 34 s) · Schluss (34 bis 42 s) |
 | Hook | H05 (W-Frage, deren Antwort das Video ist) oder H08 (Ich-Form) |
-| Bausteine | `tip-cards` je Tipp ein Teil (`show` 1, 2, 3; im Einstieg `"rise": false` und Anker `card` auf das erste Wort von Tipp 1), dazwischen mit Schnitt ein Bild zum Tipp: `week-strip` (Rhythmus, `"rivalWeek": 0`), `big-number` ("2" für "noch zwei Stempel"), `day-clock`; am Ende `wallet-pass` mit `"scan": false` |
+| Bausteine | `tip-cards` je Tipp ein Teil (`show` 1, 2, 3; im Einstieg Anker `card` auf das erste Wort von Tipp 1: bis dahin hängen nur Überschrift und Zettel-Leiste, Bild 0 ist trotzdem fertig), dazwischen mit Schnitt ein Bild zum Tipp: `week-strip` (Rhythmus, `"rivalWeek": 0`), `big-number` ("2" für "noch zwei Stempel"), `day-clock`; am Ende `wallet-pass` mit `"scan": false` |
 | Nie | erfundene Zahlen ("80 % kommen wieder"), "Studien zeigen", Versprechen ("so verdoppelst du"), das Produkt in Tipp 1 oder 2, Nähe, Papier-Knick |
 | Produkt | nur der letzte Satz vor dem Schluss, eine Aussage (A1, A2 oder B2) |
-| Schluss | "Soll deine Karte auch ins Handy?" |
+| Schluss | "Gleich probieren?" |
 
 Tipps, die wahr und allgemein sind: den Rhythmus eines Stammkunden kennen; seine
 Bestellung oder Sorte merken; ihm sagen, wie weit er ist ("noch zwei"); den
 nächsten Besuch beim Namen nennen ("bis Freitag"); die Belohnung erreichbar
 machen (die Zahl der Stempel legt der Laden fest, D2).
 
-Beispiel (Eis am Markt, EIS, 107 Wörter):
+Beispiel (Eis am Markt, EIS, 105 Wörter):
 > [tip-cards, Einstieg] Was macht aus einem Gast einen Stammgast? Drei Dinge, ab morgen.
-> [tip-cards 1] Eins: Kenn seinen Rhythmus. [week-strip] Kommt er jeden Dienstag und Freitag, merkst du sofort, wenn er einmal fehlt. Dann frag nach, ob alles gut ist.
-> [tip-cards 2] Zwei: Merk dir seine Sorte. [Kamera auf die Karte] Wie immer, Pistazie? Mit diesem einen Satz weiß er, dass du ihn kennst.
+> [tip-cards 1] Eins: Kenn seinen Rhythmus. [week-strip] Kommt er jeden Dienstag und jeden Freitag, merkst du sofort, wenn er einmal fehlt. Dann frag nach, ob alles gut ist.
+> [tip-cards 2] Zwei: Merk dir seine Sorte. [Kamera auf die Karte] Wie immer, Pistazie? Mit diesem einen Satz weiß er, dass du ihn wirklich kennst.
 > [tip-cards 3] Drei: Sag ihm, wie weit er ist. [big-number "2"] Noch zwei Stempel, dann ist die Kugel gratis. So hat er ein Ziel, und das kostet dich keinen Cent.
 > [wallet-pass] Bei Eis am Markt steht das auf seinem Handy, in der Wallet.
-> [cta-comment] Soll deine Karte auch ins Handy? Dann kommentiere jetzt EIS, und wir melden uns bei dir.
+> [cta-comment] Gleich probieren? Dann kommentiere jetzt EIS, und wir melden uns bei dir.
 
 ### F02 Sag nicht, sag lieber (Wert)
 
@@ -155,15 +158,15 @@ Drei Sätze an der Theke, jeder wird durchgestrichen und durch einen besseren er
 | Bausteine | `tip-cards` mit `label` "Sag nicht:" und `better`, Anker `strike` und `swap`, Kamera nach dem Tausch; dazwischen `week-strip` (der Tag, den der bessere Satz nennt), `big-number` (die Zahl im Satz), `day-clock`; am Ende `wallet-pass` |
 | Nie | Kunden lächerlich machen (`HOOKS.md` 4.3, Punkt 4), Sätze, die eine Funktion aus Klasse 2 voraussetzen ("Ich schick dir eine Nachricht"), Nähe |
 | Produkt | nur im letzten Satz vor dem Schluss: der Stand steht auf dem Handy (A1, B2) |
-| Schluss | "Welchen Satz sagst du ab morgen?" |
+| Schluss | "Welcher zuerst?" |
 
 Beispiel (Bäckerei Morgenrot, BROT, 105 Wörter):
-> [tip-cards 1, Einstieg] Schönen Tag noch. Der falsche Satz für Stammkunden. Drei Sätze, die besser sind.
-> [streichen, tauschen] Sag lieber: Bis Freitag! [week-strip] Damit sagst du: Ich weiß, wann du kommst, und ich freu mich drauf.
+> [tip-cards 1, Einstieg] Schönen Tag noch. Der falsche Satz für Stammkunden. Hier drei Sätze, die besser sind.
+> [streichen, tauschen] Sag lieber: Bis Freitag! [week-strip] Damit sagst du: Ich weiß, wann du kommst, und ich freu mich schon drauf.
 > [tip-cards 2] Sag nicht: Haben Sie eine Stempelkarte? [tauschen] Sag lieber: Noch drei, dann ist dein Brötchen gratis. [big-number "3"] Ein Ziel in Sicht ist mehr wert als jede Frage nach der Karte.
-> [tip-cards 3] Sag nicht: Kommen Sie mal wieder. [tauschen] Sag lieber: Samstag gibt es wieder Mohnschnecken. [day-clock Samstag 07:00] Ein Grund zum Wiederkommen schlägt jede Floskel.
+> [tip-cards 3] Sag nicht: Kommen Sie mal wieder. [tauschen] Sag lieber: Samstag gibt es wieder Mohnschnecken. [day-clock 07:00] Ein echter Grund zum Wiederkommen schlägt jede höfliche Floskel.
 > [wallet-pass] Den Stand sieht er bei dir im Handy, in der Wallet.
-> [cta-comment] Welchen Satz sagst du ab morgen? Dann kommentiere jetzt BROT, und wir melden uns bei dir.
+> [cta-comment] Welcher zuerst? Dann kommentiere jetzt BROT, und wir melden uns bei dir.
 
 ### F03 Ein Kommentar, eine Antwort (Einwand)
 
@@ -174,20 +177,20 @@ Eine Frage wird als Kommentar getippt, das Video beantwortet sie; danach höchst
 | Takte | Frage getippt (0 bis 3 s) · kurze Antwort, groß (3 bis 6 s) · Beweis in Bildern (6 bis 18 s) · Nachfrage als zweiter Kommentar, Antwort, Bild (18 bis 28 s) · Pointe (28 bis 32 s) · Schluss (32 bis 42 s) |
 | Hook | H06 (der Einwand zuerst, der nächste Satz antwortet: `HOOKS.md` 1.6, Ausnahme b) |
 | Bausteine | `comment-thread` (Einstieg mit `"typed": true`, `send` auf das letzte Wort der Frage, `reply` mit der Antwort in höchstens 60 Zeichen), `wallet-pass` (Scan, dann Stempel), zweiter `comment-thread` mit `"typed": false`, `stamp-check` |
-| Fragen mit Antwort in Klasse 1 | "Brauchen meine Kunden dafür eine App?" (A2, A3, A1) · "Wie kommt der Stempel aufs Handy?" (B1, B2) · "Wie viele Stempel braucht die Karte?" (D2) · "Und der Datenschutz?" (F1, nur gesprochen) · "Was, wenn die Papierkarte verloren geht?" (A4) |
+| Fragen mit Antwort in Klasse 1 | "Brauchen meine Kunden dafür eine App?" (A2, A3, A1) · "Wie kommt der Stempel aufs Handy?" (B1, B2) · "Wie viele Stempel braucht die Karte?" (D2) · "Geht das nur mit Apple?" (A1) · "Und der Datenschutz?" (F1: nur gesprochen, also ohne `reply` und ohne Stempel) · "Was, wenn die Papierkarte verloren geht?" (A4) |
 | Nie | "Was kostet das?", "Gibt es einen Test?", "Brauche ich ein Gerät?", "Muss sich der Kunde anmelden?" (N1, N6, N7, N13: keine Antwort in Klasse 1); ein erfundener Name als Absender (`author` bleibt "Du") |
 | Produkt | von Anfang an, es ist die Antwort |
-| Schluss | "Noch eine Frage?" |
+| Schluss | "Noch Fragen?" |
 
-Beispiel (Salon Haarscharf, SALON, 95 Wörter):
+Beispiel (Salon Haarscharf, SALON, 106 Wörter):
 > [comment-thread, getippt] Brauchen meine Kunden dafür eine App?
-> [Antwort erscheint] Nein. Einmal scannen, fertig. Und das geht so.
-> [wallet-pass, Scan] Deine Kundin scannt einmal einen QR-Code, gleich hier im Salon. Danach liegt die Karte in Apple oder Google Wallet. Kein Store, kein Download.
+> [Antwort erscheint] Nein. Einmal scannen, fertig. Und das geht so, Schritt für Schritt.
+> [wallet-pass, Scan] Deine Kundin scannt einmal einen QR-Code, gleich hier im Salon, noch mit nassen Haaren. Danach liegt die Karte in Apple oder Google Wallet. Kein Store, kein Download.
 > [comment-thread, zweite Frage] Und wie kommt der Stempel drauf?
-> [wallet-pass, Stempel] Du scannst ihre Karte mit der Handy-Kamera. Der Stempel ist sofort auf ihrem Handy. Bei jedem Haarschnitt wieder.
-> [comment-thread, dritte Frage] Und der Datenschutz? [Antwort] DSGVO-konform und in Deutschland entwickelt.
+> [wallet-pass, Stempel] Du scannst ihre Karte mit der Handy-Kamera, ganz ohne Stempelkissen. Der Stempel ist sofort auf ihrem Handy. Bei jedem Haarschnitt wieder, ganz einfach.
+> [comment-thread, dritte Frage, ohne `reply`: F1 ist nur gesprochen] Und der Datenschutz? DSGVO-konform und in Deutschland entwickelt.
 > [stamp-check] Eine Karte im Handy, ganz ohne App! Und ohne Papier, das verloren geht.
-> [cta-comment] Noch eine Frage? Dann kommentiere jetzt SALON, und wir melden uns bei dir.
+> [cta-comment] Noch Fragen? Dann kommentiere jetzt SALON, und wir melden uns bei dir.
 
 ### F04 Rechnen wir mal (Rechnung)
 
@@ -200,19 +203,19 @@ Eine Beispielrechnung Schritt für Schritt, jede Zahl ein eigenes Bild; das Prod
 | Bausteine | `big-number` je Faktor (mit `from` = Zwischenstand davor, `sub` "Beispiel"), `week-strip` für "wie oft", dann `calc-panel` als Zusammenfassung: alle Zeilen auf den Wörtern **einer** Textzeile, `result` auf die Ergebniszahl, Kamera 1,2 wie im Döner-Video; am Ende `wallet-pass` |
 | Nie | Zahlen über die App, "garantiert", Umsatz als Zusage, mehr als drei Faktoren, viele Stammkunden (Geschmack des Betreibers: wenige, die öfter kommen), Preise der App |
 | Produkt | letzter Satz vor dem Schluss (A1, A4 oder B2) |
-| Schluss | "Lohnt sich das für deinen Laden?" |
+| Schluss | "Lohnt sich das?" |
 
 Die Rechnung muss aufgehen: `calc-panel` rechnet das Produkt nach, und
 `big-number` zeigt nur Zahlen, die in `calc-panel` wieder vorkommen.
 
-Beispiel (Salon Haarscharf, SALON, 102 Wörter, T05):
+Beispiel (Salon Haarscharf, SALON, 106 Wörter, T05):
 > [big-number "2", Einstieg] Zwei Haarschnitte mehr im Jahr. Klingt nach wenig, oder? Rechnen wir mal.
-> [big-number "40"] Nimm vierzig Stammkunden, nicht mehr. [week-strip] Jeder kommt nur zweimal mehr im Jahr.
-> [big-number "25 €"] Bei jedem Schnitt bleiben dir fünfundzwanzig Euro.
-> [calc-panel] Vierzig mal zwei mal fünfundzwanzig. Das sind zweitausend Euro mehr im Jahr. [Kamera] Ein Beispiel, kein Versprechen. Aber eine Richtung.
+> [big-number "40"] Nimm vierzig Stammkunden, nicht mehr, nicht weniger. [week-strip] Jeder kommt nur zweimal mehr im Jahr, mehr nicht.
+> [big-number "25 €"] Bei jedem Schnitt bleiben dir, sagen wir, fünfundzwanzig Euro.
+> [calc-panel] Vierzig mal zwei mal fünfundzwanzig. Das sind zweitausend Euro mehr im Jahr. [Kamera] Ein Beispiel, kein Versprechen. Aber eine klare Richtung.
 > [tip-cards, ein Zettel] Was holt sie öfter zurück? Ein Grund, an dich zu denken. Zum Beispiel eine Karte, die fast voll ist und nicht im Portemonnaie zerfällt.
 > [wallet-pass] Bei Salon Haarscharf liegt sie im Handy, in der Wallet, ohne App.
-> [cta-comment] Lohnt sich das für deinen Salon? Dann kommentiere jetzt SALON, und wir melden uns bei dir.
+> [cta-comment] Lohnt sich das? Dann kommentiere jetzt SALON, und wir melden uns bei dir.
 
 ### F05 Ein Tag im Laden (Geschichte)
 
@@ -225,15 +228,15 @@ Ein Tag in Uhrzeiten, vom Aufschließen bis zum Feierabend; das Produkt taucht a
 | Bausteine | `day-clock` je Uhrzeit (`from` = Uhrzeit davor, `events` = die früheren), dazwischen mit Schnitt `shop-door` mit `"accent": "#5A4FCF"` (der Stammkunde kommt), `wallet-pass` (Scan, Stempel), `stamp-check` |
 | Nie | Sperrbildschirm, Karte von oben (kein Bild der Nähe), Papier-Knick, Zahlen zum Umsatz, echte Namen |
 | Produkt | in der Mitte, als Teil des Tages (B1, B2, A3, A2), nie als Erklärung |
-| Schluss | "Wie sieht dein Tag aus?" |
+| Schluss | "Dein Tag?" |
 
-Beispiel (Bäckerei Morgenrot, BROT, 108 Wörter):
+Beispiel (Bäckerei Morgenrot, BROT, 105 Wörter):
 > [day-clock 06:00, Einstieg] Sechs Uhr. Der Ofen läuft, die Bäckerei Morgenrot macht auf.
 > [day-clock 07:10] Sieben Uhr zehn. [shop-door] Der erste Stammkunde, wie jeden Morgen: zwei Brötchen, ein Kaffee. [wallet-pass, Stempel] Ein Scan mit der Handy-Kamera, und der Stempel ist sofort auf seinem Handy.
 > [day-clock 09:30] Halb zehn. Eine Neue fragt nach der Stempelkarte, zum ersten Mal hier. [wallet-pass, Scan] Sie scannt einmal den QR-Code. Die Karte liegt in ihrer Wallet, ohne App.
 > [day-clock 12:15] Viertel nach zwölf. Die Schlange reicht bis zur Tür. Keiner sucht eine Papierkarte, jeder Stempel ist ein Scan.
 > [day-clock 19:00] Sieben Uhr abends. Feierabend. [stamp-check] Kein Stempelkissen, keine Karte vergessen! Und morgen geht es weiter.
-> [cta-comment] Wie sieht dein Tag aus? Dann kommentiere jetzt BROT, und wir melden uns bei dir.
+> [cta-comment] Dein Tag? Dann kommentiere jetzt BROT, und wir melden uns bei dir.
 
 ### F06 Papier gegen Handy (Duell)
 
@@ -243,18 +246,18 @@ Beide Karten nebeneinander, Runde für Runde, mit Spielstand; eine Runde endet e
 |---|---|
 | Takte | Ansage mit beiden Karten (0 bis 4 s) · Runde 1 (4 bis 11 s) · Runde 2 (11 bis 19 s) · Runde 3, Unentschieden (19 bis 26 s) · Runde 4 (26 bis 31 s) · Endstand, Pokal (31 bis 34 s) · Schluss (34 bis 42 s) |
 | Hook | H11 (zwei Dinge gegeneinander), Laden im Satz |
-| Bausteine | `versus-split` je Runde ein Teil: `"scene"` `start`, `regen` (A4), `vergessen` (A4, B1, B2), `app` (A2, `"winner": "both"`), `knick` (A4, nur wenn V3 es erlaubt), `ende`; `score` = Stand vor der Runde. Kamera nur nach 6.3 |
+| Bausteine | `versus-split` je Runde ein Teil: `"scene"` `start`, `regen` (A4), `vergessen` (A4, B1, B2), `app` (A2, `"winner": "both"`), `knick` (A4, nur wenn V3 es erlaubt), `ende`; `score` = Stand vor der Runde. Jede Runde beginnt von selbst mit einem Banner quer durchs Bild ("Runde 2 / Vergessen"; Anker `action` frühestens auf das zweite Wort, sonst ist es nach 0,5 s weg). Je Runde eine Kamera hinein und zurück (`AUTOMATIK.md` 6.3): so kommen fünf Runden-Szenen auf zwölf Bildwechsel |
 | Nie | eine Runde, die das Handy nur durch Klasse 2 gewinnt (Erinnerung, Nachricht, Geburtstag), eine Runde zur Nähe (C1 hat hier kein Bild), Spott über Kunden |
 | Produkt | durchgehend, als rechte Seite |
-| Schluss | "Welche Karte hat dein Laden?" |
+| Schluss | "Dein Favorit?" |
 
-Beispiel (Döner Palast, IMBISS, 102 Wörter):
-> [versus-split start, Einstieg] Papierkarte gegen Handy. Drei Runden, im Döner Palast. Wer gewinnt?
-> [regen] Runde eins: Regen. Die Papierkarte wird Matsch. Die Karte im Handy bleibt, wie sie ist. Punkt fürs Handy.
+Beispiel (Döner Palast, IMBISS, 105 Wörter):
+> [versus-split start, Einstieg] Papierkarte gegen Handy. Drei Runden, im Döner Palast. Wer gewinnt am Ende?
+> [regen] Runde eins: Regen auf dem Heimweg. Die Papierkarte wird Matsch. Die Karte im Handy bleibt, wie sie ist. Punkt fürs Handy.
 > [vergessen] Runde zwei: Karte zu Hause vergessen. Papier heißt: heute kein Stempel. Handy heißt: ein Scan mit der Kamera, und der Stempel ist sofort drauf. Zwei zu null.
 > [app] Runde drei: eine App laden? Braucht keiner von beiden. Einmal den QR-Code scannen, und die Karte liegt in der Wallet. Unentschieden! Fair ist fair.
-> [ende] Endstand: drei zu eins fürs Handy. Glückwunsch, Handy.
-> [cta-comment] Welche Karte hat dein Imbiss? Dann kommentiere jetzt IMBISS, und wir melden uns bei dir.
+> [ende] Endstand: drei zu eins fürs Handy. Glückwunsch, liebes Handy.
+> [cta-comment] Dein Favorit? Dann kommentiere jetzt IMBISS, und wir melden uns bei dir.
 
 ### F07 Meme-Bogen (Meme)
 
@@ -264,18 +267,18 @@ Ein Meme aus `HOOKS.md` 3.2 als Rahmen: erste Hälfte im Hook, zweite Hälfte al
 |---|---|
 | Takte | Meme-Hook (0 bis 4 s) · das Bild, das die Erwartung baut (4 bis 12 s) · Wendung (12 bis 15 s, Pointe nach 10 bis 14 s, `HOOKS.md` H10) · zwei oder drei kurze Belege (15 bis 32 s) · Schluss (32 bis 42 s) |
 | Hook | H10 mit dem Meme nach `HOOKS.md` 4.1 und 4.2 |
-| Bausteine | die Spalte "Bild" des Memes in `HOOKS.md` 3.2; für "Erwartung / Realität" und "Red Flag / Green Flag" auch `versus-split` mit eigenen `leftLabel` und `rightLabel` |
+| Bausteine | die Spalte "Bild" des Memes in `HOOKS.md` 3.2; für "Red Flag / Green Flag" (M24) auch `versus-split` mit `leftLabel` "Red Flag" und `rightLabel` "Green Flag" (links steht immer Papier, rechts das Handy: für "Erwartung / Realität" passt es deshalb nicht) |
 | Nie | ein zweites Meme, fremder Ton, eine Figur oder Sprechweise der Vorlage (`HOOKS.md` 4.3). Die Skripte in 3.2 mit `shop-map` nur, wenn V2 die Nähe erlaubt; sonst die Fassung des Memes ohne C1 |
 | Produkt | in der Pointe (sie ist eine Aussage aus Klasse 1) und in den Belegen |
-| Schluss | eine Frage zum Meme, z. B. "Wann machst du wieder auf?" |
+| Schluss | eine Frage zum Meme aus zwei Wörtern, z. B. "Und du?" |
 
-Beispiel (Eis am Markt, EIS, M05, 98 Wörter):
+Beispiel (Eis am Markt, EIS, M05, 105 Wörter):
 > [paper-card, Einstieg] Deine Eisdiele macht Winterpause. Rate mal, was mit den Stempelkarten passiert.
-> [paper-card, Kamera] Auf Papier: Sie liegen bis März in Schubladen, unter Kassenbons, im Altpapier. [guest-ghost] Und keiner weiß mehr, wie weit er war.
-> [stamp-check] Im Handy: nichts! Gar nichts.
-> [wallet-pass] Sie bleiben in Apple oder Google Wallet, den ganzen Winter, mit jedem Stempel. Die Karte zerknickt nicht und geht nicht verloren.
-> [day-clock] Im März kommt die erste Kundin wieder. [wallet-pass, Stempel] Ein Scan mit der Handy-Kamera, und der Stempel ist sofort drauf. Genau da, wo sie im Herbst aufgehört hat.
-> [cta-comment] Wann machst du wieder auf? Dann kommentiere jetzt EIS, und wir melden uns bei dir.
+> [paper-card, Kamera] Auf Papier: Sie liegen bis März in Schubladen, unter Kassenbons, im Altpapier. [guest-ghost] Und keiner weiß mehr, wie weit er war. Acht Stempel? Oder drei?
+> [stamp-check] Im Handy: nichts! Gar nichts, wirklich.
+> [wallet-pass] Sie bleiben einfach in Apple oder Google Wallet, den ganzen Winter, mit jedem Stempel. Die Karte zerknickt nicht und geht nicht verloren.
+> [shop-door, eigener Laden] Im März kommt die erste Kundin wieder, und die Sonne auch. [wallet-pass, Stempel] Ein Scan mit der Handy-Kamera, und der Stempel ist sofort drauf. Genau da, wo sie im Herbst aufgehört hat.
+> [cta-comment] Und du? Dann kommentiere jetzt EIS, und wir melden uns bei dir.
 
 ### F08 Der Moment in der Nähe (C1 als Kern)
 
@@ -288,17 +291,17 @@ Das einzige Format mit Karte von oben und Sperrbildschirm im Mittelpunkt: der Mo
 | Bausteine | `lock-notification` (Werte aus 6.4, Text mit dem Stand), `shop-map`, `wallet-pass` (Scan, Stempel), `lock-notification` als Sicht des Ladens |
 | Nie | Papier (`paper-card`, `wallet-vanish`, `guest-ghost`, `card-bin`): das war der alte Bogen. Entfernung, Häufigkeit, "vibriert" (N3, `HOOKS.md` 1.6) |
 | Produkt | durchgehend (C1, A2, A3, B2) |
-| Schluss | "Willst du da auch stehen?" |
+| Schluss | "Du auch?" |
 | Takt | höchstens eins in drei Videos (V2), nie direkt nach einem `A0` |
 
-Beispiel (Bäckerei Morgenrot, BROT, 100 Wörter, T16):
-> [lock-notification, Einstieg] Kurz vor acht, auf dem Weg zur Bahn. Und ihre Stempelkarte meldet sich.
+Beispiel (Bäckerei Morgenrot, BROT, 105 Wörter, T16):
+> [lock-notification, Einstieg] Kurz vor acht, auf dem Weg zur Bahn, Kopfhörer im Ohr. Und ihre Stempelkarte meldet sich.
 > [Kamera] Noch ein Stempel bis: Gratis-Brötchen.
 > [shop-map] Sie ist gar nicht in der Bäckerei, nur in der Nähe. Und ihr Handy zeigt die Karte von selbst, auf dem Sperrbildschirm, mit dem Stand.
 > [wallet-pass, Scan] Gespeichert hat sie die Karte vor drei Wochen, an der Theke. Einmal den QR-Code gescannt, ohne App.
-> [wallet-pass, Stempel] Seitdem landet jeder Stempel sofort auf ihrem Handy.
-> [lock-notification, Sicht des Ladens] Und für dich heißt das: Du stehst auf dem Sperrbildschirm deiner Stammkunden. Ohne dass du etwas tust.
-> [cta-comment] Willst du da auch stehen? Dann kommentiere jetzt BROT, und wir melden uns bei dir.
+> [wallet-pass, Stempel] Seitdem landet jeder Stempel sofort auf ihrem Handy, jeden Morgen genau einer.
+> [lock-notification, Sicht des Ladens] Und für deine Bäckerei heißt das: Du stehst auf dem Sperrbildschirm deiner Stammkunden. Ohne dass du etwas tust.
+> [cta-comment] Du auch? Dann kommentiere jetzt BROT, und wir melden uns bei dir.
 
 ### F09 Stimmt oder stimmt nicht? (Quiz)
 
@@ -309,17 +312,17 @@ Drei oder vier Behauptungen als Kommentare, jede bekommt ihren Stempel; die Erkl
 | Takte | Behauptung 1 (0 bis 3 s) · Urteil und Erklärung (3 bis 10 s) · Behauptung 2 mit Urteil und Erklärung (10 bis 19 s) · Behauptung 3 (19 bis 27 s) · Behauptung 4, kurz (27 bis 32 s) · Schluss (32 bis 42 s) |
 | Hook | H06 (die Behauptung, die der nächste Satz beantwortet) |
 | Bausteine | `comment-thread` je Behauptung (`"typed": false`, `verdict` "falsch" oder "stimmt", Anker `verdict` auf "Stimmt"), nach jedem Urteil mit Schnitt ein Bild der Erklärung (`wallet-pass`, `big-number`) |
-| Nie | Behauptungen, deren Antwort Klasse 2 oder "kein Bild" ist (Statistik, Newsletter, Preise); mehr als ein "stimmt" ohne Bild |
+| Nie | Behauptungen, deren Antwort Klasse 2, "kein Bild" oder "nur gesprochen" ist (Statistik, Newsletter, Preise, Datenschutz F1 bis F4): der Stempel am Kommentar wäre ihr Bild |
 | Produkt | durchgehend, jede Erklärung ist eine Zeile aus Klasse 1 |
-| Schluss | "Welcher Satz hat dich überrascht?" |
+| Schluss | "Alles gewusst?" |
 
-Beispiel (Döner Palast, IMBISS, 99 Wörter):
+Beispiel (Döner Palast, IMBISS, 108 Wörter):
 > [comment-thread, Einstieg] Für die Stempelkarte im Handy braucht dein Kunde eine App?
-> [Stempel "Stimmt nicht"] Stimmt nicht. [wallet-pass, Scan] Er scannt einmal den QR-Code, und die Karte liegt in seiner Wallet. Kein Download.
-> [comment-thread] Der Stempel kommt erst am nächsten Tag an? [Stempel] Stimmt nicht. [wallet-pass, Stempel] Du scannst mit der Handy-Kamera, und er ist sofort auf seinem Handy. Noch an der Theke.
+> [Stempel "Stimmt nicht"] Stimmt nicht. [wallet-pass, Scan] Er scannt einmal den QR-Code, und die Karte liegt in seiner Wallet. Kein Download, kein Store.
+> [comment-thread] Der Stempel kommt erst am nächsten Tag an? [Stempel] Stimmt nicht. [wallet-pass, Stempel] Du scannst mit der Handy-Kamera, und er ist sofort auf seinem Handy. Noch an der Theke, bevor er zahlt.
 > [comment-thread] Zehn Stempel sind Pflicht? [Stempel] Stimmt nicht. [big-number "6"] Wie viele Stempel es bis zum Gratis-Döner braucht, legst du selbst fest. Auch sechs, wenn du magst.
-> [comment-thread] Und das ist DSGVO-konform? [Stempel "Stimmt"] Stimmt. Und in Deutschland entwickelt.
-> [cta-comment] Welcher Satz hat dich überrascht? Dann kommentiere jetzt IMBISS, und wir melden uns bei dir.
+> [comment-thread] Das geht nur mit Apple? [Stempel] Stimmt nicht. [wallet-pass] Die Karte liegt in Apple Wallet oder Google Wallet.
+> [cta-comment] Alles gewusst? Dann kommentiere jetzt IMBISS, und wir melden uns bei dir.
 
 ### F10 Eine Zahl erklärt (Studie)
 
@@ -332,16 +335,16 @@ Eine Studienzahl aus `PRODUKT.md` (S1 bis S5) groß im Bild, mit Quelle im gespr
 | Bausteine | `big-number` (Zahl genau wie in `PRODUKT.md`, Spanne als Spanne, Bindestrich), `shop-counter` oder `week-strip` für das Bild dazu, `tip-cards` mit einem Zettel für den Rat, am Ende `wallet-pass` |
 | Nie | die Quelle im Bild, eine zweite Studie, die Zahl als Zusage für den eigenen Laden, die Einschränkung weglassen (S4: nicht Deutschland; S5: eine Supermarkt-App) |
 | Produkt | letzter Satz vor dem Schluss (A1, A4) |
-| Schluss | "Wen willst du behalten?" |
+| Schluss | "Schon gewusst?" |
 
-Beispiel (Eis am Markt, EIS, 104 Wörter, S3):
+Beispiel (Eis am Markt, EIS, 106 Wörter, S3):
 > [shop-counter, Einstieg] Wer ist teurer: der Neue oder der Stammkunde? Rate mal.
 > [big-number "5-25×"] Laut Harvard Business Review ist ein neuer Kunde fünf- bis fünfundzwanzigmal so teuer wie einer, der bleibt.
-> [Kamera auf die Zahl] Flyer, Rabatte, Werbung: alles nur für den ersten Besuch.
-> [week-strip] Wer schon zweimal da war, kennt deine Eisdiele längst. Den musst du nur halten.
+> [Kamera auf die Zahl] Flyer, Rabatte, Werbung: das alles nur für den ersten Besuch.
+> [week-strip] Wer schon zweimal da war, kennt deine Eisdiele längst. Den musst du nur noch halten.
 > [tip-cards, ein Zettel] Heißt: Kümmer dich um die, die schon da waren. Merk dir ihre Sorte, sag ihnen, wie weit sie sind. Und gib ihnen eine Karte, die nicht im Portemonnaie zerfällt.
-> [wallet-pass] Bei Eis am Markt liegt sie im Handy, in der Wallet.
-> [cta-comment] Wen willst du behalten? Dann kommentiere jetzt EIS, und wir melden uns bei dir.
+> [wallet-pass] Bei Eis am Markt liegt sie im Handy, in der Wallet, ohne App.
+> [cta-comment] Schon gewusst? Dann kommentiere jetzt EIS, und wir melden uns bei dir.
 
 ## 5. Was für alle Formate gilt
 
@@ -356,3 +359,25 @@ Beispiel (Eis am Markt, EIS, 104 Wörter, S3):
 - **Erst das Format, dann der Text.** Wer beim Schreiben merkt, dass der Text
   in den alten Bogen kippt (Problem mit Papier, Karte im Handy, Stempel,
   Nähe, Sperrbildschirm), hat das Format verlassen: neu anfangen.
+
+## 6. Proben vom 17.11.2026
+
+Drei Entwürfe ohne Stimme, genau nach diesen Dokumenten, als Folge für den
+19., 20. und 21.11.2026 (jeder hält V1 bis V7 gegen die Videos davor ein):
+
+| Entwurf | Format, Laden | Wörter | geschätzte Länge | Bildwechsel | längstes Bild | Warnungen |
+|---|---|---|---|---|---|---|
+| Döner, "Wer soll bei der Mittagsschlange noch stempeln?" | F03, Döner Palast | 106 | 50,1 s | 15 | 4,8 s | keine |
+| Bäckerei, "Sechs Uhr. Der Ofen läuft." | F05, Bäckerei Morgenrot | 106 | 50,6 s | 17 | 4,8 s | keine |
+| Eisdiele, "Papierkarte gegen Handy." | F06, Eis am Markt | 106 | 51,1 s | 14 | 4,8 s | keine |
+
+Was dabei auffiel und schon eingearbeitet ist: Schlussfragen mit drei und mehr
+Wörtern ließen das Schlussbild über 5 s stehen (jetzt höchstens zwei Wörter);
+eine lange Frage mit Antwort deckte das Eingabefeld zu (`comment-thread`
+verkleinert jetzt erst die Schrift); im Duell stand 43 s lang dasselbe Bild
+(`versus-split` hat jetzt das Banner je Runde, größere Karten, tiefere
+Theken); auf der Tagesuhr stand "Feierabend" kurz unter "12:15" (die Zeile
+kommt jetzt mit der neuen Uhrzeit); eine zweite Frage mit elf Wörtern ohne
+Kamera stand 5,2 s (Faustregel aus `AUTOMATIK.md` 6.3 gilt auch hier).
+Offen: F01, F02, F04 und F07 bis F10 sind nur als Bausteine erprobt, nicht
+als ganzes Video; keins der Formate lief mit Stimme.

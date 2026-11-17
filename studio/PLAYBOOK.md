@@ -120,7 +120,9 @@ immer zu `report.json`; ob beide noch zum Skript passen, zeigt `script.sha256`
    ```
    Der Ordnername ist frei, üblich ist Datum plus Kurzname. `_vorlage` selbst
    bleibt unverändert.
-3. **`script.json` schreiben.** Szenen wählen (Katalog unten), Texte setzen,
+3. **`script.json` schreiben.** Zuerst das Format wählen (`FORMATE.md`: zehn
+   Formate, Regeln der Abwechslung); die Szenen der Vorlage sind nur ein
+   Gerüst und werden ersetzt. Szenen nach den Takten des Formats wählen (Katalog unten), Texte setzen,
    Parameter anpassen, Anker auf die richtigen Wörter legen, alles nach
    "Stil C". Ziel: 40 bis 55 Sekunden mit Stimme, 105 bis 115 Wörter (das
    zweite Video: 109 Wörter, 41,9 s). Zwei Grenzen gelten bis auf Weiteres:
@@ -498,7 +500,7 @@ Oben steht immer nur eine Tafel, jede löst die vorige im Takt der Stimme ab.
   jede neue Szene, jeder weitere Teil und jede Kamerabewegung;
   `report.json` nennt sie unter `pictures` mit Zeit (`pictureCount` ist ihre
   Zahl). Das stehende Schlussbild nach dem letzten Wort zählt nicht.
-- Bewährte Kamerawerte (aus dem zweiten Video und der Vorlage):
+- Bewährte Kamerawerte (aus dem zweiten Video und der alten Vorlage; die Werte der Bausteine der Formate stehen in `AUTOMATIK.md` 6.3):
   Benachrichtigung `zoom` 1,3, `focus` [540, 1030]; QR-Code der Wallet-Karte
   `zoom` 1,5, `focus` [540, 1343], `to` [540, 1150]; Karte von oben mit
   Kreis höchstens `zoom` 1,2, `focus` [560, 1166], `to` [540, 1211]: bei
@@ -638,7 +640,7 @@ Laden steht klein im Hintergrund.
 **`stamp-check`: die Pointe.** Leeres Stempelfeld, auf den Anker `hit` der
 Schlag und ein Abdruck mit Haken. Bewusst kein Wort im Abdruck (sähe aus wie
 ein echtes Prüfzeichen). Als Teil mit Schnitt (so im zweiten Video) oder als
-eigene Szene (so in der Vorlage), die Pause danach mit
+eigene Szene (so in der alten Vorlage vom 16.11.2026), die Pause danach mit
 `gapBefore` an der nächsten Textzeile. Der Satz der Pointe braucht seinen
 Beleg in `PRODUKT.md` wie jeder andere.
 
@@ -674,6 +676,19 @@ das Schild. Im Döner-Video der Schnitt auf "Und tschüss":
   und gleich zufallen; das ist gewollt.
 - Kein `same` am Namen: das Bild zeigt meist den Laden gegenüber, der Bau
   warnt deshalb nicht, wenn er anders heißt als der eigene.
+
+**Bausteine der Formate (17.11.2026).** Fünf Bilder, die weder Papierkarte
+noch Handy sind, damit die Formate aus `FORMATE.md` nicht in den alten Bogen
+kippen. Alle bis zum Bildrand gezeichnet, je Teil ein Zustand (`show`,
+`round`, `time`, `value`), harte Schnitte zwischen den Teilen:
+
+| Baustein | Format | Kamera (erprobt, `AUTOMATIK.md` 6.3) | Falle |
+|---|---|---|---|
+| `tip-cards` | F01, F02 | 1,2 auf die Karte | in jedem Teil dieselbe Liste `items`; im Einstieg `"rise": false` |
+| `comment-thread` | F03, F09 | 1,1 mittig links (`focus` x = 470) | mehr Zoom schiebt Kommentar und Antwort in die Knopfspalte; `author` bleibt "Du" |
+| `versus-split` | F06 | 1,08 mittig | nie auf eine Hälfte; `score` ist der Stand vor der Runde |
+| `day-clock` | F05 | 1,15 mittig | `from` muss vor `time` liegen, beide in der Zeitleiste |
+| `big-number` | F04, F10 | 1,15 auf die Tafel, nach dem Klappern | keine Quelle im Bild; höchstens 7 Zeichen |
 
 **Erweitert, Vorgaben unverändert:**
 
@@ -1145,6 +1160,26 @@ Textzeilen: mindestens 1, davon eine mit `"role": "cta"`. Datei: `components/cta
 |---|---|---|
 | `logo` | `{"cap":-1,"word":-1}` | Bezugswort für das Logo: es steigt 0,5 s danach auf (Ton: chime), die Stempelreihe pulsiert. Vorgabe: letztes Wort |
 
+### `big-number` - Eine Zahl, groß: Fallblatt-Tafel
+
+<img src="docs/components/big-number.png" width="270" alt="Eine Zahl, groß: Fallblatt-Tafel">
+
+Für eine Zahl im Bild (FORMATE.md, F10 Studie, F04 Rechnung): die Blätter klappern auf "show" bis zur Zahl, darunter eine Zeile, was sie bedeutet. Mit "from" klappert eine Zahl in die nächste (Zwischenstand einer Rechnung).
+
+Textzeilen: mindestens 1. Datei: `components/big-number.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `value` | `"5-25×"` | Die Zahl mit Zeichen, höchstens 7 Zeichen (Leerzeichen, Komma und Punkt zählen halb). Normale Bindestriche, nie Gedankenstriche |
+| `from` | `""` | Was vor "show" auf der Tafel steht, z. B. die Zahl des Schritts davor. Leer = leere Blätter |
+| `label` | `"so teuer ist ein neuer Kunde wie einer, der bleibt"` | Zeile unter der Tafel, was die Zahl bedeutet (höchstens etwa 60 Zeichen, bis 2 Zeilen) |
+| `sub` | `""` | Kleine Zeile über der Tafel, z. B. "Schritt 2" oder "Beispiel" (höchstens etwa 24 Zeichen). Nie eine Quelle: die wird gesprochen, nicht gezeigt |
+| `tones` | `true` | Eigene Töne (tick beim Klappern, pop, wenn die Zahl steht). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `show` | `{"cap":0,"word":0}` | Die Blätter klappern bis zur Zahl (Töne: tick, pop). Auf das Wort, das die Zahl nennt |
+
 ### `card-bin` - Papierkarte landet im Altpapier
 
 <img src="docs/components/card-bin.png" width="270" alt="Papierkarte landet im Altpapier">
@@ -1169,6 +1204,55 @@ Textzeilen: mindestens 1. Datei: `components/card-bin.js`
 | `stamps` | `{"cap":0,"word":3}` | Die Stempel springen nacheinander auf, je 0,07 s (Ton: tick). Auf die gesprochene Zahl |
 | `crumple` | `{"cap":0,"word":-3}` | Die Karte knüllt sich zu einer Kugel (Ton: crumple) |
 | `land` | `{"cap":0,"word":-1}` | Die Kugel fällt in die Tonne, die Tonne wackelt (Ton: drop). Auf "Altpapier" |
+
+### `comment-thread` - Kommentar: Frage getippt, dann beantwortet
+
+<img src="docs/components/comment-thread.png" width="270" alt="Kommentar: Frage getippt, dann beantwortet">
+
+Für Einwände und Fragen (FORMATE.md, F03) und das Quiz (F09): die Frage wird unten getippt und steht dann groß in der Liste, darunter erscheint die Antwort. Mit "verdict" ein Stempel "Stimmt" oder "Stimmt nicht" am Kommentar.
+
+Textzeilen: mindestens 1. Datei: `components/comment-thread.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `text` | `"Brauchen meine Kunden dafür eine App?"` | Die Frage oder Behauptung im Kommentar (höchstens etwa 70 Zeichen, bis 3 Zeilen) |
+| `author` | `"Du"` | Absender des Kommentars (höchstens etwa 20 Zeichen). Nie ein echter oder erfundener Name einer Person: das sähe aus wie eine Kundenstimme |
+| `typed` | `true` | Die Frage wird ab dem Anker "type" unten im Eingabefeld getippt und auf "send" abgeschickt. false: der Kommentar springt auf "send" in die Liste, ohne Tippen |
+| `reply` | `""` | Antwort unter dem Kommentar (höchstens etwa 60 Zeichen, bis 2 Zeilen). Leer = keine Antwort |
+| `replyName` | `"Stampit"` | Absender der Antwort, mit dem Logo davor (höchstens etwa 20 Zeichen) |
+| `verdict` | `""` | "stimmt" oder "falsch": Stempel "Stimmt" oder "Stimmt nicht" am Kommentar (Anker "verdict"). Leer = kein Stempel |
+| `tones` | `true` | Eigene Töne (pop beim Absenden und bei der Antwort, thud beim Stempel). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `type` | `{"at":"start","offset":0.05}` | Das Eingabefeld leuchtet auf, die Frage wird Buchstabe für Buchstabe getippt (Ton: pop), bis kurz vor "send" |
+| `send` | `{"cap":0,"word":-1}` | Die Frage wird abgeschickt und steht groß in der Liste (Ton: pop). Auf das letzte Wort der Frage |
+
+### `day-clock` - Tag im Laden: Uhr, Fenster und Zeitleiste
+
+<img src="docs/components/day-clock.png" width="270" alt="Tag im Laden: Uhr, Fenster und Zeitleiste">
+
+Für "Ein Tag im Laden" (FORMATE.md, F05): je Teil eine Uhrzeit. Auf "move" laufen Zeiger, Himmel im Fenster und Markierung auf der Zeitleiste von "from" auf "time", auf "event" springt dort ein Punkt auf. Die Zeile unter der Uhrzeit sagt, was gerade ist.
+
+Textzeilen: mindestens 1. Datei: `components/day-clock.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Nordwind"` | Name auf dem Schild oben (höchstens etwa 24 Zeichen) |
+| `icon` | `"cup"` | Symbol auf dem Schild und auf dem Aufsteller: cup, bread, scissors, star, heart, check, kebab |
+| `time` | `"07:10"` | Uhrzeit dieses Teils, "HH:MM", zwischen "open" und "close" |
+| `from` | `""` | Uhrzeit, von der Zeiger, Himmel und Markierung auf "move" loslaufen (meist die Zeit des Teils davor). Leer = sie stehen schon auf "time" |
+| `label` | `"Erster Kunde"` | Zeile unter der Uhrzeit (höchstens etwa 24 Zeichen). Leer = keine |
+| `open` | `6` | Erste Stunde der Zeitleiste (0 bis 22) |
+| `close` | `20` | Letzte Stunde der Zeitleiste (größer als "open", höchstens 24) |
+| `events` | `[]` | Frühere Ereignisse als Liste von "HH:MM": sie stehen schon als Punkte auf der Zeitleiste |
+| `mark` | `true` | Auf "event" springt an der Uhrzeit dieses Teils ein Punkt auf (Ton: pop). false: kein neuer Punkt |
+| `tones` | `true` | Eigene Töne (tick beim Weiterlaufen, pop beim Punkt). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `move` | `{"at":"start","offset":0.05}` | Zeiger, Himmel und Markierung laufen von "from" auf "time" (Ton: tick), die Uhrzeit springt um |
+| `event` | `{"cap":0,"word":-1}` | Ein Punkt springt an dieser Uhrzeit auf die Zeitleiste (Ton: pop) |
 
 ### `shop-counter` - Betreiber an der Theke, ahnungslos
 
@@ -1327,6 +1411,58 @@ Textzeilen: mindestens 1. Datei: `components/stamp-check.js`
 | Anker | Vorgabe | Wann |
 |---|---|---|
 | `hit` | `{"cap":0,"word":-1}` | Der Stempel trifft (Töne: thud, ok), der Abdruck bleibt stehen. Auf das Wort der Pointe |
+
+### `tip-cards` - Tipp-Karten an der Pinnwand
+
+<img src="docs/components/tip-cards.png" width="270" alt="Tipp-Karten an der Pinnwand">
+
+Für Tipps und Listen (FORMATE.md, F01 und F02): oben die Überschrift, darunter je Tipp ein kleiner Zettel, in der Mitte groß der Tipp, um den es gerade geht. Je Teil ein Tipp ("show"). Mit "better" wird der Satz durchgestrichen und ein besserer darüber gepinnt.
+
+Textzeilen: mindestens 1. Datei: `components/tip-cards.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `head` | `"3 Tipps für Stammkunden"` | Überschrift auf dem Streifen oben (höchstens etwa 30 Zeichen) |
+| `items` | `[{"title":"Sprich ihn mit Namen an.","text":"Wer erkannt wird, kommt gern wieder."},{"title":"Sag, wie weit er ist.","text":"\"Noch zwei, dann ist der nächste gratis.\""},{"title":"Gib ihm eine Karte, die er nicht verliert.","icon":"check"}]` | Die Tipps, 1 bis 5, in jedem Teil dieselbe Liste. Je Tipp: title (der Satz, höchstens etwa 60 Zeichen, bis 3 Zeilen), text (kleine Zeile darunter, freiwillig, höchstens etwa 70 Zeichen), icon (Symbol unten rechts, freiwillig), label (kleine Zeile über dem Satz, z. B. "Sag nicht:"), better (besserer Satz, der auf "swap" darübergepinnt wird) und betterLabel (Vorgabe "Sag lieber:") |
+| `show` | `1` | Welcher Tipp in diesem Teil groß im Bild ist (1 = der erste). Die Zettel davor gelten als erledigt, die danach sind noch verdeckt |
+| `numbered` | `true` | Nummer im runden Feld der Karte. false: dort steht das Symbol des Tipps (oder ein Haken) |
+| `rise` | `true` | Die Karte fliegt auf den Anker "card" von unten herein. false: sie hängt ab dem ersten Bild (für den Einstieg, Bild 0 muss fertig sein) |
+| `tones` | `true` | Eigene Töne (pop beim Anpinnen, whoosh beim Durchstreichen). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `card` | `{"at":"start","offset":0}` | Die große Karte wird angepinnt, ihr Zettel in der Leiste leuchtet auf (Ton: pop) |
+
+### `versus-split` - Duell: Papier gegen Handy, Runde für Runde
+
+<img src="docs/components/versus-split.png" width="270" alt="Duell: Papier gegen Handy, Runde für Runde">
+
+Für das Duell (FORMATE.md, F06): links die Papierkarte, rechts die Karte in der Wallet, oben der Spielstand. Je Teil eine Runde: auf "action" passiert beiden dasselbe (Regen, Knick, vergessen, App), auf "point" Haken, Kreuz und neuer Spielstand.
+
+Textzeilen: mindestens 1. Datei: `components/versus-split.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Café Nordwind"` | Name des Ladens auf beiden Karten (höchstens etwa 20 Zeichen, längere werden kleiner gesetzt) |
+| `icon` | `"cup"` | Stempel-Symbol: cup, bread, scissors, star, heart, check, kebab |
+| `stamps` | `10` | Felder auf beiden Karten, 4 bis 10 |
+| `filled` | `6` | So viele Stempel sind auf beiden Karten (in der Runde "vergessen" kommt rechts einer dazu) |
+| `leftLabel` | `"Papier"` | Name der linken Seite im Spielstand (höchstens etwa 10 Zeichen) |
+| `rightLabel` | `"Handy"` | Name der rechten Seite im Spielstand (höchstens etwa 10 Zeichen) |
+| `round` | `1` | Nummer der Runde im Spielstand, 1 bis 9. 0 = keine Nummer (Einstieg und Ende) |
+| `title` | `"Regen"` | Name der Runde in der Mitte des Spielstands (höchstens etwa 14 Zeichen) |
+| `scene` | `"regen"` | Was in dieser Runde passiert: "start" (beide nur da), "regen" (A4), "knick" (A4), "vergessen" (links bleibt die Karte zu Hause, rechts Scan und Stempel: A4, B1, B2), "app" (beide ohne App: A2), "ende" (Pokal für den Sieger) |
+| `winner` | `"right"` | "right", "left", "both" (Unentschieden, beide bekommen einen Punkt) oder "none" (kein Punkt) |
+| `score` | `[0,0]` | Spielstand VOR dieser Runde, [links, rechts]. Auf "point" kommt der Punkt dazu |
+| `leftNote` | `""` | Ergebnis links, erscheint auf "point" unter der Karte (höchstens etwa 16 Zeichen, z. B. "Matsch") |
+| `rightNote` | `""` | Ergebnis rechts (höchstens etwa 16 Zeichen, z. B. "Alles da") |
+| `intro` | `true` | Banner der Runde quer durchs Bild ("Runde 2", darunter "title"), vom Anfang des Teils bis kurz vor "action". Nicht bei "scene": "start". false: kein Banner |
+| `tones` | `true` | Eigene Töne (je Runde, ok und tick beim Punkt). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `action` | `{"cap":0,"word":1}` | Die Runde passiert: Regen setzt ein, die Papierkarte knickt, die Karte bleibt zu Hause und rechts wird gescannt, oder die App wird durchgestrichen |
+| `point` | `{"cap":-1,"word":-1}` | Haken für den Sieger, Kreuz für den Verlierer, der Spielstand zählt hoch (Töne: ok, tick). Beim Ende: der Pokal |
 
 ### `week-strip` - Wochenleiste: Besuche des Stammkunden, eine Woche gegenüber
 
@@ -1724,11 +1860,14 @@ aufnehmen ist nie nötig.
 - Die Prüfungen messen die Ruhelage (außer `knopfspalte`), auch bei einer
   Kamerafahrt. Bewegungen und vergrößerte Bilder prüft das Auge.
 - Die Längen-Angaben der Parameter sind Richtwerte, keine Zusage.
-- Elf Bausteine: acht aus dem ersten Video, drei aus dem zweiten
-  (`shop-street`, `shop-map`, `stamp-check`). Ein neuer Blickwinkel braucht
+- Einundzwanzig Bausteine: acht aus dem ersten Video, drei aus dem zweiten
+  (`shop-street`, `shop-map`, `stamp-check`), fünf aus dem Döner-Video und
+  fünf für die Formate (17.11.2026: `tip-cards`, `comment-thread`,
+  `versus-split`, `day-clock`, `big-number`). Ein neuer Blickwinkel braucht
   meist einen neuen Baustein; das ist gewollt und oben beschrieben. Es fehlen
   Bilder für Statistik, Newsletter und Design-Editor.
-- `calc-panel` (Beispielrechnung) ist in Stil C noch nicht gebaut worden.
+- `calc-panel` (Beispielrechnung) ist in Stil C nur einmal gebaut (Döner-Video,
+  eine Textzeile, Kamera 1,2); so nimmt es das Format F04.
 - Die Becherreihe steht mit ihrem Preisschild in der Knopfspalte von TikTok.
   Das ist bekannt und im veröffentlichten Video so; für ein neues Video wäre
   es ein Grund, den Baustein nach links zu rücken (dann als neuer Parameter,

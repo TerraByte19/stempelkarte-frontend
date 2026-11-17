@@ -23,10 +23,13 @@ oben im Bild (Stil C). **Lauf** = der unbeaufsichtigte tägliche Lauf.
 
 ## 0. Ablauf für den Lauf
 
-1. Idee, Laden und Blickwinkel stehen (`AUTOMATIK.md`, Abschnitt 5).
+1. Idee, Laden, Blickwinkel und **Format** stehen (`AUTOMATIK.md`, Abschnitt 5;
+   `FORMATE.md` 3).
 2. **Meme-Tag?** Nach 4.1 entscheiden. Wenn ja: Meme nach 4.2 wählen.
-3. **Hook-Muster** wählen: Tabelle 1.3 (passt zum Blickwinkel), Muster in
-   Abschnitt 2. Fertige Zeilen für `THEMEN.md` stehen in Abschnitt 5.
+3. **Hook-Muster** wählen: zuerst das Muster des Formats (`FORMATE.md` 4,
+   Zeile "Hook"), sonst Tabelle 1.3 (passt zum Blickwinkel); Muster in
+   Abschnitt 2. Fertige Zeilen für `THEMEN.md` stehen in Abschnitt 5 und in
+   der Spalte "Hook" von `THEMEN.md`.
 4. Erste Textzeile schreiben nach 1.2 und 1.4, gegen 1.5 halten.
 5. Prüfliste 1.6 abhaken, mit ihren Ausnahmen. Ein Punkt nicht erfüllt: Satz
    neu schreiben.
@@ -64,6 +67,13 @@ oben im Bild (Stil C). **Lauf** = der unbeaufsichtigte tägliche Lauf.
 
 ### 1.3 Erstes Bild und Muster je Blickwinkel
 
+**Das Format geht vor** (seit 17.11.2026): Bild 0 ist der Einstieg des Formats
+(`FORMATE.md` 4) und nicht der Einstieg eines der letzten zwei Videos
+(`FORMATE.md`, V4). Die Spalte "Bild ab Bild 0" gilt, wo das Format die Wahl
+lässt (F07, F08, F10). Bilder der Nähe (`lock-notification`, `shop-map`) und
+die zerknickte Papierkarte (`wallet-vanish`) nur, wenn die Regeln V2 und V3
+sie erlauben.
+
 | Blickwinkel | Bild ab Bild 0 | Muster zuerst | Memes, die passen (4.2) |
 |---|---|---|---|
 | `sperrbildschirm` | `lock-notification`, `"rise": false`, `"buzzes": 2`, `"waves": true`, `"pin": false` (Werte aus `AUTOMATIK.md` 6.4; das Brummen im Bild ist laut `PRODUKT.md` C1 ein Stilmittel auf Wunsch des Betreibers). Text wie im Backend: "Noch <n> Stempel bis: <Belohnung>", bei voller Karte "<Belohnung> wartet auf dich" | H01, H05, H04 | M27, M05, M02, M10, M13 |
@@ -73,7 +83,12 @@ oben im Bild (Stil C). **Lauf** = der unbeaufsichtigte tägliche Lauf.
 | `stempelzahl` | `paper-card`, 10 Felder, wenige gestempelt | H03, H08 | M09 |
 | `team` | `paper-card` (Stempelschlag), Schnitt auf `wallet-pass` mit Scan | H07, H11 | M23, M02 |
 | `karte-bleibt` | `paper-card` (Eis), Schnitt auf `wallet-vanish` | H05, H04 | M05, M23 |
-| `rechnung` | **nur begleitet.** `calc-panel` ist im Lauf nicht erlaubt (`AUTOMATIK.md` 6.4), T05 und T19 stehen in `THEMEN.md` auf "wartet (Stil C)". Der Lauf baut diesen Blickwinkel nicht | H03 | keins: Zahl und Meme zusammen ist zu viel |
+| `rechnung` | Format F04: `big-number` mit der Alltagszahl; `calc-panel` nur als Zusammenfassung nach `AUTOMATIK.md` 6.4 (wie im Döner-Video) | H03 | keins: Zahl und Meme zusammen ist zu viel |
+| `stammkunden-tipps` | Format F01: `tip-cards`, Anker `card` auf das erste Wort von Tipp 1 (bis dahin nur Überschrift und Zettel-Leiste) | H05, H08 | keins |
+| `theke-saetze` | Format F02: `tip-cards` mit `"rise": false` und dem ersten schlechten Satz | H11 | keins |
+| `einwand` | Format F03: `comment-thread`, die Frage wird getippt; F09: Behauptung als Kommentar | H06 | M04 |
+| `ladentag` | Format F05: `day-clock` mit der ersten Uhrzeit | wie H01, ohne Sperrbildschirm | keins |
+| `duell` | Format F06: `versus-split` mit `"scene": "start"` | H11 | M24 (Seiten "Red Flag" und "Green Flag"; links steht immer Papier, rechts das Handy) |
 | `studie` | `guest-ghost` | H02, H05; die Studienzahl erst in der Mitte | keins |
 
 ### 1.4 Länge
@@ -146,8 +161,8 @@ Stichwort in allen 38 Reels, Median 18 Likes).
 - [ ] Was im Video über die App gesagt wird, hat seine Zeile in `PRODUKT.md`,
       Klasse 1 (in `meta.beleg`). Kein Café, kein "geht aufs Haus", keine
       Preise der App (N6), keine Entfernung, keine Häufigkeit von
-      Nachrichten. Euro nur in einer Beispielrechnung, und die ist nur
-      begleitet (1.3, `rechnung`).
+      Nachrichten. Euro nur in einer Beispielrechnung im Format F04 (1.3,
+      `rechnung`).
 - [ ] Was zu C1 gesagt wird, bleibt bei `PRODUKT.md` C1 (Stand 16.11.2026,
       vom Betreiber richtiggestellt): in der Nähe des Ladens zeigt sich die
       Karte von selbst auf dem Sperrbildschirm, mit dem Stand; ist sie voll,
@@ -235,7 +250,9 @@ Reihenfolge = Rang für 4.2 (die ersten zehn wie in `docs/memes-recherche.md`). 
 siehe 4.4. Zuletzt benutzt: nur M01 (16.11.2026).
 
 Jedes Skript, das C1 sagt, zeigt vor diesem Satz die Nähe mit `shop-map`
-(1.6); in den Skripten unten steht das dabei.
+(1.6); in den Skripten unten steht das dabei. Diese Fassungen nur, wenn die
+Regel V2 in `FORMATE.md` das Motiv Nähe erlaubt; sonst die Fassung des Memes
+ohne C1 (Format F07).
 
 | Nr. | Meme, Satzbau, Platz | Bild | Cool-down · Risiko · Lauf · prüfen bis | Skript: Hook → Wendung (Laden, Thema, Beleg) |
 |---|---|---|---|---|
@@ -390,9 +407,9 @@ benutzte.
 
 Erste Textzeile mit `"instant": true`; der Strich | trennt hier erste und
 zweite Textzeile. Spalte "Lauf": `ja` = das Thema steht in `THEMEN.md` auf
-"ja". **Nr. 6 und 16 warten** mit T05 und T19 ("wartet (Stil C)":
-`calc-panel` ist im Lauf nicht erlaubt, `AUTOMATIK.md` 6.4); der Lauf
-benutzt sie nicht. Nr. 1 ist gestrichen (zu nah am Treffer eines
+"ja". Nr. 6 und 16 (T05 und T19) gehen seit dem 17.11.2026 im Format F04
+(`FORMATE.md`; `calc-panel` nur als Zusammenfassung, `AUTOMATIK.md` 6.4).
+Nr. 1 ist gestrichen (zu nah am Treffer eines
 Mitbewerbers); die übrigen Nummern bleiben, damit Verweise stimmen. H02 steht
 nur einmal (Nr. 11).
 
@@ -406,7 +423,7 @@ Hook aus `THEMEN.md`. Beleg ist der aus `THEMEN.md`.
 | 3 | T02 Döner, `sperrbildschirm` | Mittagspause. \| Sein Sperrbildschirm sagt: Noch zwei Stempel. | H01 | ja |
 | 4 | T03 Eis, `papierkarte` | Die Stempelkarte war in der Badetasche. \| Jetzt ist sie Matsch. | H09 (Hook aus `THEMEN.md`) | ja |
 | 5 | T04 Bäckerei, `kein-download` | Eine App für zwei Brötchen? \| Lädt keiner. Muss auch keiner. | H06 | ja |
-| 6 | T05 Salon, `rechnung` | Zwei Haarschnitte mehr im Jahr. \| Klingt nach wenig. Rechne mit 40 Stammkunden. | H03 | **wartet (Stil C)** |
+| 6 | T05 Salon, `rechnung` | Zwei Haarschnitte mehr im Jahr. \| Klingt nach wenig. Rechne mit 40 Stammkunden. | H03 | ja (F04) |
 | 7 | T06 Döner, `stempelzahl` | Ein Döner pro Woche, zehn Stempel. \| Das sind zehn Wochen Warten. | H03 | ja |
 | 8 | T06 Döner, `stempelzahl` | Unpopuläre Meinung: \| Zehn Stempel bis zum Döner sind zu viele. | M09 | ja |
 | 9 | T10 Döner, `team` | Dieser Dönerladen stempelt ohne Stempelkissen. | H07 | ja |
@@ -416,17 +433,16 @@ Hook aus `THEMEN.md`. Beleg ist der aus `THEMEN.md`.
 | 13 | T16 Bäckerei, `sperrbildschirm` | Kurz vor acht, auf dem Weg zur Bahn. \| Und ihre Stempelkarte meldet sich. | H01 | ja |
 | 14 | T17 Döner, `papierkarte` | Sieben Stempel. \| Dann kam die Knoblauchsoße. | H09 | ja |
 | 15 | T18 Salon, `kein-download` | Bei diesem Friseur ist die Karte im Handy, \| bevor die Haare trocken sind. | H07 | ja |
-| 16 | T19 Eis, `rechnung` | 30 Stammkunden, ein Eis mehr pro Woche. \| Rechne mal den Sommer durch. | H03 | **wartet (Stil C)** |
+| 16 | T19 Eis, `rechnung` | 30 Stammkunden, ein Eis mehr pro Woche. \| Rechne mal den Sommer durch. | H03 | ja (F04) |
 | 17 | T20 Salon, `stempelzahl` | Wenn ich einen Salon hätte, \| wäre meine Karte nach fünf Schnitten voll. | H08 | ja |
 | 18 | T25 Eis, `sperrbildschirm` | Er denkt gerade nicht an Eis. \| Dann meldet sich seine Stempelkarte. | H01, Pointe M27 | ja |
 | 19 | T26 Bäckerei, `papierkarte` | Liebe Papierkarte, wir müssen reden. | M08 | ja |
 | 20 | T27 Eis, `kein-download` | Erklär's mir, als wär ich fünf: \| Stempelkarte ohne App? | M04 | ja |
 
 Hinweise: Nr. 3, 13 und 18 zeigen nur den Moment; der Satz mit "in der
-Nähe" folgt im Video, mit `shop-map` (1.6). Nr. 3 passt zum Kern von T02
-(Sperrbildschirm "Noch 2 Stempel bis: Gratis-Döner"). Nr. 6 und 16 erst, wenn T05
-und T19 auf "ja" stehen; dann müssen die Zahlen im Hook zu `calc-panel`
-passen (T05: 40 × 2; T19: 30 × 16 Wochen). Nr. 12 beginnt mit `paper-card`
+Nähe" folgt im Video, mit `shop-map` (1.6). Nr. 3 passt zum Bild der Aussage von T02
+(Sperrbildschirm "Noch 2 Stempel bis: Gratis-Döner"). In Nr. 6 und 16 müssen
+die Zahlen im Hook zu `calc-panel` passen (T05: 40 × 2; T19: 30 × 16 Wochen). Nr. 12 beginnt mit `paper-card`
 (8 von 10, `hit` nach 1.2), nicht mit dem unerprobten `guest-ghost`. Nr. 17
 braucht `wallet-pass` mit 5 Feldern wie T20. Nr. 18 an Tagen ohne Meme ohne
 die Pointe M27. Uhrzeit und Text auf dem Sperrbildschirm passend: Nr. 3 um

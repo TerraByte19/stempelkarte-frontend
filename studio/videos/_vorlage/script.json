@@ -3,148 +3,395 @@
     "title": "TITEL DES VIDEOS",
     "slug": "kurzer-name-ohne-leerzeichen",
     "language": "de",
+    "format": "F??",
+    "kern_bild": "",
+    "einstieg": "",
+    "motive": [],
+    "schluss": "",
+    "hook_muster": "",
+    "meme": "",
+    "beleg": "",
     "idee": "Ein Satz: Welche Beobachtung steckt hinter diesem Video und woher kam die Anregung? Anregung heißt Aufbau oder Kniff, nie Text oder Bild übernehmen. Im unbeaufsichtigten Lauf ohne Namen von Konten (AUTOMATIK.md, Regel 12).",
-    "_hinweis": "Diesen Ordner kopieren nach videos/<JJJJ-MM-TT>-<slug>/ und nur die Kopie ändern. Alles, was mit _ beginnt, ist ein Hinweis für dich und wird ignoriert. Das ist ein Beispiel im Stil C (Standard seit dem 16.11.2026, Vorbild: videos/2026-11-16-ist-das-koscher): Laden, Text, Anker und Parameter sind für jedes Video neu zu schreiben. Regeln: studio/AUTOMATIK.md Abschnitt 6, studio/PLAYBOOK.md Abschnitt 'Stil C'. Die Blöcke captionStyle, timing, pace und mix oben stehen so in studio/state/konfig.json (skript, mix) und bleiben, wie sie sind."
+    "_hinweis": "Diesen Ordner kopieren nach videos/<JJJJ-MM-TT>-<slug>/ und nur die Kopie ändern. Alles, was mit _ beginnt, ist ein Hinweis für dich und wird ignoriert. Die Szenen unten sind ein GERÜST, KEIN BEISPIEL: sie zeigen nur, wie Teile, Schnitte, Anker und Kamera geschrieben werden, und werden alle gelöscht. Reihenfolge, Bausteine und Text kommen aus den Takten des gewählten Formats (studio/FORMATE.md, Abschnitt 4) und den Regeln der Abwechslung (FORMATE.md, Abschnitt 2). In meta gehören format, kern_bild, einstieg, motive und schluss (FORMATE.md 2), hook_muster und meme (HOOKS.md 0), beleg (PRODUKT.md). Regeln: studio/AUTOMATIK.md Abschnitt 6, studio/PLAYBOOK.md Abschnitt 'Stil C'. Die Blöcke captionStyle, timing, pace und mix oben stehen so in studio/state/konfig.json (skript, mix) und bleiben, wie sie sind."
   },
   "voice": {
     "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
-    "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
   },
   "timing": {
     "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
-    "lead": 0.35, "hold": 3.2, "maxGap": 0.45
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
   },
   "captionStyle": {
     "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
     "mode": "wort"
   },
-  "pace": { "maxStill": 5, "minChanges": 12 },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
   "mix": {
     "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
-    "lufs": -14, "truePeak": -1
+    "lufs": -14,
+    "truePeak": -1
   },
   "scenes": [
     {
-      "_hinweis": "Einstieg, eine Szene aus zwei Teilen. Das erste Bild zeigt, wovon der Hook spricht: hier vom Handy, deshalb der Sperrbildschirm. Spricht der Hook vom Papier oder von einem verlorenen Kunden, steht hier paper-card oder guest-ghost, nie ein Sperrbildschirm mit voller Karte (AUTOMATIK.md 6.4). Teil 1: die Frage steht ab dem allerersten Bild ('instant'), das Handy steht schon ('rise': false) und brummt zweimal. Auf das zweite Wort von Text 2 fährt die Kamera auf die Benachrichtigung. Teil 2: harter Schnitt ('enter': 'cut') auf die Straße. 'across': die Kundin geht auf der ANDEREN Straßenseite vorbei, der Laden steht klein im Hintergrund; nie direkt an der Ladentür vorbei. Ladenname, Symbol und Stempelzahl in JEDEM Teil gleich setzen.",
+      "_hinweis": "Gerüst, Szene 1: der Einstieg. Die erste Textzeile trägt 'instant': true und steht ab Bild 0; das Bild darunter steht schon fertig da (hier 'rise': false). Jeder weitere Teil mit 'enter': 'cut' ist ein harter Schnitt.",
       "parts": [
         {
-          "component": "lock-notification",
-          "params": { "clock": "07:48", "date": "Dienstag, 17. November", "title": "Bäckerei Morgenrot", "body": "8 von 8, dein Brötchen wartet", "icon": "bread", "pin": false, "rise": false, "buzzes": 2, "waves": true },
-          "anchors": { "notify": { "at": "start", "offset": 0.15 } },
-          "camera": [ { "cap": 1, "word": 1, "zoom": 1.32, "focus": [540, 1030] } ],
+          "component": "tip-cards",
+          "params": {
+            "head": "Gerüst, kein Beispiel",
+            "rise": false,
+            "show": 1,
+            "items": [
+              {
+                "title": "Erst das Format wählen."
+              },
+              {
+                "title": "Dann die Takte aus FORMATE.md."
+              },
+              {
+                "title": "Dann die Regeln der Abwechslung."
+              }
+            ]
+          },
+          "anchors": {
+            "card": {
+              "at": "start",
+              "offset": 0.05
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.2,
+              "focus": [
+                500,
+                1040
+              ],
+              "to": [
+                540,
+                1080
+              ],
+              "dur": 0.3
+            }
+          ],
           "captions": [
-            { "lines": ["Wer sagt deiner", "Kundin, dass die", "Karte *voll ist?"], "instant": true },
-            { "lines": ["Ihr *Handy | macht das | *von *selbst,"] }
+            {
+              "lines": [
+                "Erst das *Format,",
+                "dann der Text."
+              ],
+              "instant": true,
+              "scale": 1.2
+            },
+            {
+              "lines": [
+                "Diese Szenen | sind ein | *Gerüst."
+              ]
+            }
           ]
         },
         {
-          "component": "shop-street",
+          "component": "tip-cards",
           "enter": "cut",
-          "params": { "shop": "Bäckerei Morgenrot", "icon": "bread", "direction": "right", "across": true, "shopAt": 0.7, "circle": false, "notify": true, "note": "8 von 8", "from": -0.08, "via": 0.13, "to": 0.15 },
-          "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 8, "offset": -0.1 }, "arrive": { "cap": 0, "word": -1, "offset": 0.25 } },
+          "params": {
+            "head": "Gerüst, kein Beispiel",
+            "show": 2,
+            "items": [
+              {
+                "title": "Erst das Format wählen."
+              },
+              {
+                "title": "Dann die Takte aus FORMATE.md."
+              },
+              {
+                "title": "Dann die Regeln der Abwechslung."
+              }
+            ]
+          },
           "captions": [
-            { "lines": ["genau wenn | sie auf dem Weg | an deiner | *Bäckerei | vorbeigeht."] }
+            {
+              "lines": [
+                "Die Takte | stehen in | *FORMATE.md.{Formate.}"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "tip-cards",
+          "enter": "cut",
+          "params": {
+            "head": "Gerüst, kein Beispiel",
+            "show": 3,
+            "items": [
+              {
+                "title": "Erst das Format wählen."
+              },
+              {
+                "title": "Dann die Takte aus FORMATE.md."
+              },
+              {
+                "title": "Dann die Regeln der Abwechslung."
+              }
+            ]
+          },
+          "captions": [
+            {
+              "lines": [
+                "Die *Regeln | der Abwechslung | auch."
+              ]
+            }
           ]
         }
       ]
     },
     {
-      "_hinweis": "Das Problem mit Papier (PRODUKT.md A4), drei Teile Schlag auf Schlag, jeweils mit hartem Schnitt. Für diese drei Bausteine gibt es keinen erprobten Kamerawert: je Teil höchstens zehn Wörter (mit zwei Textzeilen neun), mehr Text auf den nächsten Papier-Baustein. paper-card: 'mug': true nur für Café und Bäckerei. wallet-vanish: drei Schläge auf drei Schlüsselwörter. guest-ghost: das Schildchen springt auf das Wort, das den Fast-Stammkunden nennt.",
-      "parts": [
-        {
-          "component": "paper-card",
-          "params": { "shop": "Bäckerei Morgenrot", "stamps": 8, "filled": 7, "icon": "bread", "mug": true },
-          "anchors": { "hit": { "at": "start", "offset": 0.4 }, "free": { "cap": 0, "word": -1 } },
-          "captions": [
-            { "lines": ["Mit der | *Papierkarte | merkt das | bei dir | *niemand."] }
-          ]
+      "_hinweis": "Gerüst, Szene 2: eine Frage als Kommentar (Format F03). Anker immer auf das gemeinte Wort setzen, die Vorgaben passen zu keinem neuen Text.",
+      "component": "comment-thread",
+      "params": {
+        "text": "Welches Format darf heute?",
+        "reply": "Eins, das die letzten drei nicht hatten."
+      },
+      "anchors": {
+        "type": {
+          "at": "start",
+          "offset": 0.05
         },
-        {
-          "component": "wallet-vanish",
-          "enter": "cut",
-          "params": { "shop": "Bäckerei Morgenrot", "stamps": 8, "filled": 7, "icon": "bread" },
-          "anchors": { "crumple": { "cap": 0, "word": 0 }, "wallet": { "cap": 0, "word": 1 }, "drop": { "cap": 0, "word": 2 } },
-          "captions": [
-            { "lines": ["*Zerknickt, | *vergessen, | *verloren."] }
-          ]
+        "send": {
+          "cap": 0,
+          "word": -1
         },
-        {
-          "component": "guest-ghost",
-          "enter": "cut",
-          "params": { "chip": "7 von 8 Stempeln" },
-          "anchors": { "chip": { "cap": 0, "word": 1 } },
-          "captions": [
-            { "lines": ["Wer *fast | am Ziel war, | siehst du | *nie."] }
-          ]
+        "reply": {
+          "cap": 1,
+          "word": 0
         }
-      ]
-    },
-    {
-      "_hinweis": "Die Pointe: der eine Satz, auf den das Video hinausläuft, hier als eigene Szene mit dem Stempel. Als weiterer Teil einer Szene mit \"enter\": \"cut\" geht es genauso (so im zweiten Video). Auch die Pointe ist eine Aussage über die App und braucht ihre Zeile in PRODUKT.md (hier A3: die Karte bleibt auf dem Handy). Kein 'Mit Stampit passiert das nicht!' nach einem Satz, den Stampit nicht löst. 'scale' macht die Tafeln größer. Die Pause danach stellt 'gapBefore' an der nächsten Textzeile ein.",
-      "component": "stamp-check",
-      "params": { "icon": "check" },
-      "anchors": { "hit": { "cap": 0, "word": -1, "offset": 0.1 } },
+      },
+      "camera": [
+        {
+          "cap": 1,
+          "word": 2,
+          "zoom": 1.1,
+          "focus": [
+            470,
+            880
+          ],
+          "to": [
+            470,
+            930
+          ],
+          "dur": 0.3
+        }
+      ],
       "captions": [
-        { "lines": ["Mit Stampit | bleibt die Karte | *im *Handy!"], "scale": 1.15 }
-      ]
-    },
-    {
-      "_hinweis": "Das Produkt (PRODUKT.md A1, A2, A3, B2). Teil 1: die Karte fällt in die Wallet, auf 'Einmal' fährt die Kamera auf den QR-Code. Teil 2: harter Schnitt, dieselbe Karte ohne neues Hereinfahren ('rise' und 'drop' false), ein Stempel landet. Jeder neue Stempel (after minus before) braucht einen Anker stamp1, stamp2, ...",
-      "parts": [
         {
-          "component": "wallet-pass",
-          "params": { "shop": "Bäckerei Morgenrot", "location": "", "reward": "8 Stempel = 1 Brötchen gratis", "stamps": 8, "before": 2, "after": 2, "icon": "bread" },
-          "anchors": { "card": { "cap": 0, "word": 1 }, "scan": { "cap": 1, "word": 0 }, "ok": { "cap": 1, "word": -1 } },
-          "camera": [ { "cap": 1, "word": 0, "zoom": 1.5, "focus": [540, 1343], "to": [540, 1150] } ],
-          "captions": [
-            { "lines": ["Die Karte | liegt in Apple | oder Google | *Wallet."], "gapBefore": 0.55 },
-            { "lines": ["*Einmal | gescannt, | kein Store, | *kein *Download."] }
+          "lines": [
+            "Welches | *Format | darf heute?"
           ]
         },
         {
-          "component": "wallet-pass",
-          "enter": "cut",
-          "params": { "shop": "Bäckerei Morgenrot", "location": "", "reward": "8 Stempel = 1 Brötchen gratis", "stamps": 8, "before": 6, "after": 7, "icon": "bread", "scan": false, "rise": false, "drop": false },
-          "anchors": { "stamp1": { "cap": 0, "word": 3 } },
-          "camera": [ { "at": "start", "dur": 0, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080] } ],
-          "captions": [
-            { "lines": ["Jeder Stempel | ist *sofort | auf dem *Handy."] }
+          "lines": [
+            "Eins, | das die | *letzten *drei | nicht hatten."
           ]
         }
       ]
     },
     {
-      "_hinweis": "Das Schlüsselbild für 'in der Nähe' (PRODUKT.md C1): immer die Karte von oben (shop-map), nie eine Figur an der Ladentür. Die Kundin geht eine Straße weiter, tritt in den Kreis, dort brummt ihr Handy, sichtbar entfernt von der Ortsnadel. Kamera nur leicht heran (1,2), damit der ganze Kreis im Bild bleibt. Danach harter Schnitt auf den Sperrbildschirm. Nirgends eine Entfernung in Zahlen.",
+      "_hinweis": "Gerüst, Szene 3: Duell in Runden (Format F06). 'score' ist der Stand vor der Runde.",
       "parts": [
         {
-          "component": "shop-map",
-          "params": { "shop": "Bäckerei Morgenrot", "icon": "bread", "circle": true, "notify": true, "note": "8 von 8, dein Brötchen wartet", "path": [[-0.1, 1], [0.55, 1]] },
-          "anchors": { "circle": { "at": "start", "offset": 0.05 }, "walk": { "at": "start" }, "buzz": { "cap": 1, "word": 0, "offset": -0.1 }, "arrive": { "at": "end", "offset": -0.5 } },
-          "camera": [ { "cap": 1, "word": 0, "zoom": 1.2, "focus": [560, 1166], "to": [540, 1211], "dur": 0.3 } ],
+          "component": "versus-split",
+          "params": {
+            "shop": "Laden aus THEMEN.md",
+            "icon": "check",
+            "round": 0,
+            "title": "Gerüst",
+            "scene": "start",
+            "winner": "none"
+          },
           "captions": [
-            { "lines": ["Ist die Karte | *voll | und sie kommt | in die *Nähe,"] },
-            { "lines": ["zeigt ihr | *Handy | sie *von *selbst | an."] }
+            {
+              "lines": [
+                "Papier | gegen *Handy | ist eins davon."
+              ]
+            }
           ]
         },
         {
-          "component": "lock-notification",
+          "component": "versus-split",
           "enter": "cut",
-          "params": { "clock": "07:48", "date": "Dienstag, 17. November", "title": "Bäckerei Morgenrot", "body": "8 von 8, dein Brötchen wartet", "icon": "bread", "pin": false, "rise": false },
-          "anchors": { "notify": { "at": "start", "offset": 0.1 } },
-          "camera": [ { "cap": 0, "word": 2, "zoom": 1.3, "focus": [540, 1030] } ],
+          "params": {
+            "shop": "Laden aus THEMEN.md",
+            "icon": "check",
+            "round": 1,
+            "title": "Regen",
+            "scene": "regen",
+            "winner": "right",
+            "score": [
+              0,
+              0
+            ],
+            "leftNote": "Matsch",
+            "rightNote": "Alles da"
+          },
+          "anchors": {
+            "action": {
+              "cap": 0,
+              "word": 0
+            },
+            "point": {
+              "cap": 0,
+              "word": -1
+            }
+          },
           "captions": [
-            { "lines": ["Und du musst | dafür *gar | *nichts | *tun."] }
+            {
+              "lines": [
+                "Runde | für Runde, | mit *Spielstand."
+              ]
+            }
           ]
         }
       ]
     },
     {
-      "_hinweis": "Schluss, immer so: eine kurze Frage oben, die stehen bleibt (darum hier 'mode': 'zeile' mit 'keep'), dann der Satz mit Stichwort nach einer kleinen Pause ('gapBefore'). Zeile 1 endet mit dem Stichwort in GROSSBUCHSTABEN, gesprochen normal: STICHWORT,{Stichwort,}",
+      "_hinweis": "Gerüst, Szene 4: ein Tag im Laden (Format F05). 'from' ist die Uhrzeit des Teils davor.",
+      "parts": [
+        {
+          "component": "day-clock",
+          "params": {
+            "shop": "Laden aus THEMEN.md",
+            "icon": "check",
+            "time": "07:10",
+            "from": "06:00",
+            "label": "Erster Kunde"
+          },
+          "anchors": {
+            "event": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Ein *Tag | im Laden | ist ein anderes."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "day-clock",
+          "enter": "cut",
+          "params": {
+            "shop": "Laden aus THEMEN.md",
+            "icon": "check",
+            "time": "12:15",
+            "from": "07:10",
+            "label": "Mittag",
+            "events": [
+              "07:10"
+            ]
+          },
+          "anchors": {
+            "event": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Jede *Uhrzeit | ein Bild."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Gerüst, Szene 5: eine Zahl groß (Formate F04 und F10). Eine Quelle steht nie im Bild, sie wird gesprochen.",
+      "parts": [
+        {
+          "component": "big-number",
+          "params": {
+            "value": "12",
+            "sub": "Stil C",
+            "label": "Bildwechsel, mindestens"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": 1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Mindestens | *zwölf{zwölf} | Bildwechsel."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "enter": "cut",
+          "params": {
+            "value": "5 s",
+            "from": "12",
+            "sub": "Stil C",
+            "label": "steht ein Bild höchstens"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": 4
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und kein Bild | länger als | *fünf | Sekunden."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Schluss: die Frage des Formats (FORMATE.md, je Format 'Schluss'; nicht dieselbe wie in einem der letzten zwei Videos), dann diese Aufforderung mit dem Stichwort des Ladens.",
       "component": "cta-comment",
-      "anchors": { "logo": { "cap": -1, "word": -1 } },
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
       "captions": [
-        { "lines": ["Klingt interessant?"], "accent": 1, "keep": true, "mode": "zeile" },
-        { "role": "cta", "lines": ["Dann kommentiere jetzt BROT,{Brot,}", "und wir melden uns bei dir."], "gapBefore": 0.65 }
+        {
+          "lines": [
+            "Deine Frage?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt WORT,{Wort,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
       ]
     }
   ]
