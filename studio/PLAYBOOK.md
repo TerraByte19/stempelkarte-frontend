@@ -1083,6 +1083,9 @@ Textzeilen: mindestens 1. Datei: `components/wallet-pass.js`
 | `after` | `5` | Stempel am Ende der Szene. Jeder neue Stempel braucht einen Anker (stamp1, stamp2, ...) |
 | `icon` | `"cup"` | Stempel-Symbol: cup, bread, scissors, star, heart, check |
 | `walletTitle` | `"Wallet"` | Überschrift auf dem Handy |
+| `colors` | `""` | Eigene Farben des Ladens für die Karte, zwei Farben für den Verlauf: "#B8507A,#6E2449" (PRODUKT.md D1). Leer = Stampit-Lila wie bisher |
+| `design` | `false` | true: die Karte entsteht im Bild (D1). Sie ist erst grau, ohne Logo und ohne Symbol; auf "paint" färbt sie sich, auf "logo" springt das Logo hinein, auf "symbol" bekommen die Stempel ihr Symbol. Nur mit "drop": false, ohne Scan und ohne neue Stempel |
+| `device` | `"iphone"` | "iphone" (Insel oben, Apple Wallet) oder "android" (Kamera als Loch, Gestenleiste unten; für Google Wallet, dann "walletTitle": "Google Wallet") |
 | `scan` | `true` | Scan-Rahmen und Haken über dem QR-Code zeigen (false: nur Karte und Stempel) |
 | `rise` | `true` | Das Handy fährt von unten herein. false: es steht schon da (für einen kurzen Teil nach einem Schnitt) |
 | `drop` | `true` | Die Karte fällt auf den Anker "card" in die Wallet. false: sie liegt schon drin, ohne Ton und ohne Anker |
@@ -1180,7 +1183,8 @@ Textzeilen: mindestens 1. Datei: `components/big-number.js`
 | `value` | `"5-25×"` | Die Zahl mit Zeichen, höchstens 7 Zeichen (Leerzeichen, Komma und Punkt zählen halb). Normale Bindestriche, nie Gedankenstriche |
 | `from` | `""` | Was vor "show" auf der Tafel steht, z. B. die Zahl des Schritts davor. Leer = leere Blätter |
 | `label` | `"so teuer ist ein neuer Kunde wie einer, der bleibt"` | Zeile unter der Tafel, was die Zahl bedeutet (höchstens etwa 60 Zeichen, bis 2 Zeilen) |
-| `sub` | `""` | Kleine Zeile über der Tafel, z. B. "Schritt 2" oder "Beispiel" (höchstens etwa 24 Zeichen). Nie eine Quelle: die wird gesprochen, nicht gezeigt |
+| `sub` | `""` | Kleine Zeile über der Tafel, z. B. "Schritt 2" oder "Beispiel" (höchstens etwa 24 Zeichen). Nie eine Quelle: die wird gesprochen, nicht gezeigt. Mit "count" darf "{n}" darin stehen, dann zählt die Zeile mit ("Bei {n} Stempeln") |
+| `count` | `false` | true: die Tafel zählt Zahl für Zahl von "from" nach "value" (10, 9, 8, 7, 6, 5), statt über zufällige Blätter zu klappern; die Zeile darunter bleibt dabei stehen, "{n}" in "sub" zählt mit. Nur ganze Zahlen, höchstens 12 Schritte |
 | `tones` | `true` | Eigene Töne (tick beim Klappern, pop, wenn die Zahl steht). false, wenn das Skript Klänge aus der Bibliothek setzt |
 
 | Anker | Vorgabe | Wann |
@@ -1228,6 +1232,7 @@ Textzeilen: mindestens 1. Datei: `components/comment-thread.js`
 | `reply` | `""` | Antwort unter dem Kommentar (höchstens etwa 60 Zeichen, bis 2 Zeilen). Leer = keine Antwort |
 | `replyName` | `"Stampit"` | Absender der Antwort, mit dem Logo davor (höchstens etwa 20 Zeichen) |
 | `verdict` | `""` | "stimmt" oder "falsch": Stempel "Stimmt" oder "Stimmt nicht" am Kommentar (Anker "verdict"). Leer = kein Stempel |
+| `strike` | `""` | Ein Stück des Kommentars, wörtlich aus "text", das auf den Anker "strike" durchgestrichen wird (Pointe, die zum Einwand vom Anfang zurückkehrt). Leer = nichts |
 | `tones` | `true` | Eigene Töne (pop beim Absenden und bei der Antwort, thud beim Stempel). false, wenn das Skript Klänge aus der Bibliothek setzt |
 
 | Anker | Vorgabe | Wann |

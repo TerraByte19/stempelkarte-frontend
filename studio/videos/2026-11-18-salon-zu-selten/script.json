@@ -70,7 +70,7 @@
         { "cap": 0, "word": -1, "offset": -0.3, "zoom": 1.1, "focus": [210, 880], "to": [210, 930], "dur": 0.3 },
         { "cap": 2, "word": 0, "zoom": 1.1, "focus": [210, 1000], "to": [210, 900], "dur": 0.3 }
       ],
-      "sounds": [ { "sound": "ladenglocke", "at": "start", "offset": 0, "vol": 0.8 } ],
+      "sounds": [ { "sound": "ladenglocke", "at": "start", "offset": 0, "vol": 0.7 } ],
       "captions": [
         { "lines": ["Stempelkarte im Salon?", "Meine Kundinnen", "kommen zu *selten."], "instant": true },
         { "lines": ["Mit *zehn | Stempeln, ja."] },
@@ -78,15 +78,16 @@
       ]
     },
     {
-      "_hinweis": "Beweis in Zahlen (D2): zehn Stempel bei einem Schnitt im Monat sind zehn Monate. Dann der harte Schnitt, und die Tafel zaehlt 10, 9, 8, 7, 6, 5 ('count'), die Zeile darueber zaehlt mit ('Bei {n} Stempeln'): in keinem Bild stehen zwei verschiedene Zahlen. In Fassung 2 sass der Anker 'show' auf 'machst', und rund 0,8 s stand BEI 5 STEMPELN ueber der alten 10, beim Klappern kamen 37, 93 und 1. Kamera 1,2 statt 1,15: weniger leere Theke unten.",
+      "_hinweis": "Beweis in Zahlen (D2): zehn Stempel bei einem Schnitt im Monat sind zehn Monate. Dann der harte Schnitt, und die Tafel zaehlt 10, 9, 8, 7, 6, 5 ('count'), die Zeile darueber zaehlt mit ('Bei {n} Stempeln'): in keinem Bild stehen zwei verschiedene Zahlen. Die erste Tafel steht schon auf 10 ('from' gleich 'value', ohne eigene Toene): beim Klappern aus leeren Blaettern stand dort kurz eine 3 unter BEI 10 STEMPELN. In Fassung 2 sass der Anker 'show' auf 'machst', und rund 0,8 s stand BEI 5 STEMPELN ueber der alten 10, beim Klappern kamen 37, 93 und 1. Kamera 1,2 statt 1,15: weniger leere Theke unten.",
       "parts": [
         {
           "component": "big-number",
           "params": {
             "value": "10",
-            "from": "",
+            "from": "10",
             "sub": "Bei 10 Stempeln",
-            "label": "Monate warten auf den Gratis-Schnitt"
+            "label": "Monate warten auf den Gratis-Schnitt",
+            "tones": false
           },
           "anchors": { "show": { "at": "start", "offset": 0.1 } },
           "camera": [ { "cap": 1, "word": 0, "zoom": 1.2, "focus": [540, 820], "to": [540, 880], "dur": 0.3 } ],
@@ -139,7 +140,8 @@
         "symbol": { "cap": 2, "word": 1 }
       },
       "camera": [
-        { "at": "start", "offset": 0, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080], "dur": 0 },
+        { "at": "start", "offset": 0, "zoom": 1.15, "focus": [540, 1082], "to": [540, 1080], "dur": 0 },
+        { "cap": 0, "word": 1, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080], "dur": 1.6 },
         { "cap": 1, "word": 2, "zoom": 1.5, "focus": [540, 914], "to": [540, 800], "dur": 0.3 },
         { "cap": 2, "word": 0, "zoom": 1.6, "focus": [540, 1082], "to": [540, 1000], "dur": 0.3 }
       ],
