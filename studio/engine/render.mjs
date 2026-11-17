@@ -5,7 +5,7 @@
 import { createRequire } from 'node:module'
 import http from 'node:http'
 import { readFile } from 'node:fs/promises'
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { STAGE } from './script.mjs'
@@ -121,7 +121,26 @@ export async function renderVideo(pages, { duration, fps, out, onFrame, log = ()
   return n
 }
 
+// Welches python3 die Werkzeuge nehmen. Im ersten unbeaufsichtigten Lauf
+// (17.11.2026) zeigte "python3" auf ein Python 3.11 ohne Pillow, der Bau brach
+// beim Kontaktbogen ab; /usr/bin/python3 (3.13) hatte alles. Deshalb wird
+// einmal geprueft, welches Python numpy und PIL laden kann, und dieses fuer
+// jeden Aufruf von "python3" benutzt. STUDIO_PYTHON setzt es von Hand.
+let PYTHON = null
+function python() {
+  if (PYTHON) return PYTHON
+  const kandidaten = [process.env.STUDIO_PYTHON, 'python3', '/usr/bin/python3', 'python3.13', 'python3.12'].filter(Boolean)
+  for (const k of kandidaten) {
+    try {
+      const r = spawnSync(k, ['-c', 'import numpy, PIL'], { stdio: 'ignore' })
+      if (r.status === 0) return (PYTHON = k)
+    } catch (e) { /* naechster Kandidat */ }
+  }
+  return (PYTHON = 'python3') // keiner taugt: der Fehler des Werkzeugs sagt dann, was fehlt
+}
+
 export function run(cmd, args, opts = {}) {
+  if (cmd === 'python3') cmd = python()
   return new Promise((res, rej) => {
     const p = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'], ...opts }); let out = '', err = ''
     p.stdout.on('data', d => out += d); p.stderr.on('data', d => err += d)
