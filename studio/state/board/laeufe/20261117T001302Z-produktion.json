@@ -3,7 +3,7 @@
   "ergebnis": "Video für Mittwoch mit Stimme gebaut (629 Zeichen), 2 Einträge beantwortet, 3 neue Ideen, 3 Reels bewertet.",
   "modus": "produktion",
   "problem": "Das voreingestellte Python der Maschine hatte kein funktionierendes Pillow; gebaut wurde deshalb mit /usr/bin/python3.",
-  "push": "ausstehend",
+  "push": "ok",
   "stimme_zeichen": 629,
   "video_id": "2026-11-18-salon-karte-im-handy-v1",
   "zeit": "2026-11-17T00:38:57Z"
