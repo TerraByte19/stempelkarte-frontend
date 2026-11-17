@@ -979,6 +979,20 @@ Gemeinsam für alle:
   dieselbe bleibt. Wann welcher Baustein, steht unter "Stil C" und in
   `AUTOMATIK.md`, Abschnitt 6.4.
 
+- **3D (seit 17.11.2026, erst eine Probe):** `iso-street` ist der erste Baustein,
+  der sein Bild mit three.js (WebGL) zeichnet statt mit HTML. Er meldet mit
+  `ctx.frame(fn)` eine Zeichenfunktion an; `engine.js` ruft sie bei jedem
+  `seek(t)` mit genau diesem `t` auf, also bleibt Bild N in jedem Lauf gleich
+  (kein Zufall ohne festen Startwert, keine Uhr). three.js liegt in
+  `engine/vendor/` (r170, ohne Netz, `engine/vendor/LIESMICH.md`). Chromium
+  rechnet hier ohne Grafikkarte: etwa 1,2 bis 1,4 s je Bild statt Bruchteilen,
+  eine 5-s-Szene kostet also rund zwei Minuten mehr Bauzeit. Die Prüfungen
+  sehen in die Leinwand nicht hinein (kein `data-safe`): ob Schilder lesbar
+  sind und nichts unter den Textzeilen liegt, zeigen nur die Standbilder.
+  `node studio/tools/test_3d.mjs` prüft, dass dasselbe Bild zweimal dieselben
+  Pixel ergibt und die Szene nicht leer ist (noch nicht in `selftest.mjs`).
+  Probe: `videos/_probe-3d`.
+
 <!-- KATALOG:ANFANG -->
 ### `paper-card` - Papier-Stempelkarte auf der Theke
 
@@ -1265,6 +1279,39 @@ Textzeilen: mindestens 1. Datei: `components/day-clock.js`
 |---|---|---|
 | `move` | `{"at":"start","offset":0.05}` | Zeiger, Himmel und Markierung laufen von "from" auf "time" (Ton: tick), die Uhrzeit springt um |
 | `event` | `{"cap":0,"word":-1}` | Ein Punkt springt an dieser Uhrzeit auf die Zeitleiste (Ton: pop) |
+
+### `iso-street` - Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber
+
+<img src="docs/components/iso-street.png" width="270" alt="Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber">
+
+Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.
+
+Textzeilen: mindestens 1. Datei: `components/iso-street.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `shop` | `"Döner Palast"` | Name des eigenen Ladens auf seinem Schild (höchstens etwa 14 Zeichen, längere werden kleiner gesetzt) |
+| `icon` | `"kebab"` | Symbol des eigenen Ladens: cup, bread, scissors, star, heart, check, kebab |
+| `accent` | `"#7366E8"` | Farbe des eigenen Ladens (Markise, Symbolfeld) |
+| `rival` | `"Imbiss Sonne"` | Name des Ladens gegenüber (höchstens etwa 14 Zeichen) |
+| `rivalIcon` | `"kebab"` | Symbol des Ladens gegenüber |
+| `rivalAccent` | `"#E58A45"` | Farbe des Ladens gegenüber |
+| `ours` | `"left"` | Auf welcher Seite der eigene Laden steht: "left" oder "right" |
+| `heart` | `true` | Herz über dem eigenen Laden, zerbricht auf den Anker "crack" |
+| `walker` | `true` | Der Stammkunde geht über die Kreuzung (Anker "walk", "cross", "enter") |
+| `back` | `false` | true: er kommt vom Laden gegenüber zurück in den eigenen Laden (Schluss "so bleibt er bei dir"); das Herz zerbricht dann nicht, es pocht |
+| `from` | `0` | Wo der Stammkunde auf "walk" steht, als Anteil des Weges (0 = drinnen hinter der eigenen Tür, 0,5 = mitten auf der Kreuzung) |
+| `smoke` | `true` | Rauch steigt aus dem Schornstein des Ladens gegenüber (Grill) |
+| `push` | `0.05` | Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25; mehr schneidet die Läden am Rand an) |
+| `orbit` | `7` | Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12) |
+| `tones` | `true` | Eigene Töne (thud beim Zerbrechen, ding an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `crack` | `{"cap":0,"word":-1}` | Das Herz über dem eigenen Laden zerbricht (Ton: thud). Auf "betrogen" o. ä. |
+| `walk` | `{"at":"start","offset":0}` | Der Stammkunde geht los (von "from" aus); die Tür, aus der er kommt, geht kurz vorher auf |
+| `cross` | `{"at":"start","offset":0}` | Er tritt an die Bordsteinkante und geht auf die Fahrbahn. Vorgabe: gleich mit "walk", dann geht er gleichmäßig durch. Auf ein Wort gesetzt, ist er genau dann an der Kante |
+| `enter` | `{"cap":-1,"word":-1}` | Er ist an der Tür drüben und verschwindet hinein, die Ladenglocke schwingt (Ton: ding) |
 
 ### `shop-counter` - Betreiber an der Theke, ahnungslos
 

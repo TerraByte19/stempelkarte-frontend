@@ -31,11 +31,11 @@ const W = 1080, H = 1920
 const SS = 1 // Bildpunkte je Buehnenpunkt; 2 waere glatter, kostet aber das Dreifache
 
 // Stadtplan in Metern. Strassen liegen im Raster P, die Kreuzung im Ursprung.
-const RH = 2.1          // halbe Fahrbahn
-const B = RH + 1.4      // Hauskante, von der Strassenmitte aus (Fahrbahn + Gehweg)
+const RH = 1.9          // halbe Fahrbahn
+const B = RH + 1.25     // Hauskante, von der Strassenmitte aus (Fahrbahn + Gehweg)
 const P = 24            // Abstand der Strassen
 const CURB = 0.15       // Hoehe der Gehwege
-const SHOP = { w: 6, d: 6, h: 9, door: 1.3 }   // Laden: Breite der Front, Tiefe, Hoehe, Tuermitte ab Ecke
+const SHOP = { w: 5.6, d: 6, h: 9, door: 1.25 }   // Laden: Breite der Front, Tiefe, Hoehe, Tuermitte ab Ecke
 // Bodentextur: deckt x und z von GO bis GO + GS ab (weiter hinten liegt Dunst)
 const GO = -72, GS = 144, GN = 1024
 
@@ -61,7 +61,7 @@ const lerp = (a, b, t) => a + (b - a) * t
 
 export default {
   title: 'Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber',
-  use: 'Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Rechnet etwa eine Sekunde je Bild, also deutlich länger als die 2D-Bausteine.',
+  use: 'Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.',
   params: {
     shop: { default: 'Döner Palast', doc: 'Name des eigenen Ladens auf seinem Schild (höchstens etwa 14 Zeichen, längere werden kleiner gesetzt)', same: 'Ladenname' },
     icon: { default: 'kebab', doc: 'Symbol des eigenen Ladens: cup, bread, scissors, star, heart, check, kebab', same: 'Symbol' },
@@ -75,7 +75,7 @@ export default {
     back: { default: false, doc: 'true: er kommt vom Laden gegenüber zurück in den eigenen Laden (Schluss "so bleibt er bei dir"); das Herz zerbricht dann nicht, es pocht' },
     from: { default: 0, doc: 'Wo der Stammkunde auf "walk" steht, als Anteil des Weges (0 = drinnen hinter der eigenen Tür, 0,5 = mitten auf der Kreuzung)' },
     smoke: { default: true, doc: 'Rauch steigt aus dem Schornstein des Ladens gegenüber (Grill)' },
-    push: { default: 0.16, doc: 'Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,16 = 16 % näher, höchstens 0,4)' },
+    push: { default: 0.05, doc: 'Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25; mehr schneidet die Läden am Rand an)' },
     orbit: { default: 7, doc: 'Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12)' },
     tones: { default: true, doc: 'Eigene Töne (thud beim Zerbrechen, ding an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt' }
   },
@@ -90,8 +90,8 @@ export default {
   }),
   demo: {
     params: { shop: 'Döner Palast', icon: 'kebab', rival: 'Imbiss Sonne', rivalIcon: 'kebab' },
-    captions: [{ lines: ['Dein Stammkunde', 'hat dich betrogen.'], accent: 2 }],
-    at: { cap: 0, word: -1, offset: 0.25 }
+    captions: [{ lines: ['Dein Stammkunde', 'hat dich betrogen.'], accent: 2 }, { lines: ['Mit dem Dönerladen gegenüber.'] }],
+    at: { cap: 0, word: -1, offset: 0.3 }
   },
   css: `
   .is-canvas { position: absolute; left: 0; top: 0; width: ${W}px; height: ${H}px; }
@@ -99,14 +99,14 @@ export default {
   .is-calm { position: absolute; left: 0; right: 0; top: 0; height: 760px; pointer-events: none;
     background: linear-gradient(180deg, ${BRAND.night} 0%, rgba(14,10,36,.94) 20%, rgba(14,10,36,.7) 40%, rgba(14,10,36,.25) 68%, rgba(14,10,36,0) 100%); }
   /* Ecken leicht abdunkeln: haelt den Blick in der Mitte, wie bei einer Linse */
-  .is-vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 80% 62% at 50% 56%, rgba(14,10,36,0) 60%, rgba(14,10,36,.55) 100%); }
+  .is-vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 85% 60% at 50% 52%, rgba(14,10,36,0) 58%, rgba(14,10,36,.6) 100%), linear-gradient(180deg, rgba(14,10,36,0) 72%, rgba(14,10,36,.5) 100%); }
   `,
   async build(ctx) {
     const { p } = ctx
     if (!['left', 'right'].includes(p.ours)) ctx.fail('"ours" muss "left" oder "right" sein')
     if (!ICONS[p.rivalIcon]) ctx.fail(`Symbol "${p.rivalIcon}" gibt es nicht. Erlaubt: ${Object.keys(ICONS).join(', ')}`)
     if (typeof p.from !== 'number' || p.from < 0 || p.from > 0.9) ctx.fail('"from" muss zwischen 0 und 0,9 liegen')
-    if (!(p.push >= 0 && p.push <= 0.4)) ctx.fail('"push" muss zwischen 0 und 0,4 liegen (weiter heran zeigt nur noch eine Wand)')
+    if (!(p.push >= 0 && p.push <= 0.25)) ctx.fail('"push" muss zwischen 0 und 0,25 liegen (weiter heran schneidet die Schilder am Bildrand ab)')
     if (!(p.orbit >= 0 && p.orbit <= 12)) ctx.fail('"orbit" muss zwischen 0 und 12 Grad liegen (mehr zeigt den Rand der Stadt)')
 
     // three.js erst hier laden: so bleibt der Baustein in Node (Katalog, Selbsttest) ohne die 700 KB importierbar
@@ -128,10 +128,9 @@ export default {
     renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true
     const aniso = renderer.capabilities.getMaxAnisotropy()
 
-    ;(window.__isoT ||= []).push(['A', Math.round(performance.now())])
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(C.fog)
-    scene.fog = new THREE.Fog(C.fog, 66, 140)
+    scene.fog = new THREE.Fog(C.fog, 98, 172)
 
     // ---------------------------------------------------------------- Hilfen
     const col = c => new THREE.Color(c)
@@ -255,9 +254,9 @@ export default {
     const FOUNT = [-12.4, 12.4]
     const plaza = [[-6.2, 6.4], [-10.4, 6.1], [-16.8, 6.6], [-6.3, 11.2], [-6.6, 17.8], [-18.2, 12], [-17.4, 18.2], [-11.6, 19.2]]
     plaza.forEach(([x, z], k) => trees.push([x, z, 0.5 + ((k * 37) % 10) / 45, k % 4]))
-    const lamps = [[-B + 0.45, B - 0.45], [B - 0.45, -B + 0.45], [-B + 0.45, -B - 12], [-B - 12.5, B - 0.45], [B + 12, -B + 0.45], [B - 0.45, B + 12.5], [-B + 0.45, -B - 34], [-B - 34, -B + 0.45], [B + 34, B - 0.45], [-B - 24, B - 0.45], [B - 0.45, B + 34], [B + 24, -B + 0.45]]
+    // Keine Laterne an der Ecke zur Kamera: im Bild stand ihr Mast mitten auf dem Weg des Stammkunden
+    const lamps = [[-B - 5.5, B - 0.45], [B - 0.45, -B + 0.45], [-B + 0.45, -B - 12], [-B - 12.5, B - 0.45], [B + 12, -B + 0.45], [B - 0.45, B + 12.5], [-B + 0.45, -B - 34], [-B - 34, -B + 0.45], [B + 34, B - 0.45], [-B - 24, B - 0.45], [B - 0.45, B + 34], [B + 24, -B + 0.45]]
 
-    ;(window.__isoT ||= []).push(['plan', Math.round(performance.now())])
     // ---------------------------------------------------------------- Boden malen
     // Grundfarben, Bordsteinkanten und Kontaktschatten in die Farbtextur, Lichtkegel in die Leuchttextur.
     const shopGlow = { [oursSide]: '185,176,255', [rivalSide]: '255,180,106' }
@@ -275,7 +274,6 @@ export default {
       for (const [x, z, s] of trees) { g.beginPath(); g.arc(gx(x), gx(z), 1.1 * s * GN / GS, 0, Math.PI * 2); g.fill() }
       g.filter = 'none'
     })
-    ;(window.__isoT ||= []).push(['groundTex', Math.round(performance.now())])
     const glowTex = canvasTex(GN, GN, g => {
       g.fillStyle = '#000'; g.fillRect(0, 0, GN, GN); g.globalCompositeOperation = 'lighter'
       const spot = (x, z, r, rgb, a) => { const gr = g.createRadialGradient(gx(x), gx(z), 0, gx(x), gx(z), r * GN / GS); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(0.45, `rgba(${rgb},${a * 0.45})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = gr; g.fillRect(gx(x - r), gx(z - r), 2 * r * GN / GS, 2 * r * GN / GS) }
@@ -286,7 +284,6 @@ export default {
         for (const [x, z] of along) spot(x, z, 3.4, shopGlow[side], 0.42)
       }
     })
-    ;(window.__isoT ||= []).push(['glowTex', Math.round(performance.now())])
     const groundMat = worldMapped(lam('#FFFFFF', { map: groundTex, emissive: '#FFFFFF', emissiveMap: glowTex }))
     // Boden und Gehwege zuletzt zeichnen (renderOrder): was Haeuser verdecken, faellt dann schon am Tiefentest
     // heraus, statt erst teuer beleuchtet und dann uebermalt zu werden
@@ -311,7 +308,6 @@ export default {
     stripes.forEach(([x, z, w, d, c], k) => { m4.compose(v3.set(x, 0.011, z), q.identity(), s3.set(w, 1, d)); stripeMesh.setMatrixAt(k, m4); stripeMesh.setColorAt(k, col(c)) })
     stripeMesh.receiveShadow = true; scene.add(stripeMesh)
 
-    ;(window.__isoT ||= []).push(['groundObj', Math.round(performance.now())])
     // ---------------------------------------------------------------- Stadt bauen
     const boxGeo = new RoundedBoxGeometry(1, 1, 1, 1, 0.03)
     // Unten dunkler als oben: wirkt wie Licht, das am Boden verschluckt wird (gebackene Verdeckung)
@@ -369,14 +365,14 @@ export default {
       // Brunnen: Becken, Rand, leuchtendes Wasser (Lila), Saeule in der Mitte
       const [fx, fz] = FOUNT
       const rim = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.35, 0.55, 28), lam('#4A4475')); rim.position.set(fx, CURB + 0.27, fz); kit.add(rim)
-      const water = new THREE.Mesh(new THREE.CylinderGeometry(1.95, 1.95, 0.05, 28), new THREE.MeshBasicMaterial({ color: '#7E73E8' })); water.position.set(fx, CURB + 0.5, fz); kit.add(water)
+      // Wasser knapp ueber dem Rand: der Deckel des Zylinders laege sonst darueber
+      const water = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.9, 0.04, 28), new THREE.MeshBasicMaterial({ color: '#5F56B4' })); water.position.set(fx, CURB + 0.57, fz); kit.add(water)
       const col1 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 1.3, 10), lam('#5A5488')); col1.position.set(fx, CURB + 1.1, fz); kit.add(col1)
       const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.35, 0.3, 18), lam('#5A5488')); bowl.position.set(fx, CURB + 1.75, fz); kit.add(bowl)
-      glow('#9C92FF', 5, new THREE.Vector3(fx, CURB + 0.8, fz), 0.25)
+      glow('#9C92FF', 4, new THREE.Vector3(fx, CURB + 0.8, fz), 0.12)
     }
     kit.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true } })
 
-    ;(window.__isoT ||= []).push(['city', Math.round(performance.now())])
     // ---------------------------------------------------------------- Laeden (die beiden Helden)
     const iconImage = async (name, color) => {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`
@@ -411,11 +407,14 @@ export default {
         c2.fillStyle = gr; c2.fillRect(0, 0, cw, chh)
         c2.fillStyle = ours ? 'rgba(48,36,110,.55)' : 'rgba(90,40,30,.5)'
         c2.fillRect(0, chh * 0.72, cw, chh * 0.28)                                               // Theke
-        c2.beginPath(); c2.moveTo(cw * 0.2, chh * 0.16); c2.lineTo(cw * 0.33, chh * 0.16); c2.lineTo(cw * 0.3, chh * 0.68); c2.lineTo(cw * 0.23, chh * 0.68); c2.closePath(); c2.fill() // Spiess
         c2.fillRect(cw * 0.62, chh * 0.44, cw * 0.16, chh * 0.28)                                // Kasse
         c2.fillStyle = 'rgba(255,255,255,.35)'; c2.beginPath(); c2.moveTo(cw * 0.5, 0); c2.lineTo(cw * 0.62, 0); c2.lineTo(cw * 0.42, chh); c2.lineTo(cw * 0.3, chh); c2.fill() // Spiegelung im Glas
       })
       put(new THREE.Mesh(new THREE.PlaneGeometry(winW, 1.9), new THREE.MeshBasicMaterial({ map: winTex })), winX, 1.55, 0.14, false)
+      // Das Symbol des Ladens gross auf der Scheibe, in der Ladenfarbe (wie ein Aufkleber)
+      const ico = await iconImage(icon, '#' + acc.clone().multiplyScalar(ours ? 0.75 : 0.85).getHexString())
+      const icoTex = canvasTex(256, 256, (c2, cw) => { c2.drawImage(ico, 0, 0, cw, cw) }, { sharp: true })
+      put(new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.15), new THREE.MeshBasicMaterial({ map: icoTex, transparent: true, toneMapped: false })), winX + (flip ? 0.55 : -0.55), 1.62, 0.16, false)
       // Tuer: Rahmen, dahinter das Licht des Ladens, davor das Tuerblatt (dreht auf, wenn jemand kommt)
       put(new THREE.Mesh(new RoundedBoxGeometry(1.42, 2.6, 0.22, 2, 0.06), std('#140F33')), dx, 1.3, 0.02, false)
       put(new THREE.Mesh(new THREE.PlaneGeometry(1.14, 2.36), new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(1.1) })), dx, 1.2, 0.135, false)
@@ -429,27 +428,29 @@ export default {
       const awTex = canvasTex(512, 64, (c2, cw, chh) => { for (let i = 0; i < 8; i++) { c2.fillStyle = i % 2 ? (ours ? BRAND.lilac : BRAND.paper) : '#' + acc.getHexString(); c2.fillRect(i * cw / 8, 0, cw / 8 + 1, chh) } })
       const aw = put(new THREE.Mesh(new RoundedBoxGeometry(winW + 0.5, 0.12, 1.35, 2, 0.05), std('#FFFFFF', { map: awTex, roughness: 0.7 })), winX, 2.86, 0.62)
       aw.rotation.x = 0.36
-      // Schild ueber dem Laden: Papierfarbe, Symbolfeld in der Ladenfarbe, Name in Tinte. Unbeleuchtetes
-      // Material (leuchtet von innen): nachts ist das Schild das Hellste an der Front und bleibt lesbar.
-      const ico = await iconImage(icon, '#FFFFFF')
-      const signW = w - 0.4, signH = 1.4, TW = 2048, TH = Math.round(TW * signH / signW)
+      // Schild ueber dem Laden: Papierfarbe, Name in Tinte ueber die ganze Breite. Das Symbol steht nicht
+      // auf dem Schild, sondern gross im Schaufenster: neben einem Symbolfeld blieb fuer "Imbiss Sonne" nur
+      // eine Schrift, die auf dem Handy niemand las. Unbeleuchtetes Material (leuchtet von innen): nachts
+      // ist das Schild das Hellste an der Front.
+      const signW = w - 0.3, signH = 1.5, TW = 2048, TH = Math.round(TW * signH / signW)
       const signTex = canvasTex(TW, TH, (c2, cw, chh) => {
         c2.fillStyle = BRAND.paper; c2.beginPath(); c2.roundRect(0, 0, cw, chh, chh * 0.18); c2.fill()
-        const pad = chh * 0.13, tile = chh - 2 * pad
-        c2.fillStyle = '#' + acc.getHexString(); c2.beginPath(); c2.roundRect(pad, pad, tile, tile, tile * 0.22); c2.fill()
-        c2.drawImage(ico, pad + tile * 0.13, pad + tile * 0.13, tile * 0.74, tile * 0.74)
-        // Name so gross wie moeglich, in der Breite neben dem Symbolfeld
-        const room = cw - tile - pad * 3.4
-        let size = chh * 0.62
+        // Streifen in der Ladenfarbe unten: verbindet Schild und Markise
+        c2.fillStyle = '#' + acc.getHexString(); c2.fillRect(chh * 0.18, chh * 0.86, cw - chh * 0.36, chh * 0.06)
+        const room = cw - chh * 0.5
+        let size = chh * 0.66
         c2.font = `700 ${size}px ${BRAND.display}`
-        while (c2.measureText(name).width > room && size > chh * 0.3) { size *= 0.97; c2.font = `700 ${size}px ${BRAND.display}` }
+        while (c2.measureText(name).width > room && size > chh * 0.25) { size *= 0.97; c2.font = `700 ${size}px ${BRAND.display}` }
         c2.fillStyle = BRAND.ink; c2.textBaseline = 'middle'; c2.textAlign = 'center'
-        c2.fillText(name, pad * 2 + tile + room / 2, chh * 0.54)
+        c2.fillText(name, cw / 2, chh * 0.47)
         // Groesse relativ zur Schildhoehe: unter 0,4 wird der Name auf dem Handy zu klein
         signs.push({ name, size: +(size / chh).toFixed(2), fits: c2.measureText(name).width <= room })
       }, { sharp: true })
       put(new THREE.Mesh(new RoundedBoxGeometry(signW + 0.18, signH + 0.18, 0.24, 2, 0.07), std('#1A1440')), -w / 2, 3.95, 0.12, false)
       put(new THREE.Mesh(new THREE.PlaneGeometry(signW, signH), new THREE.MeshBasicMaterial({ map: signTex, toneMapped: false })), -w / 2, 3.95, 0.25, false)
+      // Schein um das Schild (wie ein Leuchtkasten): weiche Flaeche hinter dem Schild, additiv
+      const halo = put(new THREE.Mesh(new THREE.PlaneGeometry(signW + 2.2, signH + 1.6), new THREE.MeshBasicMaterial({ map: blobTex, color: ours ? '#9F95FF' : '#FFB46A', transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false })), -w / 2, 3.95, 0.2, false)
+      halo.receiveShadow = false
       // Schornstein (beim Grill gegenueber steigt dort Rauch auf)
       put(new THREE.Mesh(new RoundedBoxGeometry(0.7, 1.3, 0.7, 2, 0.08), std(wallC.clone().multiplyScalar(0.8))), ax(w - 1.1), h + 0.75, -d + 1.2)
       // Licht vor dem Laden: eine echte Punktlichtquelle (faerbt Markise, Figur, Glocke)
@@ -460,7 +461,7 @@ export default {
       return {
         g, hinge, open, light: pl, rot: lots[side].rot,
         inWorld: world(dx, 0, -0.9), outWorld: world(dx, 0, 1.15),
-        top: world(ax(w / 2 - 0.5), h + 2.5, -1.2), chimney: world(ax(w - 1.1), h + 1.5, -d + 1.2), bellPos: world(ax(0.35), 2.95, 0.2)
+        top: world(ax(1.7), h + 1.75, -0.5), chimney: world(ax(w - 1.1), h + 1.5, -d + 1.2), bellPos: world(ax(0.35), 2.95, 0.2)
       }
     }
     const S = {}
@@ -468,9 +469,8 @@ export default {
     S[rivalSide] = await buildShop(rivalSide, { name: p.rival, icon: p.rivalIcon, accent: p.rivalAccent, ours: false })
     const our = S[oursSide], riv = S[rivalSide]
     // Ein zu langer Name wird auf dem Schild so klein, dass ihn auf dem Handy niemand liest
-    for (const s of signs) if (!s.fits || s.size < 0.4) ctx.warn(`der Name "${s.name}" steht auf dem Schild sehr klein. Namen kürzen (höchstens etwa 14 Zeichen).`)
+    for (const s of signs) if (!s.fits || s.size < 0.42) ctx.warn(`der Name "${s.name}" steht auf dem Schild sehr klein. Namen kürzen (höchstens etwa 14 Zeichen).`)
 
-    ;(window.__isoT ||= []).push(['shops', Math.round(performance.now())])
     // ---------------------------------------------------------------- Herz ueber dem eigenen Laden
     let heart = null
     if (p.heart) {
@@ -592,13 +592,15 @@ export default {
     }
 
     // ---------------------------------------------------------------- Kamera
-    const camera = new THREE.PerspectiveCamera(30, W / H, 5, 400)
+    // Langes Objektiv aus grosser Entfernung: Hauskanten bleiben fast senkrecht, das wirkt wie die
+    // isometrischen Spielzeugstaedte der Vorbilder. Mit 30 Grad kippten die Haeuser am Rand nach aussen.
+    const camera = new THREE.PerspectiveCamera(22, W / H, 20, 500)
     // Die Mitte der Szene liegt etwas unter der Bildmitte (oben stehen die Woerter): Bild nach unten verschieben
     camera.setViewOffset(W, H, 0, -H * 0.05, W, H)
     const target = new THREE.Vector3(0, 1.6, 0)
     const placeCamera = t => {
       const u = smooth((t - ctx.s) / Math.max(0.1, ctx.e - ctx.s))
-      const dist = 74 * (1 - p.push * u), az = THREE.MathUtils.degToRad(45 + p.orbit / 2 - p.orbit * u), el = THREE.MathUtils.degToRad(37 - 1.5 * u)
+      const dist = 86 * (1 - p.push * u), az = THREE.MathUtils.degToRad(45 + p.orbit / 2 - p.orbit * u), el = THREE.MathUtils.degToRad(34 - 1.5 * u)
       camera.position.set(target.x - dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az))
       camera.lookAt(target)
       return az
@@ -667,8 +669,6 @@ export default {
     }
     // Ruhelage der Herzhaelften (fuer das Auseinanderfallen)
     const X0L = heart ? heart.pivL.position.x : 0, X0R = heart ? heart.pivR.position.x : 0, Y0 = heart ? heart.pivL.position.y : 0
-    ;(window.__isoT ||= []).push(['rest', Math.round(performance.now())])
     ctx.frame(draw)
-    window.__iso = { renderer, scene, camera, draw, THREE }
   }
 }

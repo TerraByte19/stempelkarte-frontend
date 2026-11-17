@@ -7,7 +7,7 @@
   },
   "timing": {
     "lead": 0.35,
-    "hold": 2.6,
+    "hold": 3.3,
     "maxGap": 0.45
   },
   "captionStyle": {
