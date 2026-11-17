@@ -38,9 +38,14 @@ gesperrt).
   meist der Laden wechselt und derselbe Blickwinkel in der Regel frühestens
   nach sieben Tagen wiederkommt. Die genaue Regel der Auswahl steht in
   `AUTOMATIK.md`, Abschnitt 5.
-- **Der Hook ist ein Vorschlag.** Er darf beim Schreiben des Skripts besser
-  werden und muss zum Format passen (Muster in `FORMATE.md` 4), aber nie zu
-  einer Aussage, die `PRODUKT.md` in Klasse 1 nicht deckt.
+- **Der Hook ist ein Vorschlag.** Seit dem 17.11.2026, abends, ist er einer
+  von mindestens fünf Kandidaten, die der Lauf schreibt und mit dem
+  Bewertungsbogen zählt (`HOOKS.md` 0 und 1.8); gewinnt ein anderer, steht
+  der andere im Video. Jeder Kandidat muss zum Format passen (Muster in
+  `HOOKS.md` 1.7.3), nie zu einer Aussage, die `PRODUKT.md` in Klasse 1 nicht
+  deckt. T06 hat seit dem 17.11.2026 auch F03: der beste Anfang dieser Idee in
+  der Jury-Runde war ein Einwand ("Weniger Stempel, mehr Gratis-Döner? Da geh
+  ich doch pleite.", `HOOKS.md` 5.1).
 - **Nichts wiederholt das erste Video** ("Der sechste Kaffee geht aufs Haus.
   Warum eigentlich?": Café, Gratis-Kaffee als Rechnung, 6.500 Euro, Stichwort
   KARTE mit Becherreihe). Kein Thema hier beginnt mit "geht aufs Haus", keines
@@ -123,7 +128,7 @@ andere, Reihenfolge und Einstieg eingeschlossen, kommt aus dem Format.
 | T03 | ja | `eiscafe` | `papierkarte` | F06, F07 | Die Stempelkarte war in der Jeans. Die Jeans war in der Waschmaschine. | Papier geht kaputt oder verloren. Die Karte in der Wallet nicht. | A4, A1, A3 | `versus-split` Runde "regen" |
 | T04 | ja | `cafe` | `kein-download` | F03, F09 | Für Brötchen lädt niemand eine App herunter. Muss auch keiner. | Der Kunde scannt einmal einen QR-Code, danach liegt die Karte in der Wallet. Kein Store, kein Download. | A2, A3, A1 | `wallet-pass` (Scan und Haken) |
 | T05 | ja | `friseur` | `rechnung` | F04 | Zwei Haarschnitte mehr im Jahr. Klingt nach wenig. | Beispielrechnung: 25 € bleiben pro Haarschnitt, mal 40 Stammkunden, mal 2 Besuche mehr im Jahr, sind 2.000 € mehr im Jahr. Ein Beispiel, kein Versprechen. | Beispielrechnung, A1, A4 | `big-number` je Faktor, `calc-panel` (40 × 2 × 25 = 2.000 €) |
-| T06 | ja | `doener` | `stempelzahl` | F09, F01 | Zehn Stempel bis zum Gratis-Döner sind Pflicht? (F09; F01: "Was bringt deine Stammkunden durch zehn Stempel?") | Du legst selbst fest, wie viele Stempel es bis zur Belohnung braucht, und wie die Karte aussieht. | D2, D1, A1 | `big-number` ("6"), `wallet-pass` (6 Felder, ohne Scan). Die Stempelzahl wechselt mit Absicht: die Warnung `hinweise` dazu ist gewollt |
+| T06 | ja | `doener` | `stempelzahl` | F09, F01, F03 | Zehn Stempel bis zum Gratis-Döner sind Pflicht? (F09; F01: "Was bringt deine Stammkunden durch zehn Stempel?") | Du legst selbst fest, wie viele Stempel es bis zur Belohnung braucht, und wie die Karte aussieht. | D2, D1, A1 | `big-number` ("6"), `wallet-pass` (6 Felder, ohne Scan). Die Stempelzahl wechselt mit Absicht: die Warnung `hinweise` dazu ist gewollt |
 | T07 | wartet (C3, C5) | `eiscafe` | `nachricht` | | Neue Sorte seit heute. Deine Stammkunden wissen es schon. | Du schickst deinen Kunden selbst eine Nachricht aufs Handy, oder stellst ein Tagesangebot auf die Karte. | C3, C5 | `lock-notification` (ohne Ortsnadel) |
 | T08 | wartet (C2) | `friseur` | `rueckhol` | | Dein Kunde war lange nicht da. Sein Handy erinnert ihn an dich. | Wenn Kunden länger nicht da waren, meldet sich die Karte. | C2 | `lock-notification` (ohne Ortsnadel) |
 | T09 | wartet (C4) | `cafe` | `geburtstag` | | Deine Stammkundin hat heute Geburtstag. Dein Laden gratuliert von selbst. | Automatische Nachrichten, zum Beispiel zum Geburtstag. | C4 | `lock-notification` (ohne Ortsnadel) |
@@ -165,7 +170,8 @@ andere, Reihenfolge und Einstieg eingeschlossen, kommt aus dem Format.
    Format der letzten fünf Videos; Nähe, Papier und Scan je höchstens in
    einem von drei Videos; keine Kernaussage der letzten zwei.
 2. **Takte des Formats schreiben** (`FORMATE.md` 4): Reihenfolge, Bausteine,
-   Hook-Muster, Schlussfrage kommen von dort. Das "Bild der Aussage" kommt in
+   Schlussfrage kommen von dort, die Muster der Hook-Kandidaten aus
+   `HOOKS.md` 1.7.3 (fünf Kandidaten, der beste ab 10 von 12 Punkten). Das "Bild der Aussage" kommt in
    den Takt, in dem das Format die Aussage hat.
 3. **Stil C einhalten** (`AUTOMATIK.md` 6): 105 bis 115 Wörter, mindestens 12
    Bildwechsel, kein Bild über 5 s. Fehlt ein Bildwechsel: Kamerafahrt nach
@@ -179,7 +185,8 @@ Außerdem gilt:
   Video sagt" und "Beleg" ist Inhalt, kein Text zum Abschreiben.
 - Der Hook steht in der ersten Textzeile mit `"instant": true`, als eine
   Tafel mit höchstens drei Zeilen zu etwa 20 Zeichen. Ist er länger: auf zwei
-  Textzeilen verteilen oder kürzen.
+  Textzeilen verteilen oder kürzen. Ab Bild 0 klingt ein Ortsklang
+  (`HOOKS.md` 1.7.5), bis 0,5 s bewegt sich das Bild.
 - Uhrzeit, Datum und Text auf Sperrbildschirm und Tagesuhr müssen
   zusammenpassen: ein Döner um 12 Uhr, ein Brötchen am Morgen, Eis am
   Nachmittag. Das Datum ohne Jahr, der Wochentag passt zum Tag (Befehl in

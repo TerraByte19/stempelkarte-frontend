@@ -1,6 +1,12 @@
 // Handy mit geoeffneter Wallet: die Karte faellt hinein, der QR-Code wird
 // gescannt, danach kommen Stempel dazu. Das Herzstueck: so sieht Stampit
 // beim Kunden wirklich aus.
+//
+// "device": "android" (Gegenpruefung am Salon-Video, 17.11.2026): auf die Frage "Und Kundinnen
+// ohne iPhone?" antwortete das Video mit demselben Handy samt Dynamic Island, nur die Ueberschrift
+// hiess "Google Wallet". Das Bild widersprach der Frage. Jetzt gibt es ein Android-Handy: Kamera
+// als Loch in der Mitte statt Insel, flachere Ecken, unten die Gestenleiste. Ohne Angabe bleibt
+// alles beim iPhone wie in den veroeffentlichten Videos (regress.mjs vergleicht Bild fuer Bild).
 import { QR } from '../engine/qr.js'
 import { stampCols } from '../engine/parts.js'
 
@@ -21,6 +27,7 @@ export default {
     after: { default: 5, doc: 'Stempel am Ende der Szene. Jeder neue Stempel braucht einen Anker (stamp1, stamp2, ...)' },
     icon: { default: 'cup', doc: 'Stempel-Symbol: cup, bread, scissors, star, heart, check', same: 'Symbol' },
     walletTitle: { default: 'Wallet', doc: 'Überschrift auf dem Handy' },
+    device: { default: 'iphone', doc: '"iphone" (Insel oben, Apple Wallet) oder "android" (Kamera als Loch, Gestenleiste unten; für Google Wallet, dann "walletTitle": "Google Wallet")' },
     scan: { default: true, doc: 'Scan-Rahmen und Haken über dem QR-Code zeigen (false: nur Karte und Stempel)' },
     rise: { default: true, doc: 'Das Handy fährt von unten herein. false: es steht schon da (für einen kurzen Teil nach einem Schnitt)' },
     drop: { default: true, doc: 'Die Karte fällt auf den Anker "card" in die Wallet. false: sie liegt schon drin, ohne Ton und ohne Anker' }
@@ -72,15 +79,21 @@ export default {
   .okbadge { width: 62px; height: 62px; border-radius: 50%; background: var(--lilac);
     color: var(--night); display: grid; place-items: center; opacity: 0; box-shadow: 0 8px 22px rgba(0,0,0,.4); }
   .okbadge svg { width: 32px; fill: none; stroke: currentColor; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+  .phone.android { border-radius: 58px; }
+  .phone.android .screen { border-radius: 44px; }
+  .punch { position: absolute; top: 24px; left: 50%; margin-left: -17px; width: 34px; height: 34px; border-radius: 50%; background: #000; box-shadow: inset 0 0 0 6px #14112E; }
+  .gbar { position: absolute; bottom: 16px; left: 50%; margin-left: -70px; width: 140px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.55); }
   `,
   build(ctx) {
     const { p, key, pop, cue, el } = ctx, { BACK, OUT } = ctx.ease
     if (!Number.isInteger(p.stamps) || p.stamps < 4 || p.stamps > 10) ctx.fail('"stamps" muss zwischen 4 und 10 liegen')
     if (!(p.before >= 0 && p.before <= p.after && p.after <= p.stamps)) ctx.fail('es muss gelten: 0 <= before <= after <= stamps')
+    if (!['iphone', 'android'].includes(p.device)) ctx.fail('"device" ist "iphone" oder "android"')
+    const android = p.device === 'android'
     ctx.html(`
       <div class="abs glow4"></div>
-      <div class="abs phone"><div class="screen">
-        <div class="island"></div>
+      <div class="abs phone${android ? ' android' : ''}"><div class="screen">
+        ${android ? '<div class="punch"></div><div class="gbar"></div>' : '<div class="island"></div>'}
         <div class="wtitle"></div>
         <div class="peek" style="top:150px;background:#2A2452"><u style="width:150px"></u></div>
         <div class="peek" style="top:196px;background:#352D68"><u style="width:110px"></u></div>

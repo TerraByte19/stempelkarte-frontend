@@ -81,6 +81,8 @@ Dokument-id: `<datum>-<slug>-v<version>`, zum Beispiel
 | `erstellt` | Text, ISO 8601 UTC | angelegt am | Automation |
 | `geaendert` | Text, ISO 8601 UTC | zuletzt geändert | Automation und Nutzer |
 | `caption` | Text mit Zeilenumbrüchen (`\n`), freiwillig | der fertige Beitragstext für Instagram, Facebook und TikTok: Hook, ein bis zwei Sätze, "👉 Kommentiere STICHWORT und wir melden uns.", Leerzeile, genau 5 Hashtags. Regeln: `../AUTOMATIK.md`, Abschnitt 6.6, geprüft mit `../tools/beitrag.mjs`. Seit dem 16.11.2026; ältere Dokumente haben das Feld nicht | Automation |
+| `vorschau_teile` | Zahl, freiwillig | wie viele Teile der kleinen Fassung fürs iPhone in der Sammlung `vorschau` liegen (unten). 0 oder fehlt: keine Vorschau. Die Seite liest es (als `vorschau`, höchstens 40) und setzt die Teile zusammen, wenn sie die Datei selbst nicht laden kann. Seit dem 17.11.2026 | Automation |
+| `vorschau_rest` | Zahl, freiwillig | nur nach einem abgebrochenen Schreiben der Vorschau: so viele Teile liegen schon in `vorschau`, ohne dass `vorschau_teile` gesetzt ist. Die Seite liest es nicht; die Automation findet daran die Teile zum Aufräumen | Automation |
 
 `status` hat genau fünf Werte:
 
@@ -171,6 +173,74 @@ Ein einziges Dokument, nur die Automation schreibt es, die Seite liest es.
 | `start_satz` | Text | der Satz, den der Nutzer in einen neuen Chat einfügt |
 | `konten` | Liste von Texten | Konten, von denen Ideen kommen |
 
+### Sammlung `vorschau` (seit 17.11.2026)
+
+Warum: auf dem iPhone (Claude-App und Safari) holt die Seite keine Datei von
+ihrer eigenen Adresse: am 17.11.2026 gab `/_blob/<id>` dort 404 und die
+Datei neben der Seite 403 (gemessen über `diagnose`, unten). Die Datenbank
+geht dort, weil sie über die Brücke der Seite läuft. Deshalb liegt jedes
+Video zusätzlich als kleine Fassung (720 x 1280, rund 3,5 MB) in Teilen hier,
+und die Seite setzt sie zu einem Video zusammen ("Weg 4" in `index.html`).
+
+Dokument-id: `<video-id>-<n>`, `n` ab 0, zum Beispiel
+`2026-11-19-quiz-stempelzahl-v1-0`. `<video-id>` ist die id des Dokuments in
+`videos`, also je Fassung eigene Teile.
+
+| Feld | Typ | Bedeutung |
+| --- | --- | --- |
+| `video_id` | Text | id des Videos in `videos` |
+| `n` | Zahl | Nummer des Teils, ab 0 |
+| `von` | Zahl | Zahl aller Teile (gleich `vorschau_teile` am Video) |
+| `typ` | Text | `video/mp4` |
+| `b64` | Text | das Stück der mp4-Datei als base64, höchstens 240.000 Zeichen |
+
+- **Wer schreibt:** nur die Automation, mit `tools/vorschau.mjs`
+  (`node studio/tools/vorschau.mjs <mp4> <video-id> <ordner>`), das die
+  kleine Fassung rechnet, die Teile schreibt und fertige Listen für
+  `ArtifactData` mit `action: "batch"` ablegt, je Batch höchstens drei Teile
+  (ein Dokument darf 256 KiB haben, ein Batch 1 MiB). Danach setzt sie
+  `vorschau_teile` am Video (`../AUTOMATIK.md`, Schritt 19, Punkt 5). Ein
+  Video von 40 s: rund 20 Teile, 7 Batches, rund 5 MB in der Datenbank.
+- **Wer liest:** nur die Seite, Teil für Teil (alle auf einmal stießen an
+  die Grenze für Aufrufe je Ansicht). Die Automation liest diese Sammlung nie
+  ohne `out_dir`: ein Teil hat rund 240 KB.
+- **Höchstens 12:** bevor die Automation eine Vorschau schreibt, zählt sie
+  alle Videos mit `vorschau_teile` oder `vorschau_rest` über 0 (ohne
+  Datumsgrenze). Sind es 12, bekommt das neue Video keine (rund 60 MB).
+  Das gilt immer, auch wenn das Aufräumen scheitert (`../AUTOMATIK.md`,
+  Schritt 19, Punkt 5).
+- **Aufräumen:** die Automation löscht die Teile von Videos, deren `datum`
+  älter als 7 Tage ist, und darüber hinaus die ältesten, bis 11 übrig sind
+  (Platz für das nächste). Nie die eines Videos, das wartet (`neu`,
+  `aendern`) oder freigegeben ist und dessen `datum` noch kommt oder heute
+  ist: sind nur noch solche übrig, hört sie auf, und ein neues Video bekommt
+  keine Vorschau. Sie löscht zuerst die Teile, dann setzt sie
+  `vorschau_teile` auf 0, und nur mit Versionen, die sie gelesen hat
+  (`node studio/tools/vorschau.mjs loeschliste`), nie mit geratenen
+  (`../AUTOMATIK.md`, Schritt 22a). Das ist die einzige Stelle, an der die
+  Automation etwas löscht, und nur, wenn der Auftragstext es erlaubt.
+- **Nie im Repo:** der Abzug vom Board (`../state/LIESMICH.md`) nimmt diese
+  Sammlung nicht mit.
+
+### Sammlung `diagnose` (seit 17.11.2026)
+
+Die Seite prüft einmal je Sitzung leise ihre Ladewege mit einem kleinen
+Stück eines Videos und legt das Ergebnis hier ab (Dokument-id erzeugt die
+Laufzeit). Damit ließ sich am 17.11.2026 sehen, warum am iPhone kein Video
+lud.
+
+| Feld | Typ | Bedeutung |
+| --- | --- | --- |
+| `zeit` | Text, ISO 8601 UTC | wann geprüft |
+| `browser` | Text, höchstens 300 Zeichen | Kennung des Browsers |
+| `service_worker` | wahr/falsch | ob ein Service Worker die Seite steuert |
+| `asset_abruf`, `datei_abruf` | Text | Ergebnis eines Abrufs von `/_blob/<id>` und der Datei neben der Seite, z. B. "HTTP 404 text/html" |
+| `asset_player`, `datei_player` | Text | was ein Video-Element mit derselben Adresse meldet, z. B. "ok, 38 s" oder "Fehler 4" |
+
+- **Wer schreibt:** nur die Seite. **Wer liest:** nur eine begleitete
+  Sitzung, wenn am Handy etwas nicht lädt. Die Automation liest und kopiert
+  sie nie. Keine Adresse, nichts Persönliches außer der Browserkennung.
+
 ### Erweiterungen durch die Automatik
 
 Die Automatik hält sich an den Vertrag oben und fügt hinzu, was die Seite
@@ -178,8 +248,10 @@ nicht anzeigt und nicht braucht. Die genaue Liste steht in `../AUTOMATIK.md`,
 Abschnitt 2.1; hier nur, was es gibt und wo es vom Text weiter unten abweicht:
 
 - **Zusätzliche Felder** an `videos` (`thema`, `branche`, `idee_id`,
-  `entwurf`, `pruefung`; `caption` steht oben im Vertrag, weil die Seite es
-  zeigt), an `ideen` (`thema`, `branche`, `hook`, `beleg`,
+  `entwurf`, `pruefung`, die Felder der Abwechslung `format`, `kern_bild`,
+  `einstieg`, `motive`, `beleg_kern`, `studie`, `schluss`, dazu `meme`,
+  `hook_muster`, `hook_punkte`, `hook_kandidaten`; `caption` und
+  `vorschau_teile` stehen oben im Vertrag, weil die Seite sie liest), an `ideen` (`thema`, `branche`, `hook`, `beleg`,
   `stichwort`, `herkunft`, `reel_*`, `themen_nr`, `eingang_id`,
   `geplant_fuer`, `video_id`), an `laeufe` (`push`, `stimme_zeichen`,
   `video_id`) und an `stand/aktuell` (`probleme`, `push_fehlversuche`,
@@ -188,7 +260,9 @@ Abschnitt 2.1; hier nur, was es gibt und wo es vom Text weiter unten abweicht:
   `gedaechtnis` (Kassenbuch der Stimme, verwendete Themen, Wünsche des
   Nutzers), `reels` (schon bewertete Reels der Mitbewerber) und `quellen`
   (Skript und Aufnahme je Fassung eines Videos). Die Zugriffsregel an der
-  Wurzel gilt auch für sie: nur der Besitzer sieht sie.
+  Wurzel gilt auch für sie: nur der Besitzer sieht sie. Seit dem 17.11.2026
+  dazu `vorschau` (schreibt die Automatik, liest die Seite) und `diagnose`
+  (schreibt die Seite), beide oben beschrieben.
 - **Ein zusätzlicher Statuswechsel:** Kann die Automatik einen
   Änderungswunsch nicht erfüllen, setzt sie das Video von `aendern` zurück
   auf `neu`, und `antwort` beginnt mit "Nichts: ".
@@ -198,7 +272,9 @@ Abschnitt 2.1; hier nur, was es gibt und wo es vom Text weiter unten abweicht:
   (`tools/budget.mjs`), nicht aus "alter Wert plus neue Aufnahme" wie in
   Schritt 10 unten beschrieben.
 - **Löschen:** Die Automatik löscht nichts, auch keine alten Läufe (anders
-  als der Vorschlag in Schritt 9 unten).
+  als der Vorschlag in Schritt 9 unten). Einzige Ausnahme seit dem
+  17.11.2026: alte Teile in `vorschau` (oben), und nur, wenn der Auftragstext
+  es erlaubt.
 - **Abgelöst:** `modus` ist beim täglichen Lauf immer `produktion`; einen
   eigenen Lauf für die Ideensuche (`scout`) gibt es in Version 1 nicht.
 
@@ -778,6 +854,7 @@ ArtifactData({
 | Abos je Ansicht | 64 (die Seite braucht 5) | [Skill: `db.d.ts`] |
 | `ArtifactData` lesen | `limit` 1 bis 1000, Standard 100 | [Werkzeug] |
 | `ArtifactData` batch | 1 bis 50 Schreibvorgänge, 1 MiB | [Werkzeug] |
+| Datenbank gesamt | 100 MB; die Vorschau (rund 5 MB je Video) hält die Automatik bei höchstens 12 Videos, also rund 60 MB | Angabe der begleitenden Sitzung vom 17.11.2026, hier nicht nachgelesen [ungeprüft] |
 | Seite | 16 MB (`index.html` hat rund 134 KB) | [Skill: `artifact-design`] |
 | Download über die Seite | Endungen u. a. mp4; kein Größenlimit außer 200 MiB in der Android-App | [Skill: `downloads.d.ts`] |
 

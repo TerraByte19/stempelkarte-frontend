@@ -1,8 +1,11 @@
 # Hooks und Memes: Regelwerk für den ersten Satz
 
-**Eingebunden am 16.11.2026.** Der unbeaufsichtigte Lauf liest diese Datei
-ganz, bevor er in Schritt 15 (`AUTOMATIK.md`) die erste Textzeile schreibt
-und entscheidet, ob das Video ein Meme trägt. Sie ersetzt keine Regel aus
+**Eingebunden am 16.11.2026; packende Anfänge (Abschnitte 0, 1.7, 1.8, H12
+bis H16, 5.1) seit dem 17.11.2026, abends.** Der unbeaufsichtigte Lauf liest
+diese Datei ganz, bevor er in Schritt 15 (`AUTOMATIK.md`) die erste Textzeile
+schreibt und entscheidet, ob das Video ein Meme trägt. Das Format steht dann
+schon fest (`FORMATE.md` 3): der Hook richtet sich nach dem Format, nie
+umgekehrt. Sie ersetzt keine Regel aus
 `AUTOMATIK.md`, `PRODUKT.md`, `THEMEN.md` oder `PLAYBOOK.md`; wo sie
 abweicht, gelten die. Was die Daten dahinter sind: `docs/hooks-daten.md` und
 `docs/memes-recherche.md`.
@@ -23,22 +26,67 @@ oben im Bild (Stil C). **Lauf** = der unbeaufsichtigte tägliche Lauf.
 
 ## 0. Ablauf für den Lauf
 
+Seit dem 17.11.2026, abends: **mindestens fünf Kandidaten statt einem Satz**,
+gezählt mit dem Bewertungsbogen 1.8, und **ab Bild 0 ein Ton** (1.7.4). Grund:
+in der Jury-Runde (1.7) lagen zwischen bestem und schwächstem Satz desselben
+Musters bis zu 2,83 Punkte, zwischen den Mitteln der Muster nur bis 1,55. Wer
+nur einen Satz schreibt, würfelt. Die Kandidaten kosten nichts: sie entstehen
+vor dem Skript, gebaut und aufgenommen wird nur der gewählte.
+
 1. Idee, Laden, Blickwinkel und **Format** stehen (`AUTOMATIK.md`, Abschnitt 5;
    `FORMATE.md` 3). Ob heute Meme-Tag ist (4.1), entscheidet schon dort mit:
-   an einem Meme-Tag geht F07 vor.
-2. **Meme?** Nur wenn das Format F07 ist: Meme nach 4.2 wählen. In jedem
-   anderen Format kein Meme, auch an einem Meme-Tag.
-3. **Hook-Muster** wählen: zuerst das Muster des Formats (`FORMATE.md` 4,
-   Zeile "Hook"), sonst Tabelle 1.3 (passt zum Blickwinkel); Muster in
-   Abschnitt 2. Fertige Zeilen für `THEMEN.md` stehen in Abschnitt 5 und in
-   der Spalte "Hook" von `THEMEN.md`.
-4. Erste Textzeile schreiben nach 1.2 und 1.4, gegen 1.5 halten.
-5. Prüfliste 1.6 abhaken, mit ihren Ausnahmen. Ein Punkt nicht erfüllt: Satz
-   neu schreiben.
-6. In `meta` notieren: `hook_muster` (z. B. `"H02"`), `meme` (z. B. `"M23"`
-   oder `""`), dazu wie immer `beleg`.
-7. Beim Entwurf `--stills 0,1,3` bauen und Bild 0 ansehen (1.6, letzter
-   Punkt).
+   an einem Meme-Tag geht F07 vor. Bild 0 ist immer der Einstieg dieses
+   Formats (`FORMATE.md` 4, V4); kein Kandidat ändert daran etwas.
+2. **Meme?** Nur wenn das Format F07 ist, das einzige Format mit Meme. In
+   jedem anderen Format kein Meme, auch an einem Meme-Tag, und kein Kandidat
+   mit Meme-Satzbau aus 3.2.
+3. **Muster, die heute gehen:** die Spalte "Muster" des Formats in Tabelle
+   1.7.3; in F07 die freien Memes nach 4.2, jedes zählt als ein Muster. Davon
+   fallen weg: jedes Muster, dessen Takt aus 1.7.2 erreicht ist, H02 nach 1.6,
+   und das `hook_muster` der letzten zwei Videos (die Videos aus Schritt 6 von
+   `AUTOMATIK.md`; ein Video ohne das Feld zählt als ohne Muster). Bleiben
+   weniger als drei, kommt zuerst das Muster des vorletzten, dann das des
+   letzten Videos wieder dazu. Takt und H02-Regel fallen nie weg.
+4. **Mindestens fünf Kandidaten** aus **mindestens drei** dieser Muster. Lässt
+   Schritt 3 weniger übrig, aus allen, und in `pruefung` steht "nur <n>
+   Muster frei". Je Kandidat:
+   - der erste Satz (die Tafel nach 1.2 und 1.4) und der Satz danach,
+   - Bild 0: der Einstieg des Formats mit seinem Anker aus 1.7.3 (Bewegung
+     bis 0,5 s),
+   - der erste Ton nach 1.7.5,
+   - die Einlösung bis 10 s, mit ihrer Zeile aus `PRODUKT.md` Klasse 1 (in
+     F01 und F02 der erste Rat, in F04 die Rechnung, in F10 die Studie: dort
+     ist das Produkt erst der letzte Satz).
+   Nicht zweimal derselbe Satzanfang (erste drei Wörter). Fertige Zeilen aus
+   Abschnitt 5, 5.1 und der Spalte "Hook" von `THEMEN.md` dürfen Kandidaten
+   sein, wenn 1.6 sie zulässt; ein Satz, der in den letzten 60 Tagen an einem
+   Video stand, nie (`FORMATE.md` V10).
+5. Jeden Kandidaten gegen 1.5 und die Prüfliste 1.6 halten. Wer einen Punkt
+   nicht erfüllt, fällt raus; der Grund kommt in `raus`. **Fällt jeder
+   raus:** drei neue Kandidaten aus den Mustern von Schritt 3 schreiben, die
+   die Gründe in `raus` vermeiden, und wieder prüfen, so oft, bis mindestens
+   einer 1.6 besteht. Das geht immer: jeder Punkt in 1.6 lässt sich beim
+   Schreiben vermeiden. Alle Runden kommen in `hook_kandidaten`. Ein
+   Kandidat, der in 1.6 rausfiel, wird nie gewählt, auch nicht in Schritt 6.
+6. Die übrigen mit dem **Bewertungsbogen 1.8** zählen, Punkt für Punkt, je
+   Punkt ein Wort Begründung. Gewählt wird der Kandidat mit den meisten
+   Punkten, und nur mit **mindestens 10 von 12**; bei Gleichstand der mit dem
+   Muster, das am längsten nicht `hook_muster` war (in F07: das Meme mit dem
+   besseren Rang in 3.2). Hat keiner 10: einmal drei neue Kandidaten im Muster
+   des besten schreiben, gegen 1.6 halten und zählen, dann den besten mit
+   mindestens 8 nehmen.
+   Hat auch dann keiner 8: den besten trotzdem nehmen und in `pruefung`
+   vermerken: "Hook unter 8 Punkten". Am Hook scheitert kein Video.
+7. In `meta` notieren: `hook_muster` (z. B. `"H13"`; in F07 `"H10"`),
+   `hook_punkte` (0 bis 12), `hook_kandidaten` (alle Kandidaten aus den
+   Schritten 4 und 6 als Liste
+   `{ "satz": "...", "muster": "H13", "punkte": 11, "gruende": "S1 Glocke, S2 Theke, ...", "raus": "" }`;
+   `raus` ist der Grund aus Schritt 5 oder leer, `punkte` dann 0), `meme`
+   (z. B. `"M23"` oder `""`), dazu wie immer `beleg`. Dieselben drei Felder
+   kommen ans Video auf dem Board (`AUTOMATIK.md` Schritt 19).
+8. Beim Entwurf `--stills 0,0.5,1,2,3` bauen, die fünf Bilder ansehen und
+   `tools/einstieg.mjs` laufen lassen (`AUTOMATIK.md` Schritt 16, Zeile "Die
+   ersten 3 Sekunden"; Grenzen in 1.7.4).
 
 ---
 
@@ -63,7 +111,8 @@ oben im Bild (Stil C). **Lauf** = der unbeaufsichtigte tägliche Lauf.
 | Hook steht als Tafel ab Bild 0 | erste Textzeile mit `"instant": true`; höchstens 3 Zeilen zu rund 20 Zeichen, `"scale": 1.2` nur bei höchstens 2 Zeilen | Stil C; das Titelbild (`poster.png`) ist dann genau diese Tafel |
 | Hook wird sofort gesprochen | die erste Textzeile **ist** der erste Satz; kein "Hallo", kein "In diesem Video", kein Logo, kein Vorspann | Einsatz nach 0,35 s, Kernbotschaft in den 3 s |
 | Das Bild sagt das Thema sofort | erstes Bild nach Tabelle 1.3; es steht ab Bild 0 (beim Handy `"rise": false`) | wer ohne Ton schaut, muss am Bild sehen, worum es geht |
-| Bruch im ersten halben Satz | Bewegung mit Ton in den ersten 0,5 s. **Erprobt:** Meldung auf dem Sperrbildschirm (`lock-notification`, Anker `notify` `{ "at": "start", "offset": 0.15 }`, `"buzzes": 2`, `"waves": true`, Werte aus `AUTOMATIK.md` 6.4) und Stempelschlag (`paper-card`, `hit` `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01). Für die Formate (17.11.2026): getippte Frage (`comment-thread`, Anker `type` von selbst bei 0,05 s), Zettel leuchtet auf (`tip-cards`, `"rise": false`, Anker `card` `{ "at": "start", "offset": 0.15 }`), Blätter klappern (`big-number`, Anker `show` auf `{ "at": "start", "offset": 0.1 }` und `"poster": 0.6`: bei 0 s steht die Tafel noch leer, das Titelbild zeigt so die Zahl), Zeiger laufen (`day-clock`), Banner (`versus-split`). **Nicht erprobt als Einstieg:** Knick (`wallet-vanish`, `crumple`), Schildchen (`guest-ghost`, `chip`) und `wallet-pass`. Dann Standbild bei 0 s und 1 s ansehen (0, Schritt 7); steht dort etwas halb, mit `paper-card` beginnen | ein stehendes Bild mit Text wirkt wie eine Anzeige |
+| Bruch im ersten halben Satz | Bewegung mit Ton in den ersten 0,5 s. **Erprobt:** Meldung auf dem Sperrbildschirm (`lock-notification`, Anker `notify` `{ "at": "start", "offset": 0.15 }`, `"buzzes": 2`, `"waves": true`, Werte aus `AUTOMATIK.md` 6.4) und Stempelschlag (`paper-card`, `hit` `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01). Für die Formate (17.11.2026): getippte Frage (`comment-thread`, Anker `type` von selbst bei 0,05 s), Zettel leuchtet auf (`tip-cards`, `"rise": false`, Anker `card` `{ "at": "start", "offset": 0.15 }`), Blätter klappern (`big-number`, Anker `show` auf `{ "at": "start", "offset": 0.1 }` und `"poster": 0.6`: bei 0 s steht die Tafel noch leer, das Titelbild zeigt so die Zahl), Zeiger laufen (`day-clock`), Banner (`versus-split`). **Nicht erprobt als Einstieg:** Knick (`wallet-vanish`, `crumple`), Schildchen (`guest-ghost`, `chip`) und `wallet-pass`. Dann Standbilder bei 0 s und 0,5 s ansehen (0, Schritt 8); steht dort etwas halb, mit `paper-card` beginnen. Je Format der Anker in 1.7.3 | ein stehendes Bild mit Text wirkt wie eine Anzeige |
+| Ton ab Bild 0 (seit 17.11.2026, abends) | ein Ortsklang aus der Bibliothek am ersten Teil: `"sounds": [ { "sound": "<Klang aus 1.7.5>", "at": "start", "offset": 0, "vol": <Wert aus 1.7.5> } ]`; `tools/einstieg.mjs` misst ihn | alle vier Videos bis zum 18.11. begannen mit 0,10 bis 0,30 s digitaler Stille (gemessen am 17.11.2026), im Döner-Video kam der erste Effekt erst bei 1,51 s; derselbe Satz still 4,50, mit Bild und Ton 5,83 Punkte (1.7.1, Punkt 4) |
 | Erster Bildwechsel früh | Kamera oder Schnitt auf das **erste Wort der zweiten Textzeile** (Koscher-Video: Kamera bei 1,95 s, Schnitt bei 2,93 s). Kamera nur mit Werten aus `AUTOMATIK.md`, 6.3; gibt es für den Baustein keine, ein Schnitt | danach gilt `pace` wie immer |
 | Reibung zwischen Tafel und Bild, wo es passt | die Tafel sagt das Gegenteil dessen, was das Bild zeigt ("ohne Stempelkissen" über einem Stempel, der auf Papier knallt) | Neugier ohne Behauptung |
 
@@ -74,6 +123,9 @@ oben im Bild (Stil C). **Lauf** = der unbeaufsichtigte tägliche Lauf.
 Einstieg eines der letzten zwei Videos (`FORMATE.md`, V4). Bilder der Nähe
 (`lock-notification`, `shop-map`) gibt es nur in F08, Papier nur, wenn V3 es
 erlaubt. Die Spalte "Bild ab Bild 0" nennt deshalb je Format, was dort steht.
+Welche Muster in einem Format Kandidaten liefern, entscheidet seit dem
+17.11.2026 die Tabelle 1.7.3; die Spalte "Muster zuerst" hilft nur, unter
+diesen die zum Blickwinkel passenden zuerst zu schreiben.
 
 | Blickwinkel | Bild ab Bild 0 | Muster zuerst | Memes, die passen (4.2, nur in F07) |
 |---|---|---|---|
@@ -114,6 +166,9 @@ erlaubt. Die Spalte "Bild ab Bild 0" nennt deshalb je Format, was dort steht.
 | **Eine Alltagszahl, die kippt** (H03) | schwacher Beleg. Zahl/Rechnung: 1 von 6 Treffer, Median 1,83×. Der Treffer 367 Likes = 20,4× ("A €15 cut is rarely just €15") kam mit derselben Caption im zweiten Upload auf 48 = 2,7×. Dazu 750 = 17,9× ("Ten stamps ... is why nobody finishes your card"), in `docs/hooks-daten.md` als "Kühne Behauptung" gezählt |
 | **Meme-Rahmen mit echtem Inhalt** (H08, H10) | Meme/Trend: 2 von 8 Treffer (25 %), bis 15,0×; beide Treffer sind dasselbe Video in zwei Uploads |
 | **"Stell dir vor"** mit einem Bild aus dem Laden (H04) | 1 von 4 Treffer, Median 2,48× (n = 4, zwei davon derselbe Text) |
+| **Der Einwand des Ladenbesitzers in seinen Worten** (H06) | Jury-Runde 17.11.2026 (simuliert, n = 3, 1.7): 6,58 und 6,33, Platz 2 und 5 von 63 |
+| **Drama im Laden** (H12), mit Ort oder Gegenspieler | Jury-Runde: 7,50, Platz 1 (Döner-Video vom 17.11.); Skip-Rate des Videos noch nicht gemessen |
+| **Provokation mit Entwarnung** (H13), niemand verliert etwas | Jury-Runde: 6,50 und 6,17, Platz 4 und 8 |
 
 | Meiden als erster Satz | Beleg |
 |---|---|
@@ -127,6 +182,11 @@ erlaubt. Die Spalte "Bild ab Bild 0" nennt deshalb je Format, was dort steht.
 | Leere Mitmach-Memes ("Sei ehrlich, wer warst du?") | 0 bis 2 Likes |
 | Kopie oder Übersetzung eines fremden Treffers, auch eines eigenen | in × Median des jeweiligen Kontos: 21,0× → 0,3×, 38,3× → 1,9×, 110× → 1,2×, 50,8× → 2,4×, 163× → 1,7× (Likes 880 → 6, 1.608 → 35, 4.634 → 54, 2.339 → 112, 2.942 → 31). Gleiche Caption, gleiches Konto: 4,0× und 68× |
 | Erfolgsversprechen, Umsatz ("macht 30.000 Euro") | `PRODUKT.md`, N5 |
+| Floskel ohne Gegenstand ("Das hat dir bestimmt noch niemand gesagt.", "Ist das koscher?") | Jury-Runde 17.11.2026: 4,25 und 4,17, Platz 53 und 56 von 63 ("hör ich zehnmal am Tag"); mit Gegenstand im selben Satz 6,25 (H14) |
+| Stilles Bild ohne Ton am Anfang | derselbe Satz 4,50 still gegen 5,83 mit Bild und Ton; zehn stille Zeilen im Mittel 4,65 |
+| Belehrung ("Hör auf ...", "Der größte Fehler ...", "Red Flag" über seine Karte) | 4,42 bis 5,75; "klingt nach Belehrung", "fühl mich eher angegriffen" |
+| Sommerbild oder Sommerwort im Winter (Badetasche, Freibad, Sonne, Sommergewitter; `THEMEN.md`, "Saison"). Eis am Markt selbst gehört auch im Winter dazu, mit einem Satz aus seinem Winter (Winterpause, T13) | "Sommergewitter über der Eisdiele ..." 3,50, der schwächste Satz der Runde. Die sechs Eis-Zeilen im November lagen im Mittel bei 4,39, auch die ohne Sommer: ein Eis-Satz im Winter muss sich im Bogen 1.8 behaupten wie jeder andere |
+| Was der Zuschauer erst kennen muss (Jugendwort, Spiel, Nachricht, Meme ohne Inhalt). Ein Meme aus 3.2 in F07 nur, wenn der Satz ohne die Vorlage trägt (4.3, Punkt 6) | GTA 6 4,33, Red Flag 5,17, Gesamtsituation 5,33; eine Nachricht ("staatliche Wallet ab Januar") 5,75, aber ungeprüft, ob sie stimmt |
 
 Kommentare sind kein Maß für einen Hook: das Stichwort im Schluss bringt 14-
 bis 22-mal so viele Kommentare je Like, aber nicht mehr Likes (loyaltify.io:
@@ -144,7 +204,15 @@ Stichwort in allen 38 Reels, Median 18 Likes).
       `hook_muster` H02 hat. Das Feld steht seit dem 17.11.2026 am Video auf
       dem Board (Schritt 19); die Videos davor hatten kein H02.
 - [ ] Ein Laden aus `THEMEN.md` oder ein Gegenstand aus ihm ist genannt oder
-      zu sehen; keine Branche angeredet.
+      zu sehen; keine Branche angeredet. **Ausnahme H16:** dort zählt der
+      Papierkram des Ladenbesitzers (Ausdrucken, Fax, Formular) als
+      Gegenstand, und ein Gegenstand seines Ladens (meist die Papierkarte)
+      steht spätestens mit dem dritten Satz, rund 6 s, im Bild.
+- [ ] Eine Floskel ohne Gegenstand nie allein, auch nicht der Satz des
+      Betreibers "Das hat dir bestimmt noch niemand gesagt." (Jury-Runde: 4,25,
+      Platz 53 von 63). Die Insider-Form gibt es nur als H14, mit einem
+      Gegenstand seines Ladens im selben Satz: "Unter uns: Dein Stempelkissen
+      kannst du wegwerfen." (6,25).
 - [ ] Kein Markenname, kein Fachwort ("Kundenbindung", "Loyalty", "NFC").
 - [ ] Keine echte Ja-Frage an den Zuschauer. **Erlaubt sind:** (a) eine
       W-Frage, deren Antwort das Video gibt (H05); (b) eine rhetorische Frage
@@ -176,9 +244,225 @@ Stichwort in allen 38 Reels, Median 18 Likes).
       dem Sperrbildschirm". Das Bild darf brummen (Stilmittel, `PRODUKT.md`
       C1); ob das Wort auch gesprochen werden darf, hat der Betreiber nicht
       gesagt (7).
-- [ ] Höchstens ein Meme (Abschnitt 4).
+- [ ] Höchstens ein Meme (Abschnitt 4), und nur in F07.
 - [ ] Standbild bei 0 s: Tafel vollständig, Bild steht schon, nichts halb
-      eingeblendet. Bei 1 s: die Bewegung mit Ton hat begonnen.
+      eingeblendet. Bei 0,5 s: die Bewegung hat begonnen.
+- [ ] Bild 0 bewegt sich bis 0,5 s, bei 0,00 s klingt ein Ton (1.7.4, 1.7.5);
+      der erste Bildwechsel liegt bis 3 s (im Entwurf bis 4 s).
+      `tools/einstieg.mjs` misst es.
+- [ ] Nichts aus 1.5 "Meiden", auch nicht aus den Zeilen vom 17.11.2026
+      (Floskel ohne Gegenstand, stilles Bild, Sommerbild oder Sommerwort im
+      Winter, Vorwissen). **Einzige Ausnahme:** Belehrung ("Hör auf ...",
+      "Red Flag") fällt nicht raus, sie zieht im Bogen 1.8 einen Punkt ab;
+      in F07 gilt für den Satzbau eines freien Memes 4.3, Punkt 6. Jeder
+      Punkt ist entweder hier ein Ausschluss oder in 1.8 ein Abzug, nie
+      beides: was hier rausfällt, kommt in 1.8 nicht mehr an.
+
+### 1.7 Packende Anfänge (Jury-Runde vom 17.11.2026)
+
+Wunsch des Betreibers (17.11.2026): "Das soll packen, der Anfang." Grundlage:
+63 Anfänge (12 eigene alte, 51 neue), blind bewertet von drei **simulierten**
+Jurys (KI-Rollen: Döner-Inhaber, Café-Inhaberin, Friseurin); Punkte 0 bis 10
+= (2 x stopp + klar + weiter) / 4, gemittelt über die drei. **Keine echten
+Zuschauer, n = 3.** Die Döner-Rolle mag Döner-Themen lieber. Rohdaten und
+Rechnung liegen nicht im Repo (Arbeitsordner der Sitzung vom 17.11.2026).
+Ob ein Anfang wirklich packt, zeigt erst die Skip-Rate (Abschnitt 6).
+
+#### 1.7.1 Was die Runde gezeigt hat
+
+1. **Sein eigener Gedanke packt.** Der Einwand des Ladenbesitzers in seinen
+   Worten: "Weniger Stempel, mehr Gratis-Döner? Da geh ich doch pleite."
+   6,58 (Platz 2 von 63), "Stempelkarte im Handy? Für meinen Imbiss viel zu
+   kompliziert." 6,33 (Platz 5). Begründungen: "Genau das hätte ich gesagt",
+   "Da tippt einer genau, was ich denke".
+2. **Drama und Frechheit mit einem Ding aus seinem Laden.** "Dein Stammkunde
+   hat dich betrogen. Mit dem Dönerladen gegenüber." 7,50 (Platz 1, unser
+   Döner-Video), "Nimm deinen Stammkunden die Stempelkarte weg. Allen." 6,50
+   (Platz 4, so nicht verwendbar: die Kunden verlören ihre Stempel), "Zehn
+   Stempel bis zum Gratis-Döner? Steht in keinem Gesetz." 6,17 (Platz 8).
+3. **Der Gegenstand gehört in den Satz.** "Das hat dir bestimmt noch niemand
+   gesagt." 4,25 (Platz 53): "Den Satz hör ich zehnmal am Tag", "ich weiß
+   null, worum es geht". Mit Gegenstand: "Unter uns: Dein Stempelkissen
+   kannst du wegwerfen." 6,25 (Platz 7).
+4. **Bewegung und Ton ab Bild 0.** Derselbe Satz "Deutschland und Technik
+   sind Erzfeinde." bekam als stilles Bild ohne Ton 4,50, mit Duell-Bild und
+   Ton 5,83 (+1,33). Die zehn alten Zeilen, die als stilles Bild ohne Ton
+   beschrieben waren, liegen im Mittel bei 4,65. Ehrlich dazu: ein Teil des
+   Vorsprungs der neuen Zeilen kommt von Bild und Ton, nicht vom Satz.
+5. **Was durchfällt:** die falsche Jahreszeit (sechs Eis-Zeilen im
+   November, Mittel 4,39, am schwächsten das Sommergewitter mit 3,50; als
+   Regel gilt nur Sommerbild und Sommerwort im Winter, weil Eis am Markt laut
+   `THEMEN.md` auch im Winter läuft), was man erst kennen muss (Red Flag 5,17, GTA 6 4,33,
+   Gesamtsituation 5,33), Belehrung ("Hör auf ..." 4,42 bis 5,75, "klingt
+   nach Belehrung"), Zahlen mit Kleingedrucktem (4,25 und 4,33), die Branche
+   angeredet ("Wer Brötchen verkauft ..." 4,58), der Gag laut erklärt.
+6. **Der Satz entscheidet.** Unter den 51 neuen Zeilen, alle mit Bewegung und
+   Ton beschrieben, liegen 3,08 Punkte zwischen bestem und schwächstem Satz,
+   innerhalb eines Musters bis 2,83. Deshalb schreibt der Lauf mindestens
+   fünf Kandidaten und zählt sie (Abschnitt 0, 1.8).
+
+#### 1.7.2 Neue Muster und ihr Takt
+
+Die Muster stehen in Tabelle 2 (H12 bis H16 neu, H06 geschärft). Der Takt ist
+abgeleitet, nicht gemessen: frecher Ton nutzt sich ab. "Eins in fünf" heißt:
+nicht unter `hook_muster` der letzten vier Videos.
+
+| Muster | höchstens | dazu |
+|---|---|---|
+| H12 Drama im Laden | eins in fünf Videos | nicht in 30 Tagen nach einem H02 |
+| H13 Provokation mit Entwarnung | eins in fünf | |
+| H14 Insider mit Gegenstand | eins in fünf | |
+| H15 Mitten drin mit Witz | eins in fünf | dasselbe Witzbild (Steppenläufer in `shop-counter`, `grillen-stille`) höchstens einmal in 30 Tagen; der Steppenläufer lief am 17.11.2026 |
+| H16 Selbstironie mit Papierkram | eins in zehn | nie zwei Deutschland-Witze in derselben Woche |
+| alle | nicht das Muster der letzten zwei Videos (Abschnitt 0, Schritt 3) | H02 nach 1.6 |
+
+#### 1.7.3 Welche Muster in welchem Format
+
+Das Format steht vor dem Hook (`FORMATE.md` 3). Bild 0 ist immer der Einstieg
+des Formats (`FORMATE.md` 4, V4), der Anker bringt die Bewegung bis 0,5 s.
+Jedes Format hat mindestens drei Muster, damit Abschnitt 0, Schritt 4 aus
+drei Mustern schreiben kann; die Zeile "Hook" in `FORMATE.md` 4 verweist
+hierher. Beispiele mit Punkten sind von der Jury bewertet, die übrigen nicht.
+
+| Format | Bild 0 und Bewegung bis 0,5 s | Muster | Beispiele |
+|---|---|---|---|
+| F01 Tipps | `tip-cards`, `"show": 1`, `"rise": false`, Anker `card` auf `{ "at": "start", "offset": 0.15 }` (der Zettel leuchtet mit Ton auf) | H05, H08, H14 (Folge ist hier ein Rat, keine Produktaussage: F01 nennt das Produkt erst im letzten Satz) | "Was macht aus einem Gast einen Stammgast?" (H05, T28) · "Unter uns: Dein Stammgast merkt, ob du seine Sorte kennst." (H14) |
+| F02 Sätze | `tip-cards` mit `label` "Sag nicht:", Anker `card` wie F01 | H11, H13, H08 | "Schönen Tag noch. Der falsche Satz für Stammkunden." (H11, T29) · "Streich 'Schönen Tag noch'. Jedenfalls bei Stammkunden." (H13) |
+| F03 Einwand | `comment-thread`, `"typed": true`, Anker `type` von selbst bei 0,05 s | H06, H05, H11; dazu H03 bei der Frage nach der Stempelzahl, H09 bei der Frage nach der verlorenen Karte | "Weniger Stempel, mehr Gratis-Döner? Da geh ich doch pleite." 6,58 (H06) · "Stempelkarte im Handy? Für meinen Imbiss viel zu kompliziert." 6,33 (H06) |
+| F04 Rechnung | `big-number` mit der Alltagszahl, Anker `show` auf `{ "at": "start", "offset": 0.1 }`, `"poster": 0.6` | H03, H06 (Antwort: die Beispielrechnung), H05 | Zahl-Anfänge lagen in der Runde nur bei 4,25 bis 5,50: hier entscheidet der Bogen besonders. "Zwei Haarschnitte mehr im Jahr? Lohnt sich doch nicht." (H06) |
+| F05 Tag | `day-clock` mit der ersten Uhrzeit und `from` eine halbe Stunde davor: Anker `move` (von selbst bei 0,05 s) lässt die Zeiger laufen | Uhrzeit plus Moment (Bauart H01 ohne Sperrbildschirm, `hook_muster` `"H01"`), H15, H05 | "Sieben Uhr zehn, erster Kunde: Karte vergessen." (H15) · "Sechs Uhr. Der Ofen läuft." (H01, T32) |
+| F06 Duell | `versus-split`, `"scene": "start"`, Anker `vs` (von selbst bei 0,15 s: das VS schlägt mit Ton ein, seit dem 17.11.2026) | H11, H05, H16 | "Papierkarte gegen Handy. Drei Runden." (H11, T33) · "Deutschland und Technik sind Erzfeinde." (H16; 5,83 mit Duell-Bild und Ton, 4,50 als stilles Bild) |
+| F07 Meme | der Einstieg des Memes (3.2) mit dessen Anker | H10; als "Muster" zählen hier die freien Memes (4.2) | wie 3.2 |
+| F08 Nähe | `lock-notification`, Anker `notify` auf `{ "at": "start", "offset": 0.15 }` (`AUTOMATIK.md` 6.4) | H01 (auch als "volle Karte zuerst"), H05, H04, H14 (nur mit C1) | "Gratis-Döner wartet auf dich. Das liest dein Kunde gerade." 6,17 (H01) · "Unter uns: Deine Stempelkarte meldet sich von selbst." (H14, C1) |
+| F09 Quiz | `comment-thread`, `"typed": true`, Anker `type` bei 0,05 s; `verdict` auf das Urteil | H06, H13, H11, H03 (nur zur Stempelzahl, D2) | "Zehn Stempel bis zum Gratis-Döner? Steht in keinem Gesetz." 6,17 (H13) · "Für die Stempelkarte im Handy braucht dein Kunde eine App?" (H06, T35) |
+| F10 Studie | `shop-counter` (mit H15: Anker `roll` auf `{ "at": "start", "offset": 0 }`, der Steppenläufer; sonst `"tumbleweed": false` und `bubble` auf das erste Wort) oder `week-strip` (Anker `week1` auf das erste Wort) | H05, H02, H12, H15 | "Mittagszeit im Döner Palast. Ganz schön ruhig hier." (H15) · "Deine Stammkundin geht fremd. Mit der Bäckerei an der Ecke." (H12, `week-strip` mit `rivalWeek`) |
+
+In F10 löst der Anfang nicht mit dem Produkt ein, sondern mit der Studie
+(Kernaussage `studie`); das Produkt bleibt der letzte Satz. In F01 und F02
+löst er mit dem ersten Rat ein.
+
+#### 1.7.4 Sekunde 0 bis 3, für jeden Hook
+
+| Zeit | Bild | Ton | Stimme, Tafel |
+|---|---|---|---|
+| 0,00 s | Einstieg des Formats, steht ganz da; kein Logo, kein Vorspann | **ein Ortsklang** (1.7.5) mit `"sounds"` am ersten Teil, `"at": "start", "offset": 0` | Tafel ab Bild 0 (`"instant": true`), ganzer Satz |
+| bis 0,50 s | **erste Bewegung** über den Anker aus 1.7.3 | Ton des Bausteins | Liam ab 0,35 s |
+| 0,35 bis 2,0 s | kein Fenster über 0,5 s ohne Bewegung | höchstens **ein** Akzent auf dem Reizwort (1.7.5) | erster Satz zu Ende, kein `gapBefore` |
+| bis 3,0 s (Entwurf bis 4,0 s) | **erster Bildwechsel** auf dem ersten Wort der zweiten Textzeile: Kamera nach `AUTOMATIK.md` 6.3 oder Schnitt | | zweiter Satz beginnt |
+| bis 10 s | die Antwort **im Bild**, mit ihrer Zeile aus Klasse 1 (F01, F02: der Rat; F04: die Rechnung; F10: die Studie) | | die Antwort gesagt |
+
+Prüfen: `node studio/tools/einstieg.mjs <ordner>/out/check.json` misst den
+ersten Ton (höchstens 0,05 s), die erste Bewegung (höchstens 0,5 s), den ersten
+Bildwechsel (höchstens 3 s mit Stimme, 4 s im Entwurf) und die Wörter der
+ersten Tafel (höchstens 8). Am Standbild (`--stills 0,0.5,1,2,3`): Bild 0
+ohne Ton und 200 px breit lässt sich in fünf Wörtern beschreiben, und es ist
+nicht nur "ein Handy" oder "eine Stempelkarte". Zwischen zwei Standbildern
+hat sich im **Bild** etwas geändert, nicht nur in der Tafel.
+
+#### 1.7.5 Der erste Ton
+
+Klänge aus `studio/sounds/` (`sounds.json`), nur am Teil mit `"sounds"`, nie
+der Block `sound` oben im Skript. Immer mit Absenkung unter der Stimme
+(`"duck"` weglassen, Vorgabe true).
+
+| Wofür | Klang | `vol` (ungehört) |
+|---|---|---|
+| jeder Laden, Tür auf | `ladenglocke` | 0,8 |
+| Döner Palast | `grill-brutzeln` | 1,0 |
+| Papier im ersten Satz | `papier-knuellen` | 1,5 (leise Datei, -22,5 LUFS) |
+| Spannung, Verlust | `herzschlag` | 1,5 (leise Datei, -21,5 LUFS) |
+| leerer Laden (H15) | `grillen-stille` | 0,8 |
+| F08, Sperrbildschirm als Bild 0 | `handy-vibriert`, und am Baustein `lock-notification` `"tones": false` (sonst brummt es doppelt) | 0,5 |
+| Akzent auf dem Reizwort, höchstens einer in den ersten 3 s | `publikum-keucht`, `drama-stoss`, `herz-zerspringt`, `vine-boom` (höchstens einmal je Video) | 1,0; `vine-boom` 1,5 |
+
+Nie bei 0,00 s: `handy-vibriert` außer unter `lock-notification` (Stilmittel,
+`PRODUKT.md` C1; das Wort nie in Text oder Stimme), `kasse` und `muenzen`
+(Geld im ersten Satz), `applaus` (über 2 s, liegt gedämpft unter dem Satz),
+ein Klang mit `"duck": false`. Warnt `effekte` oder (mit Stimme)
+`effekt-abstand`, den `vol` halbieren. Die Werte sind nicht angehört: das
+erste begleitete Video mit Ortsklang wird angehört und die Werte danach hier
+berichtigt.
+
+### 1.8 Bewertungsbogen für Kandidaten
+
+Jeder Punkt gibt 1 oder 0. Die drei Stopp-Punkte zählen doppelt (wie in der
+Jury-Runde). Je Punkt ein Wort Begründung in `hook_kandidaten`.
+
+**Stopp (doppelt)**
+- S1 **Bewegung und Ton:** Bild 0 bewegt sich bis 0,5 s, und bei 0,00 s
+  klingt ein Ton (Ortsklang oder Baustein).
+- S2 **Sein Alltag:** der Satz handelt von etwas, das der Ladenbesitzer
+  selbst erlebt: sein Kunde, sein Laden, seine Theke, sein Geld, sein
+  Papierkram. Nicht: das Produkt, eine Branche allgemein.
+- S3 **Reibung:** Drama, Provokation, Einwand, Widerspruch, Witz oder ein
+  Verlust steckt im ersten Satz.
+
+**Klar**
+- K1 **Gegenstand im Satz:** Stempelkarte, Stempel, Stempelkissen, Döner,
+  Brötchen, der Laden gegenüber. Nur im Bild reicht nicht.
+- K2 **Ohne Vorwissen:** kein Jugendwort, keine Nachricht und keine fremde
+  Marke, die man kennen muss; ein Meme nur, wenn der Satz auch ohne die
+  Vorlage trägt (4.3, Punkt 6).
+- K3 **Kurz:** Tafel höchstens 8 Wörter, ein Gedanke, keine Zahl mit
+  Kleingedrucktem.
+
+**Weiter**
+- W1 **Sein Gedanke:** ein Einwand, eine Sorge oder ein Satz, den er an der
+  Theke hört.
+- W2 **Nicht erwartbar:** die Antwort kennt er wahrscheinlich noch nicht
+  (nicht "Papier geht verloren", nicht "liegt im Handy" allein).
+- W3 **Ehrlich eingelöst:** was der Satz verspricht, steht bis 10 s im Bild,
+  mit einer Tatsache aus Klasse 1 (in F01, F02 einem wahren Rat). Ein
+  "Geheimnis", das banal endet, gibt 0.
+
+**Abzüge, je 1** (nur, was in 1.6 nicht rausfällt)
+- **Belehrung:** belehrt oder wertet den Zuschauer ab ("Hör auf", "Red Flag",
+  "Fehler").
+- **Werbung:** klingt nach Anzeige oder Gewinnspiel, ohne Slogan oder
+  Markenname zu sein ("Bei diesem Laden ...", "Gratis ... wartet auf dich"
+  ohne den Laden als Absender).
+
+Floskel ohne Gegenstand, Sommerbild oder Sommerwort im Winter, Slogan und
+Markenname ziehen hier nichts ab: sie fallen schon in 1.6 raus. Bis zum
+17.11.2026, abends, standen Floskel und Jahreszeit hier zusätzlich als Abzug;
+ein Kandidat konnte so zugleich rausfallen und gezählt werden.
+
+**Summe** = 2 x (S1 + S2 + S3) + (K1 + K2 + K3) + (W1 + W2 + W3) - Abzüge,
+höchstens 12. Gewählt wird ab 10 (Abschnitt 0, Schritt 6). S1 und K2 sind
+für jeden Kandidaten, der 1.6 bestanden hat, 1 (Ton, Bewegung und Vorwissen
+prüft schon 1.6); sie bleiben im Bogen, damit die Summe mit der Tabelle
+unten vergleichbar ist.
+
+**Gegen die Jury gehalten** (von Hand gezählt, 15 Zeilen; Spearman 0,88):
+
+| Satz | Bogen | Jury |
+|---|---|---|
+| Dein Stammkunde hat dich betrogen. Mit dem Dönerladen gegenüber. | 12 | 7,50 |
+| Mittagszeit im Döner Palast. Und durchs Bild rollt ein Steppenläufer. | 12 | 6,33 |
+| Weniger Stempel, mehr Gratis-Döner? Da geh ich doch pleite. | 11 | 6,58 |
+| Stempelkarte im Handy? Für meinen Imbiss viel zu kompliziert. | 11 | 6,33 |
+| Unter uns: Dein Stempelkissen kannst du wegwerfen. | 11 | 6,25 |
+| Zehn Stempel bis zum Gratis-Döner? Steht in keinem Gesetz. | 11 | 6,17 |
+| Ausdrucken, unterschreiben, einscannen. So digital ist Deutschland. | 10 | 6,58 |
+| Gratis-Döner wartet auf dich. Das liest dein Kunde gerade. | 8 | 6,17 |
+| Red Flag: Die Stempelkarte gibt's nur auf Papier. | 8 | 5,17 |
+| Hör auf, übers Faxgerät zu lästern. Deine Stempelkarte ist auch Pappe. | 7 | 5,75 |
+| Der sechste Kaffee geht aufs Haus. Warum eigentlich? | 6 | 4,08 |
+| Wir Deutschen lieben Papier. Wirklich. | 6 | 3,75 |
+| Das hat dir bestimmt noch niemand gesagt. | 5 | 4,25 |
+| Sommergewitter über der Eisdiele. Und die Papierkarten in den Taschen? | 5 | 3,50 |
+| Bei diesem Friseur ist die Karte im Handy, bevor die Haare trocken sind. | 2 | 3,83 |
+
+Bogen 10 bis 12: Jury im Mittel 6,53 (6,17 bis 7,50, n = 7); 8 bis 9: 5,67
+(n = 2); bis 7: 4,19 (n = 6). Gezählt mit den Abzügen von damals: "Das hat
+dir bestimmt noch niemand gesagt." und "Sommergewitter über der Eisdiele
+..." hatten je einen Abzug für Floskel und Jahreszeit; im Lauf fallen beide
+heute schon in 1.6 raus. **Vorsicht:** der Bogen ist aus den
+Begründungen derselben Runde gebaut und an denselben Zeilen gezählt. Die 0,88
+zeigen nur, dass er die Jury nachzeichnet, nicht, dass er Zuschauer
+vorhersagt. Und der Lauf zählt seine eigenen Sätze: S2, S3, W1 und W2 sind
+Ermessen. Deshalb steht jede Begründung in `hook_kandidaten`, damit eine
+begleitete Sitzung sie nachlesen kann (Abschnitt 6).
 
 ---
 
@@ -192,17 +476,22 @@ Bäckerei Morgenrot.
 
 | Nr. | Muster und Bauart | Beleg | Drei Beispiele | Läden |
 |---|---|---|---|---|
-| H01 | **Kundenmoment.** [Tageszeit, Weg oder Lage] + [was gerade mit dem Kunden und seiner Karte passiert], meist: in der Nähe des Ladens zeigt sich seine Karte auf dem Sperrbildschirm, mit dem Stand. Der Zuschauer sieht den Moment, bevor er versteht, warum. In Text und Stimme nie "brummt" oder "vibriert" (1.6): C1 sagt "meldet sich"; ob Apple Wallet dabei überhaupt vibriert, ist **unbestätigt** (Anbieter-Doku: eher nicht). Im Bild darf es brummen (Stilmittel) | 3 von 9 Treffer, übertragbar davon einer: 4.634 = 110× (Handy meldet sich beim Vorbeigehen). Dessen Wortlaut ("phone buzz") nicht übernehmen | "Mittagspause. Sein Sperrbildschirm sagt: Noch zwei Stempel." (C1) · "Er denkt gerade nicht an Eis. Dann meldet sich seine Stempelkarte." (C1) · "Kurz vor acht, auf dem Weg zur Bahn. Und ihre Stempelkarte meldet sich." (C1) | alle; Uhrzeit auf dem Sperrbildschirm passend zum Laden |
+| H01 | **Kundenmoment.** [Tageszeit, Weg oder Lage] + [was gerade mit dem Kunden und seiner Karte passiert], meist: in der Nähe des Ladens zeigt sich seine Karte auf dem Sperrbildschirm, mit dem Stand. Der Zuschauer sieht den Moment, bevor er versteht, warum. In Text und Stimme nie "brummt" oder "vibriert" (1.6): C1 sagt "meldet sich"; ob Apple Wallet dabei überhaupt vibriert, ist **unbestätigt** (Anbieter-Doku: eher nicht). Im Bild darf es brummen (Stilmittel). Form "volle Karte zuerst" (nur F08): Bild 0 ist der Sperrbildschirm mit "<Belohnung> wartet auf dich", der Satz sagt, wer das gerade liest; der Laden steht als Absender sichtbar da, sonst wirkt es wie ein Gewinnspiel | 3 von 9 Treffer, übertragbar davon einer: 4.634 = 110× (Handy meldet sich beim Vorbeigehen). Dessen Wortlaut ("phone buzz") nicht übernehmen | "Mittagspause. Sein Sperrbildschirm sagt: Noch zwei Stempel." (C1) · "Er denkt gerade nicht an Eis. Dann meldet sich seine Stempelkarte." (C1) · "Kurz vor acht, auf dem Weg zur Bahn. Und ihre Stempelkarte meldet sich." (C1) · "Gratis-Döner wartet auf dich. Das liest dein Kunde gerade." (volle Karte zuerst, C1; Jury-Runde 6,17) | alle; Uhrzeit auf dem Sperrbildschirm passend zum Laden; F08, in F05 als Uhrzeit plus Moment ohne Sperrbildschirm |
 | H02 | **Der stille Verlust.** [eine Person] + [ihr Rhythmus] + [Bruch], dann das Nicht-Bemerken. Alle drei Teile, sonst floppt es. **Höchstens einmal je Durchlauf von `THEMEN.md` (1.6).** Nie Friseur mit "alle paar Wochen" (Treffer eines Mitbewerbers) | 2 von 11 Treffer (163× und 68×); ohne Person und Rhythmus 4 bis 23 Likes; dieselbe Bauart im Café nur 31 | "Jeden Freitag ein Döner. Acht Stempel. Dann nichts mehr." (A4, C1) · "Neun Haarschnitte bei dir. Den zehnten macht ein anderer." (Hook aus `THEMEN.md`, T01; A4, A3, C1) · "Jeden Samstag zwei Brötchen. Seit drei Wochen nicht mehr." (A4, C1) | Salon, Döner, Bäckerei (es braucht einen Rhythmus); Eis nur mit Saison |
 | H03 | **Die Alltagszahl, die kippt.** [eine Zahl, die jeder kennt] + [kurz umgedreht]. Rechnung stimmt und ist als Beispiel erkennbar | schwach: 1 von 6 Treffer (20,4×, im zweiten Upload derselben Caption 2,7×), dazu 17,9× aus einer kühnen Behauptung mit Zahl; abstrakte Zahlen 26 und 42 Likes | "Ein Döner pro Woche, zehn Stempel. Das sind zehn Wochen Warten." (D2) · "Ein Haarschnitt im Monat, zehn Stempel. Das ist fast ein Jahr." (D2) · "Zwei Haarschnitte mehr im Jahr. Klingt nach wenig." (Beispielrechnung, Format F04) | alle; `stempelzahl`; `rechnung` im Format F04 (1.3) |
 | H04 | **Stell dir vor.** "Stell dir vor, ..." + ein Bild aus dem eigenen Laden, das heute nicht passiert. Nie "jeder Kunde geht mit deiner Karte im Handy raus" (Wortlaut eines Mitbewerbers) | Median 2,48×, aber n = 4 | "Stell dir vor, die Stempelkarte sagt Bescheid, wenn sie voll ist." (C1) · "Stell dir vor, die Eisdiele ist zu, und die Karten bleiben." (A3, A1) · "Stell dir vor, keine Stempelkarte klebt mehr an einer Serviette." (A4) | alle |
 | H05 | **Die Frage, deren Antwort keiner kennt.** W-Frage (wer, was, wie lange) über den Laden des Zuschauers; die Antwort ist das Video. Nie eine Frage, deren Antwort eine Funktion aus Klasse 2 wäre: eine Erinnerung ohne die Nähe des Ladens (nach jedem Stempel, nach langer Pause: C2, N14), was der Laden über seine Kunden sieht (B5; E1 nennt das nicht) | "So what's the café really after?" 880 = 21×; Ja-Fragen 4 bis 23 | "Wer sagt deinem Kunden, dass seine Karte voll ist?" (C1) · "Was machen die Stempelkarten deiner Eisdiele im Winter?" (A3, A1) · "Wie lange braucht dein Kunde für zehn Stempel?" (D2) | alle |
-| H06 | **Der Einwand zuerst.** [Einwand, den der Ladenbesitzer denkt] + [kurze Wendung]. Nur mit Gegenstand im Satz. Die Frage beantwortet der nächste Satz (1.6, Ausnahme b) | schwach, als Muster ungemessen; ähnlicher Einstieg eines Mitbewerbers 4,0× und 1,0× | "Eine App für zwei Brötchen? Lädt keiner. Muss auch keiner." (A2, A3) · "Für einen Döner lädt keiner eine App. Braucht er auch nicht." (A2) · "Dein Kunde will keine App. Er bekommt auch keine." (A2, A3) | alle; `kein-download` |
+| H06 | **Der Einwand zuerst, in seinen Worten.** [Einwand des Ladenbesitzers, gern in Ich-Form, mit einem starken Wort: pleite, kompliziert, keine Zeit] + der nächste Satz antwortet ehrlich; stimmt der Einwand zum Teil, sagt das Video das ("Mehr verschenkt, ja. Dafür ein Ziel in Sicht."). Nur mit Gegenstand im Satz. Die Frage beantwortet der nächste Satz (1.6, Ausnahme b). Nie Einwände, deren Antwort nicht in Klasse 1 steht (Preis, Anmeldung, Gerät: N1, N6, N7, N13); in F04 ist die Antwort die Beispielrechnung | Jury-Runde 17.11.2026 (simuliert): 6,58 und 6,33 (Platz 2 und 5); "Eine App für zwei Brötchen?" 5,58; Eis im November 4,50. Ähnlicher Einstieg eines Mitbewerbers 4,0× und 1,0× | "Weniger Stempel, mehr Gratis-Döner? Da geh ich doch pleite." (D2) · "Stempelkarte im Handy? Für meinen Imbiss viel zu kompliziert." (A3, B1) · "Eine App für zwei Brötchen? Lädt keiner. Muss auch keiner." (A2, A3) | alle; F03, F04, F09; `kein-download`, `stempelzahl` |
 | H07 | **Dieser Laden ...** "Diese/r [Laden]" + was er anders macht, nur Klasse 1, kein Erfolgsversprechen. Nie "hat einen Weg/Trick gefunden" | 1 von 5 Treffer (50,8×), Median 1,07×; derselbe Inhalt zehn Tage später 112. Getragen hat dort ein Versprechen, das bei uns Klasse 2 ist (D5) | "Dieser Dönerladen stempelt ohne Stempelkissen." (B1, B2) · "Bei diesem Friseur ist die Karte im Handy, bevor die Haare trocken sind." (A3, A2) · "Diese Bäckerei hat keine Papierkarte mehr an der Theke." (A4, A1) | alle |
 | H08 | **Wenn ich ... hätte.** "Wenn ich eine/n [Laden] hätte, ..." + eine klare Entscheidung, die die App deckt. Keine Mitmachfrage am Ende | "If I opened a nail salon, ..." 15,0× und 6,7× (Uploads desselben Videos); dessen Inhalt ("Rabatte und Papierkarten weglassen") nicht übernehmen | "Wenn ich einen Salon hätte, wäre meine Karte nach fünf Schnitten voll." (D2) · "Wenn ich einen Dönerladen hätte, gäbe es Stempel nur per Scan." (B1, B2) · "Wenn ich eine Eisdiele hätte, würde meine Karte im Handy überwintern." (A3, A1) | alle |
 | H09 | **Eine Karte, ein Unglück.** [eine bestimmte Papierkarte, meist mit Stempelzahl] + [was ihr gerade passiert]. Komisch, nie belehrend; der Witz liegt auf dem Papier, nicht auf dem Kunden | als Muster ungemessen; die allgemeine Klage floppt (0,61×), der genannte Gegenstand hebt (1,70×) | "Sieben Stempel. Dann kam die Knoblauchsoße." (A4) · "Die Stempelkarte war in der Jeans. Die Jeans war in der Waschmaschine." (Hook aus `THEMEN.md`, T03; A4, A1) · "Acht Stempel. Die Karte ist weg. Er auch." (A4, A3, C1) | alle; `papierkarte`, `verlorener-stammkunde` |
 | H10 | **Meme-Bogen** (Dramaturgie des Koscher-Videos). Hook = erste Hälfte eines bekannten Satzbaus, ab Bild 0. Pointe nach 10 bis 14 s = zweite Hälfte, als `stamp-check` mit Klasse-1-Aussage, danach `"gapBefore": 0.55` | Koscher-Video: Pointe bei 10,8 s, Zahlen fehlen noch. Meme mit echtem Inhalt bis 15×, leer 0 bis 2 Likes | siehe Bibliothek: M23, M18, M24, M08 | alle; nur im Format F07 an Meme-Tagen (4.1) |
 | H11 | **Der Widerspruch im Satz.** Zwei Wörter, die nicht zusammenpassen; das Bild zeigt das eine | ungemessen; Neugierlücke ohne Gegenstand 0,65× (n = 2). Nur mit Laden oder Gegenstand | "Stempelkarte ohne Papier. Und ohne App." (A4, A2) · "Gestempelt, ohne Stempel." (B1, B2) · "Diese Stempelkarte kann man nicht im Portemonnaie vergessen." (A4, A1) | alle; `team`, `kein-download` |
+| H12 | **Drama im Laden.** [ein großes Gefühlswort aus Beziehung oder Krimi: betrogen, fremdgehen, Schluss gemacht, Funkstille] + [ein Ort oder Gegenspieler aus der Nachbarschaft, ohne Namen]. Das Drama trifft den Ladenbesitzer; der Kunde ist keine Witzfigur, er hat nur woanders gekauft (4.3, Punkt 4). Einlösung bis 10 s: in F10 die Studie. Höchstens eins in fünf Videos, nicht in 30 Tagen nach einem H02 (1.7.2) | Jury-Runde: 7,50, Platz 1 von 63 (Döner-Video vom 17.11.2026, mit Bild und Ton beschrieben). "Liebe Papierkarte, wir müssen reden." als stilles Bild 4,75 | "Dein Stammkunde hat dich betrogen. Mit dem Dönerladen gegenüber." (benutzt am 17.11.2026, nach V10 gesperrt bis 16.01.2027) · "Deine Stammkundin geht fremd. Mit der Bäckerei an der Ecke." (nicht bewertet) · "Funkstille. Seit drei Wochen kein Döner von ihm." (nicht bewertet; nah an H02) | alle; F10 mit `week-strip` (`rivalWeek`) |
+| H13 | **Provokation mit Entwarnung.** [eine Aufforderung oder Behauptung, die gegen den Strich geht] + der nächste Satz entschärft sie sofort und sagt, worum es wirklich geht. **Niemand verliert etwas:** keine Stempel der Kunden, kein Kunde als Verlierer, keine Frage, die nur Klasse 2 beantworten könnte. Höchstens eins in fünf | Jury-Runde: 6,50 (Platz 4, in dieser Fassung durchgefallen: die Kunden verlören ihre Stempel) und 6,17 (Platz 8); Dauerwellen-Vergleich 4,58 ("bemüht") | "Zehn Stempel bis zum Gratis-Döner? Steht in keinem Gesetz." (D2, 6,17) · "Schmeiß deine Stempelkarten weg. Die leeren." (A3, A1; nicht bewertet) · "Streich 'Schönen Tag noch'. Jedenfalls bei Stammkunden." (Rat, F02; nicht bewertet) | alle; F02, F09 |
+| H14 | **Insider mit Gegenstand.** ["Unter uns:" oder "Sagt dir keiner:"] + [ein Gegenstand seines Ladens] + [eine Folge, die überrascht], **alles in einem Satz**. Die Folge ist eine Tatsache aus Klasse 1, die er wahrscheinlich nicht kennt (C1, B1 und B2; A2 und A3 nur mittel, Mitbewerber werben damit); in F01 ein wahrer Rat. Nie der Insider-Satz allein, auch nicht der Satz des Betreibers "Das hat dir bestimmt noch niemand gesagt." (1.6); nie "Wusstest du", "Geheimnis", "Trick". Höchstens eins in fünf | Jury-Runde: mit Gegenstand 6,25 (Platz 7); ohne ("Das hat dir bestimmt noch niemand gesagt.") 4,25 (Platz 53) | "Unter uns: Dein Stempelkissen kannst du wegwerfen." (B1, B2; 6,25; ohne Übertreibung: "Unter uns: Stempeln geht auch ohne Stempelkissen.", nicht bewertet) · "Unter uns: Deine Stempelkarte meldet sich von selbst." (C1, nur F08; nicht bewertet) | alle; F01, F08 (mit C1) |
+| H15 | **Mitten drin mit Witz.** [Ort und Zeit im Laden] + [eine trockene Bemerkung], und das Bild zeigt das komische Detail (Steppenläufer, Grillen). Der Satz erklärt den Witz nicht. Kein Bild eines vollen Ladens danach, kein Versprechen (N5). Höchstens eins in fünf, dasselbe Witzbild höchstens einmal in 30 Tagen | Jury-Runde: 6,33 (Platz 5), mit dem Einwand "den Gag laut zu erklären macht ihn kaputt"; "Tür zu, Föhn aus ..." 5,08 ("eher Kurzfilm als Hook") | "Mittagszeit im Döner Palast. Ganz schön ruhig hier." (nicht bewertet; bewertet war "... Und durchs Bild rollt ein Steppenläufer." 6,33) · "Sieben Uhr zehn, erster Kunde: Karte vergessen." (A1, B1, B2; nicht bewertet) | alle; F05, F10 |
+| H16 | **Selbstironie mit Papierkram.** [ein Büro-Ritual, das jeder Ladenbesitzer kennt: Ausdrucken, Fax, Formular] + [Deutschland oder wir] + spätestens im dritten Satz (rund 6 s) die eigene Papierkarte als Teil davon (1.6, Ausnahme H16). Nie Ämter, Politiker, Parteien, andere Länder, "Neuland", Bargeld (Wunsch des Betreibers), Zahlen aus nicht geöffneten Quellen. Höchstens eins in zehn Videos | Jury-Runde: 6,58 (Platz 2); die übrigen zehn Deutschland-Zeilen 3,75 bis 5,83 ("hab gelacht, aber was hat das mit mir zu tun?") | "Ausdrucken, unterschreiben, einscannen. So digital ist Deutschland." (6,58; freigegeben für die Idee des Betreibers, `docs/plaene/deutschland-technik.md`) · "Deutschland und Technik sind Erzfeinde." (5,83 mit Duell-Bild und Ton, 4,50 als stilles Bild) | alle; im Lauf F06 |
 
 ---
 
@@ -348,9 +637,15 @@ und in 3.1 als geprüft eingetragen); heute nicht nach "prüfen bis"; sein
 Cool-down seit der letzten Verwendung (irgendein Video) abgelaufen; es zum
 Laden passt (M26 nur 29.11. bis 26.12., M20 nur Bäckerei).
 
-Unter den freien, die in 1.3 zum Blickwinkel passen: das nie benutzte mit dem
-besten Rang (Reihenfolge der Tabelle 3.2), sonst das am längsten nicht
-benutzte.
+Unter den freien, die in 1.3 zum Blickwinkel passen und deren Einstieg V4
+erlaubt (nicht der Einstieg eines der letzten zwei Videos): die **drei** mit
+dem besten Rang bekommen Kandidaten (Abschnitt 0, Schritt 4; nie benutzte
+zuerst, in der Reihenfolge der Tabelle 3.2, dann die am längsten nicht
+benutzten). Jedes Meme zählt dort als ein Muster. Welches gebaut wird,
+entscheidet der Bogen 1.8; bei Gleichstand der bessere Rang. Sind nur ein
+oder zwei frei, kommen die Kandidaten aus diesen (Abschnitt 0, Schritt 4:
+"nur <n> Muster frei"). Bis zum 17.11.2026 nahm der Lauf einfach das Meme mit
+dem besten Rang; seitdem zählt der Satz, wie in jedem Format.
 
 ### 4.3 Grenzen, ohne Ausnahme
 
@@ -405,11 +700,14 @@ benutzte.
 
 ### 4.5 Festhalten
 
-- In `script.json`: `meta.hook_muster` (H-Nummer) und `meta.meme` (M-Nummer
-  oder `""`). In `meta.idee` nur "Meme-Rahmen M23 (Erwartung und
-  Realität), eigene Worte, Bilder und Stimme", ohne Namen.
+- In `script.json`: `meta.hook_muster` (H-Nummer), `meta.meme` (M-Nummer
+  oder `""`), seit dem 17.11.2026, abends, auch `meta.hook_punkte` und
+  `meta.hook_kandidaten` (Abschnitt 0, Schritt 7). In `meta.idee` nur
+  "Meme-Rahmen M23 (Erwartung und Realität), eigene Worte, Bilder und
+  Stimme", ohne Namen.
 - Am Video auf dem Board: Felder `hook_muster` und `meme` (Schritt 19, seit
-  dem 17.11.2026). Das vorhandene Feld `hook` bleibt die erste Textzeile.
+  dem 17.11.2026), dazu `hook_punkte` und `hook_kandidaten`. Das vorhandene
+  Feld `hook` bleibt die erste Textzeile.
 
 ---
 
@@ -458,6 +756,41 @@ braucht `wallet-pass` mit 5 Feldern wie T20. Nr. 18 ist gesperrt; M27 ist
 seit dem 17.11.2026 keine Pointe zu C1 mehr (3.2). Uhrzeit und Text auf dem Sperrbildschirm passend: Nr. 3 um
 12 Uhr, Nr. 13 um 07:52.
 
+Seit dem 17.11.2026, abends, sind die Zeilen dieser Tabelle **Kandidaten**,
+keine fertige Wahl: jede muss durch 1.6 und den Bogen 1.8 wie ein neu
+geschriebener Satz (Abschnitt 0).
+
+### 5.1 Neue Anfänge aus der Jury-Runde vom 17.11.2026
+
+Jury = Punkte der simulierten Jury (0 bis 10, Platz von 63). "geändert" =
+nach der Regelprüfung umgeschrieben, **diese Fassung ist nicht bewertet**.
+Thema = Nummer in `THEMEN.md`. Spalte "Lauf": `ja` = als Kandidat im Format
+der Spalte "Format"; `begleitet` = Bild 0 ist kein Einstieg eines Formats,
+also nur in einer begleiteten Sitzung. Erster Ton nach 1.7.5.
+
+| Hook (erste Textzeile \| zweite) | Muster | Laden, Thema | Format, Bild 0 | erster Ton | Jury | Lauf, Bedingung |
+|---|---|---|---|---|---|---|
+| Weniger Stempel, mehr Gratis-Döner? \| Da geh ich doch pleite. | H06 | Döner, T06 | F03, `comment-thread` getippt, `reply` "Mehr verschenkt, ja. Dafür ein Ziel in Sicht." | `grill-brutzeln` | 6,58 (2), bewertet mit `paper-card` als Bild; als F03 nicht bewertet | ja, wenn T06 im Format F03 drankommt (Kernaussage `gestalten`, D2) |
+| Ausdrucken, unterschreiben, einscannen. \| So digital ist Deutschland. | H16 | Bäckerei, Idee des Betreibers | `tip-cards` "Bitte per Fax zurück." (Plan) | `papier-knuellen` | 6,58 (2) | nur als Board-Idee `20261117-deutschland-technik`, gebaut nach `docs/plaene/deutschland-technik.md` (`AUTOMATIK.md` 5) |
+| Schmeiß deine Stempelkarten weg. \| Die leeren. | H13 | Bäckerei, frei | `card-bin` mit leerer Karte (`filled` 0 ungeprüft) | `ladenglocke`, `publikum-keucht` auf "weg" | geändert; bewertet war "Nimm deinen Stammkunden die Stempelkarte weg. Allen." 6,50 (4), dort verlören die Kunden ihre Stempel | begleitet |
+| Stempelkarte im Handy? \| Für meinen Imbiss viel zu kompliziert. | H06 | Döner, T31 | F03, `comment-thread` getippt, `text` "Stempelkarte im Handy? Zu kompliziert.", `reply` "Einmal scannen. Fertig." | `grill-brutzeln` | 6,33 (5); der kürzere getippte Text ist nicht bewertet | ja; erste Tafel in zwei Reihen (`*Stempelkarte` / `im *Handy?`, sonst droht `wortgroesse`); Kernaussage `stempeln` (B1, B2), V9 gilt |
+| Mittagszeit im Döner Palast. \| Ganz schön ruhig hier. | H15 | Döner, T15 | F10, `shop-counter` mit Steppenläufer, Anker `roll` auf `{ "at": "start", "offset": 0 }` | `grillen-stille` | geändert; bewertet war "... Und durchs Bild rollt ein Steppenläufer." 6,33 (5) | ja, ab 17.12.2026 (der Steppenläufer lief am 17.11., 1.7.2) |
+| Unter uns: \| Dein Stempelkissen kannst du wegwerfen. | H14 | Salon, frei | `paper-card` Salon, `hit` 0,4 s (Stempel knallt auf Pappe) | `ladenglocke` | 6,25 (7) | begleitet; Fassung "Unter uns: Stempeln geht auch ohne Stempelkissen." (nicht bewertet), wenn "wegwerfen" zu viel verspricht |
+| Zehn Stempel bis zum Gratis-Döner? \| Steht in keinem Gesetz. | H13 | Döner, T06 | F09, `comment-thread` getippt "Zehn Stempel sind Pflicht?", `verdict` "falsch" auf "Gesetz" | `grill-brutzeln` | 6,17 (8), bewertet mit `paper-card`; als F09 nicht bewertet | ja (Kernaussage `gestalten`) |
+| Gratis-Döner wartet auf dich. \| Das liest dein Kunde gerade. | H01 | Döner, T02 | F08, `lock-notification` nach `AUTOMATIK.md` 6.4, `body` "Gratis-Döner wartet auf dich", Absender "Döner Palast", `"tones": false` | `handy-vibriert` | 6,17 (8) | ja, frühestens 24.11.2026 (F08 nach V1) und nur, wenn V2 die Nähe erlaubt |
+| Sieben Uhr zehn, erster Kunde: Karte vergessen. \| Macht nichts, sie liegt in seiner Wallet. | H15 | Bäckerei, T32 | F05, `day-clock` `time` "07:10", `from` "06:40"; Tafel `Sieben Uhr zehn,` / `erster Kunde:` / `Karte *vergessen.` | `ladenglocke` | geändert; bewertet war ein Dialog mit Rollennamen 5,92 (11), die die Stimme mitgesprochen hätte | ja, wenn V8 den Scan erlaubt (F05) |
+| Die Jeans war in der Wäsche. \| Mit neun Stempeln drin. | H09 | Salon, frei | `wallet-vanish` 10/9, `crumple` auf "Stempeln" | `ladenglocke`, `papier-knuellen` auf "Stempeln" | 5,92 (11) | begleitet; derselbe Wäsche-Witz steht in `THEMEN.md` T03 und oben Nr. 4: höchstens einmal in 60 Tagen, gleich in welchem Laden |
+
+Verworfen aus der Runde (Grund in Klammern): "Kundin: Neun Stempel, ehrlich.
+Salon: Zeig mal her." (die Kundin wird als Lügnerin vorgeführt, und die
+Rollennamen würden mitgesprochen) · "Siebzig Tage ..." (gleiche Rechnung wie
+Nr. 7) · "Wenn ich einen Dönerladen hätte, ... sechs Stempeln." (gleiche
+Aussage wie Nr. 17) · "Sommergewitter über der Eisdiele ..." (gleiche Pointe
+wie Nr. 4, Sommer im November) · "Wer Brötchen verkauft, kennt ..." (Branche
+angeredet) · "Das hat dir bestimmt noch niemand gesagt." allein (Floskel,
+4,25) · "Deine Stempelkarte kann sich melden. Hat dir bestimmt noch keiner
+gesagt." (die Floskel steht als eigener Satz ohne Gegenstand; 1.6).
+
 ---
 
 ## 6. Messen und nachsteuern (begleitete Sitzung)
@@ -483,6 +816,15 @@ seit dem 17.11.2026 keine Pointe zu C1 mehr (3.2). Uhrzeit und Text auf dem Sper
   für dasselbe Video als Trial Reels posten (Instagram, laut Berichten seit
   Dezember 2024) und nach Skip-Rate wählen. Das braucht eine zweite Aufnahme
   des ersten Satzes und ist eine Sache für einen Chat.
+- **Bewertungsbogen gegen Skip-Rate** (seit 17.11.2026): sobald zehn Videos
+  mit `hook_punkte` mindestens 72 Stunden alt sind, legt eine begleitete
+  Sitzung `hook_punkte` neben die Skip-Rate und liest `hook_kandidaten` nach
+  (hat der Lauf ehrlich gezählt?). Haben Videos mit 10 bis 12 Punkten im
+  Median keine um mindestens 5 Punkte niedrigere Skip-Rate als die mit 8 bis
+  9, wird der Bogen (1.8) überarbeitet; der Lauf ändert ihn nie selbst.
+  Ausgangswert: rund 69 % (Kaffee 69,3 %, Koscher 68,1 %, Metricool,
+  17.11.2026). Dasselbe für den Ortsklang ab Bild 0 (1.7.4): die ersten
+  Videos mit Ortsklang gegen die vier ohne.
 
 ---
 
@@ -501,6 +843,28 @@ Richtigstellung von C1 in `AUTOMATIK.md` 6.4 und `THEMEN.md`. Offen:
    im Bild bleibt das Brummen, laut `PRODUKT.md` C1 auf seinen Wunsch).
 5. M01 (Koscher) setzt der Lauf nie von selbst ein: der Spruch gehört zu
    einer echten Person, und ein zweites Mal wirkt er nicht mehr neu.
+6. **Packende Anfänge (17.11.2026, abends).** Entschieden und eingebaut:
+   mindestens fünf Kandidaten aus drei Mustern mit Bogen (0, 1.8); ein
+   Ortsklang ab Bild 0 und höchstens ein Akzent (1.7.5, `AUTOMATIK.md` 6);
+   mehr Muster je Format (1.7.3); die Ausnahme H16 in 1.6; der Satz "Das hat
+   dir bestimmt noch niemand gesagt." nur noch als H14 mit Gegenstand.
+   Unverändert: höchstens ein Meme in vier Videos (4.1; Meme-Zeilen der Runde
+   5,17 bis 5,33, aber das Koscher-Video wurde 8-mal geteilt); H07 "Dieser
+   Laden ..." bleibt (einzige Zeile 3,83, aber als stilles Bild beschrieben).
+   Nicht aufgenommen: Stopp-Hook, Zahlschock, Situations-Callout, angekündigte
+   Pointe, Dialog-Tafel (Mittel 4,62 bis 5,25; der Callout redet die Branche
+   an, die Dialog-Tafel liest Rollennamen mit vor). Offen:
+   - die Lautstärken in 1.7.5 sind nicht angehört (erstes begleitetes Video
+     mit Ortsklang);
+   - der Bogen ist nur an der simulierten Runde ausgerichtet (6);
+   - nicht gebaut, je eine Entscheidung oder ein eigener Auftrag: Wort-Punch
+     in der Tafel (ändert das Aussehen jedes Videos, Frage an den Betreiber),
+     Sperrbildschirm lesbar ab Bild 0 mit Zoom 1,8 für "volle Karte zuerst"
+     (Parameter `shown` in `lock-notification`; bis dahin F08 wie bisher mit
+     `notify` bei 0,15 s), die berechneten Töne `impact` und `riser` aus dem
+     Skript, und das maschinelle Zählen des Takts aus 1.7.2 in
+     `tools/abwechslung.mjs` (heute zählt der Lauf von Hand aus
+     `hook_muster`).
 
 ---
 

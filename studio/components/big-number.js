@@ -23,6 +23,10 @@
 // liegt bei y ueber 900 die Knopfspalte von TikTok), Zeile darunter 1030 bis 1180 und x 120 bis
 // 880 (mit Kamera 1,15 bis x = 931; bis zum 17.11.2026 reichte sie bis 920 und vergroessert bis 978, in die
 // Knopfspalte), Theke ab 1262 (Beiwerk). Alle Klassen beginnen mit "bn-".
+//
+// "count" (Gegenpruefung am Salon-Video, 17.11.2026): von 10 auf 5 klapperte die Tafel ueber
+// zufaellige Blaetter, man sah 37, 93 und "1", bevor die 5 stand. Bei einer Zahl, die kleiner
+// oder groesser WIRD ("kuerzer", "mehr"), liest sich ein Zaehlwerk besser: 10, 9, 8, 7, 6, 5.
 
 const BOARD = { x: 110, y: 646, w: 860, h: 330 }, ROOM = 700   // Zellen zusammen hoechstens so breit, mittig: rechts bis x = 890
 const COUNTER = 1262
@@ -37,6 +41,7 @@ export default {
     from: { default: '', doc: 'Was vor "show" auf der Tafel steht, z. B. die Zahl des Schritts davor. Leer = leere Blätter' },
     label: { default: 'so teuer ist ein neuer Kunde wie einer, der bleibt', doc: 'Zeile unter der Tafel, was die Zahl bedeutet (höchstens etwa 60 Zeichen, bis 2 Zeilen)' },
     sub: { default: '', doc: 'Kleine Zeile über der Tafel, z. B. "Schritt 2" oder "Beispiel" (höchstens etwa 24 Zeichen). Nie eine Quelle: die wird gesprochen, nicht gezeigt' },
+    count: { default: false, doc: 'true: die Tafel zählt Zahl für Zahl von "from" nach "value" (10, 9, 8, 7, 6, 5), statt über zufällige Blätter zu klappern; die Zeile darunter bleibt dabei stehen. Nur ganze Zahlen, höchstens 12 Schritte' },
     tones: { default: true, doc: 'Eigene Töne (tick beim Klappern, pop, wenn die Zahl steht). false, wenn das Skript Klänge aus der Bibliothek setzt' }
   },
   captions: { min: 1 },
@@ -102,6 +107,33 @@ export default {
     const fs = Math.min(220, Math.round(cw * 1.4))
 
     const ts = ctx.at('show')
+    if (p.count) {
+      // Zaehlwerk: jede Zahl rechtsbuendig auf alle Zellen verteilt, je Zelle nur dort ein neues
+      // Blatt, wo sich ihr Zeichen aendert (die 1 von 10 faellt einmal, die Einer zaehlen).
+      const a = p.from.trim(), b = p.value.trim()
+      if (!/^\d+$/.test(a) || !/^\d+$/.test(b)) ctx.fail('"count" geht nur mit ganzen Zahlen in "from" und "value"')
+      const A = +a, B = +b, steps = Math.abs(B - A), dir = Math.sign(B - A), st = 0.11
+      if (!steps || steps > 12) ctx.fail(`"count" zählt höchstens 12 Schritte (hier ${steps}); sonst ohne "count" klappern lassen`)
+      const nums = Array.from({ length: steps + 1 }, (_, k) => String(A + dir * k).padStart(n))
+      // Zahl k steht ab T(k): die erste von Anfang an, die zweite auf "show", dann alle st Sekunden die naechste
+      const T = k => k === 0 ? ctx.s : ts + (k - 1) * st
+      ctx.$$('.bn-cell').forEach((cell, i) => {
+        const runs = []
+        nums.forEach((s, k) => { const ch = s[i] ?? ' '; if (runs.length && runs.at(-1).ch === ch) runs.at(-1).k1 = k; else runs.push({ ch, k0: k, k1: k }) })
+        runs.forEach((r, j) => {
+          const e = ctx.el('i', j === runs.length - 1 ? 'end' : ''); e.textContent = r.ch.trim() ? r.ch : ''; e.style.fontSize = fs + 'px'; cell.append(e)
+          const fr = [[T(r.k0) - 0.001, { opacity: 0 }], [T(r.k0), { opacity: 1 }]]
+          if (j < runs.length - 1) fr.push([T(r.k1 + 1) - 0.001, { opacity: 1 }], [T(r.k1 + 1), { opacity: 0 }])
+          key(e, fr)
+        })
+        // Bei jedem Wechsel dieser Zelle verdunkelt sich kurz die obere Haelfte: das Blatt faellt
+        const flips = runs.slice(1).map(r => T(r.k0))
+        if (flips.length) key(cell.querySelector('b'), [[flips[0] - 0.002, { opacity: 0 }], ...flips.flatMap(t => [[t - 0.001, { opacity: 0 }], [t, { opacity: 1 }], [t + 0.06, { opacity: 0 }]])])
+      })
+      const end = T(steps)
+      if (p.tones) { for (let k = 1; k < steps; k++) cue(T(k), 'tick', k % 2 ? 0.55 : 0.45); cue(end, 'pop', 0.8, 1.05) }
+      return
+    }
     ctx.$$('.bn-cell').forEach((cell, i) => {
       const from = start[i] ?? ' ', to = target[i] ?? ' ', same = from === to
       const seq = same ? [to] : [from, ...SPIN.slice(0, 3 + (i % 3)), to]

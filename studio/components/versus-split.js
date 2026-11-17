@@ -43,7 +43,7 @@ export default {
     rightLabel: { default: 'Handy', doc: 'Name der rechten Seite im Spielstand (höchstens etwa 10 Zeichen)' },
     round: { default: 1, doc: 'Nummer der Runde im Spielstand, 1 bis 9. 0 = keine Nummer (Einstieg und Ende)' },
     title: { default: 'Regen', doc: 'Name der Runde in der Mitte des Spielstands (höchstens etwa 14 Zeichen)' },
-    scene: { default: 'regen', doc: 'Was in dieser Runde passiert: "start" (beide nur da), "regen" (A4), "knick" (A4), "vergessen" (links bleibt die Karte zu Hause, rechts Scan und Stempel: A4, B1, B2), "app" (beide ohne App: A2), "ende" (Pokal für den Sieger)' },
+    scene: { default: 'regen', doc: 'Was in dieser Runde passiert: "start" (beide nur da; auf den Anker "vs", Vorgabe 0,15 s nach Beginn, schlägt das VS mit Ton ein), "regen" (A4), "knick" (A4), "vergessen" (links bleibt die Karte zu Hause, rechts Scan und Stempel: A4, B1, B2), "app" (beide ohne App: A2), "ende" (Pokal für den Sieger)' },
     winner: { default: 'right', doc: '"right", "left", "both" (Unentschieden, beide bekommen einen Punkt) oder "none" (kein Punkt)' },
     score: { default: [0, 0], doc: 'Spielstand VOR dieser Runde, [links, rechts]. Auf "point" kommt der Punkt dazu' },
     leftNote: { default: '', doc: 'Ergebnis links, erscheint auf "point" unter der Karte (höchstens etwa 16 Zeichen, z. B. "Matsch")' },
@@ -55,6 +55,7 @@ export default {
   captions: { min: 1 },
   anchors: p => {
     const a = {}
+    if (p.scene === 'start') a.vs = { at: 'start', offset: 0.15, doc: 'Nur beim Einstieg ("start"): das VS in der Mitte schlägt kurz ein (Ton: thud), die erste Bewegung bis 0,5 s (HOOKS.md 1.7.4)' }
     if (!['start', 'ende'].includes(p.scene)) a.action = { cap: 0, word: 1, doc: 'Die Runde passiert: Regen setzt ein, die Papierkarte knickt, die Karte bleibt zu Hause und rechts wird gescannt, oder die App wird durchgestrichen' }
     if (p.winner !== 'none' || p.scene === 'ende') a.point = { cap: -1, word: -1, doc: 'Haken für den Sieger, Kreuz für den Verlierer, der Spielstand zählt hoch (Töne: ok, tick). Beim Ende: der Pokal' }
     return a
@@ -182,6 +183,16 @@ export default {
     const nums = [sl.querySelector('.vs-num'), sr.querySelector('.vs-num')]
     nums.forEach((n, i) => { n.querySelector('.o').textContent = p.score[i]; n.querySelector('.n').textContent = after[i] })
     if (!solo) ctx.html('<div class="abs vs-vs">VS</div>')
+    // Einstieg ("start"): ohne Runde bewegte sich hier bis zum ersten Punkt nichts, Bild 0 stand still. Die
+    // Jury-Runde vom 17.11.2026 gab demselben Satz still 4,50, mit Bewegung und Ton 5,83 Punkte, und HOOKS.md
+    // 1.7.4 verlangt eine Bewegung bis 0,5 s. Das VS schlaegt deshalb kurz ein; bis zum Anker steht es in
+    // normaler Groesse da, Bild 0 bleibt also, wie es war. ".vs-vs" hatte bisher keine Animation, "scale"
+    // ueberschreibt nichts.
+    if (p.scene === 'start') {
+      const tv = ctx.at('vs')
+      key(ctx.$('.vs-vs'), [[tv, { scale: 1 }, OUT], [tv + 0.08, { scale: 1.35 }, IN], [tv + 0.32, { scale: 1 }]])
+      if (p.tones) cue(tv, 'thud', 0.7)
+    }
 
     // ---- Links: Papierkarte (mit Naesse, Knick und Umriss fuer "vergessen")
     const slots = (n, on, cls) => Array.from({ length: n }, (_, i) => `<div class="${cls}${i < on ? ' on' : ''}">${i < on ? ctx.icon(p.icon) : ''}</div>`).join('')

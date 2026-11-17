@@ -1,6 +1,7 @@
 # Stampit Studio: zehn Formate und die Regeln der Abwechslung
 
-Stand 17.11.2026, abends (nach der Gegenprüfung). Der unbeaufsichtigte Lauf
+Stand 17.11.2026, abends (nach der Gegenprüfung; Zeilen "Hook" nach der
+Jury-Runde zu den Anfängen ergänzt). Der unbeaufsichtigte Lauf
 liest diese Datei **ganz**, bevor er eine Idee wählt (`AUTOMATIK.md`,
 Abschnitt 5) und bevor er das Skript schreibt (Schritt 15). Sie legt fest,
 **wie** ein Video gebaut ist und was sich von Video zu Video wiederholen darf.
@@ -166,7 +167,9 @@ Stammkunden behalten?". Die Idee
 
 Für alle gilt Stil C (`AUTOMATIK.md` 6): 105 bis 115 Wörter, fertig rund 40
 bis 45 s (Zeiten unten sind fertige Sekunden, der Entwurf schätzt ein Drittel
-mehr), mindestens 12 Bildwechsel, kein Bild über 5 s, Hook ab Bild 0, ein
+mehr), mindestens 12 Bildwechsel, kein Bild über 5 s, Hook ab Bild 0 (gewählt
+aus mindestens fünf Kandidaten, mit einem Ton ab Bild 0 und einer Bewegung bis
+0,5 s: `HOOKS.md` 0 und 1.7; die Zeile "Hook" nennt die Muster), ein
 Laden aus `THEMEN.md`, Schluss = Frage des Formats, dann
 `Dann kommentiere jetzt STICHWORT,` / `und wir melden uns bei dir.` Die
 Schlussfrage hat **höchstens zwei Wörter**: mit drei und mehr stand das
@@ -199,7 +202,7 @@ Drei echte Tipps für Stammkunden, nummeriert; das Produkt ist erst der letzte S
 | | |
 |---|---|
 | Takte | Hook über der Pinnwand, Tipp 1 hängt schon (0 bis 4 s) · Tipp 1 gesprochen, Schnitt auf ein Bild dazu (4 bis 13 s) · Tipp 2: Karte, dann Bild (13 bis 22 s) · Tipp 3 (22 bis 30 s) · das Produkt als Folge von Tipp 3 (30 bis 34 s) · Schluss (34 bis 42 s) |
-| Hook | H05 (W-Frage, deren Antwort das Video ist) oder H08 (Ich-Form) |
+| Hook | H05 (W-Frage, deren Antwort das Video ist), H08 (Ich-Form) oder H14 (Insider mit Gegenstand, die Folge ist ein Rat). Kandidaten und Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `tip-cards` mit `"show": 1`, `"rise": false` und Anker `card` auf `{ "at": "start", "offset": 0.15 }`: Tipp 1 hängt ab Bild 0, sein Zettel in der Leiste leuchtet nach einer Viertelsekunde mit Ton auf (`HOOKS.md` 1.2) |
 | Bausteine | `tip-cards` für Tipp 2 und 3 (`show` 2, 3; Anker `card` auf das erste Wort des Tipps), dazwischen mit Schnitt je ein Bild zum Tipp: `week-strip` (`"rivalWeek": 0`), `big-number` ("2" für "noch zwei Stempel"), `day-clock`, `shop-counter`; am Ende `wallet-pass` mit `"scan": false` und `before` gleich `after` |
 | Kern-Bild | `zettel` |
@@ -228,7 +231,7 @@ Drei Sätze an der Theke, jeder wird durchgestrichen und durch einen besseren er
 | | |
 |---|---|
 | Takte | Hook = der erste schlechte Satz (0 bis 4 s) · Paar 1: streichen, besserer Satz, ein Bild dazu (4 bis 13 s) · Paar 2 (13 bis 22 s) · Paar 3 (22 bis 31 s) · Produkt als Grund für den besten Satz (31 bis 35 s) · Schluss (35 bis 42 s) |
-| Hook | H11 (Widerspruch im Satz: eine Höflichkeit als falscher Satz) |
+| Hook | H11 (Widerspruch im Satz: eine Höflichkeit als falscher Satz), H13 (Provokation mit Entwarnung: "Streich ...") oder H08. Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `tip-cards` mit `label` "Sag nicht:", `"rise": false`, Anker `card` auf `{ "at": "start", "offset": 0.15 }` |
 | Bausteine | `tip-cards` mit `label` "Sag nicht:" und `better`, Anker `strike` und `swap`, Kamera nach dem Tausch; dazwischen `week-strip` (der Tag, den der bessere Satz nennt), `big-number` (die Zahl im Satz), `day-clock`; am Ende `wallet-pass` mit `"scan": false` und `before` gleich `after` |
 | Kern-Bild | `zettel` |
@@ -252,7 +255,7 @@ Eine Frage wird als Kommentar getippt, das Video beantwortet sie; danach höchst
 | | |
 |---|---|
 | Takte | Frage getippt (0 bis 3 s) · kurze Antwort, groß (3 bis 6 s) · Beweis in Bildern (6 bis 18 s) · Nachfrage als zweiter Kommentar, Antwort in einem Satz, Bild (18 bis 28 s) · Pointe (28 bis 32 s) · Schluss (32 bis 42 s) |
-| Hook | H06 (der Einwand zuerst, der nächste Satz antwortet: `HOOKS.md` 1.6, Ausnahme b) |
+| Hook | H06 (der Einwand in seinen Worten, der nächste Satz antwortet ehrlich: `HOOKS.md` 2 und 1.6, Ausnahme b), H05 oder H11; bei der Frage nach der Stempelzahl auch H03, bei der verlorenen Karte H09. Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `comment-thread` mit `"typed": true` |
 | Bausteine | `comment-thread` (`send` auf das letzte Wort der Frage, `reply` mit der Antwort in höchstens 60 Zeichen), das Bild der Kernaussage: `wallet-pass` mit Scan nur bei der Frage nach Scannen oder Stempeln, sonst ohne Scan; `paper-card` (nur bei der Frage nach der verlorenen Karte, das eine Papier-Bild); `big-number` (Stempelzahl); zweiter `comment-thread` mit `"typed": false`; `stamp-check` |
 | Kern-Bild | `kommentar` |
@@ -278,7 +281,7 @@ Eine Beispielrechnung Schritt für Schritt, jede Zahl ein eigenes Bild; das Prod
 | | |
 |---|---|
 | Takte | Alltagszahl (0 bis 4 s) · Faktor 1 (4 bis 9 s) · Faktor 2 (9 bis 14 s) · Faktor 3 (14 bis 19 s) · Ergebnis und "ein Beispiel, kein Versprechen" (19 bis 26 s) · was einen Kunden öfter zurückbringt (26 bis 31 s) · Produkt (31 bis 35 s) · Schluss (35 bis 42 s) |
-| Hook | H03 (die Alltagszahl, die kippt) |
+| Hook | H03 (die Alltagszahl, die kippt), H06 (Einwand, die Antwort ist die Rechnung) oder H05, immer mit der Alltagszahl im Satz. Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `big-number` mit der Alltagszahl, `sub` "Beispiel", Anker `show` auf `{ "at": "start", "offset": 0.1 }`: die Blätter klappern in der ersten halben Sekunde (Bewegung mit Ton, `HOOKS.md` 1.2), und `"poster": 0.6`, damit das Titelbild die Zahl zeigt (auf ein späteres Wort gelegt, stand im Entwurf vom 21.11. die erste Sekunde eine leere Tafel) |
 | Bausteine | `big-number` je Faktor (mit `from` = Zwischenstand davor, `sub` "Beispiel"), `week-strip` für "wie oft", dann `calc-panel` als Zusammenfassung: alle Zeilen auf den Wörtern **einer** Textzeile, `result` auf die Ergebniszahl, Kamera 1,2 wie im Döner-Video; `tip-cards` mit einem Zettel (`"numbered": false`) für "was ihn öfter zurückbringt"; am Ende `wallet-pass` mit `"scan": false` und `before` gleich `after` |
 | Kern-Bild | `zahl` |
@@ -306,8 +309,8 @@ Ein Tag in Uhrzeiten, vom Aufschließen bis zum Feierabend; das Produkt taucht a
 | | |
 |---|---|
 | Takte | Uhrzeit 1, der Laden öffnet (0 bis 4 s) · Uhrzeit 2, der erste Stammkunde, Stempel (4 bis 12 s) · Uhrzeit 3, jemand Neues, einmal scannen (12 bis 20 s) · Uhrzeit 4, viel los (20 bis 27 s) · Uhrzeit 5, Feierabend, Pointe (27 bis 33 s) · Schluss (33 bis 42 s) |
-| Hook | Uhrzeit plus Moment (Bauart wie H01, ohne Sperrbildschirm) |
-| Einstieg | `day-clock` mit der ersten Uhrzeit |
+| Hook | Uhrzeit plus Moment (Bauart wie H01, ohne Sperrbildschirm), H15 (Mitten drin mit Witz) oder H05. Wahl nach `HOOKS.md` 0 und 1.7.3 |
+| Einstieg | `day-clock` mit der ersten Uhrzeit und `from` eine halbe Stunde davor: der Anker `move` (von selbst bei 0,05 s) lässt die Zeiger laufen, die Bewegung bis 0,5 s (`HOOKS.md` 1.7.4) |
 | Bausteine | `day-clock` je Uhrzeit (`from` = Uhrzeit davor, `events` = die früheren), dazwischen mit Schnitt `shop-door` mit `"accent": "#5A4FCF"` (der Stammkunde kommt), `wallet-pass` (Scan, Stempel), `stamp-check`. Nur, wenn V8 den Scan erlaubt |
 | Kern-Bild | `tag` |
 | Kernaussage | `stempeln` |
@@ -330,8 +333,8 @@ Beide Karten nebeneinander, Runde für Runde, mit Spielstand; eine Runde endet e
 | | |
 |---|---|
 | Takte | Ansage mit beiden Karten (0 bis 4 s) · Runde 1 (4 bis 11 s) · Runde 2 (11 bis 19 s) · Runde 3, Unentschieden (19 bis 26 s) · Endstand, Pokal (26 bis 32 s) · Schluss (32 bis 42 s) |
-| Hook | H11 (zwei Dinge gegeneinander), Laden im Satz |
-| Einstieg | `versus-split` mit `"scene": "start"` |
+| Hook | H11 (zwei Dinge gegeneinander), Laden im Satz; H05 oder H16 (Selbstironie mit Papierkram, höchstens eins in zehn Videos). Wahl nach `HOOKS.md` 0 und 1.7.3 |
+| Einstieg | `versus-split` mit `"scene": "start"`; der Anker `vs` (von selbst bei 0,15 s, seit 17.11.2026) lässt das VS mit Ton einschlagen, die Bewegung bis 0,5 s (`HOOKS.md` 1.7.4) |
 | Bausteine | `versus-split` je Runde **zwei oder drei Teile**: zuerst beide Seiten (`"view": "split"`, Anker `action`), dann mit `"enter": "cut"` dieselbe Runde aus der Nähe (`"view": "left"` für die Papierkarte, `"right"` für das Handy; Anker `action` auf `{ "at": "start", "offset": 0.05 }`, `point` mit Haken oder Kreuz). Runden `regen` (A4), `knick` (A4), `app` (A2, `"winner": "both"`), `vergessen` (A4, B1, B2) nur, wenn V8 den Scan erlaubt; `ende`. `score` = Stand vor der Runde. Das Banner jeder Runde kommt von selbst (Anker `action` frühestens auf das zweite Wort). So wechselt das Bild je Runde zweimal, ohne Kamera |
 | Kern-Bild | `duell` |
 | Kernaussage | `papier` |
@@ -354,7 +357,7 @@ Ein Meme aus `HOOKS.md` 3.2 als Rahmen: erste Hälfte im Hook, zweite Hälfte al
 | | |
 |---|---|
 | Takte | Meme-Hook (0 bis 4 s) · das Bild, das die Erwartung baut (4 bis 12 s) · Wendung (12 bis 15 s, Pointe nach 10 bis 14 s, `HOOKS.md` H10) · zwei oder drei kurze Belege (15 bis 32 s) · Schluss (32 bis 42 s) |
-| Hook | H10 mit dem Meme nach `HOOKS.md` 4.1 und 4.2 |
+| Hook | H10 mit dem Meme nach `HOOKS.md` 4.1 und 4.2: Kandidaten aus bis zu drei freien Memes, gebaut wird das mit dem besten Hook (`HOOKS.md` 0) |
 | Einstieg | der des Memes (`HOOKS.md` 3.2, Spalte "Einstieg"); je Meme ein anderer, nur bei M26, M29 und M21 die Papierkarte |
 | Bausteine | höchstens **ein** Papier-Bild (`paper-card`, `guest-ghost`, `wallet-vanish` oder `card-bin`), `wallet-pass` nur mit `"scan": false` und ohne neuen Stempel; sonst `big-number`, `week-strip`, `shop-door`, `comment-thread`, `tip-cards` (ein Zettel), `stamp-check` für die Pointe; für "Red Flag / Green Flag" (M24) `versus-split` mit `leftLabel` "Red Flag" und `rightLabel` "Green Flag" |
 | Kern-Bild | `meme` |
@@ -379,7 +382,7 @@ Das einzige Format mit Karte von oben und Sperrbildschirm: der Moment zuerst, da
 | | |
 |---|---|
 | Takte | Moment auf dem Sperrbildschirm (0 bis 5 s) · Karte von oben: nur in der Nähe (5 bis 13 s) · Rückblick: ihr Rhythmus, die Karte füllt sich (13 bis 24 s) · Sicht des Ladens (24 bis 32 s) · Schluss (32 bis 42 s) |
-| Hook | H01 |
+| Hook | H01 (auch als "volle Karte zuerst", `HOOKS.md` 2), H05, H04 oder H14 mit C1. Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `lock-notification` (Werte aus `AUTOMATIK.md` 6.4, Text mit dem Stand) |
 | Bausteine | `lock-notification`, `shop-map`, `week-strip` (ihre Woche, `"rivalWeek": 0`), `wallet-pass` mit `"scan": false` und `before` gleich `after` (der Stand), `lock-notification` als Sicht des Ladens |
 | Kern-Bild | `naehe` |
@@ -405,7 +408,7 @@ Drei Behauptungen als Kommentare, jede bekommt ihren Stempel; die Erklärung ist
 | | |
 |---|---|
 | Takte | Behauptung 1, getippt (0 bis 3 s) · Urteil und Erklärung (3 bis 12 s) · Behauptung 2 mit Urteil und Erklärung (12 bis 22 s) · Behauptung 3 (22 bis 32 s) · Schluss (32 bis 42 s) |
-| Hook | H06 (die Behauptung, die der nächste Satz beantwortet) |
+| Hook | H06 (die Behauptung, die der nächste Satz beantwortet), H13 (Provokation mit Entwarnung als Behauptung: "Zehn Stempel bis zum Gratis-Döner? Steht in keinem Gesetz."), H11 oder H03 (nur zur Stempelzahl). Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `comment-thread` mit `"typed": true` (die erste Behauptung wird getippt), `verdict` und Anker `verdict` auf "Stimmt" |
 | Bausteine | `comment-thread` je Behauptung (danach `"typed": false`, `verdict` "falsch" oder "stimmt"), nach jedem Urteil mit Schnitt ein Bild der Erklärung: `big-number`, `wallet-pass` (ohne Scan, außer die Behauptung handelt vom Scannen oder Stempeln), `day-clock` |
 | Kern-Bild | `kommentar` |
@@ -428,8 +431,8 @@ Eine Studienzahl aus `PRODUKT.md` (S1 bis S5) groß im Bild, mit Quelle im gespr
 | | |
 |---|---|
 | Takte | Frage oder Moment (0 bis 4 s) · Auflösung als Zahl, Quelle gesprochen (4 bis 12 s) · was die Zahl heißt (12 bis 20 s) · was der Laden daraus macht (20 bis 29 s) · Produkt (29 bis 33 s) · Schluss (33 bis 42 s) |
-| Hook | H05 oder H02 (H02 höchstens einmal je Durchlauf, `HOOKS.md` 1.6); die Zahl nie im ersten Satz (`HOOKS.md` 1.5) |
-| Einstieg | `shop-counter` oder `week-strip` (nie `guest-ghost`: als Einstieg nicht erprobt, `HOOKS.md` 1.2) |
+| Hook | H05, H02 (höchstens einmal je Durchlauf, `HOOKS.md` 1.6), H12 (Drama im Laden, mit `week-strip` und `rivalWeek`) oder H15 (Mitten drin mit Witz, mit `shop-counter` und Steppenläufer); die Zahl nie im ersten Satz (`HOOKS.md` 1.5). Wahl nach `HOOKS.md` 0 und 1.7.3 |
+| Einstieg | `shop-counter` oder `week-strip` (nie `guest-ghost`: als Einstieg nicht erprobt, `HOOKS.md` 1.2), mit dem Anker aus `HOOKS.md` 1.7.3 bis 0,5 s |
 | Bausteine | `big-number` (Zahl genau wie in `PRODUKT.md`, Spanne als Spanne, Bindestrich), `shop-counter` oder `week-strip` für das Bild dazu, `tip-cards` mit einem Zettel für den Rat, am Ende `wallet-pass` mit `"scan": false` und `before` gleich `after` |
 | Kern-Bild | `zahl` |
 | Kernaussage | `studie` |
@@ -513,6 +516,20 @@ QR-Code", "Wallet, ohne App"). `abwechslung.mjs` lehnt alle drei für den
 19.11. ab (V3 oder V7, V8, V9, V10 mit 7, 8 und 3 gleichen Gruppen; in `meta`
 standen dort Motive, die nicht zu den Bausteinen passten). Sie bleiben als
 Proben der Bausteine.
+
+**Nachtrag 17.11.2026, abends.** Die Folge oben rechnet ohne Ideen aus dem
+Eingang. Die Idee des Betreibers `20261117-deutschland-technik` hat einen
+eigenen Plan (`docs/plaene/deutschland-technik.md`, `AUTOMATIK.md` 5) und
+geht vor, sobald die Regeln einen Tag erlauben (nie am 22.11.; ein festes
+Datum gibt es nicht, mit dem Salon-Video vom 18.11. sperrt allein die
+Themenpause bis einschließlich 25.11.). Solange sie wartet und in den drei
+Tagen nach dem geplanten dran sein könnte, nimmt der Lauf kein F01 und kein
+F02 (gleicher Einstieg `tip-cards`; Probe in `AUTOMATIK.md` 5). Die Folge
+oben kann sich dadurch verschieben (nicht neu durchgespielt). Wo der Plan
+vor diesem Dokument gilt (Takte, "Nie", "Produkt", "Handy spät", Länge,
+Schluss), zählt `AUTOMATIK.md` 5 auf, "Was ein Plan ersetzt". Die
+Hooks der Folge sind seit der Jury-Runde Kandidaten (`HOOKS.md` 0): welcher
+Satz am Ende im Video steht, entscheidet der Bewertungsbogen.
 
 Offen: F02, F03, F04, F05, F06, F08 und F10 sind seit dieser Fassung nicht als
 ganzes Video gebaut (F06 nur mit den neuen Ansichten `"view"` als Probe); keins

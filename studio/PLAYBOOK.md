@@ -142,7 +142,11 @@ immer zu `report.json`; ob beide noch zum Skript passen, zeigt `script.sha256`
    Karte, die zu früh erscheint, ein Text, der sachlich nicht zum Bild passt
    (z. B. ein Satz über Statistik über dem Bild der Wallet-Karte). Jedes Handy
    und jede Karte einmal groß ansehen: auf `sheet.png` (216 px je Bild) ist
-   ein abgeschnittener Ladenname nicht zu erkennen.
+   ein abgeschnittener Ladenname nicht zu erkennen. Für den Anfang (seit
+   17.11.2026) `--stills 0,0.5,1,2,3` und danach
+   `node studio/tools/einstieg.mjs studio/videos/<ordner>/out/check.json`:
+   Ton bei 0,00 s, Bewegung bis 0,5 s, erster Bildwechsel bis 3 s (im
+   Entwurf 4 s), erste Tafel höchstens 8 Wörter (`HOOKS.md` 1.7.4).
 6. **Entwurf bauen.** `node studio/make.mjs studio/videos/<ordner> --no-voice`
 7. **`out/sheet.png` und `out/poster.png` ansehen.** Übersicht: ein Bild je
    Sekunde. Achten auf: Überlauf, Überlappung von Text und Bild, abgeschnittene
@@ -1454,7 +1458,7 @@ Textzeilen: mindestens 1. Datei: `components/versus-split.js`
 | `rightLabel` | `"Handy"` | Name der rechten Seite im Spielstand (höchstens etwa 10 Zeichen) |
 | `round` | `1` | Nummer der Runde im Spielstand, 1 bis 9. 0 = keine Nummer (Einstieg und Ende) |
 | `title` | `"Regen"` | Name der Runde in der Mitte des Spielstands (höchstens etwa 14 Zeichen) |
-| `scene` | `"regen"` | Was in dieser Runde passiert: "start" (beide nur da), "regen" (A4), "knick" (A4), "vergessen" (links bleibt die Karte zu Hause, rechts Scan und Stempel: A4, B1, B2), "app" (beide ohne App: A2), "ende" (Pokal für den Sieger) |
+| `scene` | `"regen"` | Was in dieser Runde passiert: "start" (beide nur da; auf den Anker "vs", Vorgabe 0,15 s nach Beginn, schlägt das VS mit Ton ein), "regen" (A4), "knick" (A4), "vergessen" (links bleibt die Karte zu Hause, rechts Scan und Stempel: A4, B1, B2), "app" (beide ohne App: A2), "ende" (Pokal für den Sieger) |
 | `winner` | `"right"` | "right", "left", "both" (Unentschieden, beide bekommen einen Punkt) oder "none" (kein Punkt) |
 | `score` | `[0,0]` | Spielstand VOR dieser Runde, [links, rechts]. Auf "point" kommt der Punkt dazu |
 | `leftNote` | `""` | Ergebnis links, erscheint auf "point" unter der Karte (höchstens etwa 16 Zeichen, z. B. "Matsch") |
@@ -1518,6 +1522,14 @@ ungenutzt `sparkle`, `riser`, `impact`, `wtick` (siehe Geschmack des Nutzers).
 Alle Töne sind aus Sinus und Rauschen berechnet, es gibt keine fremden
 Aufnahmen. Ein neuer Ton braucht eine Funktion in `tools/sfx.py` (dort in
 `MAKE` eintragen) und seinen Namen in `SOUNDS` in `engine/engine.js`.
+
+**Ton ab Bild 0** (seit 17.11.2026, abends): jedes neue Video beginnt mit
+einem Ortsklang aus der Bibliothek am ersten Teil, `"sounds": [ { "sound":
+"ladenglocke", "at": "start", "offset": 0, "vol": 0.8 } ]`, und hat in den
+ersten zwei Textzeilen höchstens einen Akzent. Welcher Klang wofür und mit
+welchem `vol`: `HOOKS.md` 1.7.5 (Lautstärken noch nicht angehört). Grund:
+alle vier Videos bis zum 18.11. begannen mit einer kurzen Stille, und in der
+Jury-Runde bekam derselbe Satz still 4,50, mit Bild und Ton 5,83 Punkte.
 
 **Wischer sind leise.** Dem Nutzer waren die Wisch-Töne im ersten Entwurf zu
 laut, im veröffentlichten Video laufen sie mit halber Lautstärke. Das sind
@@ -1655,6 +1667,14 @@ Warnungen (Ende-Code bleibt 0):
 | `tafelzeit` | Modus "wort": eine Tafel steht kürzer als 0,14 s | das kurze Wort mit dem Nachbarn auf eine Tafel (im Skript ohne `\|` dazwischen) |
 | `bildwechsel` | nur mit `pace`: ein Bild steht länger als `maxStill`, oder es gibt weniger als `minChanges` Bildwechsel | einen Teil, einen Schnitt oder eine Kamerabewegung ergänzen |
 | `hinweise` | Hinweise der Bausteine: ein Anker, dessen Vorgabe nicht zum Text passt; Ladenname, Stempelzahl oder Symbol nicht in allen Szenen gleich; ein Ladenname, der sehr klein gesetzt werden musste |
+
+**Die ersten drei Sekunden** prüft nicht `make.mjs`, sondern
+`tools/einstieg.mjs` (seit 17.11.2026): es liest `out/check.json` oder
+`out/report.json` und nennt ersten Ton, erste Bewegung, ersten Bildwechsel und
+die Wörter der ersten Tafel, mit Ende-Code 1 und Abhilfe, wenn eine Grenze
+aus `HOOKS.md` 1.7.4 verletzt ist. Bewusst keine Warnung in
+`engine/checks.mjs`: die hätte jedes alte Video und die Vorlage getroffen,
+die im Selbsttest ohne Warnung bauen müssen.
 
 **Frei bleiben müssen auf beiden Plattformen:** die oberen 220 px, die unteren
 384 px und die rechte Spalte ab x = 950 px zwischen y = 900 und 1540 px. Der

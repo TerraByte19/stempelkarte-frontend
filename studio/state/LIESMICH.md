@@ -17,7 +17,7 @@ kann).
 | `start/stimme.json` | leeres Kassenbuch der Stimme | begleitete Sitzung | Startfassung von `gedaechtnis/stimme` |
 | `start/themen.json` | leere Liste der verwendeten Nummern aus `THEMEN.md` | begleitete Sitzung | Startfassung von `gedaechtnis/themen` |
 | `start/wuensche.json` | leere Liste der Wünsche des Betreibers | begleitete Sitzung | Startfassung von `gedaechtnis/wuensche` |
-| `board/<sammlung>/<id>.json` | Abzug vom Board: nur `laeufe`, `gedaechtnis/stimme` und `gedaechtnis/themen`. Entsteht beim ersten Lauf; bis dahin gibt es den Ordner nicht | der Lauf, Schritt 24, mit `ArtifactData` und `out_dir` | genau diese Dokumente, im Zustand am Ende des Laufs |
+| `board/<sammlung>/<id>.json` | Abzug vom Board: nur `laeufe`, `gedaechtnis/stimme` und `gedaechtnis/themen`, nie `vorschau` oder `diagnose`. Entsteht beim ersten Lauf; bis dahin gibt es den Ordner nicht | der Lauf, Schritt 24, mit `ArtifactData` und `out_dir` | genau diese Dokumente, im Zustand am Ende des Laufs |
 
 ## Die Startfassungen
 
@@ -29,7 +29,10 @@ leer: der Zustand gehört aufs Board.
 ## Der Abzug
 
 - Er enthält **nur** das Protokoll der Läufe, das Kassenbuch der Stimme und
-  die Liste der verwendeten Themen. Wünsche des Betreibers, Texte aus dem
+  die Liste der verwendeten Themen. Nie die Sammlungen `vorschau` (jedes
+  Video als base64, rund 5 MB) und `diagnose` (Messungen der Seite am
+  iPhone): sie wären groß oder für das Repo ohne Nutzen. `tools/selftest.mjs`
+  prüft, dass `abzug.sammlungen` in `konfig.json` sie nicht nennt. Wünsche des Betreibers, Texte aus dem
   Eingang, Ideen, Videos und alles über Mitbewerber bleiben allein auf dem
   Board: das Repo kann öffentlich sein (`../AUTOMATIK.md`, Regel 12).
 - Er wird überschrieben, nie zusammengeführt, und nie aufs Board

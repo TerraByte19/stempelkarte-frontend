@@ -53,6 +53,32 @@ müssen:
   dem Skript ab und prüft die Regeln (`FORMATE.md` 2 und 3). Dafür gibt es
   fünf neue Bausteine: `tip-cards`, `comment-thread`, `versus-split`,
   `day-clock`, `big-number`.
+- **Packende Anfänge (17.11.2026, abends):** Der Betreiber wollte, dass der
+  Anfang packt. Eine Jury-Runde mit drei simulierten Zuschauern (KI-Rollen,
+  keine echten) bewertete 63 Anfänge. Seitdem schreibt der Lauf je Video
+  mindestens fünf Kandidaten für den ersten Satz aus drei Mustern, zählt sie
+  mit einem Bogen (höchstens 12 Punkte, gewählt ab 10) und hält Muster,
+  Punkte und alle Kandidaten am Video fest (`HOOKS.md` 0, 1.7, 1.8). Jedes
+  Video klingt ab Bild 0 (Ortsklang aus der Bibliothek) und bewegt sich bis
+  0,5 s; `tools/einstieg.mjs` misst das. Neu sind die Muster H12 bis H16
+  (Drama, Provokation mit Entwarnung, Insider mit Gegenstand, trockener
+  Witz, Selbstironie mit Papierkram). Der Satz "Das hat dir bestimmt noch
+  niemand gesagt." kam allein auf Platz 53 von 63 und kommt nur noch mit
+  einem Ding aus dem Laden im selben Satz vor ("Unter uns: Dein
+  Stempelkissen kannst du wegwerfen.").
+- **Vorschau fürs iPhone (17.11.2026):** am iPhone lädt das Board keine
+  Datei von seiner eigenen Adresse, die Datenbank aber schon. Jedes Video
+  kommt deshalb zusätzlich als kleine Fassung in Teilen in die Sammlung
+  `vorschau` (`tools/vorschau.mjs`, `AUTOMATIK.md` Schritt 19); alte Teile
+  räumt der Lauf weg (Schritt 22a), sobald der Auftragstext der Aufgabe das
+  Löschen erlaubt (`AUTOMATIK.md` 10.3, Punkt 6).
+- **Deutschland-Video:** die Idee `20261117-deutschland-technik` hat einen
+  fertigen Plan (`docs/plaene/deutschland-technik.md`), den der Lauf nimmt,
+  sobald die Regeln einen Tag erlauben (nie am Totensonntag 22.11.2026; mit
+  dem Salon-Video vom 18.11., wie es am 17.11. abends auf dem Board liegt,
+  sperrt die Themenpause bis einschließlich 25.11.). Wo der Plan vor den
+  Regeln des Laufs gilt (Format, Länge, Schluss, erster Bildwechsel), steht
+  in `AUTOMATIK.md` 5, "Was ein Plan ersetzt".
 - **Beitragstext je Video:** Hook, ein bis zwei Sätze, "Kommentiere
   STICHWORT", genau 5 Hashtags (Instagram nimmt nicht mehr). Er steht am
   Video auf dem Board (Feld `caption`); `tools/beitrag.mjs` prüft ihn. Die
@@ -134,7 +160,14 @@ für Ton mit beiden Fassungen).
   dürfen nicht veröffentlicht werden.
 - **Markenname:** geschrieben "Stampit", gesprochen wie englisch "Stamp It".
 - **Töne:** Effekte ja. Wisch-Töne leise. Kein Klangteppich, kein Anschwellen,
-  kein Wort-Ticken (ausprobiert und abgelehnt).
+  kein Wort-Ticken (ausprobiert und abgelehnt). Seit dem 17.11.2026, abends,
+  beginnt jedes Video mit einem Ortsklang (Ladenglocke, Grill, Papier) und
+  hat höchstens einen Akzent im ersten Satz (`HOOKS.md` 1.7.5); die
+  Lautstärken sind noch nicht angehört.
+- **Deutschland-Video (17.11.2026):** erster Satz "Ausdrucken,
+  unterschreiben, einscannen. So digital ist Deutschland.", dazu "Entwickelt
+  übrigens in Deutschland." nach "Einmal scannen, kein Download.", keine
+  Schlussfrage, kein Satz zum Bargeld.
 - **Text:** einfache, kurze Sätze. Kein "Café" und "Kaffee" dicht
   hintereinander. Beispielrechnung mit wenigen Stammkunden, die öfter kommen,
   und ohne Kleingedrucktes darunter. Schluss nach dem Muster: "Klingt
@@ -298,6 +331,13 @@ nicht war). Ob sie an oder aus ist, zeigt claude.ai/code/routines. Offen ist:
    - Später: ob die Automatik alte Dateien vom Board löschen darf (der
      Speicher reicht für etwa 80 Videos), und was mit einem Tag geschieht,
      dessen Video am Vorabend verworfen wurde (bisher: er bleibt leer).
+   - Ob ihm der Ton ab Bild 0 gefällt (am ersten Video damit anhören; die
+     Lautstärken in `HOOKS.md` 1.7.5 sind geschätzt), und ob die Wörter der
+     ersten Tafel auf ihrem gesprochenen Wort kurz größer schlagen sollen
+     ("Wort-Punch"; nicht gebaut, weil es das Aussehen jedes Videos ändert).
+   - Dass der Auftragstext der Aufgabe die Vorschau fürs iPhone schreiben
+     und alte Teile löschen darf (`AUTOMATIK.md` 10.2 und 10.3, Punkt 6).
+     Ohne das bekommt ab dem zwölften Video keins mehr eine Vorschau.
 6. Später: eigene kurze Aufgaben nur für die Ideensuche; neue Bausteine für
    die Themen auf der Warteliste (`THEMEN.md`: Statistik, Newsletter,
    Design-Editor, Datenschutz); auf der Seite des Boards die Antwort der

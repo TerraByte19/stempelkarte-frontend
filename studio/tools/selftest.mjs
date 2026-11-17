@@ -20,6 +20,11 @@
 //     prueft den Entwurf, BEVOR es um eine Aufnahme geht
 //   - ein Satz von ausserhalb des Studios (tools/clip-in.py) kommt in die Aufnahme,
 //     ohne dass sie angefasst oder etwas gesendet wird (tools/test_clip_in.py)
+//   - die ersten drei Sekunden (HOOKS.md 1.7.4, seit 17.11.2026): tools/einstieg.mjs sieht die
+//     Stille am Anfang, ein Ortsklang mit "at": "start" liegt bei 0,00 s, und das Duell
+//     (versus-split, "start") bewegt sich bis 0,5 s
+//   - der Abzug vom Board nimmt nie "vorschau" oder "diagnose" mit
+//   - alte Vorschauen loescht der Lauf nur mit gelesenen Versionen, nie mit geratenen
 //   - der Beitragstext je Video haelt die Regeln aus state/konfig.json ein: genau 5
 //     Hashtags (Grenze von Instagram), kein Gedankenstrich, das Stichwort des Videos
 //     (tools/beitrag.mjs selbsttest)
@@ -240,6 +245,18 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
     check('Zweites Video: die Frage steht im allerersten Bild vollständig da (zwei Reihen, ein Schlüsselwort)', r.probed.opacity === 1 && r.probed.rows === 2 && r.probed.keys === 1, JSON.stringify(r.probed))
     const kinds = r.state.pictures.reduce((m, x) => { m[x.kind] = (m[x.kind] || 0) + 1; return m }, {})
     check('Zweites Video: Bildwechsel stehen im Zustand (Szenen, Teile, Kamera) und jede Tafel passt in die Breite', r.state.pictures.length >= 12 && kinds.szene === 6 && kinds.teil >= 6 && kinds.kamera >= 5 && r.state.capFit.every(f => f.width <= 940), `${r.state.pictures.length} Wechsel: ${JSON.stringify(kinds)}, breiteste Tafel ${Math.max(...r.state.capFit.map(f => f.width))} px`)
+    // Die ersten drei Sekunden (HOOKS.md 1.7.4, tools/einstieg.mjs): alle Videos bis zum 18.11.2026 begannen mit
+    // einer kurzen Stille, das zweite mit 0,10 s. Festgenagelt: das Werkzeug sieht diese Stille, und ein Ortsklang aus
+    // der Bibliothek mit "at": "start", "offset": 0 am ersten Teil liegt wirklich bei 0,00 s, ohne dass eine Pruefung bricht.
+    {
+      const { ersteSekunden } = await import(path.join(STUDIO_ROOT, 'tools', 'einstieg.mjs'))
+      const vorher = ersteSekunden(r.state, { stimme: false })
+      const mit = await page(variant(s => { s.scenes[0].parts[0].sounds = [{ sound: 'ladenglocke', at: 'start', offset: 0, vol: 0.8 }] }, s2))
+      const nachher = ersteSekunden(mit.state, { stimme: false })
+      check('Die ersten 3 Sekunden (tools/einstieg.mjs): das zweite Video meldet nur den späten Ton; mit Ortsklang am ersten Teil klingt es bei 0,00 s, bewegt sich bis 0,5 s, wechselt das Bild bis 4 s und besteht alle Prüfungen',
+        vorher.verletzt.length === 1 && /erster Ton/.test(vorher.verletzt[0]) && mit.res.ok && nachher.verletzt.length === 0 && nachher.erster_ton_s === 0 && mit.state.cues.some(c => c.lib && c.name === 'ladenglocke' && c.t === 0),
+        `vorher ${JSON.stringify(vorher.verletzt).slice(0, 80)}, nachher Ton ${nachher.erster_ton_s} s, Bewegung ${nachher.erste_bewegung_s} s, Bildwechsel ${nachher.erster_bildwechsel_s} s ${mit.res.errors.join(' | ').slice(0, 80)}`)
+    }
     // Fassung 2: wo das Video die Erinnerung zeigt, steht niemand mehr vor der Tuer. Satz 6 ist die Karte von oben.
     const comps = s2.scenes.flatMap(sc => (sc.parts || [sc])), maps = comps.filter(c => c.component === 'shop-map')
     const atDoor = comps.filter(c => c.component === 'shop-street' && c.params.notify !== false && c.params.walker !== false && c.params.view !== 'owner' && !c.params.across && !c.params.privacy)
@@ -428,6 +445,16 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
     const r = await page(one(name, (mod.demo && mod.demo.params) || {}, mod.demo.captions), null, { motion: true })
     check(`Baustein ${name} (Formate): Katalog-Beispiel baut ohne Fehler und ohne Hinweis, nichts in Sperrzone oder Knopfspalte`, sauber(r), warum(r))
   }
+  {
+    // Einstieg des Duells (F06, "scene": "start"): bis zum 17.11.2026 bewegte sich dort nichts bis zum ersten Punkt,
+    // HOOKS.md 1.7.4 verlangt aber eine Bewegung bis 0,5 s. Festgenagelt: das VS schlaegt bei 0,15 s mit Ton ein,
+    // und Bild 0 (das Titelbild) zeigt es in normaler Groesse, wie vorher.
+    const groesse = () => { const v = document.querySelector('.vs-vs'), s = () => { const c = getComputedStyle(v).scale; return c === 'none' ? 1 : +parseFloat(c).toFixed(2) }; window.seek(0); const a = s(); window.seek(0.23); const b = s(); window.seek(0.6); return [a, b, s()] }
+    const r = await page(one('versus-split', { shop: 'Bäckerei Morgenrot', icon: 'bread', scene: 'start', round: 0, title: 'Duell', winner: 'none' }, [{ lines: ['Papier gegen Handy.', 'Wer gewinnt?'] }]), null, { probe: groesse })
+    const vs = r.state.anchors.find(a => a.name === 'vs'), thud = r.state.cues.find(c => c.name === 'thud')
+    check('Duell, Einstieg ("start"): das VS schlägt bei 0,15 s mit Ton ein, Bild 0 zeigt es in normaler Größe', sauber(r) && !!vs && vs.t === 0.15 && !!thud && Math.abs(thud.t - 0.15) < 0.001 && r.probed[0] === 1 && r.probed[1] > 1.2 && r.probed[2] === 1,
+      `Anker ${vs && vs.t} s, Ton ${thud && thud.t} s, Größe bei 0 / 0,23 / 0,6 s: ${JSON.stringify(r.probed)} ${warum(r)}`)
+  }
   const lehnt = async (label, scr, re) => { const r = await page(scr); check(label, !r.res.ok && re.test(r.res.errors.join(' ')), String(r.res.errors[0] || 'kein Fehler').slice(0, 130)) }
   const satz = [{ lines: ['Ein Satz', 'für das Bild.'] }]
   await lehnt('Prüfung schlägt an: Tipp-Karte mit einem Satz über 60 Zeichen', one('tip-cards', { items: [{ title: 'Sprich deine Stammkunden immer mit ihrem Namen an, auch wenn viel los ist.' }] }, satz), /höchstens 60/)
@@ -447,6 +474,39 @@ check('tools/test_voice.py', py.code === 0, py.out.trim().split('\n').pop() + (p
 // Hashtags: Instagram nimmt hoechstens 5.
 const bt = await run('node', [path.join(STUDIO_ROOT, 'tools', 'beitrag.mjs'), 'selbsttest'])
 check('tools/beitrag.mjs: Regeln für den Beitragstext (5 Hashtags, kein Gedankenstrich, Stichwort)', bt.code === 0, (bt.out.trim() || bt.err.trim()).split('\n').pop())
+
+// ---- Abzug vom Board (AUTOMATIK.md Schritt 24, state/konfig.json "abzug"): seit dem 17.11.2026 liegen auf dem
+// Board auch "vorschau" (jedes Video als base64, rund 5 MB) und "diagnose" (Messungen der Seite am iPhone). Kaemen
+// sie in den Abzug, waere das Repo nach einer Woche Dutzende MB groesser, und das Repo kann oeffentlich sein.
+{
+  const k = JSON.parse(readFileSync(path.join(STUDIO_ROOT, 'state', 'konfig.json'), 'utf8')), s = (k.abzug && k.abzug.sammlungen) || []
+  check('Abzug vom Board: nur Protokoll, Kassenbuch und Themen, nie "vorschau" oder "diagnose"', s.length === 3 && ['laeufe', 'gedaechtnis/stimme', 'gedaechtnis/themen'].every(x => s.includes(x)) && !s.some(x => /vorschau|diagnose/.test(x)), s.join(', '))
+}
+
+// ---- Alte Vorschauen loeschen (AUTOMATIK.md Schritt 22a, tools/vorschau.mjs loeschliste): die erste Fassung riet
+// fuer Teile ohne "version" die 1. Stimmte das nicht, scheiterte jeder Batch, und die Vorschauen (rund 5 MB je Video)
+// fuellten die Datenbank (100 MB) Tag fuer Tag weiter. Festgenagelt: ohne Version gibt es keine Liste (Ende-Code 1),
+// mit den Versionen aus der Antwort der Abfrage schon, und die Teile von "...-v10" sind nie bei "...-v1" dabei.
+{
+  const d = path.join(tmp, 'vorschau-weg'), id = '2026-11-19-quiz-v1', tool = path.join(STUDIO_ROOT, 'tools', 'vorschau.mjs')
+  mkdirSync(path.join(d, 'huelle', 'vorschau'), { recursive: true }); mkdirSync(path.join(d, 'nackt'), { recursive: true })
+  for (const n of [0, 1, 2]) {
+    writeFileSync(path.join(d, 'huelle', 'vorschau', `${id}-${n}.json`), JSON.stringify({ id: `${id}-${n}`, version: 1, data: { video_id: id, n } }))
+    writeFileSync(path.join(d, 'nackt', `${id}-${n}.json`), JSON.stringify({ video_id: id, n }))
+  }
+  writeFileSync(path.join(d, 'huelle', 'vorschau', '2026-11-19-quiz-v10-0.json'), JSON.stringify({ id: '2026-11-19-quiz-v10-0', version: 1, data: {} }))
+  writeFileSync(path.join(d, 'versionen.json'), JSON.stringify({ [`${id}-0`]: 4, [`${id}-1`]: 4, [`${id}-2`]: 5 }))
+  const liste = f => existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : null
+  const a = await run('node', [tool, 'loeschliste', path.join(d, 'huelle'), id, path.join(d, 'a.json')])
+  const b = await run('node', [tool, 'loeschliste', path.join(d, 'nackt'), id, path.join(d, 'b.json')])
+  const c = await run('node', [tool, 'loeschliste', path.join(d, 'nackt'), id, path.join(d, 'c.json'), path.join(d, 'versionen.json')])
+  const la = liste(path.join(d, 'a.json')), lc = liste(path.join(d, 'c.json'))
+  check('Vorschau aufräumen: Liste nur mit gelesenen Versionen, ohne Version keine Liste, "-v10" nie bei "-v1"',
+    a.code === 0 && la && la.length === 3 && la.every((w, n) => w.op === 'delete' && w.collection === 'vorschau' && w.doc_id === `${id}-${n}` && w.if_version === 1)
+      && b.code === 1 && liste(path.join(d, 'b.json')) === null && /"ohne_version":3/.test(b.out)
+      && c.code === 0 && lc && lc.map(w => w.if_version).join() === '4,4,5',
+    `mit Hülle ${a.code}, ohne Version ${b.code}, mit Versionen ${c.code}: ${lc ? lc.map(w => w.if_version).join() : '-'}`)
+}
 
 // ---- Abwechslung (tools/abwechslung.mjs): seit dem 17.11.2026 liest ein Werkzeug Format, Motive und
 // Schlussfrage aus dem Skript ab und zaehlt gleiche Saetze. Vorher trug der Lauf die Felder selbst ein, und

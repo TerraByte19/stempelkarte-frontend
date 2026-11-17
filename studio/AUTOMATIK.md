@@ -16,7 +16,13 @@ entsteht im **Stil C** (seit dem 16.11.2026, Vorbild:
 die Regeln der Abwechslung ein (`FORMATE.md` 2): der alte Bogen (Papier,
 Handy, Stempel, Karte von oben, Sperrbildschirm) ist kein Standard mehr. Die
 Regeln prüft `tools/abwechslung.mjs`; gewählt wird zuerst das Format, dann
-das Thema (`FORMATE.md` 3).
+das Thema (`FORMATE.md` 3). **Seit dem 17.11.2026, abends,** schreibt jeder
+Lauf für den ersten Satz mindestens fünf Kandidaten und zählt sie
+(`HOOKS.md` 0, 1.8), jedes Video klingt ab Bild 0 (`HOOKS.md` 1.7), und jedes
+Video bekommt auf dem Board eine kleine Fassung fürs iPhone (Schritt 19).
+Hat die Idee des Tages einen eigenen Plan (Abschnitt 5), wird auch er ganz
+gelesen (`docs/plaene/`); in den Punkten, die Abschnitt 5 unter "Was ein
+Plan ersetzt" aufzählt, gilt er vor dieser Datei.
 `board/LIESMICH.md` nur nachschlagen, wenn ein Aufruf des Boards etwas Unerwartetes liefert. Wo eines
 dieser Dokumente von dieser Datei abweicht, gilt diese Datei.
 
@@ -45,7 +51,7 @@ stellt keine davon um.
 | A2 | **Was nur im Tarifvergleich steht, kommt in kein Video** (`PRODUKT.md`, Klasse 2): Erinnerung nach langer Pause, Geburtstag, Push-Kampagnen, Tagesangebot, Willkommensgeschenk, Kunde wirbt Kunde, Zugänge für Aushilfen | `PRODUKT.md`, nach seiner Bestätigung |
 | A3 | **Das GitHub-Repo gilt als öffentlich.** Ins Repo kommen nur Protokoll, Kassenbuch der Stimme und die Liste der verwendeten Themen (Regel 12) | `konfig.json`, `abzug` |
 | A4 | Der Monat der Stimme ist der Kalendermonat; der Verbrauch im November vor dem ersten Lauf ist auf 5.080 Zeichen geschätzt | `konfig.json`, `stimme.vortrag` |
-| A5 | Gemischt wird auf -14 LUFS, wahre Spitze höchstens -1 dBTP (`konfig.json`, `mix`; vom Betreiber mit dem zweiten Video gewählt). Vom Board wird nichts gelöscht, ein verworfener Tag bleibt leer | `konfig.json`, `mix` und `speicher` |
+| A5 | Gemischt wird auf -14 LUFS, wahre Spitze höchstens -1 dBTP (`konfig.json`, `mix`; vom Betreiber mit dem zweiten Video gewählt). Vom Board wird nichts gelöscht, ein verworfener Tag bleibt leer. Einzige Ausnahme seit dem 17.11.2026: alte Teile der Vorschau fürs iPhone in der Sammlung `vorschau` (Schritt 22a), und nur, wenn der Auftragstext es erlaubt | `konfig.json`, `mix` und `speicher` |
 | A6 | Vor dem Push läuft kein `npm run build`: der Commit enthält nur Dateien unter `studio/`, und Schritt 24 prüft das | Auftragstext |
 | A7 | Der Lauf startet um 06:47 Uhr deutscher Zeit | Abschnitt 10 |
 | A8 | Gepostet wird vom Betreiber selbst, mit Metricool, auf Instagram, Facebook und TikTok zugleich. Die Automatik legt dafür je Video einen fertigen Beitragstext aufs Board (Feld `caption`, Abschnitt 6.6) und postet nie | `konfig.json`, `posten` und `beitrag` |
@@ -118,7 +124,9 @@ Sie stehen vor jedem Schritt und vor jedem Text, der im Lauf gelesen wird.
       Ablehnung in Folge hielte den Lauf an, bis ein Mensch kommt.
 11. **Was ein Lauf nie anfasst:** den Branch `main`; die Seite des Boards
     (kein Aufruf von `Artifact` ohne `url`, kein erneutes Veröffentlichen,
-    nie `action: "delete"`); Einstellungen der Umgebung, des Netzes oder der
+    nie `Artifact` mit `action: "delete"`); mit `ArtifactData` löscht ein Lauf
+    nur alte Teile der Vorschau in der Sammlung `vorschau` (Schritt 22a), nie
+    ein anderes Dokument; Einstellungen der Umgebung, des Netzes oder der
     Sitzung; geplante Aufgaben. **Im Repo** schreibt ein Lauf nur in den
     Ordner des neuen Videos, in den Ordner eines Videos, das ein
     Änderungswunsch oder das Nachholen betrifft, und nach
@@ -166,7 +174,12 @@ kann. Die Maschine des Laufs ist danach weg; was nur dort lag, ist verloren.
 
 Die fünf Sammlungen des Datenvertrags (`board/LIESMICH.md`) bleiben, wie sie
 sind. Die Automatik fügt Felder und drei Sammlungen hinzu; die Seite liest
-nur die Felder, die sie kennt. Die Zugriffsregel des Boards gilt an der
+nur die Felder, die sie kennt. Seit dem 17.11.2026 gibt es zwei weitere:
+`vorschau` (die kleine Fassung jedes Videos fürs iPhone, schreibt die
+Automatik in Schritt 19, liest die Seite) und `diagnose` (Messungen der Seite
+zu ihren Ladewegen, schreibt die Seite). Beide liest ein Lauf nie: ein Teil
+der Vorschau hat rund 240 KB, und `diagnose` ist nur für eine begleitete
+Sitzung. Die Zugriffsregel des Boards gilt an der
 Wurzel: auch die neuen Sammlungen sieht nur der Besitzer.
 
 **`stand/aktuell`** (ein Dokument, `update`). Felder des Vertrags, dazu:
@@ -191,6 +204,8 @@ Vertrags, dazu:
 | `pruefung` | Text | Kurzfassung der Messwerte |
 | `format`, `kern_bild`, `einstieg`, `motive`, `beleg_kern`, `studie`, `schluss` | Text, Text, Text, Liste, Text, Text, Text | Format, Bilder und Kernaussage des Videos für die Regeln der Abwechslung (`FORMATE.md` 2), wie `tools/abwechslung.mjs felder` sie ausgibt. Ältere Videos haben sie nicht: dann gilt die Tabelle "Altbestand" in `FORMATE.md` |
 | `meme`, `hook_muster` | Text, Text | `HOOKS.md` 4.5: M-Nummer oder `""`, H-Nummer. Seit dem 17.11.2026; ältere Videos haben sie nicht (`HOOKS.md` 4.1 zählt dann nach Format) |
+| `hook_punkte`, `hook_kandidaten` | Zahl, Liste von `{ satz, muster, punkte, gruende, raus }` | Punkte des gewählten Hooks nach dem Bewertungsbogen `HOOKS.md` 1.8 (0 bis 12) und alle Kandidaten, aus denen er gewählt wurde (`HOOKS.md` 0, Schritt 7), genau wie in `meta`. Seit dem 17.11.2026, abends; ältere Videos haben sie nicht. Eine begleitete Sitzung legt sie neben die Skip-Rate (`HOOKS.md` 6) |
+| `vorschau_teile` | Zahl | wie viele Teile der kleinen Fassung für das iPhone in der Sammlung `vorschau` liegen (Schritt 19, Punkt 5). Fehlt es oder ist es 0, gibt es keine; die Seite spielt dann am iPhone nichts ab |
 | `caption` | Text mit Zeilenumbrüchen | der fertige Beitragstext für Instagram, Facebook und TikTok: Hook, ein bis zwei Sätze, Aufforderung mit Stichwort, nach einer Leerzeile genau 5 Hashtags (Abschnitt 6.6). Die Seite zeigt ihn mit dem Knopf "Text kopieren". Ältere Videos haben ihn nicht |
 
 `zeichen` ist, was für **diese Fassung** wirklich aufgenommen wurde: die volle
@@ -274,7 +289,7 @@ braucht, um diese Fassung zu ändern. Aufbau in Abschnitt 7.
 | Ort | Inhalt | schreibt |
 |---|---|---|
 | `studio/videos/<datum>-<slug>/script.json` und `voice/` | Skript und bezahlte Aufnahme | der Lauf |
-| `studio/state/board/` | Abzug vom Board am Ende des Laufs: `laeufe`, `gedaechtnis/stimme`, `gedaechtnis/themen`. Sonst nichts (Regel 12) | der Lauf, Schritt 24 |
+| `studio/state/board/` | Abzug vom Board am Ende des Laufs: `laeufe`, `gedaechtnis/stimme`, `gedaechtnis/themen`. Sonst nichts (Regel 12), nie `vorschau` (rund 5 MB je Video) oder `diagnose` | der Lauf, Schritt 24 |
 | `studio/state/konfig.json`, `studio/state/start/` | Einstellungen, Startfassungen | nur begleitete Sitzungen |
 
 Der Abzug wird nie zurück aufs Board gespielt.
@@ -312,6 +327,9 @@ neueste zuerst; die Texte mit Leerzeichen verbunden, höchstens drei, danach
 | `push` | Seit <N> Läufen kommt die Kopie nicht ins Repo. Nichts ist verloren, alles liegt auf dem Board. | ein Push gelungen ist |
 | `eyes-aus` | Die zweite Prüfung der Videos ist abgeschaltet, weil ihre Einrichtung abgelehnt wurde. | nur durch eine begleitete Sitzung |
 | `kein-video` | Für <Wochentag> ist kein Video entstanden: <Grund in fünf Wörtern>. | wieder ein Video aufs Board ging |
+| `vorschau-auftrag` **!** | Der Auftrag erlaubt noch nicht, alte Vorschauen fürs iPhone zu löschen. Ab 12 Videos bekommt ein neues keine Vorschau mehr und lässt sich am iPhone nicht abspielen. Das braucht einen Chat. | der Auftragstext das Löschen der Vorschau erlaubt (Schritt 22a) |
+| `vorschau-loeschen` **!** | Das Aufräumen der Vorschau fürs iPhone wurde abgelehnt. Ab 12 Videos bekommt ein neues keine Vorschau mehr. Das braucht einen Chat. | nur durch eine begleitete Sitzung |
+| `vorschau-aufraeumen` **!** | Alte Vorschauen fürs iPhone ließen sich am <Datum> nicht löschen. Bleibt das so, bekommt ab 12 Videos ein neues keine Vorschau mehr. Steht das morgen noch hier, braucht es einen Chat. | ein Lauf in Schritt 22a alles gelöscht hat, was dort weg sollte |
 
 `push` wird erst ab drei Fehlversuchen in Folge gesetzt
 (`push.problem_ab_fehlversuchen`).
@@ -374,7 +392,11 @@ dem Board und wartet auf dein Okay." Bei einem Entwurf: "Stampit: Für
 <Wochentag> liegt ein Entwurf ohne Stimme auf dem Board." mit dem Grund in
 einem Halbsatz. Ohne Video: "Stampit: Heute ist kein Video entstanden.
 Auf dem Board steht warum." Steht in `probleme` ein neuer Eintrag mit **!**:
-"Auf dem Board steht außerdem ein Hinweis." Scheitert die Benachrichtigung,
+"Auf dem Board steht außerdem ein Hinweis." Hat das neue Video keine Vorschau
+fürs iPhone (Schritt 19, Punkt 5), kommt dazu: "Am iPhone lässt es sich
+diesmal nicht abspielen, am Computer schon." Die ganze Nachricht bleibt unter
+200 Zeichen; zur Not fällt der Satz mit dem Hinweis weg, nie der zum iPhone.
+Scheitert die Benachrichtigung,
 ist das kein Hindernis. Ob sie am Handy ankommt, ist ungeprüft; der sichere
 Weg ist die Benachrichtigung der Aufgabe selbst (Abschnitt 10).
 
@@ -436,7 +458,7 @@ git -C "$R" fetch origin ccr-816d9995-jhzqdq && git -C "$R" checkout ccr-816d999
 
 ```bash
 TZ=Europe/Berlin date '+HEUTE=%F UHR=%H:%M OFFSET=%:z'; TZ=Europe/Berlin date -d tomorrow '+MORGEN=%F'; TZ=Europe/Berlin date -d '2 days' '+UEBERMORGEN=%F'
-TZ=Europe/Berlin date -d '14 days ago' '+VOR14=%F'; TZ=Europe/Berlin date -d '30 days ago' '+VOR30=%F'; TZ=Europe/Berlin date -d '60 days ago' '+VOR60=%F'; TZ=Europe/Berlin date -d '30 days' '+IN30=%F'
+TZ=Europe/Berlin date -d '7 days ago' '+VOR7=%F'; TZ=Europe/Berlin date -d '14 days ago' '+VOR14=%F'; TZ=Europe/Berlin date -d '30 days ago' '+VOR30=%F'; TZ=Europe/Berlin date -d '60 days ago' '+VOR60=%F'; TZ=Europe/Berlin date -d '30 days' '+IN30=%F'
 date -u '+LAUF=%Y%m%dT%H%M%SZ BEGINN=%s'
 mkdir -p /tmp/stampit-lauf && echo A=/tmp/stampit-lauf
 ```
@@ -531,6 +553,8 @@ Ohne Stimme heißt: kein Aufruf mit `--allow-voice-spend` in diesem Lauf.
 ```
 ArtifactData({ action: "query", url: URL, collection: "videos", query: { where: [["status", "==", "aendern"]], limit: 20 } })
 ArtifactData({ action: "query", url: URL, collection: "videos", query: { where: [["datum", ">=", "<VOR60>"]], limit: 200 } })
+ArtifactData({ action: "query", url: URL, collection: "videos", query: { where: [["vorschau_teile", ">=", 1]], limit: 100 } })
+ArtifactData({ action: "query", url: URL, collection: "videos", query: { where: [["vorschau_rest", ">=", 1]], limit: 100 } })
 ArtifactData({ action: "query", url: URL, collection: "eingang", query: { where: [["status", "==", "offen"]], limit: 50 } })
 ArtifactData({ action: "query", url: URL, collection: "ideen", query: { where: [["status", "in", ["offen", "geplant", "gesperrt"]]], limit: 200 } })
 ArtifactData({ action: "get", url: URL, collection: "gedaechtnis", doc_id: "wuensche" })
@@ -540,6 +564,16 @@ ArtifactData({ action: "get", url: URL, collection: "gedaechtnis", doc_id: "stim
 
 Erfolg: jede Antwort nennt Dokumente mit `id`, `data`, `version` (oder keine).
 Scheitert die Abfrage der Ideen am Operator `in`: dreimal mit `==` fragen.
+Die Sammlungen `vorschau` und `diagnose` werden hier nicht gelesen (2.1);
+welche Videos eine Vorschau haben, steht an den Videos selbst
+(`vorschau_teile`, `vorschau_rest`). Die zwei Abfragen danach sind die
+**Liste der Vorschauen** (beide zusammen, jedes Video einmal, mit seiner
+`version`): Schritt 19 zählt an ihr, Schritt 22a räumt aus ihr auf. Sie
+fragen ohne Datumsgrenze, weil eine Vorschau, deren Aufräumen scheiterte,
+nach 60 Tagen sonst aus jeder Zählung fiele und nie mehr gelöscht würde.
+Scheitert eine der beiden, ist die Liste unbekannt: dann bekommt in diesem
+Lauf kein Video eine Vorschau (Schritt 19, Punkt 5), und Schritt 22a
+entfällt.
 
 Der letzte Aufruf legt das Kassenbuch als Datei ab, weil `budget.mjs` eine
 Datei liest (erwartet: `/tmp/stampit-lauf/board/gedaechtnis/stimme.json`; den
@@ -733,7 +767,9 @@ mit `datum` ab heute, das früheste voran, danach ältere.
 
    Schreibt der Batch nichts, weil sich die alte Fassung geändert hat: neu
    lesen. Zog der Betreiber den Wunsch zurück, bleibt die neue Fassung
-   ungeschrieben; ihre hochgeladenen Dateien bleiben liegen.
+   ungeschrieben; ihre hochgeladenen Dateien bleiben liegen. Ist sie
+   geschrieben: ihre Vorschau fürs iPhone wie Schritt 19, Punkt 5, mit der id
+   der neuen Fassung (die Vorschau der alten räumt Schritt 22a später ab).
 7. Quellen der neuen Fassung sichern (7.1, 7.2).
 
 Die neue Fassung braucht wieder ein Okay des Betreibers, auch wenn die alte
@@ -754,6 +790,7 @@ Aufnahme des Tages; `budget.mjs` vergibt sie nur für diesen Zweck.
    `antwort: "Jetzt mit Stimme."` und dem `caption` der alten (fehlt er dort,
    jetzt nach 6.6 schreiben); die alte auf `ersetzt`. War der Entwurf
    schon freigegeben, braucht die Fassung mit Stimme trotzdem ein neues Okay.
+   Dann die Vorschau der neuen Fassung wie Schritt 19, Punkt 5.
 
 Sagt `budget.mjs` nein, oder läuft der Lauf ohne Stimme: der Entwurf bleibt.
 Hat er das `datum` von heute, bekommt er einmal `antwort: "Für dieses Video
@@ -889,7 +926,12 @@ Sperrbildschirm" am 17.11.2026 beinahe als T25 wieder.
 
 Entfällt, wenn für `ZIEL` schon ein Video lebt oder `studio-kaputt` gilt.
 Sonst nach Abschnitt 5 und `FORMATE.md` 3: zuerst das Format, dann die Idee
-dazu. Gibt es für das Format nur eine Nummer und noch keine Idee, die Idee
+dazu. Eine Idee mit eigenem Plan (Abschnitt 5, zum Beispiel
+`20261117-deutschland-technik`) geht vor, sobald sie für `ZIEL` laufen darf
+(Abschnitt 5, "Darf sie an einem Tag D laufen?", mit D = `ZIEL`); ihr Format
+und ihr `thema` stehen im Plan, beide kommen mit an die Idee. Wartet sie
+noch, gilt für das Format jeder anderen Idee die Sperre für F01 und F02
+(Abschnitt 5). Gibt es für das Format nur eine Nummer und noch keine Idee, die Idee
 jetzt anlegen wie in Schritt 13 (auch über die Grenze von drei neuen Ideen:
 sie wird heute verbaut). Die gewählte Idee mit ihrem Format festhalten:
 
@@ -900,6 +942,7 @@ ArtifactData({
 })
 ```
 
+(Bei einer Idee mit eigenem Plan steht in `data` dazu `thema: "<thema aus dem Plan>"`.)
 "Version veraltet" heißt, der Betreiber hat getippt. Neu lesen; ist sie
 gesperrt, die nächste nehmen. Erfüllt keine Idee und keine Nummer die
 Bedingungen: Hindernis `kein-video` mit dem Grund "keine freie Idee", weiter
@@ -908,13 +951,21 @@ bei Schritt 22.
 ### Schritt 15: das Skript schreiben
 
 Vor der ersten Textzeile: das Format der Idee in `FORMATE.md` 4 lesen
-(Takte, Hook, Bausteine, "Nie", Produkt, Schluss, Beispiel). Dann `HOOKS.md`
-Abschnitt 0 abarbeiten (Meme nur in F07 nach 4.1 und 4.2, Hook-Muster nach
-1.3 und 2 **und nach dem Format**, Prüfliste 1.6) und in `meta` des Skripts
+(Takte, Hook, Bausteine, "Nie", Produkt, Schluss, Beispiel). Hat die Idee
+einen eigenen Plan (Abschnitt 5, "Ideen mit eigenem Plan"), gilt der Plan,
+und die Schritte bis zum Ende dieses Absatzes entfallen bis auf `meta`. Sonst
+`HOOKS.md` Abschnitt 0 abarbeiten: Meme nur in F07 nach 4.1 und 4.2; die
+Muster, die heute gehen, nach 1.7.2 und 1.7.3 (Takt aus `hook_muster` der
+Videos aus Schritt 6); **mindestens fünf Kandidaten aus mindestens drei
+Mustern**, jeder mit Bild 0, erstem Ton und Einlösung; Prüfliste 1.6; die
+übrigen mit dem Bewertungsbogen 1.8 zählen und den besten ab 10 von 12
+nehmen (darunter nach `HOOKS.md` 0, Schritt 6). In `meta` des Skripts
 eintragen: `format`, `beleg_kern` (die Kernaussage, `FORMATE.md` 2), bei F10
-`studie`, `datum`, `thema`, `branche`, `hook_muster`, `meme`, `beleg`. Die
-Felder `kern_bild`, `einstieg`, `motive` und `schluss` liest Schritt 16 mit
-`abwechslung.mjs felder` aus dem fertigen Skript ab und trägt sie dann ein.
+`studie`, `datum`, `thema`, `branche`, `hook_muster`, `hook_punkte`,
+`hook_kandidaten`, `meme`, `beleg`. Die Felder `kern_bild`, `einstieg`,
+`motive` und `schluss` liest Schritt 16 mit `abwechslung.mjs felder` aus dem
+fertigen Skript ab und trägt sie dann ein. Die Kandidaten kosten nichts: sie
+entstehen vor dem Skript, gebaut und aufgenommen wird nur der gewählte.
 
 ```bash
 R=/home/user/stempelkarte-frontend; Z="$R/studio/videos/<ZIEL>-<slug>"; test -e "$Z" && echo SCHON-DA || { cp -r "$R/studio/videos/_vorlage" "$Z" && ls "$Z"; }
@@ -933,7 +984,9 @@ Vorlage ist ein **Gerüst, kein Beispiel**: die Blöcke `voice`, `timing`,
 Vorlage werden gelöscht**. Die Szenen entstehen neu, Takt für Takt aus dem
 Format, mit den Bausteinen, die das Format nennt. Die Szenen der Vorlage
 zeigen nur, wie Teile, Schnitte, Anker und Kamera geschrieben werden. Kein
-Satz der Vorlage bleibt stehen.
+Satz der Vorlage bleibt stehen. Bei einer Idee mit eigenem Plan entstehen die
+Szenen Bild für Bild aus dem Plan, mit seinem Wortlaut und seinen Werten
+(Abschnitt 5, "Was ein Plan ersetzt").
 
 ### Schritt 16: Entwurf ohne Stimme
 
@@ -944,11 +997,12 @@ Kostet nichts. Jeder Befehl mit `R=/home/user/stempelkarte-frontend;` davor.
 | prüfen | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --check; echo "Ende-Code $?"` | Ende-Code 0, alle Prüfungen `ok` | Code 2: Fehler im Skript, die Meldung nennt ihn. Code 1: eine Prüfung, Abhilfe steht im Playbook ("Prüfungen"). Beheben und wiederholen, höchstens fünf Runden; danach Hindernis `kein-video` |
 | Wörter und Anker | `node "$R/studio/tools/times.mjs" "$R/studio/videos/<ordner>"` | je Textzeile die Wörter mit Nummer: jeder Anker liegt auf dem gemeinten Wort | Anker im Skript berichtigen |
 | Standbilder | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills <t1,t2,...>` mit je einem Zeitpunkt kurz nach jedem Anker (Zeiten aus `out/check.json`, `anchors[].t` und `scenes`) | PNGs in `out/stills/`. Jedes mit dem Read-Werkzeug ansehen | was nicht stimmt, im Skript ändern |
+| Die ersten 3 Sekunden | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills 0,0.5,1,2,3`, die fünf Bilder ansehen, dann `node "$R/studio/tools/einstieg.mjs" "$R/studio/videos/<ordner>/out/check.json"; echo "Ende-Code $?"` | Ende-Code 0: erster Ton höchstens 0,05 s, erste Bewegung höchstens 0,5 s, erster Bildwechsel höchstens 4 s (mit Stimme 3 s), erste Tafel höchstens 8 Wörter. Bild 0 ohne Ton lässt sich in fünf Wörtern beschreiben und ist nicht nur "ein Handy" oder "eine Stempelkarte"; zwischen zwei Standbildern hat sich im Bild etwas geändert (`HOOKS.md` 1.7.4) | Ende-Code 1: `verletzt` nennt die Abhilfe (Ortsklang nach Abschnitt 6, Zeile "Stimme, Töne, Farben"; Anker nach `HOOKS.md` 1.7.3; Kamera oder Schnitt nach 6.3). Einmal nachbessern, dann in `pruefung` vermerken. Ende-Code 2: der Bericht fehlt, erst `--stills` bauen |
 | Entwurf bauen (rund 2 bis 4 Minuten, unter Last auch länger, `timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice; echo "Ende-Code $?"` | Ende-Code 0, `out/video.mp4`, `out/sheet.png`, `out/poster.png`, `out/report.json` mit `"ok": true` | Code 1: wie oben. Ein Fehler von Playwright oder ffmpeg: einmal wiederholen, dann Hindernis `studio-kaputt` |
 | ansehen | `out/sheet.png` und `out/poster.png` mit dem Read-Werkzeug | siehe Liste unten | ändern und neu bauen |
-| Kennzahlen | Befehl unten | `laenge_s` (geschätzt) höchstens 56, `woerter` 105 bis 115, `zeichen` bis 800, `bildwechsel` ab 12, `laengstes_bild_s` bis 5, `warnungen` leer | einmal nachbessern (Text kürzen oder ergänzen, eine Textzeile mit Kamera oder Schnitt teilen, Abschnitt 6.3), dann weitergehen: Richtwerte halten keinen Lauf auf. **Zwei Ausnahmen:** über 56 Sekunden geschätzt oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
+| Kennzahlen | Befehl unten | `laenge_s` (geschätzt) höchstens 56, `woerter` 105 bis 115, `zeichen` bis 800, `bildwechsel` ab 12, `laengstes_bild_s` bis 5, `warnungen` leer | einmal nachbessern (Text kürzen oder ergänzen, eine Textzeile mit Kamera oder Schnitt teilen, Abschnitt 6.3), dann weitergehen: Richtwerte halten keinen Lauf auf. Bei einer Idee mit eigenem Plan nie am freigegebenen Wortlaut: dort gelten Wörter und Länge des Plans. **Zwei Ausnahmen:** über 56 Sekunden geschätzt oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
 | Felder | `node "$R/studio/tools/abwechslung.mjs" felder "$R/studio/videos/<ordner>"` | `kern_bild`, `einstieg`, `motive`, `schluss` aus der Ausgabe in `meta` übernehmen; `abweichung` danach leer | die Ausgabe gilt, nicht der Plan |
-| Format und Abwechslung | `node "$R/studio/tools/abwechslung.mjs" pruefen "$R/studio/videos/<ordner>" --verlauf /tmp/stampit-lauf/verlauf.json --ziel <ZIEL>; echo "Ende-Code $?"`. Bei einem Format mit "Handy spät" dazu: Anfang des Teils mit der Karte im Handy (`scenes` in `out/check.json`) höchstens 13 s vor dem letzten Wort | Ende-Code 0 (V1 bis V11, Themenpause, Thema mit Laden), Takte des Formats in dieser Reihenfolge, nichts aus "Nie" des Formats | `verletzt` nennt jede Regel. V10 (gleiche Sätze): die genannten Wortgruppen in eigenen Worten neu sagen. Ein Motiv zu viel: das Bild durch eines aus den Bausteinen des Formats ersetzen. Höchstens drei Runden; ist das Format selbst nicht erlaubt (V1, V4 Einstieg, V6, V9): zurück zu Schritt 14. Hat Schritt 14 Regeln fallen lassen (`FORMATE.md` 3, Punkt 3), dürfen genau diese in `verletzt` stehen; welche, kommt in `pruefung` |
+| Format und Abwechslung | `node "$R/studio/tools/abwechslung.mjs" pruefen "$R/studio/videos/<ordner>" --verlauf /tmp/stampit-lauf/verlauf.json --ziel <ZIEL>; echo "Ende-Code $?"`. Bei einem Format mit "Handy spät" dazu: Anfang des Teils mit der Karte im Handy (`scenes` in `out/check.json`) höchstens 13 s vor dem letzten Wort | Ende-Code 0 (V1 bis V11, Themenpause, Thema mit Laden), Takte des Formats in dieser Reihenfolge, nichts aus "Nie" des Formats. Bei einer Idee mit eigenem Plan statt Takten, "Nie" und "Handy spät": die Bilder des Plans in seiner Reihenfolge | `verletzt` nennt jede Regel. V10 (gleiche Sätze): die genannten Wortgruppen in eigenen Worten neu sagen. Ein Motiv zu viel: das Bild durch eines aus den Bausteinen des Formats ersetzen. Höchstens drei Runden; ist das Format selbst nicht erlaubt (V1, V4 Einstieg, V6, V9): zurück zu Schritt 14. Hat Schritt 14 Regeln fallen lassen (`FORMATE.md` 3, Punkt 3), dürfen genau diese in `verletzt` stehen; welche, kommt in `pruefung`. Bei einer Idee mit eigenem Plan dürfen genau die Regeln stehen, die der Plan nennt, und am Wortlaut und an den Bildern ändert sich nichts, auch kein Motiv: steht eine andere Regel in `verletzt` (etwa V10), ist die Idee heute nicht erlaubt. Sie geht mit `update` und `if_version` zurück auf `status: "offen"`, und der Lauf geht ohne sie zurück zu Schritt 14 |
 | Beitragstext | Abschnitt 6.6 | `beitrag.mjs pruefen` endet mit 0 | nach 6.6 |
 
 ```bash
@@ -1042,6 +1096,7 @@ Kennzahlen mit demselben Befehl lesen:
 | `tempo_beim_sprechen` | 150 bis 190 | vermerken |
 | `bildwechsel`, `laengstes_bild_s` | ab 12, höchstens 5 | vermerken |
 | `laenge_s` | 40 bis 55 | bis 60 erlaubt; vermerken |
+| die ersten 3 Sekunden: `node "$R/studio/tools/einstieg.mjs" "$R/studio/videos/<ordner>/out/report.json"` | Ende-Code 0 (mit Stimme: erster Bildwechsel bis 3 s) | nichts neu aufnehmen; was `verletzt` nennt, in `pruefung` vermerken |
 
 Vermerken heißt: in `pruefung` am Video, bei deutlicher Abweichung auch in
 `meldung`. `pruefung` ist ein Satz, zum Beispiel: "41,9 s, 19 Bildwechsel,
@@ -1091,14 +1146,15 @@ längstes Bild 4,0 s, Pausen 1,2 s, 174 Wörter je Minute, -14,1 LUFS."
        erstellt: "<jetzt UTC>", geaendert: "<jetzt UTC>",
        thema: "<schlüssel>", branche: "<schlüssel>", idee_id: "<id>", entwurf: <true|false>, pruefung: "<ein Satz>",
        format: "<Fxx>", kern_bild: "<meta.kern_bild>", einstieg: "<meta.einstieg>", motive: [<meta.motive>], beleg_kern: "<meta.beleg_kern>", studie: "<meta.studie oder leer>", schluss: "<meta.schluss>",
-       meme: "<meta.meme>", hook_muster: "<meta.hook_muster>",
+       meme: "<meta.meme>", hook_muster: "<meta.hook_muster>", hook_punkte: <meta.hook_punkte>, hook_kandidaten: <meta.hook_kandidaten>,
        caption: "<Beitragstext aus Abschnitt 6.6, Zeilenumbrüche als \n>"
      }
    })
    ```
 
    `format`, `kern_bild`, `einstieg`, `motive`, `beleg_kern`, `studie`,
-   `schluss`, `meme` und `hook_muster` stehen genau so im Dokument wie in
+   `schluss`, `meme`, `hook_muster`, `hook_punkte` und `hook_kandidaten`
+   stehen genau so im Dokument wie in
    `meta` des Skripts (nach Schritt 16 also wie `abwechslung.mjs felder` sie
    abliest): der nächste Lauf liest daran die Regeln der Abwechslung und den
    Meme-Takt ab (`FORMATE.md` 2, `HOOKS.md` 4.1). `text` ist der ganze
@@ -1108,7 +1164,60 @@ längstes Bild 4,0 s, Pausen 1,2 s, 174 Wörter je Minute, -14,1 LUFS."
    erste Textzeile, wie sie zu lesen ist, ohne `*`, `|` und die gesprochenen
    Formen in `{}`. Aus `script.json` abgeschrieben stünden diese Zeichen mit
    auf dem Board.
-5. **Die Idee abhaken:**
+5. **Vorschau fürs iPhone**, direkt nach dem Dokument. Warum: auf dem iPhone
+   (Claude-App und Safari) holt die Seite des Boards keine Datei von ihrer
+   eigenen Adresse (am 17.11.2026: `/_blob/` 404, die Datei neben der Seite
+   403), ihre Datenbank geht dort aber. Die Seite spielt deshalb eine kleine
+   Fassung (720p, rund 3,5 MB) ab, die als base64 in Teilen in der Sammlung
+   `vorschau` liegt (`board/LIESMICH.md`). Ohne Vorschau sieht der Betreiber
+   das Video am iPhone nicht, am Computer schon. Gilt genauso für jede neue
+   Fassung aus den Schritten 9 und 10.
+
+   **Vorher zählen, immer:** wie viele Videos haben schon eine Vorschau? Das
+   ist die Liste der Vorschauen aus Schritt 6 (ohne Datumsgrenze), dazu jede
+   Vorschau, die dieser Lauf schon geschrieben hat (Schritte 9 und 10), auch
+   wartende Videos (`neu`, `aendern`) und solche mit `vorschau_rest`. Sind es
+   schon 12, oder ist die Liste unbekannt (Schritt 6): **keine** Vorschau für
+   dieses Video. Das gilt, ob Schritt 22a heute löschen darf oder nicht:
+   scheitert das Aufräumen Tag für Tag, ohne abgelehnt zu werden, hält nur
+   diese Zählung die Datenbank unter ihrer Grenze (Schritt 22a). Wartende
+   Videos verlieren ihre Vorschau nie, damit der Betreiber sie am iPhone
+   prüfen kann; voll heißt also: das neue Video geht ohne. Dann wie in der
+   letzten Zeile der Tabelle unten, Grund "Speicher für die Vorschau ist
+   voll".
+
+   ```bash
+   R=/home/user/stempelkarte-frontend; A=/tmp/stampit-lauf
+   node "$R/studio/tools/vorschau.mjs" "$R/studio/videos/<ordner>/out/video.mp4" "<video-id>" "$A/vorschau-<video-id>"; echo "Ende-Code $?"
+   ```
+
+   Erfolg: Ende-Code 0 und eine Zeile `{ "video_id", "teile", "bytes", "batches" }`
+   (ein Video von 40 s: rund 20 Teile in 7 Batches). Dann jede Datei
+   `$A/vorschau-<video-id>/batch-<k>.json`, k = 0 bis `batches` - 1, der
+   Reihe nach mit je einem Aufruf:
+
+   ```
+   ArtifactData({ action: "batch", url: URL, writes: <Inhalt von batch-<k>.json> })
+   ```
+
+   Jede Datei ist schon die fertige Liste `writes`, höchstens drei Einträge
+   `{ "op": "set", "collection": "vorschau", "doc_id": "<video-id>-<n>", "file_path": "..." }`:
+   mit dem Read-Werkzeug lesen und unverändert übergeben. Die Teile selbst
+   gehen über `file_path` und nicht durch die Unterhaltung. Mehr als drei
+   Teile je Batch gehen nicht: ein Batch darf höchstens 1 MiB haben, ein Teil
+   hat 240.000 Zeichen. Die Teile sind neu, also ohne `if_version`. Sind alle
+   Batches geschrieben:
+
+   ```
+   ArtifactData({ action: "update", url: URL, collection: "videos", doc_id: "<video-id>",
+     data: { vorschau_teile: <teile> }, if_version: <Version aus Punkt 4> })
+   ```
+
+   | | |
+   |---|---|
+   | Erfolg | die Seite spielt das Video am iPhone aus der Datenbank ab |
+   | `vorschau.mjs` endet nicht mit 0, ein Batch scheitert (nach der einen Wiederholung aus Schritt 4 bei `unavailable` oder `resource_exhausted`), oder das `update` scheitert | keine weiteren Batches. Das Video bleibt hochgeladen und gilt. Wurden schon Teile geschrieben, kommt ihre Zahl als `vorschau_rest` ans Video (`update` mit `if_version`, `vorschau_teile` bleibt 0), damit Schritt 22a sie später findet. In `laeufe.problem` dieses Laufs: "Vorschau fürs iPhone fehlt: <Grund in fünf Wörtern>."; `pruefung` am Video bekommt "ohne Vorschau fürs iPhone"; `meldung` und die Benachrichtigung (3.3) sagen es dazu. Kein zweiter Versuch in diesem Lauf. Wird ein Aufruf von der Sicherheitsprüfung abgelehnt, gilt Regel 10 |
+6. **Die Idee abhaken:**
    `update` auf `ideen/<id>` mit `{ status: "verwendet", video_id: "<id des Videos>" }`
    und `if_version`. Hat der Betreiber sie inzwischen gesperrt, bleibt
    `gesperrt` stehen; das Video liegt trotzdem zur Freigabe da und er kann es
@@ -1136,7 +1245,10 @@ steht. Abschnitt 9. Das Ergebnis kommt mit `update` und `if_version` in
 Der Betreiber soll sehen, was als Nächstes gebaut wird, und es sperren
 können. Steht keine Idee auf `geplant`: nach Abschnitt 5 die beste für den
 nächsten Lauf wählen, mit einem Format nach `FORMATE.md` 3 (das heutige Video
-zählt dann als letztes), und setzen:
+zählt dann als letztes), und setzen. Eine Idee mit eigenem Plan, die für
+`UEBERMORGEN` laufen darf, geht vor (Abschnitt 5, mit D = `UEBERMORGEN`);
+wartet sie noch, gilt für jede andere Idee die Sperre für F01 und F02
+(Abschnitt 5, mit T = `UEBERMORGEN`):
 
 ```
 ArtifactData({
@@ -1146,6 +1258,102 @@ ArtifactData({
 ```
 
 Eine Idee, die der Betreiber gesperrt hat, wird nie zurückgesetzt.
+
+### Schritt 22a: alte Vorschauen aufräumen
+
+Warum: die Datenbank des Boards hat eine Grenze von 100 MB, und eine
+Vorschau fürs iPhone (Schritt 19, Punkt 5) belegt dort rund 5 MB. Ohne
+Aufräumen wäre sie nach rund drei Wochen voll, und dann scheiterte jedes
+Schreiben, auch das von Protokoll und Stand. Zwölf Vorschauen sind höchstens
+rund 60 MB; mehr lässt die Zählung in Schritt 19 nicht zu, auch wenn dieser
+Schritt scheitert. Er steht spät im Lauf, damit eine Ablehnung (Regel 10)
+das Video des Tages nicht mehr aufhält.
+
+**Entfällt,** wenn in diesem Lauf schon ein Aufruf abgelehnt wurde (Regel
+10): jeder Aufruf hier geht ans Board, und eine zweite Ablehnung kostete
+Protokoll, Stand und Benachrichtigung. Der nächste Lauf räumt auf. Entfällt
+auch, wenn die Liste der Vorschauen unbekannt ist (Schritt 6).
+
+**Nur wenn** der Auftragstext das Löschen der Vorschau erlaubt (Regel 9: die
+Zeile "Auf dem Board nichts löschen außer alten Teilen der iPhone-Vorschau
+..."; fehlt die Ausnahme, ist nichts erlaubt) und in `probleme` kein
+`vorschau-loeschen` steht. Sonst entfällt der Schritt; fehlt die
+Erlaubnis, kommt `vorschau-auftrag` in `probleme` (3.1), und erlaubt der
+Auftragstext es wieder, wird dieser Eintrag gestrichen.
+
+**Was nie weg kommt:** die Vorschau eines Videos mit `status` `neu` oder
+`aendern` (es wartet darauf, dass der Betreiber es am iPhone ansieht), eines
+Videos mit `status` `freigegeben` und `datum` ab `<HEUTE>` (er kann es von
+dort noch posten), und die des Videos, das heute neu auf das Board kam.
+
+**Was weg kommt.** Aus der Liste der Vorschauen (Schritt 6, dazu die in
+diesem Lauf geschriebenen), nur Videos, die nicht oben stehen:
+
+1. jedes, dessen `datum` vor `<VOR7>` liegt (älter als 7 Tage), auch
+   `ersetzt` und `verworfen`;
+2. haben danach noch mehr als 11 Videos eine Vorschau (die geschützten
+   mitgezählt): die ältesten nach `datum` (bei gleichem Datum die niedrigere
+   Fassung), bis 11 übrig sind. So hat das Video von morgen Platz (Schritt
+   19 zählt bis 12). Bleiben nur geschützte übrig und sind es noch mehr als
+   11: aufhören, nichts weiter löschen. Das nächste Video geht dann ohne
+   Vorschau (Schritt 19), und `meldung` sagt dazu: "Viele Videos warten auf
+   dich. Bis ältere erledigt sind, bekommt ein neues keine Vorschau fürs
+   iPhone."
+
+Höchstens fünf Videos je Lauf (Regel 13); der Rest kommt morgen dran. Je
+Video, nacheinander, jedes in einen eigenen Ordner:
+
+```
+ArtifactData({ action: "query", url: URL, collection: "vorschau", query: { where: [["video_id", "==", "<video-id>"]], limit: 50 }, out_dir: "/tmp/stampit-lauf/weg-<video-id>" })
+```
+
+Immer mit `out_dir`: die Teile kommen als Dateien auf die Maschine, nicht in
+die Unterhaltung. Dann die Liste zum Löschen bauen:
+
+```bash
+R=/home/user/stempelkarte-frontend; A=/tmp/stampit-lauf
+node "$R/studio/tools/vorschau.mjs" loeschliste "$A/weg-<video-id>" "<video-id>" "$A/liste-<video-id>.json"; echo "Ende-Code $?"
+```
+
+| Ende-Code | |
+|---|---|
+| 0 | `$A/liste-<video-id>.json` ist die fertige Liste, `teile` die Zahl der Teile darin. Nennt die Antwort der Abfrage mehr Dokumente, als `teile` sagt: die Dateien liegen anders als erwartet (ihre Form ist ungeprüft, Abschnitt 11). Dann nichts löschen, den Zähler nicht anfassen, Hindernis `vorschau-aufraeumen`, nächstes Video |
+| 1 | `ohne_version` über 0: die abgelegten Dateien nennen keine Version, und es gibt keine Liste. Nennt die Antwort der Abfrage je Teil seine `version`: sie mit dem Write-Werkzeug als `{ "<doc-id>": <version>, ... }` nach `$A/versionen-<video-id>.json` schreiben und den Befehl wiederholen, mit `"$A/versionen-<video-id>.json"` als zusätzlichem letzten Wert. Sonst nichts löschen, keine Version raten: dieses Video bleibt, Hindernis `vorschau-aufraeumen` |
+| 2 | wie "ein anderer Fehler" unten |
+
+Sind es Teile:
+
+```
+ArtifactData({ action: "batch", url: URL, writes: <Inhalt von liste-<video-id>.json> })
+```
+
+Danach, auch wenn die Abfrage gar keine Teile nannte, das Video:
+
+```
+ArtifactData({ action: "update", url: URL, collection: "videos", doc_id: "<video-id>",
+  data: { vorschau_teile: 0, vorschau_rest: 0 }, if_version: <Version aus Schritt 6> })
+```
+
+Zuerst die Teile, dann der Zähler: scheitert das `update`, findet der nächste
+Lauf das Video wieder und räumt nur noch den Zähler ab. Umgekehrt blieben
+Teile ohne Zähler liegen, die niemand mehr findet.
+
+| | |
+|---|---|
+| Erfolg | Teile weg, `vorschau_teile` 0. Im `ergebnis` des Protokolls: "<n> alte Vorschauen gelöscht" |
+| der Batch scheitert, weil eine Version nicht stimmt | nicht raten, auch nicht die Version aus der Fehlermeldung einsetzen (sie nennt nur den ersten falschen Teil). Die Abfrage einmal neu stellen, mit `out_dir` "/tmp/stampit-lauf/weg2-<video-id>", die Liste mit demselben Befehl aus diesem Ordner neu bauen und einmal schicken. Scheitert es wieder: dieses Video bleibt, Hindernis `vorschau-aufraeumen` |
+| `version` veraltet beim `update` (der Betreiber hat getippt) | neu lesen, einmal wiederholen |
+| ein Aufruf wird von der Sicherheitsprüfung abgelehnt | Regel 10 (zählt mit). Hindernis `vorschau-loeschen`, der Schritt endet sofort; kein Lauf versucht es wieder, bis eine begleitete Sitzung es streicht |
+| ein anderer Fehler | Hindernis `vorschau-aufraeumen`, weiter mit dem nächsten Video |
+
+Hat der Schritt alles gelöscht, was er sich in diesem Lauf vorgenommen hatte
+(höchstens fünf Videos), wird `vorschau-aufraeumen` gestrichen. Die
+Zählung in Schritt 19 gilt so oder so: auch wenn hier Tag für Tag etwas
+scheitert, kommen nie mehr als 12 Vorschauen in die Datenbank.
+
+Gelöscht wird nur in `vorschau`, nur mit Dokument-ids `<video-id>-<n>` aus
+genau dieser Abfrage, nie ein Video, eine Datei im Dateispeicher oder ein
+anderes Dokument.
 
 ### Schritt 23: Protokoll, Stand, Benachrichtigung
 
@@ -1158,7 +1366,10 @@ wurde), dann 3.3.
 Entfällt ganz, wenn in diesem Lauf schon ein Aufruf abgelehnt wurde (Regel
 10) oder der Auftragstext keinen Push erlaubt.
 
-1. **Abzug vom Board ins Repo** (nacheinander, nur diese drei):
+1. **Abzug vom Board ins Repo** (nacheinander, nur diese drei; nie
+   `vorschau`, `diagnose`, `videos`, `ideen`, `eingang`, `reels`, `quellen`
+   oder `gedaechtnis/wuensche`: Regel 12, und die Vorschau allein brächte
+   rund 5 MB je Video ins Repo):
 
    ```
    ArtifactData({ action: "get",   url: URL, collection: "gedaechtnis", doc_id: "stimme", out_dir: "<R>/studio/state/board" })
@@ -1227,7 +1438,9 @@ eine andere als die erprobte.
 **Rangfolge.** Die erste Idee, die alle Bedingungen erfüllt:
 
 1. offene Ideen mit `herkunft: "eingang"`, neueste zuerst (ein Wunsch des
-   Betreibers geht vor), mit dem ersten erlaubten Format, das zu ihr passt,
+   Betreibers geht vor), mit dem ersten erlaubten Format, das zu ihr passt;
+   eine Idee mit eigenem Plan (unten, "Ideen mit eigenem Plan") mit dem
+   Format und den Regeln ihres Plans,
 2. die Idee mit `status: "geplant"`, wenn ihr Format noch erlaubt ist (vor dem
    Benutzen neu lesen: hat der Betreiber sie gesperrt, gilt das),
 3. offene Ideen mit `herkunft: "reel"`, die mit den meisten `reel_likes`
@@ -1239,6 +1452,89 @@ eine andere als die erprobte.
    das Format in der Spalte "Formate" hat (älteste zuerst), sonst eine Nummer
    aus `THEMEN.md` mit diesem Format (unten), die Idee dazu gleich anlegen wie
    in Schritt 13. Passt keine: das nächste Format.
+
+**Ideen mit eigenem Plan.** Für manche Ideen des Betreibers gibt es einen
+freigegebenen Wortlaut und einen fertigen Plan im Repo (`docs/plaene/`). Sie
+stehen in Stufe 1 der Rangfolge, gleich welche `herkunft` sie haben. Heute
+genau eine:
+
+| Idee auf dem Board | Plan | in Kürze |
+|---|---|---|
+| `20261117-deutschland-technik` | `docs/plaene/deutschland-technik.md` | Bäckerei Morgenrot, `thema` `kein-download`, Stichwort KARTE, Wortlaut vom Betreiber freigegeben (rund 60 Wörter, keine Schlussfrage). `meta.format` "F01". Nie am 22.11.2026 (Totensonntag); sonst an dem Tag, für den die Regeln sie erlauben (Schritt 14) |
+
+**Was ein Plan ersetzt.** In genau diesen Punkten gilt der Plan **vor
+dieser Anleitung** (auch vor Abschnitt 6, 6.2 und Schritt 16), vor
+`FORMATE.md` und vor `HOOKS.md`; der Plan nennt sie in Abschnitt 3 noch
+einmal:
+
+1. die Takte des Formats, seine Bausteine und seine Kernaussage
+   (`FORMATE.md` 4) und Abschnitt 6, Zeile "Format": es gelten die Bilder
+   aus dem Plan, in seiner Reihenfolge, mit seinen Werten;
+2. die Zeilen "Nie" und "Produkt" des Formats: beim Deutschland-Video
+   Papier (`paper-card`), Scan (`wallet-pass`) und das Produkt ab dem
+   fünften Satz (A1, A2, A3, F1);
+3. "Handy spät" (`FORMATE.md` 4) und die Prüfung dazu in Schritt 16: das
+   Handy kommt bei rund 12 von rund 25 s;
+4. `HOOKS.md` 0 (Kandidaten, Bogen, Wahl): erster Satz, `hook_muster`,
+   `hook_punkte` und `hook_kandidaten` stehen im Plan;
+5. Länge und Wörter: A1, Abschnitt 6, Zeile "Länge" (Wörter, Textzeilen,
+   Szenen), und die Kennzahl `woerter` in Schritt 16. Es bleiben: höchstens
+   800 Zeichen, über 56 s geschätzt keine Aufnahme, die Prüfung `laenge`;
+6. der Schluss: Abschnitt 6, Zeile "Schluss", die Form in 6.2 und die Zeile
+   "Schluss" des Formats. Statt Schlussfrage und "Dann kommentiere jetzt
+   ... bei dir." gilt der Schluss des Plans ("Kommentiere KARTE, und wir
+   melden uns.");
+7. die Lage des ersten Bildwechsels (Abschnitt 6, Zeile "Einstieg";
+   `HOOKS.md` 1.2 und 1.7.4: "auf dem ersten Wort der zweiten Textzeile"):
+   hier die Kamera auf dem letzten Wort der ersten Textzeile. Die Grenzen
+   von `tools/einstieg.mjs` bleiben;
+8. die Einlösung bis 10 s (`HOOKS.md` 1.7.4): hier die Papierkarte bei rund
+   6 s (H16, `HOOKS.md` 1.6), das Produkt erst danach;
+9. aus den Regeln der Abwechslung V1, V7 und von V9 der Teil "eine
+   Kernaussage des Formats".
+
+Alles andere gilt weiter, ohne Ausnahme: Abschnitt 1, `PRODUKT.md` (nur
+Klasse 1), die übrigen Regeln der Abwechslung mit Themenpause und "Thema mit
+Laden", Stil C (Tafeln, Töne nach Abschnitt 6, Zeile "Stimme, Töne, Farben",
+Kamerawerte aus 6.3), der Kopf des Skripts (6.1), der Beitragstext (6.6) und
+das Budget der Stimme. **Am Wortlaut und an der Bildfolge eines Plans ändert
+kein Lauf etwas,** auch nicht, um eine Regel oder einen Richtwert
+einzuhalten: verletzt das Skript eine Regel, die der Plan nicht ausnimmt,
+ist die Idee an diesem Tag nicht erlaubt (Schritt 16). Ein Plan ist kein
+Freibrief: was `PRODUKT.md` nicht deckt, steht auch dort nicht, und eine
+Idee mit Plan, die der Betreiber gesperrt hat, wird nie gebaut.
+
+**Darf sie an einem Tag D laufen?** Für das Deutschland-Video gilt, gerechnet
+mit den Videos vor D (wie `FORMATE.md` 2, "Die letzten Videos"):
+
+- D ist nicht der 22.11.2026;
+- kein Video mit `thema` `kein-download` in den 7 Tagen vor D
+  (Themenpause), keins mit `kein-download` aus der Bäckerei (`cafe`) in den
+  21 Tagen vor D ("Thema mit Laden");
+- kein `hook_muster` `H16` unter den letzten neun Videos und keins in den 7
+  Tagen vor D (`HOOKS.md` 1.7.2);
+- das letzte Video ist nicht aus der Bäckerei (V5);
+- keins der letzten zwei Videos hat `papier` oder `scan` in `motive` oder
+  die Kernaussage `ohne-app` (V3, V8, V9), und keins hat `tip-cards` als
+  Einstieg (V4);
+- keins der letzten drei Videos hat das Kern-Bild `zettel` (V6).
+
+Ob die Sätze neu genug sind (V10), zeigt erst Schritt 16.
+
+**Sperre für F01 und F02, solange sie wartet.** Die Idee braucht vor sich
+zwei Videos ohne `tip-cards` als Einstieg und drei ohne Kern-Bild `zettel`
+(V4, V6). Ein F01 oder F02 kurz vor ihrem Tag schöbe sie um Tage nach
+hinten. Deshalb: wählt Schritt 14 (für den Tag T = `ZIEL`) oder Schritt 22
+(für T = `UEBERMORGEN`) ein Format für eine **andere** Idee, kommen F01 und
+F02 nicht in Frage, wenn die Idee an T+1, T+2 oder T+3 laufen könnte. Die
+Probe dafür: für mindestens einen dieser Tage D erfüllt die Idee die Liste
+oben **ohne die letzten zwei Punkte** (V4 und V6 sind, was die Sperre
+schützt). Gerechnet wird mit den Videos, die schon auf dem Board liegen
+(Schritt 6; in Schritt 22 zählt das Video von heute dazu); jeder Tag ab T,
+für den es noch keins gibt, zählt als ein Video ohne Motive, mit einer
+anderen Kernaussage und einem anderen Thema, aus einem anderen Laden und
+ohne H16. Lässt die Sperre kein Format übrig, fällt sie weg: an ihr bleibt
+kein Tag leer.
 
 **Bedingungen.**
 
@@ -1312,14 +1608,18 @@ Stil C regelt Tempo, Tafeln und Mischung, nicht die Reihenfolge der Bilder:
 die kommt aus den Takten des Formats. In `meta` kommen `title`, `slug`,
 `idee` (ein Satz: was die Anregung war und was daran eigenes ist, ohne Namen,
 Regel 12), `format`, `beleg_kern`, bei F10 `studie`, `datum`, `thema`,
-`branche`, `hook_muster`, `meme` und, wie `abwechslung.mjs felder` sie
+`branche`, `hook_muster`, `hook_punkte`, `hook_kandidaten` (`HOOKS.md` 0,
+Schritt 7), `meme` und, wie `abwechslung.mjs felder` sie
 abliest, `kern_bild`, `einstieg`, `motive`, `schluss` (`FORMATE.md` 2); frei
-dazu `beleg`, `idee_id`. Zusätzlich gilt:
+dazu `beleg`, `idee_id`. Für eine Idee mit eigenem Plan gilt in den Punkten,
+die Abschnitt 5 unter "Was ein Plan ersetzt" aufzählt (Format, Länge,
+Schluss, erster Bildwechsel), der Plan vor dieser Tabelle und vor 6.2; in
+allen anderen Punkten die Tabelle. Zusätzlich gilt:
 
 | Punkt | Vorgabe |
 |---|---|
 | Format | Die Takte des Formats aus `FORMATE.md` 4, in dieser Reihenfolge, mit den Bausteinen, die es nennt; nichts aus seiner Zeile "Nie". Kein Format ist der Standard. Fehlen Bildwechsel, kommt eine Kamerafahrt oder ein weiterer Teil desselben Bilds dazu, nicht Papier, Wallet oder Karte von oben (`FORMATE.md` 5) |
-| Einstieg | Die erste Textzeile trägt `"instant": true` und ist eine Frage oder ein Moment, kein Vorspann. Sie steht ab Bild 0 da und wird in der ersten Sekunde gesprochen. Das Bild darunter ist der Einstieg des Formats (`FORMATE.md` 4, Zeile "Einstieg"; in F07 der des Memes) und zeigt, wovon sie spricht. Es ist nicht der Einstieg eines der letzten zwei Videos (V4) |
+| Einstieg | Die erste Textzeile trägt `"instant": true` und ist der gewählte Kandidat aus `HOOKS.md` 0, kein Vorspann. Sie steht ab Bild 0 da und wird in der ersten Sekunde gesprochen. Das Bild darunter ist der Einstieg des Formats (`FORMATE.md` 4, Zeile "Einstieg"; in F07 der des Memes) und zeigt, wovon sie spricht. Es ist nicht der Einstieg eines der letzten zwei Videos (V4). **Sekunde 0 bis 3** nach `HOOKS.md` 1.7.4: am ersten Teil ein Ortsklang, `"sounds": [ { "sound": "<Klang aus HOOKS.md 1.7.5>", "at": "start", "offset": 0, "vol": <Wert von dort> } ]`; die erste Bewegung über den Anker aus `HOOKS.md` 1.7.3 bis 0,5 s; der erste Bildwechsel (Kamera nach 6.3 oder Schnitt) auf dem ersten Wort der zweiten Textzeile, im Entwurf bis 4 s, mit Stimme bis 3 s; kein `gapBefore` vor 3 s; die Antwort bis 10 s im Bild |
 | Aussagen | Eine Kernaussage (`meta.beleg_kern`) und höchstens eine Aussage daneben, A1 als Ort und F1 nicht mitgezählt (`FORMATE.md` 4). Jede in eigenen Worten: höchstens zwei gleiche Gruppen aus vier Wörtern mit jedem der letzten drei Videos (V10, `abwechslung.mjs`) |
 | Erzählform | **Ein** Laden aus der Tabelle "Läden" in `THEMEN.md`, nie derselbe wie im letzten Video (V5). Wie erzählt wird (Geschichte, Tipps, Frage und Antwort, Rechnung, Tag, Duell, Quiz, Zahl), bestimmt das Format. Jede Aussage über die App hat ihre Zeile in `PRODUKT.md`, Klasse 1 |
 | Länge | 105 bis 115 Wörter, 15 bis 21 Textzeilen (die zwei des Schlusses mitgezählt), 5 bis 7 Szenen vor dem Schluss, höchstens 800 Zeichen (A1). **Ab 110 Wörtern höchstens 18 Textzeilen.** Der Entwurf schätzt 3,2 s + 0,36 s je Wort + 0,5 s je Textzeile nach der ersten + 0,35 s je Szene vor dem Schluss (die alte Vorlage vom 16.11.2026: 108 Wörter, 15 Textzeilen, 5 Szenen, 50,8 s). Mit der Regel davor bleibt das unter 56 s; alle Höchstwerte zusammen (115 Wörter, 21 Textzeilen, 7 Szenen) ergäben rund 57 s. `--check` nennt den Wert in der Zeile "Länge". Fertig mit Stimme werden es rund 40 bis 45 s. Über 56 s geschätzt wird nicht aufgenommen, über 60 s bricht der Bau ab |
@@ -1328,7 +1628,7 @@ dazu `beleg`, `idee_id`. Zusätzlich gilt:
 | Laden | Name, Stempelzahl und Symbol in jeder Szene und jedem Teil gleich. Abweichung nur mit Absicht (Thema `stempelzahl`) |
 | Sperrbildschirm | Uhrzeit passt zum Laden, Datum ohne Jahr, Wochentag passt zum Tag (Befehl in Schritt 2). `"pin": false`: die Nähe zeigt in Stil C die Karte von oben (6.4) |
 | Schluss | Die Frage des Formats (`FORMATE.md` 4, Zeile "Schluss"; höchstens zwei Wörter, sonst steht das Schlussbild über 5 s; kein Wort aus der Schlussfrage eines der letzten zwei Videos, V7), dann `Dann kommentiere jetzt STICHWORT,{Stichwort,}` und `und wir melden uns bei dir.` Nichts anderes, auch nicht "schick das einem Freund" wie bei den Vorbildern. Form in 6.2 |
-| Stimme, Töne, Farben | `voice` wie in der Vorlage, kein `sound`, kein `seed`. Das dunkle Aussehen bleibt |
+| Stimme, Töne, Farben | `voice` wie in der Vorlage, kein `sound` (der Block oben im Skript), kein `seed`. Das dunkle Aussehen bleibt. Klänge der Bibliothek (`"sounds"` an einem Teil) nur so: **ein Ortsklang** am ersten Teil bei 0,00 s und **höchstens ein Akzent** auf einem Wort der ersten zwei Textzeilen, beide aus `HOOKS.md` 1.7.5 mit dem `vol` von dort; dazu wie bisher `ladenglocke` am Anker `close` von `shop-door` (6.4). Immer mit Absenkung (`"duck"` weglassen, Vorgabe true). Nie `kasse`, `muenzen` oder `applaus` am Anfang, `handy-vibriert` nur unter `lock-notification` (dann dort `"tones": false`). Warnt `effekte` oder (mit Stimme) `effekt-abstand`, den `vol` halbieren |
 | Werkzeuge | Nie `tools/clip-in.py` (Sätze von außerhalb des Studios, nur in begleiteten Sitzungen, Regel 11), nie `--force`, nie ein neuer Baustein |
 | Wünsche | Alles aus `gedaechtnis/wuensche` mit `art: "text"` beachten, solange es keiner Regel widerspricht |
 
@@ -1367,7 +1667,7 @@ Zeichenkette in `lines`.
 | `"gapBefore": 0.55` | Pause vor dieser Textzeile genau so lang (6.5) | Nur an den zwei Stellen aus 6.5 |
 | `"mode": "zeile"` | eine einzelne Textzeile im alten Stil (ganze Zeilen, `accent`, `keep`) | Nur für die Schlussfrage |
 
-Der Schluss sieht immer so aus (Frage aus dem Format, Stichwort ändern, sonst nichts):
+Der Schluss sieht immer so aus (Frage aus dem Format, Stichwort ändern, sonst nichts; einzige Ausnahme: eine Idee mit eigenem Plan, Abschnitt 5):
 
 ```json
 "captions": [
@@ -1468,8 +1768,8 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 
 | Aussage (`PRODUKT.md`) | Baustein | So |
 |---|---|---|
-| Einstieg in F08 (der Hook spricht vom Handy, vom Sperrbildschirm oder von der vollen Karte, zum Beispiel T02, T16) | `lock-notification` | `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Text der Benachrichtigung mit dem Stand: "Noch <n> Stempel bis: <Belohnung>", nur bei voller Karte "<Belohnung> wartet auf dich" (C1 in `PRODUKT.md`). Wie der erste Satz klingt, steht in `HOOKS.md` 1.2 und 1.6 |
-| Einstieg in jedem anderen Format: der Baustein aus der Zeile "Einstieg" des Formats (`FORMATE.md` 4), in F07 der des Memes (`HOOKS.md` 3.2). Für Papier als Einstieg (nur M26, M29, M21, M18 in F07) | `paper-card`; nie `guest-ghost` oder `wallet-vanish` (als Einstieg nicht erprobt) | Das Bild steht ab Bild 0, seine erste Bewegung liegt auf einem Anker kurz nach dem Anfang (`paper-card`: `hit` mit `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01 erprobt; `wallet-pass` als Einstieg ist nicht erprobt, Standbild bei 0 s ansehen). **Nie ein Bild, das dem Hook widerspricht:** unter "Den zehnten macht ein anderer" kein Sperrbildschirm mit "10 von 10". Der Sperrbildschirm kommt dann später, als Schnitt nach dem Bild für "in der Nähe" |
+| Einstieg in F08 (der Hook spricht vom Handy, vom Sperrbildschirm oder von der vollen Karte, zum Beispiel T02, T16) | `lock-notification` | `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, `"tones": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Der erste Ton ist `handy-vibriert` bei 0,00 s (`HOOKS.md` 1.7.5); ohne `"tones": false` brummte es doppelt, und der eigene Ton `ding` käme erst bei 0,10 s. Text der Benachrichtigung mit dem Stand: "Noch <n> Stempel bis: <Belohnung>", nur bei voller Karte "<Belohnung> wartet auf dich" (C1 in `PRODUKT.md`). Wie der erste Satz klingt, steht in `HOOKS.md` 1.2 und 1.6 |
+| Einstieg in jedem anderen Format: der Baustein aus der Zeile "Einstieg" des Formats (`FORMATE.md` 4), in F07 der des Memes (`HOOKS.md` 3.2). Für Papier als Einstieg (nur M26, M29, M21, M18 in F07) | `paper-card`; nie `guest-ghost` oder `wallet-vanish` (als Einstieg nicht erprobt) | Das Bild steht ab Bild 0, seine erste Bewegung liegt auf einem Anker bis 0,5 s (je Format in `HOOKS.md` 1.7.3; `paper-card`: `hit` mit `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01 erprobt; `wallet-pass` als Einstieg ist nicht erprobt, Standbild bei 0 s ansehen). Dazu der Ortsklang bei 0,00 s (Abschnitt 6, Zeile "Stimme, Töne, Farben"). **Nie ein Bild, das dem Hook widerspricht:** unter "Den zehnten macht ein anderer" kein Sperrbildschirm mit "10 von 10". Der Sperrbildschirm kommt dann später, als Schnitt nach dem Bild für "in der Nähe" |
 | Die Kundin ist unterwegs, geht am Laden vorbei (Weg zu C1) | `shop-street` mit `"across": true`, `"circle": false`, `"shopAt": 0.7`, `"direction": "right"`, `"from": -0.08`, `"via": 0.13`, `"to": 0.15` | Sie geht auf der **anderen** Straßenseite, der Laden steht klein im Hintergrund. `to` höchstens 0,09 hinter `via`, sonst deckt die kleine Karte den Laden zu. Nie `shop-street` mit Passant ohne `across` |
 | **C1: "in der Nähe", die Karte erscheint von selbst auf dem Sperrbildschirm (immer, mit dem Stand; nicht erst, wenn sie voll ist). Nur in F08 (`FORMATE.md`: kein anderes Format zeigt die Nähe, F07 ausdrücklich nicht), und nach V2 höchstens in einem von drei Videos** | **`shop-map`**, Karte von oben: `"circle": true`, `"notify": true`, `"note": "Noch <n> Stempel bis: <Belohnung>"` (nur bei voller Karte: `"<Belohnung> wartet auf dich"`), `"path": [[-0.1, 1], [0.55, 1]]`, Anker `circle` und `walk` am Anfang, `buzz` auf das Wort "zeigt" oder "meldet" mit `"offset": -0.1`, `arrive` mit `{ "at": "end", "offset": -0.5 }`, Kamera nach 6.3 | **Immer**, wenn ein Satz von der Nähe des Ladens handelt. Die Kundin geht eine Straße hinter dem Laden, tritt in den Kreis, und dort, sichtbar entfernt von der Ortsnadel, zeigt ihr Handy die Karte. Es darf nie so aussehen, als müsse man vor der Tür stehen: das war die Korrektur des Betreibers am zweiten Video. Den Weg nicht ändern; einen eigenen Weg lehnt der Baustein ab, wenn er an der Tür vorbeiführt. Danach oft ein Schnitt auf `lock-notification` |
 | Viele Stammkunden sehen den Laden auf dem Sperrbildschirm (C1, Sicht des Ladens) | `lock-notification` als Teil mit `"enter": "cut"`, Kamera auf die Benachrichtigung (6.3) | Der Satz sagt nur C1, zum Beispiel "Dann stehst du auf dem Sperrbildschirm deiner Stammkunden." Nie "sehen", "wissen, wo" oder "orten". Nicht `shop-map` mit `"view": "owner"` (unten) |
@@ -1480,8 +1780,8 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 | Die Pointe (der Beleg der Idee in einem Satz) | `stamp-check` als eigene Szene oder als Teil mit `"enter": "cut"` (6.2) | `"icon": "check"`, Anker `hit` auf das letzte Wort, `"offset": 0.1` |
 | Tipps, Satz-Tausch (F01, F02) | `tip-cards`, je Tipp ein Teil mit `"show"`; dieselbe Liste `items` in jedem Teil | Im Einstieg `"rise": false` (die Pinnwand steht ab Bild 0). Satz-Tausch: `label` "Sag nicht:", `better`, Anker `strike` auf das letzte Wort des alten Satzes, `swap` auf das erste Wort des neuen. Kamera nach 6.3. Höchstens 60 Zeichen je Satz |
 | Frage, Einwand, Quiz (F03, F09) | `comment-thread` | Einstieg: `"typed": true`, Anker `type` `{ "at": "start", "offset": 0.05 }`, `send` auf das letzte Wort der Frage, `reply` (höchstens 60 Zeichen) auf das erste Wort der Antwort. Weitere Fragen: `"typed": false`. Quiz: `verdict` `"falsch"` oder `"stimmt"`, Anker `verdict` auf "Stimmt". `author` bleibt "Du" (nie ein Name, N12). Eine Antwort, die in `PRODUKT.md` "nur gesprochen" ist (F1), kommt nicht in `reply` und bekommt keinen Stempel |
-| Duell, Runde für Runde (F06) | `versus-split`, je Runde zwei Teile: `"view": "split"` mit Anker `action`, dann mit `"enter": "cut"` `"view": "left"` oder `"right"` mit Anker `point` | `"scene"`: `start`, `regen`, `knick`, `app` (mit `"winner": "both"`), `vergessen` (Motiv `scan`, nur nach V8), `ende`. Im Teil aus der Nähe läuft die Runde mit `action` auf `{ "at": "start", "offset": 0.05 }` noch einmal kurz an. `score` = Stand **vor** der Runde, `round` zählt hoch, Anker `action` auf das Wort der Runde, `point` auf das Urteil. Laden, Symbol und Stempelzahl in jedem Teil gleich |
-| Ein Tag im Laden (F05) | `day-clock`, je Uhrzeit ein Teil | `time` "HH:MM", `from` = Uhrzeit des Teils davor, `events` = die früheren Uhrzeiten, `label` höchstens 24 Zeichen, Anker `event` auf das Wort der Uhrzeit oder des Ereignisses. Uhrzeiten passen zum Laden (Bäckerei früh, Eis am Nachmittag) |
+| Duell, Runde für Runde (F06) | `versus-split`, je Runde zwei Teile: `"view": "split"` mit Anker `action`, dann mit `"enter": "cut"` `"view": "left"` oder `"right"` mit Anker `point` | `"scene"`: `start` (Einstieg; dort der Anker `vs` von selbst bei 0,15 s: das VS schlägt mit Ton ein), `regen`, `knick`, `app` (mit `"winner": "both"`), `vergessen` (Motiv `scan`, nur nach V8), `ende`. Im Teil aus der Nähe läuft die Runde mit `action` auf `{ "at": "start", "offset": 0.05 }` noch einmal kurz an. `score` = Stand **vor** der Runde, `round` zählt hoch, Anker `action` auf das Wort der Runde, `point` auf das Urteil. Laden, Symbol und Stempelzahl in jedem Teil gleich |
+| Ein Tag im Laden (F05) | `day-clock`, je Uhrzeit ein Teil | `time` "HH:MM", `from` = Uhrzeit des Teils davor (im Einstieg eine halbe Stunde vor `time`, damit die Zeiger ab 0,05 s laufen), `events` = die früheren Uhrzeiten, `label` höchstens 24 Zeichen, Anker `event` auf das Wort der Uhrzeit oder des Ereignisses. Uhrzeiten passen zum Laden (Bäckerei früh, Eis am Nachmittag) |
 | Eine Zahl groß (F04, F10) | `big-number` | `value` höchstens 7 Zeichen, normale Bindestriche; `from` = Zahl des Schritts davor; Anker `show` auf das Wort, das die Zahl nennt. Eine Studienzahl genau wie in `PRODUKT.md`, die Quelle nur gesprochen, nie in `sub` |
 | Beispielrechnung (F04) | `calc-panel` als Zusammenfassung nach den Schritten mit `big-number` | Wie im Döner-Video (in Stil C erprobt): alle Zeilen auf den Wörtern **einer** Textzeile (`row1`, `row2`, ... auf die gesprochenen Zahlen, `result` auf die Ergebniszahl), `"coin": ""`, Kamera nach 6.3. Höchstens drei Zeilen, wenige Stammkunden, die öfter kommen. Der Bau bricht ab, wenn die Rechnung nicht aufgeht |
 | Schluss | `cta-comment` | Anker `logo` auf `{ "cap": -1, "word": -1 }`, Text nach 6.2 |
@@ -1921,7 +2221,12 @@ ist, und braucht dann einen eigenen Auftragstext ohne Stimme, Bau und Push.
 
 Das ist der Text der angelegten Aufgabe, Wort für Wort (abgeglichen am
 16.11.2026 mit der gespeicherten Aufgabe). Wer ihn hier ändert, ändert ihn
-auch an der Aufgabe, und umgekehrt: beide müssen gleich bleiben.
+auch an der Aufgabe, und umgekehrt: beide müssen gleich bleiben. **Seit dem
+17.11.2026, abends, weicht eine Zeile ab:** die Zeile über das Board erlaubt
+hier das Schreiben und Löschen der iPhone-Vorschau, an der gespeicherten
+Aufgabe noch nicht (10.3, Punkt 6). Bis sie dort steht, löscht kein Lauf
+(Regel 9), Hindernis `vorschau-auftrag`, und ab 12 Vorschauen bekommt ein
+neues Video keine mehr (Schritt 19, Punkt 5).
 
 ```
 Stampit-Automatik, täglicher Lauf. Dieser Lauf ist unbeaufsichtigt: stelle keine Fragen und warte auf niemanden.
@@ -1934,7 +2239,7 @@ Das Board ist https://claude.ai/artifact/NN4DTD3LpysNVZ1YaziVXm. Nur diese Adres
 Für diese Aufgabe erlaube ich genau das:
 - das Repo TerraByte19/stempelkarte-frontend wie in Schritt 1 an diese Sitzung holen, kein anderes.
 - im Arbeitsordner Videos bauen (node, ffmpeg, Playwright) und dafür numpy mit pip installieren.
-- auf diesem Board Dokumente lesen und schreiben und Dateien hochladen (Video, Standbild, Quellen-Paket) und das eigene Quellen-Paket wieder herunterladen. Auf dem Board nichts löschen, die Seite nicht neu veröffentlichen.
+- auf diesem Board Dokumente lesen und schreiben (auch die Teile der iPhone-Vorschau in der Sammlung vorschau) und Dateien hochladen (Video, Standbild, Quellen-Paket) und das eigene Quellen-Paket wieder herunterladen. Auf dem Board nichts löschen außer alten Teilen der iPhone-Vorschau in der Sammlung vorschau (AUTOMATIK.md, Schritt 22a), die Seite nicht neu veröffentlichen.
 - über die Verbindung Metricool Zahlen lesen, nur mit getAnalyticsDataByMetrics (Marke 7969131). Fehlt die Verbindung, gilt, was AUTOMATIK.md für "metricool-fehlt" sagt.
 - die Stimme bei ElevenLabs aufnehmen, nur über studio/make.mjs und nur, wenn studio/tools/budget.mjs direkt davor zustimmt: eine volle Aufnahme am Tag, eine zweite nur für ein Video vom Vortag, das noch ohne Stimme ist, dazu höchstens zwei einzelne Sätze. Höchstens 1600 Zeichen am Tag und 27000 im Monat. Bleibt eine Aufnahme ohne Antwort: am selben Tag kein zweiter Versuch, am nächsten Tag einmal neu aufnehmen, auch wenn das im schlimmsten Fall doppelt kostet. Dafür darf die alte Sperrdatei im Ordner dieses Videos entfernt werden.
 - studio/tools/eyes-setup.sh ausführen und damit das fertige eigene Video prüfen. Das Skript lädt das Prüfwerkzeug claude-eyes und whisper.cpp von GitHub und ein Sprachmodell von Hugging Face.
@@ -1994,6 +2299,12 @@ Offen, in dieser Reihenfolge:
 5. **Dann einschalten:** erst wenn der begleitete Lauf sauber durch ist,
    läuft die Aufgabe allein. Bis dahin bleibt sie pausiert, damit sie nicht
    vorher um 06:47 Uhr allein startet.
+6. **Auftragstext angleichen** (seit 17.11.2026, abends): die Zeile über das
+   Board an der gespeicherten Aufgabe so ändern, wie sie in 10.2 steht
+   (Vorschau fürs iPhone schreiben und alte Teile löschen). Nur in einer
+   begleiteten Sitzung mit dem Werkzeug für geplante Aufgaben und mit dem
+   Okay des Betreibers; ein Lauf ändert nie eine Aufgabe (Regel 11).
+   Spätestens bevor zwölf Videos eine Vorschau haben.
 
 Muss die Aufgabe doch neu angelegt werden (gelöscht, anderer Branch): in
 einer begleiteten Sitzung mit dem Werkzeug für geplante Aufgaben, Name
@@ -2021,7 +2332,7 @@ erste begleitete Lauf (10.3) geht diese Liste durch:
 | `Artifact` und `ArtifactData` ohne Rückfrage in einer unbeaufsichtigten Sitzung; ob vor dem ersten Upload ein `read` nötig ist | offen (`board/LIESMICH.md`) | Schritte 4 und 19 |
 | Upload einer `.json`-Datei als Asset und Zurückholen mit `action: "read"` und `path` | steht in den Beschreibungen der Werkzeuge, nie ausprobiert | 7.1, und einmal 7.3 Weg 2 von Hand |
 | `out_dir` bei `ArtifactData` (auch mit einem Pfad im Repo); die Form der abgelegten Dateien und ob sie die `version` nennen | steht in der Beschreibung. `budget.mjs` und `quellen.mjs` lesen beide Formen | Schritte 6 und 24 |
-| Abfragen mit `in`, mit `>=` auf `datum` und `veroeffentlicht`, mit `order_by`; was `get` für ein Dokument liefert, das es nicht gibt | steht im Schema bzw. unbekannt | Schritte 6, 7, 24 |
+| Abfragen mit `in`, mit `>=` auf `datum`, `veroeffentlicht`, `vorschau_teile` und `vorschau_rest`, mit `order_by`; was `get` für ein Dokument liefert, das es nicht gibt | steht im Schema bzw. unbekannt | Schritte 6, 7, 24 |
 | ob die Seite `antwort` an einem Eintrag zeigt, der `offen` bleibt | nicht nachgesehen | Schritt 11, am Handy |
 | genaue Spaltennamen der Antworten von Metricool | die Bedeutung der Kennzahlen ist am 15.11.2026 geprüft | Schritt 7 |
 | Pfad des Repos in einer geplanten Sitzung; ob git dort Name und E-Mail kennt | angenommen bzw. unbekannt | Schritte 1 und 24 |
@@ -2036,5 +2347,7 @@ erste begleitete Lauf (10.3) geht diese Liste durch:
 | Schritt 1 des Auftragstexts: `add_repo`, Klon und `register_repo_root` in einer geplanten Sitzung, und wohin der Klon geht | nie gelaufen | Schritt 1 |
 | der Vortrag von 5.080 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
 | die Formate (`FORMATE.md`) und die Regeln der Abwechslung im Lauf; die neuen Bausteine `tip-cards`, `comment-thread`, `versus-split`, `day-clock`, `big-number`; `tools/abwechslung.mjs` | am 17.11.2026 in begleiteten Sitzungen geschrieben und nach einer Gegenprüfung überarbeitet (Format zuerst, V1 bis V11, Sätze gezählt); die Folge der nächsten 30 Tage mit dem Werkzeug durchgespielt; drei Entwürfe ohne Stimme (F09, F07, F01). Mit Stimme, im Lauf, mit `verlauf.json` aus einer echten Abfrage des Boards nie gelaufen | Schritte 6, 13, 14, 15, 16, 19 |
+| die ersten drei Sekunden (seit 17.11.2026, abends, `HOOKS.md` 0, 1.7, 1.8): fünf Kandidaten, Bewertungsbogen, Ortsklang ab Bild 0, `tools/einstieg.mjs`, der Anker `vs` in `versus-split` | `einstieg.mjs` von Hand an den Berichten von Kaffee, Koscher und Döner gelaufen (meldet bei allen den späten Ton, Döner erst bei 1,51 s); im Selbsttest: ein Ortsklang bei 0,00 s am zweiten Video besteht alle Prüfungen, und das VS im Duell schlägt bei 0,15 s ein. Nicht angehört: die Lautstärken der Ortsklänge (`HOOKS.md` 1.7.5). Der Bogen ist nur an einer simulierten Jury-Runde ausgerichtet, nicht an der Skip-Rate, und der Lauf zählt seine eigenen Kandidaten (Ermessen bei S2, S3, W1, W2). Ob das Board die Liste `hook_kandidaten` am Video ohne Weiteres annimmt: ungeprüft | Schritte 15, 16, 19; `HOOKS.md` 6 |
+| die Vorschau fürs iPhone (Schritt 19, Punkt 5) und das Aufräumen (Schritt 22a) | `tools/vorschau.mjs` an zwei Videos gelaufen (Döner 38,4 s: 19 Teile, 7 Batches; Koscher 41,9 s: 21 Teile, 7 Batches); die Seite setzt die Teile zusammen (`board/index.html`, Weg 4). Nie im Lauf geschrieben: ob `ArtifactData` einen Batch mit `file_path` je Eintrag in einer unbeaufsichtigten Sitzung ohne Rückfrage nimmt, ob `delete` dort erlaubt wird, welche Form die Dateien von `out_dir` haben (nennen sie `version`? `vorschau.mjs loeschliste` liest beide Formen und rät keine Version, im Selbsttest geprüft), und ob das Board 12 Vorschauen (rund 60 MB) neben dem Rest wirklich hält | Schritte 19 und 22a |
 
 ENDE DER ANLEITUNG

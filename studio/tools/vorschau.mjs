@@ -17,9 +17,68 @@
 // Ergebnis im Ausgabeordner: vorschau.mp4, teil-<n>.json (je ein Dokument)
 // und batch-<n>.json (fertige "writes"-Listen fuer ArtifactData action
 // "batch"), dazu info.json mit { teile, bytes }.
+//
+// Aufraeumen (AUTOMATIK.md Schritt 22a):
+//   node studio/tools/vorschau.mjs loeschliste <abfrage-ordner> <video_id> <liste.json> [versionen.json]
+// liest die Teile, die eine Abfrage mit out_dir abgelegt hat, und schreibt die
+// fertige "writes"-Liste zum Loeschen. Ende-Code 0: Liste geschrieben (auch leer).
+// 1: mindestens ein Teil ohne Version, KEINE Liste. 2: Aufruf falsch.
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
+
+// Warum es keine geratene Version mehr gibt: die erste Fassung des Aufraeumens
+// setzte fuer Teile ohne "version" einfach 1. Stimmte das nicht, scheiterte der
+// ganze Batch, die Antwort nannte nur die Version des ersten falschen Teils, und
+// die Teile blieben Tag fuer Tag liegen, waehrend die Datenbank (100 MB) mit
+// rund 5 MB je Video volllief. Jetzt kommt die Version aus der abgelegten Datei
+// oder aus einer Liste, die der Lauf aus der Antwort der Abfrage abschreibt;
+// fehlt sie, wird nichts geloescht.
+function loeschliste(ordner, videoId, versionen = {}) {
+  const dateien = []
+  const sammeln = (d, tiefe) => {
+    if (!fs.existsSync(d) || tiefe > 3) return
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name)
+      if (e.isDirectory()) sammeln(p, tiefe + 1)
+      else if (e.name.endsWith('.json')) dateien.push(p)
+    }
+  }
+  sammeln(ordner, 0)
+  // Nur Dokument-ids der Form <video_id>-<n>: "...-v1" darf nie die Teile von "...-v10" treffen.
+  const passt = id => typeof id === 'string' && id.startsWith(videoId + '-') && /^[0-9]+$/.test(id.slice(videoId.length + 1))
+  const gesehen = new Map()
+  for (const f of dateien) {
+    let j
+    try { j = JSON.parse(fs.readFileSync(f, 'utf8')) } catch { continue }
+    // Abgelegt wird entweder das Dokument selbst oder die Huelle { id, data, version }, auch als Liste.
+    for (const x of Array.isArray(j) ? j : [j]) {
+      if (!x || typeof x !== 'object') continue
+      const id = typeof x.id === 'string' ? x.id : (Array.isArray(j) ? null : path.basename(f, '.json'))
+      if (!passt(id) || gesehen.has(id)) continue
+      const v = Number.isInteger(x.version) ? x.version : versionen[id]
+      gesehen.set(id, Number.isInteger(v) ? v : null)
+    }
+  }
+  const ids = [...gesehen.keys()].sort((a, b) => +a.slice(videoId.length + 1) - +b.slice(videoId.length + 1))
+  const ohne = ids.filter(id => gesehen.get(id) === null)
+  return { teile: ids.length, ohne_version: ohne.length, writes: ohne.length ? null : ids.map(id => ({ op: 'delete', collection: 'vorschau', doc_id: id, if_version: gesehen.get(id) })) }
+}
+
+if (process.argv[2] === 'loeschliste') {
+  const [, ordner, id, liste, vdatei] = process.argv.slice(2)
+  if (!ordner || !id || !liste) { console.error('Aufruf: node studio/tools/vorschau.mjs loeschliste <abfrage-ordner> <video_id> <liste.json> [versionen.json]'); process.exit(2) }
+  let versionen = {}
+  if (vdatei) {
+    try { versionen = JSON.parse(fs.readFileSync(vdatei, 'utf8')) } catch (e) { console.error('versionen.json unlesbar: ' + e.message); process.exit(2) }
+  }
+  const r = loeschliste(ordner, id, versionen)
+  // Ein Batch nimmt hoechstens 50 Schreibvorgaenge; eine Vorschau hat hoechstens 40 Teile (unten).
+  if (r.teile > 50) { console.error('mehr als 50 Teile: ' + r.teile); process.exit(2) }
+  if (r.writes) fs.writeFileSync(liste, JSON.stringify(r.writes))
+  console.log(JSON.stringify({ video_id: id, teile: r.teile, ohne_version: r.ohne_version }))
+  process.exit(r.writes ? 0 : 1)
+}
 
 const [quelle, videoId, aus] = process.argv.slice(2)
 if (!quelle || !videoId || !aus) {
