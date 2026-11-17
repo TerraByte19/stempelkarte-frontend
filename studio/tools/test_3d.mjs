@@ -28,9 +28,14 @@
 //  7. Die Tuer: in 0,05-s-Schritten um "walk" und "enter" hat der Stammkunde Abstand zu jedem
 //     Tuerblatt (canvas.isoDebug.doorGap, in Metern). Vorher schwang das Blatt in ihn hinein und sein
 //     Arm steckte bei 4,7 s im Glas.
+//  8. Lange Ladennamen ("Döner Nordwind") stehen in zwei Zeilen, das letzte Wort gross, ohne Warnung
+//     "sehr klein"; kurze ("Döner Palast") bleiben einzeilig wie in der Probe. Vorher stand der Name des
+//     Doener-Videos einzeilig auf 0,38 der Schildhoehe, auf dem Handy kaum lesbar.
+//  9. Folgt eine Szene, dunkelt die Stadt beim Wechsel ab (als letzte Szene und in der Ruhelage nicht).
+//     Vorher stand die halb durchsichtige naechste Szene rund 0,25 s lang ueber der hellen Stadt.
 //
-// Kein Netz, keine Kosten, etwa zwei Minuten. NOCH NICHT in tools/selftest.mjs eingebunden (dort
-// arbeitete beim Bau eine andere Sitzung); das soll spaeter dort aufgerufen werden.
+// Kein Netz, keine Kosten, etwa zwei Minuten. Laeuft seit dem 17.11.2026 (abends) auch in
+// tools/selftest.mjs mit; vorher arbeitete dort eine andere Sitzung.
 import { createHash } from 'node:crypto'
 import { normalize, estimateTimes, STAGE } from '../engine/script.mjs'
 import { openStudio, seek, sampleMotion } from '../engine/render.mjs'
@@ -166,7 +171,49 @@ try {
   await seek(a, st1.duration - 0.05)
   const endOur = (await boxStats(a)).find(it => it.what === 'Schild Döner Palast'), startOur = by('Schild Döner Palast')
   check('Schlussbild: das Schild des verlassenen Ladens ist am Ende deutlich dunkler', !!endOur && !!startOur && endOur.bright < startOur.bright * 0.5, endOur && startOur ? `helle Pixel ${(startOur.bright * 100).toFixed(0)} % bei ${T} s, ${(endOur.bright * 100).toFixed(0)} % am Ende` : 'fehlt')
+  // Kurze Namen bleiben einzeilig: so sah der Betreiber die Probe, und so bleibt sie
+  const shortSigns = await a.evaluate(() => document.querySelector('canvas.is-canvas').isoDebug.signs)
+  check('Kurze Namen ("Döner Palast", "Imbiss Sonne") stehen in einer Zeile wie in der Probe', !!shortSigns && shortSigns.length === 2 && shortSigns.every(s => s.lines === 1 && s.size >= 0.42), JSON.stringify(shortSigns))
 } finally { await studio.close() }
+
+// ---- 8. Lange Namen: zwei Zeilen statt winziger Schrift
+// Im Doener-Video heissen die Laeden "Döner Nordwind" und "Döner Südwind" (wie in allen 2D-Szenen). In einer
+// Zeile standen sie auf 0,38 und 0,41 der Schildhoehe, unter der Grenze 0,42, und make.mjs warnte "sehr klein"
+// (17.11.2026). Jetzt: vorn klein, das letzte Wort gross, keine Warnung, und die Kaesten liegen weiter auf den
+// Schildern (deren Form hat sich nicht geaendert, nur die Schrift darauf).
+{
+  const sc = JSON.parse(JSON.stringify(script)); Object.assign(sc.scenes[0].params, { shop: 'Döner Nordwind', rival: 'Döner Südwind' })
+  const st = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
+  try {
+    const pg = await st.page(), s0 = await st.state(pg)
+    const small = s0.warnings.filter(w => /sehr klein/.test(w))
+    check('Lange Namen: Seite baut ohne Fehler und ohne Warnung "sehr klein"', !s0.errors.length && !st.problems.length && !small.length, [...s0.errors, ...st.problems, ...small].join(' | ').slice(0, 200))
+    await seek(pg, 1.4)
+    const signs = await pg.evaluate(() => document.querySelector('canvas.is-canvas').isoDebug.signs)
+    check('Lange Namen stehen in zwei Zeilen, das letzte Wort mindestens 0,5 der Schildhöhe', !!signs && signs.length === 2 && signs.every(s => s.lines === 2 && s.size >= 0.5 && s.fits), JSON.stringify(signs))
+    const boxes = (await boxStats(pg)).filter(it => it.what.startsWith('Schild '))
+    check('Lange Namen: Kästen liegen auf beiden Schildern (mindestens 25 % helle Pixel)', boxes.length === 2 && boxes.every(it => it.bright > 0.25), boxes.map(it => `${it.what} ${(it.bright * 100).toFixed(0)} %`).join(', '))
+  } finally { await st.close() }
+}
+
+// ---- 9. Abblenden beim Szenenwechsel
+// Folgt eine Szene, dunkelt die Stadt ab 0,06 s vor dem Wechsel ab: sonst stand im Doener-Video die halb
+// durchsichtige Wochenleiste rund 0,25 s lang ueber der hellen Stadt (17.11.2026). Als letzte Szene (Teil 5
+// oben, Schlussbild) bleibt sie hell. Gemessen an .is-dim, ohne Bilder zu rechnen.
+{
+  const sc = JSON.parse(JSON.stringify(script))
+  sc.scenes.push({ component: 'big-number', params: { value: '832 €', label: 'Umsatz im Jahr' }, captions: [{ lines: ['Das sind 832 Euro.'] }] })
+  const st = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
+  try {
+    const pg = await st.page(), s0 = await st.state(pg)
+    const e = s0.scenes ? s0.scenes[0].e : null
+    const dimAt = t => pg.evaluate(t => { window.seek(t, { paint: false }); return +getComputedStyle(document.querySelector('.is-dim')).opacity }, t)
+    const before = e != null ? await dimAt(e - 0.3) : null, after = e != null ? await dimAt(e + 0.2) : null
+    check('Szenenwechsel: vorher nicht abgedunkelt, 0,2 s nach dem Wechsel mindestens 0,7', !s0.errors.length && e != null && before === 0 && after >= 0.7, `Szenenende ${e}, Deckkraft ${before} / ${after}`)
+    const r = await st.page({ rest: true }); const restDim = await r.evaluate(() => +getComputedStyle(document.querySelector('.is-dim')).opacity); await r.close()
+    check('Ruhelage (Prüfungen): nicht abgedunkelt', restDim === 0, String(restDim))
+  } finally { await st.close() }
+}
 
 // ---- 6. und 7. Bildausschnitt an den Grenzen der Parameter, und die Tuer
 const limits = [

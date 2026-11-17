@@ -73,6 +73,49 @@ Warnungen `effekt-abstand` (vine-boom 4,1 dB bei 4,46 s, ladenglocke 6,1 dB
 bei 9,09 s, handy-vibriert 5,4 dB bei 27,14 s, Richtwert 8 dB) gehören zur
 unveränderten Tonspur, nicht zu dieser Änderung.
 
+## Änderung vom 17.11.2026, abends: Einstieg in 3D (Fassung v6-3D)
+
+Der Betreiber sah die 3D-Probe (`videos/_probe-3d`) und sagte: den Einstieg
+des Döner-Videos in 3D bauen. Ersetzt ist nur Szene 1 (0 bis 4,87 s, "Dein
+Stammkunde hat dich betrogen. Mit dem Dönerladen gegenüber."): `shop-duel`
+wird `iso-street`. Text, Aufnahme (Cache `36c5ae99c539badd`, 0 Zeichen),
+Wort-Zeiten, Textzeilen und alle anderen Szenen sind unverändert; ab 5,17 s
+ist das Bild gleich wie in v5 (PSNR über 45 dB je Bild), die Tonspur nach
+5 s weicht nur um rund 0,2 dB Pegel ab (die Lautheit wird für das ganze
+Video neu gerechnet). Vorher-Skript: nicht im Repo, nur in der Sitzung.
+
+| | v5 (2D) | v6-3D |
+|---|---|---|
+| Baustein | `shop-duel` | `iso-street`, Döner Nordwind (`accent` #5A4FCF wie die Markise in 2D) gegenüber Döner Südwind (#E58A45), `push` 0,1, `orbit` 7, `after` true |
+| Herz | zerbricht auf "betrogen" (1,51 s) | gleich, Glasherz `herz-zerspringt` 0,8 am Anker `crack` |
+| Stammkunde | ab 0,12 des Weges, verschwindet auf "gegenüber" (4,06 s) | kommt ab Bild 0 aus der eigenen Tür, über die Kreuzung, Tür drüben auf "gegenüber" (4,06 s), Glocke schwingt |
+| Ladenglocke | `ladenglocke` 0,8 am Anker `enter` (4,06 s) | gleich |
+| erster Ton | Herz bei 1,51 s (davor 0,38 s Stille) | `grill-brutzeln` 0,8 bei 0,00 s (Ortsklang, `HOOKS.md` 1.7.5); er lag in 2D erst bei "Mit" (2,98 s, 0,35) auf der Kamerafahrt zum Laden gegenüber, die es in 3D nicht gibt |
+| Kamera | 2D, 1,08 ab "Mit" (zählte als Bildwechsel bei 2,98 s) | nur die 3D-Kamera; keine `camera` (die Kamera-Ebene blendet oben bis 522 px alles aus) |
+
+Gemessen am fertigen Video: Ton ab den ersten 10 ms bei rund -15 dBFS (nichts
+abgeschnitten); jeder Bibliotheksklang liegt per Kreuzkorrelation 4 ms nach
+seiner Sollzeit, genau wie in v5 (Grill 0,004 s, Glasherz 1,514 s, Glocke
+4,068 s). `soundLib`: Grill mindestens 14,1 dB unter der Stimme, Glasherz
+12,0, Glocke 11,1. Die drei Warnungen `effekt-abstand` (vine-boom 4,46 s,
+ladenglocke 9,09 s, handy-vibriert 27,14 s) sind dieselben wie in v5.
+-14,1 LUFS, -1,2 dBTP, 38,4 s. Bau 5 min 45 s (v5: 2 min 40 s).
+
+Dafür geändert am Baustein `iso-street` (Probe und `tools/test_3d.mjs` laufen
+weiter, kurze Namen sehen aus wie vorher):
+
+- **Lange Namen in zwei Zeilen.** "Döner Nordwind" und "Döner Südwind"
+  standen einzeilig nur auf 0,38 und 0,41 der Schildhöhe (Warnung "sehr
+  klein"). Jetzt "Döner" klein, "Nordwind" groß (0,56).
+- **Abblenden beim Szenenwechsel.** Folgt eine Szene, dunkelt die Stadt ab
+  0,06 s vor dem Wechsel in 0,2 s ab. Vorher stand die halb durchsichtige
+  Wochenleiste rund 0,25 s lang über der hellen Stadt.
+
+Offen: `tools/einstieg.mjs` meldet den ersten Bildwechsel erst bei 4,87 s
+(Grenze 3 s; v5 hatte die 2D-Kamera bei 2,98 s). Die 3D-Kamera fährt die
+ganzen 4,87 s, aber das zählt nicht als Bildwechsel. Der Stammkunde ist
+klein (rund 40 x 100 px). Angehört hat niemand.
+
 ## Idee und Aufbau
 
 Anregung: ein Mitbewerber-Reel mit dem Aufbau "ein Laden gegenüber, ein

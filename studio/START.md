@@ -150,7 +150,7 @@ und schreibt das Kassenbuch zurück nach `gedaechtnis/stimme`.
 | `studio/board/` | die Übersichtsseite: `index.html`, `LIESMICH.md` (Datenvertrag und Schreibwege), `ADRESSE.txt` |
 | `launch-video/` | Quellen des ersten, von Hand gebauten Videos; Vergleichsbasis für `studio/tools/regress.mjs` |
 
-Prüfen, ob alles heil ist: `node studio/tools/selftest.mjs` (etwa 1 bis 1,5 min) und
+Prüfen, ob alles heil ist: `node studio/tools/selftest.mjs` (etwa 3 min, davon 2 min der 3D-Test) und
 `node studio/tools/regress.mjs` (etwa 4 min, vergleicht Bild für Bild und Ton
 für Ton mit beiden Fassungen).
 

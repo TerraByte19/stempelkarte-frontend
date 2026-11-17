@@ -999,8 +999,18 @@ Gemeinsam für alle:
   `node studio/tools/test_3d.mjs` prüft: gleiche Pixel für dasselbe Bild,
   Szene nicht leer, Kästen liegen auf dem Gezeichneten, Ausschnitt an den
   Grenzen von `push` und `orbit` (Laden links und rechts), Tür und Stammkunde
-  berühren sich nie (0,05-s-Schritte). Etwa zwei Minuten, noch nicht in
-  `selftest.mjs`. Probe: `videos/_probe-3d`.
+  berühren sich nie (0,05-s-Schritte), lange Namen in zwei Zeilen, Abblenden
+  beim Szenenwechsel. Etwa zwei Minuten, läuft seit dem 17.11.2026 (abends) in
+  `selftest.mjs` mit. Probe: `videos/_probe-3d`.
+  Erster Einsatz: der Einstieg des Döner-Videos (Fassung v6-3D, 17.11.2026,
+  abends; Bau 5 min 45 s statt rund 2 min 40 s). Gelernt dabei: Namen wie
+  "Döner Nordwind" kamen einzeilig nur auf 0,38 der Schildhöhe; jetzt steht
+  der Name dann in zwei Zeilen ("Döner" klein, "Nordwind" groß). Folgt eine
+  Szene, dunkelt die Stadt beim Wechsel ab, sonst steht die halb
+  durchsichtige nächste Szene über der hellen Stadt. Keine `camera` an einem
+  3D-Teil: die Kamera-Ebene blendet oben bis 522 px alles aus, dann hört die
+  Stadt mitten im Bild auf. Der erste Bildwechsel kommt so erst mit der
+  nächsten Szene (im Döner-Video bei 4,87 s; `tools/einstieg.mjs` will 3 s).
 
 <!-- KATALOG:ANFANG -->
 ### `paper-card` - Papier-Stempelkarte auf der Theke
@@ -1299,10 +1309,10 @@ Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 
 | Parameter | Vorgabe | Bedeutung |
 |---|---|---|
-| `shop` | `"Döner Palast"` | Name des eigenen Ladens auf seinem Schild (höchstens etwa 14 Zeichen, längere werden kleiner gesetzt) |
+| `shop` | `"Döner Palast"` | Name des eigenen Ladens auf seinem Schild (höchstens etwa 14 Zeichen). Passt er in einer Zeile nur klein, steht er in zwei Zeilen: vorn klein, das letzte Wort groß ("Döner" über "Nordwind") |
 | `icon` | `"kebab"` | Symbol des eigenen Ladens: cup, bread, scissors, star, heart, check, kebab |
 | `accent` | `"#7366E8"` | Farbe des eigenen Ladens (Markise, Symbolfeld) |
-| `rival` | `"Imbiss Sonne"` | Name des Ladens gegenüber (höchstens etwa 14 Zeichen) |
+| `rival` | `"Imbiss Sonne"` | Name des Ladens gegenüber (höchstens etwa 14 Zeichen, lange Namen wie bei "shop" in zwei Zeilen) |
 | `rivalIcon` | `"kebab"` | Symbol des Ladens gegenüber |
 | `rivalAccent` | `"#E58A45"` | Farbe des Ladens gegenüber |
 | `ours` | `"left"` | Auf welcher Seite der eigene Laden steht: "left" oder "right" |
@@ -1849,7 +1859,7 @@ Regeln:
 ## Selbstprüfung
 
 ```bash
-node studio/tools/selftest.mjs     # rund eine halbe Minute: Skript-Logik, Wort-Zeiten, Töne, jede Prüfung mit einem Fehlerfall, voice.py mit Attrappe, make.mjs
+node studio/tools/selftest.mjs     # rund drei Minuten (zwei davon der 3D-Test): Skript-Logik, Wort-Zeiten, Töne, jede Prüfung mit einem Fehlerfall, voice.py mit Attrappe, make.mjs
 node studio/tools/regress.mjs      # rund 4 min: beide Referenzvideos, je 130 Standbilder gegen das Original, dazu Töne, Länge und Ton
 node studio/tools/regress.mjs --only v10 --no-audio   # nur ein Video, nur Bilder
 ```

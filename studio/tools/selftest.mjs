@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// selftest.mjs - schnelle Selbstpruefung des Studios (rund eine halbe Minute,
+// selftest.mjs - schnelle Selbstpruefung des Studios (rund drei Minuten, davon zwei fuer tools/test_3d.mjs,
 // kein Netz, keine Kosten). Nach jeder Aenderung an engine/, components/ oder
 // tools/ laufen lassen; fuer den Bild-fuer-Bild-Vergleich gibt es regress.mjs.
 //
@@ -28,6 +28,8 @@
 //   - der Beitragstext je Video haelt die Regeln aus state/konfig.json ein: genau 5
 //     Hashtags (Grenze von Instagram), kein Gedankenstrich, das Stichwort des Videos
 //     (tools/beitrag.mjs selbsttest)
+//   - der 3D-Baustein iso-street zeichnet in jedem Lauf dasselbe Bild, laesst die Knopfspalte
+//     frei und setzt lange Ladennamen lesbar (tools/test_3d.mjs, etwa zwei Minuten)
 import { readFileSync, existsSync, mkdtempSync, writeFileSync, rmSync, readdirSync, cpSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -591,6 +593,16 @@ check('tools/abwechslung.mjs: Regeln der Abwechslung (V1 bis V11), Tabelle gleic
 // ein fremder Klang ohne Herkunft oder eine geaenderte alte Effektspur erst beim Anhoeren auf.
 const ts = await run('node', [path.join(STUDIO_ROOT, 'tools', 'test_sounds.mjs')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
 check('tools/test_sounds.mjs: Sound-Sammlung, Absenkung unter Wörtern, alte Effektspuren unverändert', ts.code === 0, (ts.out.trim() || ts.err.trim()).split('\n').pop())
+
+// ---- 3D (components/iso-street.js, tools/test_3d.mjs): seit dem 17.11.2026 zeichnet ein Baustein mit
+// WebGL statt HTML, und seit dem Abend beginnt das Doener-Video damit. Ohne diesen Test fiele erst im fertigen
+// Video auf, wenn die Leinwand leer bleibt (WebGL ohne Grafikkarte faellt aus), ein Bild vom vorigen abhaengt
+// (Flackern, weil renderVideo auf mehreren Seiten rechnet), ein Schild in die Knopfspalte wandert oder der
+// Stammkunde im Tuerblatt steckt. Eingehaengt erst jetzt: beim Bau des Bausteins arbeitete eine andere Sitzung
+// an dieser Datei. Dauert allein etwa zwei Minuten, also den groessten Teil des Selbsttests.
+const t3 = await run('node', [path.join(STUDIO_ROOT, 'tools', 'test_3d.mjs')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
+process.stdout.write(t3.out.split('\n').filter(l => l.startsWith('FEHLER')).map(l => '  [3d] ' + l).join('\n') + (/^FEHLER/m.test(t3.out) ? '\n' : ''))
+check('tools/test_3d.mjs: 3D-Baustein iso-street (gleiche Pixel je Bild, Szene nicht leer, Prüfkästen, Ausschnitt, Tür, Schilder)', t3.code === 0, (t3.out.trim() || t3.err.trim()).split('\n').pop())
 
 // ---- Satz von ausserhalb des Studios (tools/clip-in.py): kuenstlicher Clip, kein Netz
 const pc = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'test_clip_in.py')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })

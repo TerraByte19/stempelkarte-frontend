@@ -78,10 +78,10 @@ export default {
   title: 'Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber',
   use: 'Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.',
   params: {
-    shop: { default: 'Döner Palast', doc: 'Name des eigenen Ladens auf seinem Schild (höchstens etwa 14 Zeichen, längere werden kleiner gesetzt)', same: 'Ladenname' },
+    shop: { default: 'Döner Palast', doc: 'Name des eigenen Ladens auf seinem Schild (höchstens etwa 14 Zeichen). Passt er in einer Zeile nur klein, steht er in zwei Zeilen: vorn klein, das letzte Wort groß ("Döner" über "Nordwind")', same: 'Ladenname' },
     icon: { default: 'kebab', doc: 'Symbol des eigenen Ladens: cup, bread, scissors, star, heart, check, kebab', same: 'Symbol' },
     accent: { default: '#7366E8', doc: 'Farbe des eigenen Ladens (Markise, Symbolfeld)' },
-    rival: { default: 'Imbiss Sonne', doc: 'Name des Ladens gegenüber (höchstens etwa 14 Zeichen)' },
+    rival: { default: 'Imbiss Sonne', doc: 'Name des Ladens gegenüber (höchstens etwa 14 Zeichen, lange Namen wie bei "shop" in zwei Zeilen)' },
     rivalIcon: { default: 'kebab', doc: 'Symbol des Ladens gegenüber' },
     rivalAccent: { default: '#E58A45', doc: 'Farbe des Ladens gegenüber' },
     ours: { default: 'left', doc: 'Auf welcher Seite der eigene Laden steht: "left" oder "right"' },
@@ -123,6 +123,8 @@ export default {
   /* Ecken leicht abdunkeln: haelt den Blick in der Mitte, wie bei einer Linse */
   /* Schwaecher als in der ersten Probe: dort lag der Platz unten bei Helligkeit 10 bis 19 von 255 */
   .is-vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 90% 64% at 50% 52%, rgba(14,10,36,0) 62%, rgba(14,10,36,.42) 100%), linear-gradient(180deg, rgba(14,10,36,0) 80%, rgba(14,10,36,.3) 100%); }
+  /* Abblenden beim Szenenwechsel (siehe place): liegt ueber Stadt, Verlaeufen und Pruefkaesten */
+  .is-dim { position: absolute; inset: 0; pointer-events: none; background: ${BRAND.night}; opacity: 0; }
   `,
   async build(ctx) {
     const { p } = ctx
@@ -139,7 +141,8 @@ export default {
 
     const wrap = ctx.el('div', 'is-wrap'), canvas = ctx.el('canvas', 'is-canvas'); canvas.width = W * SS; canvas.height = H * SS
     wrap.append(canvas)
-    ctx.root.append(wrap, ctx.el('div', 'is-vig'), ctx.el('div', 'is-calm'))
+    const dim = ctx.el('div', 'is-dim')
+    ctx.root.append(wrap, ctx.el('div', 'is-vig'), ctx.el('div', 'is-calm'), dim)
     const illEl = ctx.root.closest('.ill')
     let renderer
     try {
@@ -501,13 +504,41 @@ export default {
         // Streifen in der Ladenfarbe unten: verbindet Schild und Markise
         c2.fillStyle = '#' + acc.getHexString(); c2.fillRect(chh * 0.18, chh * 0.86, cw - chh * 0.36, chh * 0.06)
         const room = cw - chh * 0.5
-        let size = chh * 0.66
-        c2.font = `700 ${size}px ${BRAND.display}`
-        while (c2.measureText(name).width > room && size > chh * 0.25) { size *= 0.97; c2.font = `700 ${size}px ${BRAND.display}` }
-        c2.fillStyle = BRAND.ink; c2.textBaseline = 'middle'; c2.textAlign = 'center'
-        c2.fillText(name, cw / 2, chh * 0.47)
-        // Groesse relativ zur Schildhoehe: unter 0,4 wird der Name auf dem Handy zu klein
-        signs.push({ name, size: +(size / chh).toFixed(2), fits: c2.measureText(name).width <= room })
+        const font = s => { c2.font = `700 ${s}px ${BRAND.display}`; return s }
+        // Groesste Schrift, mit der txt in die Breite passt (ab start, in 3-%-Schritten kleiner)
+        const fitW = (txt, start) => { let s = font(start); while (c2.measureText(txt).width > room && s > chh * 0.2) s = font(s * 0.97); return s }
+        let size = fitW(name, chh * 0.66)
+        c2.fillStyle = BRAND.ink; c2.textAlign = 'center'
+        const words = name.trim().split(/\s+/)
+        if (size / chh < 0.42 && words.length > 1) {
+          // Zwei Zeilen: vorn klein (meist die Art des Ladens), das letzte Wort gross. Warum: im Doener-Video
+          // heissen die Laeden "Döner Nordwind" und "Döner Südwind" wie in allen 2D-Szenen; in einer Zeile
+          // kamen sie nur auf 0,38 und 0,41 der Schildhoehe (Grenze 0,42), auf dem Handy kaum lesbar. In zwei
+          // Zeilen steht "Nordwind" auf 0,56, also rund anderthalbmal so gross, und genau das Wort
+          // unterscheidet die beiden Laeden. Kurze Namen ("Döner Palast") bleiben in einer Zeile wie bisher.
+          const top = words.slice(0, -1).join(' '), main = words[words.length - 1]
+          let big = fitW(main, chh * 0.56), small = fitW(top, big * 0.62)
+          // Senkrecht zwischen 0,08 und 0,81 der Hoehe (darunter liegt der Streifen); gemessen an den echten
+          // Glyphen, sonst stossen die Punkte des Ö oben an den Rand
+          const box = (t, s) => { font(s); const m = c2.measureText(t); return [m.actualBoundingBoxAscent, m.actualBoundingBoxDescent] }
+          const y0 = chh * 0.08, y1 = chh * 0.81, gap = chh * 0.05
+          let [a1, d1] = box(top, small), [a2, d2] = box(main, big)
+          const k = Math.min(1, (y1 - y0 - gap) / (a1 + d1 + a2 + d2))
+          big *= k; small *= k; [a1, d1] = box(top, small); [a2, d2] = box(main, big)
+          const y = y0 + (y1 - y0 - (a1 + d1 + gap + a2 + d2)) / 2
+          c2.textBaseline = 'alphabetic'
+          font(small); c2.fillText(top, cw / 2, y + a1)
+          font(big); c2.fillText(main, cw / 2, y + a1 + d1 + gap + a2)
+          // Fuer die Warnung zaehlt das grosse Wort; das kleine ist immer 0,62 davon
+          const fitsMain = c2.measureText(main).width <= room
+          font(small)
+          signs.push({ name, size: +(big / chh).toFixed(2), lines: 2, fits: fitsMain && c2.measureText(top).width <= room })
+        } else {
+          font(size); c2.textBaseline = 'middle'
+          c2.fillText(name, cw / 2, chh * 0.47)
+          // Groesse relativ zur Schildhoehe: unter 0,4 wird der Name auf dem Handy zu klein
+          signs.push({ name, size: +(size / chh).toFixed(2), lines: 1, fits: c2.measureText(name).width <= room })
+        }
       }, { sharp: true })
       put(new THREE.Mesh(new RoundedBoxGeometry(signW + 0.18, signH + 0.18, 0.24, 2, 0.07), std('#1A1440')), -w / 2, 3.95, 0.12, false)
       const signMat = new THREE.MeshBasicMaterial({ map: signTex, toneMapped: false })
@@ -755,6 +786,13 @@ export default {
       const t = ctx.rest ? ctx.s : t0
       shown = t >= visibleFrom && t <= visibleTo
       if (!shown) { for (const k of Object.keys(boxes)) setBox(k, null); return }
+      // Beim Wechsel in die naechste Szene dunkelt die Stadt ab (ab 0,06 s vor dem Wechsel, 0,2 s lang). Warum: die alte Szene blendet
+      // 0,28 s aus, waehrend die neue schon einblendet. In 2D liegt dabei Dunkel auf Dunkel; im Doener-Video
+      // (17.11.2026) stand die halb durchsichtige Wochenleiste dagegen rund 0,25 s lang ueber der hellen
+      // 3D-Stadt mit ihren Fenstern, und "Woche 1" bis "Woche 4" waren davor kaum zu lesen. Nicht am Ende
+      // des Videos: dort folgt nichts, und das Schlussbild soll stehen bleiben.
+      const leaves = !(ctx.isLast && ctx.e >= ctx.sceneEnd - 1e-6)
+      dim.style.opacity = leaves && t > ctx.e - 0.06 ? (0.8 * smooth((t - ctx.e + 0.06) / 0.2)).toFixed(3) : '0'
       // 2D-Kamerafahrt der Szene aufheben (siehe .is-wrap)
       const illScale = illEl ? parseFloat(getComputedStyle(illEl).scale) : 1
       wrap.style.scale = illScale > 0 ? String(1 / illScale) : ''
@@ -839,6 +877,8 @@ export default {
     // Bilder. drawnBox: rechnet das Bild einmal mit und einmal ohne Figur bzw. Herz und gibt zurueck, wo sich
     // Pixel aendern; der Test vergleicht das mit dem Pruefkasten (liegt der Kasten wirklich auf dem Ding?).
     canvas.isoDebug = {
+      // Wie die Namen auf den Schildern stehen (Zeilen, Groesse relativ zur Schildhoehe)
+      signs: signs.map(x => ({ ...x })),
       drawnBox(what) {
         const obj = what === 'walker' ? walker && walker.fig : what === 'heart' ? heart && heart.grp : null
         if (!obj || !obj.visible) return null
