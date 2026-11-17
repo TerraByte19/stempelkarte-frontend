@@ -1162,12 +1162,12 @@ textarea[readonly] { opacity: 0.75; }
     function set(v, sofort) {
       letztes = v;
       if (sofort !== false) geholt = true;
-      var k = v.asset + '|' + v.poster + '|' + (v.asset ? '' : v.status) + '|' + geholt;
+      var k = v.asset + '|' + v.poster + '|' + v.vorschau + '|' + (v.asset ? '' : v.status) + '|' + geholt;
       if (k === key) return;       // dasselbe Video nicht neu aufbauen, sonst bricht die Wiedergabe ab
       key = k;
       // "Noch nicht hochgeladen" stimmt nur fuer ein Video, das auf die Freigabe
       // wartet. Bei aelteren kann die Datei auch beim Aufraeumen geloescht worden sein.
-      if (!v.asset) { meldung(v.status === 'neu' ? 'Das Video ist noch nicht hochgeladen.' : 'Zu diesem Video ist keine Datei gespeichert.'); return; }
+      if (!v.asset && !v.vorschau) { meldung(v.status === 'neu' ? 'Das Video ist noch nicht hochgeladen.' : 'Zu diesem Video ist keine Datei gespeichert.'); return; }
       if (!geholt) { meldung('Dieses Video wird erst geladen, wenn du es ansehen willst.', 'Video laden', function () { geholt = true; nochmal(); }); return; }
       box.textContent = '';
       blobWeg();
@@ -1183,19 +1183,27 @@ textarea[readonly] { opacity: 0.75; }
       // ("v/<id>.mp4"): die kommt ueber denselben Weg wie die Seite selbst,
       // und die laedt ja. Hat ein Weg einmal geklappt, fangen weitere Player
       // gleich dort an, statt jedes Mal 12 MB umsonst zu holen.
+      // Weg 4 kam dazu, als die Pruefung zeigte, dass auf dem iPhone (App und
+      // Safari) Weg 1 bis 3 gar nicht gehen (404 und 403): die Seite darf dort
+      // keine Datei von ihrer eigenen Adresse holen. Die Datenbank geht, also
+      // liegt eine kleine Fassung (720p) in Teilen in "vorschau" und wird hier
+      // zusammengesetzt (studio/tools/vorschau.mjs).
       var meinKey = key;
-      var stufe = S.startStufe || 0;
+      var stufe = v.asset ? (S.startStufe || 0) : 3;
       var codes = [];
+      // Kein Link "in neuem Tab" mehr: auf dem iPhone ging er nie (403), und wo
+      // er ginge, spielt schon Weg 1 bis 3.
       function endgueltig() {
-        var link = el('a', { class: 'linkbtn', href: DATEI_BASE + v.asset + '.mp4', target: '_blank', rel: 'noopener', text: 'Video in neuem Tab öffnen' });
         meldung('Das Video lässt sich gerade nicht laden.', 'Noch einmal versuchen', nochmal,
-          el('span', {}, [link, el('small', { class: 'player-detail', text: 'Fehler: ' + codes.join(', ') })]));
+          el('span', {}, [el('small', { class: 'player-detail', text: 'Fehler: ' + codes.join(', ') })]));
       }
       function weg(n) {
         stufe = n;
         if (n === 0) { video.src = ASSET_BASE + v.asset; return; }
         if (n === 2) { video.src = DATEI_BASE + v.asset + '.mp4'; return; }
-        if (n > 2) { endgueltig(); return; }
+        if (n === 3) { ausDatenbank(); return; }
+        if (n > 3) { endgueltig(); return; }
+        if (!v.asset) { weg(3); return; }
         fetch(ASSET_BASE + v.asset).then(function (res) {
           if (!res.ok) throw { status: res.status };
           return res.blob();
@@ -1211,6 +1219,53 @@ textarea[readonly] { opacity: 0.75; }
           codes.push('Weg 2: Abruf ' + (e && e.status ? e.status : 'ohne Antwort'));
           weg(2);
         });
+      }
+      function ausDatenbank() {
+        if (!v.vorschau || !S.db) { codes.push('Weg 4: keine Vorschau'); weg(4); return; }
+        // Ein Teil nach dem anderen: 20 Abrufe auf einmal je Video stossen an
+        // die Grenze fuer Aufrufe je Ansicht (db.d.ts: resource_exhausted).
+        var teile = [];
+        function hole(i) {
+          if (key !== meinKey) return Promise.reject({ weg: true });
+          meldungLaden(i, v.vorschau);
+          if (i >= v.vorschau) return Promise.resolve();
+          function lies() { return Promise.resolve(S.db.doc('vorschau/' + v.id + '-' + i).get()); }
+          return lies().catch(function (e) {
+            var c = e && e.code;
+            if (c !== 'unavailable' && c !== 'resource_exhausted') throw e;
+            return wait(800 + Math.random() * 800).then(lies);
+          }).then(function (sn) {
+            var d = sn && sn.exists ? sn.data() : null;
+            if (!d || typeof d.b64 !== 'string' || d.n !== i) throw { teil: i };
+            teile.push(d.b64);
+            return hole(i + 1);
+          });
+        }
+        hole(0).then(function () {
+          var bin = atob(teile.join(''));
+          var bytes = new Uint8Array(bin.length);
+          for (var j = 0; j < bin.length; j++) bytes[j] = bin.charCodeAt(j);
+          return new Blob([bytes], { type: 'video/mp4' });
+        }).then(function (b) {
+          if (key !== meinKey) return;
+          blobWeg();
+          blobUrl = URL.createObjectURL(b);
+          box.textContent = '';
+          box.append(video);
+          video.src = blobUrl;
+        }).catch(function (e) {
+          if (key !== meinKey || (e && e.weg)) return;
+          codes.push('Weg 4: ' + (e && e.teil != null ? 'Teil ' + e.teil + ' fehlt' : 'Datenbank ' + (e && e.code || '?')));
+          weg(4);
+        });
+      }
+      // Waehrend die Teile kommen, steht statt des schwarzen Players ein Satz da.
+      function meldungLaden(i, n) {
+        var t = 'Video wird geladen … ' + Math.min(100, Math.round(i / n * 100)) + ' %';
+        var p = box.querySelector('.player-msg span');
+        if (p && box.querySelector('.player-msg.laden')) { p.textContent = t; return; }
+        box.textContent = '';
+        box.append(el('p', { class: 'player-msg laden' }, [el('span', { text: t })]));
       }
       video.addEventListener('error', function () {
         if (key !== meinKey) return;
@@ -1702,6 +1757,7 @@ textarea[readonly] { opacity: 0.75; }
       id: id,
       datum: str(d.datum), titel: str(d.titel) || 'Ohne Titel', hook: str(d.hook), text: str(d.text), quelle: str(d.quelle),
       asset: assetId(d.asset_id), poster: assetId(d.poster_asset_id),
+      vorschau: Math.max(0, Math.min(40, Math.floor(num(d.vorschau_teile) || 0))),
       dauer: num(d.dauer_s), version: num(d.version),
       status: str(d.status), feedback: str(d.feedback), antwort: str(d.antwort),
       caption: str(d.caption).trim(),
