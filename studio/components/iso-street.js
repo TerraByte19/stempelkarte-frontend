@@ -56,8 +56,8 @@ const GO = -72, GS = 144, GN = 1024
 const C = {
   // Stadt eine Stufe heller als in der ersten Probe: dort verschwammen die Hauswaende mit dem Nachthimmel,
   // und die Fenster schwebten als lose Rechtecke im Dunkel (Review 17.11.2026)
-  fog: BRAND.night, road: '#1D1940', walk: '#302C5A', curb: '#4A4480', mark: '#4F4987', zebra: '#9590C4',
-  pave: '#3A356A', lawn: '#283A5E',
+  fog: BRAND.night, road: '#221D4A', walk: '#37326A', curb: '#4F4988', mark: '#4F4987', zebra: '#9590C4',
+  pave: '#423C76', lawn: '#2C4066',
   city: ['#3B375F', '#433E69', '#37335A', '#4A4572', '#3F3A63'],
   winWarm: ['#FFD58A', '#FFC56E', '#FFB55A'], winCool: '#B9B0FF', winOff: '#221B4A',
   tree: ['#6077AA', '#706CB2', '#4F8094', '#8471A8'], trunk: '#2A1F45', lamp: '#FFD9A0', pole: '#2A2258',
@@ -129,7 +129,8 @@ export default {
     if (!['left', 'right'].includes(p.ours)) ctx.fail('"ours" muss "left" oder "right" sein')
     if (!ICONS[p.rivalIcon]) ctx.fail(`Symbol "${p.rivalIcon}" gibt es nicht. Erlaubt: ${Object.keys(ICONS).join(', ')}`)
     if (typeof p.from !== 'number' || p.from < 0 || p.from > 0.9) ctx.fail('"from" muss zwischen 0 und 0,9 liegen')
-    if (!(p.push >= 0 && p.push <= 0.25)) ctx.fail('"push" muss zwischen 0 und 0,25 liegen (weiter heran schneidet die Schilder am Bildrand ab)')
+    // Die Fahrt endet immer im vermessenen Ausschnitt; mehr als 0,25 hiesse nur, dass die Laeden am Anfang winzig sind
+    if (!(p.push >= 0 && p.push <= 0.25)) ctx.fail('"push" muss zwischen 0 und 0,25 liegen (mehr lässt die Kamera so weit weg anfangen, dass die Läden am Anfang winzig sind)')
     if (!(p.orbit >= 0 && p.orbit <= 12)) ctx.fail('"orbit" muss zwischen 0 und 12 Grad liegen (mehr zeigt den Rand der Stadt)')
 
     // three.js erst hier laden: so bleibt der Baustein in Node (Katalog, Selbsttest) ohne die 700 KB importierbar

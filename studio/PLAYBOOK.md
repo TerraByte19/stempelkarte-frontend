@@ -986,12 +986,21 @@ Gemeinsam für alle:
   (kein Zufall ohne festen Startwert, keine Uhr). three.js liegt in
   `engine/vendor/` (r170, ohne Netz, `engine/vendor/LIESMICH.md`). Chromium
   rechnet hier ohne Grafikkarte: etwa 1,2 bis 1,4 s je Bild statt Bruchteilen,
-  eine 5-s-Szene kostet also rund zwei Minuten mehr Bauzeit. Die Prüfungen
-  sehen in die Leinwand nicht hinein (kein `data-safe`): ob Schilder lesbar
-  sind und nichts unter den Textzeilen liegt, zeigen nur die Standbilder.
-  `node studio/tools/test_3d.mjs` prüft, dass dasselbe Bild zweimal dieselben
-  Pixel ergibt und die Szene nicht leer ist (noch nicht in `selftest.mjs`).
-  Probe: `videos/_probe-3d`.
+  eine 5-s-Szene kostet also rund zwei Minuten mehr Bauzeit.
+  Die Prüfungen sehen seit dem Review vom 17.11.2026 auch in die Leinwand:
+  der Baustein meldet mit `ctx.place(fn)` (läuft bei jedem `seek`, auch ohne
+  Zeichnen) unsichtbare Kästen mit `data-safe` auf beiden Schildern, dem Herz
+  und dem Stammkunden, genau dort, wo die Kamera sie hinwirft. Sperrzonen,
+  Textabstand, Überdeckung (Schilder und Herz) und Knopfspalte gelten damit
+  auch in 3D. Vorher stand das rechte Schild bis x = 1069 unter den
+  TikTok-Knöpfen, und der Bau meldete "ok knopfspalte". Die Kamera endet immer
+  im selben vermessenen Ausschnitt (beide Läden ganz im Bild, 60 px Rand,
+  rechts vor x = 940); `push` sagt nur, wie weit sie vorher weg war.
+  `node studio/tools/test_3d.mjs` prüft: gleiche Pixel für dasselbe Bild,
+  Szene nicht leer, Kästen liegen auf dem Gezeichneten, Ausschnitt an den
+  Grenzen von `push` und `orbit` (Laden links und rechts), Tür und Stammkunde
+  berühren sich nie (0,05-s-Schritte). Etwa zwei Minuten, noch nicht in
+  `selftest.mjs`. Probe: `videos/_probe-3d`.
 
 <!-- KATALOG:ANFANG -->
 ### `paper-card` - Papier-Stempelkarte auf der Theke
@@ -1302,8 +1311,9 @@ Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 | `back` | `false` | true: er kommt vom Laden gegenüber zurück in den eigenen Laden (Schluss "so bleibt er bei dir"); das Herz zerbricht dann nicht, es pocht |
 | `from` | `0` | Wo der Stammkunde auf "walk" steht, als Anteil des Weges (0 = drinnen hinter der eigenen Tür, 0,5 = mitten auf der Kreuzung) |
 | `smoke` | `true` | Rauch steigt aus dem Schornstein des Ladens gegenüber (Grill) |
-| `push` | `0.05` | Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25; mehr schneidet die Läden am Rand an) |
+| `push` | `0.05` | Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25). Sie endet immer im selben Ausschnitt, in dem beide Läden ganz zu sehen sind; mehr "push" heißt nur, dass sie weiter weg anfängt |
 | `orbit` | `7` | Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12) |
+| `after` | `true` | Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf. false, wenn die Szene gleich danach endet |
 | `tones` | `true` | Eigene Töne (thud beim Zerbrechen, ding an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt |
 
 | Anker | Vorgabe | Wann |

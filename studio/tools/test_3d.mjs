@@ -69,7 +69,7 @@ const canvasStats = pg => pg.evaluate(() => {
   return { hash: h.toString(16), w: c.width, h: c.height, notSky: notSky / n, bright: bright / n, pink: pink / n }
 })
 
-// Was in den Pruefkaesten auf der Leinwand liegt: Anteil heller Pixel (Schild, Mantel) und rosa Pixel (Herz).
+// Was in den Pruefkaesten auf der Leinwand liegt: Anteil heller Pixel (Schild) und rosa Pixel (Herz).
 // Die Kaesten sitzen in Buehnenpunkten; die Leinwand ist so gross wie die Buehne und die 2D-Kamerafahrt
 // ist aufgehoben (.is-wrap), also sind es dieselben Punkte.
 const boxStats = pg => pg.evaluate(() => {
@@ -77,11 +77,11 @@ const boxStats = pg => pg.evaluate(() => {
   const x = g.getContext('2d', { willReadFrequently: true }); x.drawImage(c, 0, 0)
   return window.STUDIO.probe().map(it => {
     const x0 = Math.max(0, Math.round(it.left)), y0 = Math.max(0, Math.round(it.top)), w = Math.min(c.width, Math.round(it.right)) - x0, h = Math.min(c.height, Math.round(it.bottom)) - y0
-    if (w < 2 || h < 2) return { ...it, bright: 0, light: 0, pink: 0 }
+    if (w < 2 || h < 2) return { ...it, bright: 0, pink: 0 }
     const d = x.getImageData(x0, y0, w, h).data
-    let bright = 0, light = 0, pink = 0
-    for (let i = 0; i < d.length; i += 4) { const r = d[i], gg = d[i + 1], b = d[i + 2]; if (r + gg + b > 600) bright++; if (r + gg + b > 420) light++; if (r > 180 && gg < 110 && b > 80 && b < 170) pink++ }
-    return { ...it, bright: bright / (w * h), light: light / (w * h), pink: pink / (w * h) }
+    let bright = 0, pink = 0
+    for (let i = 0; i < d.length; i += 4) { const r = d[i], gg = d[i + 1], b = d[i + 2]; if (r + gg + b > 600) bright++; if (r > 180 && gg < 110 && b > 80 && b < 170) pink++ }
+    return { ...it, bright: bright / (w * h), pink: pink / (w * h) }
   })
 })
 const MARGIN = 60, COL = STAGE.column, SAFE_TOP = STAGE.safeTop, SAFE_BOTTOM = STAGE.h - STAGE.safeBottom
@@ -151,7 +151,7 @@ try {
   for (const [what, key] of [['Stammkunde', 'walker'], ['Herz', 'heart']]) {
     const it = by(what), d = await a.evaluate(k => document.querySelector('canvas.is-canvas').isoDebug.drawnBox(k), key), tol = 4
     const inside = !!it && !!d && d.pixels > 200 && d.left >= it.left - tol && d.right <= it.right + tol && d.top >= it.top - tol && d.bottom <= it.bottom + tol
-    check(`Kasten "${what}" umfasst alles, was von ${what === 'Herz' ? 'ihm' : 'ihr'} gezeichnet wird`, inside, it && d ? `gezeichnet x ${d.left} bis ${d.right}, y ${d.top} bis ${d.bottom} (${d.pixels} Pixel); Kasten x ${Math.round(it.left)} bis ${Math.round(it.right)}, y ${Math.round(it.top)} bis ${Math.round(it.bottom)}` : 'fehlt')
+    check(`Kasten "${what}" umfasst alles, was davon gezeichnet wird`, inside, it && d ? `gezeichnet x ${d.left} bis ${d.right}, y ${d.top} bis ${d.bottom} (${d.pixels} Pixel); Kasten x ${Math.round(it.left)} bis ${Math.round(it.right)}, y ${Math.round(it.top)} bis ${Math.round(it.bottom)}` : 'fehlt')
   }
   // Ruhelage: dort messen Sperrzonen und Textabstand
   const r = await studio.page({ rest: true }), m = await r.evaluate(() => window.STUDIO.measure()); await r.close()
