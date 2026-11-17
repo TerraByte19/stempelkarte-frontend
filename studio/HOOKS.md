@@ -33,6 +33,11 @@ Musters bis zu 2,83 Punkte, zwischen den Mitteln der Muster nur bis 1,55. Wer
 nur einen Satz schreibt, würfelt. Die Kandidaten kosten nichts: sie entstehen
 vor dem Skript, gebaut und aufgenommen wird nur der gewählte.
 
+Hat die Idee einen eigenen Plan (`AUTOMATIK.md` 5, "Ideen mit eigenem
+Plan"), entfällt dieser Ablauf: erster Satz, `hook_muster`, `hook_punkte`
+und `hook_kandidaten` stehen im Plan, auch wenn sein Muster nicht in 1.7.3
+beim Format steht. Der Takt aus 1.7.2 gilt trotzdem.
+
 1. Idee, Laden, Blickwinkel und **Format** stehen (`AUTOMATIK.md`, Abschnitt 5;
    `FORMATE.md` 3). Ob heute Meme-Tag ist (4.1), entscheidet schon dort mit:
    an einem Meme-Tag geht F07 vor. Bild 0 ist immer der Einstieg dieses

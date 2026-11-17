@@ -45,8 +45,9 @@ andere über Schritt 9.
 60 Wörter, gesprochen rund 24 s, mit Schlussbild rund 27 s (Schätzung).
 Die Prüfung `laenge` verlangt 20 bis 60 s: passt. Länge, Wörter, Schlussfrage
 und die Form der Aufforderung des Laufs gelten hier nicht (Abschnitt 3, "Was
-der Plan ersetzt", Punkte 5 und 6): der Text ist freigegeben. "Stampit" spricht die Stimme von selbst als "Stämp-it"
-(`engine/script.mjs`, `SAY_DEFAULT`).
+der Plan ersetzt", Punkte 5 und 6): der Text ist freigegeben. "Stampit"
+spricht die Stimme von selbst als "Stämp-it" (`engine/script.mjs`,
+`SAY_DEFAULT`).
 
 ## 3. Format, Thema und Regeln
 
@@ -76,9 +77,10 @@ Schlussfrage.
 In genau diesen Punkten gilt der Plan, auch vor `AUTOMATIK.md` 6, 6.2 und
 Schritt 16 (dort Abschnitt 5, "Was ein Plan ersetzt"):
 
-1. **Takte und Bausteine von F01** (`FORMATE.md` 4) und `AUTOMATIK.md` 6,
-   Zeile "Format": es gelten die Bilder aus Abschnitt 4, in dieser
-   Reihenfolge, mit diesen Werten. F01 ist hier ein Etikett für die Regeln.
+1. **Takte, Hook, Bausteine und Kernaussage von F01** (`FORMATE.md` 4) und
+   `AUTOMATIK.md` 6, Zeile "Format": es gelten die Bilder aus Abschnitt 4,
+   in dieser Reihenfolge, mit diesen Werten. F01 ist hier ein Etikett für
+   die Regeln.
 2. **"Nie" und "Produkt" von F01** (kein Papier, kein Scan, das Produkt nur
    im letzten Satz, A3, B2 oder D2): hier `paper-card` in Szene 1,
    `wallet-pass` mit Scan in Szene 3 und das Produkt ab Satz 5 (A1, A2, A3,
@@ -86,12 +88,14 @@ Schritt 16 (dort Abschnitt 5, "Was ein Plan ersetzt"):
 3. **"Handy spät"** (`FORMATE.md` 4): das Handy kommt bei rund 11,9 von 24,8
    gesprochenen Sekunden, im Entwurf geschätzt rund 16 s vor dem letzten
    Wort. Die Prüfung dazu in Schritt 16 entfällt.
-4. **`HOOKS.md` 0** (Kandidaten, Bogen, Wahl): der erste Satz ist
+4. **`HOOKS.md` 0** (Kandidaten, Bogen, Wahl) und die Muster je Format
+   (`HOOKS.md` 1.7.3, dort hat F01 kein H16): der erste Satz ist
    freigegeben; `hook_muster`, `hook_punkte` und `hook_kandidaten` stehen
-   oben und in Abschnitt 4.
-5. **Länge:** 60 Wörter, 9 Textzeilen, 4 Szenen vor dem Schluss statt 105
-   bis 115 Wörtern, 15 bis 21 Textzeilen und 5 bis 7 Szenen (`AUTOMATIK.md`
-   A1 und 6, Zeile "Länge"; Kennzahl `woerter` in Schritt 16). Es bleiben:
+   oben und in Abschnitt 4. Der Takt von H16 (`HOOKS.md` 1.7.2) gilt.
+5. **Länge:** 60 Wörter, 11 Textzeilen (die zwei des Schlusses
+   mitgezählt), 4 Szenen vor dem Schluss statt 105 bis 115 Wörtern, 15 bis
+   21 Textzeilen und 5 bis 7 Szenen (`AUTOMATIK.md` A1 und 6, Zeile
+   "Länge"; Kennzahl `woerter` in Schritt 16). Es bleiben:
    die Prüfung `laenge` (20 bis 60 s), höchstens 800 Zeichen, über 56 s
    geschätzt keine Aufnahme.
 6. **Schluss:** keine Schlussfrage, und statt "Dann kommentiere jetzt
@@ -130,17 +134,20 @@ ohne Papier- oder Scan-Bild gibt es nicht: der Plan ist so freigegeben
 
 **Nie am 22.11.2026** (Totensonntag: kein Witz-Video an einem stillen Tag;
 Termin aus Suchtreffern, nicht in einem Kalender nachgesehen). Sonst an dem
-Tag, für den die Regeln es erlauben: Schritt 14 prüft das jeden Tag nach
-`AUTOMATIK.md` 5, "Darf sie an einem Tag D laufen?" (Themenpause, Thema mit
-Laden, H16, V3, V4, V5, V6, V8, V9; V10 erst in Schritt 16). Ein festes
-Datum steht hier mit Absicht nicht: es hängt an den Videos davor, und die
-können sich ändern.
+Tag, für den die Regeln es erlauben: Schritt 14 (für `ZIEL`) und Schritt 22
+(für `UEBERMORGEN`) prüfen das jeden Tag nach `AUTOMATIK.md` 5, "Darf sie an
+einem Tag D laufen?" (Themenpause, Thema mit Laden, H16, V3, V4, V5, V6, V8,
+V9; V10 erst in Schritt 16). Ein festes Datum steht hier mit Absicht
+nicht: es hängt an den Videos davor, und die können sich ändern.
 
 Zum Beispiel, Stand 17.11.2026 abends, keine Regel: das Salon-Video vom
 18.11.2026 auf dem Board hat `thema` `kein-download`, Papier, Scan und die
 Kernaussage `ohne-app`. Allein die Themenpause sperrt damit jeden Tag bis
 einschließlich 25.11.2026. Wird dieses Video durch eine andere Fassung
-ersetzt, gilt deren Thema, und der Tag kann früher kommen.
+ersetzt, gilt deren Thema, und der Tag kann früher kommen (die Fassung
+`videos/2026-11-18-salon-zu-selten` im Repo hat `thema` `stempelzahl`, keine
+Motive und `gestalten`; dann sperrt das Döner-Video vom 17.11. über V3 und
+V8 noch den 19.11., danach zählen die Videos ab dem 19.11.).
 
 Solange die Idee wartet, nimmt der Lauf für andere Videos kein F01 und kein
 F02 (gleicher Einstieg `tip-cards`, gleiches Kern-Bild `zettel`), wenn sie
@@ -159,7 +166,7 @@ Entwurf der Recherche. Kopf des Skripts wie immer aus der Vorlage
 | 0,00 | (Stimme ab 0,35 s) | ab Bild 0, `"instant": true`, drei Reihen, ohne `scale`: `Ausdrucken,` / `unterschreiben,` / `*einscannen.` | **Szene 1, Teil 1:** `tip-cards`, `"rise": false`, `"numbered": false`, `"show": 1`, `head` "Digital auf Deutsch", `items` `[ { "title": "Bitte per Fax zurück." } ]`, Anker `card` auf `{ "at": "start", "offset": 0.15 }` (der Zettel leuchtet mit Ton auf). Bild 0 in fünf Wörtern: "Pinnwand: Bitte per Fax zurück" | **`papier-knuellen`** bei 0,00 s: `"sounds": [ { "sound": "papier-knuellen", "at": "start", "offset": 0, "vol": 1.5 } ]` (leise Datei, -22,5 LUFS) |
 | 0,15 | | | der Zettel leuchtet auf | `pop` des Bausteins |
 | 0,35 bis 2,4 | Ausdrucken, unterschreiben, einscannen. | (steht) | Kamera auf "einscannen" (`AUTOMATIK.md` 6.3, `tip-cards`): `"zoom": 1.2, "focus": [500, 1040], "to": [540, 1080], "dur": 0.3`; das ist der erste Bildwechsel, rund 1,9 s | |
-| 2,7 bis 4,0 | So digital ist Deutschland. | `So *digital \| ist *Deutschland.` | **Teil 2**, `"enter": "cut"`: `big-number`, `"from": "2026"`, `"value": "FAX"`, `label` "Deutschlands Lieblingsgerät", Anker `show` auf "faxen" (nächste Textzeile). Bis dahin steht "2026" auf dem Fallblatt | **`vine-boom`** auf "Deutschland" (`vol` 1,5): der eine Akzent in den ersten zwei Textzeilen (`HOOKS.md` 1.7.5) |
+| 2,7 bis 4,0 | So digital ist Deutschland. | `So *digital \| ist *Deutschland.` | **Teil 2**, `"enter": "cut"`: `big-number`, `"from": "2026"`, `"value": "FAX"`, `label` "Deutschlands Lieblingsgerät", Anker `show` auf "faxen" (nächste Textzeile). Bis dahin steht "2026" auf dem Fallblatt | **`vine-boom`** auf "Deutschland" (`vol` 1,5): der eine Akzent in den ersten zwei Textzeilen (`AUTOMATIK.md` 6, Zeile "Stimme, Töne, Farben"; Klang und `vol` aus `HOOKS.md` 1.7.5). Er liegt bei rund 3,6 s, nach den 3 s, die `HOOKS.md` 1.7.5 nennt: es gilt `AUTOMATIK.md`, er bleibt |
 | 4,3 bis 5,3 | Wir faxen noch. | `Wir *faxen \| noch.` | (Teil 2) das Fallblatt klappert von 2026 auf FAX; Kamera nach dem Klappern auf "noch" (6.3, `big-number`: `"zoom": 1.15, "focus": [540, 820], "to": [540, 860], "dur": 0.3`) | `tick`, `pop` des Bausteins |
 | 5,6 bis 7,6 | Und Stempel sammeln wir auf Pappe. | `Und *Stempel sammeln \| wir auf *Pappe.` | **Teil 3**, `"enter": "cut"`: `paper-card` Bäckerei Morgenrot, `"mug": true`, `icon` bread, `stamps` 10, `filled` 7, Anker `hit` auf "Pappe" (das einzige Papier-Bild; zugleich der Gegenstand seines Ladens, den `HOOKS.md` 1.6 für H16 bis rund 6 s verlangt) | `thud` auf "Pappe" |
 | 7,9 bis 11,6 | Dabei hat fast jeder deiner Kunden ein Handy in der Tasche. | `Dabei hat fast jeder \| deiner *Kunden \| ein *Handy \| in der Tasche.` | **Szene 2:** `big-number`, `"from": "PAPPE"`, `"value": "HANDY"`, `label` "hat fast jeder in der Tasche", Anker `show` auf "Handy"; Kamera auf "Tasche" (Werte wie oben) | Töne des Bausteins |

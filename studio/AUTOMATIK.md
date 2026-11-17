@@ -1000,7 +1000,7 @@ Kostet nichts. Jeder Befehl mit `R=/home/user/stempelkarte-frontend;` davor.
 | Die ersten 3 Sekunden | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills 0,0.5,1,2,3`, die fünf Bilder ansehen, dann `node "$R/studio/tools/einstieg.mjs" "$R/studio/videos/<ordner>/out/check.json"; echo "Ende-Code $?"` | Ende-Code 0: erster Ton höchstens 0,05 s, erste Bewegung höchstens 0,5 s, erster Bildwechsel höchstens 4 s (mit Stimme 3 s), erste Tafel höchstens 8 Wörter. Bild 0 ohne Ton lässt sich in fünf Wörtern beschreiben und ist nicht nur "ein Handy" oder "eine Stempelkarte"; zwischen zwei Standbildern hat sich im Bild etwas geändert (`HOOKS.md` 1.7.4) | Ende-Code 1: `verletzt` nennt die Abhilfe (Ortsklang nach Abschnitt 6, Zeile "Stimme, Töne, Farben"; Anker nach `HOOKS.md` 1.7.3; Kamera oder Schnitt nach 6.3). Einmal nachbessern, dann in `pruefung` vermerken. Ende-Code 2: der Bericht fehlt, erst `--stills` bauen |
 | Entwurf bauen (rund 2 bis 4 Minuten, unter Last auch länger, `timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice; echo "Ende-Code $?"` | Ende-Code 0, `out/video.mp4`, `out/sheet.png`, `out/poster.png`, `out/report.json` mit `"ok": true` | Code 1: wie oben. Ein Fehler von Playwright oder ffmpeg: einmal wiederholen, dann Hindernis `studio-kaputt` |
 | ansehen | `out/sheet.png` und `out/poster.png` mit dem Read-Werkzeug | siehe Liste unten | ändern und neu bauen |
-| Kennzahlen | Befehl unten | `laenge_s` (geschätzt) höchstens 56, `woerter` 105 bis 115, `zeichen` bis 800, `bildwechsel` ab 12, `laengstes_bild_s` bis 5, `warnungen` leer | einmal nachbessern (Text kürzen oder ergänzen, eine Textzeile mit Kamera oder Schnitt teilen, Abschnitt 6.3), dann weitergehen: Richtwerte halten keinen Lauf auf. Bei einer Idee mit eigenem Plan nie am freigegebenen Wortlaut: dort gelten Wörter und Länge des Plans. **Zwei Ausnahmen:** über 56 Sekunden geschätzt oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
+| Kennzahlen | Befehl unten | `laenge_s` (geschätzt) höchstens 56, `woerter` 105 bis 115, `zeichen` bis 800, `bildwechsel` ab 12, `laengstes_bild_s` bis 5, `warnungen` leer | einmal nachbessern (Text kürzen oder ergänzen, eine Textzeile mit Kamera oder Schnitt teilen, Abschnitt 6.3), dann weitergehen: Richtwerte halten keinen Lauf auf. Bei einer Idee mit eigenem Plan wird nichts nachgebessert, weder am Wortlaut noch an den Bildern: dort gelten Wörter und Länge des Plans, und was hier abweicht (etwa `bildwechsel` unter 12), kommt in `pruefung`. **Zwei Ausnahmen:** über 56 Sekunden geschätzt oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
 | Felder | `node "$R/studio/tools/abwechslung.mjs" felder "$R/studio/videos/<ordner>"` | `kern_bild`, `einstieg`, `motive`, `schluss` aus der Ausgabe in `meta` übernehmen; `abweichung` danach leer | die Ausgabe gilt, nicht der Plan |
 | Format und Abwechslung | `node "$R/studio/tools/abwechslung.mjs" pruefen "$R/studio/videos/<ordner>" --verlauf /tmp/stampit-lauf/verlauf.json --ziel <ZIEL>; echo "Ende-Code $?"`. Bei einem Format mit "Handy spät" dazu: Anfang des Teils mit der Karte im Handy (`scenes` in `out/check.json`) höchstens 13 s vor dem letzten Wort | Ende-Code 0 (V1 bis V11, Themenpause, Thema mit Laden), Takte des Formats in dieser Reihenfolge, nichts aus "Nie" des Formats. Bei einer Idee mit eigenem Plan statt Takten, "Nie" und "Handy spät": die Bilder des Plans in seiner Reihenfolge | `verletzt` nennt jede Regel. V10 (gleiche Sätze): die genannten Wortgruppen in eigenen Worten neu sagen. Ein Motiv zu viel: das Bild durch eines aus den Bausteinen des Formats ersetzen. Höchstens drei Runden; ist das Format selbst nicht erlaubt (V1, V4 Einstieg, V6, V9): zurück zu Schritt 14. Hat Schritt 14 Regeln fallen lassen (`FORMATE.md` 3, Punkt 3), dürfen genau diese in `verletzt` stehen; welche, kommt in `pruefung`. Bei einer Idee mit eigenem Plan dürfen genau die Regeln stehen, die der Plan nennt, und am Wortlaut und an den Bildern ändert sich nichts, auch kein Motiv: steht eine andere Regel in `verletzt` (etwa V10), ist die Idee heute nicht erlaubt. Sie geht mit `update` und `if_version` zurück auf `status: "offen"`, und der Lauf geht ohne sie zurück zu Schritt 14 |
 | Beitragstext | Abschnitt 6.6 | `beitrag.mjs pruefen` endet mit 0 | nach 6.6 |
@@ -1177,7 +1177,7 @@ längstes Bild 4,0 s, Pausen 1,2 s, 174 Wörter je Minute, -14,1 LUFS."
    ist die Liste der Vorschauen aus Schritt 6 (ohne Datumsgrenze), dazu jede
    Vorschau, die dieser Lauf schon geschrieben hat (Schritte 9 und 10), auch
    wartende Videos (`neu`, `aendern`) und solche mit `vorschau_rest`. Sind es
-   schon 12, oder ist die Liste unbekannt (Schritt 6): **keine** Vorschau für
+   schon 12 oder mehr, oder ist die Liste unbekannt (Schritt 6): **keine** Vorschau für
    dieses Video. Das gilt, ob Schritt 22a heute löschen darf oder nicht:
    scheitert das Aufräumen Tag für Tag, ohne abgelehnt zu werden, hält nur
    diese Zählung die Datenbank unter ihrer Grenze (Schritt 22a). Wartende
@@ -1342,7 +1342,7 @@ Teile ohne Zähler liegen, die niemand mehr findet.
 |---|---|
 | Erfolg | Teile weg, `vorschau_teile` 0. Im `ergebnis` des Protokolls: "<n> alte Vorschauen gelöscht" |
 | der Batch scheitert, weil eine Version nicht stimmt | nicht raten, auch nicht die Version aus der Fehlermeldung einsetzen (sie nennt nur den ersten falschen Teil). Die Abfrage einmal neu stellen, mit `out_dir` "/tmp/stampit-lauf/weg2-<video-id>", die Liste mit demselben Befehl aus diesem Ordner neu bauen und einmal schicken. Scheitert es wieder: dieses Video bleibt, Hindernis `vorschau-aufraeumen` |
-| `version` veraltet beim `update` (der Betreiber hat getippt) | neu lesen, einmal wiederholen |
+| `version` veraltet beim `update` (der Betreiber hat getippt) | neu lesen, einmal wiederholen. Scheitert es wieder: Hindernis `vorschau-aufraeumen` (der nächste Lauf findet das Video an seinem Zähler und räumt ihn ab) |
 | ein Aufruf wird von der Sicherheitsprüfung abgelehnt | Regel 10 (zählt mit). Hindernis `vorschau-loeschen`, der Schritt endet sofort; kein Lauf versucht es wieder, bis eine begleitete Sitzung es streicht |
 | ein anderer Fehler | Hindernis `vorschau-aufraeumen`, weiter mit dem nächsten Video |
 
@@ -1460,14 +1460,14 @@ genau eine:
 
 | Idee auf dem Board | Plan | in Kürze |
 |---|---|---|
-| `20261117-deutschland-technik` | `docs/plaene/deutschland-technik.md` | Bäckerei Morgenrot, `thema` `kein-download`, Stichwort KARTE, Wortlaut vom Betreiber freigegeben (rund 60 Wörter, keine Schlussfrage). `meta.format` "F01". Nie am 22.11.2026 (Totensonntag); sonst an dem Tag, für den die Regeln sie erlauben (Schritt 14) |
+| `20261117-deutschland-technik` | `docs/plaene/deutschland-technik.md` | Bäckerei Morgenrot, `thema` `kein-download`, Stichwort KARTE, Wortlaut vom Betreiber freigegeben (rund 60 Wörter, keine Schlussfrage). `meta.format` "F01". Nie am 22.11.2026 (Totensonntag); sonst an dem Tag, für den die Regeln sie erlauben (Schritte 14 und 22, "Darf sie an einem Tag D laufen?" unten) |
 
 **Was ein Plan ersetzt.** In genau diesen Punkten gilt der Plan **vor
 dieser Anleitung** (auch vor Abschnitt 6, 6.2 und Schritt 16), vor
 `FORMATE.md` und vor `HOOKS.md`; der Plan nennt sie in Abschnitt 3 noch
 einmal:
 
-1. die Takte des Formats, seine Bausteine und seine Kernaussage
+1. die Zeilen "Takte", "Hook", "Bausteine" und "Kernaussage" des Formats
    (`FORMATE.md` 4) und Abschnitt 6, Zeile "Format": es gelten die Bilder
    aus dem Plan, in seiner Reihenfolge, mit seinen Werten;
 2. die Zeilen "Nie" und "Produkt" des Formats: beim Deutschland-Video
@@ -1475,8 +1475,10 @@ einmal:
    fünften Satz (A1, A2, A3, F1);
 3. "Handy spät" (`FORMATE.md` 4) und die Prüfung dazu in Schritt 16: das
    Handy kommt bei rund 12 von rund 25 s;
-4. `HOOKS.md` 0 (Kandidaten, Bogen, Wahl): erster Satz, `hook_muster`,
-   `hook_punkte` und `hook_kandidaten` stehen im Plan;
+4. `HOOKS.md` 0 (Kandidaten, Bogen, Wahl) und die Muster je Format
+   (`HOOKS.md` 1.7.3): erster Satz, `hook_muster` (beim Deutschland-Video
+   H16, das dort sonst nur F06 hat), `hook_punkte` und `hook_kandidaten`
+   stehen im Plan. Der Takt der Muster (`HOOKS.md` 1.7.2) bleibt;
 5. Länge und Wörter: A1, Abschnitt 6, Zeile "Länge" (Wörter, Textzeilen,
    Szenen), und die Kennzahl `woerter` in Schritt 16. Es bleiben: höchstens
    800 Zeichen, über 56 s geschätzt keine Aufnahme, die Prüfung `laenge`;
@@ -1490,8 +1492,9 @@ einmal:
    von `tools/einstieg.mjs` bleiben;
 8. die Einlösung bis 10 s (`HOOKS.md` 1.7.4): hier die Papierkarte bei rund
    6 s (H16, `HOOKS.md` 1.6), das Produkt erst danach;
-9. aus den Regeln der Abwechslung V1, V7 und von V9 der Teil "eine
-   Kernaussage des Formats".
+9. aus den Regeln der Abwechslung V1, V7 und von V9 der Teil "Kernaussage
+   im Format erlaubt" (die Kernaussage gegen die zwei Videos davor bleibt).
+   Genau diese dürfen in `verletzt` von `abwechslung.mjs pruefen` stehen.
 
 Alles andere gilt weiter, ohne Ausnahme: Abschnitt 1, `PRODUKT.md` (nur
 Klasse 1), die übrigen Regeln der Abwechslung mit Themenpause und "Thema mit
@@ -1515,8 +1518,8 @@ mit den Videos vor D (wie `FORMATE.md` 2, "Die letzten Videos"):
   Tagen vor D (`HOOKS.md` 1.7.2);
 - das letzte Video ist nicht aus der Bäckerei (V5);
 - keins der letzten zwei Videos hat `papier` oder `scan` in `motive` oder
-  die Kernaussage `ohne-app` (V3, V8, V9), und keins hat `tip-cards` als
-  Einstieg (V4);
+  die Kernaussage `ohne-app` (V3, V8, V9);
+- keins der letzten zwei Videos hat `tip-cards` als Einstieg (V4);
 - keins der letzten drei Videos hat das Kern-Bild `zettel` (V6).
 
 Ob die Sätze neu genug sind (V10), zeigt erst Schritt 16.
@@ -1612,9 +1615,11 @@ Regel 12), `format`, `beleg_kern`, bei F10 `studie`, `datum`, `thema`,
 Schritt 7), `meme` und, wie `abwechslung.mjs felder` sie
 abliest, `kern_bild`, `einstieg`, `motive`, `schluss` (`FORMATE.md` 2); frei
 dazu `beleg`, `idee_id`. Für eine Idee mit eigenem Plan gilt in den Punkten,
-die Abschnitt 5 unter "Was ein Plan ersetzt" aufzählt (Format, Länge,
-Schluss, erster Bildwechsel), der Plan vor dieser Tabelle und vor 6.2; in
-allen anderen Punkten die Tabelle. Zusätzlich gilt:
+die Abschnitt 5 unter "Was ein Plan ersetzt" aufzählt (Takte, Hook und
+Bausteine des Formats mit "Nie", "Produkt" und "Handy spät", erster Satz,
+Länge, Schluss, erster Bildwechsel, Einlösung bis 10 s, V1, V7 und ein Teil
+von V9), der Plan vor dieser Tabelle und vor 6.2; in allen anderen Punkten
+die Tabelle. Zusätzlich gilt:
 
 | Punkt | Vorgabe |
 |---|---|

@@ -27,6 +27,8 @@
 // "count" (Gegenpruefung am Salon-Video, 17.11.2026): von 10 auf 5 klapperte die Tafel ueber
 // zufaellige Blaetter, man sah 37, 93 und "1", bevor die 5 stand. Bei einer Zahl, die kleiner
 // oder groesser WIRD ("kuerzer", "mehr"), liest sich ein Zaehlwerk besser: 10, 9, 8, 7, 6, 5.
+// Steht in "sub" ein "{n}" ("Bei {n} Stempeln"), zaehlt die Zeile mit: vorher stand rund 0,8 s
+// BEI 5 STEMPELN ueber der alten 10, die Tafel widersprach sich selbst.
 
 const BOARD = { x: 110, y: 646, w: 860, h: 330 }, ROOM = 700   // Zellen zusammen hoechstens so breit, mittig: rechts bis x = 890
 const COUNTER = 1262
@@ -40,8 +42,8 @@ export default {
     value: { default: '5-25×', doc: 'Die Zahl mit Zeichen, höchstens 7 Zeichen (Leerzeichen, Komma und Punkt zählen halb). Normale Bindestriche, nie Gedankenstriche' },
     from: { default: '', doc: 'Was vor "show" auf der Tafel steht, z. B. die Zahl des Schritts davor. Leer = leere Blätter' },
     label: { default: 'so teuer ist ein neuer Kunde wie einer, der bleibt', doc: 'Zeile unter der Tafel, was die Zahl bedeutet (höchstens etwa 60 Zeichen, bis 2 Zeilen)' },
-    sub: { default: '', doc: 'Kleine Zeile über der Tafel, z. B. "Schritt 2" oder "Beispiel" (höchstens etwa 24 Zeichen). Nie eine Quelle: die wird gesprochen, nicht gezeigt' },
-    count: { default: false, doc: 'true: die Tafel zählt Zahl für Zahl von "from" nach "value" (10, 9, 8, 7, 6, 5), statt über zufällige Blätter zu klappern; die Zeile darunter bleibt dabei stehen. Nur ganze Zahlen, höchstens 12 Schritte' },
+    sub: { default: '', doc: 'Kleine Zeile über der Tafel, z. B. "Schritt 2" oder "Beispiel" (höchstens etwa 24 Zeichen). Nie eine Quelle: die wird gesprochen, nicht gezeigt. Mit "count" darf "{n}" darin stehen, dann zählt die Zeile mit ("Bei {n} Stempeln")' },
+    count: { default: false, doc: 'true: die Tafel zählt Zahl für Zahl von "from" nach "value" (10, 9, 8, 7, 6, 5), statt über zufällige Blätter zu klappern; die Zeile darunter bleibt dabei stehen, "{n}" in "sub" zählt mit. Nur ganze Zahlen, höchstens 12 Schritte' },
     tones: { default: true, doc: 'Eigene Töne (tick beim Klappern, pop, wenn die Zahl steht). false, wenn das Skript Klänge aus der Bibliothek setzt' }
   },
   captions: { min: 1 },
@@ -70,7 +72,8 @@ export default {
     if (typeof p.value !== 'string' || !p.value.trim()) ctx.fail('"value" darf nicht leer sein')
     if (width(p.value) > 7 || width(p.from) > 7) ctx.fail('"value" und "from" höchstens 7 Zeichen (Leerzeichen, Komma und Punkt zählen halb)')
     if (p.label.length > 64) ctx.fail(`"label" hat ${p.label.length} Zeichen, höchstens etwa 60 passen in zwei Zeilen`)
-    if (p.sub.length > 26) ctx.fail('"sub" höchstens etwa 24 Zeichen')
+    if (p.sub.replace('{n}', '00').length > 26) ctx.fail('"sub" höchstens etwa 24 Zeichen')
+    if (p.sub.includes('{n}') && !p.count) ctx.fail('"{n}" in "sub" zählt nur mit "count": true mit')
 
     // ---- Wand mit Latten, Stangen, Bank mit zwei kleinen Tafeln: bis zum Bildrand
     const g = [`<defs><pattern id="bn-slat" width="72" height="40" patternUnits="userSpaceOnUse"><rect width="72" height="40" fill="#2A2166"/><rect x="0" y="0" width="6" height="40" fill="#221A58"/><rect x="40" y="12" width="3" height="18" rx="1.5" fill="rgba(255,255,255,.05)"/></pattern>
@@ -112,7 +115,7 @@ export default {
       // Blatt, wo sich ihr Zeichen aendert (die 1 von 10 faellt einmal, die Einer zaehlen).
       const a = p.from.trim(), b = p.value.trim()
       if (!/^\d+$/.test(a) || !/^\d+$/.test(b)) ctx.fail('"count" geht nur mit ganzen Zahlen in "from" und "value"')
-      const A = +a, B = +b, steps = Math.abs(B - A), dir = Math.sign(B - A), st = 0.11
+      const A = +a, B = +b, steps = Math.abs(B - A), dir = Math.sign(B - A), st = 0.13
       if (!steps || steps > 12) ctx.fail(`"count" zählt höchstens 12 Schritte (hier ${steps}); sonst ohne "count" klappern lassen`)
       const nums = Array.from({ length: steps + 1 }, (_, k) => String(A + dir * k).padStart(n))
       // Zahl k steht ab T(k): die erste von Anfang an, die zweite auf "show", dann alle st Sekunden die naechste
@@ -130,6 +133,19 @@ export default {
         const flips = runs.slice(1).map(r => T(r.k0))
         if (flips.length) key(cell.querySelector('b'), [[flips[0] - 0.002, { opacity: 0 }], ...flips.flatMap(t => [[t - 0.001, { opacity: 0 }], [t, { opacity: 1 }], [t + 0.06, { opacity: 0 }]])])
       })
+      // "{n}" in der Zeile ueber der Tafel: je Zahl eine Fassung der Zeile, jede genau so lange
+      // sichtbar wie ihre Zahl auf der Tafel. Die erste bleibt im Fluss und gibt die Hoehe vor.
+      if (p.sub.includes('{n}')) {
+        const sub = ctx.$('.bn-sub'); sub.textContent = ''
+        nums.forEach((s, k) => {
+          const e = ctx.el('span'); e.textContent = p.sub.replace('{n}', s.trim())
+          if (k) Object.assign(e.style, { position: 'absolute', left: '0', right: '0', top: '0' })
+          sub.append(e)
+          const fr = [[T(k) - 0.001, { opacity: 0 }], [T(k), { opacity: 1 }]]
+          if (k < steps) fr.push([T(k + 1) - 0.001, { opacity: 1 }], [T(k + 1), { opacity: 0 }])
+          key(e, fr)
+        })
+      }
       const end = T(steps)
       if (p.tones) { for (let k = 1; k < steps; k++) cue(T(k), 'tick', k % 2 ? 0.55 : 0.45); cue(end, 'pop', 0.8, 1.05) }
       return

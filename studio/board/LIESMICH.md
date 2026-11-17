@@ -206,9 +206,9 @@ Dokument-id: `<video-id>-<n>`, `n` ab 0, zum Beispiel
   ohne `out_dir`: ein Teil hat rund 240 KB.
 - **Höchstens 12:** bevor die Automation eine Vorschau schreibt, zählt sie
   alle Videos mit `vorschau_teile` oder `vorschau_rest` über 0 (ohne
-  Datumsgrenze). Sind es 12, bekommt das neue Video keine (rund 60 MB).
-  Das gilt immer, auch wenn das Aufräumen scheitert (`../AUTOMATIK.md`,
-  Schritt 19, Punkt 5).
+  Datumsgrenze). Sind es 12 oder mehr, bekommt das neue Video keine (rund
+  60 MB). Das gilt immer, auch wenn das Aufräumen scheitert
+  (`../AUTOMATIK.md`, Schritt 19, Punkt 5).
 - **Aufräumen:** die Automation löscht die Teile von Videos, deren `datum`
   älter als 7 Tage ist, und darüber hinaus die ältesten, bis 11 übrig sind
   (Platz für das nächste). Nie die eines Videos, das wartet (`neu`,

@@ -8,8 +8,11 @@ Abschnitt 5) und bevor er das Skript schreibt (Schritt 15). Sie legt fest,
 Was es sagen darf, bleibt bei `PRODUKT.md` (nur Klasse 1), der erste Satz bei
 `HOOKS.md`, Laden und Thema bei `THEMEN.md`, Stil C (Tempo, Tafeln, Mischung)
 bei `AUTOMATIK.md` 6. Wo diese Datei einer davon widerspricht, gelten die.
-Die Regeln prüft `tools/abwechslung.mjs` (Abschnitt 2, "Prüfen"); der Lauf
-trägt keine Felder mehr aus dem Kopf ein.
+Hat eine Idee einen eigenen Plan (`docs/plaene/`), gilt in den Punkten, die
+`AUTOMATIK.md` 5 unter "Was ein Plan ersetzt" aufzählt, der Plan, auch vor
+den Zeilen "Takte", "Nie", "Produkt" und "Schluss" eines Formats und vor
+"Handy spät". Die Regeln prüft `tools/abwechslung.mjs` (Abschnitt 2,
+"Prüfen"); der Lauf trägt keine Felder mehr aus dem Kopf ein.
 
 ## 1. Warum es diese Datei gibt
 

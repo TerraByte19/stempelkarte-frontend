@@ -7,6 +7,14 @@
 // hiess "Google Wallet". Das Bild widersprach der Frage. Jetzt gibt es ein Android-Handy: Kamera
 // als Loch in der Mitte statt Insel, flachere Ecken, unten die Gestenleiste. Ohne Angabe bleibt
 // alles beim iPhone wie in den veroeffentlichten Videos (regress.mjs vergleicht Bild fuer Bild).
+//
+// "colors" und "design" (ebenda): die Antwort auf "So sieht deine Karte aus" war dieselbe lila
+// Karte, die schon im Kaffee-, Koscher-, Doener- und alten Salon-Video lag, dazu fuhr das Handy
+// hoch und die Karte fiel hinein - genau das Bild, das der Betreiber am alten Salon-Video
+// abgelehnt hat. "colors" gibt der Karte die Farben des Ladens (PRODUKT.md D1), "design" zeigt,
+// wie sie entsteht: erst eine graue Karte ohne Logo und ohne Symbol, dann faerbt sie sich auf
+// "paint", das Logo springt auf "logo" hinein, die Stempel bekommen auf "symbol" ihr Symbol.
+// Beides nur fuer neue Skripte; ohne Angabe sieht die Karte aus wie bisher.
 import { QR } from '../engine/qr.js'
 import { stampCols } from '../engine/parts.js'
 
@@ -27,6 +35,8 @@ export default {
     after: { default: 5, doc: 'Stempel am Ende der Szene. Jeder neue Stempel braucht einen Anker (stamp1, stamp2, ...)' },
     icon: { default: 'cup', doc: 'Stempel-Symbol: cup, bread, scissors, star, heart, check', same: 'Symbol' },
     walletTitle: { default: 'Wallet', doc: 'Überschrift auf dem Handy' },
+    colors: { default: '', doc: 'Eigene Farben des Ladens für die Karte, zwei Farben für den Verlauf: "#B8507A,#6E2449" (PRODUKT.md D1). Leer = Stampit-Lila wie bisher' },
+    design: { default: false, doc: 'true: die Karte entsteht im Bild (D1). Sie ist erst grau, ohne Logo und ohne Symbol; auf "paint" färbt sie sich, auf "logo" springt das Logo hinein, auf "symbol" bekommen die Stempel ihr Symbol. Nur mit "drop": false, ohne Scan und ohne neue Stempel' },
     device: { default: 'iphone', doc: '"iphone" (Insel oben, Apple Wallet) oder "android" (Kamera als Loch, Gestenleiste unten; für Google Wallet, dann "walletTitle": "Google Wallet")' },
     scan: { default: true, doc: 'Scan-Rahmen und Haken über dem QR-Code zeigen (false: nur Karte und Stempel)' },
     rise: { default: true, doc: 'Das Handy fährt von unten herein. false: es steht schon da (für einen kurzen Teil nach einem Schnitt)' },
@@ -41,6 +51,11 @@ export default {
         ok: { cap: 1, word: 2, doc: 'Haken am QR-Code (Ton: ok). Auf "kein Download" o. ä.' }
       } : {})
     }
+    if (p.design) Object.assign(a, {
+      paint: { cap: 1, word: 1, doc: 'Die graue Karte färbt sich in den Farben des Ladens (Ton: sparkle). Auf "Farben"' },
+      logo: { cap: 1, word: 3, doc: 'Das Logo springt in die Karte (Ton: pop). Auf "Logo"' },
+      symbol: { cap: 2, word: 1, doc: 'Die Stempel bekommen ihr Symbol, einer nach dem anderen (Ton: pop). Auf das Wort, das das Symbol nennt' }
+    })
     for (let i = 0; i < Math.max(0, p.after - p.before); i++) a['stamp' + (i + 1)] = { cap: 2, word: STAMP_WORDS[i] ?? 9, doc: `Stempel ${i + 1} landet (Ton: pop, jeder etwas höher)` }
     return a
   },
@@ -82,6 +97,10 @@ export default {
   .phone.android { border-radius: 58px; }
   .phone.android .screen { border-radius: 44px; }
   .punch { position: absolute; top: 24px; left: 50%; margin-left: -17px; width: 34px; height: 34px; border-radius: 50%; background: #000; box-shadow: inset 0 0 0 6px #14112E; }
+  .scard.design > * { position: relative; }
+  .scard.design > .sblank { position: absolute; inset: 0; border-radius: 32px; background: linear-gradient(163deg, #5E5A74, #37344A); }
+  .scard.design .smark { position: relative; background: rgba(255,255,255,0); }
+  .sph { position: absolute; inset: 0; border-radius: 15px; border: 3px dashed rgba(255,255,255,.55); }
   .gbar { position: absolute; bottom: 16px; left: 50%; margin-left: -70px; width: 140px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.55); }
   `,
   build(ctx) {
@@ -90,6 +109,12 @@ export default {
     if (!(p.before >= 0 && p.before <= p.after && p.after <= p.stamps)) ctx.fail('es muss gelten: 0 <= before <= after <= stamps')
     if (!['iphone', 'android'].includes(p.device)) ctx.fail('"device" ist "iphone" oder "android"')
     const android = p.device === 'android'
+    let colors = null
+    if (p.colors) {
+      colors = String(p.colors).split(',').map(x => x.trim())
+      if (colors.length !== 2 || !colors.every(c => /^#[0-9a-fA-F]{6}$/.test(c))) ctx.fail('"colors" sind zwei Farben wie "#B8507A,#6E2449"')
+    }
+    if (p.design && (p.drop || p.scan || p.after > p.before)) ctx.fail('"design" geht nur mit "drop": false, "scan": false und ohne neue Stempel (after gleich before): sonst passiert zu viel auf einmal')
     ctx.html(`
       <div class="abs glow4"></div>
       <div class="abs phone${android ? ' android' : ''}"><div class="screen">
@@ -97,7 +122,8 @@ export default {
         <div class="wtitle"></div>
         <div class="peek" style="top:150px;background:#2A2452"><u style="width:150px"></u></div>
         <div class="peek" style="top:196px;background:#352D68"><u style="width:110px"></u></div>
-        <div class="scard" data-safe="Wallet-Karte">
+        <div class="scard${p.design ? ' design' : ''}" data-safe="Wallet-Karte"${colors ? ` style="--card-from:${colors[0]};--card-to:${colors[1]}"` : ''}>
+          ${p.design ? '<div class="sblank"></div>' : ''}
           <div class="shead" data-fit="Kopf der Wallet-Karte (Ladenname und Kürzel)"><span class="smark">${ctx.icon(p.icon)}</span><span class="sshop"></span><span class="sloc"></span></div>
           <div class="sgrid"></div>
           <div class="sreward" data-oneline="Belohnungszeile"></div>
@@ -156,6 +182,25 @@ export default {
       pop('.okbadge', tk, 0.4)
       key('.okwrap', [[tk + 2.2, { opacity: 1 }], [tk + 2.5, { opacity: 0 }]])
       cue(tk, 'ok', 0.8)
+    }
+
+    // "design": die Karte entsteht. Die graue Flaeche wischt von links nach rechts weg, darunter
+    // liegen die Farben des Ladens; das Logo springt aus einem gestrichelten Platzhalter; die
+    // Symbole kommen nacheinander in die Felder. Vorher: leere Felder und weisse Kreise ohne Symbol.
+    if (p.design) {
+      const tp = ctx.at('paint'), tl = ctx.at('logo'), ty = ctx.at('symbol')
+      const mark = ctx.$('.smark'), ph = el('i', 'sph'); mark.prepend(ph)
+      key(ctx.$('.sblank'), [[tp, { clipPath: 'inset(0 0 0 0%)' }, OUT], [tp + 0.5, { clipPath: 'inset(0 0 0 100%)' }]])
+      cue(tp, 'sparkle', 0.5)
+      key(mark, [[tl - 0.001, { scale: 1, backgroundColor: 'rgba(255,255,255,0)' }], [tl, { scale: 0.5, backgroundColor: 'rgba(255,255,255,1)' }, BACK], [tl + 0.4, { scale: 1, backgroundColor: 'rgba(255,255,255,1)' }]])
+      key(ph, [[tl - 0.001, { opacity: 1 }], [tl, { opacity: 0 }]])
+      key(mark.querySelector('svg'), [[tl - 0.001, { opacity: 0 }], [tl, { opacity: 1 }]])
+      cue(tl, 'pop', 0.8, 1.1)
+      ctx.$$('.sslot').forEach((s, i) => {
+        const t = ty + i * 0.09
+        for (const ic of [s.firstElementChild, s.querySelector('.son svg')]) key(ic, [[t - 0.001, { opacity: 0, scale: 0.3 }], [t, { opacity: 1, scale: 0.3 }, BACK], [t + 0.35, { opacity: 1, scale: 1 }]])
+        if (i < p.before) cue(t, 'pop', 0.6, PITCH(i))
+      })
     }
 
     // "Jeder Besuch ein Stempel": einige waren schon da, die neuen kommen auf ihr Wort

@@ -81,7 +81,13 @@ const gleich = s => woerter(s).join(' ')
 /** Gesprochener Text ohne Schlussfrage und Aufforderung, Laeden als Platzhalter, in Woertern. */
 export function rumpfWoerter(text) {
   let t = String(text || '')
-  const i = t.search(/Dann kommentiere jetzt/i)
+  // Die Aufforderung gibt es lang ("Dann kommentiere jetzt KARTE, und wir melden uns bei dir.") und
+  // kurz ("Kommentiere KARTE, und wir melden uns.": Doener-Video vom 17.11.2026 und der Plan
+  // docs/plaene/deutschland-technik.md). Frueher fiel nur die lange weg. Die kurze zaehlte als Satz,
+  // und der Plan teilte so mit dem Doener-Video drei Vierergruppen ("kommentiere karte und wir ...")
+  // und waere an V10 gescheitert, ohne einen Satz zu wiederholen. Die letzte Aufforderung zaehlt.
+  const auf = [...t.matchAll(/(?:\bDann\s+)?\bkommentiere\s+(?:jetzt\s+)?[^\s,.!?]+,?\s+und wir melden uns/gi)].pop()
+  const i = auf ? auf.index : -1
   if (i >= 0) {
     t = t.slice(0, i).trimEnd()
     // die Schlussfrage davor: der letzte Satz, wenn er mit ? endet
@@ -275,6 +281,9 @@ function selbsttest() {
   // 4. Saetze: Aufforderung, Schlussfrage und Ladenname zaehlen nicht
   const a = rumpfWoerter('Der Stempel ist sofort auf seinem Handy. Noch Fragen? Dann kommentiere jetzt Imbiss, und wir melden uns bei dir.')
   soll('Schluss und Aufforderung fallen weg', a.join(' '), 'der stempel ist sofort auf seinem handy')
+  soll('kurze Aufforderung fällt auch weg, mit Schlussfrage davor', rumpfWoerter('Nicht die von gegenüber. Willst du deine Stammkunden behalten? Kommentiere Karte, und wir melden uns.').join(' '), 'nicht die von gegenüber')
+  soll('kurze Aufforderung ohne Schlussfrage (Plan deutschland-technik)', rumpfWoerter('Sei der Laden, der nicht zwanzig Jahre hinterher ist. Kommentiere KARTE, und wir melden uns.').join(' '), 'sei der laden der nicht zwanzig jahre hinterher ist')
+  soll('"kommentiert" mitten im Text bleibt stehen', rumpfWoerter('Ein Kunde kommentiert: zu viele Stempel. Noch Fragen? Dann kommentiere jetzt Imbiss, und wir melden uns bei dir.').join(' '), 'ein kunde kommentiert zu viele stempel')
   soll('Ladenname zählt nicht', [...gruppen(rumpfWoerter('Bei Eis am Markt liegt sie im Handy.'))], ['liegt sie im handy'])
   // 5. Regeln an einem Verlauf: die vier alten Videos (nur ordner und datum auf dem Board)
   const verlauf = Object.keys(alt).map(o => ({ id: o + '-v1', data: { datum: o.slice(0, 10), ordner: o, version: 1, status: 'neu' } }))

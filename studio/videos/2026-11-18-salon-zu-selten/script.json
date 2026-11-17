@@ -4,7 +4,7 @@
     "slug": "salon-zu-selten",
     "language": "de",
     "datum": "2026-11-18",
-    "fassung": 3,
+    "fassung": 4,
     "format": "F03",
     "beleg_kern": "gestalten",
     "studie": "",
@@ -17,9 +17,9 @@
     "einstieg": "comment-thread",
     "motive": [],
     "schluss": "Noch Fragen?",
-    "beleg": "D2 (der Laden legt selbst fest, wie viele Stempel es braucht: Antwort ab rund 3 s, Satz 3 und 6, Tafel zählt von 10 auf 5), D1 (Farben, Logo und Stempel-Symbol: Satz 8 bis 10, Wallet-Karte mit Scheren aus der Nähe), A1 (Apple Wallet oder Google Wallet: Nachfrage, Satz 11 bis 13, Android-Handy). Satz 4, 5 und 7 sind ein erkennbares Beispiel (ein Schnitt im Monat), keine Zusage.",
+    "beleg": "D2 (der Laden legt selbst fest, wie viele Stempel es braucht: Antwort ab rund 3 s, Satz 3 und 6, Tafel zählt von 10 auf 5), D1 (Farben, Logo und Stempel-Symbol: Satz 8, die Karte färbt sich in den Farben des Salons, das Logo springt hinein, die Felder bekommen Scheren), A1 (Apple Wallet oder Google Wallet: Nachfrage, Satz 9 bis 11, Android-Handy). Satz 4, 5 und 7 sind ein erkennbares Beispiel (ein Schnitt im Monat), keine Zusage.",
     "idee": "Wunsch des Betreibers am 17.11.2026: das Salon-Video ganz neu, anderes Format, andere Bilder, packender Anfang. Eigener Blickwinkel aus THEMEN.md T20: beim Friseur kommt die Kundin selten, zehn Stempel dauern fast ein Jahr; der Einwand des Salons in seinen eigenen Worten wird ehrlich beantwortet (mit zehn ja, mit fünf nicht).",
-    "_hinweis": "Ersetzt 2026-11-18-salon-karte-im-handy (der Betreiber: gleiche Animation wie das erste Video). Kein Papier, keine Naehe, kein Scan (V2, V3, V8: Koscher und Doener zeigten Naehe und Scan). Hook-Wahl mit Bewertungsbogen: scratchpad salon-neu/hook-wahl.md. Fassung 3 nach der Gegenpruefung vom 17.11.2026: in Fassung 2 stieg ab 20 s das Handy hoch und die Karte fiel hinein, wie im abgelehnten alten Salon-Video und im Kaffee-Video, die Pointe war wieder stamp-check; jetzt Karte von Anfang an aus der Naehe, Android-Handy fuer Google Wallet, Pointe als durchgestrichener Einwand vom Anfang. Dazu 106 statt 85 Woerter (Stil C verlangt 105 bis 115)."
+    "_hinweis": "Ersetzt 2026-11-18-salon-karte-im-handy (der Betreiber: gleiche Animation wie das erste Video). Kein Papier, keine Naehe, kein Scan (V2, V3, V8: Koscher und Doener zeigten Naehe und Scan). Hook-Wahl mit Bewertungsbogen: scratchpad salon-neu/hook-wahl.md. Fassung 4 nach der Gegenpruefung vom 17.11.2026: in Fassung 2 stieg ab 20 s das Handy hoch und die Karte fiel hinein, wie im abgelehnten alten Salon-Video und im Kaffee-Video, danach dieselbe lila Karte noch einmal und stamp-check als Pointe. Jetzt steht das Handy schon da, die Karte entsteht im Bild in den Farben des Salons (wallet-pass 'design', neu), fuer Google Wallet ein Android-Handy, die Pointe ist der durchgestrichene Einwand vom Anfang. Gesprochener Text hoechstens 600 Zeichen (Freigabe des Betreibers 500 bis 600), deshalb rund 100 statt 105 Woerter."
   },
   "voice": {
     "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme.",
@@ -53,7 +53,7 @@
   },
   "scenes": [
     {
-      "_hinweis": "Einstieg F03: der Einwand des Salons wird getippt, in voller Schriftgroesse, die Tasten leuchten mit. Ab Bild 0 klingt die Ladenglocke, ab 0,05 s laeuft das Tippen, und die Kamera faehrt langsam auf das Eingabefeld zu (in Fassung 2 bewegte sich in den ersten 2 s nur 20 px hohe Schrift, gemessen 4- bis 8-mal weniger Bewegung als in jedem frueheren Video). Erster Bildwechsel auf 'selten', mit dem Absenden: so bleibt er auch mit Stimme unter 3 s (auf dem ersten Wort von Satz 2 laege er bei rund 3,1 bis 3,3 s). Zweite Kamera auf die Antwort.",
+      "_hinweis": "Einstieg F03: der Einwand des Salons wird getippt, in voller Schriftgroesse, das Feld rollt mit, die Tasten leuchten mit. Ab Bild 0 klingt die Ladenglocke, ab 0,05 s laeuft das Tippen, und die Kamera faehrt von Bild 0 an langsam auf das Eingabefeld zu (in Fassung 2 bewegte sich in den ersten 2 s nur 20 px hohe Schrift, gemessen 4- bis 8-mal weniger Bewegung als in jedem frueheren Video). Absenden und erster Bildwechsel 0,3 s vor 'selten': so bleibt er auch mit Stimme unter 3 s (auf dem ersten Wort von Satz 2 laege er bei rund 3,1 bis 3,3 s). Zweite Kamera auf die Antwort.",
       "component": "comment-thread",
       "params": {
         "text": "Stempelkarte im Salon? Meine Kundinnen kommen zu selten.",
@@ -62,12 +62,12 @@
       },
       "anchors": {
         "type": { "at": "start", "offset": 0.05 },
-        "send": { "cap": 0, "word": -1 },
+        "send": { "cap": 0, "word": -1, "offset": -0.3 },
         "reply": { "cap": 1, "word": 0 }
       },
       "camera": [
-        { "at": "start", "offset": 0, "zoom": 1.08, "focus": [450, 1448], "to": [450, 1400], "dur": 2.4 },
-        { "cap": 0, "word": -1, "zoom": 1.1, "focus": [210, 880], "to": [210, 930], "dur": 0.3 },
+        { "at": "start", "offset": 0, "zoom": 1.1, "focus": [450, 1448], "to": [450, 1390], "dur": 2.4 },
+        { "cap": 0, "word": -1, "offset": -0.3, "zoom": 1.1, "focus": [210, 880], "to": [210, 930], "dur": 0.3 },
         { "cap": 2, "word": 0, "zoom": 1.1, "focus": [210, 1000], "to": [210, 900], "dur": 0.3 }
       ],
       "sounds": [ { "sound": "ladenglocke", "at": "start", "offset": 0, "vol": 0.8 } ],
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "_hinweis": "Beweis in Zahlen (D2): zehn Stempel bei einem Schnitt im Monat sind zehn Monate. Dann der harte Schnitt, und die Tafel zaehlt 10, 9, 8, 7, 6, 5 ('count'). Der Anker 'show' sitzt auf dem Schnitt: in Fassung 2 sass er auf 'machst', und rund 0,8 s stand BEI 5 STEMPELN ueber der alten 10, beim Klappern kamen 37, 93 und 1.",
+      "_hinweis": "Beweis in Zahlen (D2): zehn Stempel bei einem Schnitt im Monat sind zehn Monate. Dann der harte Schnitt, und die Tafel zaehlt 10, 9, 8, 7, 6, 5 ('count'), die Zeile darueber zaehlt mit ('Bei {n} Stempeln'): in keinem Bild stehen zwei verschiedene Zahlen. In Fassung 2 sass der Anker 'show' auf 'machst', und rund 0,8 s stand BEI 5 STEMPELN ueber der alten 10, beim Klappern kamen 37, 93 und 1. Kamera 1,2 statt 1,15: weniger leere Theke unten.",
       "parts": [
         {
           "component": "big-number",
@@ -89,10 +89,10 @@
             "label": "Monate warten auf den Gratis-Schnitt"
           },
           "anchors": { "show": { "at": "start", "offset": 0.1 } },
-          "camera": [ { "cap": 1, "word": 0, "zoom": 1.15, "focus": [540, 820], "to": [540, 860], "dur": 0.3 } ],
+          "camera": [ { "cap": 1, "word": 0, "zoom": 1.2, "focus": [540, 820], "to": [540, 880], "dur": 0.3 } ],
           "sounds": [ { "sound": "keuchen-1", "cap": 1, "word": 0, "offset": -0.6, "vol": 1.0 } ],
           "captions": [
-            { "lines": ["Kommt sie | *einmal | im Monat, | wartet sie | *zehn *Monate."] },
+            { "lines": ["Kommt eine | *Kundin | einmal im Monat, | wartet sie | *zehn *Monate."] },
             { "lines": ["Fast ein *Jahr, | für *einen Schnitt!"], "gapBefore": 0.6 }
           ]
         },
@@ -103,21 +103,21 @@
             "value": " 5",
             "from": "10",
             "count": true,
-            "sub": "Bei 5 Stempeln",
+            "sub": "Bei {n} Stempeln",
             "label": "Monate warten auf den Gratis-Schnitt"
           },
           "anchors": { "show": { "at": "start", "offset": 0.05 } },
-          "camera": [ { "cap": 1, "word": 3, "zoom": 1.15, "focus": [540, 820], "to": [540, 860], "dur": 0.3 } ],
+          "camera": [ { "cap": 1, "word": 3, "zoom": 1.2, "focus": [540, 820], "to": [540, 880], "dur": 0.3 } ],
           "sounds": [ { "sound": "erfolg-pling", "cap": 1, "word": 6, "offset": 0, "vol": 0.55 } ],
           "captions": [
-            { "lines": ["Bei *Stampit | machst du | einfach | *fünf daraus."] },
+            { "lines": ["Bei *Stampit | machst du | *fünf daraus."] },
             { "lines": ["Dann ist der | *Gratis-Schnitt | schon im *Frühling da."] }
           ]
         }
       ]
     },
     {
-      "_hinweis": "Die Karte, wie der Salon sie gestaltet (D1, D2): fuenf Felder, Scheren als Stempel. Das Handy steht schon da, die Karte liegt schon drin ('rise' und 'drop' false), die Kamera ist von Anfang an nah dran und faehrt dann auf Kopf mit Logo und auf die Scheren. In Fassung 2 fuhr hier das leere Handy hoch und die Karte fiel hinein: genau das Bild, das der Betreiber am alten Salon-Video abgelehnt hat. Ohne Scan und ohne neuen Stempel (V8).",
+      "_hinweis": "Die Karte, wie der Salon sie gestaltet (D1): das Handy steht schon da ('rise' false), die Karte liegt schon drin ('drop' false), aber noch grau, ohne Logo und ohne Symbol ('design'). Auf 'Farben' faerbt sie sich in den Farben des Salons ('colors', Beere statt Stampit-Lila), auf 'Logo' springt das Logo hinein, auf 'Scheren' bekommen die Felder ihr Symbol. In Fassung 2 fuhr hier das leere Handy hoch und die Karte fiel hinein, in Fassung 3 stand dieselbe lila Karte wie in allen alten Videos: beides Bilder, die der Betreiber schon kennt. Ohne Scan und ohne neuen Stempel (V8).",
       "component": "wallet-pass",
       "params": {
         "shop": "Salon Haarscharf",
@@ -129,21 +129,28 @@
         "icon": "scissors",
         "scan": false,
         "rise": false,
-        "drop": false
+        "drop": false,
+        "colors": "#B8507A,#6E2449",
+        "design": true
+      },
+      "anchors": {
+        "paint": { "cap": 1, "word": 1 },
+        "logo": { "cap": 1, "word": 3 },
+        "symbol": { "cap": 2, "word": 1 }
       },
       "camera": [
         { "at": "start", "offset": 0, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080], "dur": 0 },
         { "cap": 1, "word": 2, "zoom": 1.5, "focus": [540, 914], "to": [540, 800], "dur": 0.3 },
-        { "cap": 2, "word": 1, "zoom": 1.6, "focus": [540, 1082], "to": [540, 1000], "dur": 0.3 }
+        { "cap": 2, "word": 0, "zoom": 1.6, "focus": [540, 1082], "to": [540, 1000], "dur": 0.3 }
       ],
       "captions": [
-        { "lines": ["Und so sieht | deine *Karte | im Handy aus:"] },
+        { "lines": ["So sieht | deine *Karte | im Handy aus:"] },
         { "lines": ["deine *Farben, | dein *Logo"] },
         { "lines": ["und *Scheren | als Stempel."] }
       ]
     },
     {
-      "_hinweis": "Nachfrage (A1), nicht getippt, Antwort in einem Satz; das Bild zur Antwort ist ein Android-Handy ('device': 'android', Kamera als Loch statt Insel) mit Google Wallet. In Fassung 2 war es dasselbe iPhone mit anderer Ueberschrift: das Bild widersprach der Frage. Ohne Scan und ohne neuen Stempel (V8).",
+      "_hinweis": "Nachfrage (A1), nicht getippt, Antwort in einem Satz; das Bild zur Antwort ist ein Android-Handy ('device': 'android', Kamera als Loch statt Insel, Gestenleiste) mit Google Wallet und derselben Karte in den Farben des Salons. In Fassung 2 war es dasselbe iPhone mit anderer Ueberschrift: das Bild widersprach der Frage. Ohne Scan und ohne neuen Stempel (V8).",
       "parts": [
         {
           "component": "comment-thread",
@@ -176,15 +183,16 @@
             "scan": false,
             "rise": false,
             "drop": false,
+            "colors": "#B8507A,#6E2449",
             "device": "android",
             "walletTitle": "Google Wallet"
           },
           "camera": [
             { "at": "start", "offset": 0, "zoom": 1.2, "focus": [540, 900], "to": [540, 960], "dur": 0 },
-            { "cap": 0, "word": 6, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080], "dur": 0.3 }
+            { "cap": 0, "word": 4, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080], "dur": 0.3 }
           ],
           "captions": [
-            { "lines": ["Die Karte liegt | dann einfach in | *Google *Wallet."] }
+            { "lines": ["Die Karte | liegt in | *Google *Wallet."] }
           ]
         }
       ]
@@ -196,7 +204,7 @@
         "text": "Stempelkarte im Salon? Meine Kundinnen kommen zu selten.",
         "typed": false,
         "strike": "Meine Kundinnen kommen zu selten.",
-        "reply": "Deine Karte war einfach zu lang!"
+        "reply": "Deine Karte war zu lang!"
       },
       "anchors": {
         "send": { "at": "start", "offset": 0.05 },
@@ -209,7 +217,7 @@
       ],
       "captions": [
         { "lines": ["Nicht *sie | kommt zu *selten."], "scale": 1.15 },
-        { "lines": ["Deine *Karte | war einfach | zu *lang!"], "scale": 1.15 }
+        { "lines": ["Deine *Karte | war zu *lang!"], "scale": 1.15 }
       ]
     },
     {

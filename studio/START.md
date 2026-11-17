@@ -77,8 +77,9 @@ müssen:
   sobald die Regeln einen Tag erlauben (nie am Totensonntag 22.11.2026; mit
   dem Salon-Video vom 18.11., wie es am 17.11. abends auf dem Board liegt,
   sperrt die Themenpause bis einschließlich 25.11.). Wo der Plan vor den
-  Regeln des Laufs gilt (Format, Länge, Schluss, erster Bildwechsel), steht
-  in `AUTOMATIK.md` 5, "Was ein Plan ersetzt".
+  Regeln des Laufs gilt (Format samt "Nie", "Produkt" und "Handy spät",
+  erster Satz, Länge, Schluss, erster Bildwechsel, V1, V7 und ein Teil von
+  V9), steht in `AUTOMATIK.md` 5, "Was ein Plan ersetzt".
 - **Beitragstext je Video:** Hook, ein bis zwei Sätze, "Kommentiere
   STICHWORT", genau 5 Hashtags (Instagram nimmt nicht mehr). Er steht am
   Video auf dem Board (Feld `caption`); `tools/beitrag.mjs` prüft ihn. Die

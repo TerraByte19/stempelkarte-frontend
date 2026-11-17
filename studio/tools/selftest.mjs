@@ -462,6 +462,78 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
   await lehnt('Prüfung schlägt an: Duell mit einem Spielstand, der keine zwei Zahlen hat', one('versus-split', { score: [1], winner: 'right' }, [{ lines: ['Runde eins:', 'Regen.'] }]), /"score"/)
   await lehnt('Prüfung schlägt an: Tagesuhr läuft rückwärts ("from" nach "time")', one('day-clock', { time: '07:10', from: '09:00' }, satz), /nur vorwärts/)
   await lehnt('Prüfung schlägt an: Fallblatt-Tafel mit mehr als 7 Zeichen', one('big-number', { value: '12.345,67 €' }, satz), /höchstens 7 Zeichen/)
+
+  // ---- Gegenpruefung am neuen Salon-Video (17.11.2026), vier Maengel in Bausteinen, hier festgenagelt:
+  // 1. Auf "Und Kundinnen ohne iPhone?" antwortete ein iPhone mit Dynamic Island, nur die Ueberschrift hiess
+  //    "Google Wallet". Jetzt gibt es "device": "android"; ohne Angabe bleibt alles beim iPhone.
+  {
+    const wp = extra => one('wallet-pass', { shop: 'Salon Haarscharf', location: '', reward: '5 Stempel = 1 Schnitt gratis', stamps: 5, before: 3, after: 3, icon: 'scissors', scan: false, rise: false, drop: false, ...extra }, [{ lines: ['Die Karte liegt', 'in Google Wallet.'] }])
+    const geraet = () => ({ punch: document.querySelectorAll('#s1 .punch').length, island: document.querySelectorAll('#s1 .island').length, title: document.querySelector('#s1 .wtitle').textContent })
+    const an = await page(wp({ device: 'android', walletTitle: 'Google Wallet' }), null, { probe: geraet }), ip = await page(wp({}), null, { probe: geraet })
+    check('Wallet-Karte, "device": "android": Kamera als Loch statt Insel, Überschrift Google Wallet; ohne Angabe bleibt das iPhone mit Insel',
+      sauber(an) && sauber(ip) && an.probed.punch === 1 && an.probed.island === 0 && an.probed.title === 'Google Wallet' && ip.probed.punch === 0 && ip.probed.island === 1,
+      `${JSON.stringify(an.probed)} / ${JSON.stringify(ip.probed)} ${warum(an)} ${warum(ip)}`)
+    await lehnt('Prüfung schlägt an: Wallet-Karte mit unbekanntem Gerät', wp({ device: 'nokia' }), /"device"/)
+  }
+  // 2. "So sieht deine Karte aus" zeigte dieselbe lila Karte wie alle alten Videos, nachdem das Handy hochfuhr und die
+  //    Karte hineinfiel. Jetzt entsteht die Karte im Bild ("design"): grau, dann auf "paint" in den Farben des Ladens
+  //    ("colors"), auf "logo" das Logo, auf "symbol" die Symbole. Vorher darf nichts davon zu sehen sein.
+  {
+    const scr = one('wallet-pass', { shop: 'Salon Haarscharf', location: '', reward: '5 Stempel = 1 Schnitt gratis', stamps: 5, before: 3, after: 3, icon: 'scissors', scan: false, rise: false, drop: false, colors: '#B8507A,#6E2449', design: true },
+      [{ lines: ['So sieht deine Karte', 'im Handy aus:'] }, { lines: ['deine Farben,', 'dein Logo'] }, { lines: ['und Scheren', 'als Stempel.'] }])
+    const entsteht = () => {
+      const A = n => window.STUDIO.anchors.find(a => a.name === n).t, q = s => document.querySelector('#s1 ' + s), op = e => +getComputedStyle(e).opacity
+      const z = t => { window.seek(t); return { weg: /100%/.test(getComputedStyle(q('.sblank')).clipPath), logo: op(q('.smark svg')), platz: op(q('.sph')), symbole: [...document.querySelectorAll('#s1 .sslot')].map(s => op(s.firstElementChild)) } }
+      return { vorher: z(A('paint') - 0.05), gefaerbt: z(A('logo') - 0.05), fertig: z(A('symbol') + 1), farbe: getComputedStyle(q('.scard')).getPropertyValue('--card-to').trim().toLowerCase() }
+    }
+    const r = await page(scr, null, { probe: entsteht }), p = r.probed || {}
+    const ok = sauber(r) && p.farbe === '#6e2449' && !p.vorher.weg && p.vorher.logo === 0 && p.vorher.platz === 1 && p.vorher.symbole.every(o => o === 0)
+      && p.gefaerbt.weg && p.gefaerbt.logo === 0 && p.fertig.weg && p.fertig.logo === 1 && p.fertig.platz === 0 && p.fertig.symbole.length === 5 && p.fertig.symbole.every(o => o === 1)
+    check('Wallet-Karte, "design": erst grau ohne Logo und Symbol, dann Farben des Ladens, Logo, Symbole, jeweils auf ihr Wort', ok, `${JSON.stringify(p)} ${warum(r)}`.slice(0, 300))
+    await lehnt('Prüfung schlägt an: Wallet-Karte, die entsteht und zugleich gescannt wird', one('wallet-pass', { design: true, drop: false, scan: true, before: 2, after: 2 }, satz), /"design"/)
+  }
+  // 3. Von 10 auf 5 klapperte die Tafel ueber 37, 93 und "1", und 0,8 s stand BEI 5 STEMPELN ueber der alten 10.
+  //    Jetzt zaehlt sie ("count"), und "{n}" in der Zeile darueber zaehlt mit: in keinem Bild zwei verschiedene Zahlen.
+  {
+    const scr = one('big-number', { value: ' 5', from: '10', count: true, sub: 'Bei {n} Stempeln', label: 'Monate warten auf den Gratis-Schnitt' }, [{ lines: ['Bei Stampit machst du', 'fünf daraus.'] }])
+    const zaehlt = () => {
+      const vis = e => +getComputedStyle(e).opacity > 0.5, folge = [], falsch = []
+      for (let t = 0; t <= 3; t = +(t + 0.01).toFixed(2)) {
+        window.seek(t)
+        const tafel = [...document.querySelectorAll('#s1 .bn-cell')].map(c => [...c.querySelectorAll('i')].filter(vis).map(i => i.textContent).join('')).join('')
+        const zeile = [...document.querySelectorAll('#s1 .bn-sub span')].filter(vis).map(s => s.textContent)
+        if (zeile.length !== 1 || (zeile[0].match(/\d+/) || [])[0] !== tafel) falsch.push(`${t}: ${tafel} / ${zeile.join('+')}`)
+        if (tafel && folge.at(-1) !== tafel) folge.push(tafel)
+      }
+      return { folge: folge.join(','), falsch: falsch.slice(0, 3), n: falsch.length }
+    }
+    const r = await page(scr, null, { probe: zaehlt })
+    check('Fallblatt-Tafel, "count" mit "{n}": zählt 10, 9, 8, 7, 6, 5, Zeile und Tafel zeigen in jedem Bild dieselbe Zahl', sauber(r) && !!r.probed && r.probed.folge === '10,9,8,7,6,5' && r.probed.n === 0, `${JSON.stringify(r.probed)} ${warum(r)}`)
+    await lehnt('Prüfung schlägt an: "{n}" in der Zeile über der Tafel ohne "count"', one('big-number', { value: '5', sub: 'Bei {n} Stempeln' }, satz), /"\{n\}"/)
+  }
+  // 4. Die erste Sekunde stand fast still: die getippte Frage war rund 26 px hoch, die Schreibmarke stand von Anfang
+  //    an am Ende, die Tasten blieben dunkel. Und die Pointe soll zum Einwand vom Anfang zurueckkehren koennen ("strike").
+  {
+    const tippen = () => {
+      const q = s => document.querySelector('#s1 ' + s), x = () => new DOMMatrixReadOnly(getComputedStyle(q('.ct-caret')).transform).m41 || parseFloat(getComputedStyle(q('.ct-caret')).translate) || 0
+      const lit = () => [...document.querySelectorAll('#s1 .ct-key')].filter(k => +getComputedStyle(k).opacity > 0.5).length
+      const send = window.STUDIO.anchors.find(a => a.name === 'send').t, s = []
+      for (const f of [0.25, 0.5, 0.75]) { window.seek(0.05 + (send - 0.05) * f); s.push({ x: Math.round(x()), lit: lit() }) }
+      return { groesse: parseFloat(getComputedStyle(q('.ct-typed')).fontSize), s }
+    }
+    const scr = one('comment-thread', { text: 'Stempelkarte im Salon? Meine Kundinnen kommen zu selten.', typed: true }, [{ lines: ['Stempelkarte im Salon?', 'Meine Kundinnen', 'kommen zu selten.'] }])
+    const r = await page(scr, null, { probe: tippen }), p = r.probed || { s: [] }
+    check('Kommentar, getippt: Schrift im Feld mindestens 40 px, die Schreibmarke läuft mit, eine Taste leuchtet', sauber(r) && p.groesse >= 40 && p.s.length === 3 && p.s.every((v, i) => !i || v.x !== p.s[i - 1].x) && p.s.some(v => v.lit >= 1), `${JSON.stringify(p)} ${warum(r)}`)
+    const strich = () => {
+      const t = window.STUDIO.anchors.find(a => a.name === 'strike').t, w = () => [...document.querySelectorAll('#s1 .ct-strike')].map(e => Math.round(e.getBoundingClientRect().width))
+      window.seek(t - 0.05); const vor = w(); window.seek(t + 1); return { vor, nach: w() }
+    }
+    const st = await page(one('comment-thread', { text: 'Stempelkarte im Salon? Meine Kundinnen kommen zu selten.', typed: false, strike: 'Meine Kundinnen kommen zu selten.', reply: 'Deine Karte war zu lang!' },
+      [{ lines: ['Nicht sie', 'kommt zu selten.'] }, { lines: ['Deine Karte', 'war zu lang!'] }]), null, { probe: strich })
+    const q = st.probed || { vor: [], nach: [] }
+    check('Kommentar, "strike": der Strich fährt erst auf seinem Wort durch das Stück, Zeile für Zeile', sauber(st) && q.nach.length >= 1 && q.vor.every(w => w < 5) && q.nach.every(w => w > 100), `${JSON.stringify(q)} ${warum(st)}`)
+    await lehnt('Prüfung schlägt an: "strike" mit einem Stück, das nicht im Kommentar steht', one('comment-thread', { text: 'Kommen meine Kundinnen zu selten?', typed: false, strike: 'zu oft' }, satz), /wörtlich/)
+  }
 }
 
 // ---- Stimme (Python)
