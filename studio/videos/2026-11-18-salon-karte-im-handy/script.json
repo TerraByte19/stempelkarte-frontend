@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "title": "Karte im Handy, bevor die Haare trocken sind",
+    "slug": "salon-karte-im-handy",
+    "language": "de",
+    "datum": "2026-11-18",
+    "thema": "kein-download",
+    "branche": "friseur",
+    "idee_id": "20261117-salon-karte-im-handy",
+    "beleg": "A2, A3 (einmal scannen, keine App), A1 (Apple oder Google Wallet), A4 (Papier geht verloren), B1, B2 (Scan mit der Handy-Kamera, Stempel sofort), C1 (in der Nähe zeigt das Handy die Karte von selbst, mit dem Stand)",
+    "hook_muster": "H07",
+    "meme": "",
+    "idee": "Wunsch des Betreibers: ein Video für Friseure. Eigene Geschichte im Salon Haarscharf: einmal scannen statt App laden, die Papierkarte geht verloren, in der Nähe zeigt sich die Karte von selbst. Hook nach THEMEN.md T18, eigene Worte, Bilder und Stimme."
+  },
+  "voice": {
+    "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05
+  },
+  "timing": {
+    "lead": 0.35, "hold": 3.2, "maxGap": 0.45
+  },
+  "captionStyle": {
+    "mode": "wort"
+  },
+  "poster": 1.2,
+  "pace": { "maxStill": 5, "minChanges": 12 },
+  "mix": {
+    "lufs": -14, "truePeak": -1
+  },
+  "scenes": [
+    {
+      "_hinweis": "Einstieg: der Hook spricht von der Karte im Handy, deshalb steht das Handy mit der Wallet ab Bild 0. Die Karte fällt kurz nach dem Anfang hinein, auf die zweite Textzeile fährt die Kamera auf den QR-Code.",
+      "component": "wallet-pass",
+      "params": { "shop": "Salon Haarscharf", "location": "", "reward": "10 Stempel = 1 Schnitt gratis", "stamps": 10, "before": 0, "after": 0, "icon": "scissors", "rise": false },
+      "anchors": { "card": { "at": "start", "offset": 0.4 }, "scan": { "cap": 1, "word": 0 }, "ok": { "cap": 1, "word": -1 } },
+      "camera": [ { "cap": 1, "word": 0, "zoom": 1.5, "focus": [540, 1343], "to": [540, 1150] } ],
+      "captions": [
+        { "lines": ["Bei diesem Friseur", "ist die Karte", "*im *Handy,"], "instant": true },
+        { "lines": ["bevor die | *Haare | *trocken | sind."] }
+      ]
+    },
+    {
+      "_hinweis": "Papier (A4), drei Teile Schlag auf Schlag.",
+      "parts": [
+        {
+          "component": "paper-card",
+          "params": { "shop": "Salon Haarscharf", "stamps": 10, "filled": 6, "icon": "scissors", "mug": false },
+          "anchors": { "hit": { "at": "start", "offset": 0.4 }, "free": { "cap": 0, "word": 5 } },
+          "captions": [
+            { "lines": ["Früher lag | auch hier | eine *Papierkarte | auf dem Tresen."] }
+          ]
+        },
+        {
+          "component": "wallet-vanish",
+          "enter": "cut",
+          "params": { "shop": "Salon Haarscharf", "stamps": 10, "filled": 6, "icon": "scissors" },
+          "anchors": { "crumple": { "cap": 0, "word": 0 }, "wallet": { "cap": 0, "word": 1 }, "drop": { "cap": 0, "word": 2 } },
+          "captions": [
+            { "lines": ["*Zerknickt, | *vergessen, | *verloren."] }
+          ]
+        },
+        {
+          "component": "guest-ghost",
+          "enter": "cut",
+          "params": { "chip": "6 von 10 Stempeln" },
+          "anchors": { "chip": { "cap": 0, "word": 2 } },
+          "captions": [
+            { "lines": ["Und wie *nah | er dran war, | wusste | *keiner."] }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Die Pointe (A2, A3).",
+      "component": "stamp-check",
+      "params": { "icon": "check" },
+      "anchors": { "hit": { "cap": 0, "word": -1, "offset": 0.1 } },
+      "captions": [
+        { "lines": ["Heute reicht | *ein *Scan, | ganz *ohne *App!"], "scale": 1.15 }
+      ]
+    },
+    {
+      "_hinweis": "Das Produkt (A1, B1, B2): Karte in der Wallet, Scan mit der Handy-Kamera, Stempel sofort auf dem Handy.",
+      "parts": [
+        {
+          "component": "wallet-pass",
+          "params": { "shop": "Salon Haarscharf", "location": "", "reward": "10 Stempel = 1 Schnitt gratis", "stamps": 10, "before": 6, "after": 6, "icon": "scissors", "scan": false },
+          "anchors": { "card": { "cap": 0, "word": 3 } },
+          "captions": [
+            { "lines": ["Danach liegt | die *Karte | in Apple oder | Google *Wallet."], "gapBefore": 0.55 }
+          ]
+        },
+        {
+          "component": "wallet-pass",
+          "enter": "cut",
+          "params": { "shop": "Salon Haarscharf", "location": "", "reward": "10 Stempel = 1 Schnitt gratis", "stamps": 10, "before": 6, "after": 6, "icon": "scissors", "rise": false, "drop": false },
+          "anchors": { "scan": { "cap": 0, "word": 3 }, "ok": { "cap": 0, "word": -1 } },
+          "camera": [ { "cap": 0, "word": 3, "zoom": 1.5, "focus": [540, 1343], "to": [540, 1150] } ],
+          "captions": [
+            { "lines": ["Beim nächsten | Haarschnitt | scannt der Friseur | sie mit der | *Handy-Kamera,"] }
+          ]
+        },
+        {
+          "component": "wallet-pass",
+          "enter": "cut",
+          "params": { "shop": "Salon Haarscharf", "location": "", "reward": "10 Stempel = 1 Schnitt gratis", "stamps": 10, "before": 6, "after": 7, "icon": "scissors", "scan": false, "rise": false, "drop": false },
+          "anchors": { "stamp1": { "cap": 0, "word": 4 } },
+          "camera": [ { "at": "start", "dur": 0, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080] } ],
+          "captions": [
+            { "lines": ["und der *Stempel | ist *sofort | auf seinem *Handy."] }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "In der Nähe (C1): Karte von oben, der Kunde eine Straße weiter. Danach Schnitt auf den Sperrbildschirm mit dem Stand.",
+      "parts": [
+        {
+          "component": "shop-map",
+          "params": { "shop": "Salon Haarscharf", "icon": "scissors", "circle": true, "notify": true, "note": "Noch 3 Stempel bis: Gratis-Schnitt", "path": [[-0.1, 1], [0.55, 1]] },
+          "anchors": { "circle": { "at": "start", "offset": 0.05 }, "walk": { "at": "start" }, "buzz": { "cap": 1, "word": 0, "offset": -0.1 }, "arrive": { "at": "end", "offset": -0.5 } },
+          "camera": [ { "cap": 1, "word": 0, "zoom": 1.2, "focus": [560, 1166], "to": [540, 1211], "dur": 0.3 } ],
+          "captions": [
+            { "lines": ["Und kommt er | später wieder | in die *Nähe | des Salons,"] },
+            { "lines": ["zeigt sein | *Handy | ihm die Karte | *von *selbst."] }
+          ]
+        },
+        {
+          "component": "lock-notification",
+          "enter": "cut",
+          "params": { "clock": "16:20", "date": "Mittwoch, 18. November", "title": "Salon Haarscharf", "body": "Noch 3 Stempel bis: Gratis-Schnitt", "icon": "scissors", "pin": false, "rise": false },
+          "anchors": { "notify": { "at": "start", "offset": 0.1 } },
+          "camera": [ { "cap": 0, "word": 2, "zoom": 1.3, "focus": [540, 1030] } ],
+          "captions": [
+            { "lines": ["Auf dem | *Sperrbildschirm, | mit dem *Stand | seiner Karte."] }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": { "logo": { "cap": -1, "word": -1 } },
+      "captions": [
+        { "lines": ["Klingt interessant?"], "accent": 1, "keep": true, "mode": "zeile" },
+        { "role": "cta", "lines": ["Dann kommentiere jetzt SALON,{Salon,}", "und wir melden uns bei dir."], "gapBefore": 0.65 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "buchungen": [
+    {
+      "art": "voll",
+      "id": "20261117T003010Z-voll",
+      "stand": "bestaetigt",
+      "tag": "2026-11-17",
+      "video": "2026-11-18-salon-karte-im-handy",
+      "zeichen": 629,
+      "zeit": "2026-11-17T00:30:10Z",
+      "zweck": "neu"
+    }
+  ],
+  "format": 1
+}
