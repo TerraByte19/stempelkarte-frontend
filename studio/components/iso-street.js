@@ -37,7 +37,7 @@ const P = 24            // Abstand der Strassen
 const CURB = 0.15       // Hoehe der Gehwege
 const SHOP = { w: 6, d: 6, h: 9, door: 1.3 }   // Laden: Breite der Front, Tiefe, Hoehe, Tuermitte ab Ecke
 // Bodentextur: deckt x und z von GO bis GO + GS ab (weiter hinten liegt Dunst)
-const GO = -72, GS = 144, GN = 4096
+const GO = -72, GS = 144, GN = 1024
 
 // Farben. Die Stadt bleibt bewusst grau-lila und dunkel: nur die beiden Laeden duerfen leuchten,
 // sonst sucht das Auge auf dem Handy, worum es geht.
@@ -128,6 +128,7 @@ export default {
     renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true
     const aniso = renderer.capabilities.getMaxAnisotropy()
 
+    ;(window.__isoT ||= []).push(['A', Math.round(performance.now())])
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(C.fog)
     scene.fog = new THREE.Fog(C.fog, 66, 140)
@@ -137,11 +138,13 @@ export default {
     const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0, ...o })
     const lam = (color, o = {}) => new THREE.MeshLambertMaterial({ color, ...o })
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3(), eul = new THREE.Euler()
-    const canvasTex = (w, h, draw, { srgb = true } = {}) => {
+    // Anisotrope Filterung nur fuer Schrift (Schilder): am Boden kostete sie eine halbe Sekunde je Bild,
+    // und dort liegt ohnehin nur Weiches (Lichtkegel, Kontaktschatten)
+    const canvasTex = (w, h, draw, { srgb = true, sharp = false } = {}) => {
       const c = document.createElement('canvas'); c.width = w; c.height = h
       draw(c.getContext('2d'), w, h)
       const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace
-      t.anisotropy = aniso; t.minFilter = THREE.LinearMipmapLinearFilter
+      t.anisotropy = sharp ? Math.min(8, aniso) : 1; t.minFilter = THREE.LinearMipmapLinearFilter
       return t
     }
     const blobTex = canvasTex(128, 128, (g, w) => {
@@ -249,6 +252,7 @@ export default {
     plaza.forEach(([x, z], k) => trees.push([x, z, 0.62 + ((k * 37) % 10) / 40, k % 4]))
     const lamps = [[-B + 0.45, B - 0.45], [B - 0.45, -B + 0.45], [-B + 0.45, -B - 12], [-B - 12.5, B - 0.45], [B + 12, -B + 0.45], [B - 0.45, B + 12.5], [-B + 0.45, -B - 34], [-B - 34, -B + 0.45], [B + 34, B - 0.45], [-B - 24, B - 0.45], [B - 0.45, B + 34], [B + 24, -B + 0.45]]
 
+    ;(window.__isoT ||= []).push(['plan', Math.round(performance.now())])
     // ---------------------------------------------------------------- Boden malen
     // Grundfarben, Bordsteinkanten und Kontaktschatten in die Farbtextur, Lichtkegel in die Leuchttextur.
     const shopGlow = { [oursSide]: '185,176,255', [rivalSide]: '255,180,106' }
@@ -266,6 +270,7 @@ export default {
       for (const [x, z, s] of trees) { g.beginPath(); g.arc(gx(x), gx(z), 1.1 * s * GN / GS, 0, Math.PI * 2); g.fill() }
       g.filter = 'none'
     })
+    ;(window.__isoT ||= []).push(['groundTex', Math.round(performance.now())])
     const glowTex = canvasTex(GN, GN, g => {
       g.fillStyle = '#000'; g.fillRect(0, 0, GN, GN); g.globalCompositeOperation = 'lighter'
       const spot = (x, z, r, rgb, a) => { const gr = g.createRadialGradient(gx(x), gx(z), 0, gx(x), gx(z), r * GN / GS); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(0.45, `rgba(${rgb},${a * 0.45})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = gr; g.fillRect(gx(x - r), gx(z - r), 2 * r * GN / GS, 2 * r * GN / GS) }
@@ -276,12 +281,15 @@ export default {
         for (const [x, z] of along) spot(x, z, 3.4, shopGlow[side], 0.42)
       }
     })
+    ;(window.__isoT ||= []).push(['glowTex', Math.round(performance.now())])
     const groundMat = worldMapped(lam('#FFFFFF', { map: groundTex, emissive: '#FFFFFF', emissiveMap: glowTex }))
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(GS * 3, GS * 3), groundMat); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground)
+    // Boden und Gehwege zuletzt zeichnen (renderOrder): was Haeuser verdecken, faellt dann schon am Tiefentest
+    // heraus, statt erst teuer beleuchtet und dann uebermalt zu werden
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(GS * 3, GS * 3), groundMat); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; ground.renderOrder = 2; scene.add(ground)
     // Gehwege als flache Platten mit abgeschraegter Kante: die Kante faengt Licht wie ein Bordstein
     const slabs = new THREE.InstancedMesh(new RoundedBoxGeometry(1, 1, 1, 1, 0.06), groundMat, blocks.length)
     blocks.forEach((b, k) => { m4.compose(v3.set((b.x0 + b.x1) / 2, CURB / 2, (b.z0 + b.z1) / 2), q.identity(), s3.set(b.x1 - b.x0, CURB, b.z1 - b.z0)); slabs.setMatrixAt(k, m4) })
-    slabs.receiveShadow = true; scene.add(slabs)
+    slabs.receiveShadow = true; slabs.renderOrder = 1; scene.add(slabs)
     // Mittelstreifen und Zebrastreifen als echte Koerper (gemalt waeren sie unscharf); sie lesen dieselbe
     // Leuchttextur, sonst laegen sie im Lichtkegel einer Laterne als dunkle Striche
     const stripes = []
@@ -298,6 +306,7 @@ export default {
     stripes.forEach(([x, z, w, d, c], k) => { m4.compose(v3.set(x, 0.011, z), q.identity(), s3.set(w, 1, d)); stripeMesh.setMatrixAt(k, m4); stripeMesh.setColorAt(k, col(c)) })
     stripeMesh.receiveShadow = true; scene.add(stripeMesh)
 
+    ;(window.__isoT ||= []).push(['groundObj', Math.round(performance.now())])
     // ---------------------------------------------------------------- Stadt bauen
     const boxGeo = new RoundedBoxGeometry(1, 1, 1, 1, 0.03)
     // Unten dunkler als oben: wirkt wie Licht, das am Boden verschluckt wird (gebackene Verdeckung)
@@ -353,6 +362,7 @@ export default {
     car(-17, 1.15, Math.PI / 2, C.cars[0]); car(1.15, -15.5, 0, C.cars[1]); car(15.5, -1.15, Math.PI / 2, C.cars[2])
     kit.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true } })
 
+    ;(window.__isoT ||= []).push(['city', Math.round(performance.now())])
     // ---------------------------------------------------------------- Laeden (die beiden Helden)
     const iconImage = async (name, color) => {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`
@@ -418,7 +428,7 @@ export default {
         c2.fillText(name, pad * 2 + tile + room / 2, chh * 0.54)
         // Groesse relativ zur Schildhoehe: unter 0,4 wird der Name auf dem Handy zu klein
         signs.push({ name, size: +(size / chh).toFixed(2), fits: c2.measureText(name).width <= room })
-      })
+      }, { sharp: true })
       put(new THREE.Mesh(new RoundedBoxGeometry(signW + 0.18, signH + 0.18, 0.24, 2, 0.07), std('#1A1440')), -w / 2, 3.95, 0.12, false)
       put(new THREE.Mesh(new THREE.PlaneGeometry(signW, signH), new THREE.MeshBasicMaterial({ map: signTex, toneMapped: false })), -w / 2, 3.95, 0.25, false)
       // Schornstein (beim Grill gegenueber steigt dort Rauch auf)
@@ -441,6 +451,7 @@ export default {
     // Ein zu langer Name wird auf dem Schild so klein, dass ihn auf dem Handy niemand liest
     for (const s of signs) if (!s.fits || s.size < 0.4) ctx.warn(`der Name "${s.name}" steht auf dem Schild sehr klein. Namen kürzen (höchstens etwa 14 Zeichen).`)
 
+    ;(window.__isoT ||= []).push(['shops', Math.round(performance.now())])
     // ---------------------------------------------------------------- Herz ueber dem eigenen Laden
     let heart = null
     if (p.heart) {
@@ -625,6 +636,7 @@ export default {
     }
     // Ruhelage der Herzhaelften (fuer das Auseinanderfallen)
     const X0L = heart ? heart.pivL.position.x : 0, X0R = heart ? heart.pivR.position.x : 0, Y0 = heart ? heart.pivL.position.y : 0
+    ;(window.__isoT ||= []).push(['rest', Math.round(performance.now())])
     ctx.frame(draw)
     window.__iso = { renderer, scene, camera, draw, THREE }
   }
