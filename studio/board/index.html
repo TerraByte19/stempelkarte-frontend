@@ -314,6 +314,8 @@ body[data-sperre] .entscheid { opacity: 0.45; }
 .player video { width: 100%; height: 100%; display: block; background: var(--video-bg); object-fit: contain; }
 .player-msg { color: var(--video-ink); text-align: center; padding: 16px; font-size: 15px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
 .player-msg .linkbtn { color: var(--video-ink); }
+.player-msg > span:last-child { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.player-detail { font-size: 12.5px; opacity: 0.8; }
 
 details.more { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 details.more > summary {
@@ -1142,10 +1144,13 @@ textarea[readonly] { opacity: 0.75; }
     var key = null;
     var letztes = null;
     var geholt = false;
-    function meldung(text, knopf, tun) {
+    var blobUrl = null;
+    function blobWeg() { if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; } }
+    function meldung(text, knopf, tun, extra) {
       box.textContent = '';
       var p = el('p', { class: 'player-msg' }, [el('span', { text: text })]);
       if (knopf) p.append(el('button', { type: 'button', class: 'linkbtn', text: knopf, onclick: tun }));
+      if (extra) p.append(extra);
       box.append(p);
     }
     function nochmal() { key = null; if (letztes) set(letztes); }
@@ -1163,10 +1168,44 @@ textarea[readonly] { opacity: 0.75; }
       if (!v.asset) { meldung(v.status === 'neu' ? 'Das Video ist noch nicht hochgeladen.' : 'Zu diesem Video ist keine Datei gespeichert.'); return; }
       if (!geholt) { meldung('Dieses Video wird erst geladen, wenn du es ansehen willst.', 'Video laden', function () { geholt = true; nochmal(); }); return; }
       box.textContent = '';
+      blobWeg();
       var video = el('video', { controls: true, playsinline: true, preload: 'metadata', 'aria-label': 'Video: ' + v.titel });
       if (v.poster) video.poster = ASSET_BASE + v.poster;
-      // assets.d.ts: ein Zeiger, dessen Datei fehlt, gilt als "fehlt" und bekommt einen Platzhalter.
-      video.addEventListener('error', function () { meldung('Das Video lässt sich gerade nicht laden.', 'Noch einmal versuchen', nochmal); });
+      // Zweiter Weg: Am 17.11. lud im Board kein Video mehr, obwohl jede Datei
+      // vollstaendig auf dem Server lag (H.264, moov vorne) und der Code
+      // unveraendert war. Der Player holt die Datei in Stuecken (Range) und in
+      // manchen App-Ansichten ohne die Anmeldung der Seite; ein fetch() derselben
+      // Adresse geht dagegen ueber den normalen Weg der Seite. Deshalb beim
+      // ersten Fehler die ganze Datei per fetch holen und als blob abspielen.
+      // Erst wenn auch das scheitert, die Meldung, mit Fehlercode, damit man
+      // sieht, welcher Weg klemmt.
+      var meinKey = key;
+      var umweg = false;
+      function endgueltig(detail) {
+        var link = el('a', { class: 'linkbtn', href: ASSET_BASE + v.asset, target: '_blank', rel: 'noopener', text: 'Video in neuem Tab öffnen' });
+        meldung('Das Video lässt sich gerade nicht laden.', 'Noch einmal versuchen', nochmal,
+          el('span', {}, [link, el('small', { class: 'player-detail', text: detail })]));
+      }
+      video.addEventListener('error', function () {
+        if (key !== meinKey) return;
+        var code = video.error ? video.error.code : 0;
+        if (umweg) { endgueltig('Fehler: Player ' + code + ' (auch über den zweiten Weg)'); return; }
+        umweg = true;
+        fetch(ASSET_BASE + v.asset).then(function (res) {
+          if (!res.ok) throw { status: res.status };
+          return res.blob();
+        }).then(function (b) {
+          if (key !== meinKey) return;
+          // Kommt die Datei ohne passenden Typ, spielt Safari sie nicht ab.
+          var datei = b.type && b.type.indexOf('video/') === 0 ? b : new Blob([b], { type: 'video/mp4' });
+          blobWeg();
+          blobUrl = URL.createObjectURL(datei);
+          video.src = blobUrl;
+        }).catch(function (e) {
+          if (key !== meinKey) return;
+          endgueltig('Fehler: Player ' + code + ', Abruf ' + (e && e.status ? e.status : 'ohne Antwort'));
+        });
+      });
       video.src = ASSET_BASE + v.asset;
       box.append(video);
     }
