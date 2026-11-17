@@ -45,7 +45,12 @@ müssen:
   Sperrbildschirm). Seitdem hat jedes Video eins von zehn Formaten
   (`FORMATE.md`: Tipps, Satz-Tausch, Einwand, Rechnung, Tag im Laden, Duell,
   Meme, Nähe, Quiz, Studienzahl) und hält Regeln der Abwechslung ein (Format,
-  Nähe, zerknickte Papierkarte, Einstieg, Laden, Schlussfrage). Dafür gibt es
+  Nähe, Papier, Scan, Einstieg, Laden, Kern-Bild, Kernaussage, Schlussfrage,
+  gleiche Sätze). Eine Gegenprüfung am selben Tag fand, dass die erste
+  Fassung nur den Rahmen wechselte: Wallet mit Scan in zehn von zehn
+  simulierten Videos, dieselben Sätze, F07 als alter Bogen. Seitdem wird
+  zuerst das Format gewählt, und `tools/abwechslung.mjs` liest die Felder aus
+  dem Skript ab und prüft die Regeln (`FORMATE.md` 2 und 3). Dafür gibt es
   fünf neue Bausteine: `tip-cards`, `comment-thread`, `versus-split`,
   `day-clock`, `big-number`.
 - **Beitragstext je Video:** Hook, ein bis zwei Sätze, "Kommentiere
@@ -102,7 +107,7 @@ und schreibt das Kassenbuch zurück nach `gedaechtnis/stimme`.
 | `studio/PLAYBOOK.md` | Anleitung zum Bauen eines Videos, Stil C, Bausteine, Textregeln, Erkenntnisse (darunter die beiden vermessenen Vorbilder) |
 | `studio/AUTOMATIK.md` | Arbeitsanleitung für den unbeaufsichtigten täglichen Lauf: Regeln, Zustand, die 24 Schritte, Wahl der Idee, Quellen sichern, Grenzen der Stimme, Prüfung mit claude-eyes, der Auftragstext der einen Aufgabe, Liste des Ungeprüften |
 | `studio/PRODUKT.md` | was die App kann, in zwei Klassen: "gesichert" (auf der Landing Page zu sehen) und "nur im Tarifvergleich genannt, noch nicht bestätigt". Dazu, was ein Video nie sagt |
-| `studio/FORMATE.md` | zehn Formate (F01 bis F10) mit Takten, Hook, Bausteinen, Verboten, Schluss und je einem Beispielskript; die Regeln der Abwechslung (V1 bis V7) und wie ein Format gewählt wird |
+| `studio/FORMATE.md` | zehn Formate (F01 bis F10) mit Takten, Hook, Einstieg, Bausteinen, Kern-Bild, Kernaussage, Verboten, Schluss und je einem Beispielskript; die Regeln der Abwechslung (V1 bis V11), wie zuerst das Format und dann das Thema gewählt wird, und die durchgespielte Folge der nächsten Tage. Geprüft von `tools/abwechslung.mjs` |
 | `studio/THEMEN.md` | 39 eigene Themen (Laden mal Blickwinkel, je ein erster Satz und die passenden Formate), davon 30 heute benutzbar |
 | `studio/state/` | `konfig.json` (alle Einstellungen der Automatik: Grenzen der Stimme, Kopf jedes Skripts in Stil C, Richtwerte, Mischung, Posten und Beitragstext mit Hashtags), `start/` (Startfassungen fürs Board), `LIESMICH.md`. Der Abzug vom Board (`board/`) entsteht beim ersten Lauf |
 | `studio/components/`, `studio/engine/`, `studio/tools/` | Bausteine, Zeitleiste, Stimme, Töne, Prüfungen |
@@ -134,6 +139,9 @@ für Ton mit beiden Fassungen).
   hintereinander. Beispielrechnung mit wenigen Stammkunden, die öfter kommen,
   und ohne Kleingedrucktes darunter. Schluss nach dem Muster: "Klingt
   interessant? Dann kommentiere jetzt KARTE, und wir melden uns bei dir."
+  Seit dem 17.11.2026 hat jedes Format eine eigene Frage aus zwei Wörtern
+  nach diesem Muster ("Noch Fragen?", "Dein Favorit?"); "Klingt
+  interessant?" behält F08. Gefragt ist er dazu noch nicht (Punkt 5 unten).
 - **Stil:** Stil C (16.11.2026), wie das zweite Video. Lauter gemischt:
   -14 LUFS, wahre Spitze höchstens -1 dBTP (entschieden mit dem zweiten
   Video).
@@ -261,6 +269,13 @@ nicht war). Ob sie an oder aus ist, zeigt claude.ai/code/routines. Offen ist:
 4. **Dann einschalten:** erst wenn der begleitete Lauf sauber durch ist,
    läuft die Aufgabe jeden Morgen allein. Bis dahin bleibt sie pausiert.
 5. **Was der Betreiber noch entscheiden muss:**
+   - Ob ihm die Schlussfragen der Formate recht sind (`FORMATE.md` 4: "Gleich
+     probieren?", "Welcher zuerst?", "Noch Fragen?", "Lohnt sich's?",
+     "Kennst du's?", "Dein Favorit?", "Und du?", "Klingt interessant?",
+     "Alles gewusst?", "Überrascht?"). Sein Satz war "Klingt interessant?";
+     in jedem Video wäre er nach V7 nicht mehr erlaubt. Bis er antwortet,
+     gelten die Fragen der Formate. Ebenso: ob ihm ein Meme in etwa sechs
+     Videos recht ist (`HOOKS.md` 4.1, Memes nur in F07).
    - Ob es die Funktionen aus dem Tarifvergleich so gibt und sie ins Video
      dürfen: Erinnerung nach langer Pause, Nachricht zum Geburtstag,
      Push-Kampagnen, Tagesangebot, Willkommensgeschenk, Kunde wirbt Kunde,

@@ -448,6 +448,12 @@ check('tools/test_voice.py', py.code === 0, py.out.trim().split('\n').pop() + (p
 const bt = await run('node', [path.join(STUDIO_ROOT, 'tools', 'beitrag.mjs'), 'selbsttest'])
 check('tools/beitrag.mjs: Regeln für den Beitragstext (5 Hashtags, kein Gedankenstrich, Stichwort)', bt.code === 0, (bt.out.trim() || bt.err.trim()).split('\n').pop())
 
+// ---- Abwechslung (tools/abwechslung.mjs): seit dem 17.11.2026 liest ein Werkzeug Format, Motive und
+// Schlussfrage aus dem Skript ab und zaehlt gleiche Saetze. Vorher trug der Lauf die Felder selbst ein, und
+// drei Entwuerfe in "neuen" Formaten sagten wieder dieselben Saetze wie das Video vom 18.11.
+const ab = await run('node', [path.join(STUDIO_ROOT, 'tools', 'abwechslung.mjs'), 'selbsttest'])
+check('tools/abwechslung.mjs: Regeln der Abwechslung (V1 bis V11), Tabelle gleich FORMATE.md', ab.code === 0, (ab.out.trim() || ab.err.trim()).split('\n').pop())
+
 // ---- Sound-Sammlung (studio/sounds, tools/test_sounds.mjs): seit dem 16.11.2026 kommen echte
 // Effekte aus einer eigenen Sammlung dazu. Ohne diesen Test fiele ein kaputter Fingerabdruck,
 // ein fremder Klang ohne Herkunft oder eine geaenderte alte Effektspur erst beim Anhoeren auf.

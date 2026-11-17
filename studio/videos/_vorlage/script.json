@@ -8,11 +8,13 @@
     "einstieg": "",
     "motive": [],
     "schluss": "",
+    "beleg_kern": "",
+    "studie": "",
     "hook_muster": "",
     "meme": "",
     "beleg": "",
     "idee": "Ein Satz: Welche Beobachtung steckt hinter diesem Video und woher kam die Anregung? Anregung heißt Aufbau oder Kniff, nie Text oder Bild übernehmen. Im unbeaufsichtigten Lauf ohne Namen von Konten (AUTOMATIK.md, Regel 12).",
-    "_hinweis": "Diesen Ordner kopieren nach videos/<JJJJ-MM-TT>-<slug>/ und nur die Kopie ändern. Alles, was mit _ beginnt, ist ein Hinweis für dich und wird ignoriert. Die Szenen unten sind ein GERÜST, KEIN BEISPIEL: sie zeigen nur, wie Teile, Schnitte, Anker und Kamera geschrieben werden, und werden alle gelöscht. Reihenfolge, Bausteine und Text kommen aus den Takten des gewählten Formats (studio/FORMATE.md, Abschnitt 4) und den Regeln der Abwechslung (FORMATE.md, Abschnitt 2). In meta gehören format, kern_bild, einstieg, motive und schluss (FORMATE.md 2), hook_muster und meme (HOOKS.md 0), beleg (PRODUKT.md). Regeln: studio/AUTOMATIK.md Abschnitt 6, studio/PLAYBOOK.md Abschnitt 'Stil C'. Die Blöcke captionStyle, timing, pace und mix oben stehen so in studio/state/konfig.json (skript, mix) und bleiben, wie sie sind."
+    "_hinweis": "Diesen Ordner kopieren nach videos/<JJJJ-MM-TT>-<slug>/ und nur die Kopie ändern. Alles, was mit _ beginnt, ist ein Hinweis für dich und wird ignoriert. Die Szenen unten sind ein GERÜST, KEIN BEISPIEL: sie zeigen nur, wie Teile, Schnitte, Anker und Kamera geschrieben werden, und werden alle gelöscht. Reihenfolge, Bausteine und Text kommen aus den Takten des gewählten Formats (studio/FORMATE.md, Abschnitt 4) und den Regeln der Abwechslung (FORMATE.md, Abschnitt 2). In meta gehören format, beleg_kern (die Kernaussage) und bei F10 studie (FORMATE.md 2), datum, thema, branche, hook_muster und meme (HOOKS.md 0), beleg (PRODUKT.md); kern_bild, einstieg, motive und schluss liest node studio/tools/abwechslung.mjs felder aus dem fertigen Skript ab (AUTOMATIK.md Schritt 16). Regeln: studio/AUTOMATIK.md Abschnitt 6, studio/PLAYBOOK.md Abschnitt 'Stil C'. Die Blöcke captionStyle, timing, pace und mix oben stehen so in studio/state/konfig.json (skript, mix) und bleiben, wie sie sind."
   },
   "voice": {
     "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",

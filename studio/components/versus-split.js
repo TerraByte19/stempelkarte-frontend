@@ -20,6 +20,11 @@
 // (17.11.2026) stand 43 s lang dasselbe Bild, die Runden waren nur an kleinen Zeichen zu erkennen. Rechts endet alles bei
 // x = 900, damit eine Kamera 1,1 um die Mitte (x = 540) die Knopfspalte (ab 950) nicht trifft;
 // eine Kamera auf eine Haelfte schoebe die andere hinein, deshalb nur mittig. Alle Klassen beginnen mit "vs-".
+// "view" (Gegenpruefung 17.11.2026): mit nur dieser einen Aufteilung stand im Entwurf 43 s lang dieselbe
+// Komposition, die Kamera 1,08 war kaum zu sehen. Jetzt hat jede Runde einen zweiten Teil: "left" zeigt
+// die Papierkarte 1,5-mal so gross in der Mitte vor der ganzen warmen Wand, "right" das Handy in der
+// Mitte vor der kuehlen. Dafuer gezeichnet, nicht vergroessert: Wand und Theke laufen ueber die ganze
+// Breite, die andere Seite fehlt. Vorgabe bleibt "split", so wie bisher.
 const SCENES = ['start', 'regen', 'knick', 'vergessen', 'app', 'ende']
 // Regenstriche: [x, Phase, Laenge]; feste Liste, damit jedes Bild bei jedem Lauf gleich ist
 const RAIN = [[40, 0, 70], [110, .3, 90], [170, .55, 60], [230, .15, 80], [300, .7, 70], [350, .4, 95], [420, .05, 65], [480, .6, 85],
@@ -43,7 +48,8 @@ export default {
     score: { default: [0, 0], doc: 'Spielstand VOR dieser Runde, [links, rechts]. Auf "point" kommt der Punkt dazu' },
     leftNote: { default: '', doc: 'Ergebnis links, erscheint auf "point" unter der Karte (höchstens etwa 16 Zeichen, z. B. "Matsch")' },
     rightNote: { default: '', doc: 'Ergebnis rechts (höchstens etwa 16 Zeichen, z. B. "Alles da")' },
-    intro: { default: true, doc: 'Banner der Runde quer durchs Bild ("Runde 2", darunter "title"), vom Anfang des Teils bis kurz vor "action". Nicht bei "scene": "start". false: kein Banner' },
+    intro: { default: true, doc: 'Banner der Runde quer durchs Bild ("Runde 2", darunter "title"), vom Anfang des Teils bis kurz vor "action". Nicht bei "scene": "start" und nicht bei "view" "left" oder "right". false: kein Banner' },
+    view: { default: 'split', doc: '"split": beide Seiten nebeneinander. "left": nur die Papierkarte, groß in der Mitte; "right": nur das Handy, in der Mitte. Für den zweiten Teil einer Runde mit "enter": "cut", Anker "action" dann auf { "at": "start", "offset": 0.05 } (FORMATE.md, F06). Nicht bei "start" und "ende"' },
     tones: { default: true, doc: 'Eigene Töne (je Runde, ok und tick beim Punkt). false, wenn das Skript Klänge aus der Bibliothek setzt' }
   },
   captions: { min: 1 },
@@ -122,6 +128,9 @@ export default {
     if (!Number.isInteger(p.round) || p.round < 0 || p.round > 9) ctx.fail('"round" muss zwischen 0 und 9 liegen')
     if (!Number.isInteger(p.stamps) || p.stamps < 4 || p.stamps > 10) ctx.fail('"stamps" muss zwischen 4 und 10 liegen')
     if (!Number.isInteger(p.filled) || p.filled < 0 || p.filled > p.stamps - (p.scene === 'vergessen' ? 1 : 0)) ctx.fail(`"filled" muss zwischen 0 und ${p.stamps - (p.scene === 'vergessen' ? 1 : 0)} liegen (in der Runde "vergessen" kommt rechts einer dazu)`)
+    if (!['split', 'left', 'right'].includes(p.view)) ctx.fail('"view" ist "split", "left" oder "right"')
+    if (p.view !== 'split' && ['start', 'ende'].includes(p.scene)) ctx.fail('"view" "left" oder "right" nur in einer Runde, nicht bei "start" oder "ende"')
+    const L = p.view !== 'right', Rt = p.view !== 'left', solo = p.view !== 'split'
     for (const [k, n] of [['title', 16], ['leftNote', 18], ['rightNote', 16], ['leftLabel', 10], ['rightLabel', 10]]) if (String(p[k]).length > n) ctx.fail(`"${k}" ist zu lang (höchstens ${n} Zeichen)`)
     const gain = { right: [0, 1], left: [1, 0], both: [1, 1], none: [0, 0] }[p.winner]
     const after = p.scene === 'ende' ? p.score : [p.score[0] + gain[0], p.score[1] + gain[1]]
@@ -131,16 +140,28 @@ export default {
       <pattern id="vs-dots" width="44" height="44" patternUnits="userSpaceOnUse"><rect width="44" height="44" fill="#1C1752"/><circle cx="22" cy="22" r="3" fill="rgba(185,176,255,.16)"/></pattern>
       <linearGradient id="vs-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E0A24"/><stop offset="1" stop-color="#0E0A24" stop-opacity="0"/></linearGradient>
       <linearGradient id="vs-glow" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#B9B0FF" stop-opacity="0"/><stop offset=".5" stop-color="#B9B0FF" stop-opacity=".45"/><stop offset="1" stop-color="#B9B0FF" stop-opacity="0"/></linearGradient></defs>`]
-    g.push('<rect x="0" y="500" width="540" height="1420" fill="url(#vs-hatch)"/><rect x="540" y="500" width="540" height="1420" fill="url(#vs-dots)"/>')
+    // Bei "left" oder "right" laeuft die eine Seite ueber die ganze Breite (wl, wr: linke und rechte Wandbreite)
+    const wl = p.view === 'left' ? 1080 : p.view === 'right' ? 0 : 540, xr = 1080 - (p.view === 'right' ? 1080 : p.view === 'left' ? 0 : 540)
+    if (wl) g.push(`<rect x="0" y="500" width="${wl}" height="1420" fill="url(#vs-hatch)"/>`)
+    if (xr < 1080) g.push(`<rect x="${xr}" y="500" width="${1080 - xr}" height="1420" fill="url(#vs-dots)"/>`)
     // Theken: links Holz mit Maserung, rechts glatt mit Glanzstreifen
-    g.push('<rect x="0" y="1450" width="540" height="470" fill="#4A2F45"/><rect x="0" y="1450" width="540" height="14" fill="#6B4A5E"/>')
-    for (const [y, x1, x2] of [[1500, 30, 380], [1560, 120, 520], [1630, 0, 300], [1700, 200, 540], [1770, 40, 420], [1840, 140, 540], [1900, 0, 330]]) g.push(`<path d="M${x1} ${y} q ${(x2 - x1) / 2} 14 ${x2 - x1} 0" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="5"/>`)
-    g.push('<rect x="540" y="1450" width="540" height="470" fill="#2A2270"/><rect x="540" y="1450" width="540" height="14" fill="#4A40A8"/>')
-    for (const y of [1530, 1640, 1800]) g.push(`<rect x="540" y="${y}" width="540" height="${y === 1520 ? 40 : 18}" fill="rgba(255,255,255,.035)"/>`)
+    if (wl) {
+      g.push(`<rect x="0" y="1450" width="${wl}" height="470" fill="#4A2F45"/><rect x="0" y="1450" width="${wl}" height="14" fill="#6B4A5E"/>`)
+      for (const [y, x1, x2] of [[1500, 30, 380], [1560, 120, 520], [1630, 0, 300], [1700, 200, 540], [1770, 40, 420], [1840, 140, 540], [1900, 0, 330]]) {
+        g.push(`<path d="M${x1} ${y} q ${(x2 - x1) / 2} 14 ${x2 - x1} 0" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="5"/>`)
+        if (wl > 540) g.push(`<path d="M${x1 + 540} ${y + 30} q ${(x2 - x1) / 2} 14 ${x2 - x1} 0" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="5"/>`)
+      }
+    }
+    if (xr < 1080) {
+      g.push(`<rect x="${xr}" y="1450" width="${1080 - xr}" height="470" fill="#2A2270"/><rect x="${xr}" y="1450" width="${1080 - xr}" height="14" fill="#4A40A8"/>`)
+      for (const y of [1530, 1640, 1800]) g.push(`<rect x="${xr}" y="${y}" width="${1080 - xr}" height="18" fill="rgba(255,255,255,.035)"/>`)
+    }
     // Beiwerk links: Stempelkissen und Kassenbons; rechts: Schale mit Muenzen und eine Pflanze
-    g.push('<rect x="40" y="1600" width="170" height="90" rx="10" fill="#2B1E33"/><rect x="52" y="1610" width="146" height="58" rx="6" fill="#5A4FCF"/><rect x="270" y="1640" width="120" height="150" rx="6" fill="#E9E1D2" transform="rotate(12 330 1710)"/><rect x="292" y="1670" width="70" height="8" rx="4" fill="#B9AE9A" transform="rotate(12 330 1710)"/><rect x="292" y="1692" width="54" height="8" rx="4" fill="#B9AE9A" transform="rotate(12 330 1710)"/>')
-    g.push('<ellipse cx="660" cy="1680" rx="90" ry="26" fill="#1A1446"/><circle cx="640" cy="1670" r="18" fill="#C9A94A"/><circle cx="676" cy="1674" r="18" fill="#D9B95A"/><rect x="930" y="1560" width="110" height="110" rx="14" fill="#3A2E64"/><path d="M985 1560 q-40 -90 -10 -150 M985 1560 q10 -110 50 -140 M985 1560 q-60 -40 -80 -100" fill="none" stroke="#5FA77A" stroke-width="14" stroke-linecap="round"/>')
-    g.push('<rect x="510" y="500" width="60" height="1420" fill="url(#vs-glow)"/><rect x="537" y="500" width="6" height="1420" fill="#B9B0FF" opacity=".75"/>')
+    if (wl) g.push('<rect x="40" y="1600" width="170" height="90" rx="10" fill="#2B1E33"/><rect x="52" y="1610" width="146" height="58" rx="6" fill="#5A4FCF"/><rect x="270" y="1640" width="120" height="150" rx="6" fill="#E9E1D2" transform="rotate(12 330 1710)"/><rect x="292" y="1670" width="70" height="8" rx="4" fill="#B9AE9A" transform="rotate(12 330 1710)"/><rect x="292" y="1692" width="54" height="8" rx="4" fill="#B9AE9A" transform="rotate(12 330 1710)"/>')
+    if (wl > 540) g.push('<rect x="700" y="1620" width="150" height="110" rx="10" fill="#E9E1D2" transform="rotate(-8 775 1675)"/><rect x="722" y="1650" width="90" height="8" rx="4" fill="#B9AE9A" transform="rotate(-8 775 1675)"/><rect x="900" y="1580" width="140" height="80" rx="10" fill="#2B1E33"/>')
+    if (xr < 1080) g.push('<ellipse cx="660" cy="1680" rx="90" ry="26" fill="#1A1446"/><circle cx="640" cy="1670" r="18" fill="#C9A94A"/><circle cx="676" cy="1674" r="18" fill="#D9B95A"/><rect x="930" y="1560" width="110" height="110" rx="14" fill="#3A2E64"/><path d="M985 1560 q-40 -90 -10 -150 M985 1560 q10 -110 50 -140 M985 1560 q-60 -40 -80 -100" fill="none" stroke="#5FA77A" stroke-width="14" stroke-linecap="round"/>')
+    if (xr === 0) g.push('<ellipse cx="200" cy="1690" rx="96" ry="26" fill="#1A1446"/><circle cx="180" cy="1680" r="18" fill="#C9A94A"/><circle cx="216" cy="1684" r="18" fill="#D9B95A"/><rect x="60" y="1560" width="110" height="110" rx="14" fill="#3A2E64"/><path d="M115 1560 q-30 -90 0 -150 M115 1560 q20 -110 60 -140 M115 1560 q-50 -40 -70 -100" fill="none" stroke="#5FA77A" stroke-width="14" stroke-linecap="round"/>')
+    if (!solo) g.push('<rect x="510" y="500" width="60" height="1420" fill="url(#vs-glow)"/><rect x="537" y="500" width="6" height="1420" fill="#B9B0FF" opacity=".75"/>')
     g.push('<rect x="0" y="500" width="1080" height="150" fill="url(#vs-fade)"/>')
     ctx.html(`<svg class="abs vs-wall" viewBox="0 0 1080 1920">${g.join('')}</svg>`)
 
@@ -160,7 +181,7 @@ export default {
     const mid = ctx.$('.vs-mid b'); mid.textContent = p.title; ctx.fit(mid, 340, 28)
     const nums = [sl.querySelector('.vs-num'), sr.querySelector('.vs-num')]
     nums.forEach((n, i) => { n.querySelector('.o').textContent = p.score[i]; n.querySelector('.n').textContent = after[i] })
-    ctx.html('<div class="abs vs-vs">VS</div>')
+    if (!solo) ctx.html('<div class="abs vs-vs">VS</div>')
 
     // ---- Links: Papierkarte (mit Naesse, Knick und Umriss fuer "vergessen")
     const slots = (n, on, cls) => Array.from({ length: n }, (_, i) => `<div class="${cls}${i < on ? ' on' : ''}">${i < on ? ctx.icon(p.icon) : ''}</div>`).join('')
@@ -170,6 +191,9 @@ export default {
       <div class="abs vs-ghost">?</div>`)
     const paper = ctx.$('.vs-paper'), pname = ctx.$('.vs-ptop b')
     pname.textContent = p.shop; ctx.fit(pname, 250, 16)
+    // "left": Papierkarte und Umriss 1,5-mal so gross in der Mitte (transform setzt sich mit den Angaben
+    // scale und rotate der Bewegungen zusammen, die bleiben deshalb unveraendert)
+    if (p.view === 'left') for (const e of [paper, ctx.$('.vs-ghost')]) { e.style.left = '310px'; e.style.top = '880px'; e.style.transform = 'scale(1.5)' }
 
     // ---- Rechts: Handy mit der Karte in der Wallet
     ctx.html(`<div class="abs vs-phone" data-safe="Handy"><div class="vs-screen"><i class="vs-island"></i><div class="vs-wt">Wallet</div>
@@ -178,11 +202,17 @@ export default {
       ${p.scene === 'regen' ? DROPS.map(([x, y]) => `<i class="vs-drop" style="left:${x}px;top:${y}px"></i>`).join('') : ''}</div></div>`)
     const phone = ctx.$('.vs-phone'), cname = ctx.$('.vs-chead b')
     cname.textContent = p.shop; ctx.fit(cname, 200, 13)
+    if (p.view === 'right') phone.style.left = '383px'
+    // Die andere Seite ist bei "left"/"right" nicht im Bild: unsichtbar und ohne Pruefmarken (sonst
+    // mass die Pruefung ein Element, das niemand sieht)
+    const weg = e => { e.style.visibility = 'hidden'; for (const x of [e, ...e.querySelectorAll('[data-safe],[data-oneline]')]) { x.removeAttribute('data-safe'); x.removeAttribute('data-oneline') } }
+    if (p.view === 'left') weg(phone)
+    if (p.view === 'right') { weg(paper); weg(ctx.$('.vs-ghost')) }
 
     // ---- Was in der Runde passiert
     const ta = ['start', 'ende'].includes(p.scene) ? null : ctx.at('action'), tp = p.winner !== 'none' || p.scene === 'ende' ? ctx.at('point') : null
     // Banner der Runde: kommt mit dem Teil, ist vor dem Geschehen der Runde wieder weg
-    if (p.intro && p.scene !== 'start') {
+    if (p.intro && p.scene !== 'start' && !solo) {
       ctx.html('<div class="abs vs-intro"><span></span><b data-safe="Banner der Runde" data-oneline="Banner der Runde"></b></div>')
       const ib = ctx.$('.vs-intro b'), ia = ctx.$('.vs-intro')
       ctx.$('.vs-intro span').textContent = p.scene === 'ende' ? 'Ergebnis' : (p.round ? 'Runde ' + p.round : 'Duell')
@@ -216,7 +246,9 @@ export default {
       if (p.tones) { cue(ta + 0.15, 'scan', 0.7); cue(ta + 0.9, 'pop', 0.85, 1.2) }
     }
     if (p.scene === 'app') {
-      ctx.html('<div class="abs vs-noapp" style="left:210px;top:810px"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg></div><div class="abs vs-noapp" style="left:683px;top:1040px;z-index:3"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg></div>')
+      const dl = '<svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>'
+      const pos = p.view === 'left' ? [[480, 720]] : p.view === 'right' ? [[480, 1040]] : [[210, 810], [683, 1040]]
+      ctx.html(pos.map(([x, y]) => `<div class="abs vs-noapp" style="left:${x}px;top:${y}px;z-index:3">${dl}</div>`).join(''))
       ctx.$$('.vs-noapp').forEach((n, i) => key(n, [[ta + i * 0.12, { opacity: 0, scale: 0.4 }, BACK], [ta + i * 0.12 + 0.3, { opacity: 1, scale: 1 }]]))
       if (p.tones) cue(ta + 0.05, 'pop', 0.7, 0.9)
     }
@@ -225,7 +257,9 @@ export default {
     if (tp != null) {
       const mark = (left, win) => {
         const m = el('div', 'abs vs-mark ' + (win ? 'win' : 'lose'), win ? ctx.icon('check') : '<svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>')
-        m.style.left = (left ? 195 : 668) + 'px'; m.style.top = (left ? 1190 : 1250) + 'px'; m.style.zIndex = 6
+        // Haken und Kreuz: bei "left"/"right" rechts unten neben der einen Karte
+        const at = p.view === 'left' ? [790, 1150] : p.view === 'right' ? [730, 1230] : left ? [195, 1190] : [668, 1250]
+        m.style.left = at[0] + 'px'; m.style.top = at[1] + 'px'; m.style.zIndex = 6
         ctx.root.append(m)
         key(m, [[tp, { opacity: 0, scale: 2 }, BACK], [tp + 0.28, { opacity: 1, scale: 1 }]])
       }
@@ -237,7 +271,8 @@ export default {
         if (p.tones) cue(tp + 0.1, 'chime', 0.8)
       } else {
         const lw = p.winner === 'left' || p.winner === 'both', rw = p.winner === 'right' || p.winner === 'both'
-        mark(true, lw); mark(false, rw)
+        if (L) mark(true, lw)
+        if (Rt) mark(false, rw)
         if (!lw && p.scene !== 'vergessen') key(paper, [[tp, { opacity: 1 }], [tp + 0.4, { opacity: 0.55 }]])
         if (!rw) key(phone, [[tp, { opacity: 1 }], [tp + 0.4, { opacity: 0.55 }]])
         nums.forEach((n, i) => {
@@ -248,9 +283,12 @@ export default {
         if (p.tones) { cue(tp, 'ok', 0.7); cue(tp + 0.3, 'tick', 0.8) }
       }
       for (const [side, txt] of [['l', p.leftNote], ['r', p.rightNote]]) {
-        if (!txt) continue
+        if (!txt || (side === 'l' && !L) || (side === 'r' && !Rt)) continue
         ctx.html(`<div class="abs vs-note ${side}" data-safe="Ergebnis ${side === 'l' ? 'links' : 'rechts'}"><b data-oneline="Ergebnis ${side === 'l' ? 'links' : 'rechts'}"></b></div>`)
-        const nt = ctx.$(`.vs-note.${side}`), nb = nt.querySelector('b'); nb.textContent = txt; ctx.fit(nb, side === 'l' ? 360 : 260, 24)
+        const nt = ctx.$(`.vs-note.${side}`), nb = nt.querySelector('b'); nb.textContent = txt
+        // Bei einer Seite allein steht der Zettel mittig unter ihr
+        if (solo) { nt.style.left = side === 'l' ? '240px' : '385px'; nt.style.width = side === 'l' ? '600px' : '310px' }
+        ctx.fit(nb, side === 'l' ? (solo ? 540 : 360) : 260, 24)
         key(nt, [[tp + 0.15, { opacity: 0, translate: '0px 30px' }, OUT], [tp + 0.45, { opacity: 1, translate: '0px 0px' }]])
       }
     }

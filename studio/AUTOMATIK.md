@@ -14,7 +14,9 @@ entsteht im **Stil C** (seit dem 16.11.2026, Vorbild:
 `videos/2026-11-16-ist-das-koscher`); wie, steht in Abschnitt 6. **Seit dem
 17.11.2026 hat jedes Video ein Format** (`FORMATE.md`, F01 bis F10) und hält
 die Regeln der Abwechslung ein (`FORMATE.md` 2): der alte Bogen (Papier,
-Handy, Stempel, Karte von oben, Sperrbildschirm) ist kein Standard mehr.
+Handy, Stempel, Karte von oben, Sperrbildschirm) ist kein Standard mehr. Die
+Regeln prüft `tools/abwechslung.mjs`; gewählt wird zuerst das Format, dann
+das Thema (`FORMATE.md` 3).
 `board/LIESMICH.md` nur nachschlagen, wenn ein Aufruf des Boards etwas Unerwartetes liefert. Wo eines
 dieser Dokumente von dieser Datei abweicht, gilt diese Datei.
 
@@ -187,7 +189,8 @@ Vertrags, dazu:
 | `idee_id` | Text | id der Idee, aus der das Video entstand |
 | `entwurf` | wahr/falsch | `true`: ohne Stimme gebaut. Dann beginnt `titel` mit "Entwurf ohne Stimme: " |
 | `pruefung` | Text | Kurzfassung der Messwerte |
-| `format`, `kern_bild`, `einstieg`, `motive`, `schluss` | Text, Text, Text, Liste, Text | Format und Bilder des Videos für die Regeln der Abwechslung (`FORMATE.md` 2), wie in `meta` des Skripts. Ältere Videos haben sie nicht: dann gilt die Tabelle "Altbestand" in `FORMATE.md` |
+| `format`, `kern_bild`, `einstieg`, `motive`, `beleg_kern`, `studie`, `schluss` | Text, Text, Text, Liste, Text, Text, Text | Format, Bilder und Kernaussage des Videos für die Regeln der Abwechslung (`FORMATE.md` 2), wie `tools/abwechslung.mjs felder` sie ausgibt. Ältere Videos haben sie nicht: dann gilt die Tabelle "Altbestand" in `FORMATE.md` |
+| `meme`, `hook_muster` | Text, Text | `HOOKS.md` 4.5: M-Nummer oder `""`, H-Nummer. Seit dem 17.11.2026; ältere Videos haben sie nicht (`HOOKS.md` 4.1 zählt dann nach Format) |
 | `caption` | Text mit Zeilenumbrüchen | der fertige Beitragstext für Instagram, Facebook und TikTok: Hook, ein bis zwei Sätze, Aufforderung mit Stichwort, nach einer Leerzeile genau 5 Hashtags (Abschnitt 6.6). Die Seite zeigt ihn mit dem Knopf "Text kopieren". Ältere Videos haben ihn nicht |
 
 `zeichen` ist, was für **diese Fassung** wirklich aufgenommen wurde: die volle
@@ -211,6 +214,7 @@ Vertrags, dazu:
 | `beleg` | Liste von Texten | Zeilen aus `PRODUKT.md`, Klasse 1, z. B. `["C1", "A2"]` |
 | `stichwort` | Text | Wort für die Schlusszeile |
 | `format` | Text | `F01` bis `F10` (`FORMATE.md`); spätestens in Schritt 14 gesetzt, vor dem Skript |
+| `formate` | Liste von Texten | nur bei `herkunft: "reel"`: bis zu drei Formate, deren Aufbau dem Kniff des Reels nahe ist, das passendste zuerst (`FORMATE.md` 3) |
 | `herkunft` | `reel`, `eingang`, `themen` | woher die Idee kommt |
 | `reel_id`, `reel_konto`, `reel_link`, `reel_likes` | Text, Text, Text, Zahl | wenn ein Reel die Anregung war. Der Link wird nie geöffnet |
 | `themen_nr` | Text | bei `herkunft: "themen"`, z. B. `T05` |
@@ -432,7 +436,7 @@ git -C "$R" fetch origin ccr-816d9995-jhzqdq && git -C "$R" checkout ccr-816d999
 
 ```bash
 TZ=Europe/Berlin date '+HEUTE=%F UHR=%H:%M OFFSET=%:z'; TZ=Europe/Berlin date -d tomorrow '+MORGEN=%F'; TZ=Europe/Berlin date -d '2 days' '+UEBERMORGEN=%F'
-TZ=Europe/Berlin date -d '14 days ago' '+VOR14=%F'; TZ=Europe/Berlin date -d '30 days ago' '+VOR30=%F'; TZ=Europe/Berlin date -d '30 days' '+IN30=%F'
+TZ=Europe/Berlin date -d '14 days ago' '+VOR14=%F'; TZ=Europe/Berlin date -d '30 days ago' '+VOR30=%F'; TZ=Europe/Berlin date -d '60 days ago' '+VOR60=%F'; TZ=Europe/Berlin date -d '30 days' '+IN30=%F'
 date -u '+LAUF=%Y%m%dT%H%M%SZ BEGINN=%s'
 mkdir -p /tmp/stampit-lauf && echo A=/tmp/stampit-lauf
 ```
@@ -526,7 +530,7 @@ Ohne Stimme heißt: kein Aufruf mit `--allow-voice-spend` in diesem Lauf.
 
 ```
 ArtifactData({ action: "query", url: URL, collection: "videos", query: { where: [["status", "==", "aendern"]], limit: 20 } })
-ArtifactData({ action: "query", url: URL, collection: "videos", query: { where: [["datum", ">=", "<VOR14>"]], limit: 100 } })
+ArtifactData({ action: "query", url: URL, collection: "videos", query: { where: [["datum", ">=", "<VOR60>"]], limit: 200 } })
 ArtifactData({ action: "query", url: URL, collection: "eingang", query: { where: [["status", "==", "offen"]], limit: 50 } })
 ArtifactData({ action: "query", url: URL, collection: "ideen", query: { where: [["status", "in", ["offen", "geplant", "gesperrt"]]], limit: 200 } })
 ArtifactData({ action: "get", url: URL, collection: "gedaechtnis", doc_id: "wuensche" })
@@ -545,15 +549,26 @@ in der Antwort oder in der Datei
 keine von beiden eine Version: das Dokument einmal ohne `out_dir` lesen. Gibt
 es das Dokument noch nicht, ist `R/studio/state/start/stimme.json` das Buch.
 
-Aus den Videos der letzten 14 Tage ergibt sich:
+Die Videos ab `VOR60` (60 Tage: so weit reichen die Regeln für Hooks und
+Sätze, `HOOKS.md` 1.6, `FORMATE.md` V10) kommen als Datei
+`/tmp/stampit-lauf/verlauf.json` auf die Maschine: mit dem Write-Werkzeug die
+Dokumente der Antwort als JSON-Liste, je Eintrag `{ "id": "<id>", "data": { ... } }`,
+genau so, wie die Antwort sie nennt. `tools/abwechslung.mjs` liest diese
+Datei (Schritt 16). Mehr als 200 Videos gibt es in 60 Tagen nicht; nennt die
+Antwort genau 200, ein zweites Mal mit `datum` ab dem jüngsten Datum der
+ersten Antwort fragen und zusammenführen.
+
+Aus diesen Videos ergibt sich:
 
 - welche `thema` und `branche` zuletzt dran waren, und in welcher Reihenfolge,
-- **die letzten drei Videos** vor `ZIEL` (`FORMATE.md` 2: höchstes `datum`, je
+- **die letzten Videos** vor `ZIEL` (`FORMATE.md` 2: höchstes `datum`, je
   Datum die höchste Fassung, verworfene mitgezählt, `ersetzt` nicht) mit
-  `format`, `kern_bild`, `einstieg`, `motive`, `branche` und `schluss`. Fehlt
-  ein Feld: Tabelle "Altbestand" in `FORMATE.md`, sonst `meta` in
-  `videos/<ordner>/script.json`. Daraus folgen die erlaubten Formate
-  (`FORMATE.md` 3),
+  `format`, `kern_bild`, `einstieg`, `motive`, `beleg_kern`, `branche`,
+  `schluss`, `meme`, `hook` und `text`. Fehlt ein Feld: Tabelle
+  "Altbestand" in `FORMATE.md`, sonst `meta` in
+  `videos/<ordner>/script.json` (so liest es auch das Werkzeug). Daraus
+  folgen die erlaubten Formate (`FORMATE.md` 3) und ob heute Meme-Tag ist
+  (`HOOKS.md` 4.1),
 - ob für `ZIEL` schon ein Video lebt. **Dann entsteht heute kein neues**; die
   Schritte 14 bis 21 entfallen,
 - welche Videos `verworfen` sind und noch keine `antwort` haben (Schritt 8),
@@ -816,7 +831,7 @@ ArtifactData({
     notiz: "Das Reel: <was es gemacht hat, ein Satz in eigenen Worten>. Unser Dreh: <was Stampit zum selben Thema sagt, mit eigenem Laden und eigenen Bildern, ein Satz>.",
     quelle: "Angeregt durch ein Reel von @<konto> (<Likes> Likes)",
     erstellt: "<jetzt UTC>", status: "offen",
-    thema: "<schlüssel>", branche: "<schlüssel>", hook: "<erster Satz>", beleg: ["C1"], stichwort: "<WORT>", format: "<F01 bis F10>",
+    thema: "<schlüssel>", branche: "<schlüssel>", hook: "<erster Satz>", beleg: ["C1"], stichwort: "<WORT>", formate: ["<Fxx>", "<Fxx>"],
     herkunft: "reel", reel_id: "<id>", reel_konto: "<konto>", reel_link: "<link als Text>", reel_likes: <Zahl>
   }
 })
@@ -831,8 +846,10 @@ Was eine Idee aus einem Reel darf und nicht darf:
 - Der eigene Dreh hat einen eigenen Laden (einen aus `THEMEN.md`, Tabelle
   "Läden"), einen eigenen ersten Satz und nur Bilder aus den eigenen
   Bausteinen.
-- Er bekommt ein Format (`FORMATE.md` 3, Punkt 2): das, dessen Aufbau dem
-  Kniff des Reels am nächsten ist. Nie die Bildfolge des Reels.
+- Er bekommt bis zu drei Formate (`formate`, das passendste zuerst): die,
+  deren Aufbau dem Kniff des Reels am nächsten ist. Nie die Bildfolge des
+  Reels. Welches davon gebaut wird, entscheidet Schritt 14 nach
+  `FORMATE.md` 3. Ein Reel über die Karte auf dem Sperrbildschirm hat nur F08.
 - Die Aussage über die App kommt aus `PRODUKT.md`, nicht aus dem Reel. Sagt
   der Mitbewerber etwas, das Stampit nicht belegen kann ("niemand verfolgt
   dich"), wird es nicht übernommen.
@@ -854,19 +871,27 @@ ArtifactData({
 
 Stehen jetzt weniger als `ideen.min_offen` (3) Ideen auf `offen` oder
 `geplant`, und ist die Grenze von drei neuen Ideen nicht erreicht: **eine**
-Idee aus `THEMEN.md` anlegen. Die Nummer wählt Abschnitt 5 ("Eine Nummer aus
+Idee aus `THEMEN.md` anlegen, für das Format, das nach `FORMATE.md` 3 als
+nächstes dran wäre. Die Nummer wählt Abschnitt 5 ("Eine Nummer aus
 `THEMEN.md`"). Die Idee entsteht nach dem Muster oben mit
 `herkunft: "themen"`, `themen_nr`, `quelle: "Eigene Idee"`, `notiz` = der
-Satz aus der Spalte "Was das Video sagt", ohne `reel_`-Felder. Danach
-`gedaechtnis/themen` schreiben: `verwendet` um
-`{ nr, datum: "<HEUTE>", idee_id }` ergänzt. `format` ist das erste Format aus
-der Spalte "Formate" der Nummer, das nach `FORMATE.md` 3 erlaubt ist.
+Satz aus der Spalte "Was das Video sagt", ohne `reel_`-Felder und ohne
+`formate` (die Formate stehen an der Nummer). Danach `gedaechtnis/themen`
+schreiben: `verwendet` um `{ nr, datum: "<HEUTE>", idee_id }` ergänzt.
+`format` bekommt die Idee erst in Schritt 14 oder 22.
+
+**Nie eine Nummer, deren `thema` und `branche` zu einer Idee mit Status
+`gesperrt` passen** oder zu einer geltenden `sperre` in `wuensche`: Schritt
+12 fängt das nur für Reels ab. So kam die gesperrte Idee "Eisdiele,
+Sperrbildschirm" am 17.11.2026 beinahe als T25 wieder.
 
 ### Schritt 14: die Idee des Tages wählen
 
 Entfällt, wenn für `ZIEL` schon ein Video lebt oder `studio-kaputt` gilt.
-Sonst nach Abschnitt 5 und `FORMATE.md` 3 (Idee **und** Format), und die
-gewählte Idee mit ihrem Format festhalten:
+Sonst nach Abschnitt 5 und `FORMATE.md` 3: zuerst das Format, dann die Idee
+dazu. Gibt es für das Format nur eine Nummer und noch keine Idee, die Idee
+jetzt anlegen wie in Schritt 13 (auch über die Grenze von drei neuen Ideen:
+sie wird heute verbaut). Die gewählte Idee mit ihrem Format festhalten:
 
 ```
 ArtifactData({
@@ -884,10 +909,12 @@ bei Schritt 22.
 
 Vor der ersten Textzeile: das Format der Idee in `FORMATE.md` 4 lesen
 (Takte, Hook, Bausteine, "Nie", Produkt, Schluss, Beispiel). Dann `HOOKS.md`
-Abschnitt 0 abarbeiten (Meme-Tag ja oder nein nach 4.1, Meme nach 4.2,
-Hook-Muster nach 1.3 und 2 **und nach dem Format**, Prüfliste 1.6) und in
-`meta` des Skripts eintragen: `format`, `kern_bild`, `einstieg`, `motive`,
-`schluss` (`FORMATE.md` 2), `hook_muster`, `meme`, `beleg`.
+Abschnitt 0 abarbeiten (Meme nur in F07 nach 4.1 und 4.2, Hook-Muster nach
+1.3 und 2 **und nach dem Format**, Prüfliste 1.6) und in `meta` des Skripts
+eintragen: `format`, `beleg_kern` (die Kernaussage, `FORMATE.md` 2), bei F10
+`studie`, `datum`, `thema`, `branche`, `hook_muster`, `meme`, `beleg`. Die
+Felder `kern_bild`, `einstieg`, `motive` und `schluss` liest Schritt 16 mit
+`abwechslung.mjs felder` aus dem fertigen Skript ab und trägt sie dann ein.
 
 ```bash
 R=/home/user/stempelkarte-frontend; Z="$R/studio/videos/<ZIEL>-<slug>"; test -e "$Z" && echo SCHON-DA || { cp -r "$R/studio/videos/_vorlage" "$Z" && ls "$Z"; }
@@ -920,7 +947,8 @@ Kostet nichts. Jeder Befehl mit `R=/home/user/stempelkarte-frontend;` davor.
 | Entwurf bauen (rund 2 bis 4 Minuten, unter Last auch länger, `timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice; echo "Ende-Code $?"` | Ende-Code 0, `out/video.mp4`, `out/sheet.png`, `out/poster.png`, `out/report.json` mit `"ok": true` | Code 1: wie oben. Ein Fehler von Playwright oder ffmpeg: einmal wiederholen, dann Hindernis `studio-kaputt` |
 | ansehen | `out/sheet.png` und `out/poster.png` mit dem Read-Werkzeug | siehe Liste unten | ändern und neu bauen |
 | Kennzahlen | Befehl unten | `laenge_s` (geschätzt) höchstens 56, `woerter` 105 bis 115, `zeichen` bis 800, `bildwechsel` ab 12, `laengstes_bild_s` bis 5, `warnungen` leer | einmal nachbessern (Text kürzen oder ergänzen, eine Textzeile mit Kamera oder Schnitt teilen, Abschnitt 6.3), dann weitergehen: Richtwerte halten keinen Lauf auf. **Zwei Ausnahmen:** über 56 Sekunden geschätzt oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
-| Format und Abwechslung | `meta` gegen `FORMATE.md` 2 halten: `einstieg` = Baustein des ersten Teils, `motive` aus den Bausteinen abgelesen, `schluss` = die Schlussfrage im Skript. Bei einem Format mit "Handy spät": Anfang des Teils mit der Karte im Handy (`scenes` in `out/check.json`) höchstens 13 s vor dem letzten Wort | V1 bis V7 erfüllt, Takte des Formats in dieser Reihenfolge, nichts aus "Nie" des Formats | Bild oder Satz tauschen, bis es passt. Ist das Format selbst nicht erlaubt: zurück zu Schritt 14 |
+| Felder | `node "$R/studio/tools/abwechslung.mjs" felder "$R/studio/videos/<ordner>"` | `kern_bild`, `einstieg`, `motive`, `schluss` aus der Ausgabe in `meta` übernehmen; `abweichung` danach leer | die Ausgabe gilt, nicht der Plan |
+| Format und Abwechslung | `node "$R/studio/tools/abwechslung.mjs" pruefen "$R/studio/videos/<ordner>" --verlauf /tmp/stampit-lauf/verlauf.json --ziel <ZIEL>; echo "Ende-Code $?"`. Bei einem Format mit "Handy spät" dazu: Anfang des Teils mit der Karte im Handy (`scenes` in `out/check.json`) höchstens 13 s vor dem letzten Wort | Ende-Code 0 (V1 bis V11, Themenpause, Thema mit Laden), Takte des Formats in dieser Reihenfolge, nichts aus "Nie" des Formats | `verletzt` nennt jede Regel. V10 (gleiche Sätze): die genannten Wortgruppen in eigenen Worten neu sagen. Ein Motiv zu viel: das Bild durch eines aus den Bausteinen des Formats ersetzen. Höchstens drei Runden; ist das Format selbst nicht erlaubt (V1, V4 Einstieg, V6, V9): zurück zu Schritt 14. Hat Schritt 14 Regeln fallen lassen (`FORMATE.md` 3, Punkt 3), dürfen genau diese in `verletzt` stehen; welche, kommt in `pruefung` |
 | Beitragstext | Abschnitt 6.6 | `beitrag.mjs pruefen` endet mit 0 | nach 6.6 |
 
 ```bash
@@ -951,7 +979,8 @@ Beim Ansehen von Übersicht und Titelbild achten auf:
   Sperrbildschirm mit voller Karte (6.4, Einstieg).
 - **Kein alter Bogen.** Läuft die Übersicht doch wieder Papier, Handy,
   Stempel, Karte von oben, Sperrbildschirm, hat das Skript sein Format
-  verlassen (`FORMATE.md` 5): neu schreiben.
+  verlassen (`FORMATE.md` 5): neu schreiben. V11 fängt das nur an den
+  Bausteinen; die Übersicht zeigt es auch, wenn die Sätze es erzählen.
 - **"In der Nähe" ist nie "vor der Tür".** Jedes Bild zu einem Satz über die
   Nähe des Ladens zeigt die Karte von oben (`shop-map`) mit sichtbarem
   Abstand zwischen Kundin und Ortsnadel, oder die andere Straßenseite
@@ -1061,15 +1090,19 @@ längstes Bild 4,0 s, Pausen 1,2 s, 174 Wörter je Minute, -14,1 LUFS."
        feedback: "", antwort: "", ordner: "<ZIEL>-<slug>", zeichen: <aufgenommene Zeichen>,
        erstellt: "<jetzt UTC>", geaendert: "<jetzt UTC>",
        thema: "<schlüssel>", branche: "<schlüssel>", idee_id: "<id>", entwurf: <true|false>, pruefung: "<ein Satz>",
-       format: "<Fxx>", kern_bild: "<meta.kern_bild>", einstieg: "<meta.einstieg>", motive: [<meta.motive>], schluss: "<meta.schluss>",
+       format: "<Fxx>", kern_bild: "<meta.kern_bild>", einstieg: "<meta.einstieg>", motive: [<meta.motive>], beleg_kern: "<meta.beleg_kern>", studie: "<meta.studie oder leer>", schluss: "<meta.schluss>",
+       meme: "<meta.meme>", hook_muster: "<meta.hook_muster>",
        caption: "<Beitragstext aus Abschnitt 6.6, Zeilenumbrüche als \n>"
      }
    })
    ```
 
-   `format`, `kern_bild`, `einstieg`, `motive` und `schluss` stehen genau so
-   im Dokument wie in `meta` des Skripts: der nächste Lauf liest daran die
-   Regeln der Abwechslung ab (`FORMATE.md` 2). `caption` ist der Text, den
+   `format`, `kern_bild`, `einstieg`, `motive`, `beleg_kern`, `studie`,
+   `schluss`, `meme` und `hook_muster` stehen genau so im Dokument wie in
+   `meta` des Skripts (nach Schritt 16 also wie `abwechslung.mjs felder` sie
+   abliest): der nächste Lauf liest daran die Regeln der Abwechslung und den
+   Meme-Takt ab (`FORMATE.md` 2, `HOOKS.md` 4.1). `text` ist der ganze
+   gesprochene Text: an ihm misst V10 die Sätze der nächsten drei Videos. `caption` ist der Text, den
    `beitrag.mjs pruefen` mit Ende-Code 0 bestanden hat, Zeichen für Zeichen. Bei einem Entwurf ohne Stimme gehört
    er genauso dazu. `hook` ist `captions[0].text` aus `out/report.json`: die
    erste Textzeile, wie sie zu lesen ist, ohne `*`, `|` und die gesprochenen
@@ -1102,8 +1135,8 @@ steht. Abschnitt 9. Das Ergebnis kommt mit `update` und `if_version` in
 
 Der Betreiber soll sehen, was als Nächstes gebaut wird, und es sperren
 können. Steht keine Idee auf `geplant`: nach Abschnitt 5 die beste für den
-nächsten Lauf wählen, mit einem Format nach `FORMATE.md` 3 (die letzten drei
-Videos sind dann die zwei von vorher und das heutige), und setzen:
+nächsten Lauf wählen, mit einem Format nach `FORMATE.md` 3 (das heutige Video
+zählt dann als letztes), und setzen:
 
 ```
 ArtifactData({
@@ -1186,65 +1219,75 @@ Die letzte Ausgabe der Sitzung: ein bis zwei Sätze (3.4).
 
 ## 5. Die Wahl der Idee
 
-Eine Regel für die Schritte 13, 14 und 22.
+Eine Regel für die Schritte 13, 14 und 22. Seit dem 17.11.2026 kommt **zuerst
+das Format** (`FORMATE.md` 3), dann die Idee. Grund: der Reihe nach gewählt,
+liefen die neuen Formate erst nach Wochen, und die Folge der nächsten Tage war
+eine andere als die erprobte.
 
 **Rangfolge.** Die erste Idee, die alle Bedingungen erfüllt:
 
 1. offene Ideen mit `herkunft: "eingang"`, neueste zuerst (ein Wunsch des
-   Betreibers geht vor),
-2. die Idee mit `status: "geplant"` (vor dem Benutzen neu lesen: hat der
-   Betreiber sie gesperrt, gilt das),
+   Betreibers geht vor), mit dem ersten erlaubten Format, das zu ihr passt,
+2. die Idee mit `status: "geplant"`, wenn ihr Format noch erlaubt ist (vor dem
+   Benutzen neu lesen: hat der Betreiber sie gesperrt, gilt das),
 3. offene Ideen mit `herkunft: "reel"`, die mit den meisten `reel_likes`
-   zuerst,
-4. offene Ideen mit `herkunft: "themen"`, älteste zuerst,
-5. gibt es keine: eine Nummer aus `THEMEN.md` (unten), die Idee dazu gleich
-   anlegen wie in Schritt 13.
+   zuerst, mit dem ersten erlaubten Format aus `formate` (fehlt die Liste: aus
+   `format`),
+4. sonst **das Format zuerst** (`FORMATE.md` 3, Punkt 2.4): an einem Meme-Tag
+   F07, wenn erlaubt; sonst das erlaubte Format, das am längsten kein Video
+   hatte. Dazu die erste offene Idee mit `herkunft: "themen"`, deren Nummer
+   das Format in der Spalte "Formate" hat (älteste zuerst), sonst eine Nummer
+   aus `THEMEN.md` mit diesem Format (unten), die Idee dazu gleich anlegen wie
+   in Schritt 13. Passt keine: das nächste Format.
 
 **Bedingungen.**
 
 - Status nicht `gesperrt`; Thema und Laden nicht als geltende `sperre` in
-  `wuensche`. **Was der Betreiber gesperrt hat, wird nie gebaut.**
+  `wuensche`, und nicht dieselben wie bei einer Idee mit Status `gesperrt`.
+  **Was der Betreiber gesperrt hat, wird nie gebaut**, auch nicht unter einer
+  anderen Nummer.
 - Jede Aussage hat ihre Zeile in `PRODUKT.md`, Klasse 1, und in der Spalte
   "Im Video" steht kein "kein Bild". Baubar mit den Bausteinen aus Abschnitt
-  6.4.
-- **Format und Abwechslung.** Es gibt für die Idee ein erlaubtes Format und
-  das Video kann die Regeln V1 bis V7 einhalten (`FORMATE.md` 2 und 3). Das
-  Format kommt an die Idee, bevor das Skript entsteht.
+  6.4. Die Saison passt (`THEMEN.md`, "Läden").
+- **Format und Abwechslung.** Das Format ist heute erlaubt und das Video kann
+  die Regeln V1 bis V11 einhalten (`FORMATE.md` 2 und 3). Das Format kommt an
+  die Idee, bevor das Skript entsteht.
 - **Themenpause.** Das `thema` kommt in keinem Video der letzten 7 Tage vor
   (`ideen.thema_pause_tage`, verworfene mitgezählt). Erfüllt das keine Idee
-  und keine Nummer, fällt diese Bedingung weg, und es kommt das Thema mit
-  der längsten Pause dran, nur nicht das vom Vortag. So bleibt kein Tag
-  leer.
+  und keine Nummer, fällt diese Bedingung weg (`FORMATE.md` 3, Punkt 3), und
+  es kommt das Thema mit der längsten Pause dran, nur nicht das vom Vortag.
+  So bleibt kein Tag leer.
+- **Thema mit Laden.** Dasselbe `thema` mit derselben `branche` frühestens
+  nach 21 Tagen wieder. Diese Bedingung fällt nie weg.
 
 **Dauerwünsche** (`wuensche`, `art: "thema"`):
 
 - `richtung: "mehr"`: Passt **keines der letzten zwei Videos** dazu, wird aus
   allen Stufen die erste Idee genommen, die dazu passt und die Bedingungen
-  erfüllt. Gibt es keine, wird die nächste passende Nummer aus `THEMEN.md`
-  angelegt. Gibt es auch die nicht, gilt die normale Rangfolge. So bekommt
-  der Wunsch den nächsten freien Tag und danach etwa jedes dritte Video
-  (`ideen.wunsch_jedes_n_te_video`), bis der Betreiber etwas anderes sagt.
-  Bei mehreren solchen Wünschen ist der dran, der am längsten kein Video
-  hatte.
+  erfüllt, mit dem ersten erlaubten Format. Gibt es keine, wird die nächste
+  passende Nummer aus `THEMEN.md` angelegt. Gibt es auch die nicht, gilt die
+  normale Rangfolge. So bekommt der Wunsch den nächsten freien Tag und danach
+  etwa jedes dritte Video (`ideen.wunsch_jedes_n_te_video`), bis der
+  Betreiber etwas anderes sagt. Bei mehreren solchen Wünschen ist der dran,
+  der am längsten kein Video hatte.
 - `richtung: "weniger"`: Ideen, die dazu passen, kommen erst dran, wenn sonst
   keine die Bedingungen erfüllt.
 
-Nie dieselbe `branche` wie das letzte Video (`FORMATE.md`, V5). Unter gleich
-guten Ideen die, deren Format am längsten kein Video hatte.
+Nie dieselbe `branche` wie das letzte Video (`FORMATE.md`, V5).
 
-**Eine Nummer aus `THEMEN.md`.** Nur Nummern mit "ja" in der Spalte "V1"
-und mit mindestens einem Format in der Spalte "Formate", das nach
-`FORMATE.md` 3 heute erlaubt ist. Der Reihe nach, bis eine passt:
+**Eine Nummer aus `THEMEN.md`** für ein Format. Nur Nummern mit "ja" in der
+Spalte "V1", die das Format in der Spalte "Formate" haben. Der Reihe nach,
+bis eine passt:
 
 1. die kleinste nie verwendete Nummer (`gedaechtnis/themen`), die die
-   Bedingungen erfüllt und deren Laden nicht der vom Vortag ist,
-2. dasselbe, aber mit einem Format, das erst erlaubt ist, wenn V7, V6 und V4
-   wegfallen (`FORMATE.md` 3, Punkt 3). Der Laden bleibt ein anderer als im
-   letzten Video (V5 fällt nie weg),
-3. die nie verwendete Nummer, deren Blickwinkel am längsten kein Video
-   hatte,
-4. sind alle verwendet: die Nummer, deren letzte Verwendung am längsten
-   zurückliegt und die nicht gesperrt ist, mit einem neuen ersten Satz.
+   Bedingungen erfüllt,
+2. dasselbe, wenn Regeln in der Reihenfolge aus `FORMATE.md` 3, Punkt 3
+   wegfallen (V7, V6, V4, Themenpause, dann V9 und V1). Der Laden bleibt ein
+   anderer als im letzten Video (V5 fällt nie weg),
+3. gibt es für das Format keine nie verwendete Nummer mehr: die Nummer mit
+   diesem Format, deren letzte Verwendung am längsten zurückliegt (mindestens
+   21 Tage) und die nicht gesperrt ist, mit einem neuen ersten Satz,
+4. passt keine: das nächste Format nach `FORMATE.md` 3.
 
 Sind weniger als fünf Nummern unverbraucht, kommt in `meldung`: "Die eigene
 Themenliste geht zur Neige."
@@ -1268,21 +1311,23 @@ Playbook (Abschnitte "Stil C", "script.json", "Textregeln", "Bausteine").
 Stil C regelt Tempo, Tafeln und Mischung, nicht die Reihenfolge der Bilder:
 die kommt aus den Takten des Formats. In `meta` kommen `title`, `slug`,
 `idee` (ein Satz: was die Anregung war und was daran eigenes ist, ohne Namen,
-Regel 12), `format`, `kern_bild`, `einstieg`, `motive`, `schluss` (`FORMATE.md`
-2) und frei dazu `datum`, `thema`, `branche`, `beleg`, `idee_id`,
-`hook_muster`, `meme`. Zusätzlich gilt:
+Regel 12), `format`, `beleg_kern`, bei F10 `studie`, `datum`, `thema`,
+`branche`, `hook_muster`, `meme` und, wie `abwechslung.mjs felder` sie
+abliest, `kern_bild`, `einstieg`, `motive`, `schluss` (`FORMATE.md` 2); frei
+dazu `beleg`, `idee_id`. Zusätzlich gilt:
 
 | Punkt | Vorgabe |
 |---|---|
 | Format | Die Takte des Formats aus `FORMATE.md` 4, in dieser Reihenfolge, mit den Bausteinen, die es nennt; nichts aus seiner Zeile "Nie". Kein Format ist der Standard. Fehlen Bildwechsel, kommt eine Kamerafahrt oder ein weiterer Teil desselben Bilds dazu, nicht Papier, Wallet oder Karte von oben (`FORMATE.md` 5) |
-| Einstieg | Die erste Textzeile trägt `"instant": true` und ist eine Frage oder ein Moment, kein Vorspann. Sie steht ab Bild 0 da und wird in der ersten Sekunde gesprochen. Das Bild darunter ist der Einstieg des Formats und zeigt, wovon sie spricht (6.4, Einstieg). Es ist nicht der Einstieg eines der letzten zwei Videos (V4) |
+| Einstieg | Die erste Textzeile trägt `"instant": true` und ist eine Frage oder ein Moment, kein Vorspann. Sie steht ab Bild 0 da und wird in der ersten Sekunde gesprochen. Das Bild darunter ist der Einstieg des Formats (`FORMATE.md` 4, Zeile "Einstieg"; in F07 der des Memes) und zeigt, wovon sie spricht. Es ist nicht der Einstieg eines der letzten zwei Videos (V4) |
+| Aussagen | Eine Kernaussage (`meta.beleg_kern`) und höchstens eine Aussage daneben, A1 als Ort und F1 nicht mitgezählt (`FORMATE.md` 4). Jede in eigenen Worten: höchstens zwei gleiche Gruppen aus vier Wörtern mit jedem der letzten drei Videos (V10, `abwechslung.mjs`) |
 | Erzählform | **Ein** Laden aus der Tabelle "Läden" in `THEMEN.md`, nie derselbe wie im letzten Video (V5). Wie erzählt wird (Geschichte, Tipps, Frage und Antwort, Rechnung, Tag, Duell, Quiz, Zahl), bestimmt das Format. Jede Aussage über die App hat ihre Zeile in `PRODUKT.md`, Klasse 1 |
 | Länge | 105 bis 115 Wörter, 15 bis 21 Textzeilen (die zwei des Schlusses mitgezählt), 5 bis 7 Szenen vor dem Schluss, höchstens 800 Zeichen (A1). **Ab 110 Wörtern höchstens 18 Textzeilen.** Der Entwurf schätzt 3,2 s + 0,36 s je Wort + 0,5 s je Textzeile nach der ersten + 0,35 s je Szene vor dem Schluss (die alte Vorlage vom 16.11.2026: 108 Wörter, 15 Textzeilen, 5 Szenen, 50,8 s). Mit der Regel davor bleibt das unter 56 s; alle Höchstwerte zusammen (115 Wörter, 21 Textzeilen, 7 Szenen) ergäben rund 57 s. `--check` nennt den Wert in der Zeile "Länge". Fertig mit Stimme werden es rund 40 bis 45 s. Über 56 s geschätzt wird nicht aufgenommen, über 60 s bricht der Bau ab |
 | Tempo der Stimme | Die Stimme bleibt, wie sie ist (Liam, 1,05). Das ergibt rund 170 Wörter je Minute beim Sprechen |
 | Texte | Einfache, kurze Sätze, Du-Form. Nie "Café" und "Kaffee" nah beieinander. Rechnung mit wenigen Stammkunden, die öfter kommen, ohne Kleingedrucktes, mit möglichst wenigen Kommas |
 | Laden | Name, Stempelzahl und Symbol in jeder Szene und jedem Teil gleich. Abweichung nur mit Absicht (Thema `stempelzahl`) |
 | Sperrbildschirm | Uhrzeit passt zum Laden, Datum ohne Jahr, Wochentag passt zum Tag (Befehl in Schritt 2). `"pin": false`: die Nähe zeigt in Stil C die Karte von oben (6.4) |
-| Schluss | Die Frage des Formats (`FORMATE.md` 4, Zeile "Schluss"; höchstens zwei Wörter, sonst steht das Schlussbild über 5 s; nicht dieselbe wie in einem der letzten zwei Videos, V7), dann `Dann kommentiere jetzt STICHWORT,{Stichwort,}` und `und wir melden uns bei dir.` Nichts anderes, auch nicht "schick das einem Freund" wie bei den Vorbildern. Form in 6.2 |
+| Schluss | Die Frage des Formats (`FORMATE.md` 4, Zeile "Schluss"; höchstens zwei Wörter, sonst steht das Schlussbild über 5 s; kein Wort aus der Schlussfrage eines der letzten zwei Videos, V7), dann `Dann kommentiere jetzt STICHWORT,{Stichwort,}` und `und wir melden uns bei dir.` Nichts anderes, auch nicht "schick das einem Freund" wie bei den Vorbildern. Form in 6.2 |
 | Stimme, Töne, Farben | `voice` wie in der Vorlage, kein `sound`, kein `seed`. Das dunkle Aussehen bleibt |
 | Werkzeuge | Nie `tools/clip-in.py` (Sätze von außerhalb des Studios, nur in begleiteten Sitzungen, Regel 11), nie `--force`, nie ein neuer Baustein |
 | Wünsche | Alles aus `gedaechtnis/wuensche` mit `art: "text"` beachten, solange es keiner Regel widerspricht |
@@ -1326,7 +1371,7 @@ Der Schluss sieht immer so aus (Frage aus dem Format, Stichwort ändern, sonst n
 
 ```json
 "captions": [
-  { "lines": ["Dein Tag?"], "accent": 1, "keep": true, "mode": "zeile" },
+  { "lines": ["Kennst du's?"], "accent": 1, "keep": true, "mode": "zeile" },
   { "role": "cta", "lines": ["Dann kommentiere jetzt BROT,{Brot,}", "und wir melden uns bei dir."], "gapBefore": 0.65 }
 ]
 ```
@@ -1378,8 +1423,8 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
   | `shop-door` | keine: er ist schon die Nahaufnahme |
   | `week-strip` | `"zoom": 1.15, "focus": [580, 600], "to": [540, 610]` (wächst von der Kopfzeile nach unten) |
   | `tip-cards` | auf die große Karte: `"zoom": 1.2, "focus": [500, 1040], "to": [540, 1080], "dur": 0.3` |
-  | `comment-thread` | auf Kommentar und Antwort: `"zoom": 1.1, "focus": [470, 880], "to": [470, 930], "dur": 0.3`. Mehr, und beide reichen in die Knopfspalte von TikTok |
-  | `versus-split` | nur mittig: `"zoom": 1.08, "focus": [540, 1000], "to": [540, 1040], "dur": 0.3`, und auf der nächsten Textzeile derselben Runde zurück mit `"zoom": 1, "focus": [540, 960], "to": [540, 960], "dur": 0.3` (zwei Bildwechsel je Runde). Nie auf eine Hälfte: das schöbe die andere in die Knopfspalte |
+  | `comment-thread` | auf Kommentar und Antwort: `"zoom": 1.1, "focus": [210, 880], "to": [210, 930], "dur": 0.3`. Der Punkt `focus` bleibt bei 1,1 stehen, alles andere rückt von ihm weg: mit x = 210 bleibt die Karte links und rechts im Bild (vorher x = 470: links rund 12 px abgeschnitten, Gegenprüfung 17.11.2026). Mehr Zoom, und beide reichen in die Knopfspalte von TikTok |
+  | `versus-split` | keine: je Runde zwei Teile, beide Seiten (`"view": "split"`) und mit `"enter": "cut"` eine Seite aus der Nähe (`"view": "left"` oder `"right"`, dafür gezeichnet). Die Kamera 1,08 mittig war kaum zu sehen (Gegenprüfung 17.11.2026). Nie eine Kamera auf eine Hälfte: das schöbe die andere in die Knopfspalte |
   | `day-clock` | `"zoom": 1.15, "focus": [520, 980], "to": [540, 1030], "dur": 0.3` |
   | `big-number` | auf die Tafel: `"zoom": 1.15, "focus": [540, 820], "to": [540, 860], "dur": 0.3` (nach dem Klappern, auf ein späteres Wort) |
   | `calc-panel` | nur in F04, wie im Döner-Video: `"zoom": 1.2, "focus": [540, 1060], "to": [540, 1120], "dur": 0.2` |
@@ -1408,8 +1453,8 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
   `"enter": "cut"` ein anderes Bild **aus den Bausteinen des Formats**, nicht
   von selbst das nächste Papier-Bild (der Dreierschlag Papier, zerknickt,
   verloren war Teil des alten Bogens, `FORMATE.md` 1). Jeder der drei
-  Papier-Bausteine höchstens einmal im Video; `wallet-vanish` ist das Motiv
-  `papier-knick` und nach V3 nur in einem von drei Videos.
+  Papier-Bausteine höchstens einmal im Video; jedes Papier-Bild ist das
+  Motiv `papier` und nach V3 nur in einem von drei Videos.
   So ist der Entwurf zu T01 am 16.11.2026 auf 12 Bildwechsel und höchstens
   4,8 s je Bild gekommen; im ersten Versuch mit 12 Wörtern auf `guest-ghost`
   stand ein Bild 5,5 s, in der Probe zu T15 mit 12 Wörtern in zwei
@@ -1423,10 +1468,10 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 
 | Aussage (`PRODUKT.md`) | Baustein | So |
 |---|---|---|
-| Einstieg, wenn der Hook vom Handy, vom Sperrbildschirm oder von der vollen Karte spricht (zum Beispiel T02, T16, T25) | `lock-notification` | `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Text der Benachrichtigung mit dem Stand: "Noch <n> Stempel bis: <Belohnung>", nur bei voller Karte "<Belohnung> wartet auf dich" (C1 in `PRODUKT.md`). Wie der erste Satz klingt, steht in `HOOKS.md` 1.2 und 1.6 |
-| Einstieg, wenn der Hook von etwas anderem spricht: vom Papier, von einem fast verlorenen Kunden (zum Beispiel T01, T03, T15), vom Scannen ohne App (T04, T18) | der Baustein dieser Aussage: `paper-card`, `guest-ghost` oder `wallet-vanish`; beim Scannen `wallet-pass` mit `"rise": false` | Das Bild steht ab Bild 0, seine erste Bewegung liegt auf einem Anker kurz nach dem Anfang (`paper-card`: `hit` mit `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01 erprobt; `wallet-pass` als Einstieg ist nicht erprobt, Standbild bei 0 s ansehen). **Nie ein Bild, das dem Hook widerspricht:** unter "Den zehnten macht ein anderer" kein Sperrbildschirm mit "10 von 10". Der Sperrbildschirm kommt dann später, als Schnitt nach dem Bild für "in der Nähe" |
+| Einstieg in F08 (der Hook spricht vom Handy, vom Sperrbildschirm oder von der vollen Karte, zum Beispiel T02, T16) | `lock-notification` | `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Text der Benachrichtigung mit dem Stand: "Noch <n> Stempel bis: <Belohnung>", nur bei voller Karte "<Belohnung> wartet auf dich" (C1 in `PRODUKT.md`). Wie der erste Satz klingt, steht in `HOOKS.md` 1.2 und 1.6 |
+| Einstieg in jedem anderen Format: der Baustein aus der Zeile "Einstieg" des Formats (`FORMATE.md` 4), in F07 der des Memes (`HOOKS.md` 3.2). Für Papier als Einstieg (nur M26, M29, M21, M18 in F07) | `paper-card`; nie `guest-ghost` oder `wallet-vanish` (als Einstieg nicht erprobt) | Das Bild steht ab Bild 0, seine erste Bewegung liegt auf einem Anker kurz nach dem Anfang (`paper-card`: `hit` mit `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01 erprobt; `wallet-pass` als Einstieg ist nicht erprobt, Standbild bei 0 s ansehen). **Nie ein Bild, das dem Hook widerspricht:** unter "Den zehnten macht ein anderer" kein Sperrbildschirm mit "10 von 10". Der Sperrbildschirm kommt dann später, als Schnitt nach dem Bild für "in der Nähe" |
 | Die Kundin ist unterwegs, geht am Laden vorbei (Weg zu C1) | `shop-street` mit `"across": true`, `"circle": false`, `"shopAt": 0.7`, `"direction": "right"`, `"from": -0.08`, `"via": 0.13`, `"to": 0.15` | Sie geht auf der **anderen** Straßenseite, der Laden steht klein im Hintergrund. `to` höchstens 0,09 hinter `via`, sonst deckt die kleine Karte den Laden zu. Nie `shop-street` mit Passant ohne `across` |
-| **C1: "in der Nähe", die Karte erscheint von selbst auf dem Sperrbildschirm (immer, mit dem Stand; nicht erst, wenn sie voll ist). Nur in F08 als Kern, sonst nur, wenn V2 das Motiv `naehe` erlaubt (`FORMATE.md` 2)** | **`shop-map`**, Karte von oben: `"circle": true`, `"notify": true`, `"note": "Noch <n> Stempel bis: <Belohnung>"` (nur bei voller Karte: `"<Belohnung> wartet auf dich"`), `"path": [[-0.1, 1], [0.55, 1]]`, Anker `circle` und `walk` am Anfang, `buzz` auf das Wort "zeigt" oder "meldet" mit `"offset": -0.1`, `arrive` mit `{ "at": "end", "offset": -0.5 }`, Kamera nach 6.3 | **Immer**, wenn ein Satz von der Nähe des Ladens handelt. Die Kundin geht eine Straße hinter dem Laden, tritt in den Kreis, und dort, sichtbar entfernt von der Ortsnadel, zeigt ihr Handy die Karte. Es darf nie so aussehen, als müsse man vor der Tür stehen: das war die Korrektur des Betreibers am zweiten Video. Den Weg nicht ändern; einen eigenen Weg lehnt der Baustein ab, wenn er an der Tür vorbeiführt. Danach oft ein Schnitt auf `lock-notification` |
+| **C1: "in der Nähe", die Karte erscheint von selbst auf dem Sperrbildschirm (immer, mit dem Stand; nicht erst, wenn sie voll ist). Nur in F08 (`FORMATE.md`: kein anderes Format zeigt die Nähe, F07 ausdrücklich nicht), und nach V2 höchstens in einem von drei Videos** | **`shop-map`**, Karte von oben: `"circle": true`, `"notify": true`, `"note": "Noch <n> Stempel bis: <Belohnung>"` (nur bei voller Karte: `"<Belohnung> wartet auf dich"`), `"path": [[-0.1, 1], [0.55, 1]]`, Anker `circle` und `walk` am Anfang, `buzz` auf das Wort "zeigt" oder "meldet" mit `"offset": -0.1`, `arrive` mit `{ "at": "end", "offset": -0.5 }`, Kamera nach 6.3 | **Immer**, wenn ein Satz von der Nähe des Ladens handelt. Die Kundin geht eine Straße hinter dem Laden, tritt in den Kreis, und dort, sichtbar entfernt von der Ortsnadel, zeigt ihr Handy die Karte. Es darf nie so aussehen, als müsse man vor der Tür stehen: das war die Korrektur des Betreibers am zweiten Video. Den Weg nicht ändern; einen eigenen Weg lehnt der Baustein ab, wenn er an der Tür vorbeiführt. Danach oft ein Schnitt auf `lock-notification` |
 | Viele Stammkunden sehen den Laden auf dem Sperrbildschirm (C1, Sicht des Ladens) | `lock-notification` als Teil mit `"enter": "cut"`, Kamera auf die Benachrichtigung (6.3) | Der Satz sagt nur C1, zum Beispiel "Dann stehst du auf dem Sperrbildschirm deiner Stammkunden." Nie "sehen", "wissen, wo" oder "orten". Nicht `shop-map` mit `"view": "owner"` (unten) |
 | Papier geht verloren, zerknickt, wird vergessen (A4) | `paper-card`, `wallet-vanish`, `guest-ghost` | Als Teile einer Szene, Schlag auf Schlag mit `"enter": "cut"`. `wallet-vanish`: drei Anker auf drei `*`-Wörter ("*Zerknickt, \| *vergessen, \| *verloren."). `"mug": true` nur für die Bäckerei. Je Bild höchstens zehn Wörter, mit zwei Textzeilen neun, ohne Kamera (6.3) |
 | Karte in Apple und Google Wallet, einmal scannen, kein Download (A1, A2, A3) | `wallet-pass` mit Scan | Kamera auf den QR-Code (6.3), `location: ""` |
@@ -1435,7 +1480,7 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 | Die Pointe (der Beleg der Idee in einem Satz) | `stamp-check` als eigene Szene oder als Teil mit `"enter": "cut"` (6.2) | `"icon": "check"`, Anker `hit` auf das letzte Wort, `"offset": 0.1` |
 | Tipps, Satz-Tausch (F01, F02) | `tip-cards`, je Tipp ein Teil mit `"show"`; dieselbe Liste `items` in jedem Teil | Im Einstieg `"rise": false` (die Pinnwand steht ab Bild 0). Satz-Tausch: `label` "Sag nicht:", `better`, Anker `strike` auf das letzte Wort des alten Satzes, `swap` auf das erste Wort des neuen. Kamera nach 6.3. Höchstens 60 Zeichen je Satz |
 | Frage, Einwand, Quiz (F03, F09) | `comment-thread` | Einstieg: `"typed": true`, Anker `type` `{ "at": "start", "offset": 0.05 }`, `send` auf das letzte Wort der Frage, `reply` (höchstens 60 Zeichen) auf das erste Wort der Antwort. Weitere Fragen: `"typed": false`. Quiz: `verdict` `"falsch"` oder `"stimmt"`, Anker `verdict` auf "Stimmt". `author` bleibt "Du" (nie ein Name, N12). Eine Antwort, die in `PRODUKT.md` "nur gesprochen" ist (F1), kommt nicht in `reply` und bekommt keinen Stempel |
-| Duell, Runde für Runde (F06) | `versus-split`, je Runde ein Teil | `"scene"`: `start`, `regen`, `vergessen`, `app` (mit `"winner": "both"`), `knick` (nur nach V3), `ende`. `score` = Stand **vor** der Runde, `round` zählt hoch, Anker `action` auf das Wort der Runde, `point` auf das Urteil. Laden, Symbol und Stempelzahl in jedem Teil gleich |
+| Duell, Runde für Runde (F06) | `versus-split`, je Runde zwei Teile: `"view": "split"` mit Anker `action`, dann mit `"enter": "cut"` `"view": "left"` oder `"right"` mit Anker `point` | `"scene"`: `start`, `regen`, `knick`, `app` (mit `"winner": "both"`), `vergessen` (Motiv `scan`, nur nach V8), `ende`. Im Teil aus der Nähe läuft die Runde mit `action` auf `{ "at": "start", "offset": 0.05 }` noch einmal kurz an. `score` = Stand **vor** der Runde, `round` zählt hoch, Anker `action` auf das Wort der Runde, `point` auf das Urteil. Laden, Symbol und Stempelzahl in jedem Teil gleich |
 | Ein Tag im Laden (F05) | `day-clock`, je Uhrzeit ein Teil | `time` "HH:MM", `from` = Uhrzeit des Teils davor, `events` = die früheren Uhrzeiten, `label` höchstens 24 Zeichen, Anker `event` auf das Wort der Uhrzeit oder des Ereignisses. Uhrzeiten passen zum Laden (Bäckerei früh, Eis am Nachmittag) |
 | Eine Zahl groß (F04, F10) | `big-number` | `value` höchstens 7 Zeichen, normale Bindestriche; `from` = Zahl des Schritts davor; Anker `show` auf das Wort, das die Zahl nennt. Eine Studienzahl genau wie in `PRODUKT.md`, die Quelle nur gesprochen, nie in `sub` |
 | Beispielrechnung (F04) | `calc-panel` als Zusammenfassung nach den Schritten mit `big-number` | Wie im Döner-Video (in Stil C erprobt): alle Zeilen auf den Wörtern **einer** Textzeile (`row1`, `row2`, ... auf die gesprochenen Zahlen, `result` auf die Ergebniszahl), `"coin": ""`, Kamera nach 6.3. Höchstens drei Zeilen, wenige Stammkunden, die öfter kommen. Der Bau bricht ab, wenn die Rechnung nicht aufgeht |
@@ -1990,6 +2035,6 @@ erste begleitete Lauf (10.3) geht diese Liste durch:
 | ob die Texte `lp_price_*` irgendwo live zu sehen sind und die Funktionen dahinter stimmen | auf diesem Branch zeigt sie keine Seite an (A2) | der Betreiber bestätigt |
 | Schritt 1 des Auftragstexts: `add_repo`, Klon und `register_repo_root` in einer geplanten Sitzung, und wohin der Klon geht | nie gelaufen | Schritt 1 |
 | der Vortrag von 5.080 Zeichen für November 2026 | geschätzt | der Betreiber sieht den wahren Verbrauch bei ElevenLabs |
-| die Formate (`FORMATE.md`) und die Regeln der Abwechslung im Lauf; die neuen Bausteine `tip-cards`, `comment-thread`, `versus-split`, `day-clock`, `big-number` | am 17.11.2026 in einer begleiteten Sitzung geschrieben; drei Entwürfe ohne Stimme (F03, F05, F06) nach den Dokumenten gebaut. Mit Stimme, im Lauf und mit dem Lesen der Felder vom Board nie gelaufen | Schritte 6, 14, 15, 16, 19 |
+| die Formate (`FORMATE.md`) und die Regeln der Abwechslung im Lauf; die neuen Bausteine `tip-cards`, `comment-thread`, `versus-split`, `day-clock`, `big-number`; `tools/abwechslung.mjs` | am 17.11.2026 in begleiteten Sitzungen geschrieben und nach einer Gegenprüfung überarbeitet (Format zuerst, V1 bis V11, Sätze gezählt); die Folge der nächsten 30 Tage mit dem Werkzeug durchgespielt; drei Entwürfe ohne Stimme (F09, F07, F01). Mit Stimme, im Lauf, mit `verlauf.json` aus einer echten Abfrage des Boards nie gelaufen | Schritte 6, 13, 14, 15, 16, 19 |
 
 ENDE DER ANLEITUNG

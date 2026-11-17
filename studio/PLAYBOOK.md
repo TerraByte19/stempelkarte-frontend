@@ -685,10 +685,10 @@ kippen. Alle bis zum Bildrand gezeichnet, je Teil ein Zustand (`show`,
 | Baustein | Format | Kamera (erprobt, `AUTOMATIK.md` 6.3) | Falle |
 |---|---|---|---|
 | `tip-cards` | F01, F02 | 1,2 auf die Karte | in jedem Teil dieselbe Liste `items`; im Einstieg `"rise": false` |
-| `comment-thread` | F03, F09 | 1,1 mittig links (`focus` x = 470) | mehr Zoom schiebt Kommentar und Antwort in die Knopfspalte; `author` bleibt "Du" |
-| `versus-split` | F06 | 1,08 mittig | nie auf eine Hälfte; `score` ist der Stand vor der Runde |
+| `comment-thread` | F03, F09 | 1,1 mit `focus` x = 210 (der Punkt bleibt stehen; mit x = 470 lief die Karte links aus dem Bild) | mehr Zoom schiebt Kommentar und Antwort in die Knopfspalte; `author` bleibt "Du" |
+| `versus-split` | F06 | keine: je Runde `"view": "split"`, dann mit Schnitt `"left"` oder `"right"` (eine Seite groß, dafür gezeichnet) | nie eine Kamera auf eine Hälfte; `score` ist der Stand vor der Runde |
 | `day-clock` | F05 | 1,15 mittig | `from` muss vor `time` liegen, beide in der Zeitleiste |
-| `big-number` | F04, F10 | 1,15 auf die Tafel, nach dem Klappern | keine Quelle im Bild; höchstens 7 Zeichen |
+| `big-number` | F04, F10, F07 (M23, M09) | 1,15 auf die Tafel, nach dem Klappern (die Tafel ist dafür schmal genug) | keine Quelle im Bild; höchstens 7 Zeichen |
 
 **Erweitert, Vorgaben unverändert:**
 
@@ -784,7 +784,8 @@ frischer Checkout still mit der alten Betonung. Die Einzelheiten stehen in
    nicht hinein, auch wenn es auf der Landing Page steht (z. B. Preise oder
    "14 Tage gratis" im Schlussbild).
 7. **Schlusszeile, immer in dieser Form:** oben eine kurze Frage
-   ("Klingt interessant?", höchstens 2 Zeilen, in Stil C mit
+   (die des Formats aus `FORMATE.md` 4, höchstens zwei Wörter, z. B.
+   "Klingt interessant?", höchstens 2 Zeilen, in Stil C mit
    `"mode": "zeile"`), dann
    `Dann kommentiere jetzt STICHWORT, und wir melden uns bei dir.`
    Das Stichwort ist ein Wort in Großbuchstaben, passend zum Video (KARTE,
@@ -928,7 +929,9 @@ umstoßen.
 - **Wischer leise.** Die Wisch-Töne waren ihm zu laut; sie laufen jetzt mit
   halber Lautstärke (Vorgaben, siehe Töne).
 - **Schlusszeile:** "Klingt interessant? Dann kommentiere jetzt WORT, und wir
-  melden uns bei dir."
+  melden uns bei dir." Seit dem 17.11.2026 steht oben die Frage des Formats,
+  zwei Wörter nach diesem Muster (`FORMATE.md` 4); "Klingt interessant?"
+  behält F08. Die Rückfrage an ihn ist offen (`START.md`, Punkt 5).
 - **Ausrufezeichen nach "Und das lohnt sich"** (nicht Doppelpunkt): dafür
   wurde im ersten Video eigens ein Satz neu aufgenommen.
 - **Beispielrechnung:** mit wenigen Stammkunden, die öfter kommen (im Video:
@@ -1456,7 +1459,8 @@ Textzeilen: mindestens 1. Datei: `components/versus-split.js`
 | `score` | `[0,0]` | Spielstand VOR dieser Runde, [links, rechts]. Auf "point" kommt der Punkt dazu |
 | `leftNote` | `""` | Ergebnis links, erscheint auf "point" unter der Karte (höchstens etwa 16 Zeichen, z. B. "Matsch") |
 | `rightNote` | `""` | Ergebnis rechts (höchstens etwa 16 Zeichen, z. B. "Alles da") |
-| `intro` | `true` | Banner der Runde quer durchs Bild ("Runde 2", darunter "title"), vom Anfang des Teils bis kurz vor "action". Nicht bei "scene": "start". false: kein Banner |
+| `intro` | `true` | Banner der Runde quer durchs Bild ("Runde 2", darunter "title"), vom Anfang des Teils bis kurz vor "action". Nicht bei "scene": "start" und nicht bei "view" "left" oder "right". false: kein Banner |
+| `view` | `"split"` | "split": beide Seiten nebeneinander. "left": nur die Papierkarte, groß in der Mitte; "right": nur das Handy, in der Mitte. Für den zweiten Teil einer Runde mit "enter": "cut", Anker "action" dann auf { "at": "start", "offset": 0.05 } (FORMATE.md, F06). Nicht bei "start" und "ende" |
 | `tones` | `true` | Eigene Töne (je Runde, ok und tick beim Punkt). false, wenn das Skript Klänge aus der Bibliothek setzt |
 
 | Anker | Vorgabe | Wann |

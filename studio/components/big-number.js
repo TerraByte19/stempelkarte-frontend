@@ -12,14 +12,20 @@
 // einen Namen oder ein Jahr.
 //
 // Gezeichnet bis zum Bildrand: Holzlatten an der Wand, die Tafel an zwei Stangen, darunter
-// eine Bank mit zwei kleinen Tafeln als Beiwerk. Kein Zufall: alle Zeichenfolgen der Blaetter
-// stehen fest im Code. Eine Kamera 1,15 um die Mitte der Tafel bleibt im gezeichneten Bild.
-// Aufteilung (Buehnen-Pixel): Zeile ueber der Tafel 584 bis 630, Tafel 646 bis 976 (die Zellen
-// zusammen hoechstens 700 px breit und mittig, also rechts vor x = 890, auch mit Kamera 1,15: ab 950 liegt bei
-// y ueber 900 die Knopfspalte von TikTok), Zeile darunter 1030 bis
-// 1180 und hoechstens bis x = 920, Bank ab 1330 (Beiwerk). Alle Klassen beginnen mit "bn-".
+// eine Theke mit Brettern bis zum unteren Rand. Kein Zufall: alle Zeichenfolgen der Blaetter
+// stehen fest im Code.
+// Gegenpruefung 17.11.2026: unten standen nur zwei kleine Tafeln ohne Zahl und leere Rahmen
+// (gut ein Drittel des Bildes Platzhalter), und die Tafel war 980 px breit: die Kamera 1,15 schnitt
+// ihren Rahmen links und rechts ab. Jetzt ist die Tafel 860 px breit (mit 1,15 um x = 540 von
+// 45 bis 1035 px im Bild) und unten steht eine Theke mit Klingel und Pflanze.
+// Aufteilung (Buehnen-Pixel): Zeile ueber der Tafel 584 bis 630, Tafel 646 bis 976 und x 110 bis
+// 970 (die Zellen zusammen hoechstens 700 px breit und mittig, also rechts vor x = 890: ab 950
+// liegt bei y ueber 900 die Knopfspalte von TikTok), Zeile darunter 1030 bis 1180 und x 120 bis
+// 880 (mit Kamera 1,15 bis x = 931; bis zum 17.11.2026 reichte sie bis 920 und vergroessert bis 978, in die
+// Knopfspalte), Theke ab 1262 (Beiwerk). Alle Klassen beginnen mit "bn-".
 
-const BOARD = { x: 50, y: 646, w: 980, h: 330 }, ROOM = 700   // Zellen zusammen hoechstens so breit, mittig: rechts bis x = 890
+const BOARD = { x: 110, y: 646, w: 860, h: 330 }, ROOM = 700   // Zellen zusammen hoechstens so breit, mittig: rechts bis x = 890
+const COUNTER = 1262
 // Blaetter, durch die jede Zelle klappert, bevor sie stehen bleibt
 const SPIN = ['7', '3', '9', '1', '5']
 
@@ -51,7 +57,7 @@ export default {
   .bn-cell i.end { color: var(--lilac); text-shadow: 0 0 40px rgba(142,130,245,.55); }
   .bn-cell b { position: absolute; left: 0; right: 0; top: 0; height: 50%; background: rgba(0,0,0,.35); opacity: 0; }
   .bn-cell::after { content: ''; position: absolute; left: -2px; right: -2px; top: 50%; height: 4px; margin-top: -2px; background: #0B081E; }
-  .bn-label { left: 80px; width: 840px; top: 1030px; text-align: center; font: 600 62px/1.16 var(--display); letter-spacing: -.01em; }
+  .bn-label { left: 120px; width: 760px; top: 1030px; text-align: center; font: 600 58px/1.16 var(--display); letter-spacing: -.01em; }
   `,
   build(ctx) {
     const { p, key, cue } = ctx, { OUT } = ctx.ease
@@ -67,15 +73,15 @@ export default {
       <radialGradient id="bn-spot" cx=".5" cy="0" r="1"><stop offset="0" stop-color="#B9B0FF" stop-opacity=".28"/><stop offset="1" stop-color="#B9B0FF" stop-opacity="0"/></radialGradient></defs>`]
     g.push('<rect x="0" y="500" width="1080" height="1420" fill="url(#bn-slat)"/>')
     g.push('<path d="M120 560 L-80 1300 H1160 L960 560 Z" fill="url(#bn-spot)"/>')
-    for (const x of [260, 820]) g.push(`<rect x="${x - 7}" y="500" width="14" height="${BOARD.y - 490}" fill="#5A4FCF"/><rect x="${x - 22}" y="${BOARD.y - 24}" width="44" height="26" rx="6" fill="#3A3180"/>`)
-    // Bank: Sitz, Beine, darauf zwei kleine Tafeln mit Strichen (ohne Zahl, nur Beiwerk)
-    g.push('<rect x="0" y="1330" width="1080" height="590" fill="#1F1855"/><rect x="0" y="1330" width="1080" height="14" fill="#4A40A8"/>')
-    for (const x of [0, 540]) {
-      g.push(`<g transform="translate(${x + 60} 1384)"><rect width="420" height="170" rx="16" fill="#0B081E" stroke="#3A3180" stroke-width="6"/>`)
-      for (let i = 0; i < 4; i++) g.push(`<rect x="${26 + i * 98}" y="26" width="80" height="118" rx="8" fill="#1B1650"/><rect x="${26 + i * 98}" y="83" width="80" height="4" fill="#0B081E"/><rect x="${46 + i * 98}" y="78" width="40" height="12" rx="6" fill="rgba(255,255,255,.2)"/>`)
-      g.push('</g>')
-    }
-    for (let x = 30; x < 1080; x += 180) g.push(`<rect x="${x}" y="1620" width="140" height="220" rx="12" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="4"/>`)
+    for (const x of [290, 790]) g.push(`<rect x="${x - 7}" y="500" width="14" height="${BOARD.y - 490}" fill="#5A4FCF"/><rect x="${x - 22}" y="${BOARD.y - 24}" width="44" height="26" rx="6" fill="#3A3180"/>`)
+    // Theke: Platte mit Lichtkante, Front aus senkrechten Brettern mit Fugen und einer Leiste, bis zum Rand
+    g.push(`<pattern id="bn-plank" width="96" height="60" patternUnits="userSpaceOnUse"><rect width="96" height="60" fill="#2B2270"/><rect width="6" height="60" fill="#1D1752"/><rect x="40" y="10" width="3" height="40" rx="1.5" fill="rgba(255,255,255,.05)"/><rect x="70" y="24" width="2" height="22" rx="1" fill="rgba(0,0,0,.12)"/></pattern>`)
+    g.push(`<rect x="0" y="${COUNTER + 30}" width="1080" height="${1920 - COUNTER}" fill="url(#bn-plank)"/>`)
+    g.push(`<rect x="0" y="${COUNTER + 30}" width="1080" height="40" fill="rgba(0,0,0,.28)"/><rect x="0" y="1560" width="1080" height="16" fill="#3A3180"/><rect x="0" y="1850" width="1080" height="70" fill="#1A1446"/>`)
+    g.push(`<rect x="-10" y="${COUNTER}" width="1100" height="36" rx="6" fill="#4A40A8"/><rect x="-10" y="${COUNTER}" width="1100" height="9" fill="#7468D8"/>`)
+    // Beiwerk auf der Theke: links eine Tischklingel, rechts eine Pflanze im Topf (fuer jeden Laden passend)
+    g.push(`<ellipse cx="190" cy="${COUNTER - 2}" rx="78" ry="12" fill="#1A1446"/><path d="M128 ${COUNTER - 6} a62 56 0 0 1 124 0 Z" fill="#C9C2F0"/><path d="M146 ${COUNTER - 22} a44 40 0 0 1 40 -30" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" opacity=".55"/><rect x="183" y="${COUNTER - 76}" width="14" height="18" rx="5" fill="#9A90DA"/>`)
+    g.push(`<rect x="950" y="${COUNTER - 64}" width="100" height="64" rx="12" fill="#3A2E64"/><rect x="944" y="${COUNTER - 70}" width="112" height="16" rx="7" fill="#4A3C7A"/><path d="M1000 ${COUNTER - 68} q-34 -60 -12 -104 M1000 ${COUNTER - 68} q10 -74 40 -96 M1000 ${COUNTER - 68} q-50 -24 -66 -66 M1000 ${COUNTER - 68} q38 -28 56 -62" fill="none" stroke="#5FA77A" stroke-width="12" stroke-linecap="round"/>`)
     g.push('<rect x="0" y="500" width="1080" height="150" fill="url(#bn-fade)"/>')
     ctx.html(`<svg class="abs bn-wall" viewBox="0 0 1080 1920">${g.join('')}</svg>`)
 

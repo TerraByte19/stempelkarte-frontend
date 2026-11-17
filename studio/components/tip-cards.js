@@ -84,6 +84,8 @@ export default {
   .tc-label { font: 700 30px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--brand); margin-bottom: 14px; }
   .tc-title { position: relative; font: 700 74px/1.12 var(--display); letter-spacing: -.02em; }
   .tc-text { position: relative; margin-top: 26px; font: 500 40px/1.3 var(--body); opacity: .75; }
+  .tc-card.tc-solo { display: flex; flex-direction: column; justify-content: center; }
+  .tc-card.tc-solo .tc-title { font-size: 88px; }
   .tc-water { position: absolute; right: 44px; bottom: 22px; font: 700 260px/.8 var(--display); color: var(--brand); opacity: .1; }
   .tc-ico { position: absolute; right: 40px; bottom: 34px; width: 96px; color: var(--brand); opacity: .9; }
   .tc-ico svg { width: 96px; stroke-width: 2.2; }
@@ -134,7 +136,10 @@ export default {
 
     // ---- Die grosse Karte
     const badge = p.numbered ? String(p.show) : ctx.icon(cur.icon || 'check')
-    ctx.html(`<div class="abs tc-card" data-safe="Tipp-Karte"><i class="tc-pin"></i><div class="tc-badge">${badge}</div>
+    // Nur ein Satz (ohne text, label, better): gross und mittig, sonst blieben unten gut 60 % der Karte
+    // leer (Gegenpruefung 17.11.2026, mit Kamera 1,2 gut zu sehen)
+    const solo = !cur.text && !cur.label && !cur.better
+    ctx.html(`<div class="abs tc-card${solo ? ' tc-solo' : ''}" data-safe="Tipp-Karte"><i class="tc-pin"></i><div class="tc-badge">${badge}</div>
       ${cur.label ? `<div class="tc-label" data-oneline="Kleine Zeile über dem Tipp">${esc(cur.label)}</div>` : ''}
       <div class="tc-title" data-maxlines="Tipp auf der Karte" data-max="3"><span></span><i class="tc-strike"></i></div>
       ${cur.text ? '<div class="tc-text" data-maxlines="Zeile unter dem Tipp" data-max="2"></div>' : ''}
@@ -144,7 +149,7 @@ export default {
     if (cur.text) ctx.$('.tc-text').textContent = cur.text
     // Lange Saetze: Schrift verkleinern, bis sie in drei Zeilen passen (Breite allein reicht nicht)
     const shrink = (e, size, min, lines) => { e.style.fontSize = size + 'px'; while (e.offsetHeight > size * 1.12 * lines + 4 && size > min) { size -= 2; e.style.fontSize = size + 'px' } return size }
-    shrink(title, 74, 50, 3)
+    shrink(title, solo ? 88 : 74, 50, 3)
     if (card.offsetTop + card.offsetHeight > CARD.maxBottom) ctx.fail(`Die Karte reicht bis ${card.offsetTop + card.offsetHeight} px und damit in die untere Sperrzone. Satz oder Zeile darunter kürzen`)
 
     const t = ctx.at('card')
