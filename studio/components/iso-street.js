@@ -198,7 +198,9 @@ export default {
     // Links: Block nordwestlich der Kreuzung, Front nach Sueden (+z). Rechts: Block suedoestlich, Front nach
     // Westen (-x). Ein Laden wird im eigenen Koordinatensystem gebaut (Front zeigt nach +z, Ecke zur Kreuzung
     // bei x = 0, der Laden reicht nach -x und -z) und dann an seinen Platz gedreht.
-    const lots = { left: { pos: new THREE.Vector3(-B, CURB, -B), rot: 0 }, right: { pos: new THREE.Vector3(B, CURB, B), rot: -Math.PI / 2 } }
+    // Rechts ist der Laden gespiegelt: gedreht reichte er sonst in die Kreuzung hinein statt von ihr weg
+    // (so stand er im ersten Versuch). "flip" legt Tuer und Glocke dort an das andere Ende der Front.
+    const lots = { left: { pos: new THREE.Vector3(-B, CURB, -B), rot: 0, flip: false }, right: { pos: new THREE.Vector3(B, CURB, B + SHOP.w), rot: -Math.PI / 2, flip: true } }
     const oursSide = p.ours, rivalSide = p.ours === 'left' ? 'right' : 'left'
     // Grundflaeche eines Ladens in Weltkoordinaten (fuer Bodentextur und Freihalten)
     const shopRect = side => side === 'left' ? [-B - SHOP.w, -B, -B - SHOP.d, -B] : [B, B + SHOP.d, B, B + SHOP.w]
@@ -374,7 +376,9 @@ export default {
       const g = new THREE.Group(); g.position.copy(lots[side].pos); g.rotation.y = lots[side].rot; scene.add(g)
       const acc = col(accent), wallC = ours ? col(BRAND.brand).lerp(col('#2A2166'), 0.2) : col('#46325F')
       const put = (mesh, x, y, z, cast = true) => { mesh.position.set(x, y, z); mesh.castShadow = cast; mesh.receiveShadow = true; g.add(mesh); return mesh }
-      const { w, d, h } = SHOP, dx = -SHOP.door
+      const { w, d, h } = SHOP, flip = lots[side].flip
+      // a = Abstand von der Ecke zur Kreuzung, entlang der Front -> x im Laden
+      const ax = a => flip ? -w + a : -a, dx = ax(SHOP.door), open = flip ? 1 : -1
       // Haus: abgerundeter Block; Erdgeschoss ist der Laden, darueber zwei Etagen Wohnungen
       put(new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, 0.16), std(wallC)), -w / 2, h / 2, -d / 2)
       // Gesims oben, Band ueber dem Laden, Sockel: liest sich wie ein gebautes Haus, nicht wie eine Kiste
@@ -382,12 +386,12 @@ export default {
       put(new THREE.Mesh(new RoundedBoxGeometry(w + 0.12, 0.24, 0.3, 2, 0.08), std(wallC.clone().lerp(col('#FFFFFF'), 0.1))), -w / 2, 4.85, 0.05, false)
       put(new THREE.Mesh(new RoundedBoxGeometry(w + 0.1, 0.42, d + 0.1, 2, 0.1), std(wallC.clone().multiplyScalar(0.62))), -w / 2, 0.21, -d / 2, false)
       // Wohnungsfenster, warm erleuchtet (nicht alle: bewohnt, aber nicht festlich)
-      for (const [x, y, on] of [[-w + 1.1, 6.05, 1], [-w / 2, 6.05, 0], [-1.1, 6.05, 1], [-w + 1.1, 7.85, 0], [-w / 2, 7.85, 1], [-1.1, 7.85, 1]]) {
+      for (const [x, y, on] of [[ax(w - 1.1), 6.05, 1], [-w / 2, 6.05, 0], [ax(1.1), 6.05, 1], [ax(w - 1.1), 7.85, 0], [-w / 2, 7.85, 1], [ax(1.1), 7.85, 1]]) {
         put(new THREE.Mesh(new RoundedBoxGeometry(1.1, 1.25, 0.14, 2, 0.04), std('#191340')), x, y, 0.02, false)
         put(new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.98), new THREE.MeshBasicMaterial({ color: on ? col(C.winWarm[1]).multiplyScalar(1.15) : col(C.winOff) })), x, y, 0.1, false)
       }
       // Schaufenster: leuchtet von innen, mit Theke und Spiess als Schattenriss
-      const winW = w - SHOP.door - 1.55, winX = dx - 0.85 - winW / 2
+      const winW = w - SHOP.door - 1.55, winX = ax(SHOP.door + 0.85 + winW / 2)
       put(new THREE.Mesh(new RoundedBoxGeometry(winW + 0.3, 2.2, 0.22, 2, 0.06), std('#140F33')), winX, 1.55, 0.02, false)
       const lightC = ours ? '#E9E2FF' : '#FFD7A0'
       const winTex = canvasTex(512, 256, (c2, cw, chh) => {
@@ -403,11 +407,14 @@ export default {
       // Tuer: Rahmen, dahinter das Licht des Ladens, davor das Tuerblatt (dreht auf, wenn jemand kommt)
       put(new THREE.Mesh(new RoundedBoxGeometry(1.42, 2.6, 0.22, 2, 0.06), std('#140F33')), dx, 1.3, 0.02, false)
       put(new THREE.Mesh(new THREE.PlaneGeometry(1.14, 2.36), new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(1.1) })), dx, 1.2, 0.135, false)
-      const hinge = new THREE.Group(); hinge.position.set(dx - 0.57, 0, 0.17); g.add(hinge)
-      const leaf = new THREE.Mesh(new RoundedBoxGeometry(1.12, 2.32, 0.08, 2, 0.03), std(wallC.clone().multiplyScalar(0.55))); leaf.position.set(0.56, 1.2, 0); hinge.add(leaf)
-      const pane = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.2), new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(0.92) })); pane.position.set(0.56, 1.45, 0.05); hinge.add(pane)
+      // Angel an der Seite weg von der Ecke; das Blatt reicht zur Ecke hin und schwingt nach aussen auf
+      const hinge = new THREE.Group(); hinge.position.set(ax(SHOP.door + 0.57), 0, 0.17); g.add(hinge)
+      const lx = flip ? -0.56 : 0.56
+      const leaf = new THREE.Mesh(new RoundedBoxGeometry(1.12, 2.32, 0.08, 2, 0.03), std(wallC.clone().multiplyScalar(0.55))); leaf.position.set(lx, 1.2, 0); hinge.add(leaf)
+      const pane = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.2), new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(0.92) })); pane.position.set(lx, 1.45, 0.05); hinge.add(pane)
       // Markise in Streifen, nur ueber dem Schaufenster (ueber der Tuer haengt die Glocke)
-      const awTex = canvasTex(512, 64, (c2, cw, chh) => { for (let i = 0; i < 8; i++) { c2.fillStyle = '#' + (i % 2 ? acc.clone().multiplyScalar(0.6) : acc).getHexString(); c2.fillRect(i * cw / 8, 0, cw / 8 + 1, chh) } })
+      // Markise: Ladenfarbe im Wechsel mit Lila (eigener Laden) oder Papier (gegenueber), wie auf einer Stempelkarte
+      const awTex = canvasTex(512, 64, (c2, cw, chh) => { for (let i = 0; i < 8; i++) { c2.fillStyle = i % 2 ? (ours ? BRAND.lilac : BRAND.paper) : '#' + acc.getHexString(); c2.fillRect(i * cw / 8, 0, cw / 8 + 1, chh) } })
       const aw = put(new THREE.Mesh(new RoundedBoxGeometry(winW + 0.5, 0.12, 1.35, 2, 0.05), std('#FFFFFF', { map: awTex, roughness: 0.7 })), winX, 2.86, 0.62)
       aw.rotation.x = 0.36
       // Schild ueber dem Laden: Papierfarbe, Symbolfeld in der Ladenfarbe, Name in Tinte. Unbeleuchtetes
@@ -432,16 +439,16 @@ export default {
       put(new THREE.Mesh(new RoundedBoxGeometry(signW + 0.18, signH + 0.18, 0.24, 2, 0.07), std('#1A1440')), -w / 2, 3.95, 0.12, false)
       put(new THREE.Mesh(new THREE.PlaneGeometry(signW, signH), new THREE.MeshBasicMaterial({ map: signTex, toneMapped: false })), -w / 2, 3.95, 0.25, false)
       // Schornstein (beim Grill gegenueber steigt dort Rauch auf)
-      put(new THREE.Mesh(new RoundedBoxGeometry(0.7, 1.3, 0.7, 2, 0.08), std(wallC.clone().multiplyScalar(0.8))), -w + 1.1, h + 0.75, -d + 1.2)
+      put(new THREE.Mesh(new RoundedBoxGeometry(0.7, 1.3, 0.7, 2, 0.08), std(wallC.clone().multiplyScalar(0.8))), ax(w - 1.1), h + 0.75, -d + 1.2)
       // Licht vor dem Laden: eine echte Punktlichtquelle (faerbt Markise, Figur, Glocke)
       const pl = new THREE.PointLight(lightC, 18, 8, 1.6); pl.position.set(-w / 2, 2.1, 1.7); g.add(pl)
       g.updateMatrixWorld(true)
       const world = (x, y, z) => g.localToWorld(new THREE.Vector3(x, y, z))
       glow(ours ? '#B9B0FF' : '#FFB46A', 5.5, world(-w / 2, 1.6, 1.0), 0.28)
       return {
-        g, hinge, light: pl, rot: lots[side].rot,
+        g, hinge, open, light: pl, rot: lots[side].rot,
         inWorld: world(dx, 0, -0.9), outWorld: world(dx, 0, 1.15),
-        top: world(-w / 2 + 0.5, h + 2.5, -1.2), chimney: world(-w + 1.1, h + 1.5, -d + 1.2), bellPos: world(dx + 0.95, 2.95, 0.2)
+        top: world(ax(w / 2 - 0.5), h + 2.5, -1.2), chimney: world(ax(w - 1.1), h + 1.5, -d + 1.2), bellPos: world(ax(0.35), 2.95, 0.2)
       }
     }
     const S = {}
@@ -617,8 +624,8 @@ export default {
         w.body.position.y = moving ? Math.abs(Math.cos(ph)) * 0.05 : 0
         w.blob.position.set(pos.x, CURB + 0.02, pos.z)
         // Tueren: drueben geht sie auf, kurz bevor er ankommt, und faellt hinter ihm zu; die eigene, als er herauskommt
-        goal.hinge.rotation.y = -1.25 * opening(t, w.tE - 0.6, w.tE + 0.25)
-        origin.hinge.rotation.y = p.from < 0.05 ? -1.25 * opening(t, w.tW - 0.35, w.tW + 0.45) : 0
+        goal.hinge.rotation.y = goal.open * 1.25 * opening(t, w.tE - 0.6, w.tE + 0.25)
+        origin.hinge.rotation.y = p.from < 0.05 ? origin.open * 1.25 * opening(t, w.tW - 0.35, w.tW + 0.45) : 0
         // Ladenglocke: gedaempfte Schwingung ab "enter", dazu zwei Schallringe
         const k = t - w.tE
         bellSwing.rotation.x = k > 0 ? 0.6 * Math.exp(-k * 3) * Math.sin(k * 19) : 0
