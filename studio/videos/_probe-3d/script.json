@@ -7,7 +7,7 @@
   },
   "timing": {
     "lead": 0.35,
-    "hold": 3.0,
+    "hold": 2.6,
     "maxGap": 0.45
   },
   "captionStyle": {
@@ -28,8 +28,8 @@
       },
       "anchors": {
         "crack": {
-          "cap": 0,
-          "word": 4,
+          "cap": 1,
+          "word": 2,
           "offset": 0.08
         },
         "walk": {
@@ -37,24 +37,32 @@
           "offset": 0.2
         },
         "enter": {
-          "cap": 1,
-          "word": 3,
-          "offset": 0.1
+          "cap": 3,
+          "word": 0,
+          "offset": 0.15
         }
       },
       "captions": [
         {
           "lines": [
-            "Dein *Stammkunde",
-            "hat dich *betrogen."
+            "Dein *Stammkunde"
           ],
           "instant": true
         },
         {
           "lines": [
-            "Mit dem | *Dönerladen | *gegenüber."
-          ],
-          "gapBefore": 1.5
+            "hat dich *betrogen."
+          ]
+        },
+        {
+          "lines": [
+            "Mit dem | *Dönerladen"
+          ]
+        },
+        {
+          "lines": [
+            "*gegenüber."
+          ]
         }
       ]
     }

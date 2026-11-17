@@ -42,10 +42,10 @@ const GO = -72, GS = 144, GN = 1024
 // Farben. Die Stadt bleibt bewusst grau-lila und dunkel: nur die beiden Laeden duerfen leuchten,
 // sonst sucht das Auge auf dem Handy, worum es geht.
 const C = {
-  fog: BRAND.night, road: '#1A1442', walk: '#2E2768', curb: '#4A41A0', mark: '#5A51B8', zebra: '#9B93E0',
-  city: ['#2C2656', '#322B5E', '#28224F', '#362F66', '#2E2859'],
+  fog: BRAND.night, road: '#1A1638', walk: '#2C2852', curb: '#453F78', mark: '#4F4987', zebra: '#9590C4',
+  city: ['#2D2A47', '#33304F', '#2A2742', '#383457', '#302C4B'],
   winWarm: ['#FFD58A', '#FFC56E', '#FFB55A'], winCool: '#B9B0FF', winOff: '#1C1640',
-  tree: ['#3E5C8C', '#456696', '#3A527E', '#4F5FA0'], trunk: '#2A1F45', lamp: '#FFD9A0', pole: '#221B4A',
+  tree: ['#4E6390', '#5C5A98', '#3F6A7C', '#70608F'], trunk: '#2A1F45', lamp: '#FFD9A0', pole: '#221B4A',
   skin: '#F2C29B', hair: '#2A1A2E', coat: BRAND.paper, legs: '#2B2457', heart: '#FF6B8B', bell: '#F4C56A',
   cars: ['#5B4E9A', '#8C3F5E', '#3E6A7A']
 }
@@ -183,7 +183,8 @@ export default {
     // Mond von hinten (Nordost): er kantet Daecher und Koepfe an und wirft die Schatten zur Kamera hin,
     // dadurch bekommt die Stadt Tiefe. Die sichtbaren Fronten liegen im Schatten und leben von den
     // Fenstern und den Ladenlichtern, wie nachts eben.
-    scene.add(new THREE.HemisphereLight('#7468E6', '#150F38', 1.25))
+    // Himmelslicht bewusst wenig gesaettigt: die Stadt soll grau-lila bleiben, damit die zwei Laeden leuchten
+    scene.add(new THREE.HemisphereLight('#7A74B8', '#171230', 1.3))
     const moon = new THREE.DirectionalLight('#D2CBFF', 2.4)
     moon.position.set(30, 46, -40); moon.target.position.set(0, 0, 0)
     moon.castShadow = true
@@ -192,7 +193,7 @@ export default {
     moon.shadow.bias = -0.0005; moon.shadow.normalBias = 0.04; moon.shadow.radius = 2.5
     scene.add(moon, moon.target)
     // Aufhellung von der Kamera her, schwach und ohne Schatten: sonst saufen die Fronten ganz ab
-    const fill = new THREE.DirectionalLight('#9189FF', 0.6); fill.position.set(-30, 25, 30); scene.add(fill)
+    const fill = new THREE.DirectionalLight('#9A94D8', 0.6); fill.position.set(-30, 25, 30); scene.add(fill)
 
     // ---------------------------------------------------------------- Laeden: Lage
     // Links: Block nordwestlich der Kreuzung, Front nach Sueden (+z). Rechts: Block suedoestlich, Front nach
@@ -250,8 +251,10 @@ export default {
     const nb = [[-B - SHOP.w - 3.9, -B - 3.1, 7.2, 6.2, 12.6], [-B - 3.1, -B - SHOP.d - 3.9, 6.2, 7.2, 15.6], [B + 3.1, B + SHOP.w + 3.9, 6.2, 7.2, 12.6], [B + SHOP.d + 3.9, B + 3.1, 7.2, 6.2, 15.6]]
     for (const [x, z, w, d, h] of nb) addHouse(x, z, w, d, h, C.city[3])
     // Platz vorn (suedwestlicher Block): kleine Baeume, Baenke, Laternen
-    const plaza = [[-6.2, 6.6], [-9.6, 6.2], [-13.6, 6.8], [-17.4, 6.3], [-6.4, 10.4], [-6.8, 14.6], [-7.2, 18.6], [-11.6, 11.4], [-15.2, 13.2], [-11, 16.8], [-18.4, 17.6], [-15, 19.4]]
-    plaza.forEach(([x, z], k) => trees.push([x, z, 0.62 + ((k * 37) % 10) / 40, k % 4]))
+    // Mitte des Platzes: ein runder Brunnen; Baeume locker drumherum, nicht als Wand
+    const FOUNT = [-12.4, 12.4]
+    const plaza = [[-6.2, 6.4], [-10.4, 6.1], [-16.8, 6.6], [-6.3, 11.2], [-6.6, 17.8], [-18.2, 12], [-17.4, 18.2], [-11.6, 19.2]]
+    plaza.forEach(([x, z], k) => trees.push([x, z, 0.5 + ((k * 37) % 10) / 45, k % 4]))
     const lamps = [[-B + 0.45, B - 0.45], [B - 0.45, -B + 0.45], [-B + 0.45, -B - 12], [-B - 12.5, B - 0.45], [B + 12, -B + 0.45], [B - 0.45, B + 12.5], [-B + 0.45, -B - 34], [-B - 34, -B + 0.45], [B + 34, B - 0.45], [-B - 24, B - 0.45], [B - 0.45, B + 34], [B + 24, -B + 0.45]]
 
     ;(window.__isoT ||= []).push(['plan', Math.round(performance.now())])
@@ -362,6 +365,15 @@ export default {
       const tl = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.12, 0.05), new THREE.MeshBasicMaterial({ color: '#FF4D6D' })); tl.position.set(0, 0.78, 1.96); c.add(tl)
     }
     car(-17, 1.15, Math.PI / 2, C.cars[0]); car(1.15, -15.5, 0, C.cars[1]); car(15.5, -1.15, Math.PI / 2, C.cars[2])
+    {
+      // Brunnen: Becken, Rand, leuchtendes Wasser (Lila), Saeule in der Mitte
+      const [fx, fz] = FOUNT
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.35, 0.55, 28), lam('#4A4475')); rim.position.set(fx, CURB + 0.27, fz); kit.add(rim)
+      const water = new THREE.Mesh(new THREE.CylinderGeometry(1.95, 1.95, 0.05, 28), new THREE.MeshBasicMaterial({ color: '#7E73E8' })); water.position.set(fx, CURB + 0.5, fz); kit.add(water)
+      const col1 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 1.3, 10), lam('#5A5488')); col1.position.set(fx, CURB + 1.1, fz); kit.add(col1)
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.35, 0.3, 18), lam('#5A5488')); bowl.position.set(fx, CURB + 1.75, fz); kit.add(bowl)
+      glow('#9C92FF', 5, new THREE.Vector3(fx, CURB + 0.8, fz), 0.25)
+    }
     kit.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true } })
 
     ;(window.__isoT ||= []).push(['city', Math.round(performance.now())])
@@ -523,21 +535,31 @@ export default {
     // ---------------------------------------------------------------- Der Stammkunde
     // Spielzeugfigur: Kapsel als Rumpf, Kugel als Kopf, Kappe als Haar, Beine und Arme als kleine Kapseln.
     // 1,3-fach so gross wie ein echter Mensch, sonst ist er aus dieser Hoehe nur ein Punkt.
-    let walker = null
-    if (p.walker) {
-      const fig = new THREE.Group(); fig.scale.setScalar(1.3); scene.add(fig)
+    // Eine Figur bauen (auch fuer die zwei Leute am Brunnen). Weicher Fleck darunter statt Mondschatten,
+    // denn der Schatten wird nur einmal geworfen (siehe oben).
+    const person = ({ coat, legs = C.legs, hair = C.hair, skin = C.skin, scale = 1.3 }) => {
+      const fig = new THREE.Group(); fig.scale.setScalar(scale); scene.add(fig)
       const body = new THREE.Group(); fig.add(body)
-      const coat = std(C.coat, { roughness: 0.6 }), legM = std(C.legs), skin = std(C.skin, { roughness: 0.55 })
-      const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.27, 0.42, 6, 14), coat); torso.position.y = 1.12; body.add(torso)
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 18, 14), skin); head.position.y = 1.72; body.add(head)
-      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.235, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), std(C.hair, { roughness: 0.7 })); hair.position.y = 1.74; hair.rotation.x = -0.25; body.add(hair)
+      const coatM = std(coat, { roughness: 0.6 }), legM = std(legs), skinM = std(skin, { roughness: 0.55 })
+      const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.27, 0.42, 6, 14), coatM); torso.position.y = 1.12; body.add(torso)
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 18, 14), skinM); head.position.y = 1.72; body.add(head)
+      const hairM = new THREE.Mesh(new THREE.SphereGeometry(0.235, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), std(hair, { roughness: 0.7 })); hairM.position.y = 1.74; hairM.rotation.x = -0.25; body.add(hairM)
       const limb = (r, len, m, x, y) => { const pv = new THREE.Group(); pv.position.set(x, y, 0); const l = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 4, 8), m); l.position.y = -len / 2 - r * 0.4; pv.add(l); return pv }
       const legL = limb(0.1, 0.5, legM, -0.12, 0.76), legR = limb(0.1, 0.5, legM, 0.12, 0.76)
-      const armL = limb(0.075, 0.42, coat, -0.33, 1.38), armR = limb(0.075, 0.42, coat, 0.33, 1.38)
+      const armL = limb(0.075, 0.42, coatM, -0.33, 1.38), armR = limb(0.075, 0.42, coatM, 0.33, 1.38)
       fig.add(legL, legR); body.add(armL, armR)
-      // Weicher Fleck unter der Figur statt Mondschatten (der wird nur einmal geworfen, siehe oben)
-      const blob = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ color: '#05030F', alphaMap: blobTex, transparent: true, opacity: 0.7, depthWrite: false }))
+      const blob = new THREE.Mesh(new THREE.PlaneGeometry(1.15 * scale, 1.15 * scale), new THREE.MeshBasicMaterial({ color: '#05030F', alphaMap: blobTex, transparent: true, opacity: 0.7, depthWrite: false }))
       blob.rotation.x = -Math.PI / 2; blob.renderOrder = 3; scene.add(blob)
+      const at = (x, z, ry) => { fig.position.set(x, CURB, z); fig.rotation.y = ry; blob.position.set(x, CURB + 0.02, z) }
+      return { fig, body, legL, legR, armL, armR, blob, at }
+    }
+    // Zwei Leute am Brunnen, im Gespraech: die Stadt lebt, ohne dass sie vom Stammkunden ablenken
+    const chat = [person({ coat: '#8C6BC8', scale: 1.2 }), person({ coat: '#C9786A', hair: '#5A3A2A', scale: 1.15 })]
+    chat[0].at(FOUNT[0] + 1.4, FOUNT[1] - 2.9, -2.2); chat[1].at(FOUNT[0] + 0.1, FOUNT[1] - 3.2, 1.2)
+    // Der Stammkunde: hell gekleidet (Papierfarbe), damit er auf dem dunklen Platz sofort zu sehen ist
+    let walker = null
+    if (p.walker) {
+      const { fig, body, legL, legR, armL, armR, blob } = person({ coat: C.coat, scale: 1.35 })
       // Weg: aus der Tuer auf den Gehweg, quer ueber die Kreuzung, auf den Gehweg drueben, durch die Tuer
       const a = origin.inWorld, a1 = origin.outWorld, b1 = goal.outWorld, b = goal.inWorld
       const path = new THREE.CatmullRomCurve3([a, a1, a1.clone().lerp(b1, 0.33), a1.clone().lerp(b1, 0.66), b1, b], false, 'centripetal')
@@ -633,6 +655,8 @@ export default {
         // Licht in der Tuer drueben leuchtet auf, wenn er hineingeht
         goal.light.intensity = 18 + 26 * opening(t, w.tE - 0.25, w.tE + 0.35)
       }
+      // Die zwei am Brunnen wiegen sich leicht und gestikulieren abwechselnd
+      chat.forEach((c, i) => { const ph = t * 2.2 + i * 2; c.body.rotation.z = 0.04 * Math.sin(ph); c.armR.rotation.x = -0.5 * Math.max(0, Math.sin(ph * 0.9 + i * 3)); c.armR.rotation.z = 0.2 * Math.max(0, Math.sin(ph * 0.9 + i * 3)) })
       for (const pf of puffs) {
         const ph = ((t * 0.42 + pf.i / puffs.length) % 1 + 1) % 1
         pf.s.position.copy(riv.chimney).add(v3.set(Math.sin(pf.i * 2.1 + t * 0.8) * 0.35, ph * 4.2, 0))
