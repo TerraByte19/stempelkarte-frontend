@@ -635,6 +635,7 @@ textarea[readonly] { opacity: 0.75; }
   // Automation, auch videos.caption (Beitragstext), den die Seite nur zeigt.
   // ------------------------------------------------------------------
   var ASSET_BASE = '/_blob/';      // laut assets.d.ts: eine gespeicherte id liegt unter "/_blob/" + id
+  var DATEI_BASE = 'v/';          // Kopien der Videos als Dateien neben der Seite (dritter Ladeweg, siehe makePlayer)
   var LADE_FRIST_MS = 10000;       // laut db.d.ts: Laden nach etwa 10 s als "nicht erreichbar" melden
   var UNDO_MS = 8000;
   var ALT_NACH_MS = 36 * 3600 * 1000;
@@ -769,7 +770,8 @@ textarea[readonly] { opacity: 0.75; }
     cards: new Map(),         // id -> Karte
     verschoben: 0,            // wann zuletzt eine Karte ihren Platz gewechselt hat
     fremd: 0,                 // Videos mit einem Status ausserhalb des Vertrags
-    seq: 0
+    seq: 0,
+    startStufe: 0             // ab welchem Ladeweg neue Player anfangen (makePlayer)
   };
 
   // ------------------------------------------------------------------
@@ -1171,26 +1173,29 @@ textarea[readonly] { opacity: 0.75; }
       blobWeg();
       var video = el('video', { controls: true, playsinline: true, preload: 'metadata', 'aria-label': 'Video: ' + v.titel });
       if (v.poster) video.poster = ASSET_BASE + v.poster;
-      // Zweiter Weg: Am 17.11. lud im Board kein Video mehr, obwohl jede Datei
-      // vollstaendig auf dem Server lag (H.264, moov vorne) und der Code
-      // unveraendert war. Der Player holt die Datei in Stuecken (Range) und in
-      // manchen App-Ansichten ohne die Anmeldung der Seite; ein fetch() derselben
-      // Adresse geht dagegen ueber den normalen Weg der Seite. Deshalb beim
-      // ersten Fehler die ganze Datei per fetch holen und als blob abspielen.
-      // Erst wenn auch das scheitert, die Meldung, mit Fehlercode, damit man
-      // sieht, welcher Weg klemmt.
+      // Drei Wege zur Datei, der Reihe nach. Am 17.11. lud im Board kein Video
+      // mehr, obwohl jede Datei vollstaendig auf dem Server lag (H.264, moov
+      // vorne) und der Code unveraendert war, und auch "Noch einmal" und "in
+      // neuem Tab" halfen nicht. Weg 1 ist die Asset-Adresse "/_blob/<id>".
+      // Weg 2 holt dieselbe Adresse per fetch und spielt sie als blob ab
+      // (falls nur der Player in Stuecken laden darf, fetch aber nicht). Weg 3
+      // ist eine Kopie, die als Datei neben der Seite veroeffentlicht ist
+      // ("v/<id>.mp4"): die kommt ueber denselben Weg wie die Seite selbst,
+      // und die laedt ja. Hat ein Weg einmal geklappt, fangen weitere Player
+      // gleich dort an, statt jedes Mal 12 MB umsonst zu holen.
       var meinKey = key;
-      var umweg = false;
-      function endgueltig(detail) {
-        var link = el('a', { class: 'linkbtn', href: ASSET_BASE + v.asset, target: '_blank', rel: 'noopener', text: 'Video in neuem Tab öffnen' });
+      var stufe = S.startStufe || 0;
+      var codes = [];
+      function endgueltig() {
+        var link = el('a', { class: 'linkbtn', href: DATEI_BASE + v.asset + '.mp4', target: '_blank', rel: 'noopener', text: 'Video in neuem Tab öffnen' });
         meldung('Das Video lässt sich gerade nicht laden.', 'Noch einmal versuchen', nochmal,
-          el('span', {}, [link, el('small', { class: 'player-detail', text: detail })]));
+          el('span', {}, [link, el('small', { class: 'player-detail', text: 'Fehler: ' + codes.join(', ') })]));
       }
-      video.addEventListener('error', function () {
-        if (key !== meinKey) return;
-        var code = video.error ? video.error.code : 0;
-        if (umweg) { endgueltig('Fehler: Player ' + code + ' (auch über den zweiten Weg)'); return; }
-        umweg = true;
+      function weg(n) {
+        stufe = n;
+        if (n === 0) { video.src = ASSET_BASE + v.asset; return; }
+        if (n === 2) { video.src = DATEI_BASE + v.asset + '.mp4'; return; }
+        if (n > 2) { endgueltig(); return; }
         fetch(ASSET_BASE + v.asset).then(function (res) {
           if (!res.ok) throw { status: res.status };
           return res.blob();
@@ -1203,11 +1208,20 @@ textarea[readonly] { opacity: 0.75; }
           video.src = blobUrl;
         }).catch(function (e) {
           if (key !== meinKey) return;
-          endgueltig('Fehler: Player ' + code + ', Abruf ' + (e && e.status ? e.status : 'ohne Antwort'));
+          codes.push('Weg 2: Abruf ' + (e && e.status ? e.status : 'ohne Antwort'));
+          weg(2);
         });
+      }
+      video.addEventListener('error', function () {
+        if (key !== meinKey) return;
+        codes.push('Weg ' + (stufe + 1) + ': Player ' + (video.error ? video.error.code : 0));
+        weg(stufe + 1);
       });
-      video.src = ASSET_BASE + v.asset;
+      video.addEventListener('loadedmetadata', function () {
+        if (key === meinKey && stufe > 0 && !S.startStufe) S.startStufe = stufe;
+      });
       box.append(video);
+      weg(stufe);
     }
     return { el: el('div', { class: 'stage' }, box), set: set };
   }
@@ -2720,6 +2734,47 @@ textarea[readonly] { opacity: 0.75; }
   });
 
   // ------------------------------------------------------------------
+  // Ladewege pruefen
+  //
+  // Warum: Am 17.11. lud beim Betreiber kein Video, bei uns im Test schon.
+  // Was in seiner Ansicht klemmt, sieht nur seine Ansicht. Deshalb prueft die
+  // Seite einmal je Sitzung leise alle drei Wege mit einem kleinen Stueck
+  // derselben Datei und legt das Ergebnis in "diagnose" ab, wo Claude es
+  // lesen kann. Keine Adresse und nichts Persoenliches, nur Statuscodes und
+  // die Browserkennung. Der Nutzer merkt davon nichts.
+  // ------------------------------------------------------------------
+  var PRUEF_ID = '12179ebe82070cb52335e317dfd8407a';   // Doener-Video, liegt als Asset und als Datei v/<id>.mp4
+  function ladewegePruefen(db) {
+    try { if (sessionStorage.getItem('ladewege-geprueft')) return; sessionStorage.setItem('ladewege-geprueft', '1'); } catch (e) {}
+    function abruf(url, stueck) {
+      var opt = stueck ? { headers: { Range: 'bytes=0-1023' } } : {};
+      return Promise.race([
+        fetch(url, opt).then(function (r) { return 'HTTP ' + r.status + ' ' + (r.headers.get('content-type') || '-'); }, function (e) { return 'Fehler ' + (e && e.name || '?'); }),
+        wait(15000).then(function () { return 'keine Antwort in 15 s'; })
+      ]);
+    }
+    function spieler(url) {
+      return new Promise(function (fertig) {
+        var v = document.createElement('video');
+        var t = setTimeout(function () { aus('keine Antwort in 20 s'); }, 20000);
+        function aus(x) { clearTimeout(t); v.removeAttribute('src'); try { v.load(); } catch (e) {} fertig(x); }
+        v.muted = true; v.preload = 'metadata'; v.setAttribute('playsinline', '');
+        v.addEventListener('loadedmetadata', function () { aus('ok, ' + Math.round(v.duration) + ' s'); });
+        v.addEventListener('error', function () { aus('Fehler ' + (v.error ? v.error.code : 0)); });
+        v.src = url;
+      });
+    }
+    var A = ASSET_BASE + PRUEF_ID, B = DATEI_BASE + PRUEF_ID + '.mp4';
+    Promise.all([abruf(A, true), abruf(B, true), spieler(A), spieler(B)]).then(function (r) {
+      var sw = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+      return db.collection('diagnose').doc().set({
+        zeit: nowIso(), browser: String(navigator.userAgent || '').slice(0, 300), service_worker: sw,
+        asset_abruf: r[0], datei_abruf: r[1], asset_player: r[2], datei_player: r[3]
+      });
+    }).catch(function () {});
+  }
+
+  // ------------------------------------------------------------------
   // Start
   // ------------------------------------------------------------------
   function allesZeichnen() { renderNotice(); renderStand(); renderVideos(); renderEingang(); renderIdeen(); renderLaeufe(); }
@@ -2758,6 +2813,7 @@ textarea[readonly] { opacity: 0.75; }
     if (!db) { S.fatal = 'keine_db'; allesZeichnen(); return; }
     S.db = db;
     verbinden();
+    ladewegePruefen(db);
   }, function () { S.fatal = 'keine_db'; allesZeichnen(); });
 })();
 </script>
