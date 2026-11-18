@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// selftest.mjs - schnelle Selbstpruefung des Studios (rund drei Minuten, davon zwei fuer tools/test_3d.mjs,
-// kein Netz, keine Kosten). Nach jeder Aenderung an engine/, components/ oder
+// selftest.mjs - Selbstpruefung des Studios (rund sieben Minuten, davon rund sechs fuer die vier 3D-Tests
+// tools/test_3d*.mjs; kein Netz, keine Kosten). Nach jeder Aenderung an engine/, components/ oder
 // tools/ laufen lassen; fuer den Bild-fuer-Bild-Vergleich gibt es regress.mjs.
 //
 // Festgenagelt wird, was im ersten Video von Hand stimmen musste und jetzt
@@ -29,7 +29,10 @@
 //     Hashtags (Grenze von Instagram), kein Gedankenstrich, das Stichwort des Videos
 //     (tools/beitrag.mjs selbsttest)
 //   - der 3D-Baustein iso-street zeichnet in jedem Lauf dasselbe Bild, laesst die Knopfspalte
-//     frei und setzt lange Ladennamen lesbar (tools/test_3d.mjs, etwa zwei Minuten)
+//     frei und setzt lange Ladennamen lesbar (tools/test_3d.mjs, etwa zwei Minuten); zwei 3D-Teile
+//     einer Szene rechnen nicht doppelt
+//   - die 3D-Bausteine iso-shop, phone-3d und iso-street "nah" (seit 18.11.2026, "3D zuerst") je mit
+//     eigenem Test: gleiche Pixel, Anker, Pruefkaesten, Knopfspalte, Wortlaut C1 (zusammen rund vier Minuten)
 import { readFileSync, existsSync, mkdtempSync, writeFileSync, rmSync, readdirSync, cpSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -350,6 +353,19 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
     const r = await page(mini({ component: 'shop-map', params: { view: 'owner', phones: 4, shop: 'Bäckerei Sonnenkorn am Markt' }, captions: [{ lines: ['Genau vor', 'deiner Tür.'] }] })), hit = r.res.checks.find(c => c.name === 'ueberdeckung' && !c.ok)
     check('Prüfung schlägt an: Karte, Blick des Betreibers, das Schild eines langen Ladennamens stößt an die Karte über einem Kunden', !!hit && /Ladenname an der Ortsnadel/.test(hit.details[0]), hit ? hit.details[0].slice(0, 130) : 'kein Fehler')
   }
+  {
+    // "ueberdeckung" je Teil (seit 18.11.2026): zwei Teile einer Szene stehen nie zugleich da, in der Ruhelage
+    // liegen sie aber uebereinander. Zwei 3D-Teile derselben Welt (zweimal iso-shop im Beispiel "3D zuerst")
+    // meldeten so ihre eigenen Schilder als "stoßen aneinander". Hier mit zwei Sperrbildschirmen: zwischen den
+    // Teilen kein Fehler, ein zu langer Absender im selben Teil weiter einer.
+    const two = extra => mini({ parts: [
+      { component: 'lock-notification', captions: [{ lines: ['Erst der eine.'] }] },
+      { component: 'lock-notification', enter: 'cut', params: extra, captions: [{ lines: ['Dann der andere.'] }] }] })
+    const a = await page(two({})), b = await page(two({ title: 'Bäckerei Sonnenkorn am Markt' }))
+    const ha = a.res.checks.find(c => c.name === 'ueberdeckung'), hb = b.res.checks.find(c => c.name === 'ueberdeckung')
+    check('ueberdeckung je Teil: zwei Teile einer Szene stoßen nie aneinander, ein langer Absender im selben Teil schon',
+      !!ha && ha.ok && !!hb && !hb.ok && hb.details.length === 1 && /"Absender" und "Zeitangabe"/.test(hb.details[0]), `${ha ? ha.details.join(' | ').slice(0, 100) : 'fehlt'} / ${hb ? hb.details.join(' | ').slice(0, 100) : 'fehlt'}`)
+  }
 
   // Die andere Strassenseite: der Laden klein im Hintergrund, die Fahrbahn dazwischen
   const across = (params = {}) => mini({ component: 'shop-street', params: { across: true, circle: false, note: '6 von 6', from: -0.05, via: 0.2, to: 0.29, ...params }, captions: [{ lines: ['Dein Handy meldet sich,', 'wenn du vorbeigehst.'] }] })
@@ -602,7 +618,24 @@ check('tools/test_sounds.mjs: Sound-Sammlung, Absenkung unter Wörtern, alte Eff
 // an dieser Datei. Dauert allein etwa zwei Minuten, also den groessten Teil des Selbsttests.
 const t3 = await run('node', [path.join(STUDIO_ROOT, 'tools', 'test_3d.mjs')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
 process.stdout.write(t3.out.split('\n').filter(l => l.startsWith('FEHLER')).map(l => '  [3d] ' + l).join('\n') + (/^FEHLER/m.test(t3.out) ? '\n' : ''))
-check('tools/test_3d.mjs: 3D-Baustein iso-street (gleiche Pixel je Bild, Szene nicht leer, Prüfkästen, Ausschnitt, Tür, Schilder)', t3.code === 0, (t3.out.trim() || t3.err.trim()).split('\n').pop())
+check('tools/test_3d.mjs: 3D-Baustein iso-street (gleiche Pixel je Bild, Szene nicht leer, Prüfkästen, Ausschnitt, Tür, Schilder, zwei 3D-Teile in einer Szene)', t3.code === 0, (t3.out.trim() || t3.err.trim()).split('\n').pop())
+
+// ---- Die drei 3D-Bausteine vom 18.11.2026 ("3D zuerst": der Betreiber will so wenig 2D wie moeglich, und der
+// taegliche Lauf baut seitdem mit ihnen). Jeder hat seinen eigenen Test; eingehaengt erst hier, weil beim Bau
+// andere Sitzungen an dieser Datei arbeiteten. Ohne sie fiele erst im fertigen Video auf, wenn eine dieser
+// Leinwaende leer bleibt, ein Bild vom vorigen abhaengt (Flackern, renderVideo rechnet auf drei Seiten), der
+// Sperrbildschirm "vibriert" sagt, der Ring um den Laden an der Tuer liegt (Naehe ist nie "vor der Tuer") oder
+// der Arm des Kunden den QR-Code verdeckt. Zusammen rund vier Minuten; nacheinander, nicht gleichzeitig: drei
+// Chromium mit WebGL ohne Grafikkarte nebeneinander brauchten laenger als hintereinander.
+for (const [datei, kurz, was] of [
+  ['test_3d_iso_shop.mjs', '3d-laden', '3D-Baustein iso-shop (gleiche Pixel, Anker, QR frei, Blase, Papier, Prüfkästen, Knopfspalte, Tür, Branchen)'],
+  ['test_3d_phone_3d.mjs', '3d-handy', '3D-Baustein phone-3d (gleiche Pixel, Anker, Prüfkästen, Lesbarkeit, Ausschnitt in drei Ansichten, Wortlaut C1)'],
+  ['test_3d_iso_street_naehe.mjs', '3d-naehe', 'iso-street "nah" (gleiche Pixel, Ring, Abstand zur Tür, Blase im Streifen und aus der Knopfspalte, Text, "stadt")']
+]) {
+  const r = await run('node', [path.join(STUDIO_ROOT, 'tools', datei)], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
+  process.stdout.write(r.out.split('\n').filter(l => l.startsWith('FEHLER')).map(l => `  [${kurz}] ` + l).join('\n') + (/^FEHLER/m.test(r.out) ? '\n' : ''))
+  check(`tools/${datei}: ${was}`, r.code === 0, (r.out.trim() || r.err.trim()).split('\n').pop())
+}
 
 // ---- Satz von ausserhalb des Studios (tools/clip-in.py): kuenstlicher Clip, kein Netz
 const pc = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'test_clip_in.py')], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })

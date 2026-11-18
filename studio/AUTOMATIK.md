@@ -153,7 +153,11 @@ Sie stehen vor jedem Schritt und vor jedem Text, der im Lauf gelesen wird.
     Dokumente nacheinander lesen, nie gleichzeitig (zehn gleichzeitige
     Lesezugriffe liefen ins Limit). Lange Befehle (Bau, Aufnahme, eyes) mit
     dem `timeout` starten, der dabeisteht, sonst bricht die Shell nach zwei
-    Minuten ab.
+    Minuten ab. Den Bau eines ganzen Videos (Schritte 16 und 18) und den
+    Selbsttest (Schritt 5) seit dem 18.11.2026 im Hintergrund: mit 3D dauern
+    sie länger als die zehn Minuten, die eine Shell im Vordergrund höchstens
+    wartet. Gewartet wird auf sie mit der Schleife aus Schritt 16 ("Der Bau
+    dauert", Punkt 3), sonst mit nichts.
 
 Die Regeln des Hauses gelten weiter: sichtbarer Text mit echten Umlauten und
 ohne Gedankenstriche, einfache kurze Sätze, Du-Form. Alles, was der Betreiber
@@ -534,14 +538,34 @@ R=/home/user/stempelkarte-frontend; cd "$R" && node studio/tools/budget.mjs selb
 node -e 'const s=require(process.argv[1]).stimme;console.log(JSON.stringify({stimme_erlaubt:s.unbeaufsichtigt_erlaubt,voll_am_tag:s.max_voll_pro_tag+s.nachholen_extra_voll_pro_tag,saetze_am_tag:s.max_satz_pro_tag,zeichen_am_tag:s.max_zeichen_pro_tag,zeichen_im_monat:s.automatik_max_monat}))' "$R/studio/state/konfig.json"
 ```
 
+Der Selbsttest des Studios braucht seit dem 18.11.2026 **rund 7 Minuten**
+(davon rund 6 die vier 3D-Tests), unter Last mehr. Im Vordergrund bräche die
+Shell ihn nach 2 Minuten ab (Regel 13), und ein Ergebnis käme nie. Deshalb
+im Hintergrund, wie der Bau (Schritt 16, "Der Bau dauert"):
+
 ```bash
-R=/home/user/stempelkarte-frontend; cd "$R" && node studio/tools/selftest.mjs; echo "studio $?"     # rund 30 s
+R=/home/user/stempelkarte-frontend; mkdir -p /tmp/stampit-lauf; cd "$R" && (node studio/tools/selftest.mjs; echo "Ende-Code $?") > /tmp/stampit-lauf/selbsttest.log 2>&1
 ```
+
+mit `run_in_background: true` und `timeout: 1800000`. Während er läuft,
+gehen die Schritte 6 bis 8 weiter (sie lesen nur; kein Bau, kein Test
+daneben). **Vor Schritt 9** auf das Ergebnis warten, im Vordergrund mit
+`timeout: 600000`:
+
+```bash
+timeout 570 bash -c 'until grep -qs Ende-Code /tmp/stampit-lauf/selbsttest.log; do sleep 5; done'; echo "warten $?"; grep -E '^ *(\[[a-z0-9-]+\] )?FEHLER' /tmp/stampit-lauf/selbsttest.log | head -n 20; tail -n 2 /tmp/stampit-lauf/selbsttest.log
+```
+
+`warten 0`: fertig, die letzten zwei Zeilen sind "<n> von <n> Prüfungen
+bestanden" und "Ende-Code <zahl>"; `studio` ist diese Zahl. `warten 124`:
+noch nicht fertig, denselben Befehl noch einmal; nach dreimal (rund 30
+Minuten) ohne "Ende-Code" gilt `studio` als nicht 0. Ein bloßes `sleep` im
+Vordergrund lehnt die Shell ab, diese Schleife mit `timeout` davor nicht.
 
 | | |
 |---|---|
-| Erfolg | Versionen werden genannt, `budget 0`, `quellen 0`, `studio 0`, `stimme_erlaubt` ist `true`, und die vier Zahlen liegen nicht über denen im Auftragstext (2 volle Aufnahmen, 2 Sätze, 1600, 27000) |
-| `pip`, `node`, `ffmpeg` oder Playwright fehlen, oder `studio` ist nicht 0 | Hindernis `studio-kaputt`: heute kein Bau. Die Schritte 6 bis 8, 11 bis 13 und 22 laufen trotzdem (lesen, antworten, Ideen), dann der Abschluss |
+| Erfolg | Versionen werden genannt, `budget 0`, `quellen 0`, im Protokoll des Selbsttests `Ende-Code 0` (`studio 0`), `stimme_erlaubt` ist `true`, und die vier Zahlen liegen nicht über denen im Auftragstext (2 volle Aufnahmen, 2 Sätze, 1600, 27000) |
+| `pip`, `node`, `ffmpeg` oder Playwright fehlen, oder `studio` ist nicht 0 (auch: nach 30 Minuten kein Ende-Code) | Hindernis `studio-kaputt`: heute kein Bau. Die Zeilen mit `FEHLER` aus dem Protokoll kommen gekürzt in `problem`. Die Schritte 6 bis 8, 11 bis 13 und 22 laufen trotzdem (lesen, antworten, Ideen), dann der Abschluss |
 | `budget` oder `quellen` ist nicht 0, oder die Einstellungen erlauben mehr als der Auftragstext | Hindernis `stimme-werkzeug`: der Lauf geht weiter, aber **ohne Stimme** |
 | `stimme_erlaubt` ist `false` | Hindernis `stimme-aus`: der Lauf geht weiter, aber **ohne Stimme** |
 
@@ -725,15 +749,17 @@ mit `datum` ab heute, das früheste voran, danach ältere.
    (`node "$R/studio/tools/times.mjs" "$R/studio/videos/<ordner>" --text`),
    `script.json` ändern (Abschnitt 6 und die Textregeln des Playbooks gelten
    für jede Änderung), den Text noch einmal ausgeben. Entwurf prüfen:
-   `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --check`
-   (Ende-Code 0), betroffene Standbilder ansehen (Schritt 16).
+   `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --check; echo "Ende-Code $?"`
+   mit `timeout: 600000` (mit 3D rund 80 s, unter Last länger als die 2
+   Minuten ohne `timeout`), Ende-Code 0; betroffene Standbilder ansehen
+   (Schritt 16, ebenfalls mit `timeout: 600000`).
 5. **Zählen, bevor etwas kostet.** Beide Texte Satz für Satz
    nebeneinanderlegen (Sätze enden an `. ! ? : ;`). Es gibt genau drei Fälle:
 
    | Fall | Was geschieht |
    |---|---|
    | kein gesprochener Satz ist anders | keine Aufnahme, weiter bei 6 |
-   | **genau ein** Satz ist anders, die Zahl der Sätze ist gleich, und der neue Satz hat höchstens 200 Zeichen | ein einzelner Satz: 8.3 mit `--art satz --zweck aenderung`, der Befehl in Zeile 4 mit `--splice`. `<N>` kommt aus dem Probelauf `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --splice --check; echo "Ende-Code $?"`: Ende-Code 3 und `elevenLabs.wouldSpend` in `out/check.json`. Sagt der Probelauf, der Austausch sei nicht möglich: wie die nächste Zeile |
+   | **genau ein** Satz ist anders, die Zahl der Sätze ist gleich, und der neue Satz hat höchstens 200 Zeichen | ein einzelner Satz: 8.3 mit `--art satz --zweck aenderung`, der Befehl in Zeile 4 mit `--splice`. `<N>` kommt aus dem Probelauf `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --splice --check; echo "Ende-Code $?"` (`timeout: 600000`): Ende-Code 3 und `elevenLabs.wouldSpend` in `out/check.json`. Sagt der Probelauf, der Austausch sei nicht möglich: wie die nächste Zeile |
    | alles andere (zwei oder mehr Sätze, ein Satz mehr oder weniger, ein langer Satz) | **eine volle Aufnahme** des ganzen Textes: 8.3 mit `--art voll --zweck aenderung`. Nur für ein Video mit `datum` ab heute. Mehrere Sätze werden nie einzeln nacheinander ausgetauscht |
 
    Sagt `budget.mjs` nein, oder ist das Video älter als heute:
@@ -994,11 +1020,11 @@ Kostet nichts. Jeder Befehl mit `R=/home/user/stempelkarte-frontend;` davor.
 
 | Was | Befehl | Erfolg | Wenn nicht |
 |---|---|---|---|
-| prüfen | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --check; echo "Ende-Code $?"` | Ende-Code 0, alle Prüfungen `ok` | Code 2: Fehler im Skript, die Meldung nennt ihn. Code 1: eine Prüfung, Abhilfe steht im Playbook ("Prüfungen"). Beheben und wiederholen, höchstens fünf Runden; danach Hindernis `kein-video` |
+| prüfen (mit 3D-Teilen rund 80 s, `timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --check; echo "Ende-Code $?"` | Ende-Code 0, alle Prüfungen `ok` | Code 2: Fehler im Skript, die Meldung nennt ihn. Code 1: eine Prüfung, Abhilfe steht im Playbook ("Prüfungen"). Beheben und wiederholen, höchstens fünf Runden; danach Hindernis `kein-video` |
 | Wörter und Anker | `node "$R/studio/tools/times.mjs" "$R/studio/videos/<ordner>"` | je Textzeile die Wörter mit Nummer: jeder Anker liegt auf dem gemeinten Wort | Anker im Skript berichtigen |
-| Standbilder | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills <t1,t2,...>` mit je einem Zeitpunkt kurz nach jedem Anker (Zeiten aus `out/check.json`, `anchors[].t` und `scenes`) | PNGs in `out/stills/`. Jedes mit dem Read-Werkzeug ansehen | was nicht stimmt, im Skript ändern |
-| Die ersten 3 Sekunden | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills 0,0.5,1,2,3`, die fünf Bilder ansehen, dann `node "$R/studio/tools/einstieg.mjs" "$R/studio/videos/<ordner>/out/check.json"; echo "Ende-Code $?"` | Ende-Code 0: erster Ton höchstens 0,05 s, erste Bewegung höchstens 0,5 s, erster Bildwechsel höchstens 4 s (mit Stimme 3 s), erste Tafel höchstens 8 Wörter. Bild 0 ohne Ton lässt sich in fünf Wörtern beschreiben und ist nicht nur "ein Handy" oder "eine Stempelkarte"; zwischen zwei Standbildern hat sich im Bild etwas geändert (`HOOKS.md` 1.7.4) | Ende-Code 1: `verletzt` nennt die Abhilfe (Ortsklang nach Abschnitt 6, Zeile "Stimme, Töne, Farben"; Anker nach `HOOKS.md` 1.7.3; Kamera oder Schnitt nach 6.3). Einmal nachbessern, dann in `pruefung` vermerken. Ende-Code 2: der Bericht fehlt, erst `--stills` bauen |
-| Entwurf bauen (rund 2 bis 4 Minuten, unter Last auch länger, `timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice; echo "Ende-Code $?"` | Ende-Code 0, `out/video.mp4`, `out/sheet.png`, `out/poster.png`, `out/report.json` mit `"ok": true` | Code 1: wie oben. Ein Fehler von Playwright oder ffmpeg: einmal wiederholen, dann Hindernis `studio-kaputt` |
+| Standbilder (`timeout: 600000`; mit 3D rund 80 s plus 1 bis 2 s je Bild) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills <t1,t2,...>` mit je einem Zeitpunkt kurz nach jedem Anker (Zeiten aus `out/check.json`, `anchors[].t` und `scenes`) | PNGs in `out/stills/`. Jedes mit dem Read-Werkzeug ansehen | was nicht stimmt, im Skript ändern |
+| Die ersten 3 Sekunden (`timeout: 600000`) | `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice --stills 0,0.5,1,2,3`, die fünf Bilder ansehen, dann `node "$R/studio/tools/einstieg.mjs" "$R/studio/videos/<ordner>/out/check.json"; echo "Ende-Code $?"` | Ende-Code 0: erster Ton höchstens 0,05 s, erste Bewegung höchstens 0,5 s, erster Bildwechsel höchstens 4 s (mit Stimme 3 s), erste Tafel höchstens 8 Wörter. Bild 0 ohne Ton lässt sich in fünf Wörtern beschreiben und ist nicht nur "ein Handy" oder "eine Stempelkarte"; zwischen zwei Standbildern hat sich im Bild etwas geändert (`HOOKS.md` 1.7.4) | Ende-Code 1: `verletzt` nennt die Abhilfe (Ortsklang nach Abschnitt 6, Zeile "Stimme, Töne, Farben"; Anker nach `HOOKS.md` 1.7.3; Kamera oder Schnitt nach 6.3). Einmal nachbessern, dann in `pruefung` vermerken. Ende-Code 2: der Bericht fehlt, erst `--stills` bauen |
+| Entwurf bauen (**im Hintergrund**, siehe "Der Bau dauert" unten) | `(node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --no-voice; echo "Ende-Code $?") > /tmp/stampit-lauf/bau.log 2>&1` mit `run_in_background: true` und `timeout: 5400000` | in `/tmp/stampit-lauf/bau.log` steht "Ende-Code 0"; `out/video.mp4`, `out/sheet.png`, `out/poster.png`, `out/report.json` mit `"ok": true` | Code 1: wie oben. Ein Fehler von Playwright oder ffmpeg: einmal wiederholen, dann Hindernis `studio-kaputt` |
 | ansehen | `out/sheet.png` und `out/poster.png` mit dem Read-Werkzeug | siehe Liste unten | ändern und neu bauen |
 | Kennzahlen | Befehl unten | `laenge_s` (geschätzt) höchstens 56, `woerter` 105 bis 115, `zeichen` bis 800, `bildwechsel` ab 12, `laengstes_bild_s` bis 5, `warnungen` leer | einmal nachbessern (Text kürzen oder ergänzen, eine Textzeile mit Kamera oder Schnitt teilen, Abschnitt 6.3), dann weitergehen: Richtwerte halten keinen Lauf auf. Bei einer Idee mit eigenem Plan wird nichts nachgebessert, weder am Wortlaut noch an den Bildern: dort gelten Wörter und Länge des Plans, und was hier abweicht (etwa `bildwechsel` unter 12), kommt in `pruefung`. **Zwei Ausnahmen:** über 56 Sekunden geschätzt oder über 800 Zeichen wird nicht aufgenommen (Schritt 17) |
 | Felder | `node "$R/studio/tools/abwechslung.mjs" felder "$R/studio/videos/<ordner>"` | `kern_bild`, `einstieg`, `motive`, `schluss` aus der Ausgabe in `meta` übernehmen; `abweichung` danach leer | die Ausgabe gilt, nicht der Plan |
@@ -1009,6 +1035,53 @@ Kostet nichts. Jeder Befehl mit `R=/home/user/stempelkarte-frontend;` davor.
 R=/home/user/stempelkarte-frontend
 node -e 'const fs=require("fs"),path=require("path");const f=path.resolve(process.argv[1]),r=require(f),s=JSON.parse(fs.readFileSync(path.join(path.dirname(f),"..","script.json"),"utf8"));const hold=(s.timing&&s.timing.hold!=null)?s.timing.hold:3.2,end=r.duration-hold,ts=[0,...(r.pictures||[]).map(x=>x.t).filter(t=>t<end),end];const lang=Math.max(...ts.slice(1).map((t,i)=>t-ts[i]));const L=r.audio&&r.audio.loudness;console.log(JSON.stringify({ok:r.ok,mode:r.mode,titel:r.title,laenge_s:r.duration,woerter:r.text.words,zeichen:r.elevenLabs.chars,schluessel:r.elevenLabs.key,skript_sha256:r.script&&r.script.sha256,bildwechsel:r.pictureCount,laengstes_bild_s:+lang.toFixed(1),pausen:r.voice&&r.voice.pauses,tempo_beim_sprechen:r.voice&&r.voice.wordsPerMinuteTalking,lufs:L?L.lufs:null,wahre_spitze_db:L?L.truePeakDb:null,lautheit_ok:L?L.ok:null,warnungen:r.warnings}))' "$R/studio/videos/<ordner>/out/report.json"
 ```
+
+**Der Bau dauert.** Ein Video in 2D braucht rund 2 bis 4 Minuten. Seit
+"3D zuerst" (18.11.2026, 6.4) sind die meisten Bilder 3D, und jedes 3D-Bild
+kostet ohne Grafikkarte etwa 1 bis 1,4 s je Seite statt 0,1 s (`make.mjs`
+rechnet auf drei Seiten zugleich). Gemessen am 18.11.2026 am Beispiel `videos/_beispiel-3d-f08` (elf von
+zwölf Bildern 3D, 85 % der Bilder; Entwurf 51,7 s, 1550 Bilder, neben anderen
+Sitzungen auf derselben Maschine): **23 min 35 s**, davon rund 20 min für die
+Bilder (0,78 s je Bild mit drei Seiten); neu gebaut am Abend allein auf der
+Maschine 22 min 18 s. Zum Vergleich ein Entwurf in 2D: 1503
+Bilder in 3 min 53 s. Ein Video mit Stimme (40 bis 45 s, rund ein Drittel
+weniger Bilder) braucht damit rund 18 bis 25 Minuten, unter mehr Last bis
+35. Dazu kommen Seiten, die
+ihre 3D-Welten erst bauen (schon `--check` und jedes `--stills` rund 80 s).
+Das ist länger als die zehn Minuten, die eine Shell im Vordergrund höchstens
+wartet, und wäre dort mitten im Bau abgebrochen. Deshalb:
+
+1. Den Bau mit `run_in_background: true` und `timeout: 5400000` starten (90
+   Minuten, die Ausgabe in `/tmp/stampit-lauf/bau.log`, Befehl oben). Nie
+   einen zweiten Bau oder einen Test daneben starten: beide teilen sich die
+   vier Kerne und brauchen zusammen länger als nacheinander.
+2. Derweil weiterarbeiten an dem, was nur `script.json` braucht: Felder und
+   Abwechslung (`abwechslung.mjs`), Beitragstext (6.6), das Dokument der Idee
+   fürs Board vorbereiten.
+3. Dann warten, bis "Ende-Code" in der Datei steht, mit **genau diesem
+   Befehl im Vordergrund** und `timeout: 600000` (er blockiert bis zu 9,5
+   Minuten und endet sofort, wenn der Bau fertig ist):
+
+   ```bash
+   timeout 570 bash -c 'until grep -qs Ende-Code /tmp/stampit-lauf/bau.log; do sleep 5; done'; echo "warten $?"; tail -n 2 /tmp/stampit-lauf/bau.log
+   ```
+
+   `warten 0`: fertig, die letzte Zeile nennt den Ende-Code des Baus.
+   `warten 124`: noch nicht fertig, die vorletzte Zeile zeigt den Stand
+   ("Bild 450/1550"); denselben Befehl noch einmal, **höchstens neunmal**
+   (rund 90 Minuten). Nicht anders warten: ein zweiter Befehl mit
+   `run_in_background` und das Werkzeug `Monitor` kehren sofort zurück und
+   warten nicht, und wer dann nichts mehr zu tun hat, beendet die Sitzung
+   samt Bau. Ein bloßes `sleep` im Vordergrund lehnt die Shell ab, die
+   Schleife mit `timeout` davor nicht (geprüft am 18.11.2026 in einer
+   begleiteten Sitzung). Die Sitzung endet nicht, solange der Bau läuft:
+   kein Schlusswort, keine Frage.
+4. Steht nach neun Runden (90 Minuten) noch kein Ende-Code da: Hindernis
+   `studio-kaputt` mit "Bau nach 90 Minuten nicht fertig"; das Skript
+   bleibt, der nächste Lauf baut es (Schritt 10).
+
+Ein langer Bau ist **kein Grund**, Bilder auf 2D zurückzustellen, und kein
+Grund für einen Abbruch.
 
 `bildwechsel` zählt jede neue Szene, jeden weiteren Teil und jede
 Kamerabewegung (`report.json`, `pictures`). `laengstes_bild_s` ist die
@@ -1036,9 +1109,11 @@ Beim Ansehen von Übersicht und Titelbild achten auf:
   verlassen (`FORMATE.md` 5): neu schreiben. V11 fängt das nur an den
   Bausteinen; die Übersicht zeigt es auch, wenn die Sätze es erzählen.
 - **"In der Nähe" ist nie "vor der Tür".** Jedes Bild zu einem Satz über die
-  Nähe des Ladens zeigt die Karte von oben (`shop-map`) mit sichtbarem
-  Abstand zwischen Kundin und Ortsnadel, oder die andere Straßenseite
-  (`shop-street` mit `across`). Keine Figur geht direkt an der Ladentür
+  Nähe des Ladens zeigt seit dem 18.11.2026 den Ring um den Laden
+  (`iso-street` mit `"mode": "nah"`: der Kunde betritt ihn auf der anderen
+  Seite der Kreuzung), im Rückfall die Karte von oben (`shop-map`) mit
+  sichtbarem Abstand zwischen Kundin und Ortsnadel, oder die andere
+  Straßenseite (`shop-street` mit `across`). Keine Figur geht direkt an der Ladentür
   vorbei oder steht davor (Abschnitt 6.4).
 - Nach jeder Kamerafahrt ein Standbild: ist im vergrößerten Bild etwas am
   Rand abgeschnitten (Nadel, Benachrichtigung, Kreis)? Das prüft keine
@@ -1075,8 +1150,12 @@ gehen die Dateien aus Schritt 16 (hat sich `script.json` seitdem geändert,
 vorher noch einmal mit `--no-voice` bauen).
 
 ```bash
-R=/home/user/stempelkarte-frontend; node "$R/studio/make.mjs" "$R/studio/videos/<ordner>"; echo "Ende-Code $?"     # timeout: 600000
+R=/home/user/stempelkarte-frontend; (node "$R/studio/make.mjs" "$R/studio/videos/<ordner>"; echo "Ende-Code $?") > /tmp/stampit-lauf/bau.log 2>&1     # run_in_background: true, timeout: 5400000
 ```
+
+Im Hintergrund und mit Warten wie in Schritt 16 ("Der Bau dauert"): mit 3D
+dauert auch dieser Bau länger als zehn Minuten. Die Aufnahme kommt dabei nur
+aus dem Cache, es wird nichts gesendet.
 
 | | |
 |---|---|
@@ -1631,7 +1710,8 @@ die Tabelle. Zusätzlich gilt:
 | Tempo der Stimme | Die Stimme bleibt, wie sie ist (Liam, 1,05). Das ergibt rund 170 Wörter je Minute beim Sprechen |
 | Texte | Einfache, kurze Sätze, Du-Form. Nie "Café" und "Kaffee" nah beieinander. Rechnung mit wenigen Stammkunden, die öfter kommen, ohne Kleingedrucktes, mit möglichst wenigen Kommas |
 | Laden | Name, Stempelzahl und Symbol in jeder Szene und jedem Teil gleich. Abweichung nur mit Absicht (Thema `stempelzahl`) |
-| Sperrbildschirm | Uhrzeit passt zum Laden, Datum ohne Jahr, Wochentag passt zum Tag (Befehl in Schritt 2). `"pin": false`: die Nähe zeigt in Stil C die Karte von oben (6.4) |
+| Sperrbildschirm | Uhrzeit passt zum Laden, Datum ohne Jahr, Wochentag passt zum Tag (Befehl in Schritt 2) und zu dem, was der Text erzählt (nicht "jeden Freitag" unter einem Samstag). Die 3D-Welt ist dunkel (Abend, im Winter auch der frühe Morgen): die Uhrzeit dann vor etwa 8 Uhr oder ab etwa 17 Uhr (Weg zur Arbeit, Feierabend), nicht "Mittagspause". Dasselbe gilt für jedes andere 3D-Bild (6.4, "Tageszeit"). 2D: `"pin": false`, die Nähe zeigt seit dem 18.11.2026 `iso-street` mit `"mode": "nah"` (6.4) |
+| 3D zuerst | Seit dem 18.11.2026: für jedes Bild, für das es einen 3D-Baustein gibt, dieser (6.4, Tabelle "3D zuerst"); 2D nur für die Bilder, die dort als 2D stehen, und als Rückfall mit Grund in `pruefung` |
 | Schluss | Die Frage des Formats (`FORMATE.md` 4, Zeile "Schluss"; höchstens zwei Wörter, sonst steht das Schlussbild über 5 s; kein Wort aus der Schlussfrage eines der letzten zwei Videos, V7), dann `Dann kommentiere jetzt STICHWORT,{Stichwort,}` und `und wir melden uns bei dir.` Nichts anderes, auch nicht "schick das einem Freund" wie bei den Vorbildern. Form in 6.2 |
 | Stimme, Töne, Farben | `voice` wie in der Vorlage, kein `sound` (der Block oben im Skript), kein `seed`. Das dunkle Aussehen bleibt. Klänge der Bibliothek (`"sounds"` an einem Teil) nur so: **ein Ortsklang** am ersten Teil bei 0,00 s und **höchstens ein Akzent** auf einem Wort der ersten zwei Textzeilen, beide aus `HOOKS.md` 1.7.5 mit dem `vol` von dort; dazu wie bisher `ladenglocke` am Anker `close` von `shop-door` (6.4). Immer mit Absenkung (`"duck"` weglassen, Vorgabe true). Nie `kasse`, `muenzen` oder `applaus` am Anfang, `handy-vibriert` nur unter `lock-notification` (dann dort `"tones": false`). Warnt `effekte` oder (mit Stimme) `effekt-abstand`, den `vol` halbieren |
 | Werkzeuge | Nie `tools/clip-in.py` (Sätze von außerhalb des Studios, nur in begleiteten Sitzungen, Regel 11), nie `--force`, nie ein neuer Baustein |
@@ -1719,6 +1799,7 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 
   | Baustein | Kamera |
   |---|---|
+  | `iso-street`, `iso-shop`, `phone-3d` (3D, seit 18.11.2026 zuerst) | **keine**: die 2D-Kamera blendet oben bis 522 px aus, und die 3D-Welt hört mitten im Bild auf. Die 3D-Kamera fährt selbst (`push`, `orbit`; in `iso-shop` der Anker `zoom` mit `close`). Ein Bildwechsel ist ein weiterer Teil mit `"enter": "cut"` und einem anderen Blick (6.4, "Regeln für 3D-Teile") |
   | `lock-notification` | auf die Benachrichtigung: `"zoom": 1.3`, `"focus": [540, 1030]` (auf ein Wort der zweiten Textzeile) |
   | `wallet-pass`, Scan | auf den QR-Code: `"zoom": 1.5`, `"focus": [540, 1343]`, `"to": [540, 1150]` (auf das Wort "Einmal" oder "gescannt") |
   | `wallet-pass`, nur Stempel | von Anfang an: `"at": "start", "dur": 0, "zoom": 1.3, "focus": [540, 1082], "to": [540, 1080]` |
@@ -1748,7 +1829,7 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 
 - **Faustregel:** spricht eine Textzeile länger als etwa 3 s (mehr als rund
   acht Wörter), bekommt ihr Teil eine Kamera auf eines ihrer Wörter, oder
-  sie wird auf zwei Teile mit Schnitt verteilt. Kein Bild (ein Teil oder eine
+  sie wird auf zwei Teile mit Schnitt verteilt (in 3D immer zwei Teile). Kein Bild (ein Teil oder eine
   Kamerastellung) trägt mehr als zehn Wörter, mit zwei Textzeilen nicht mehr
   als neun: jede weitere Textzeile kostet im Entwurf 0,5 s, ein
   Szenenwechsel danach 0,35 s. So bleibt jedes Bild im Entwurf unter 5 s.
@@ -1771,22 +1852,101 @@ Szene, jeder weitere Teil und jede Kamerabewegung. Das zweite Video hat 19.
 
 ### 6.4 Welcher Baustein für welche Aussage
 
+**3D zuerst (seit 18.11.2026).** Der Betreiber: "Ich will so wenig 2D wie
+möglich." Gibt es für ein Bild einen 3D-Baustein, nimmt das Skript ihn. Der
+2D-Baustein ist nur noch **Rückfall**, wenn das 3D-Bild im Standbild nicht
+stimmt (Schritt 16); dann steht in `pruefung`, welches Bild 2D blieb und
+warum. Alle drei 3D-Bausteine zeigen dieselbe Welt (Abend in Lila, warmes
+Licht, Spielzeugfiguren, isometrisch, ruhige Kamera); Beschreibung und Fallen
+im Playbook ("Bausteine", "Gemeinsam für alle"), alle Parameter im Katalog.
+
+| Bild | 2D (bis 17.11.2026, jetzt Rückfall) | 3D (zuerst) | So |
+|---|---|---|---|
+| Sperrbildschirm mit der Karte (C1): Einstieg in F08, Sicht des Ladens | `lock-notification` | `phone-3d` mit `"mode": "lock"` | Text nur aus `left` und `reward` (C1: "Noch <n> Stempel bis: <Belohnung>", mit `"left": 0` "<Belohnung> wartet auf dich"), `clock` passend zum Laden, `date` mit Wochentag ohne Jahr. Im Einstieg `"rise": false`, `"wake": true`, Anker `notify` auf `{ "at": "start", "offset": 0.15 }`, `"tones": false` und `handy-vibriert` bei 0,00 s (`HOOKS.md` 1.7.5), dazu `"poster": 0.6` **oben im Skript**, neben `scenes`, nicht in `params` (bei 0 s ist der Bildschirm noch dunkel; in `params` bricht der Bau mit "gibt es nicht" ab). Weitere Sperrbildschirme mit `"rise": false` und anderem `angle`; ein anderer Kunde mit `"device": "android"` |
+| In der Nähe: der Kunde unterwegs, der Ring um den Laden (C1) | `shop-map`, `shop-street` mit `across` | `iso-street` mit `"mode": "nah"` | `"frame": "stadt"` (der ganze Ring, Schilder klein) oder `"laden"` (der Ausschnitt des Duells, Schilder lesbar); `then` `"weiter"`, `"dreht"` (Anker `turn`) oder `"rein"` (`turn`, `enter`, rund 2 s nach `turn`). Anker `walk` am Anfang, `near` auf das Wort, das die Meldung nennt (mindestens 0,3 s nach `walk`). Er betritt den Ring auf der anderen Seite der Kreuzung, nie vor der Tür. Gegenüber steht ein zweiter, erfundener Laden (`rival`, Vorgabe "Imbiss Sonne"; für die Bäckerei zum Beispiel "Backstube Eck") |
+| Zwei Läden gegenüber, der Stammkunde geht rüber | `shop-duel` | `iso-street` (Vorgabe `"mode": "duell"`) | wie im Döner-Video; `"back": true` für "er kommt zu dir zurück" (das Herz pocht statt zu zerbrechen) |
+| Karte in der Wallet: Stand, Scan, neue Stempel (A1, A3, B1, B2) | `wallet-pass` | `phone-3d` (`"mode": "wallet"`) | Der Stand ohne Scan: `"scan": false`, `before` gleich `after` (sonst Motiv Scan). Scan: Anker `scan` auf "scannen", neue Stempel `stamp1`, `stamp2` auf ihre Wörter. `"rise": false`, wenn davor schon ein Handy stand |
+| Die Karte gestalten (D1) | `wallet-pass` mit `"design": true` | `phone-3d` mit `"mode": "design"` | Anker `paint`, `logo`, `symbol` auf die Wörter; `colors` zwei Farben des Ladens |
+| Im Laden: ein Kunde kommt herein, bestellt, steht an der Theke | `shop-door` (der eigene Laden), `shop-counter` ohne Steppenläufer | `iso-shop` | `branch` zum Laden: `cafe`, `doener`, `friseur`, `baeckerei`, `eis`. Aus der Board-Branche (`THEMEN.md`, "Läden"): `friseur` = `friseur`, `doener` = `doener`, `eiscafe` = `eis`, `cafe` (Bäckerei Morgenrot) = `baeckerei`; `branch` `cafe` (Siebträger, Kuchen) nur für ein echtes Café wie Café Nordwind. Dazu `shop`, `icon`, `stamps`, `have` wie in den anderen Szenen. `"start": "door"` mit `enter` auf `{ "at": "start", "offset": 1.2 }` (früher steht die Tür in Bild 0 offen), `order` auf das Bestellte. Ohne Scan `"phone": false` |
+| Scan an der Theke, Stempel sofort auf dem Handy (B1, B2) | `wallet-pass` mit Scan, zweiter `wallet-pass` mit Stempel | `iso-shop` mit Handy (Vorgabe `"phone": true`) | `"close": "phone"` mit `zoom` vor `scan` (Fahrt 0,9 s), `scan` auf "scannt", `stamp` mindestens 0,7 s danach. Soll die Karte groß und lesbar sein: `phone-3d` wallet mit Scan |
+| Papierkarte auf der Theke, landet im Papierkorb (A4) | `paper-card`, `card-bin` | `iso-shop` mit `"paper": true` | Anker `crumple` (1,1 s bis die Kugel im Korb ist); `"close": "counter"` für die Karte groß. Motiv Papier (V3) |
+
+**Bleiben 2D** (vorerst), und nur, wo das Format sie verlangt (`FORMATE.md`
+4): `comment-thread` (F03, F09, Meme M08, M04), `tip-cards` (F01, F02, ein
+Zettel in F04 und F10), `big-number` (F04, F10, eine Zahl in F01, F09, F07),
+`calc-panel` (nur F04), `versus-split` (F06, M24), `day-clock` (F05),
+`week-strip` (F04, F10 und wo ein Format es ausdrücklich nennt; in F08 zeigt
+seit dem 18.11.2026 `iso-shop` den Rhythmus). Ohne 3D-Gegenstück außerdem:
+`stamp-check` (Pointe in F03, F05, F07), `cta-comment` (Schluss), `shop-door`
+(M05: die Tür fällt bei 0,3 s zu), `shop-counter` mit Steppenläufer (H15),
+`wallet-vanish` (zerknickt, vergessen, verloren), `guest-ghost`. **Fehlt ein
+Bildwechsel, kommt ein weiterer 3D-Teil dazu** (ein anderer Blick: anderer
+Baustein, andere Ansicht, ein Augenblick später), kein zusätzliches 2D-Bild.
+
+**Regeln für 3D-Teile** (Fallen im Playbook):
+
+- **Keine `camera` an einem 3D-Teil.** Die 3D-Kamera fährt selbst
+  (`push`, `orbit`, in `iso-shop` der Anker `zoom`). Bildwechsel kommen aus
+  Teilen mit `"enter": "cut"`; seit dem 18.11.2026 rechnet ein 3D-Teil nur,
+  solange er zu sehen sein kann, mehrere 3D-Teile in einer Szene kosten also
+  nicht mehr.
+- **Jeder Teil ein anderer Blick.** Zwei Teile desselben Bausteins mit
+  denselben Werten sehen aus wie ein Ruckler: die Kamera endet immer im selben
+  Ausschnitt. Anderer Baustein, andere Ansicht (`frame`, `close`, `mode`) oder
+  ein späterer Augenblick (erst die Tür, dann die Theke).
+- **Dieselbe Ansicht höchstens zweimal je Video.** Ansicht heißt:
+  `iso-street` `mode` und `frame` ("nah"/"laden", "nah"/"stadt", Duell),
+  `iso-shop` `start` und `close`, `phone-3d` `mode` und beim Sperrbildschirm
+  `device` (iPhone, Android). Ein drittes Mal nur als **Fortsetzung** des
+  Teils davor mit derselben Ansicht (wie `"then": "rein"` nach `"dreht"`,
+  Anker vor dem Anfang des Teils, `"tones": false`). Ein anderer `angle`
+  oder `push` allein macht keine neue Ansicht. Im Entwurf zum Beispiel
+  `videos/_beispiel-3d-f08` stand fünfmal `iso-street` "nah" und siebenmal
+  dieselbe Meldung; seit dem 18.11.2026 zeigt der letzte 3D-Teil dort
+  `iso-shop` statt noch einmal "stadt". Fehlt danach ein Bildwechsel, kommt
+  eine Ansicht dazu, die im Video noch fehlt, nicht eine dritte gleiche.
+- **Tageszeit: die 3D-Welt ist immer Abend** (Laternen an, dunkle Stadt mit
+  hellen Fenstern, auch über den Wänden von `iso-shop`). Ein 3D-Bild also
+  nur, wo nichts im selben Takt vom hellen Tag spricht: keine Uhrzeit
+  (Tafel, `day-clock`, `clock`) zwischen etwa 8 und etwa 17 Uhr, im Sommer
+  (April bis September) vor etwa 20 Uhr, und kein "Mittagspause",
+  "Mittagsschlange", "Nachmittag". Sonst der 2D-Rückfall aus der Tabelle
+  oben (`shop-door`, `wallet-pass`, `shop-counter`), und in `pruefung` steht
+  "<Bild> 2D: Tageszeit". Am häufigsten in F05 (`FORMATE.md`). Eine
+  Tagesansicht der 3D-Welt gibt es noch nicht; keine Prüfung sieht den
+  Fehler, nur das Standbild.
+- **Motive** liest `abwechslung.mjs` auch aus 3D ab: `iso-street` "nah" und
+  `phone-3d` "lock" sind Nähe, `phone-3d` "wallet" mit Scan oder neuem
+  Stempel und `iso-shop` mit Handy sind Scan, `iso-shop` mit Papier ist
+  Papier. Ein Format ohne Scan (F01, F02, F04, F08, F10) nimmt also
+  `"phone": false` und den Stand ohne neuen Stempel.
+- **Text im Bild:** Schilder in `iso-street` "laden" und in `iso-shop` sind
+  lesbar, die Tafel in `iso-shop` nicht (Schmuck). Was gelesen werden muss,
+  sagt auch die Tafel oben.
+- **Rechenzeit:** etwa 1 bis 1,4 s je 3D-Bild und Seite; ein Video fast
+  ganz in 3D braucht deutlich länger als die 2 bis 4 Minuten eines 2D-Videos
+  (gemessen: Schritt 16). Schon `--check` braucht rund 80 s.
+
+Die Tabelle unten nennt je Aussage den Baustein und die erprobten Werte. Wo
+die Tabelle oben ein 3D-Bild hat, gilt dieses zuerst; die 2D-Werte unten
+gelten für den Rückfall.
+
 | Aussage (`PRODUKT.md`) | Baustein | So |
 |---|---|---|
-| Einstieg in F08 (der Hook spricht vom Handy, vom Sperrbildschirm oder von der vollen Karte, zum Beispiel T02, T16) | `lock-notification` | `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, `"tones": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Der erste Ton ist `handy-vibriert` bei 0,00 s (`HOOKS.md` 1.7.5); ohne `"tones": false` brummte es doppelt, und der eigene Ton `ding` käme erst bei 0,10 s. Text der Benachrichtigung mit dem Stand: "Noch <n> Stempel bis: <Belohnung>", nur bei voller Karte "<Belohnung> wartet auf dich" (C1 in `PRODUKT.md`). Wie der erste Satz klingt, steht in `HOOKS.md` 1.2 und 1.6 |
+| Einstieg in F08 (der Hook spricht vom Handy, vom Sperrbildschirm oder von der vollen Karte, zum Beispiel T02, T16) | 3D: `phone-3d` mit `"mode": "lock"` (Werte in der Tabelle oben). Rückfall: `lock-notification` | Rückfall: `"rise": false` (das Handy steht ab Bild 0), `"buzzes": 2`, `"waves": true`, `"pin": false`, `"tones": false`, Anker `notify` mit `{ "at": "start", "offset": 0.15 }`. Der erste Ton ist `handy-vibriert` bei 0,00 s (`HOOKS.md` 1.7.5); ohne `"tones": false` brummte es doppelt, und der eigene Ton `ding` käme erst bei 0,10 s. Text der Benachrichtigung mit dem Stand: "Noch <n> Stempel bis: <Belohnung>", nur bei voller Karte "<Belohnung> wartet auf dich" (C1 in `PRODUKT.md`). Wie der erste Satz klingt, steht in `HOOKS.md` 1.2 und 1.6 |
 | Einstieg in jedem anderen Format: der Baustein aus der Zeile "Einstieg" des Formats (`FORMATE.md` 4), in F07 der des Memes (`HOOKS.md` 3.2). Für Papier als Einstieg (nur M26, M29, M21, M18 in F07) | `paper-card`; nie `guest-ghost` oder `wallet-vanish` (als Einstieg nicht erprobt) | Das Bild steht ab Bild 0, seine erste Bewegung liegt auf einem Anker bis 0,5 s (je Format in `HOOKS.md` 1.7.3; `paper-card`: `hit` mit `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01 erprobt; `wallet-pass` als Einstieg ist nicht erprobt, Standbild bei 0 s ansehen). Dazu der Ortsklang bei 0,00 s (Abschnitt 6, Zeile "Stimme, Töne, Farben"). **Nie ein Bild, das dem Hook widerspricht:** unter "Den zehnten macht ein anderer" kein Sperrbildschirm mit "10 von 10". Der Sperrbildschirm kommt dann später, als Schnitt nach dem Bild für "in der Nähe" |
-| Die Kundin ist unterwegs, geht am Laden vorbei (Weg zu C1) | `shop-street` mit `"across": true`, `"circle": false`, `"shopAt": 0.7`, `"direction": "right"`, `"from": -0.08`, `"via": 0.13`, `"to": 0.15` | Sie geht auf der **anderen** Straßenseite, der Laden steht klein im Hintergrund. `to` höchstens 0,09 hinter `via`, sonst deckt die kleine Karte den Laden zu. Nie `shop-street` mit Passant ohne `across` |
-| **C1: "in der Nähe", die Karte erscheint von selbst auf dem Sperrbildschirm (immer, mit dem Stand; nicht erst, wenn sie voll ist). Nur in F08 (`FORMATE.md`: kein anderes Format zeigt die Nähe, F07 ausdrücklich nicht), und nach V2 höchstens in einem von drei Videos** | **`shop-map`**, Karte von oben: `"circle": true`, `"notify": true`, `"note": "Noch <n> Stempel bis: <Belohnung>"` (nur bei voller Karte: `"<Belohnung> wartet auf dich"`), `"path": [[-0.1, 1], [0.55, 1]]`, Anker `circle` und `walk` am Anfang, `buzz` auf das Wort "zeigt" oder "meldet" mit `"offset": -0.1`, `arrive` mit `{ "at": "end", "offset": -0.5 }`, Kamera nach 6.3 | **Immer**, wenn ein Satz von der Nähe des Ladens handelt. Die Kundin geht eine Straße hinter dem Laden, tritt in den Kreis, und dort, sichtbar entfernt von der Ortsnadel, zeigt ihr Handy die Karte. Es darf nie so aussehen, als müsse man vor der Tür stehen: das war die Korrektur des Betreibers am zweiten Video. Den Weg nicht ändern; einen eigenen Weg lehnt der Baustein ab, wenn er an der Tür vorbeiführt. Danach oft ein Schnitt auf `lock-notification` |
-| Viele Stammkunden sehen den Laden auf dem Sperrbildschirm (C1, Sicht des Ladens) | `lock-notification` als Teil mit `"enter": "cut"`, Kamera auf die Benachrichtigung (6.3) | Der Satz sagt nur C1, zum Beispiel "Dann stehst du auf dem Sperrbildschirm deiner Stammkunden." Nie "sehen", "wissen, wo" oder "orten". Nicht `shop-map` mit `"view": "owner"` (unten) |
-| Papier geht verloren, zerknickt, wird vergessen (A4) | `paper-card`, `wallet-vanish`, `guest-ghost` | Als Teile einer Szene, Schlag auf Schlag mit `"enter": "cut"`. `wallet-vanish`: drei Anker auf drei `*`-Wörter ("*Zerknickt, \| *vergessen, \| *verloren."). `"mug": true` nur für die Bäckerei. Je Bild höchstens zehn Wörter, mit zwei Textzeilen neun, ohne Kamera (6.3) |
-| Karte in Apple und Google Wallet, einmal scannen, kein Download (A1, A2, A3) | `wallet-pass` mit Scan | Kamera auf den QR-Code (6.3), `location: ""` |
-| Stempel sofort auf dem Handy (B1, B2) | zweiter `wallet-pass` als Teil mit `"enter": "cut"`, `"scan": false`, `"rise": false`, `"drop": false` | `before` und `after` höher als im ersten, je neuer Stempel ein Anker `stamp1`, `stamp2`, ... |
-| Ein Kunde geht in einen Laden, die Tür fällt hinter ihm zu (zum Beispiel "Und tschüss", er ist beim Laden gegenüber) | `shop-door` als Teil mit `"enter": "cut"`, nach `shop-duel` oder einem anderen Bild der Szene | `"shop"` ist der Laden, in den er geht; `"accent": "#E58A45"` für den Laden gegenüber (wie in `shop-duel`), `"#5A4FCF"` für den eigenen. Anker `close` auf das Wort (im Döner-Video "tschüss" mit `"offset": -0.05`), `sign` 0,06 s danach auf dasselbe Wort (dort `"offset": 0.01`). Mit Klängen aus der Bibliothek `"tones": false` und `ladenglocke` am Anker `close`. **Keine Kamera**, und nie stattdessen in `shop-duel` oder `shop-street` auf die Tür zoomen (6.3). `"spit": true` nur für Imbiss und Dönerladen |
+| Die Kundin ist unterwegs, geht am Laden vorbei (Weg zu C1) | 3D: `iso-street` mit `"mode": "nah"` (Tabelle oben). Rückfall: `shop-street` mit `"across": true`, `"circle": false`, `"shopAt": 0.7`, `"direction": "right"`, `"from": -0.08`, `"via": 0.13`, `"to": 0.15` | Sie geht auf der **anderen** Straßenseite, der Laden steht klein im Hintergrund. `to` höchstens 0,09 hinter `via`, sonst deckt die kleine Karte den Laden zu. Nie `shop-street` mit Passant ohne `across` |
+| **C1: "in der Nähe", die Karte erscheint von selbst auf dem Sperrbildschirm (immer, mit dem Stand; nicht erst, wenn sie voll ist). Nur in F08 (`FORMATE.md`: kein anderes Format zeigt die Nähe, F07 ausdrücklich nicht), und nach V2 höchstens in einem von drei Videos** | 3D: **`iso-street` mit `"mode": "nah"`** (Tabelle oben), danach oft ein Schnitt auf `phone-3d` mit `"mode": "lock"`. Rückfall: **`shop-map`**, Karte von oben: `"circle": true`, `"notify": true`, `"note": "Noch <n> Stempel bis: <Belohnung>"` (nur bei voller Karte: `"<Belohnung> wartet auf dich"`), `"path": [[-0.1, 1], [0.55, 1]]`, Anker `circle` und `walk` am Anfang, `buzz` auf das Wort "zeigt" oder "meldet" mit `"offset": -0.1`, `arrive` mit `{ "at": "end", "offset": -0.5 }`, Kamera nach 6.3 | **Immer**, wenn ein Satz von der Nähe des Ladens handelt. Die Kundin geht eine Straße hinter dem Laden, tritt in den Kreis, und dort, sichtbar entfernt von der Ortsnadel, zeigt ihr Handy die Karte. Es darf nie so aussehen, als müsse man vor der Tür stehen: das war die Korrektur des Betreibers am zweiten Video. Den Weg nicht ändern; einen eigenen Weg lehnt der Baustein ab, wenn er an der Tür vorbeiführt. Danach oft ein Schnitt auf `lock-notification` |
+| Viele Stammkunden sehen den Laden auf dem Sperrbildschirm (C1, Sicht des Ladens) | 3D: `phone-3d` mit `"mode": "lock"` als Teil mit `"enter": "cut"`, gern `"device": "android"` (ein anderer Kunde). Rückfall: `lock-notification` als Teil mit `"enter": "cut"`, Kamera auf die Benachrichtigung (6.3) | Der Satz sagt nur C1, zum Beispiel "Dann stehst du auf dem Sperrbildschirm deiner Stammkunden." Nie "sehen", "wissen, wo" oder "orten". Nicht `shop-map` mit `"view": "owner"` (unten) |
+| Papier geht verloren, zerknickt, wird vergessen (A4) | Liegen und Wegwerfen in 3D: `iso-shop` mit `"paper": true` (Tabelle oben). Zerknickt, vergessen, verloren als Dreierschlag nur 2D: `paper-card`, `wallet-vanish`, `guest-ghost` | Als Teile einer Szene, Schlag auf Schlag mit `"enter": "cut"`. `wallet-vanish`: drei Anker auf drei `*`-Wörter ("*Zerknickt, \| *vergessen, \| *verloren."). `"mug": true` nur für die Bäckerei. Je Bild höchstens zehn Wörter, mit zwei Textzeilen neun, ohne Kamera (6.3) |
+| Karte in Apple und Google Wallet, einmal scannen, kein Download (A1, A2, A3) | 3D: `phone-3d` (wallet) mit Scan. Rückfall: `wallet-pass` mit Scan | Kamera auf den QR-Code (6.3), `location: ""` |
+| Stempel sofort auf dem Handy (B1, B2) | 3D: `iso-shop` mit Handy (Scan und Stempel an der Theke) oder ein zweiter `phone-3d` (wallet, `"scan": false`, `"rise": false`, `"drop": false`, neue Stempel). Rückfall: zweiter `wallet-pass` als Teil mit `"enter": "cut"`, `"scan": false`, `"rise": false`, `"drop": false` | `before` und `after` höher als im ersten, je neuer Stempel ein Anker `stamp1`, `stamp2`, ... |
+| Ein Kunde geht in einen Laden, die Tür fällt hinter ihm zu (zum Beispiel "Und tschüss", er ist beim Laden gegenüber) | 3D: in `iso-street` (Duell) geht er drüben durch die Tür (Anker `enter`, die Glocke schwingt); in den eigenen Laden `iso-shop` mit `"start": "door"`. Rückfall: `shop-door` als Teil mit `"enter": "cut"`, nach `shop-duel` oder einem anderen Bild der Szene | `"shop"` ist der Laden, in den er geht; `"accent": "#E58A45"` für den Laden gegenüber (wie in `shop-duel`), `"#5A4FCF"` für den eigenen. Anker `close` auf das Wort (im Döner-Video "tschüss" mit `"offset": -0.05`), `sign` 0,06 s danach auf dasselbe Wort (dort `"offset": 0.01`). Mit Klängen aus der Bibliothek `"tones": false` und `ladenglocke` am Anker `close`. **Keine Kamera**, und nie stattdessen in `shop-duel` oder `shop-street` auf die Tür zoomen (6.3). `"spit": true` nur für Imbiss und Dönerladen |
 | Die Pointe (der Beleg der Idee in einem Satz) | `stamp-check` als eigene Szene oder als Teil mit `"enter": "cut"` (6.2) | `"icon": "check"`, Anker `hit` auf das letzte Wort, `"offset": 0.1` |
 | Tipps, Satz-Tausch (F01, F02) | `tip-cards`, je Tipp ein Teil mit `"show"`; dieselbe Liste `items` in jedem Teil | Im Einstieg `"rise": false` (die Pinnwand steht ab Bild 0). Satz-Tausch: `label` "Sag nicht:", `better`, Anker `strike` auf das letzte Wort des alten Satzes, `swap` auf das erste Wort des neuen. Kamera nach 6.3. Höchstens 60 Zeichen je Satz |
 | Frage, Einwand, Quiz (F03, F09) | `comment-thread` | Einstieg: `"typed": true`, Anker `type` `{ "at": "start", "offset": 0.05 }`, `send` auf das letzte Wort der Frage, `reply` (höchstens 60 Zeichen) auf das erste Wort der Antwort. Weitere Fragen: `"typed": false`. Quiz: `verdict` `"falsch"` oder `"stimmt"`, Anker `verdict` auf "Stimmt". `author` bleibt "Du" (nie ein Name, N12). Eine Antwort, die in `PRODUKT.md` "nur gesprochen" ist (F1), kommt nicht in `reply` und bekommt keinen Stempel |
 | Duell, Runde für Runde (F06) | `versus-split`, je Runde zwei Teile: `"view": "split"` mit Anker `action`, dann mit `"enter": "cut"` `"view": "left"` oder `"right"` mit Anker `point` | `"scene"`: `start` (Einstieg; dort der Anker `vs` von selbst bei 0,15 s: das VS schlägt mit Ton ein), `regen`, `knick`, `app` (mit `"winner": "both"`), `vergessen` (Motiv `scan`, nur nach V8), `ende`. Im Teil aus der Nähe läuft die Runde mit `action` auf `{ "at": "start", "offset": 0.05 }` noch einmal kurz an. `score` = Stand **vor** der Runde, `round` zählt hoch, Anker `action` auf das Wort der Runde, `point` auf das Urteil. Laden, Symbol und Stempelzahl in jedem Teil gleich |
-| Ein Tag im Laden (F05) | `day-clock`, je Uhrzeit ein Teil | `time` "HH:MM", `from` = Uhrzeit des Teils davor (im Einstieg eine halbe Stunde vor `time`, damit die Zeiger ab 0,05 s laufen), `events` = die früheren Uhrzeiten, `label` höchstens 24 Zeichen, Anker `event` auf das Wort der Uhrzeit oder des Ereignisses. Uhrzeiten passen zum Laden (Bäckerei früh, Eis am Nachmittag) |
+| Ein Tag im Laden (F05) | `day-clock`, je Uhrzeit ein Teil | `time` "HH:MM", `from` = Uhrzeit des Teils davor (im Einstieg eine halbe Stunde vor `time`, damit die Zeiger ab 0,05 s laufen), `events` = die früheren Uhrzeiten, `label` höchstens 24 Zeichen, Anker `event` auf das Wort der Uhrzeit oder des Ereignisses. Uhrzeiten passen zum Laden (Bäckerei früh, Eis am Nachmittag). **Die Bilder dazwischen in 3D nur bei einer Uhrzeit vor etwa 8 oder ab etwa 17 Uhr** (im Sommer ab etwa 20 Uhr): die 3D-Welt ist Abend ("Tageszeit" oben). Bei einer Uhrzeit am Tag (09:30, 12:15, Eis am Nachmittag) der 2D-Rückfall `shop-door` (`"accent": "#5A4FCF"`) oder `wallet-pass`, Grund in `pruefung` |
 | Eine Zahl groß (F04, F10) | `big-number` | `value` höchstens 7 Zeichen, normale Bindestriche; `from` = Zahl des Schritts davor; Anker `show` auf das Wort, das die Zahl nennt. Eine Studienzahl genau wie in `PRODUKT.md`, die Quelle nur gesprochen, nie in `sub` |
 | Beispielrechnung (F04) | `calc-panel` als Zusammenfassung nach den Schritten mit `big-number` | Wie im Döner-Video (in Stil C erprobt): alle Zeilen auf den Wörtern **einer** Textzeile (`row1`, `row2`, ... auf die gesprochenen Zahlen, `result` auf die Ergebniszahl), `"coin": ""`, Kamera nach 6.3. Höchstens drei Zeilen, wenige Stammkunden, die öfter kommen. Der Bau bricht ab, wenn die Rechnung nicht aufgeht |
 | Schluss | `cta-comment` | Anker `logo` auf `{ "cap": -1, "word": -1 }`, Text nach 6.2 |
@@ -1975,8 +2135,8 @@ im Speicher liegen; gelöscht wird nichts.
 1. **Aus dem Repo.** Liegt `studio/videos/<ordner>/script.json` da und stimmt
    `sha256sum script.json` mit `skript_sha256` überein, ist alles da (bei
    einem Video mit Stimme muss
-   `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --check` mit 0
-   enden).
+   `node "$R/studio/make.mjs" "$R/studio/videos/<ordner>" --check; echo "Ende-Code $?"`
+   mit `timeout: 600000` mit 0 enden).
 2. **Aus dem Dateispeicher.**
    `Artifact({ action: "read", url: URL, path: "<paket_asset_id>" })` legt die
    Datei lokal ab und nennt den Pfad. Dann:
@@ -2354,5 +2514,6 @@ erste begleitete Lauf (10.3) geht diese Liste durch:
 | die Formate (`FORMATE.md`) und die Regeln der Abwechslung im Lauf; die neuen Bausteine `tip-cards`, `comment-thread`, `versus-split`, `day-clock`, `big-number`; `tools/abwechslung.mjs` | am 17.11.2026 in begleiteten Sitzungen geschrieben und nach einer Gegenprüfung überarbeitet (Format zuerst, V1 bis V11, Sätze gezählt); die Folge der nächsten 30 Tage mit dem Werkzeug durchgespielt; drei Entwürfe ohne Stimme (F09, F07, F01). Mit Stimme, im Lauf, mit `verlauf.json` aus einer echten Abfrage des Boards nie gelaufen | Schritte 6, 13, 14, 15, 16, 19 |
 | die ersten drei Sekunden (seit 17.11.2026, abends, `HOOKS.md` 0, 1.7, 1.8): fünf Kandidaten, Bewertungsbogen, Ortsklang ab Bild 0, `tools/einstieg.mjs`, der Anker `vs` in `versus-split` | `einstieg.mjs` von Hand an den Berichten von Kaffee, Koscher und Döner gelaufen (meldet bei allen den späten Ton, Döner erst bei 1,51 s); im Selbsttest: ein Ortsklang bei 0,00 s am zweiten Video besteht alle Prüfungen, und das VS im Duell schlägt bei 0,15 s ein. Nicht angehört: die Lautstärken der Ortsklänge (`HOOKS.md` 1.7.5). Der Bogen ist nur an einer simulierten Jury-Runde ausgerichtet, nicht an der Skip-Rate, und der Lauf zählt seine eigenen Kandidaten (Ermessen bei S2, S3, W1, W2). Ob das Board die Liste `hook_kandidaten` am Video ohne Weiteres annimmt: ungeprüft | Schritte 15, 16, 19; `HOOKS.md` 6 |
 | die Vorschau fürs iPhone (Schritt 19, Punkt 5) und das Aufräumen (Schritt 22a) | `tools/vorschau.mjs` an zwei Videos gelaufen (Döner 38,4 s: 19 Teile, 7 Batches; Koscher 41,9 s: 21 Teile, 7 Batches); die Seite setzt die Teile zusammen (`board/index.html`, Weg 4). Nie im Lauf geschrieben: ob `ArtifactData` einen Batch mit `file_path` je Eintrag in einer unbeaufsichtigten Sitzung ohne Rückfrage nimmt, ob `delete` dort erlaubt wird, welche Form die Dateien von `out_dir` haben (nennen sie `version`? `vorschau.mjs loeschliste` liest beide Formen und rät keine Version, im Selbsttest geprüft), und ob das Board 12 Vorschauen (rund 60 MB) neben dem Rest wirklich hält | Schritte 19 und 22a |
+| "3D zuerst" (seit 18.11.2026, 6.4): ein Video fast ganz in 3D, gebaut im Hintergrund (Schritt 16, "Der Bau dauert") | in einer begleiteten Sitzung ein Beispiel ohne Stimme gebaut (`videos/_beispiel-3d-f08`, F08, elf von zwölf Bildern 3D, Bauzeit in Schritt 16). Das Warten mit der Schleife `timeout 570 bash -c 'until grep ...'` im Vordergrund ist am 18.11.2026 in einer begleiteten Sitzung geprüft (blockiert, endet mit 124 oder 0). Nie in einer geplanten Sitzung: ob dort `run_in_background` und diese Schleife gehen, ob die Sitzung einen Bau von einer halben Stunde und mehr (und den Selbsttest von rund 7 Minuten, Schritt 5) abwartet, ohne zu enden, und ob die Maschine dort ebenso schnell rechnet. **Vor dem Einschalten der Aufgabe einmal in einer geplanten Sitzung ausprobieren.** Mit Stimme nie gebaut | Schritte 5, 16 und 18 |
 
 ENDE DER ANLEITUNG

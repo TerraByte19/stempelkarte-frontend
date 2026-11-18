@@ -50,7 +50,10 @@ export async function openStudio(data) {
     pg.on('requestfailed', r => problems.push(`Laden fehlgeschlagen: ${r.url()} (${r.failure() && r.failure().errorText})`))
     pg.on('response', r => { if (r.status() >= 400) problems.push(`HTTP ${r.status()}: ${r.url()}`) })
     await pg.goto(base + (rest ? '?rest=1' : ''))
-    await pg.waitForFunction(() => window.STUDIO && window.STUDIO.ready, null, { timeout: 30000 })
+    // 180 s statt 30 s (18.11.2026, "3D zuerst"): jeder 3D-Teil baut beim Laden seine Welt (Geometrie,
+    // Texturen, Schilder); ein Video mit elf 3D-Teilen brauchte dafuer ueber 30 s, und make.mjs brach mit
+    // "Timeout 30000ms exceeded" ab, bevor eine Pruefung lief. Eine 2D-Seite ist weiter in Sekunden fertig.
+    await pg.waitForFunction(() => window.STUDIO && window.STUDIO.ready, null, { timeout: 180000 })
     return pg
   }
   /** Was die Seite ueber sich weiss: Laenge, Szenen, Texte, Toene, Anker, Fehler. */

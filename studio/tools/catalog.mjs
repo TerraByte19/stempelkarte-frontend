@@ -5,7 +5,7 @@
 // Parameter, Vorgaben und Anker werden aus components/<name>.js gelesen, damit
 // die Beschreibung nie von dem abweicht, was der Baustein wirklich tut.
 // Nach jedem neuen oder geaenderten Baustein laufen lassen. Kein Netz, keine Kosten.
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, mkdtempSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, mkdtempSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
 import { normalize, estimateTimes } from '../engine/script.mjs'
@@ -13,6 +13,15 @@ import { openStudio, still, run, STUDIO_ROOT } from '../engine/render.mjs'
 
 // Reihenfolge wie im ersten Video; neue Bausteine folgen nach dem Alphabet
 const ORDER = ['paper-card', 'cup-row', 'wallet-vanish', 'guest-ghost', 'wallet-pass', 'lock-notification', 'calc-panel', 'cta-comment']
+// Weitere Anker-Tabellen fuer Bausteine, deren Anker an einer Ansicht haengen (seit 18.11.2026, "3D zuerst"):
+// der Katalog zeigte nur die Anker der Vorgaben, also bei phone-3d nur die der Wallet, bei iso-street nur die
+// des Duells und bei iso-shop nur drei von sieben. Wer "lock" oder "nah" baute, fand seine Anker nirgends.
+// Bild: docs/components/<name>-<bild>.png, wenn es diese Datei gibt (wird hier nicht neu gerechnet).
+const EXTRA = {
+  'phone-3d': [{ label: 'mit `"mode": "lock"`', params: { mode: 'lock' } }, { label: 'mit `"mode": "design"`', params: { mode: 'design' } }],
+  'iso-street': [{ label: 'mit `"mode": "nah"`', params: { mode: 'nah', then: 'rein' }, bild: 'naehe', note: 'Mit `"then": "weiter"` gibt es nur `walk` und `near`, mit `"dreht"` dazu `turn`.' }],
+  'iso-shop': [{ label: 'alle sieben, mit `"start": "door"`, `"paper": true`, `"leaves": true` und `"close"`', params: { start: 'door', paper: true, leaves: true, close: 'phone' } }]
+}
 const names = readdirSync(path.join(STUDIO_ROOT, 'components')).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3))
   .sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99) || a.localeCompare(b))
 const docs = path.join(STUDIO_ROOT, 'docs', 'components'); mkdirSync(docs, { recursive: true })
@@ -50,6 +59,14 @@ for (const name of names) {
   md += '\n| Anker | Vorgabe | Wann |\n|---|---|---|\n'
   for (const [k, a] of Object.entries(anchors)) md += `| \`${k}\` | ${anchorText(a)} | ${a.doc || ''} |\n`
   md += '\n'
+  for (const x of EXTRA[name] || []) {
+    if (typeof mod.anchors !== 'function') break
+    const more = mod.anchors({ ...params, ...x.params }, [])
+    if (x.bild && existsSync(path.join(docs, `${name}-${x.bild}.png`))) md += `<img src="docs/components/${name}-${x.bild}.png" width="270" alt="${name}, ${x.label.replace(/`/g, '').replace(/"/g, '&quot;')}">\n\n`
+    md += `| Anker (${x.label}) | Vorgabe | Wann |\n|---|---|---|\n`
+    for (const [k, a] of Object.entries(more)) md += `| \`${k}\` | ${anchorText(a)} | ${a.doc || ''} |\n`
+    md += '\n' + (x.note ? x.note + '\n\n' : '')
+  }
   console.log(`${name}: Standbild bei ${at.toFixed(2)} s, ${Object.keys(mod.params || {}).length} Parameter, ${Object.keys(anchors).length} Anker`)
 }
 rmSync(tmp, { recursive: true })

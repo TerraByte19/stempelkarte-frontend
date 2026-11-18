@@ -39,6 +39,9 @@
 //     auf einer Seite, ohne dass eine ihr Bild verliert (Chromium haelt nur 16 WebGL-Kontexte je Seite, mit
 //     einem Renderer je Szene waeren die ersten schwarz); fitFrame haelt Punkte ueber die ganze Fahrt im
 //     Rahmen und fuellt ihn.
+// 11. Zwei 3D-Teile in einer Szene (seit 18.11.2026): jeder rechnet nur, solange sein Teil zu sehen sein
+//     kann. Vorher rechneten beide die ganze Szene lang, und ein Video fast ganz in 3D kam nicht auf die
+//     Bildwechsel von Stil C.
 //
 // Kein Netz, keine Kosten, etwa zwei Minuten. Laeuft seit dem 17.11.2026 (abends) auch in
 // tools/selftest.mjs mit; vorher arbeitete dort eine andere Sitzung.
@@ -218,6 +221,40 @@ try {
     check('Szenenwechsel: vorher nicht abgedunkelt, 0,2 s nach dem Wechsel mindestens 0,7', !s0.errors.length && e != null && before === 0 && after >= 0.7, `Szenenende ${e}, Deckkraft ${before} / ${after}`)
     const r = await st.page({ rest: true }); const restDim = await r.evaluate(() => +getComputedStyle(document.querySelector('.is-dim')).opacity); await r.close()
     check('Ruhelage (Prüfungen): nicht abgedunkelt', restDim === 0, String(restDim))
+  } finally { await st.close() }
+}
+
+// ---- 11. Zwei 3D-Teile in einer Szene (seit 18.11.2026, "3D zuerst")
+// Ein 3D-Teil rechnet nur noch, solange SEIN Teil zu sehen sein kann, nicht mehr die ganze Szene lang. Vorher
+// kosteten zwei 3D-Teile einer Szene doppelt, und ein Video fast ganz in 3D kam nicht auf die 12 Bildwechsel
+// von Stil C (eine 2D-Kamera gibt es an 3D-Teilen nicht). Gemessen an den Pixeln der Leinwand von Teil 1: die
+// Kamera fliegt (push, orbit), also aendert sich jedes gerechnete Bild. Mitten in Teil 2 (mehr als 0,8 s nach
+// dem Schnitt) bleibt die Leinwand von Teil 1 stehen, die von Teil 2 bewegt sich; in Teil 1 umgekehrt.
+{
+  const sc = JSON.parse(JSON.stringify(script)), p = sc.scenes[0]
+  sc.scenes[0] = { parts: [
+    { component: 'iso-street', params: { ...p.params, push: 0.2, orbit: 12, heart: false, walker: false }, captions: [{ lines: ['Zwei Läden,', 'eine Kreuzung.'], instant: true }, { lines: ['Und noch ein Satz.'] }] },
+    { component: 'iso-street', enter: 'cut', params: { ...p.params, ours: 'right', push: 0.2, orbit: 12, heart: false, walker: false }, captions: [{ lines: ['Jetzt von der anderen Seite,'] }, { lines: ['mit einem langen zweiten Satz dazu.'] }] }
+  ] }
+  const st = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
+  try {
+    const pg = await st.page(), s0 = await st.state(pg)
+    const cut = s0.pictures ? (s0.pictures.find(x => x.kind === 'teil') || {}).t : null
+    const hashes = pg2 => pg2.evaluate(() => [...document.querySelectorAll('canvas.is-canvas')].map(c => {
+      const g = document.createElement('canvas'); g.width = c.width; g.height = c.height
+      const x = g.getContext('2d', { willReadFrequently: true }); x.drawImage(c, 0, 0)
+      const d = x.getImageData(0, 0, c.width, c.height).data; let h = 0x811c9dc5
+      for (let i = 0; i < d.length; i += 7) { h ^= d[i]; h = Math.imul(h, 0x01000193) >>> 0 }
+      return h.toString(16)
+    }))
+    const at = async t => { await seek(pg, t); return hashes(pg) }
+    if (s0.errors.length || st.problems.length || cut == null) check('Zwei 3D-Teile: Seite baut', false, [...s0.errors, ...st.problems].join(' | ').slice(0, 200) || 'kein Schnitt in state.pictures')
+    else {
+      const a1 = await at(0.4), a2 = await at(0.9), b1 = await at(cut + 1.0), b2 = await at(cut + 1.6)
+      check('Zwei 3D-Teile in einer Szene: in Teil 1 rechnet nur Teil 1, mitten in Teil 2 nur Teil 2',
+        a1.length === 2 && a1[0] !== a2[0] && b1[0] === b2[0] && b1[1] !== b2[1] && a1[1] === a2[1],
+        `Schnitt bei ${cut} s; Teil 1: ${a1[0]}/${a2[0]} dann ${b1[0]}/${b2[0]}; Teil 2: ${a1[1]}/${a2[1]} dann ${b1[1]}/${b2[1]}`)
+    }
   } finally { await st.close() }
 }
 

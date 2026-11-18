@@ -237,7 +237,7 @@ const fmt = b => b ? `x ${Math.round(b.left)} bis ${Math.round(b.right)}, y ${Ma
 for (const [label, params, anchors, want] of [
   ['"enter" zu kurz nach "turn"', { then: 'rein' }, { turn: { cap: 1, word: 0, offset: 0.27 }, enter: { cap: 1, word: 1 } }, /zu kurz nach "turn"|mindestens 0,5 s nach "turn"/],
   ['unbekanntes "then"', { then: 'rennt' }, null, /"then" muss/],
-  ['Gedankenstrich in der Belohnung', { reward: 'Gratis—Döner' }, null, /Gedankenstrich/]
+  ['Gedankenstrich in der Belohnung', { reward: 'Gratis\u2014Döner' }, null, /Gedankenstrich/]
 ]) {
   const s1 = sceneRein(params); if (anchors) Object.assign(s1.anchors, anchors); else if (params.then === 'rennt') { delete s1.anchors.turn; delete s1.anchors.enter }
   const sc = { ...script, scenes: [s1, tail] }

@@ -67,7 +67,7 @@ export function runChecks({ state, measured, problems, voice, motion = null, sou
   const touch = [], ap = measured.apart || [], g = LIMITS.apartGap
   for (let i = 0; i < ap.length; i++) for (let j = i + 1; j < ap.length; j++) {
     const a = ap[i], b = ap[j]
-    if (a.scene !== b.scene || a.group !== b.group) continue
+    if (a.scene !== b.scene || (a.part || 0) !== (b.part || 0) || a.group !== b.group) continue
     if (a.left < b.right + g && b.left < a.right + g && a.top < b.bottom + g && b.top < a.bottom + g) touch.push(`Szene ${a.scene}: "${a.what}" und "${b.what}" stoßen aneinander (weniger als ${g} px Abstand). Text kürzen.`)
   }
   add('ueberdeckung', 'Texte und Zeichen im Bild überdecken sich nicht (data-apart)', touch)

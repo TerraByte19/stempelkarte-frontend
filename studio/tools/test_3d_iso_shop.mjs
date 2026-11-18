@@ -14,10 +14,11 @@
 //     oder zeichnet die Szene nichts, sieht man nur Nachthimmel, und keine andere Pruefung merkt es.
 //  3. seek(t, { paint: false }) zeichnet nicht (die Bewegungsprobe in render.mjs ruft seek alle 0,25 s).
 //  4. Sekunden je Bild werden gemessen (Warnung ab 3 s, Fehler ab 8 s).
-//  5. Die Anker wirken, und zwar zur richtigen Zeit: Kunde erst draussen, auf "enter" in der Tuer (Tuer offen,
-//     Ton ding), Sprechblase auf "order", Papierkarte flach vor und Kugel nach "crumple", Scan-Linie und Scanner
-//     auf "scan", Haken danach, auf "stamp" der Stempel und ein Stempel mehr im Handy, Nahaufnahme ab "zoom",
-//     "leave" geht er hinaus. Dazu die Toene im Bericht.
+//  5. Die Anker wirken, und zwar zur richtigen Zeit: im ersten Bild ist die Tuer zu und der Kunde draussen
+//     (in der ersten Probe stand er im ersten Bild schon in der offenen Tuer, die Glocke wie ein Hut auf dem
+//     Kopf), auf "enter" in der Tuer (Tuer offen, Ton ding), Sprechblase auf "order", Papierkarte flach vor und
+//     Kugel nach "crumple", danach im Papierkorb, Scan-Linie und Scanner auf "scan", Haken danach, auf "stamp"
+//     der Stempel und ein Stempel mehr im Handy, Nahaufnahme ab "zoom", "leave" geht er hinaus. Dazu die Toene.
 //  6. Pruefkaesten: Schild, Tafel, Inhaber, Kunde, Blase, Handys, Stempel bekommen unsichtbare Kaesten
 //     (data-safe), damit Sperrzonen, Knopfspalte und Textabstand in die Leinwand sehen. Geprueft wird, dass
 //     sie da sind, auf dem Gezeichneten liegen (Bild mit und ohne das Ding) und dass in der Nahaufnahme nur
@@ -28,9 +29,20 @@
 //     ersten Fassung ragte das offene Blatt 0,5 m an seinen Weg heran).
 //  9. Alle fuenf Branchen bauen auf EINER Seite (geteilter Renderer), ohne Fehler und Warnung, und jede zeigt
 //     ein eigenes, nicht leeres Bild. Ein langer Name steht in zwei Zeilen ohne Warnung "sehr klein".
-// 10. Falsche Angaben brechen mit einer verstaendlichen Meldung ab (Branche, close ohne Handy).
+// 10. Falsche Angaben brechen mit einer verstaendlichen Meldung ab (Branche, close ohne Handy), und Anker, die
+//     ein Bild verderben, geben eine Warnung ("enter" zu frueh: Tuer im ersten Bild offen; "zoom" weniger als
+//     1 s nach "order": Sprechblase steht keine Sekunde).
+// 11. Der QR-Code bleibt frei: Bild mit und ohne Arm des Kunden, mindestens 95 % der Pixel im Code gleich (beim
+//     Scan und im Schlussbild). In der ersten Fassung hielt die Hand das Handy in der Mitte, also auf dem Code;
+//     Unterarm und Hand deckten rund ein Drittel davon zu, die Scan-Linie lief darunter (Abnahme 18.11.2026).
+// 12. Die Bestellung ist zu sehen: die Sprechblase steht mindestens 1 s, davon mindestens 0,8 s in voller
+//     Groesse, und ist in der ganzen Ansicht mindestens 150 px breit. Vorher: 0,3 s bei 84 px, am Handy ein
+//     weisser Fleck.
+// 13. Das Knuellen ist zu sehen: die Papierkarte mit und ohne Kunde gezeichnet gibt fast dieselben Pixel (er
+//     steht nicht davor), flach mindestens 120 px, als Kugel mindestens 40 px breit. Vorher stand sein Kopf
+//     genau beim Knuellen vor der Karte, die Kugel war 32 px gross.
 //
-// Kein Netz, keine Kosten, etwa zwei Minuten (rechnet rund 20 Bilder).
+// Kein Netz, keine Kosten, etwa zwei Minuten (rechnet rund 30 Bilder).
 import { createHash } from 'node:crypto'
 import { normalize, estimateTimes, STAGE } from '../engine/script.mjs'
 import { openStudio, seek, sampleMotion } from '../engine/render.mjs'
@@ -42,16 +54,18 @@ const COL = STAGE.column, SAFE_TOP = STAGE.safeTop, SAFE_BOTTOM = STAGE.h - STAG
 // Alles in einer Szene: Kunde kommt herein, Papier knuellt sich, Bestellung, Kamera faehrt an die Handys,
 // Scan, Stempel. Anker fest in Sekunden, damit der Test nicht an der Schaetzung der Wortzeiten haengt.
 const caps = [{ lines: ['Kommt rein,'], instant: true }, { lines: ['*Papier? | Weg damit.'] }, { lines: ['Handy | *scannen,'] }, { lines: ['*Stempel | drauf.'] }]
+// Zeiten wie in der Probe videos/_probe-iso-shop; das Schlussbild steht laenger, damit der Stempel am Ende
+// wieder weg ist
 const script = {
-  meta: { title: 'test iso-shop', slug: 'test-iso-shop' }, timing: { lead: 0.3, hold: 1.3 }, captionStyle: { mode: 'wort' },
+  meta: { title: 'test iso-shop', slug: 'test-iso-shop' }, timing: { lead: 0.3, hold: 1.8 }, captionStyle: { mode: 'wort' },
   scenes: [{
     component: 'iso-shop',
     params: { branch: 'cafe', shop: 'Café Mond', icon: 'cup', start: 'door', paper: true, phone: true, bubble: true, stamps: 6, have: 3, close: 'phone' },
-    anchors: { enter: { at: 'start', offset: 0.1 }, crumple: { at: 'start', offset: 1.6 }, order: { at: 'start', offset: 2.5 }, zoom: { at: 'start', offset: 2.9 }, scan: { at: 'start', offset: 3.45 }, stamp: { at: 'start', offset: 4.35 } },
+    anchors: { enter: { at: 'start', offset: 1.0 }, crumple: { at: 'start', offset: 1.87 }, order: { at: 'start', offset: 2.5 }, zoom: { at: 'start', offset: 3.5 }, scan: { at: 'start', offset: 4.11 }, stamp: { at: 'start', offset: 4.82 } },
     captions: caps
   }]
 }
-const A = { enter: 0.1, crumple: 1.6, order: 2.5, zoom: 2.9, scan: 3.45, stamp: 4.35 }
+const A = { enter: 1.0, crumple: 1.87, order: 2.5, zoom: 3.5, scan: 4.11, stamp: 4.82 }
 
 // Pixel der 3D-Leinwand (ohne Textzeilen und Verlaeufe): Fingerabdruck und Anteile
 const canvasStats = (pg, i = 0) => pg.evaluate(i => {
@@ -102,19 +116,21 @@ try {
     check('Warmes Licht zu sehen (Lichtflecken, Holz, Lampen): mindestens 2 % warme Pixel', s1.warm > 0.02, `${(s1.warm * 100).toFixed(1)} %`)
   }
   const per = []
-  for (const t of [4.8, 0.4, 1.9, 3.6]) { const q = Date.now(); await seek(a, t); await a.screenshot({ type: 'jpeg', quality: 95 }); per.push((Date.now() - q) / 1000) }
+  for (const t of [4.8, 0.4, 2.1, 3.9]) { const q = Date.now(); await seek(a, t); await a.screenshot({ type: 'jpeg', quality: 95 }); per.push((Date.now() - q) / 1000) }
   const s3 = await canvasStats(a)
   await seek(a, T); const s2 = await canvasStats(a), shot2 = await a.screenshot()
   check(`Gleiches Bild (t = ${T} s) nach Sprüngen gleich: Leinwand Pixel für Pixel`, !!s1 && !!s2 && s1.hash === s2.hash, `${s1 && s1.hash} / ${s2 && s2.hash}`)
   check('Gleiches Bild nach Sprüngen gleich: ganzer Bildschirm (mit Textzeilen)', sha(shot1) === sha(shot2))
   check('Andere Zeit, anderes Bild (die Szene bewegt sich)', !!s3 && s3.hash !== s1.hash)
   // Nach dem Knuellen und in der Nahaufnahme: auch dort muss der Rueckweg dasselbe Bild geben
-  await seek(a, 5.0); const c1 = await canvasStats(a); await seek(a, 1.0); await seek(a, 5.0); const c2 = await canvasStats(a)
-  check('Nahaufnahme nach dem Stempel (t = 5 s) nach einem Sprung zurück gleich (Papierkugel, Handys, Kamera)', !!c1 && !!c2 && c1.hash === c2.hash)
+  await seek(a, 5.2); const c1 = await canvasStats(a); await seek(a, 1.0); await seek(a, 5.2); const c2 = await canvasStats(a)
+  check('Nahaufnahme nach dem Stempel (t = 5,2 s) nach einem Sprung zurück gleich (Papierkugel, Handys, Kamera)', !!c1 && !!c2 && c1.hash === c2.hash)
+  await seek(a, 2.2); const k1 = await canvasStats(a); await seek(a, 4.5); await seek(a, 2.2); const k2 = await canvasStats(a)
+  check('Mitten im Knüllen (t = 2,2 s) nach einem Sprung zurück gleich', !!k1 && !!k2 && k1.hash === k2.hash)
   const b = await studio.page()
   await seek(b, T); const sb = await canvasStats(b), shotB = await b.screenshot()
   check('Gleiches Bild auf einer zweiten Seite gleich (renderVideo rechnet auf mehreren)', !!sb && sb.hash === s1.hash && sha(shotB) === sha(shot1), sb && sb.hash)
-  await seek(b, 5.0); const sb5 = await canvasStats(b)
+  await seek(b, 5.2); const sb5 = await canvasStats(b)
   check('Nahaufnahme auf der zweiten Seite gleich', !!sb5 && !!c1 && sb5.hash === c1.hash)
   await b.evaluate(() => window.seek(3.9, { paint: false })); const sp = await canvasStats(b)
   check('seek(t, { paint: false }) zeichnet nicht (Bewegungsprobe bleibt schnell)', !!sp && sp.hash === sb5.hash)
@@ -125,25 +141,62 @@ try {
 
   // ---- 5. Anker
   const L = {}
-  for (const [k, t] of Object.entries({ before: 0.0, entered: A.enter + 0.15, walking: 1.2, preCrumple: A.crumple - 0.05, crumpled: A.crumple + 0.6, bubble: A.order + 0.5, wide: A.zoom - 0.05, scanning: A.scan + 0.3, checked: A.scan + 0.75, preStamp: A.stamp - 0.05, stamped: A.stamp + 0.6, end: st.duration - 0.05 })) L[k] = await live(a, t)
-  // Vor "enter" geht er draussen auf die Tuer zu (durch das Glas zu sehen), zaehlt aber fuer keine Pruefung
+  const times = await a.evaluate(() => document.querySelector('canvas.ish-canvas').isoShop.times)
+  for (const [k, t] of Object.entries({ before: 0.0, entered: A.enter + 0.15, walking: A.enter + 1.0, preCrumple: A.crumple - 0.05, crumpled: A.crumple + 0.52, binned: A.crumple + 1.15, bubble: A.order + 0.5, atCounter: A.scan - 0.8, wide: A.zoom - 0.05, scanning: A.scan + 0.3, checked: times.check + 0.06, preStamp: A.stamp - 0.05, stamped: A.stamp + 0.6, end: st.duration - 0.05 })) L[k] = await live(a, t)
+  // Im ersten Bild ist die Tuer zu und der Kunde noch draussen hinter der Wand (zaehlt fuer keine Pruefung)
   const boxBefore = await a.evaluate(() => { window.seek(0, { paint: false }); return window.STUDIO.probe().map(x => x.what) })
-  check('Vor "enter" ist der Kunde draußen vor der Tür, ohne Prüfkasten', !!L.before.guest && L.before.guest[1] < 0 && !boxBefore.includes('Kunde'), `${JSON.stringify(L.before.guest)}, Kästen ${boxBefore.join(', ')}`)
+  check('Erstes Bild: Tür zu, der Kunde draußen, ohne Prüfkasten', L.before.door === 0 && (!L.before.guest || L.before.guest[1] < 0) && !boxBefore.includes('Kunde'), `Tür ${L.before.door}, ${JSON.stringify(L.before.guest)}, Kästen ${boxBefore.join(', ')}`)
   check('Auf "enter" steht er in der Tür, die Tür ist offen', !!L.entered.guest && Math.abs(L.entered.guest[1]) < 0.9 && L.entered.door > 0.8, `Lage ${JSON.stringify(L.entered.guest)}, Tür ${L.entered.door}`)
-  check('Danach geht er zur Theke, die Tür ist wieder zu, bis "order" steht er an der Theke', !!L.walking.guest && L.walking.guest[1] > 1 && L.walking.door === 0 && Math.abs(L.bubble.guest[0] + 2.25) < 0.01 && Math.abs(L.bubble.guest[1] - 3.5) < 0.01, `${JSON.stringify(L.walking.guest)} Tür ${L.walking.door}; bei order ${JSON.stringify(L.bubble.guest)}`)
-  check('Papierkarte flach vor "crumple", Kugel danach', L.preCrumple.crumple === 0 && L.crumpled.crumple === 1, `${L.preCrumple.crumple} / ${L.crumpled.crumple}`)
+  check('Danach geht er zur Theke (vorn herum), die Tür ist wieder zu, vor dem Heben des Handys steht er an der Theke', !!L.walking.guest && L.walking.guest[1] > 1 && L.walking.door === 0 && Math.abs(L.atCounter.guest[0] + 2.25) < 0.01 && Math.abs(L.atCounter.guest[1] - 3.5) < 0.01, `${JSON.stringify(L.walking.guest)} Tür ${L.walking.door}; vor dem Scan ${JSON.stringify(L.atCounter.guest)}`)
+  check('Papierkarte flach vor "crumple", Kugel danach, nach 1,1 s im Papierkorb', L.preCrumple.crumple === 0 && L.crumpled.crumple === 1 && !L.crumpled.binned && L.binned.binned, `${L.preCrumple.crumple} / ${L.crumpled.crumple} / Korb ${L.crumpled.binned} ${L.binned.binned}`)
   check('Sprechblase auf "order"', !L.walking.bubble && L.bubble.bubble)
   check('Nahaufnahme erst ab "zoom", danach ganz nah', L.wide.zoom === 0 && L.stamped.zoom === 1, `${L.wide.zoom} / ${L.stamped.zoom}`)
   check('Auf "scan": Handy gehoben, Scanner darüber, Scan-Linie läuft, noch kein Haken', L.scanning.up === 1 && L.scanning.scannerUp === 1 && L.scanning.scanning && !L.scanning.ok, JSON.stringify(L.scanning))
-  check('Nach dem Scan der Haken (Bildschirm des Inhabers und Haken über dem Handy)', L.checked.ok && L.checked.check)
+  check('Nach dem Scan der Haken (Bildschirm des Inhabers und Haken über dem Handy)', L.checked.ok && L.checked.check, JSON.stringify(L.checked))
   check('Auf "stamp": vorher noch nicht, danach Stempel über dem Handy und ein Stempel mehr auf der Karte', !L.preStamp.after && !L.preStamp.stamp && L.stamped.after && L.stamped.stamp, `${JSON.stringify(L.preStamp)} / ${JSON.stringify(L.stamped)}`)
   check('Am Ende ist der Stempel wieder weg und die Karte zeigt ihn', !L.end.stamp && L.end.after)
   const cue = (name, t) => (st.cues || []).some(c => c.name === name && Math.abs(c.t - t) < 0.08)
-  const times = await a.evaluate(() => document.querySelector('canvas.ish-canvas').isoShop.times)
-  check('Töne: ding auf "enter", crumple, pop auf "order", scan, ok, pop auf "stamp"', cue('ding', A.enter - 0.05) && cue('crumple', A.crumple) && cue('pop', A.order) && cue('scan', A.scan + 0.02) && cue('ok', times.check) && cue('pop', A.stamp), (st.cues || []).map(c => `${c.name}@${c.t}`).join(' '))
+  check('Töne: ding auf "enter", crumple, drop im Korb, pop auf "order", scan, ok, pop auf "stamp"', cue('ding', A.enter - 0.05) && cue('crumple', A.crumple) && cue('drop', A.crumple + 1.1) && cue('pop', A.order) && cue('scan', A.scan + 0.02) && cue('ok', times.check) && cue('pop', A.stamp), (st.cues || []).map(c => `${c.name}@${c.t}`).join(' '))
+
+  // ---- 12. Bestellung: wie lange und wie gross die Sprechblase steht
+  const bubS = await a.evaluate(([o, z]) => { const c = document.querySelector('canvas.ish-canvas'), out = []; for (let t = o; t <= z + 0.6; t = +(t + 0.05).toFixed(2)) { window.seek(t, { paint: false }); out.push(c.isoShop.live().bubbleScale) } return out }, [A.order, A.zoom])
+  const shownS = bubS.filter(x => x > 0.01).length * 0.05, fullS = bubS.filter(x => x >= 0.9).length * 0.05
+  check('Sprechblase steht mindestens 1 s, davon mindestens 0,8 s in voller Größe', shownS >= 1.0 - 1e-6 && fullS >= 0.8 - 1e-6, `${shownS.toFixed(2)} s zu sehen, ${fullS.toFixed(2)} s voll`)
+  await seek(a, A.order + 0.6)
+  const bubD = await a.evaluate(() => document.querySelector('canvas.ish-canvas').isoShop.drawnBox('bubble'))
+  check('Sprechblase in der ganzen Ansicht mindestens 150 px breit (am Handy rund 55 pt)', !!bubD && bubD.right - bubD.left >= 150, bubD ? `${Math.round(bubD.right - bubD.left)} x ${Math.round(bubD.bottom - bubD.top)} px` : 'nicht gezeichnet')
+
+  // ---- 13. Knuellen: nicht verdeckt, gross genug
+  const paperPx = async t => { await seek(a, t); return a.evaluate(() => { const s = document.querySelector('canvas.ish-canvas').isoShop, w = s.drawnBox('paper'); s.hide('guest', true); const wo = s.drawnBox('paper'); s.hide('guest', false); return { w, wo } }) }
+  for (const [label, t, minW] of [['flach', A.crumple - 0.05, 120], ['mitten im Knüllen', A.crumple + 0.25, 0], ['als Kugel', A.crumple + 0.52, 40], ['im Flug', A.crumple + 0.8, 40]]) {
+    const r = await paperPx(t), wpx = r.w ? r.w.right - r.w.left : 0
+    check(`Papierkarte ${label} (t = ${t.toFixed(2)} s) nicht vom Kunden verdeckt${minW ? ` und mindestens ${minW} px breit` : ''}`, !!r.w && !!r.wo && r.w.pixels >= 0.95 * r.wo.pixels && wpx >= minW, r.w && r.wo ? `${r.w.pixels} von ${r.wo.pixels} Pixeln zu sehen, ${Math.round(wpx)} px breit` : 'nicht gezeichnet')
+  }
+
+  // ---- 11. QR-Code frei vom Arm des Kunden (beim Scan und im Schlussbild)
+  const qrFree = async t => {
+    await seek(a, t)
+    return a.evaluate(() => {
+      const c = document.querySelector('canvas.ish-canvas'), s = c.isoShop, quad = s.qrQuad()
+      const grab = () => { const g = document.createElement('canvas'); g.width = c.width; g.height = c.height; const x = g.getContext('2d', { willReadFrequently: true }); x.drawImage(c, 0, 0); return x.getImageData(0, 0, c.width, c.height).data }
+      const inQuad = (x, y) => { let inside = false; for (let i = 0, j = 3; i < 4; j = i++) { const [xi, yi] = quad[i], [xj, yj] = quad[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside } return inside }
+      const withArm = grab(); s.hide('arm', true); const without = grab(); s.hide('arm', false)
+      const xs = quad.map(q => q[0]), ys = quad.map(q => q[1]); let n = 0, same = 0
+      for (let y = Math.max(0, Math.floor(Math.min(...ys))); y < Math.min(c.height, Math.ceil(Math.max(...ys))); y++) for (let x = Math.max(0, Math.floor(Math.min(...xs))); x < Math.min(c.width, Math.ceil(Math.max(...xs))); x++) {
+        if (!inQuad(x + 0.5, y + 0.5)) continue
+        const i = (y * c.width + x) * 4; n++
+        if (Math.abs(withArm[i] - without[i]) + Math.abs(withArm[i + 1] - without[i + 1]) + Math.abs(withArm[i + 2] - without[i + 2]) < 30) same++
+      }
+      return { n, same, quad: quad.map(q => q.map(Math.round)) }
+    })
+  }
+  for (const [label, t] of [['beim Scan', A.scan + 0.3], ['im Schlussbild', st.duration - 0.05]]) {
+    const r = await qrFree(t)
+    check(`QR-Code ${label} frei: mit und ohne Arm des Kunden mindestens 95 % gleich`, r.n > 2000 && r.same / r.n >= 0.95, `${r.n} Pixel im Code, ${(100 * r.same / Math.max(1, r.n)).toFixed(1)} % gleich`)
+  }
 
   // ---- 6. Pruefkaesten
-  await seek(a, A.order + 0.33)
+  await seek(a, A.order + 0.4)
   const bx = await boxStats(a), by = w => bx.find(it => it.what === w)
   const wideBoxes = ['Schild Café Mond', 'Tafel', 'Inhaber', 'Kunde', 'Bestellung', 'Handy', 'Papierkarte']
   check('Ganze Ansicht: Kästen für Schild, Tafel, Inhaber, Kunde, Blase, Handy, Papierkarte', wideBoxes.every(by), bx.map(it => it.what).join(', '))
@@ -179,7 +232,7 @@ try {
   check(`Alle Kästen die ganze Szene zwischen y ${SAFE_TOP} und ${SAFE_BOTTOM}`, out.length === 0, out.map(x => `${x.what} y ${x.top} bis ${x.bottom}`).join(', '))
 
   // ---- 8. Tuer beim Hereinkommen
-  const gapsIn = await a.evaluate(() => { const c = document.querySelector('canvas.ish-canvas'), o = []; for (let t = 0; t <= 1.6; t = +(t + 0.05).toFixed(2)) { window.seek(t, { paint: false }); const g = c.isoShop.doorGap(); if (g != null) o.push([t, g]) } return o })
+  const gapsIn = await a.evaluate(() => { const c = document.querySelector('canvas.ish-canvas'), o = []; for (let t = 0; t <= 2.6; t = +(t + 0.05).toFixed(2)) { window.seek(t, { paint: false }); const g = c.isoShop.doorGap(); if (g != null) o.push([t, g]) } return o })
   const worstIn = gapsIn.reduce((mn, x) => x[1] < mn[1] ? x : mn, [null, Infinity])
   check('Tür beim Hereinkommen: der Kunde berührt das Türblatt nicht (über 5 cm, 0,05-s-Schritte)', gapsIn.length > 8 && worstIn[1] > 0.05, `${gapsIn.length} Bilder mit offener Tür, knappster Abstand ${worstIn[1]} m bei ${worstIn[0]} s`)
 } finally { await studio.close() }
@@ -235,6 +288,18 @@ try {
       const pg = await s4.page(), st = await s4.state(pg)
       check(`Falsche Angabe ${JSON.stringify(params)} bricht verständlich ab`, st.errors.some(e => want.test(e)), st.errors.join(' | ').slice(0, 200))
     } finally { await s4.close() }
+  }
+  // Anker, die ein Bild verderben: Warnung statt stiller Fehler
+  for (const [label, params, anchors, want] of [
+    ['"enter" 0,1 s nach Szenenbeginn', { start: 'door', phone: false, bubble: false }, { enter: { at: 'start', offset: 0.1 } }, /Glastür steht im ersten Bild schon offen/],
+    ['"zoom" 0,4 s nach "order"', { close: 'phone' }, { order: { at: 'start', offset: 0.5 }, zoom: { at: 'start', offset: 0.9 }, scan: { at: 'start', offset: 2.0 }, stamp: { at: 'start', offset: 2.8 } }, /Sprechblase steht keine Sekunde/]
+  ]) {
+    const sc = { meta: { title: 'test warnung', slug: 'test-warnung' }, timing: { lead: 0.3, hold: 3 }, scenes: [{ component: 'iso-shop', params, anchors, captions: [{ lines: ['Probe'] }] }] }
+    const s5 = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
+    try {
+      const pg = await s5.page(), st = await s5.state(pg)
+      check(`Warnung bei ${label}`, !st.errors.length && st.warnings.some(w => want.test(w)), [...st.errors, ...st.warnings].join(' | ').slice(0, 300))
+    } finally { await s5.close() }
   }
 }
 

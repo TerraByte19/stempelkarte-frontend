@@ -34,7 +34,11 @@ class Fehler extends Error {}
 
 // ---- Die Formate (FORMATE.md, Abschnitt 4). Der Selbsttest vergleicht diese Tabelle mit dem
 // Dokument: aendert sich dort eine Schlussfrage, faellt der Unterschied hier auf.
-// einstieg: erlaubte Bausteine des ersten Teils (leer = je nach Meme, HOOKS.md 3.2)
+// einstieg: erlaubte Bausteine des ersten Teils (leer = je nach Meme, HOOKS.md 3.2). Seit dem 18.11.2026
+// ("3D zuerst", Wunsch des Betreibers: so wenig 2D wie moeglich) steht der 3D-Baustein vorn, wo es einen gibt;
+// der 2D-Baustein bleibt erlaubt (Rueckfall, wenn das 3D-Standbild bei 0 s oder 0,5 s nicht stimmt). V4
+// vergleicht Bausteine, nicht Ansichten: zwei Tage hintereinander dasselbe schwebende Handy (phone-3d) oder
+// dieselbe Kreuzung (iso-street, Duell oder Naehe) als erstes Bild waere genau die Wiederholung, die V4 verhindert.
 export const FORMATE = {
   F01: { kern_bild: 'zettel', schluss: 'Gleich probieren?', einstieg: ['tip-cards'], belege: ['tipps'] },
   F02: { kern_bild: 'zettel', schluss: 'Welcher zuerst?', einstieg: ['tip-cards'], belege: ['tipps'] },
@@ -43,9 +47,9 @@ export const FORMATE = {
   F05: { kern_bild: 'tag', schluss: "Kennst du's?", einstieg: ['day-clock'], belege: ['stempeln'] },
   F06: { kern_bild: 'duell', schluss: 'Dein Favorit?', einstieg: ['versus-split'], belege: ['papier'] },
   F07: { kern_bild: 'meme', schluss: null, einstieg: [], belege: ['papier', 'ohne-app', 'stempeln', 'gestalten'] },
-  F08: { kern_bild: 'naehe', schluss: 'Klingt interessant?', einstieg: ['lock-notification'], belege: ['naehe'] },
+  F08: { kern_bild: 'naehe', schluss: 'Klingt interessant?', einstieg: ['phone-3d', 'lock-notification'], belege: ['naehe'] },
   F09: { kern_bild: 'kommentar', schluss: 'Alles gewusst?', einstieg: ['comment-thread'], belege: ['ohne-app', 'stempeln', 'gestalten'] },
-  F10: { kern_bild: 'zahl', schluss: 'Überrascht?', einstieg: ['shop-counter', 'week-strip'], belege: ['studie'] }
+  F10: { kern_bild: 'zahl', schluss: 'Überrascht?', einstieg: ['iso-shop', 'shop-counter', 'week-strip'], belege: ['studie'] }
 }
 export const BELEGE = ['ohne-app', 'stempeln', 'papier', 'naehe', 'gestalten', 'studie', 'rechnung', 'tipps']
 
@@ -71,6 +75,24 @@ export function motiveAus(parts) {
     // wallet-pass: Scan-Rahmen ist Vorgabe (scan: true), Stempel kommen dazu, wenn after > before (Vorgabe 2 und 5)
     if (c === 'wallet-pass' && (p.scan !== false || (p.after ?? 5) > (p.before ?? 2))) m.add('scan')
     if (c === 'versus-split' && p.scene === 'vergessen') m.add('scan')
+    // 3D (seit 18.11.2026): dort haengt das Motiv an der Ansicht oder an einem Schalter, nicht am Namen. Ohne
+    // diese Zeilen war ein Video aus 3D-Bausteinen fuer V2, V3, V8 und V11 motivlos: Kreis um den Laden,
+    // Papierkarte im Korb und Scan an der Theke jeden Tag, und keine Regel haette es bemerkt.
+    // iso-street: "nah" ist C1 (Ersatz fuer shop-map und shop-street), das Duell (Vorgabe) zeigt keins der drei.
+    if (c === 'iso-street' && p.mode === 'nah') m.add('naehe')
+    // phone-3d: "lock" ist der Sperrbildschirm (wie lock-notification); "wallet" wie wallet-pass, aber mit den
+    // Vorgaben dieses Bausteins (scan true, before 6, after 8); "design" (D1) zeigt keins der drei.
+    if (c === 'phone-3d') {
+      const mode = p.mode || 'wallet'
+      if (mode === 'lock') m.add('naehe')
+      if (mode === 'wallet' && (p.scan !== false || (p.after ?? 8) > (p.before ?? 6))) m.add('scan')
+    }
+    // iso-shop: mit dem Handy des Kunden (Vorgabe phone: true) scannt der Inhaber und der Stempel springt auf,
+    // das ist der Scan (B1, B2); mit "paper": true liegt die Papierkarte auf der Theke und knuellt sich.
+    if (c === 'iso-shop') {
+      if (p.phone !== false) m.add('scan')
+      if (p.paper === true) m.add('papier')
+    }
   }
   return ['naehe', 'papier', 'scan'].filter(x => m.has(x))
 }
@@ -278,6 +300,12 @@ function selbsttest() {
   soll('wallet-pass ohne Scan, aber mit neuem Stempel ist ein Scan', motiveAus([{ component: 'wallet-pass', params: { scan: false, before: 3, after: 4 } }]), ['scan'])
   soll('Duell ist Papier, Runde "vergessen" auch Scan', motiveAus([{ component: 'versus-split', params: { scene: 'regen' } }, { component: 'versus-split', params: { scene: 'vergessen' } }]), ['papier', 'scan'])
   soll('Sperrbildschirm und Karte von oben sind Nähe', motiveAus([{ component: 'lock-notification', params: {} }, { component: 'shop-map', params: {} }]), ['naehe'])
+  // 3D (seit 18.11.2026): Motive an Ansicht und Schaltern, Vorgaben der 3D-Bausteine
+  soll('iso-street: Duell (Vorgabe) ist kein Motiv, "nah" ist Nähe', [motiveAus([{ component: 'iso-street', params: {} }]), motiveAus([{ component: 'iso-street', params: { mode: 'nah', frame: 'stadt' } }])], [[], ['naehe']])
+  soll('phone-3d: Sperrbildschirm ist Nähe, Wallet mit Vorgaben ist Scan, Design keins', [motiveAus([{ component: 'phone-3d', params: { mode: 'lock' } }]), motiveAus([{ component: 'phone-3d', params: {} }]), motiveAus([{ component: 'phone-3d', params: { mode: 'design' } }])], [['naehe'], ['scan'], []])
+  soll('phone-3d: Wallet ohne Scan und ohne neuen Stempel ist kein Scan, mit neuem Stempel schon', [motiveAus([{ component: 'phone-3d', params: { scan: false, before: 8, after: 8 } }]), motiveAus([{ component: 'phone-3d', params: { scan: false, before: 7 } }])], [[], ['scan']])
+  soll('iso-shop: mit Handy (Vorgabe) Scan, ohne Handy keins, mit Papier Papier', [motiveAus([{ component: 'iso-shop', params: {} }]), motiveAus([{ component: 'iso-shop', params: { phone: false } }]), motiveAus([{ component: 'iso-shop', params: { phone: false, paper: true } }])], [['scan'], [], ['papier']])
+  soll('ein ganzes Video in 3D mit Laden, Papier und Nähe ist der alte Bogen (alle drei Motive)', motiveAus([{ component: 'iso-shop', params: { paper: true } }, { component: 'iso-street', params: { mode: 'nah' } }]), ['naehe', 'papier', 'scan'])
   // 4. Saetze: Aufforderung, Schlussfrage und Ladenname zaehlen nicht
   const a = rumpfWoerter('Der Stempel ist sofort auf seinem Handy. Noch Fragen? Dann kommentiere jetzt Imbiss, und wir melden uns bei dir.')
   soll('Schluss und Aufforderung fallen weg', a.join(' '), 'der stempel ist sofort auf seinem handy')
@@ -294,6 +322,11 @@ function selbsttest() {
   soll('ein Quiz zur Stempelzahl am 19.11. geht durch', fehler(gut), [])
   soll('F08 am 19.11.: A0 zählt als F08 (V1), Nähe am 18.11. (V2)', fehler({ ...gut, format: 'F08', kern_bild: 'naehe', einstieg: 'lock-notification', motive: ['naehe'], beleg_kern: 'naehe', schluss: 'Klingt interessant?' }).filter(x => x !== 'V4'), ['V1', 'V2', 'V6', 'V7', 'V9'])
   soll('Scan am 19.11.: der Salon vom 18.11. hatte einen (V8)', fehler({ ...gut, motive: ['scan'] }), ['V8'])
+  // F08 beginnt seit "3D zuerst" mit phone-3d (Sperrbildschirm); lock-notification bleibt erlaubt, anderes nicht
+  const ein08 = e => pruefeFelder({ ...gut, format: 'F08', einstieg: e }, vor, '2026-11-19').filter(c => c.regel === 'V4' && /des Formats/.test(c.text)).map(c => c.ok)
+  soll('F08: Einstieg phone-3d und lock-notification erlaubt, iso-shop nicht (V4)', [ein08('phone-3d'), ein08('lock-notification'), ein08('iso-shop')], [[true], [true], [false]])
+  // V4 vergleicht Bausteine: zweimal hintereinander das schwebende Handy als erstes Bild ist dieselbe Wiederholung
+  soll('zweimal phone-3d als Einstieg hintereinander (V4)', fehler({ ...gut, einstieg: 'phone-3d' }, '2026-11-19', [{ ...vor[0], einstieg: 'phone-3d' }, ...vor.slice(1)]).includes('V4'), true)
   soll('Friseur nach dem Friseur (V5)', fehler({ ...gut, branche: 'friseur' }), ['V5'])
   soll('drei Wörter in der Schlussfrage (V7)', fehler({ ...gut, schluss: 'Lohnt sich das?' }), ['V7'])
   const satz = { ...gut, text: 'Danach liegt die Karte in Apple oder Google Wallet. Der Stempel ist sofort auf seinem Handy.' }

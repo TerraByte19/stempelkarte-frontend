@@ -575,8 +575,8 @@ Das zweite Video: -14,1 LUFS, wahre Spitze -1,2 dBTP.
 Die vollständigen Tabellen stehen im Katalog unter "Bausteine"; hier, wofür
 sie da sind, und die Fallen.
 
-**`shop-map`: Karte von oben.** Das Bild für jeden Satz über "in der Nähe"
-(`PRODUKT.md`, C1). Der Betreiber hat am zweiten Video korrigiert: es muss
+**`shop-map`: Karte von oben.** Bis zum 18.11.2026 das Bild für jeden Satz über "in der Nähe"
+(`PRODUKT.md`, C1); seitdem zuerst `iso-street` mit `"mode": "nah"` (3D zuerst, Abschnitt "Bausteine"), `shop-map` ist der Rückfall. Der Betreiber hat am zweiten Video korrigiert: es muss
 klar sein, dass man nicht vor dem Laden stehen muss. Von der Seite liest jeder
 eine Figur vor einer Ladenfront als "vor dem Laden", auch mit Kreis; von oben
 reicht ein Block Abstand.
@@ -973,13 +973,63 @@ Gemeinsam für alle:
   Becherregal). Für alles außer Café und Bäckerei setzen.
 - Für Statistik, Newsletter und Design-Editor gibt es keinen Baustein
   (Textregel 2).
-- Für "in der Nähe" (C1) gibt es seit dem zweiten Video die Karte von oben
+- Für "in der Nähe" (C1) gibt es seit dem 18.11.2026 zuerst den Ring um den Laden in 3D (`iso-street` mit `"mode": "nah"`, unten), davor seit dem zweiten Video die Karte von oben
   (`shop-map`). `shop-street` und `shop-map` teilen Figur, Benachrichtigung,
   Nadel, Auge und Kreis (`engine/parts.js`), damit die Kundin in beiden Bildern
   dieselbe bleibt. Wann welcher Baustein, steht unter "Stil C" und in
   `AUTOMATIK.md`, Abschnitt 6.4.
 
-- **3D (seit 17.11.2026, erst eine Probe):** `iso-street` ist der erste Baustein,
+- **3D zuerst (seit 18.11.2026).** Der Betreiber: "Ich will so wenig 2D wie
+  möglich." Wo es für ein Bild einen 3D-Baustein gibt, nimmt jedes neue Video
+  ihn statt des 2D-Bausteins; welcher wofür, steht in `AUTOMATIK.md` 6.4
+  (Tabelle "2D und 3D"), welcher je Format in `FORMATE.md` 4 und als erstes
+  Bild in `HOOKS.md` 1.7.3. Es gibt drei 3D-Bausteine, alle auf dem Baukasten
+  `engine/kit3d.js` und in derselben Welt (Abend in Lila, warmes Licht,
+  Spielzeugfiguren, isometrisch, ruhige Kamera): `iso-street` (Kreuzung mit
+  zwei Läden: Duell, und mit `"mode": "nah"` der Ring um den Laden für C1),
+  `iso-shop` (der Laden von innen: Theke, Kunde, Scan, Stempel, Papierkarte)
+  und `phone-3d` (das Handy: Wallet-Karte, Sperrbildschirm, Kartendesign).
+  2D bleiben vorerst die Bilder, die wie eine Oberfläche aussehen
+  (`comment-thread`, `big-number`, `tip-cards`, `calc-panel`, `versus-split`,
+  `day-clock`, `week-strip`), nur dort, wo das Format sie verlangt; dazu
+  ohne 3D-Gegenstück `stamp-check` (Pointe), `cta-comment` (Schluss),
+  `shop-door`, `shop-counter` mit Steppenläufer (H15), `wallet-vanish`,
+  `guest-ghost`. Regeln für alle drei:
+  - **Immer Abend.** Laternen an, dunkle Stadt mit hellen Fenstern, auch
+    über den Wänden von `iso-shop`. Steht daneben eine Uhrzeit am hellen Tag
+    (etwa 8 bis 17 Uhr, im Sommer bis 20 Uhr) oder "Mittagspause", bleibt
+    dieses Bild 2D (`AUTOMATIK.md` 6.4, "Tageszeit"); keine Prüfung sieht
+    das, nur das Standbild.
+  - **Dieselbe Ansicht höchstens zweimal je Video** (außer als Fortsetzung
+    des Teils davor), sonst sieht ein Video ganz in 3D aus wie fünfmal
+    dieselbe Kreuzung (`AUTOMATIK.md` 6.4).
+  - **Keine `camera` an einem 3D-Teil** (die 2D-Kamera blendet oben bis
+    522 px aus, die Welt hört mitten im Bild auf). Die 3D-Kamera fährt selbst
+    (`push`, `orbit`, bei `iso-shop` der Anker `zoom`). Bildwechsel kommen
+    deshalb aus **Teilen mit `"enter": "cut"`**: jeder Teil ein anderer Blick
+    (anderer Baustein, andere Ansicht wie `frame` oder `close`, ein anderer
+    Augenblick). Seit dem 18.11.2026 rechnet ein 3D-Teil nur, solange sein
+    Teil zu sehen sein kann (vorher die ganze Szene, zwei 3D-Teile kosteten
+    doppelt; `test_3d.mjs`, Teil 11). So kommt auch ein Video fast ganz in 3D
+    auf die 12 Bildwechsel von Stil C.
+  - **Rechenzeit:** etwa 1 bis 1,4 s je Bild und Seite ohne Grafikkarte (2D:
+    0,1 bis 0,16 s). `make.mjs` rechnet auf drei Seiten zugleich, die sich
+    aber einen WebGL-Prozess teilen. Das Beispiel `videos/_beispiel-3d-f08`
+    (elf von zwölf Bildern 3D, 51,7 s im Entwurf, 1550 Bilder) brauchte am
+    18.11.2026 neben anderen Sitzungen 23 min 35 s (0,78 s je Bild); ein
+    2D-Entwurf gleicher Länge rund 4 min. Ein Video mit Stimme fast ganz in
+    3D: rund 18 bis 25 Minuten, unter Last bis 35 (`AUTOMATIK.md`,
+    Schritt 16). Allein das Laden der Seite braucht mit elf 3D-Teilen über
+    30 s, `--check` insgesamt rund 80 s (Grenze in `engine/render.mjs` seit
+    dem 18.11.2026 180 s statt 30 s).
+  - **Prüfungen** sehen in die Leinwand nur über die Kästen aus `ctx.place`.
+    `ueberdeckung` misst seit dem 18.11.2026 je Teil: zwei Teile derselben
+    3D-Welt in einer Szene (zweimal `iso-shop`) stoßen nicht mehr
+    "aneinander", sie stehen ja nie zugleich da.
+  - Jeder 3D-Baustein hat seinen eigenen Test (`tools/test_3d*.mjs`), alle
+    laufen in `selftest.mjs` mit.
+
+- **3D (seit 17.11.2026, der erste Baustein):** `iso-street` ist der erste Baustein,
   der sein Bild mit three.js (WebGL) zeichnet statt mit HTML. Er meldet mit
   `ctx.frame(fn)` eine Zeichenfunktion an; `engine.js` ruft sie bei jedem
   `seek(t)` mit genau diesem `t` auf, also bleibt Bild N in jedem Lauf gleich
@@ -1011,6 +1061,132 @@ Gemeinsam für alle:
   3D-Teil: die Kamera-Ebene blendet oben bis 522 px alles aus, dann hört die
   Stadt mitten im Bild auf. Der erste Bildwechsel kommt so erst mit der
   nächsten Szene (im Döner-Video bei 4,87 s; `tools/einstieg.mjs` will 3 s).
+  Seit dem 18.11.2026 geht das früher: ein zweiter Teil mit
+  `"enter": "cut"` (Punkt "3D zuerst" oben).
+
+- **Kunde in der Nähe in 3D (`iso-street` mit `"mode": "nah"`, seit
+  18.11.2026):** dieselbe Kreuzung wie im Duell, jetzt für C1 und der
+  3D-Ersatz für `shop-map` und `shop-street`. Ein weicher Lichtring liegt um
+  den eigenen Laden, ein Kunde geht auf dem Gehweg am Platz, auf der anderen
+  Seite der Kreuzung, und betritt ihn gut 10 m von der Tür (Anker `near`). Sein
+  Handy leuchtet, ein Lichtkegel steigt auf, und oben springt eine Blase mit
+  dem Sperrbildschirm auf: "Noch {left} Stempel bis: {reward}" (volle Karte:
+  "{reward} wartet auf dich"). Danach bleibt er stehen (`"then": "weiter"`),
+  dreht sich zur Tür (`"dreht"`, Anker `turn`) oder geht hinein (`"rein"`,
+  Anker `enter`). `"frame": "laden"` ist genau der Ausschnitt des Duells (der
+  Ring links angeschnitten), `"stadt"` fährt höher und weiter weg: der ganze
+  Ring, beide Läden, viel Stadt, die Schilder dort nur rund 25 px (wenn der
+  Name zählt, "laden").
+  - **Nähe ist nie "vor der Tür":** der Ring hat 10,5 m um die Tür, der Kunde
+    betritt ihn auf der anderen Seite der Kreuzung (der Test verlangt
+    mindestens 9,5 m). Eine Entfernung steht nie im Bild und nie im Text
+    (N3).
+  - **Der Laden schickt nichts und sieht nichts:** keine Linie vom Laden zum
+    Handy, der Ring steht still. Leuchten tut nur das Handy, die Blase kommt
+    aus dem Handy. Gesagt wird "von selbst" oder "ohne dass du etwas tust",
+    nie "der Laden sieht nicht, wo du bist" (N2). "vibriert" oder "brummt"
+    bricht den Bau ab.
+  - **Die Blase** hat eine feste Größe (640 x 300 px) im Streifen unter den
+    Textzeilen (y 602 bis rund 915, x 64 bis 936), nie in der Knopfspalte
+    und nie über einem Schild. Text in zwei Zeilen, 44 px; unter 38 px warnt
+    der Bau ("Belohnung kürzen").
+  - **Zeiten:** `near` am besten auf "Nähe" oder dem Wort, das die Meldung
+    nennt, mindestens 0,3 s nach `walk`. `turn` mindestens 0,4 s nach
+    `near`. `"rein"` braucht nach `turn` rund 2 s (9 m; ab 5 m/s warnt der
+    Bau, ab 6,5 m/s bricht er ab). Soll die Blase schon stehen, wenn der Teil
+    beginnt (Fortsetzung eines Teils davor), liegen `walk` und `near` vor dem
+    Anfang (`{ "at": "start", "offset": -1.2 }` und `-0.6`), dazu
+    `"tones": false`, sonst klingen ding und pop schon im Teil davor (so im
+    Beispiel `videos/_beispiel-3d-f08`, Szene 5).
+  - In "nah" fehlt die Laterne an der hinteren Ecke (ihr Mast stand unter der
+    Blase): ein Schnitt vom Duell auf "nah" ist an dieser Stelle nicht ganz
+    gleich. Es gibt kein Herz; `heart`, `walker`, `back`, `from` gelten nur
+    im Duell.
+  - `node studio/tools/test_3d_iso_street_naehe.mjs` (45 Prüfungen): gleiche
+    Pixel nach Sprüngen und auf einer zweiten Seite, Ring zu sehen, Anker,
+    Kästen auf den Dingen, Blase im Streifen und aus der Knopfspalte, Text,
+    Türblatt, "stadt", gespiegelt, falsche Angaben. Probe:
+    `videos/_probe-iso-street-naehe`.
+
+- **3D im Laden (`iso-shop`, seit 18.11.2026):** der Laden von innen,
+  aufgeschnitten wie ein Puppenhaus: Rückwand mit Glastür, Fenster, Regalen
+  und Ladenschild, rechte Wand mit Tafel, über den Mauerkronen die Stadt.
+  Einrichtung je Branche (`branch`: `cafe`, `doener`, `friseur`,
+  `baeckerei`, `eis`). Er ersetzt die 2D-Bilder für alles, was IM Laden
+  passiert: Kunde kommt herein (`"start": "door"`, Anker `enter`), bestellt
+  (`order`, Sprechblase, auch im Gehen), Papierkarte knüllt sich und fliegt
+  in den Papierkorb (`"paper": true`, `crumple`), Scan mit dem Handy des
+  Inhabers (`scan`, B1) und Stempel, der sofort auf der Karte im Handy ist
+  (`stamp`, B2), Kunde geht (`"leaves": true`, `leave`).
+  - **Motive** (`tools/abwechslung.mjs`): mit Handy (Vorgabe
+    `"phone": true`) ist es ein Scan (V8), mit `"paper": true` Papier (V3).
+    Für einen Laden ohne Scan (F08, F01, F04, F10) `"phone": false`.
+  - **Nahaufnahme im selben Teil:** `"close": "phone"` (Handys und Stempel,
+    die Stempel auf der Karte sind zu zählen) oder `"counter"` (Theke steil
+    von oben); beides braucht `"phone"` oder `"paper"`, sonst bricht der Bau
+    ab. Dazu Anker `zoom` (Fahrt 0,9 s; Schild und Tafel dunkeln ab). Auf
+    `{ "at": "start" }`: von Anfang an nah.
+  - **Zeiten:** `enter` mindestens rund 1,1 s nach dem Anfang des Teils, sonst
+    steht die Glastür im ersten Bild offen (Warnung). Von der Tür vorn um die
+    Theke herum geht der Kunde rund 3,8 s; liegt `scan` früher, geht er
+    schneller, ab doppeltem Tempo mit Warnung. `order` mindestens 1 s vor
+    `zoom` (Warnung), nicht während des Knüllens, solange er noch vorn links
+    geht (die Blase stünde über der Karte). `crumple` braucht 1,1 s, bis die
+    Kugel im Korb ist. `stamp` mindestens 0,7 s nach `scan`. Hinaus bis zur
+    Tür rund 4,1 s, Vorgabe `leave` 4,6 s vor dem Ende.
+  - **Text im Bild:** das Ladenschild ist lesbar; die Tafel ist Schmuck (am
+    Handy rund 8 px hoch), nichts Wichtiges darauf. Sprechblase (2-fach) und
+    Stempel (1,4-fach) sind in der ganzen Ansicht vergrößert. `stamps` und
+    `have` wie in den anderen Szenen setzen (sonst Warnung "Stempelzahl").
+  - **Zwei Teile hintereinander im selben Laden** sehen fast gleich aus (die
+    Kamera endet immer im selben Ausschnitt): einen Augenblick weiter
+    schneiden (erst die Tür, dann die Theke) oder auf `close` wechseln.
+  - **Branchen:** für die Eisdiele gibt es kein Eis-Symbol; Stempel mit
+    `heart` (Laden "Eis am Markt") oder `star`, die Sprechblase zeigt eine
+    Eistüte.
+  - `node studio/tools/test_3d_iso_shop.mjs` (68 Prüfungen): gleiche Pixel
+    nach Sprüngen und auf einer zweiten Seite (auch beim Knüllen und in der
+    Nahaufnahme), Anker samt Tönen, erstes Bild mit geschlossener Tür,
+    QR-Code frei vom Arm, Sprechblase mindestens 1 s und 150 px, Papierkarte
+    nicht verdeckt, Kästen auf dem Gezeichneten, Sperrzonen und Knopfspalte,
+    Tür und Kunde berühren sich nie, alle fünf Branchen, lange Namen. Probe:
+    `videos/_probe-iso-shop`. Offen aus der Abnahme: der Name auf der Karte
+    im Handy ist nur knapp lesbar (die Stempel gut).
+
+- **3D-Handy (`phone-3d`, seit 18.11.2026):** das 3D-Gegenstück zu
+  `wallet-pass` und `lock-notification`. Ein Handy schwebt leicht gedreht
+  vor einer Abendstraße in Unschärfe (Lichtpunkte, drei schwebende
+  Stempel-Münzen), die Kamera dreht sich langsam (`orbit`) und fährt heran
+  (`push`). Drei Ansichten (`mode`):
+  - `wallet`: die Karte gleitet in die Wallet (`card`), Scan-Rahmen,
+    Scan-Linie und 0,95 s später der Haken über dem QR-Code (`scan`), neue
+    Stempel springen auf (`stamp1` ...). A1, A3, B1, B2. Motiv Scan, außer
+    mit `"scan": false` und `before` gleich `after` (der Stand).
+  - `lock`: der Sperrbildschirm ist gedimmt, auf `notify` leuchtet er auf und
+    die Benachrichtigung gleitet herein, mit sanftem Lichtpuls. Text immer
+    aus C1: "Noch {left} Stempel bis: {reward}", mit `"left": 0` "{reward}
+    wartet auf dich". "vibriert", "brummt" oder "summt" brechen den Bau ab;
+    das Handy wackelt nicht. Motiv Nähe.
+  - `design`: die Karte entsteht (grau, `paint` färbt sie, `logo`, `symbol`).
+    D1.
+  `"device": "android"` gibt Kamera als Loch, Gestenleiste und "Google
+  Wallet" (zum Beispiel für "deine Stammkunden", wenn das Handy davor das
+  iPhone des einen Kunden war). Was gelesen werden muss, steht größer als in
+  2D (Ladenname 38 px, Belohnungszeile 31 px, Benachrichtigung 33 px). Die
+  Kamera endet in einem vermessenen Ausschnitt; `push` sagt nur, wie weit sie
+  vorher weg war. Folgen zwei `phone-3d`-Teile, im zweiten `"rise": false`,
+  sonst steigt das Handy zweimal ein; als erstes Bild ebenso (sonst zeigt
+  Bild 0 nur den oberen Teil des Handys). Mit `"wake": true` ist der
+  Sperrbildschirm in Bild 0 noch dunkel: `"poster"` auf rund 0,6 s legen.
+  Nicht gebaut: das Handy in einer Spielzeughand, ein Wackeln beim Melden,
+  die Ortsnadel aus `lock-notification`. Rechenzeit 0,6 bis 0,95 s je Bild
+  und Seite. `node studio/tools/test_3d_phone_3d.mjs` (52 Prüfungen): gleiche
+  Pixel, Anker, Kästen auf dem Gezeichneten, Lesbarkeit in Bildpunkten,
+  Ausschnitt an den Grenzen von `push`, `orbit`, `angle` und `device` in
+  allen drei Ansichten, Wortlaut aus C1, und dass `iso-street` auf derselben
+  Seite Pixel für Pixel gleich bleibt. Probe: `videos/_probe-phone-3d`.
+  Offen aus der Abnahme: mit `"stamps": 4` steht das Raster weit auseinander;
+  die Münzen drehen sich zeitweise auf die Kante.
 
 <!-- KATALOG:ANFANG -->
 ### `paper-card` - Papier-Stempelkarte auf der Theke
@@ -1299,11 +1475,55 @@ Textzeilen: mindestens 1. Datei: `components/day-clock.js`
 | `move` | `{"at":"start","offset":0.05}` | Zeiger, Himmel und Markierung laufen von "from" auf "time" (Ton: tick), die Uhrzeit springt um |
 | `event` | `{"cap":0,"word":-1}` | Ein Punkt springt an dieser Uhrzeit auf die Zeitleiste (Ton: pop) |
 
+### `iso-shop` - Laden von innen in 3D: Theke, Inhaber, Kunde, Scan und Stempel
+
+<img src="docs/components/iso-shop.png" width="270" alt="Laden von innen in 3D: Theke, Inhaber, Kunde, Scan und Stempel">
+
+Isometrischer Blick in einen Laden am Abend (Wände aufgeschnitten wie ein Puppenhaus), warmes Licht fällt durch Fenster und Glastür. Hinter der Theke der Inhaber, davor der Kunde; Einrichtung je Branche (Café, Döner, Friseur, Bäckerei, Eisdiele). Der Kunde kommt herein und bestellt (Sprechblase), hält sein Handy hin, der Inhaber scannt es mit seinem Handy von rechts oben, ein Stempel springt mit dem Symbol des Ladens über dem Handy auf (B1, B2). Mit "paper" liegt eine Papierkarte auf der Theke, die sich zusammenknüllt und in den Papierkorb fliegt. "close" fährt für Details an Theke oder Handys heran. Rechnet etwa 1 bis 1,4 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.
+
+Textzeilen: mindestens 1. Datei: `components/iso-shop.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `branch` | `"cafe"` | Art des Ladens, bestimmt die Einrichtung: "cafe" (Siebträger, Tassen, Kuchenvitrine), "doener" (Drehspieß, Grill), "friseur" (Stuhl, Spiegel, Föhn, Schere im Regal), "baeckerei" (Brotregal, Brötchen in Körben), "eis" (Eistheke mit bunten Wannen) |
+| `shop` | `"Café Mond"` | Name auf dem Ladenschild, auf der Karte im Handy und auf der Papierkarte (höchstens etwa 14 Zeichen; lange Namen in zwei Zeilen: vorn klein, das letzte Wort groß) |
+| `icon` | `"cup"` | Stempel-Symbol: cup, bread, scissors, star, heart, check, kebab. Passt es nicht zur Branche, gibt es eine Warnung |
+| `accent` | `"#7366E8"` | Farbe des Ladens (Theke, Streifen am Schild, Stempel) |
+| `menu` | `[]` | Drei Wörter auf der Tafel an der rechten Wand (je höchstens etwa 10 Zeichen). Leer = passend zur Branche. Die Tafel ist Schmuck: am Handy sind die Wörter zu klein zum Lesen, also nichts Wichtiges darauf schreiben |
+| `customer` | `0` | Aussehen des Kunden als Zahl: 0 = heller Mantel (wie der Stammkunde in iso-street), jede andere Zahl ein anderes, festes Aussehen (Mantel, Haar, Haut, Frisur) |
+| `start` | `"counter"` | "counter": der Kunde steht schon an der Theke. "door": er kommt auf "enter" durch die Glastür herein und geht zur Theke |
+| `bubble` | `true` | Sprechblase mit dem Bestellten über dem Kunden (Anker "order"), in der ganzen Ansicht doppelt so groß, damit sie am Handy zu sehen ist |
+| `phone` | `true` | Der Kunde hält sein Handy mit der Karte, der Inhaber scannt es (Anker "scan", "stamp") |
+| `paper` | `false` | Eine Papier-Stempelkarte liegt auf der Theke, links daneben steht ein Papierkorb (Anker "crumple": sie knüllt sich zusammen und fliegt in den Korb) |
+| `stamps` | `6` | Felder auf der Karte (Papier und Handy), 4 bis 10. Das letzte ist das Gratis-Feld |
+| `have` | `3` | Stempel, die schon auf der Karte sind (0 bis stamps - 1). Auf "stamp" kommt im Handy einer dazu |
+| `leaves` | `false` | Der Kunde geht am Ende wieder durch die Tür hinaus (Anker "leave") |
+| `close` | `""` | Nahaufnahme ab Anker "zoom": "" (ganzer Laden), "counter" (Theke mit Karte und Handys) oder "phone" (die beiden Handys und der Stempel; auf der Karte im Handy sind die Stempel zu zählen) |
+| `push` | `0.06` | Wie weit die Kamera während der Szene heranfährt (0 bis 0,25). Sie endet immer im berechneten Ausschnitt; mehr heißt nur, dass sie weiter weg anfängt |
+| `orbit` | `6` | Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 10) |
+| `tones` | `true` | Eigene Töne (ding an der Tür, pop für Blase und Stempel, scan und ok, crumple, drop im Papierkorb). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `order` | `{"cap":0,"word":-1}` | Über dem Kunden springt eine Sprechblase mit dem Bestellten auf (Ton: pop), auch im Gehen; der Inhaber nickt und verbeugt sich leicht. Sie steht 1,4 s; mit "close" geht sie spätestens mit "zoom" (liegt "zoom" weniger als 1 s danach: Warnung) |
+| `scan` | `{"cap":-1,"word":0}` | Der Kunde hält sein Handy (am unteren Rand) über die Theke, der Inhaber hält seins rechts darüber, Karte und Code bleiben frei: Scan-Strahl und Scan-Linie (Ton: scan), dann ein Haken (Ton: ok). Handys heben sich 0,7 s vorher |
+| `stamp` | `{"cap":-1,"word":-1}` | Der Stempel springt mit dem Symbol des Ladens über dem Handy auf (Ton: pop), auf der Karte im Handy ist ein Stempel mehr. Mindestens 0,7 s nach "scan" (sonst wird er mit Warnung auf 0,7 s danach gelegt) |
+
+| Anker (alle sieben, mit `"start": "door"`, `"paper": true`, `"leaves": true` und `"close"`) | Vorgabe | Wann |
+|---|---|---|
+| `enter` | `{"at":"start","offset":1.2}` | Der Kunde tritt durch die Glastür herein (Ton: ding) und geht vorn um die Theke herum zu ihr (rund 3,8 s; liegt "scan" früher, geht er schneller). Die Tür geht rund 1 s vorher auf; liegt "enter" näher als das am Szenenanfang, steht sie schon im ersten Bild offen (Warnung) |
+| `order` | `{"cap":0,"word":-1}` | Über dem Kunden springt eine Sprechblase mit dem Bestellten auf (Ton: pop), auch im Gehen; der Inhaber nickt und verbeugt sich leicht. Sie steht 1,4 s; mit "close" geht sie spätestens mit "zoom" (liegt "zoom" weniger als 1 s danach: Warnung) |
+| `crumple` | `{"cap":0,"word":-1,"offset":0.2}` | Die Papierkarte auf der Theke knüllt sich zu einer Kugel (Ton: crumple), die nach 0,55 s in den Papierkorb fliegt (Ton: drop, rund 1,1 s nach dem Anker). Steht der Kunde dabei vor der Karte, gibt es eine Warnung |
+| `scan` | `{"cap":-1,"word":0}` | Der Kunde hält sein Handy (am unteren Rand) über die Theke, der Inhaber hält seins rechts darüber, Karte und Code bleiben frei: Scan-Strahl und Scan-Linie (Ton: scan), dann ein Haken (Ton: ok). Handys heben sich 0,7 s vorher |
+| `stamp` | `{"cap":-1,"word":-1}` | Der Stempel springt mit dem Symbol des Ladens über dem Handy auf (Ton: pop), auf der Karte im Handy ist ein Stempel mehr. Mindestens 0,7 s nach "scan" (sonst wird er mit Warnung auf 0,7 s danach gelegt) |
+| `zoom` | `{"at":"start","offset":0}` | Die Kamera fährt in 0,9 s an "close" heran. Am Anfang des Teils: von Anfang an nah |
+| `leave` | `{"at":"end","offset":-4.6}` | Der Kunde dreht sich um und geht vorn um die Theke herum durch die Glastür hinaus (rund 4,1 s bis zur Tür, Ton: ding an der Tür) |
+
 ### `iso-street` - Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber
 
 <img src="docs/components/iso-street.png" width="270" alt="Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber">
 
-Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.
+Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Mit "mode": "nah" dieselbe Kreuzung für C1: ein Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, und über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch 2 Stempel bis: Gratis-Döner"; der 3D-Ersatz für shop-map und shop-street. Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.
 
 Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 
@@ -1323,8 +1543,14 @@ Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 | `smoke` | `true` | Rauch steigt aus dem Schornstein des Ladens gegenüber (Grill) |
 | `push` | `0.05` | Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25). Sie endet immer im selben Ausschnitt, in dem beide Läden ganz zu sehen sind; mehr "push" heißt nur, dass sie weiter weg anfängt |
 | `orbit` | `7` | Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12) |
-| `after` | `true` | Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf. false, wenn die Szene gleich danach endet |
-| `tones` | `true` | Eigene Töne (thud beim Zerbrechen, ding an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt |
+| `after` | `true` | Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf ("nah": nur der eigene leuchtet auf). false, wenn die Szene gleich danach endet |
+| `tones` | `true` | Eigene Töne (Duell: thud beim Zerbrechen, ding an der Tür; "nah": ding und pop, wenn sich die Karte meldet, chime an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt |
+| `mode` | `"duell"` | "duell": zwei Läden, Herz, Stammkunde geht rüber (wie bisher). "nah": C1, Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch {left} Stempel bis: {reward}" (Anker "walk", "near", "turn", "enter"). In "nah" gibt es kein Herz; "heart", "walker", "back", "from" gelten nur in "duell" |
+| `frame` | `"laden"` | Nur "nah": "laden" = derselbe Ausschnitt wie im Duell (beide Läden, Kreuzung, der Ring links angeschnitten). "stadt" = weiter weg und höher: der ganze Ring, beide Läden und mehr Stadt, für "das Handy macht das von selbst" (PRODUKT.md C1: "ohne dass du etwas tust"). Nie dazu sagen, der Laden sehe nicht, wo jemand ist: das ist nicht belegt (N2) |
+| `then` | `"weiter"` | Nur "nah": was der Kunde nach der Benachrichtigung tut. "weiter": geht noch ein paar Schritte und bleibt mit dem Handy stehen. "dreht": bleibt stehen, dreht sich zur Tür und geht auf sie zu (Anker "turn"). "rein": dazu geht er hinein, die Glocke klingelt, der Laden leuchtet auf (Anker "turn" und "enter") |
+| `reward` | `"Gratis-Döner"` | Nur "nah": die Belohnung, kurz (höchstens etwa 16 Zeichen), steht in der Benachrichtigung: "Noch 2 Stempel bis: Gratis-Döner" |
+| `left` | `2` | Nur "nah": wie viele Stempel noch fehlen (1 bis 20). 0 = die Karte ist voll, dann steht dort "{reward} wartet auf dich" (C1) |
+| `clock` | `"18:42"` | Nur "nah": Uhrzeit oben auf dem Sperrbildschirm in der Blase |
 
 | Anker | Vorgabe | Wann |
 |---|---|---|
@@ -1332,6 +1558,73 @@ Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 | `walk` | `{"at":"start","offset":0}` | Der Stammkunde geht los (von "from" aus); die Tür, aus der er kommt, geht kurz vorher auf |
 | `cross` | `{"at":"start","offset":0}` | Er tritt an die Bordsteinkante und geht auf die Fahrbahn. Vorgabe: gleich mit "walk", dann geht er gleichmäßig durch. Auf ein Wort gesetzt, ist er genau dann an der Kante |
 | `enter` | `{"cap":-1,"word":-1}` | Er ist an der Tür drüben und verschwindet hinein, die Ladenglocke schwingt (Ton: ding) |
+
+<img src="docs/components/iso-street-naehe.png" width="270" alt="iso-street, mit &quot;mode&quot;: &quot;nah&quot;">
+
+| Anker (mit `"mode": "nah"`) | Vorgabe | Wann |
+|---|---|---|
+| `walk` | `{"at":"start","offset":0}` | Der Kunde geht los, auf dem Gehweg am Platz auf der anderen Seite der Kreuzung (im Bild unten rechts, mit "ours": "right" unten links), noch außerhalb des Rings |
+| `near` | `{"cap":0,"word":-1}` | Er betritt den Ring: sein Handy leuchtet, die Blase mit dem Sperrbildschirm springt heraus (Töne: ding, pop). Genau jetzt steht er auf dem Rand des Rings, gut 10 m von der Tür. Auf "Nähe" o. ä. |
+| `turn` | `{"at":"end","offset":-1.7}` | Er dreht sich zur Tür des eigenen Ladens und geht los (vorher bleibt er stehen, wenn er die Ecke schon erreicht hat). Mindestens 0,4 s nach "near" |
+| `enter` | `{"at":"end","offset":-0.25}` | Er steht auf der Schwelle und geht hinein, die Glocke schwingt (Ton: chime), der Laden leuchtet auf. Braucht Zeit nach "turn" (rund 9 m Weg, ab 5 m/s warnt der Bau): etwa 2 s |
+
+Mit `"then": "weiter"` gibt es nur `walk` und `near`, mit `"dreht"` dazu `turn`.
+
+### `phone-3d` - Handy in 3D: Wallet-Karte, Sperrbildschirm oder Kartendesign
+
+<img src="docs/components/phone-3d.png" width="270" alt="Handy in 3D: Wallet-Karte, Sperrbildschirm oder Kartendesign">
+
+Ein Smartphone schwebt leicht gedreht in einem lila Raum mit Lichtpunkten, die Kamera dreht sich langsam und fährt heran. Ansicht "wallet": die Karte gleitet in die Wallet, Stempel springen auf, Scan über dem QR-Code. "lock": der Sperrbildschirm, die Karte meldet sich von selbst mit dem Wortlaut aus C1 ("Noch 2 Stempel bis: Gratis-Döner"), mit sanftem Lichtpuls. "design": die Karte entsteht (grau, Farben, Logo, Symbole). 3D-Gegenstück zu wallet-pass und lock-notification; rechnet etwa 1 s je Bild (ohne Grafikkarte).
+
+Textzeilen: mindestens 1. Datei: `components/phone-3d.js`
+
+| Parameter | Vorgabe | Bedeutung |
+|---|---|---|
+| `mode` | `"wallet"` | "wallet" (Karte in der Wallet, Stempel, Scan), "lock" (Sperrbildschirm mit Benachrichtigung, C1) oder "design" (die Karte entsteht, D1) |
+| `device` | `"iphone"` | "iphone" (Insel oben, Überschrift "Wallet") oder "android" (Kamera als Loch, Gestenleiste, Überschrift "Google Wallet") |
+| `shop` | `"Döner Palast"` | Name des Ladens auf der Karte und als Absender der Benachrichtigung (höchstens etwa 18 Zeichen, sonst wird er kleiner gesetzt und der Bau warnt) |
+| `location` | `""` | Kürzel rechts oben auf der Karte (Stadt-Viertel, Großbuchstaben, höchstens etwa 12 Zeichen). Leer = keins, dann steht der Name größer |
+| `icon` | `"kebab"` | Symbol in Logo und Stempeln: cup, bread, scissors, star, heart, check, kebab |
+| `colors` | `""` | Eigene Farben der Karte, zwei Farben für den Verlauf: "#B8507A,#6E2449" (PRODUKT.md D1). Leer = Stampit-Lila |
+| `stamps` | `10` | Felder auf der Karte, 4 bis 10 |
+| `before` | `6` | Stempel, die schon da sind. In "design" die Stempel der fertigen Karte |
+| `after` | `8` | Stempel am Ende der Szene (nur "wallet"). Jeder neue braucht einen Anker (stamp1, stamp2, ...) |
+| `reward` | `"Gratis-Döner"` | Die Belohnung, kurz (höchstens etwa 16 Zeichen). Steht auf der Karte ("10 Stempel = 1 Gratis-Döner") und in der Benachrichtigung ("Noch 2 Stempel bis: Gratis-Döner") |
+| `line` | `""` | Eigene Belohnungszeile auf der Karte (höchstens etwa 30 Zeichen). Leer = "{stamps} Stempel = 1 {reward}" |
+| `left` | `2` | Nur "lock": wie viele Stempel noch fehlen. 0 = die Karte ist voll, dann steht "{reward} wartet auf dich" da (C1) |
+| `clock` | `"18:42"` | Nur "lock": Uhrzeit auf dem Sperrbildschirm |
+| `date` | `"Dienstag, 17. November"` | Nur "lock": Datumszeile über der Uhr, ohne Jahr (höchstens etwa 24 Zeichen) |
+| `when` | `"jetzt"` | Nur "lock": Zeitangabe rechts oben in der Benachrichtigung |
+| `wake` | `true` | Nur "lock": der Bildschirm ist vorher gedimmt und leuchtet mit der Benachrichtigung auf |
+| `walletTitle` | `""` | Überschrift der Wallet. Leer = "Wallet" (iphone) bzw. "Google Wallet" (android) |
+| `rise` | `true` | Das Handy steigt am Anfang von unten ins Bild und dreht sich dabei ein (Anker "rise"). false: es schwebt vom ersten Bild an da |
+| `drop` | `true` | Nur "wallet": die Karte gleitet auf "card" von links in die Wallet. false: sie liegt schon drin |
+| `scan` | `true` | Nur "wallet": Scan-Rahmen, Scan-Linie und Haken über dem QR-Code auf "scan" |
+| `angle` | `14` | Wie weit das Handy zur Seite gedreht ist, in Grad (-24 bis 24; negativ = andersherum) |
+| `push` | `0.12` | Wie weit die Kamera während der Szene heranfährt (0 bis 0,25). Sie endet immer im selben Ausschnitt |
+| `orbit` | `10` | Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 14) |
+| `deko` | `true` | Drei schwebende Stempel-Münzen neben dem Handy (Spielzeug-Look). false: nur Handy und Lichtpunkte |
+| `tones` | `true` | Eigene Töne (pop, scan, ok, ding, sparkle). false, wenn das Skript Klänge aus der Bibliothek setzt |
+
+| Anker | Vorgabe | Wann |
+|---|---|---|
+| `rise` | `{"at":"start","offset":0}` | Das Handy steigt von unten ins Bild (0,9 s, dreht sich dabei ein) |
+| `card` | `{"cap":0,"word":1}` | Die Karte gleitet von links in einem flachen Bogen in die Wallet und legt sich auf das Glas (Ton: pop, wenn sie liegt). Auf "Karte" o. ä. |
+| `scan` | `{"cap":-1,"word":0}` | Scan-Rahmen und Scan-Linie über dem QR-Code (Ton: scan), 0,95 s später der Haken (Ton: ok). Auf "scannen" |
+| `stamp1` | `{"cap":-1,"word":1}` | Stempel 1 springt auf die Karte (Ton: pop, jeder etwas höher) |
+| `stamp2` | `{"cap":-1,"word":2}` | Stempel 2 springt auf die Karte (Ton: pop, jeder etwas höher) |
+
+| Anker (mit `"mode": "lock"`) | Vorgabe | Wann |
+|---|---|---|
+| `rise` | `{"at":"start","offset":0}` | Das Handy steigt von unten ins Bild (0,9 s, dreht sich dabei ein) |
+| `notify` | `{"cap":0,"word":2}` | Die Benachrichtigung gleitet herein, der Bildschirm leuchtet auf, ein sanfter Lichtpuls (Ton: ding). Auf "meldet" o. ä. |
+
+| Anker (mit `"mode": "design"`) | Vorgabe | Wann |
+|---|---|---|
+| `rise` | `{"at":"start","offset":0}` | Das Handy steigt von unten ins Bild (0,9 s, dreht sich dabei ein) |
+| `paint` | `{"cap":0,"word":1}` | Die graue Karte färbt sich von links nach rechts in den Farben des Ladens (Ton: sparkle). Auf "Farben" |
+| `logo` | `{"cap":0,"word":3}` | Das Logo springt in die Karte (Ton: pop). Auf "Logo" |
+| `symbol` | `{"cap":-1,"word":1}` | Die Stempelfelder bekommen ihr Symbol, eins nach dem anderen (Ton: pop). Auf das Wort, das das Symbol nennt |
 
 ### `shop-counter` - Betreiber an der Theke, ahnungslos
 
@@ -1859,7 +2152,7 @@ Regeln:
 ## Selbstprüfung
 
 ```bash
-node studio/tools/selftest.mjs     # rund drei Minuten (zwei davon der 3D-Test): Skript-Logik, Wort-Zeiten, Töne, jede Prüfung mit einem Fehlerfall, voice.py mit Attrappe, make.mjs
+node studio/tools/selftest.mjs     # rund sieben Minuten (rund sechs davon die vier 3D-Tests): Skript-Logik, Wort-Zeiten, Töne, jede Prüfung mit einem Fehlerfall, voice.py mit Attrappe, make.mjs, die 3D-Bausteine
 node studio/tools/regress.mjs      # rund 4 min: beide Referenzvideos, je 130 Standbilder gegen das Original, dazu Töne, Länge und Ton
 node studio/tools/regress.mjs --only v10 --no-audio   # nur ein Video, nur Bilder
 ```
@@ -1930,9 +2223,16 @@ aufnehmen ist nie nötig.
 - **Python:** `sfx.py`, `voice.py`, `sheet.py`, `psnr.py` und `audiocmp.py`
   brauchen `numpy` und `pillow` (`pip install numpy pillow`), außerdem `ffmpeg`
   im Pfad.
-- **Der Bau dauert:** ein ganzes Video braucht rund 2 bis 4 Minuten (90 bis
-  160 ms je Bild; ein Entwurf in Stil C mit 1503 Bildern brauchte am
-  16.11.2026 3 min 53 s). Zum Probieren `--stills` und `--check` nehmen.
+- **Der Bau dauert:** ein ganzes Video in 2D braucht rund 2 bis 4 Minuten (90
+  bis 160 ms je Bild; ein Entwurf in Stil C mit 1503 Bildern brauchte am
+  16.11.2026 3 min 53 s). Mit 3D ("3D zuerst", seit 18.11.2026) deutlich
+  länger: rund 1 bis 1,4 s je 3D-Bild und Seite, drei Seiten zugleich; das
+  Beispiel `videos/_beispiel-3d-f08` (85 % der Bilder 3D, 51,7 s) brauchte
+  23 min 35 s. Länger als die zehn Minuten, die eine Shell im
+  Vordergrund wartet: den Bau im Hintergrund starten (`AUTOMATIK.md`,
+  Schritt 16). Zum Probieren `--stills` und `--check` nehmen; schon `--check`
+  braucht mit vielen 3D-Teilen rund 80 s, weil jede Seite ihre 3D-Welten
+  baut.
 - **"Aufnahme und Skript laufen auseinander":** der Text wurde nach der
   Aufnahme geändert, oder eine gesprochene Form enthält ein Zeichen, das die
   Stimme anders zurückgibt. Nicht neu aufnehmen, bevor klar ist, welches Wort
@@ -1956,10 +2256,12 @@ aufnehmen ist nie nötig.
 - Die Prüfungen messen die Ruhelage (außer `knopfspalte`), auch bei einer
   Kamerafahrt. Bewegungen und vergrößerte Bilder prüft das Auge.
 - Die Längen-Angaben der Parameter sind Richtwerte, keine Zusage.
-- Einundzwanzig Bausteine: acht aus dem ersten Video, drei aus dem zweiten
-  (`shop-street`, `shop-map`, `stamp-check`), fünf aus dem Döner-Video und
-  fünf für die Formate (17.11.2026: `tip-cards`, `comment-thread`,
-  `versus-split`, `day-clock`, `big-number`). Ein neuer Blickwinkel braucht
+- Vierundzwanzig Bausteine: acht aus dem ersten Video, drei aus dem zweiten
+  (`shop-street`, `shop-map`, `stamp-check`), fünf aus dem Döner-Video, fünf
+  für die Formate (17.11.2026: `tip-cards`, `comment-thread`,
+  `versus-split`, `day-clock`, `big-number`) und drei in 3D (`iso-street`
+  vom 17.11., `iso-shop` und `phone-3d` vom 18.11.2026). Seit dem 18.11.2026
+  gilt "3D zuerst" (Abschnitt "Bausteine", "Gemeinsam für alle"). Ein neuer Blickwinkel braucht
   meist einen neuen Baustein; das ist gewollt und oben beschrieben. Es fehlen
   Bilder für Statistik, Newsletter und Design-Editor.
 - `calc-panel` (Beispielrechnung) ist in Stil C nur einmal gebaut (Döner-Video,

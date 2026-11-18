@@ -1,0 +1,522 @@
+{
+  "meta": {
+    "title": "Beispiel 3D zuerst: Feierabend, und die Karte meldet sich",
+    "slug": "beispiel-3d-f08",
+    "language": "de",
+    "_hinweis": "Kein Video zum Posten: Beispiel für '3D zuerst' (18.11.2026), so wie der tägliche Lauf es am 28.11.2026 nach FORMATE.md 6 bauen könnte (T02, Döner Palast, F08), ohne Stimme gebaut. Elf der zwölf Bilder vor dem Schluss sind 3D (phone-3d, iso-street 'nah', iso-shop); 2D bleibt nur der Schluss (cta-comment). Seit der Gegenprüfung am 18.11.2026: der letzte 3D-Teil zeigt einen anderen Stammkunden, der von selbst in den Laden kommt (iso-shop), statt ein zweites Mal die Kreuzung von weit oben ('stadt' stand bei 7 s fast gleich da); und er kommt 'jeden Samstag' statt 'jeden Freitag', weil der Sperrbildschirm den Samstag zeigt, an dem das Video läuft. Der Hook ist der Kandidat mit den meisten Punkten aus fünf (hook_kandidaten), die Uhrzeit abends, weil die 3D-Welt eine Abendstraße ist (der Vorschlag aus THEMEN.md, 'Mittagspause', passte nicht zum Bild).",
+    "format": "F08",
+    "datum": "2026-11-28",
+    "thema": "sperrbildschirm",
+    "branche": "doener",
+    "beleg_kern": "naehe",
+    "beleg": "C1 (Sätze 1 bis 7, 12 bis 14), A2 (Satz 11, ohne App)",
+    "hook_muster": "H01",
+    "hook_punkte": 10,
+    "hook_kandidaten": [
+      "Feierabend. Seine Stempelkarte meldet sich. (H01, 10)",
+      "Gratis-Döner? Noch zwei Stempel. Das liest dein Kunde gerade. (H01 volle Karte zuerst, abgewandelt, 9)",
+      "Er denkt gerade nicht an Döner. Dann meldet sich seine Karte. (H01, 9)",
+      "Unter uns: Deine Stempelkarte meldet sich von selbst. (H14, 8)",
+      "Was zeigt das Handy deines Stammkunden gerade? (H05, 7)"
+    ],
+    "meme": "",
+    "idee": "Eigenes Thema T02 (THEMEN.md) im Format F08, als Beispiel für 3D zuerst: der Moment auf dem Sperrbildschirm, die Kreuzung mit dem Ring um den Laden statt der Karte von oben, der Laden von innen statt der Wochenleiste, das Handy in 3D statt der 2D-Wallet.",
+    "kern_bild": "naehe",
+    "einstieg": "phone-3d",
+    "motive": [
+      "naehe"
+    ],
+    "schluss": "Klingt interessant?"
+  },
+  "voice": {
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "_hinweis": "Takt 1, der Moment: Sperrbildschirm in 3D ab Bild 0, die Benachrichtigung gleitet bei 0,15 s herein; dann Schnitt auf die Kreuzung, wo dieselbe Meldung als Blase aus seinem Handy springt.",
+      "parts": [
+        {
+          "component": "phone-3d",
+          "params": {
+            "mode": "lock",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "reward": "Gratis-Döner",
+            "left": 2,
+            "clock": "18:42",
+            "date": "Samstag, 28. November",
+            "rise": false,
+            "wake": true,
+            "tones": false,
+            "angle": 14
+          },
+          "anchors": {
+            "notify": {
+              "at": "start",
+              "offset": 0.15
+            }
+          },
+          "sounds": [
+            {
+              "sound": "handy-vibriert",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.5
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Feierabend.",
+                "Seine *Stempelkarte",
+                "meldet sich."
+              ],
+              "instant": true
+            }
+          ]
+        },
+        {
+          "component": "iso-street",
+          "enter": "cut",
+          "params": {
+            "mode": "nah",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "rival": "Imbiss Sonne",
+            "rivalIcon": "kebab",
+            "reward": "Gratis-Döner",
+            "left": 2,
+            "clock": "18:42",
+            "frame": "laden",
+            "then": "weiter"
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": 0
+            },
+            "near": {
+              "cap": 0,
+              "word": 1,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Noch zwei *Stempel | bis zum *Gratis-Döner."
+              ]
+            },
+            {
+              "lines": [
+                "Ganz von *selbst."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Takt 2, nur in der Nähe: weit (der ganze Ring), dann sein Handy, dann er bleibt stehen und dreht sich zur Tür.",
+      "parts": [
+        {
+          "component": "iso-street",
+          "params": {
+            "mode": "nah",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "rival": "Imbiss Sonne",
+            "rivalIcon": "kebab",
+            "reward": "Gratis-Döner",
+            "left": 2,
+            "clock": "18:42",
+            "frame": "stadt",
+            "then": "weiter"
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": 0
+            },
+            "near": {
+              "cap": 0,
+              "word": 3,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Dabei ist er gar nicht | in deinem *Laden."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "lock",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "reward": "Gratis-Döner",
+            "left": 2,
+            "clock": "18:42",
+            "date": "Samstag, 28. November",
+            "rise": false,
+            "wake": true,
+            "angle": -12
+          },
+          "anchors": {
+            "notify": {
+              "cap": 0,
+              "word": 4,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Nur in der *Nähe | zeigt sein Handy | die *Karte."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-street",
+          "enter": "cut",
+          "params": {
+            "mode": "nah",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "rival": "Imbiss Sonne",
+            "rivalIcon": "kebab",
+            "reward": "Gratis-Döner",
+            "left": 2,
+            "clock": "18:42",
+            "frame": "laden",
+            "then": "dreht",
+            "push": 0.12,
+            "orbit": 10
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": 0
+            },
+            "near": {
+              "cap": 0,
+              "word": 1,
+              "offset": 0
+            },
+            "turn": {
+              "cap": 1,
+              "word": 1,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Auf dem *Sperrbildschirm, | mit dem *Stand."
+              ]
+            },
+            {
+              "lines": [
+                "Er *dreht sich um."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Takt 3, Rückblick: sein Rhythmus. Der Laden von innen statt der Wochenleiste, ohne Handy (F08 zeigt keinen Scan).",
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "phone": false,
+            "paper": false,
+            "start": "door",
+            "bubble": true,
+            "stamps": 10,
+            "have": 8
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            },
+            "order": {
+              "cap": 0,
+              "word": -1,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Kein Wunder. | Seit Oktober | kommt er jeden *Samstag | zu dir."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "phone": false,
+            "paper": false,
+            "start": "counter",
+            "bubble": true,
+            "push": 0.15,
+            "orbit": 10,
+            "customer": 0,
+            "stamps": 10,
+            "have": 8
+          },
+          "anchors": {
+            "order": {
+              "cap": 0,
+              "word": 2,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Immer ein *Döner, | immer extra *scharf."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Takt 3, die Karte füllt sich: der Stand in der Wallet, ohne Scan und ohne neuen Stempel (before gleich after).",
+      "parts": [
+        {
+          "component": "phone-3d",
+          "params": {
+            "mode": "wallet",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "before": 8,
+            "after": 8,
+            "reward": "Gratis-Döner",
+            "scan": false,
+            "rise": false,
+            "drop": true
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 1,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und seine *Karte | füllt sich, | Woche für Woche."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "wallet",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "before": 8,
+            "after": 8,
+            "reward": "Gratis-Döner",
+            "scan": false,
+            "rise": false,
+            "drop": false,
+            "angle": -16,
+            "push": 0.2
+          },
+          "captions": [
+            {
+              "lines": [
+                "*Acht von zehn | hat er schon, | ganz ohne *App."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Takt 4, Sicht des Ladens: er geht hinein (die Blase steht schon, kein zweites Aufspringen), der Sperrbildschirm eines anderen Stammkunden (Android), zum Schluss kommt ein Stammkunde von selbst in den Laden (iso-shop von innen, eine Ansicht, die bis dahin nur einmal da war).",
+      "parts": [
+        {
+          "component": "iso-street",
+          "_hinweis": "Fortsetzung von Szene 2, Teil 3 (er hat sich zur Tür gedreht): 'near' liegt vor dem Anfang des Teils, die Blase steht also schon da und springt nicht ein viertes Mal auf. Ohne eigene Töne, sonst klänge ding und pop schon im Teil davor.",
+          "params": {
+            "mode": "nah",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "rival": "Imbiss Sonne",
+            "rivalIcon": "kebab",
+            "reward": "Gratis-Döner",
+            "left": 2,
+            "clock": "18:42",
+            "frame": "laden",
+            "then": "rein",
+            "tones": false
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": -1.2
+            },
+            "near": {
+              "at": "start",
+              "offset": -0.6
+            },
+            "turn": {
+              "at": "start",
+              "offset": 0.2
+            },
+            "enter": {
+              "at": "end",
+              "offset": -0.15
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und für deinen *Imbiss | heißt das | ganz einfach:"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "lock",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "reward": "Gratis-Döner",
+            "left": 1,
+            "clock": "19:05",
+            "date": "Samstag, 28. November",
+            "device": "android",
+            "rise": false,
+            "wake": true,
+            "angle": 10
+          },
+          "anchors": {
+            "notify": {
+              "cap": 0,
+              "word": 1,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Du stehst | auf dem *Sperrbildschirm | deiner *Stammkunden."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "_hinweis": "Ein anderer Stammkunde (customer 2) kommt von selbst durch die Tür: 'ohne dass du etwas tust'. Früher stand hier noch einmal die Kreuzung von weit oben ('stadt'), fast dasselbe Bild wie bei 7 s; seit dem 18.11.2026 höchstens zweimal dieselbe Ansicht (AUTOMATIK.md 6.4). Ohne Blase und ohne Handy: kein Scan in F08.",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "phone": false,
+            "paper": false,
+            "start": "door",
+            "bubble": false,
+            "customer": 2,
+            "push": 0.12,
+            "orbit": 10,
+            "stamps": 10,
+            "have": 8
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und das alles, | ohne dass du | etwas *tust."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Klingt interessant?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt IMBISS,{Imbiss,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ],
+  "poster": 0.6
+}

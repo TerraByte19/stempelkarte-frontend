@@ -57,7 +57,7 @@ er übernimmt sie aus `node studio/tools/abwechslung.mjs felder <ordner>`:
 | `format` | `F01` bis `F10` (Abschnitt 4) |
 | `kern_bild` | abgelesen aus dem Format (Zeile "Kern-Bild"): `zettel`, `kommentar`, `zahl`, `tag`, `duell`, `meme`, `naehe` |
 | `einstieg` | abgelesen: Baustein des ersten Teils der ersten Szene |
-| `motive` | abgelesen aus den Bausteinen: `naehe`, wenn `shop-map`, `shop-street` oder `lock-notification` vorkommt; `papier`, wenn `paper-card`, `guest-ghost`, `wallet-vanish`, `card-bin` oder `versus-split` vorkommt; `scan`, wenn ein `wallet-pass` den Scan zeigt (`"scan"` nicht `false`) oder einen neuen Stempel (`after` größer als `before`; Vorgaben 2 und 5), oder `versus-split` die Runde `vergessen` hat. Sonst `[]` |
+| `motive` | abgelesen aus den Bausteinen: `naehe`, wenn `shop-map`, `shop-street` oder `lock-notification` vorkommt; `papier`, wenn `paper-card`, `guest-ghost`, `wallet-vanish`, `card-bin` oder `versus-split` vorkommt; `scan`, wenn ein `wallet-pass` den Scan zeigt (`"scan"` nicht `false`) oder einen neuen Stempel (`after` größer als `before`; Vorgaben 2 und 5), oder `versus-split` die Runde `vergessen` hat. **3D** (seit 18.11.2026): `naehe` auch bei `iso-street` mit `"mode": "nah"` und `phone-3d` mit `"mode": "lock"`; `scan` bei `phone-3d` (`"mode": "wallet"`, die Vorgabe) mit Scan oder neuem Stempel (Vorgaben `before` 6, `after` 8) und bei `iso-shop` mit Handy (Vorgabe `"phone": true`); `papier` bei `iso-shop` mit `"paper": true`. `iso-street` als Duell und `phone-3d` "design" zählen nicht. Sonst `[]` |
 | `beleg_kern` | die **Kernaussage**: die Gruppe der einen Aussage, um die es geht. `ohne-app` (A2, A3), `stempeln` (B1, B2), `papier` (A4), `naehe` (C1), `gestalten` (D1, D2), `studie` (S1 bis S5), `rechnung` (Beispielrechnung), `tipps` (Rat ohne Produktaussage, F01 und F02). Welche ein Format erlaubt, steht in seiner Zeile "Kernaussage" |
 | `studie` | nur F10: die Studie, `S1` bis `S5` |
 | `schluss` | abgelesen: die Schlussfrage, wie sie im Video steht |
@@ -183,7 +183,8 @@ Betreibers ("Klingt interessant?", das F08 behält); ob sie ihm recht sind,
 ist gefragt (`START.md`, "Was der Betreiber noch entscheiden muss").
 
 **"Handy spät"** heißt: kein Bild der Karte im Handy (`wallet-pass`,
-`lock-notification`, `versus-split`) vor den letzten 10 s vor dem letzten
+`lock-notification`, `versus-split`; in 3D `phone-3d`, `iso-street` mit
+`"mode": "nah"` und `iso-shop` mit Handy) vor den letzten 10 s vor dem letzten
 gesprochenen Wort. Im Skript steht das Handy erst in der letzten Szene vor
 `cta-comment`, mit höchstens 12 Wörtern. Prüfen: Anfang dieses Teils in
 `out/check.json` (`scenes`) gegen das letzte Wort; im Entwurf höchstens 13 s
@@ -198,6 +199,20 @@ ebenso F1, das nur gesprochen wird. Jede Aussage in eigenen Worten (V10):
 
 Kamerawerte der Bausteine stehen in `AUTOMATIK.md` 6.3.
 
+**3D zuerst (seit 18.11.2026).** Der Betreiber: "Ich will so wenig 2D wie
+möglich." In den Zeilen "Einstieg" und "Bausteine" unten steht deshalb der
+3D-Baustein zuerst, wo es einen gibt (Zuordnung und Werte in `AUTOMATIK.md`
+6.4, Tabelle "3D zuerst"); der 2D-Baustein dahinter ist der Rückfall, wenn
+das 3D-Standbild nicht stimmt. 2D bleiben die Bilder, die wie eine
+Oberfläche aussehen und das Format tragen (`tip-cards`, `comment-thread`,
+`big-number`, `calc-panel`, `versus-split`, `day-clock`, `week-strip`): sie
+kommen nur dort vor, wo die Zeilen eines Formats sie nennen, nie als
+Füllung. Fehlt ein Bildwechsel, kommt ein weiterer 3D-Teil mit einem anderen
+Blick dazu (`AUTOMATIK.md` 6.4, "Regeln für 3D-Teile"). Die Motive liest
+`abwechslung.mjs` auch aus 3D ab (Abschnitt 2, Feld `motive`): ein Format
+ohne Scan nimmt `iso-shop` mit `"phone": false` und `phone-3d` mit
+`"scan": false` und `before` gleich `after`.
+
 ### F01 Drei Tipps (Wert)
 
 Drei echte Tipps für Stammkunden, nummeriert; das Produkt ist erst der letzte Satz. **Handy spät.**
@@ -207,7 +222,7 @@ Drei echte Tipps für Stammkunden, nummeriert; das Produkt ist erst der letzte S
 | Takte | Hook über der Pinnwand, Tipp 1 hängt schon (0 bis 4 s) · Tipp 1 gesprochen, Schnitt auf ein Bild dazu (4 bis 13 s) · Tipp 2: Karte, dann Bild (13 bis 22 s) · Tipp 3 (22 bis 30 s) · das Produkt als Folge von Tipp 3 (30 bis 34 s) · Schluss (34 bis 42 s) |
 | Hook | H05 (W-Frage, deren Antwort das Video ist), H08 (Ich-Form) oder H14 (Insider mit Gegenstand, die Folge ist ein Rat). Kandidaten und Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `tip-cards` mit `"show": 1`, `"rise": false` und Anker `card` auf `{ "at": "start", "offset": 0.15 }`: Tipp 1 hängt ab Bild 0, sein Zettel in der Leiste leuchtet nach einer Viertelsekunde mit Ton auf (`HOOKS.md` 1.2) |
-| Bausteine | `tip-cards` für Tipp 2 und 3 (`show` 2, 3; Anker `card` auf das erste Wort des Tipps), dazwischen mit Schnitt je ein Bild zum Tipp: `week-strip` (`"rivalWeek": 0`), `big-number` ("2" für "noch zwei Stempel"), `day-clock`, `shop-counter`; am Ende `wallet-pass` mit `"scan": false` und `before` gleich `after` |
+| Bausteine | `tip-cards` für Tipp 2 und 3 (`show` 2, 3; Anker `card` auf das erste Wort des Tipps), dazwischen mit Schnitt je ein Bild zum Tipp: `iso-shop` (3D, `"phone": false`: der Gast an der Theke, seine Bestellung in der Blase, für "seine Sorte merken"; statt `shop-counter`), `week-strip` (`"rivalWeek": 0`), `big-number` ("2" für "noch zwei Stempel"), `day-clock`; am Ende `phone-3d` (3D, `"scan": false`, `before` gleich `after`; Rückfall `wallet-pass` ebenso) |
 | Kern-Bild | `zettel` |
 | Kernaussage | `tipps` |
 | Nie | erfundene Zahlen ("80 % kommen wieder"), "Studien zeigen", Versprechen ("so verdoppelst du"), das Produkt in Tipp 1 oder 2, Nähe, Papier, Scan |
@@ -236,7 +251,7 @@ Drei Sätze an der Theke, jeder wird durchgestrichen und durch einen besseren er
 | Takte | Hook = der erste schlechte Satz (0 bis 4 s) · Paar 1: streichen, besserer Satz, ein Bild dazu (4 bis 13 s) · Paar 2 (13 bis 22 s) · Paar 3 (22 bis 31 s) · Produkt als Grund für den besten Satz (31 bis 35 s) · Schluss (35 bis 42 s) |
 | Hook | H11 (Widerspruch im Satz: eine Höflichkeit als falscher Satz), H13 (Provokation mit Entwarnung: "Streich ...") oder H08. Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `tip-cards` mit `label` "Sag nicht:", `"rise": false`, Anker `card` auf `{ "at": "start", "offset": 0.15 }` |
-| Bausteine | `tip-cards` mit `label` "Sag nicht:" und `better`, Anker `strike` und `swap`, Kamera nach dem Tausch; dazwischen `week-strip` (der Tag, den der bessere Satz nennt), `big-number` (die Zahl im Satz), `day-clock`; am Ende `wallet-pass` mit `"scan": false` und `before` gleich `after` |
+| Bausteine | `tip-cards` mit `label` "Sag nicht:" und `better`, Anker `strike` und `swap`, Kamera nach dem Tausch; dazwischen `week-strip` (der Tag, den der bessere Satz nennt), `big-number` (die Zahl im Satz), `day-clock`, `iso-shop` (3D, `"phone": false`, der Satz an der Theke); am Ende `phone-3d` (3D, `"scan": false`, `before` gleich `after`; Rückfall `wallet-pass` ebenso) |
 | Kern-Bild | `zettel` |
 | Kernaussage | `tipps` |
 | Nie | Kunden lächerlich machen (`HOOKS.md` 4.3, Punkt 4), Sätze, die eine Funktion aus Klasse 2 voraussetzen ("Ich schick dir eine Nachricht"), Nähe, Papier, Scan |
@@ -260,7 +275,7 @@ Eine Frage wird als Kommentar getippt, das Video beantwortet sie; danach höchst
 | Takte | Frage getippt (0 bis 3 s) · kurze Antwort, groß (3 bis 6 s) · Beweis in Bildern (6 bis 18 s) · Nachfrage als zweiter Kommentar, Antwort in einem Satz, Bild (18 bis 28 s) · Pointe (28 bis 32 s) · Schluss (32 bis 42 s) |
 | Hook | H06 (der Einwand in seinen Worten, der nächste Satz antwortet ehrlich: `HOOKS.md` 2 und 1.6, Ausnahme b), H05 oder H11; bei der Frage nach der Stempelzahl auch H03, bei der verlorenen Karte H09. Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `comment-thread` mit `"typed": true` |
-| Bausteine | `comment-thread` (`send` auf das letzte Wort der Frage, `reply` mit der Antwort in höchstens 60 Zeichen), das Bild der Kernaussage: `wallet-pass` mit Scan nur bei der Frage nach Scannen oder Stempeln, sonst ohne Scan; `paper-card` (nur bei der Frage nach der verlorenen Karte, das eine Papier-Bild); `big-number` (Stempelzahl); zweiter `comment-thread` mit `"typed": false`; `stamp-check` |
+| Bausteine | `comment-thread` (`send` auf das letzte Wort der Frage, `reply` mit der Antwort in höchstens 60 Zeichen), das Bild der Kernaussage in 3D: `phone-3d` (Wallet; mit Scan nur bei der Frage nach Scannen, sonst ohne; `"mode": "design"` bei "Sieht die Karte überall gleich aus?"), `iso-shop` mit Handy und `"close": "phone"` (Scan und Stempel an der Theke, nur bei der Frage, wie der Stempel aufs Handy kommt), `iso-shop` mit `"paper": true` (nur bei der Frage nach der verlorenen Karte, das eine Papier-Bild); Rückfall `wallet-pass`, `paper-card`; `big-number` (Stempelzahl); zweiter `comment-thread` mit `"typed": false`; `stamp-check` |
 | Kern-Bild | `kommentar` |
 | Kernaussage | `ohne-app`, `stempeln`, `gestalten` oder `papier`, je nach Frage |
 | Fragen mit Antwort in Klasse 1 | "Brauchen meine Kunden dafür eine App?" (A2, A3: `ohne-app`, Motiv `scan`) · "Wie kommt der Stempel aufs Handy?" (B1, B2: `stempeln`, Motiv `scan`) · "Wie viele Stempel braucht die Karte?" und "Sieht die Karte überall gleich aus?" (D2, D1: `gestalten`) · "Was, wenn die Karte verloren geht?" (A4: `papier`, Motiv `papier`). Als Nachfrage außerdem "Geht das nur mit Apple?" (A1) und "Und der Datenschutz?" (F1) |
@@ -286,7 +301,7 @@ Eine Beispielrechnung Schritt für Schritt, jede Zahl ein eigenes Bild; das Prod
 | Takte | Alltagszahl (0 bis 4 s) · Faktor 1 (4 bis 9 s) · Faktor 2 (9 bis 14 s) · Faktor 3 (14 bis 19 s) · Ergebnis und "ein Beispiel, kein Versprechen" (19 bis 26 s) · was einen Kunden öfter zurückbringt (26 bis 31 s) · Produkt (31 bis 35 s) · Schluss (35 bis 42 s) |
 | Hook | H03 (die Alltagszahl, die kippt), H06 (Einwand, die Antwort ist die Rechnung) oder H05, immer mit der Alltagszahl im Satz. Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `big-number` mit der Alltagszahl, `sub` "Beispiel", Anker `show` auf `{ "at": "start", "offset": 0.1 }`: die Blätter klappern in der ersten halben Sekunde (Bewegung mit Ton, `HOOKS.md` 1.2), und `"poster": 0.6`, damit das Titelbild die Zahl zeigt (auf ein späteres Wort gelegt, stand im Entwurf vom 21.11. die erste Sekunde eine leere Tafel) |
-| Bausteine | `big-number` je Faktor (mit `from` = Zwischenstand davor, `sub` "Beispiel"), `week-strip` für "wie oft", dann `calc-panel` als Zusammenfassung: alle Zeilen auf den Wörtern **einer** Textzeile, `result` auf die Ergebniszahl, Kamera 1,2 wie im Döner-Video; `tip-cards` mit einem Zettel (`"numbered": false`) für "was ihn öfter zurückbringt"; am Ende `wallet-pass` mit `"scan": false` und `before` gleich `after` |
+| Bausteine | `big-number` je Faktor (mit `from` = Zwischenstand davor, `sub` "Beispiel"), `week-strip` für "wie oft", dann `calc-panel` als Zusammenfassung: alle Zeilen auf den Wörtern **einer** Textzeile, `result` auf die Ergebniszahl, Kamera 1,2 wie im Döner-Video; `tip-cards` mit einem Zettel (`"numbered": false`) für "was ihn öfter zurückbringt"; am Ende `phone-3d` (3D, `"scan": false`, `before` gleich `after`; Rückfall `wallet-pass` ebenso) |
 | Kern-Bild | `zahl` |
 | Kernaussage | `rechnung` |
 | Nie | Zahlen über die App, "garantiert", Umsatz als Zusage, mehr als drei Faktoren, viele Stammkunden (Geschmack des Betreibers: wenige, die öfter kommen), Preise der App, Papier, Scan, Nähe |
@@ -314,7 +329,7 @@ Ein Tag in Uhrzeiten, vom Aufschließen bis zum Feierabend; das Produkt taucht a
 | Takte | Uhrzeit 1, der Laden öffnet (0 bis 4 s) · Uhrzeit 2, der erste Stammkunde, Stempel (4 bis 12 s) · Uhrzeit 3, jemand Neues, einmal scannen (12 bis 20 s) · Uhrzeit 4, viel los (20 bis 27 s) · Uhrzeit 5, Feierabend, Pointe (27 bis 33 s) · Schluss (33 bis 42 s) |
 | Hook | Uhrzeit plus Moment (Bauart wie H01, ohne Sperrbildschirm), H15 (Mitten drin mit Witz) oder H05. Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `day-clock` mit der ersten Uhrzeit und `from` eine halbe Stunde davor: der Anker `move` (von selbst bei 0,05 s) lässt die Zeiger laufen, die Bewegung bis 0,5 s (`HOOKS.md` 1.7.4) |
-| Bausteine | `day-clock` je Uhrzeit (`from` = Uhrzeit davor, `events` = die früheren), dazwischen mit Schnitt `shop-door` mit `"accent": "#5A4FCF"` (der Stammkunde kommt), `wallet-pass` (Scan, Stempel), `stamp-check`. Nur, wenn V8 den Scan erlaubt |
+| Bausteine | `day-clock` je Uhrzeit (`from` = Uhrzeit davor, `events` = die früheren), dazwischen mit Schnitt in 3D: `iso-shop` mit `"start": "door"` (der Stammkunde kommt, Anker `enter`), `iso-shop` mit Handy, `"close": "phone"` und `zoom` (Scan, Stempel, B1, B2), `phone-3d` (eine Neue: die Karte gleitet in die Wallet, A3); danach `stamp-check`. Rückfall: `shop-door` mit `"accent": "#5A4FCF"`, `wallet-pass`. Nur, wenn V8 den Scan erlaubt. **Die 3D-Welt ist Abend:** ein 3D-Bild nur neben einer Uhrzeit vor etwa 8 oder ab etwa 17 Uhr (im Sommer ab etwa 20 Uhr), etwa der erste Stammkunde der Bäckerei um 07:10 oder der Feierabend; neben einer Uhrzeit am Tag (09:30, 12:15, Eis am Nachmittag) der Rückfall in 2D, Grund in `pruefung` (`AUTOMATIK.md` 6.4, "Tageszeit") |
 | Kern-Bild | `tag` |
 | Kernaussage | `stempeln` |
 | Nie | Sperrbildschirm, Karte von oben, Papier, Zahlen zum Umsatz, echte Namen |
@@ -323,8 +338,8 @@ Ein Tag in Uhrzeiten, vom Aufschließen bis zum Feierabend; das Produkt taucht a
 
 Beispiel (Bäckerei Morgenrot, BROT, 108 Wörter):
 > [day-clock 06:00, Einstieg] Sechs Uhr. Der Ofen läuft, die Bäckerei Morgenrot macht auf.
-> [day-clock 07:10] Sieben Uhr zehn. [shop-door] Der erste Stammkunde, wie jeden Morgen: zwei Brötchen, ein Kaffee. [wallet-pass, Stempel] Du hältst die Handy-Kamera auf seine Karte, und schon hat er Stempel Nummer fünf.
-> [day-clock 09:30] Halb zehn. Eine Neue fragt nach der Stempelkarte, zum ersten Mal hier. [wallet-pass, Scan] Ein Code an der Theke, ein Blick mit ihrem Handy, und die Karte ist ihre.
+> [day-clock 07:10] Sieben Uhr zehn. [iso-shop, `"start": "door"`, 3D: vor 8 Uhr, im Winter noch dunkel] Der erste Stammkunde, wie jeden Morgen: zwei Brötchen, ein Kaffee. [iso-shop mit Handy, `"close": "phone"`, 3D] Du hältst die Handy-Kamera auf seine Karte, und schon hat er Stempel Nummer fünf.
+> [day-clock 09:30] Halb zehn. Eine Neue fragt nach der Stempelkarte, zum ersten Mal hier. [wallet-pass, Scan, 2D: um halb zehn ist es hell, die 3D-Welt nicht] Ein Code an der Theke, ein Blick mit ihrem Handy, und die Karte ist ihre.
 > [day-clock 12:15] Viertel nach zwölf. Die Schlange reicht bis zur Tür. Keiner kramt im Portemonnaie, jeder Stempel ist ein Scan.
 > [day-clock 19:00] Sieben Uhr abends. Feierabend. [stamp-check] Kein Stempelkissen, keine Karte vergessen! Und morgen geht es weiter.
 > [cta-comment] Kennst du's? Dann kommentiere jetzt BROT, und wir melden uns bei dir.
@@ -362,7 +377,7 @@ Ein Meme aus `HOOKS.md` 3.2 als Rahmen: erste Hälfte im Hook, zweite Hälfte al
 | Takte | Meme-Hook (0 bis 4 s) · das Bild, das die Erwartung baut (4 bis 12 s) · Wendung (12 bis 15 s, Pointe nach 10 bis 14 s, `HOOKS.md` H10) · zwei oder drei kurze Belege (15 bis 32 s) · Schluss (32 bis 42 s) |
 | Hook | H10 mit dem Meme nach `HOOKS.md` 4.1 und 4.2: Kandidaten aus bis zu drei freien Memes, gebaut wird das mit dem besten Hook (`HOOKS.md` 0) |
 | Einstieg | der des Memes (`HOOKS.md` 3.2, Spalte "Einstieg"); je Meme ein anderer, nur bei M26, M29 und M21 die Papierkarte |
-| Bausteine | höchstens **ein** Papier-Bild (`paper-card`, `guest-ghost`, `wallet-vanish` oder `card-bin`), `wallet-pass` nur mit `"scan": false` und ohne neuen Stempel; sonst `big-number`, `week-strip`, `shop-door`, `comment-thread`, `tip-cards` (ein Zettel), `stamp-check` für die Pointe; für "Red Flag / Green Flag" (M24) `versus-split` mit `leftLabel` "Red Flag" und `rightLabel` "Green Flag" |
+| Bausteine | höchstens **ein** Papier-Bild (in 3D `iso-shop` mit `"paper": true` und `"phone": false`; sonst `paper-card`, `guest-ghost`, `wallet-vanish` oder `card-bin`), die Karte im Handy nur ohne Scan und ohne neuen Stempel (`phone-3d` mit `"scan": false`, `before` gleich `after`; Rückfall `wallet-pass` ebenso); der Laden von innen `iso-shop` mit `"phone": false`; sonst `big-number`, `week-strip`, `shop-door`, `comment-thread`, `tip-cards` (ein Zettel), `stamp-check` für die Pointe; für "Red Flag / Green Flag" (M24) `versus-split` mit `leftLabel` "Red Flag" und `rightLabel` "Green Flag" |
 | Kern-Bild | `meme` |
 | Kernaussage | `papier`, `ohne-app`, `stempeln` oder `gestalten`, je nach Meme |
 | Nie | ein zweites Meme, fremder Ton, eine Figur oder Sprechweise der Vorlage (`HOOKS.md` 4.3); **Nähe** (`shop-map`, `lock-notification`, ein Satz zu C1: das ist F08); ein Scan-Bild; zwei Papier-Bilder hintereinander. Mit Papier, Wallet, Stempel und Nähe wäre es der alte Bogen (V11) |
@@ -386,11 +401,11 @@ Das einzige Format mit Karte von oben und Sperrbildschirm: der Moment zuerst, da
 |---|---|
 | Takte | Moment auf dem Sperrbildschirm (0 bis 5 s) · Karte von oben: nur in der Nähe (5 bis 13 s) · Rückblick: ihr Rhythmus, die Karte füllt sich (13 bis 24 s) · Sicht des Ladens (24 bis 32 s) · Schluss (32 bis 42 s) |
 | Hook | H01 (auch als "volle Karte zuerst", `HOOKS.md` 2), H05, H04 oder H14 mit C1. Wahl nach `HOOKS.md` 0 und 1.7.3 |
-| Einstieg | `lock-notification` (Werte aus `AUTOMATIK.md` 6.4, Text mit dem Stand) |
-| Bausteine | `lock-notification`, `shop-map`, `week-strip` (ihre Woche, `"rivalWeek": 0`), `wallet-pass` mit `"scan": false` und `before` gleich `after` (der Stand), `lock-notification` als Sicht des Ladens |
+| Einstieg | `phone-3d` mit `"mode": "lock"` (3D, Werte aus `AUTOMATIK.md` 6.4, Text mit dem Stand); Rückfall `lock-notification` |
+| Bausteine | in 3D: `phone-3d` "lock" (der Moment), `iso-street` mit `"mode": "nah"` (statt `shop-map`: der Ring um den Laden, `"frame": "stadt"` für "nur in der Nähe", `"laden"` mit `"then": "dreht"` oder `"rein"`), `iso-shop` mit `"phone": false` (ihr Rhythmus: sie kommt herein und bestellt; statt `week-strip`), `phone-3d` mit `"scan": false` und `before` gleich `after` (der Stand), `phone-3d` "lock" mit `"device": "android"` als Sicht des Ladens (ein anderer Kunde), zum Schluss gern `iso-shop` mit `"start": "door"` und einem anderen `customer` (er kommt von selbst). Jede Ansicht höchstens zweimal, außer als Fortsetzung (`AUTOMATIK.md` 6.4): nicht dreimal "stadt" oder dreimal dasselbe Handy. Rückfall: `lock-notification`, `shop-map`, `week-strip` (`"rivalWeek": 0`), `wallet-pass`. Beispiel, so gebaut: `videos/_beispiel-3d-f08` |
 | Kern-Bild | `naehe` |
 | Kernaussage | `naehe` |
-| Nie | Papier (`paper-card`, `wallet-vanish`, `guest-ghost`, `card-bin`), ein Scan-Bild, Entfernung, Häufigkeit, "vibriert" (N3, `HOOKS.md` 1.6) |
+| Nie | Papier (`paper-card`, `wallet-vanish`, `guest-ghost`, `card-bin`, `iso-shop` mit `"paper": true`), ein Scan-Bild (auch `iso-shop` mit Handy, `phone-3d` mit Scan oder neuem Stempel), Entfernung, Häufigkeit, "vibriert" (N3, `HOOKS.md` 1.6) |
 | Produkt | durchgehend C1; daneben höchstens A3 oder A2 in einem Satz |
 | Schluss | "Klingt interessant?" (der Satz des Betreibers, seit dem 17.11.2026 nur noch hier) |
 | Takt | höchstens eins in drei Videos (V2), nie direkt nach einem `A0`, nach V1 frühestens am 24.11.2026 |
@@ -413,7 +428,7 @@ Drei Behauptungen als Kommentare, jede bekommt ihren Stempel; die Erklärung ist
 | Takte | Behauptung 1, getippt (0 bis 3 s) · Urteil und Erklärung (3 bis 12 s) · Behauptung 2 mit Urteil und Erklärung (12 bis 22 s) · Behauptung 3 (22 bis 32 s) · Schluss (32 bis 42 s) |
 | Hook | H06 (die Behauptung, die der nächste Satz beantwortet), H13 (Provokation mit Entwarnung als Behauptung: "Zehn Stempel bis zum Gratis-Döner? Steht in keinem Gesetz."), H11 oder H03 (nur zur Stempelzahl). Wahl nach `HOOKS.md` 0 und 1.7.3 |
 | Einstieg | `comment-thread` mit `"typed": true` (die erste Behauptung wird getippt), `verdict` und Anker `verdict` auf "Stimmt" |
-| Bausteine | `comment-thread` je Behauptung (danach `"typed": false`, `verdict` "falsch" oder "stimmt"), nach jedem Urteil mit Schnitt ein Bild der Erklärung: `big-number`, `wallet-pass` (ohne Scan, außer die Behauptung handelt vom Scannen oder Stempeln), `day-clock` |
+| Bausteine | `comment-thread` je Behauptung (danach `"typed": false`, `verdict` "falsch" oder "stimmt"), nach jedem Urteil mit Schnitt ein Bild der Erklärung: `big-number`, `phone-3d` (3D; ohne Scan, außer die Behauptung handelt vom Scannen; `"mode": "design"` für Farben, Logo, Symbol; Rückfall `wallet-pass`), `iso-shop` mit Handy (nur, wenn die Behauptung vom Stempeln an der Theke handelt), `day-clock` |
 | Kern-Bild | `kommentar` |
 | Kernaussage | `ohne-app`, `stempeln` oder `gestalten`: die der ersten Behauptung. Die Behauptungen kommen aus höchstens zwei Gruppen, dazu darf A1 |
 | Nie | Behauptungen, deren Antwort Klasse 2, "kein Bild" oder "nur gesprochen" ist (Statistik, Newsletter, Preise, Datenschutz F1 bis F4): der Stempel am Kommentar wäre ihr Bild; erfundene Einzelheiten ("noch an der Theke, bevor er zahlt") |
@@ -435,8 +450,8 @@ Eine Studienzahl aus `PRODUKT.md` (S1 bis S5) groß im Bild, mit Quelle im gespr
 |---|---|
 | Takte | Frage oder Moment (0 bis 4 s) · Auflösung als Zahl, Quelle gesprochen (4 bis 12 s) · was die Zahl heißt (12 bis 20 s) · was der Laden daraus macht (20 bis 29 s) · Produkt (29 bis 33 s) · Schluss (33 bis 42 s) |
 | Hook | H05, H02 (höchstens einmal je Durchlauf, `HOOKS.md` 1.6), H12 (Drama im Laden, mit `week-strip` und `rivalWeek`) oder H15 (Mitten drin mit Witz, mit `shop-counter` und Steppenläufer); die Zahl nie im ersten Satz (`HOOKS.md` 1.5). Wahl nach `HOOKS.md` 0 und 1.7.3 |
-| Einstieg | `shop-counter` oder `week-strip` (nie `guest-ghost`: als Einstieg nicht erprobt, `HOOKS.md` 1.2), mit dem Anker aus `HOOKS.md` 1.7.3 bis 0,5 s |
-| Bausteine | `big-number` (Zahl genau wie in `PRODUKT.md`, Spanne als Spanne, Bindestrich), `shop-counter` oder `week-strip` für das Bild dazu, `tip-cards` mit einem Zettel für den Rat, am Ende `wallet-pass` mit `"scan": false` und `before` gleich `after` |
+| Einstieg | `iso-shop` (3D, `"phone": false`, `"start": "counter"`, Anker `order` auf `{ "at": "start", "offset": 0.3 }`: die Blase springt auf, der Inhaber nickt; als Einstieg nur in einer Probe mit Standbildern erprobt, 18.11.2026: Standbilder 0 und 0,5 s ansehen), `shop-counter` (nur mit Steppenläufer, H15, oder als Rückfall) oder `week-strip` (nie `guest-ghost`: als Einstieg nicht erprobt, `HOOKS.md` 1.2), mit dem Anker aus `HOOKS.md` 1.7.3 bis 0,5 s |
+| Bausteine | `big-number` (Zahl genau wie in `PRODUKT.md`, Spanne als Spanne, Bindestrich), `iso-shop` (3D, `"phone": false`) oder `week-strip` für das Bild dazu, `tip-cards` mit einem Zettel für den Rat, am Ende `phone-3d` (3D, `"scan": false`, `before` gleich `after`; Rückfall `wallet-pass` ebenso) |
 | Kern-Bild | `zahl` |
 | Kernaussage | `studie` |
 | Nie | die Quelle im Bild, eine zweite Studie, die Studie eines Videos der letzten 30 Tage (`meta.studie`, V9), die Zahl als Zusage für den eigenen Laden, die Einschränkung weglassen (S4: nicht Deutschland; S5: eine Supermarkt-App), Papier, Scan |
@@ -455,8 +470,10 @@ Beispiel (Eis am Markt, EIS, 105 Wörter, S3):
 ## 5. Was für alle Formate gilt
 
 - **Kein Takt aus dem alten Bogen als Füllung.** Fehlen Bildwechsel, kommt
-  eine Kamerafahrt (Werte in `AUTOMATIK.md` 6.3) oder ein weiterer Teil
-  desselben Kern-Bilds dazu, nicht Papier, Wallet oder Karte von oben.
+  eine Kamerafahrt (Werte in `AUTOMATIK.md` 6.3), ein weiterer Teil
+  desselben Kern-Bilds oder (3D) ein weiterer Teil mit einem anderen Blick
+  derselben Szene dazu, nicht Papier, Wallet oder Karte von oben, auch nicht
+  in 3D.
 - **Pointe nur, wo das Format eine hat** (F03, F05, F07). `stamp-check` ist
   kein Pflichtbild mehr.
 - **Die Beispiele sind Belege, kein Wortlaut zum Abschreiben.** Ein Satz aus
@@ -534,7 +551,23 @@ Schluss), zählt `AUTOMATIK.md` 5 auf, "Was ein Plan ersetzt". Die
 Hooks der Folge sind seit der Jury-Runde Kandidaten (`HOOKS.md` 0): welcher
 Satz am Ende im Video steht, entscheidet der Bewertungsbogen.
 
-Offen: F02, F03, F04, F05, F06, F08 und F10 sind seit dieser Fassung nicht als
-ganzes Video gebaut (F06 nur mit den neuen Ansichten `"view"` als Probe); keins
+**Nachtrag 18.11.2026, "3D zuerst".** F08 ist als ganzes Video ohne Stimme
+gebaut, so wie der Lauf es am 28.11. nach der Folge oben bauen könnte (T02,
+Döner Palast): `videos/_beispiel-3d-f08`, 109 Wörter, 51,7 s im Entwurf, 12
+Bildwechsel, längstes Bild 4,8 s, elf von zwölf Bildern vor dem Schluss in 3D
+(85 % der Bilder), alle Prüfungen ohne Warnung, `einstieg.mjs` 0,
+`abwechslung.mjs pruefen` gegen die Folge oben 0 (die Texte der Folge gibt es
+nicht, V10 zählte also nur gegen leere Texte; gegen die echten Videos teilt es
+mit dem Salon vom 18.11. drei Vierergruppen um "auf dem Sperrbildschirm, mit
+dem Stand", das wäre in den drei Tagen danach V10). Bau 23 min 35 s. Nach
+der Gegenprüfung am selben Abend neu gebaut (22 min 18 s, wieder ohne
+Warnung): der letzte 3D-Teil zeigt einen anderen Stammkunden, der von selbst
+in den Laden kommt (`iso-shop`), statt ein zweites Mal die Kreuzung "stadt"
+(fast dasselbe Bild wie bei 7 s; seither höchstens zweimal dieselbe Ansicht,
+`AUTOMATIK.md` 6.4), und er kommt "jeden Samstag" statt "jeden Freitag",
+weil der Sperrbildschirm den Samstag zeigt, an dem das Video läuft.
+
+Offen: F02, F03, F04, F05, F06 und F10 sind seit dieser Fassung nicht als
+ganzes Video gebaut (F08 nur ohne Stimme, oben) (F06 nur mit den neuen Ansichten `"view"` als Probe); keins
 der Formate lief mit Stimme. Ob die Schlussfragen
 der Formate dem Betreiber recht sind, ist gefragt.

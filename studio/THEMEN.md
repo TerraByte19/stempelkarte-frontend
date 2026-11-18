@@ -56,6 +56,16 @@ gesperrt).
 - **Jedes benutzbare Thema ist mit den vorhandenen Bausteinen baubar**,
   seit dem 17.11.2026 auch mit `tip-cards`, `comment-thread`,
   `versus-split`, `day-clock` und `big-number` (Katalog im Playbook).
+- **3D zuerst (seit 18.11.2026).** Die Spalte "Bild der Aussage" nennt die
+  2D-Bausteine, mit denen die Themen am 17.11.2026 geprüft wurden. Gebaut wird
+  mit dem 3D-Gegenstück, wo es eins gibt (`AUTOMATIK.md` 6.4): `phone-3d`
+  statt `wallet-pass` und `lock-notification`, `iso-street` mit `"mode":
+  "nah"` statt `shop-map`, `iso-shop` statt `paper-card`, `card-bin`,
+  `shop-counter` und `shop-door` im eigenen Laden. Die 3D-Welt ist dunkel:
+  Uhrzeiten im Bild am frühen Morgen oder ab dem Abend (T02 sagt deshalb
+  seit dem 18.11.2026 "Feierabend" statt "Mittagspause"). Spricht ein
+  Thema vom hellen Tag ("Mittagsschlange", T31, T32), bleibt dieses Bild
+  2D (`AUTOMATIK.md` 6.4, "Tageszeit").
 - **Beleg** nennt die Zeile in `PRODUKT.md`. Ohne Beleg kein Satz über die App.
 - **Verwendet** ist eine Nummer, sobald daraus eine Idee auf dem Board
   angelegt wurde. Das steht auf dem Board in `gedaechtnis/themen`, nicht in
@@ -124,7 +134,7 @@ andere, Reihenfolge und Einstieg eingeschlossen, kommt aus dem Format.
 | Nr. | V1 | Laden | Blickwinkel | Formate | Hook (erster Satz, steht ab Bild 0) | Was das Video sagt | Beleg | Bild der Aussage |
 |---|---|---|---|---|---|---|---|---|
 | T01 | ja | `friseur` | `verlorener-stammkunde` | F10, F07 | Neun Haarschnitte bei dir. Den zehnten macht ein anderer. | Die Papierkarte lag zerknickt im Portemonnaie, und niemand hat gemerkt, wie nah er dran war. In der Wallet geht die Karte nicht verloren. In F10 mit S2 (mehr Gewinn bei mehr Kundenbindung, nie als Zusage) | A4, A3; in F10 S2 | F07: `paper-card` (10 Felder, 9 gestempelt); F10: `big-number` |
-| T02 | ja | `doener` | `sperrbildschirm` | F08 | Mittagspause. Dein Kunde geht an deinem Laden vorbei. Und sein Handy meldet sich. | In der Nähe des Ladens erscheint die Karte von selbst auf dem Sperrbildschirm, mit dem Stand. | C1, A2 | `lock-notification` (12:07 Uhr, "Noch 2 Stempel bis: Gratis-Döner"), `shop-map` |
+| T02 | ja | `doener` | `sperrbildschirm` | F08 | Feierabend. Dein Kunde geht an deinem Laden vorbei. Und sein Handy meldet sich. | In der Nähe des Ladens erscheint die Karte von selbst auf dem Sperrbildschirm, mit dem Stand. | C1, A2 | `phone-3d` mit `"mode": "lock"` (18:42 Uhr, "Noch 2 Stempel bis: Gratis-Döner"), `iso-street` mit `"mode": "nah"`; Rückfall `lock-notification`, `shop-map` |
 | T03 | ja | `eiscafe` | `papierkarte` | F06, F07 | Die Stempelkarte war in der Jeans. Die Jeans war in der Waschmaschine. | Papier geht kaputt oder verloren. Die Karte in der Wallet nicht. | A4, A1, A3 | `versus-split` Runde "regen" |
 | T04 | ja | `cafe` | `kein-download` | F03, F09 | Für Brötchen lädt niemand eine App herunter. Muss auch keiner. | Der Kunde scannt einmal einen QR-Code, danach liegt die Karte in der Wallet. Kein Store, kein Download. | A2, A3, A1 | `wallet-pass` (Scan und Haken) |
 | T05 | ja | `friseur` | `rechnung` | F04 | Zwei Haarschnitte mehr im Jahr. Klingt nach wenig. | Beispielrechnung: 25 € bleiben pro Haarschnitt, mal 40 Stammkunden, mal 2 Besuche mehr im Jahr, sind 2.000 € mehr im Jahr. Ein Beispiel, kein Versprechen. | Beispielrechnung, A1, A4 | `big-number` je Faktor, `calc-panel` (40 × 2 × 25 = 2.000 €) |

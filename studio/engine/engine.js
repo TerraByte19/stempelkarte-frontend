@@ -493,7 +493,11 @@ async function build(state) {
     // data-apart="gruppe": Elemente derselben Gruppe duerfen sich nicht ueberdecken
     // (Absender und "jetzt" in der Benachrichtigung, Datum und Ortsnadel). Gemessen wird
     // die Schrift selbst, nicht ihr Kasten: der ist bei zentriertem Text bildschirmbreit.
-    const apart = [...stage.querySelectorAll('[data-apart]')].map(e => ({ scene: sceneOf(e), group: e.dataset.apart, what: e.dataset.label || e.textContent.trim().slice(0, 40) || label(e), ...ink(e, sr) })).filter(a => a.right > a.left)
+    // Teil dazu (seit 18.11.2026): zwei Teile einer Szene stehen nie zugleich da (Schnitt oder Blende). In der
+    // Ruhelage liegen aber alle Teile uebereinander, und zwei 3D-Teile derselben Welt (zweimal iso-shop) meldeten
+    // ihre Schilder als "stoßen aneinander", obwohl nie beide im Bild sind.
+    const partOf = e => { const p = e.closest('.part'); return p ? [...p.parentElement.children].filter(c => c.classList.contains('part')).indexOf(p) + 1 : 0 }
+    const apart = [...stage.querySelectorAll('[data-apart]')].map(e => ({ scene: sceneOf(e), part: partOf(e), group: e.dataset.apart, what: e.dataset.label || e.textContent.trim().slice(0, 40) || label(e), ...ink(e, sr) })).filter(a => a.right > a.left)
     return { caps, safe, lines, fits, apart }
   }
 

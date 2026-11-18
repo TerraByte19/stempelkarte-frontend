@@ -116,7 +116,7 @@ beim Format steht. Der Takt aus 1.7.2 gilt trotzdem.
 | Hook steht als Tafel ab Bild 0 | erste Textzeile mit `"instant": true`; höchstens 3 Zeilen zu rund 20 Zeichen, `"scale": 1.2` nur bei höchstens 2 Zeilen | Stil C; das Titelbild (`poster.png`) ist dann genau diese Tafel |
 | Hook wird sofort gesprochen | die erste Textzeile **ist** der erste Satz; kein "Hallo", kein "In diesem Video", kein Logo, kein Vorspann | Einsatz nach 0,35 s, Kernbotschaft in den 3 s |
 | Das Bild sagt das Thema sofort | erstes Bild nach Tabelle 1.3; es steht ab Bild 0 (beim Handy `"rise": false`) | wer ohne Ton schaut, muss am Bild sehen, worum es geht |
-| Bruch im ersten halben Satz | Bewegung mit Ton in den ersten 0,5 s. **Erprobt:** Meldung auf dem Sperrbildschirm (`lock-notification`, Anker `notify` `{ "at": "start", "offset": 0.15 }`, `"buzzes": 2`, `"waves": true`, Werte aus `AUTOMATIK.md` 6.4) und Stempelschlag (`paper-card`, `hit` `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01). Für die Formate (17.11.2026): getippte Frage (`comment-thread`, Anker `type` von selbst bei 0,05 s), Zettel leuchtet auf (`tip-cards`, `"rise": false`, Anker `card` `{ "at": "start", "offset": 0.15 }`), Blätter klappern (`big-number`, Anker `show` auf `{ "at": "start", "offset": 0.1 }` und `"poster": 0.6`: bei 0 s steht die Tafel noch leer, das Titelbild zeigt so die Zahl), Zeiger laufen (`day-clock`), Banner (`versus-split`). **Nicht erprobt als Einstieg:** Knick (`wallet-vanish`, `crumple`), Schildchen (`guest-ghost`, `chip`) und `wallet-pass`. Dann Standbilder bei 0 s und 0,5 s ansehen (0, Schritt 8); steht dort etwas halb, mit `paper-card` beginnen. Je Format der Anker in 1.7.3 | ein stehendes Bild mit Text wirkt wie eine Anzeige |
+| Bruch im ersten halben Satz | Bewegung mit Ton in den ersten 0,5 s. **Erprobt:** Meldung auf dem Sperrbildschirm (`lock-notification`, Anker `notify` `{ "at": "start", "offset": 0.15 }`, `"buzzes": 2`, `"waves": true`, Werte aus `AUTOMATIK.md` 6.4; in 3D `phone-3d` "lock" mit demselben Anker, Beispiel vom 18.11.2026) und Stempelschlag (`paper-card`, `hit` `{ "at": "start", "offset": 0.4 }`, so im Entwurf zu T01). Für die Formate (17.11.2026): getippte Frage (`comment-thread`, Anker `type` von selbst bei 0,05 s), Zettel leuchtet auf (`tip-cards`, `"rise": false`, Anker `card` `{ "at": "start", "offset": 0.15 }`), Blätter klappern (`big-number`, Anker `show` auf `{ "at": "start", "offset": 0.1 }` und `"poster": 0.6`: bei 0 s steht die Tafel noch leer, das Titelbild zeigt so die Zahl), Zeiger laufen (`day-clock`), Banner (`versus-split`). **Nicht erprobt als Einstieg:** Knick (`wallet-vanish`, `crumple`), Schildchen (`guest-ghost`, `chip`), `wallet-pass`, und in 3D `iso-street` und `phone-3d` "wallet"; `iso-shop` (Theke mit Blase, Papierkarte, die sich knüllt) nur als Standbilder (18.11.2026, 3.2). Dann Standbilder bei 0 s und 0,5 s ansehen (0, Schritt 8); steht dort etwas halb, mit `paper-card` beginnen. Je Format der Anker in 1.7.3 | ein stehendes Bild mit Text wirkt wie eine Anzeige |
 | Ton ab Bild 0 (seit 17.11.2026, abends) | ein Ortsklang aus der Bibliothek am ersten Teil: `"sounds": [ { "sound": "<Klang aus 1.7.5>", "at": "start", "offset": 0, "vol": <Wert aus 1.7.5> } ]`; `tools/einstieg.mjs` misst ihn | alle vier Videos bis zum 18.11. begannen mit 0,10 bis 0,30 s digitaler Stille (gemessen am 17.11.2026), im Döner-Video kam der erste Effekt erst bei 1,51 s; derselbe Satz still 4,50, mit Bild und Ton 5,83 Punkte (1.7.1, Punkt 4) |
 | Erster Bildwechsel früh | Kamera oder Schnitt auf das **erste Wort der zweiten Textzeile** (Koscher-Video: Kamera bei 1,95 s, Schnitt bei 2,93 s). Kamera nur mit Werten aus `AUTOMATIK.md`, 6.3; gibt es für den Baustein keine, ein Schnitt | danach gilt `pace` wie immer |
 | Reibung zwischen Tafel und Bild, wo es passt | die Tafel sagt das Gegenteil dessen, was das Bild zeigt ("ohne Stempelkissen" über einem Stempel, der auf Papier knallt) | Neugier ohne Behauptung |
@@ -126,16 +126,20 @@ beim Format steht. Der Takt aus 1.7.2 gilt trotzdem.
 **Das Format geht vor** (seit 17.11.2026): Bild 0 ist der Einstieg des Formats
 (`FORMATE.md` 4, Zeile "Einstieg"; in F07 der des Memes, 3.2) und nicht der
 Einstieg eines der letzten zwei Videos (`FORMATE.md`, V4). Bilder der Nähe
-(`lock-notification`, `shop-map`) gibt es nur in F08, Papier nur, wenn V3 es
-erlaubt. Die Spalte "Bild ab Bild 0" nennt deshalb je Format, was dort steht.
+(`lock-notification`, `shop-map`, in 3D `phone-3d` "lock" und `iso-street`
+"nah") gibt es nur in F08, Papier nur, wenn V3 es erlaubt. Die Spalte "Bild
+ab Bild 0" nennt deshalb je Format, was dort steht. **3D zuerst** (seit
+18.11.2026, `AUTOMATIK.md` 6.4): wo die Spalte einen 3D-Baustein nennt, steht
+er in Bild 0; die 2D-Einstiege der Formate F01 bis F06 und F09 (`tip-cards`,
+`comment-thread`, `big-number`, `day-clock`, `versus-split`) bleiben 2D.
 Welche Muster in einem Format Kandidaten liefern, entscheidet seit dem
 17.11.2026 die Tabelle 1.7.3; die Spalte "Muster zuerst" hilft nur, unter
 diesen die zum Blickwinkel passenden zuerst zu schreiben.
 
 | Blickwinkel | Bild ab Bild 0 | Muster zuerst | Memes, die passen (4.2, nur in F07) |
 |---|---|---|---|
-| `sperrbildschirm` | F08: `lock-notification`, `"rise": false`, `"buzzes": 2`, `"waves": true`, `"pin": false` (Werte aus `AUTOMATIK.md` 6.4; das Brummen im Bild ist laut `PRODUKT.md` C1 ein Stilmittel auf Wunsch des Betreibers). Text wie im Backend: "Noch <n> Stempel bis: <Belohnung>", bei voller Karte "<Belohnung> wartet auf dich" | H01, H05, H04 | keins: F07 zeigt keine Nähe |
-| `verlorener-stammkunde` | F10: `shop-counter` oder `week-strip`; F07: Einstieg des Memes | H02, H09, H05 | M23, M18 |
+| `sperrbildschirm` | F08: `phone-3d` mit `"mode": "lock"` (3D zuerst, seit 18.11.2026: `"rise": false`, `"wake": true`, Anker `notify` bei 0,15 s, `"tones": false`; `"poster": 0.6` oben im Skript, nicht in `params`; Werte in `AUTOMATIK.md` 6.4, so gebaut in `videos/_beispiel-3d-f08`). Rückfall: `lock-notification`, `"rise": false`, `"buzzes": 2`, `"waves": true`, `"pin": false` (Werte aus `AUTOMATIK.md` 6.4; das Brummen im Bild ist laut `PRODUKT.md` C1 ein Stilmittel auf Wunsch des Betreibers). Text wie im Backend: "Noch <n> Stempel bis: <Belohnung>", bei voller Karte "<Belohnung> wartet auf dich" | H01, H05, H04 | keins: F07 zeigt keine Nähe |
+| `verlorener-stammkunde` | F10: `iso-shop` (3D, ohne Handy), `shop-counter` oder `week-strip`; F07: Einstieg des Memes | H02, H09, H05 | M23, M18 |
 | `papierkarte` | F06: `versus-split` mit `"scene": "start"`; F07: Einstieg des Memes | H09, H11, H10 | M23, M08, M24, M26, M29, M03, M21 |
 | `kein-download` | F03 und F09: `comment-thread`, getippt; F10: `shop-counter` | H06, H07, H11 | M04, M06, M24, M28, M11 |
 | `stempelzahl` | F09: `comment-thread`, getippt; F01: `tip-cards`; F03: `comment-thread` | H03, H06, H08 | M09 |
@@ -144,7 +148,7 @@ diesen die zum Blickwinkel passenden zuerst zu schreiben.
 | `rechnung` | F04: `big-number` mit der Alltagszahl; `calc-panel` nur als Zusammenfassung nach `AUTOMATIK.md` 6.4 (wie im Döner-Video) | H03 | keins: Zahl und Meme zusammen ist zu viel |
 | `stammkunden-tipps` | F01: `tip-cards`, `"rise": false`, Anker `card` auf `{ "at": "start", "offset": 0.15 }` (Tipp 1 hängt schon, sein Zettel leuchtet mit Ton auf) | H05, H08 | keins |
 | `theke-saetze` | F02: `tip-cards` mit `"rise": false` und dem ersten schlechten Satz, Anker `card` wie bei F01 | H11 | keins |
-| `studie` | F10: `shop-counter` oder `week-strip`; nie `guest-ghost` (als Einstieg nicht erprobt, 1.2) | H05, H02; die Studienzahl erst in der Mitte | keins |
+| `studie` | F10: `iso-shop` (3D, ohne Handy), `shop-counter` oder `week-strip`; nie `guest-ghost` (als Einstieg nicht erprobt, 1.2) | H05, H02; die Studienzahl erst in der Mitte | keins |
 
 ### 1.4 Länge
 
@@ -240,9 +244,9 @@ Stichwort in allen 38 Reels, Median 18 Likes).
       Karte von selbst auf dem Sperrbildschirm, mit dem Stand; ist sie voll,
       wartet die Belohnung. "Ist sie voll, meldet sie sich" bleibt richtig.
       Ein Satz im Video sagt "in der Nähe" und das Video zeigt die Nähe mit
-      `shop-map`. Ein Hook davor, der nur den Moment zeigt ("Mittagspause.
-      Sein Sperrbildschirm sagt: Noch zwei Stempel."), muss das nicht selbst
-      sagen. Nie eine Entfernung, nie wie oft, nie eine Erinnerung ohne die
+      `iso-street` mit `"mode": "nah"` (Rückfall `shop-map`). Ein Hook
+      davor, der nur den Moment zeigt ("Feierabend. Sein Sperrbildschirm
+      sagt: Noch zwei Stempel."), muss das nicht selbst sagen. Nie eine Entfernung, nie wie oft, nie eine Erinnerung ohne die
       Nähe des Ladens (nach langer Pause, vor dem nächsten Besuch: C2, N14).
 - [ ] Zu C1 in Text und Stimme kein Wort für Ton oder Vibration ("brummt",
       "vibriert", "klingelt", "piept"); sagen: "meldet sich", "zeigt sich auf
@@ -338,9 +342,9 @@ hierher. Beispiele mit Punkten sind von der Jury bewertet, die übrigen nicht.
 | F05 Tag | `day-clock` mit der ersten Uhrzeit und `from` eine halbe Stunde davor: Anker `move` (von selbst bei 0,05 s) lässt die Zeiger laufen | Uhrzeit plus Moment (Bauart H01 ohne Sperrbildschirm, `hook_muster` `"H01"`), H15, H05 | "Sieben Uhr zehn, erster Kunde: Karte vergessen." (H15) · "Sechs Uhr. Der Ofen läuft." (H01, T32) |
 | F06 Duell | `versus-split`, `"scene": "start"`, Anker `vs` (von selbst bei 0,15 s: das VS schlägt mit Ton ein, seit dem 17.11.2026) | H11, H05, H16 | "Papierkarte gegen Handy. Drei Runden." (H11, T33) · "Deutschland und Technik sind Erzfeinde." (H16; 5,83 mit Duell-Bild und Ton, 4,50 als stilles Bild) |
 | F07 Meme | der Einstieg des Memes (3.2) mit dessen Anker | H10; als "Muster" zählen hier die freien Memes (4.2) | wie 3.2 |
-| F08 Nähe | `lock-notification`, Anker `notify` auf `{ "at": "start", "offset": 0.15 }` (`AUTOMATIK.md` 6.4) | H01 (auch als "volle Karte zuerst"), H05, H04, H14 (nur mit C1) | "Gratis-Döner wartet auf dich. Das liest dein Kunde gerade." 6,17 (H01) · "Unter uns: Deine Stempelkarte meldet sich von selbst." (H14, C1) |
+| F08 Nähe | `phone-3d` mit `"mode": "lock"`, `"rise": false`, `"wake": true`, Anker `notify` auf `{ "at": "start", "offset": 0.15 }`, dazu `"poster": 0.6` oben im Skript, nicht in `params` (3D, `AUTOMATIK.md` 6.4; erprobt im Beispiel `videos/_beispiel-3d-f08`: Ton bei 0,00 s, Bewegung bei 0,15 s, erster Schnitt bei 2,55 s). Rückfall `lock-notification` mit demselben Anker | H01 (auch als "volle Karte zuerst"), H05, H04, H14 (nur mit C1) | "Gratis-Döner wartet auf dich. Das liest dein Kunde gerade." 6,17 (H01) · "Unter uns: Deine Stempelkarte meldet sich von selbst." (H14, C1) |
 | F09 Quiz | `comment-thread`, `"typed": true`, Anker `type` bei 0,05 s; `verdict` auf das Urteil | H06, H13, H11, H03 (nur zur Stempelzahl, D2) | "Zehn Stempel bis zum Gratis-Döner? Steht in keinem Gesetz." 6,17 (H13) · "Für die Stempelkarte im Handy braucht dein Kunde eine App?" (H06, T35) |
-| F10 Studie | `shop-counter` (mit H15: Anker `roll` auf `{ "at": "start", "offset": 0 }`, der Steppenläufer; sonst `"tumbleweed": false` und `bubble` auf das erste Wort) oder `week-strip` (Anker `week1` auf das erste Wort) | H05, H02, H12, H15 | "Mittagszeit im Döner Palast. Ganz schön ruhig hier." (H15) · "Deine Stammkundin geht fremd. Mit der Bäckerei an der Ecke." (H12, `week-strip` mit `rivalWeek`) |
+| F10 Studie | `iso-shop` (3D, `"phone": false`, `"start": "counter"`, Anker `order` auf `{ "at": "start", "offset": 0.3 }`: die Blase springt auf, der Inhaber nickt), außer mit H15: dann `shop-counter` (Anker `roll` auf `{ "at": "start", "offset": 0 }`, der Steppenläufer; den gibt es nur in 2D). Sonst `shop-counter` nur als Rückfall (`"tumbleweed": false`, `bubble` auf das erste Wort), oder `week-strip` (Anker `week1` auf das erste Wort) | H05, H02, H12, H15 | "Mittagszeit im Döner Palast. Ganz schön ruhig hier." (H15) · "Deine Stammkundin geht fremd. Mit der Bäckerei an der Ecke." (H12, `week-strip` mit `rivalWeek`) |
 
 In F10 löst der Anfang nicht mit dem Produkt ein, sondern mit der Studie
 (Kernaussage `studie`); das Produkt bleibt der letzte Satz. In F01 und F02
@@ -377,7 +381,7 @@ der Block `sound` oben im Skript. Immer mit Absenkung unter der Stimme
 | Papier im ersten Satz | `papier-knuellen` | 1,5 (leise Datei, -22,5 LUFS) |
 | Spannung, Verlust | `herzschlag` | 1,5 (leise Datei, -21,5 LUFS) |
 | leerer Laden (H15) | `grillen-stille` | 0,8 |
-| F08, Sperrbildschirm als Bild 0 | `handy-vibriert`, und am Baustein `lock-notification` `"tones": false` (sonst brummt es doppelt) | 0,5 |
+| F08, Sperrbildschirm als Bild 0 | `handy-vibriert`, und am Baustein `phone-3d` (oder im Rückfall `lock-notification`) `"tones": false` (sonst klingt der eigene Ton des Bausteins dazu; `phone-3d` wackelt dabei nicht, das Brummen ist nur im Ton) | 0,5 |
 | Akzent auf dem Reizwort, höchstens einer in den ersten 3 s | `publikum-keucht`, `drama-stoss`, `herz-zerspringt`, `vine-boom` (höchstens einmal je Video) | 1,0; `vine-boom` 1,5 |
 
 Nie bei 0,00 s: `handy-vibriert` außer unter `lock-notification` (Stilmittel,
@@ -481,7 +485,7 @@ Bäckerei Morgenrot.
 
 | Nr. | Muster und Bauart | Beleg | Drei Beispiele | Läden |
 |---|---|---|---|---|
-| H01 | **Kundenmoment.** [Tageszeit, Weg oder Lage] + [was gerade mit dem Kunden und seiner Karte passiert], meist: in der Nähe des Ladens zeigt sich seine Karte auf dem Sperrbildschirm, mit dem Stand. Der Zuschauer sieht den Moment, bevor er versteht, warum. In Text und Stimme nie "brummt" oder "vibriert" (1.6): C1 sagt "meldet sich"; ob Apple Wallet dabei überhaupt vibriert, ist **unbestätigt** (Anbieter-Doku: eher nicht). Im Bild darf es brummen (Stilmittel). Form "volle Karte zuerst" (nur F08): Bild 0 ist der Sperrbildschirm mit "<Belohnung> wartet auf dich", der Satz sagt, wer das gerade liest; der Laden steht als Absender sichtbar da, sonst wirkt es wie ein Gewinnspiel | 3 von 9 Treffer, übertragbar davon einer: 4.634 = 110× (Handy meldet sich beim Vorbeigehen). Dessen Wortlaut ("phone buzz") nicht übernehmen | "Mittagspause. Sein Sperrbildschirm sagt: Noch zwei Stempel." (C1) · "Er denkt gerade nicht an Eis. Dann meldet sich seine Stempelkarte." (C1) · "Kurz vor acht, auf dem Weg zur Bahn. Und ihre Stempelkarte meldet sich." (C1) · "Gratis-Döner wartet auf dich. Das liest dein Kunde gerade." (volle Karte zuerst, C1; Jury-Runde 6,17) | alle; Uhrzeit auf dem Sperrbildschirm passend zum Laden; F08, in F05 als Uhrzeit plus Moment ohne Sperrbildschirm |
+| H01 | **Kundenmoment.** [Tageszeit, Weg oder Lage] + [was gerade mit dem Kunden und seiner Karte passiert], meist: in der Nähe des Ladens zeigt sich seine Karte auf dem Sperrbildschirm, mit dem Stand. Der Zuschauer sieht den Moment, bevor er versteht, warum. In Text und Stimme nie "brummt" oder "vibriert" (1.6): C1 sagt "meldet sich"; ob Apple Wallet dabei überhaupt vibriert, ist **unbestätigt** (Anbieter-Doku: eher nicht). Im Bild darf es brummen (Stilmittel). Form "volle Karte zuerst" (nur F08): Bild 0 ist der Sperrbildschirm mit "<Belohnung> wartet auf dich", der Satz sagt, wer das gerade liest; der Laden steht als Absender sichtbar da, sonst wirkt es wie ein Gewinnspiel | 3 von 9 Treffer, übertragbar davon einer: 4.634 = 110× (Handy meldet sich beim Vorbeigehen). Dessen Wortlaut ("phone buzz") nicht übernehmen | "Feierabend. Sein Sperrbildschirm sagt: Noch zwei Stempel." (C1; 3D ist Abend, nicht "Mittagspause") · "Er denkt gerade nicht an Eis. Dann meldet sich seine Stempelkarte." (C1) · "Kurz vor acht, auf dem Weg zur Bahn. Und ihre Stempelkarte meldet sich." (C1) · "Gratis-Döner wartet auf dich. Das liest dein Kunde gerade." (volle Karte zuerst, C1; Jury-Runde 6,17) | alle; Uhrzeit auf dem Sperrbildschirm passend zum Laden; F08, in F05 als Uhrzeit plus Moment ohne Sperrbildschirm |
 | H02 | **Der stille Verlust.** [eine Person] + [ihr Rhythmus] + [Bruch], dann das Nicht-Bemerken. Alle drei Teile, sonst floppt es. **Höchstens einmal je Durchlauf von `THEMEN.md` (1.6).** Nie Friseur mit "alle paar Wochen" (Treffer eines Mitbewerbers) | 2 von 11 Treffer (163× und 68×); ohne Person und Rhythmus 4 bis 23 Likes; dieselbe Bauart im Café nur 31 | "Jeden Freitag ein Döner. Acht Stempel. Dann nichts mehr." (A4, C1) · "Neun Haarschnitte bei dir. Den zehnten macht ein anderer." (Hook aus `THEMEN.md`, T01; A4, A3, C1) · "Jeden Samstag zwei Brötchen. Seit drei Wochen nicht mehr." (A4, C1) | Salon, Döner, Bäckerei (es braucht einen Rhythmus); Eis nur mit Saison |
 | H03 | **Die Alltagszahl, die kippt.** [eine Zahl, die jeder kennt] + [kurz umgedreht]. Rechnung stimmt und ist als Beispiel erkennbar | schwach: 1 von 6 Treffer (20,4×, im zweiten Upload derselben Caption 2,7×), dazu 17,9× aus einer kühnen Behauptung mit Zahl; abstrakte Zahlen 26 und 42 Likes | "Ein Döner pro Woche, zehn Stempel. Das sind zehn Wochen Warten." (D2) · "Ein Haarschnitt im Monat, zehn Stempel. Das ist fast ein Jahr." (D2) · "Zwei Haarschnitte mehr im Jahr. Klingt nach wenig." (Beispielrechnung, Format F04) | alle; `stempelzahl`; `rechnung` im Format F04 (1.3) |
 | H04 | **Stell dir vor.** "Stell dir vor, ..." + ein Bild aus dem eigenen Laden, das heute nicht passiert. Nie "jeder Kunde geht mit deiner Karte im Handy raus" (Wortlaut eines Mitbewerbers) | Median 2,48×, aber n = 4 | "Stell dir vor, die Stempelkarte sagt Bescheid, wenn sie voll ist." (C1) · "Stell dir vor, die Eisdiele ist zu, und die Karten bleiben." (A3, A1) · "Stell dir vor, keine Stempelkarte klebt mehr an einer Serviette." (A4) | alle |
@@ -548,7 +552,23 @@ F08), kein Scan-Bild und höchstens ein Papier-Bild. Mit Papier, Wallet,
 Stempel und Karte von oben wären die Meme-Skripte der alte Bogen gewesen; bis
 zum 17.11.2026 standen sie so hier. Die Skripte unten haben deshalb keine
 Pointe zu C1 mehr. Spalte "Einstieg": das erste Bild in F07, je Meme ein
-anderes, damit zwei Meme-Videos nicht gleich anfangen (V4).
+anderes, damit zwei Meme-Videos nicht gleich anfangen (V4). **3D zuerst**
+(seit 18.11.2026): steht in der Spalte ein Baustein mit 3D-Gegenstück
+(`AUTOMATIK.md` 6.4), gilt das 3D-Bild, im ersten Teil wie in den späteren:
+`wallet-pass` ohne Scan wird `phone-3d` mit `"scan": false` und `before`
+gleich `after` (M06 mit `"rise": false`), `shop-counter` wird `iso-shop` mit
+`"phone": false` (M02, M27; Anker `order` auf `{ "at": "start", "offset":
+0.3 }`), `paper-card` wird `iso-shop` mit `"paper": true`, `"phone": false`,
+`"close": "counter"`, Anker `zoom` auf den Anfang und `crumple` auf
+`{ "at": "start", "offset": 0.4 }` (M18, M26, M29, M21: die Karte liegt in
+Bild 0 auf der Theke, knüllt sich ab 0,4 s, liegt bei rund 1,5 s im Korb).
+Beide sind am 18.11.2026 nur als Standbilder bei 0, 0,5, 1 und 2 s erprobt
+(einzelne Proben, `tools/einstieg.mjs`: Ton bei 0 s, Bewegung bei 0 und
+0,3 s), in keinem ganzen Video: Standbilder bei 0 s und 0,5 s ansehen;
+steht dort etwas halb oder ist die Karte nicht zu erkennen, gilt der
+2D-Einstieg aus der Spalte. `shop-door`
+(M05) und `versus-split` (M24), `comment-thread` (M08, M04), `big-number`
+(M23, M09) und `wallet-vanish` (M03) bleiben 2D.
 
 | Nr. | Meme, Satzbau, Platz | Einstieg und Bild (F07) | Cool-down · Risiko · Lauf · prüfen bis | Skript: Hook → Wendung (Laden, Thema, Beleg) |
 |---|---|---|---|---|
@@ -733,7 +753,7 @@ Hook aus `THEMEN.md`. Beleg ist der aus `THEMEN.md`.
 | Nr. | Thema | Hook | Muster | Lauf |
 |---|---|---|---|---|
 | 2 | T01 Salon, `verlorener-stammkunde` | Erwartung: zehn Stempel. \| Realität: Karte zerknickt im Portemonnaie. | M23 | ja |
-| 3 | T02 Döner, `sperrbildschirm` | Mittagspause. \| Sein Sperrbildschirm sagt: Noch zwei Stempel. | H01 | ja |
+| 3 | T02 Döner, `sperrbildschirm` | Feierabend. \| Sein Sperrbildschirm sagt: Noch zwei Stempel. | H01 (Bild: `phone-3d` "lock", 18:42 Uhr; die 3D-Welt ist Abend, deshalb nicht mehr "Mittagspause") | ja |
 | 4 | T03 Eis, `papierkarte` | Die Stempelkarte war in der Jeans. \| Die Jeans war in der Waschmaschine. | H09 (Hook aus `THEMEN.md`) | ja |
 | 5 | T04 Bäckerei, `kein-download` | Eine App für zwei Brötchen? \| Lädt keiner. Muss auch keiner. | H06 | ja |
 | 6 | T05 Salon, `rechnung` | Zwei Haarschnitte mehr im Jahr. \| Klingt nach wenig. Rechne mit 40 Stammkunden. | H03 | ja (F04) |

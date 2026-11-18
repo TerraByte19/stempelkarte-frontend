@@ -80,6 +80,20 @@ müssen:
   Regeln des Laufs gilt (Format samt "Nie", "Produkt" und "Handy spät",
   erster Satz, Länge, Schluss, erster Bildwechsel, V1, V7 und ein Teil von
   V9), steht in `AUTOMATIK.md` 5, "Was ein Plan ersetzt".
+- **3D zuerst (18.11.2026):** Der Betreiber: "Ich will so wenig 2D wie
+  möglich." Es gibt drei 3D-Bausteine in einer Welt (Abend in Lila,
+  Spielzeugfiguren, isometrisch): `iso-street` (Kreuzung, Duell und mit
+  `"mode": "nah"` der Ring um den Laden für "in der Nähe"), `iso-shop` (der
+  Laden von innen: Theke, Scan, Stempel, Papierkarte) und `phone-3d` (Wallet,
+  Sperrbildschirm, Kartendesign). Jedes neue Video nimmt sie statt der
+  2D-Bilder (`AUTOMATIK.md` 6.4, Tabelle "3D zuerst"; `FORMATE.md` 4;
+  `HOOKS.md` 1.7.3). 2D bleiben vorerst Pinnwand, Kommentar, Fallblatt,
+  Rechnung, Duell, Uhr und Wochenleiste, nur wo das Format sie braucht. "In
+  der Nähe" zeigt jetzt der Ring um den Laden, weiter nie eine Figur vor der
+  Tür. Ein Video fast ganz in 3D baut deutlich länger als eins in 2D, deshalb
+  im Hintergrund (`AUTOMATIK.md` Schritt 16). Beispiel ohne Stimme:
+  `videos/_beispiel-3d-f08` (F08, Döner Palast). Der Deutschland-Plan zeigt
+  Laden und Handy jetzt in 3D, sein Text ist unverändert.
 - **Beitragstext je Video:** Hook, ein bis zwei Sätze, "Kommentiere
   STICHWORT", genau 5 Hashtags (Instagram nimmt nicht mehr). Er steht am
   Video auf dem Board (Feld `caption`); `tools/beitrag.mjs` prüft ihn. Die
@@ -150,7 +164,9 @@ und schreibt das Kassenbuch zurück nach `gedaechtnis/stimme`.
 | `studio/board/` | die Übersichtsseite: `index.html`, `LIESMICH.md` (Datenvertrag und Schreibwege), `ADRESSE.txt` |
 | `launch-video/` | Quellen des ersten, von Hand gebauten Videos; Vergleichsbasis für `studio/tools/regress.mjs` |
 
-Prüfen, ob alles heil ist: `node studio/tools/selftest.mjs` (etwa 3 min, davon 2 min der 3D-Test) und
+Prüfen, ob alles heil ist: `node studio/tools/selftest.mjs` (etwa 7 min, davon rund 6 min die vier 3D-Tests;
+länger als die 2 Minuten, die die Shell ohne `timeout` wartet, deshalb mit `timeout: 600000` oder im
+Hintergrund wie in `AUTOMATIK.md` Schritt 5) und
 `node studio/tools/regress.mjs` (etwa 4 min, vergleicht Bild für Bild und Ton
 für Ton mit beiden Fassungen).
 

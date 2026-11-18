@@ -3,7 +3,7 @@
     "title": "Probe 3D: Laden von innen",
     "slug": "probe-iso-shop",
     "language": "de",
-    "_hinweis": "Kein Video zum Posten: Probe für den 3D-Baustein iso-shop (Laden von innen), ohne Stimme gebaut. Zeigt in sechs Sekunden die Hauptmomente: die Glastür ist im ersten Bild zu, der Kunde kommt herein und bestellt im Gehen (Sprechblase), die Papierkarte auf der Theke knüllt sich und fliegt in den Papierkorb, die Kamera fährt an die Handys heran, der Inhaber scannt, der Stempel springt auf. Laden und Name sind eigene Beispiele."
+    "_hinweis": "Kein Video zum Posten: Probe für den 3D-Baustein iso-shop (Laden von innen), ohne Stimme gebaut. Zeigt in sechs Sekunden die Hauptmomente der Reihe nach: die Glastür ist im ersten Bild zu, der Kunde kommt herein, die Papierkarte auf der Theke knüllt sich und fliegt in den Papierkorb, er bestellt (Sprechblase, der Inhaber nickt), die Kamera fährt an die Handys heran, der Inhaber scannt, der Stempel springt auf. Laden und Name sind eigene Beispiele."
   },
   "timing": {
     "lead": 0.6,
@@ -15,7 +15,7 @@
   },
   "scenes": [
     {
-      "_hinweis": "Eine Szene, ein Teil: die Nahaufnahme kommt über den Anker 'zoom' (eine 3D-Szene statt zwei Teile, die beide jedes Bild rechnen würden).",
+      "_hinweis": "Eine Szene, ein Teil: die Nahaufnahme kommt über den Anker 'zoom' (eine 3D-Szene statt zwei Teile, die beide jedes Bild rechnen würden). Die Anker liegen so, dass sich nichts verdeckt: Knüllen und Wurf, während der Kunde noch vorn im Raum geht, die Sprechblase erst danach (sie stünde sonst genau über der Karte), 1 s Blase vor 'zoom'.",
       "component": "iso-shop",
       "params": {
         "branch": "cafe",
@@ -36,28 +36,28 @@
           "at": "start",
           "offset": 1.0
         },
-        "order": {
-          "at": "start",
-          "offset": 1.45
-        },
         "crumple": {
           "cap": 1,
           "word": 0,
           "offset": 0.05
         },
+        "order": {
+          "at": "start",
+          "offset": 2.5
+        },
         "zoom": {
           "at": "start",
-          "offset": 3.05
+          "offset": 3.5
         },
         "scan": {
           "cap": 2,
           "word": 1,
-          "offset": 0.2
+          "offset": 0.35
         },
         "stamp": {
           "cap": 3,
           "word": 0,
-          "offset": 0.1
+          "offset": 0.2
         }
       },
       "captions": [

@@ -113,10 +113,10 @@ export default {
     smoke: { default: true, doc: 'Rauch steigt aus dem Schornstein des Ladens gegenüber (Grill)' },
     push: { default: 0.05, doc: 'Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25). Sie endet immer im selben Ausschnitt, in dem beide Läden ganz zu sehen sind; mehr "push" heißt nur, dass sie weiter weg anfängt' },
     orbit: { default: 7, doc: 'Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12)' },
-    after: { default: true, doc: 'Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf. false, wenn die Szene gleich danach endet' },
-    tones: { default: true, doc: 'Eigene Töne (thud beim Zerbrechen, ding an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt' },
+    after: { default: true, doc: 'Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf ("nah": nur der eigene leuchtet auf). false, wenn die Szene gleich danach endet' },
+    tones: { default: true, doc: 'Eigene Töne (Duell: thud beim Zerbrechen, ding an der Tür; "nah": ding und pop, wenn sich die Karte meldet, chime an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt' },
     mode: { default: 'duell', doc: '"duell": zwei Läden, Herz, Stammkunde geht rüber (wie bisher). "nah": C1, Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch {left} Stempel bis: {reward}" (Anker "walk", "near", "turn", "enter"). In "nah" gibt es kein Herz; "heart", "walker", "back", "from" gelten nur in "duell"' },
-    frame: { default: 'laden', doc: 'Nur "nah": "laden" = derselbe Ausschnitt wie im Duell (beide Läden, Kreuzung, der Ring links angeschnitten). "stadt" = weiter weg und höher: der ganze Ring, beide Läden und mehr Stadt, für "das Handy macht das von selbst, der Laden sieht nichts"' },
+    frame: { default: 'laden', doc: 'Nur "nah": "laden" = derselbe Ausschnitt wie im Duell (beide Läden, Kreuzung, der Ring links angeschnitten). "stadt" = weiter weg und höher: der ganze Ring, beide Läden und mehr Stadt, für "das Handy macht das von selbst" (PRODUKT.md C1: "ohne dass du etwas tust"). Nie dazu sagen, der Laden sehe nicht, wo jemand ist: das ist nicht belegt (N2)' },
     then: { default: 'weiter', doc: 'Nur "nah": was der Kunde nach der Benachrichtigung tut. "weiter": geht noch ein paar Schritte und bleibt mit dem Handy stehen. "dreht": bleibt stehen, dreht sich zur Tür und geht auf sie zu (Anker "turn"). "rein": dazu geht er hinein, die Glocke klingelt, der Laden leuchtet auf (Anker "turn" und "enter")' },
     reward: { default: 'Gratis-Döner', doc: 'Nur "nah": die Belohnung, kurz (höchstens etwa 16 Zeichen), steht in der Benachrichtigung: "Noch 2 Stempel bis: Gratis-Döner"' },
     left: { default: 2, doc: 'Nur "nah": wie viele Stempel noch fehlen (1 bis 20). 0 = die Karte ist voll, dann steht dort "{reward} wartet auf dich" (C1)' },
@@ -124,10 +124,10 @@ export default {
   },
   captions: { min: 1 },
   anchors: p => p.mode === 'nah' ? {
-    walk: { at: 'start', offset: 0, doc: 'Der Kunde geht los, unten rechts auf dem Gehweg am Platz, noch außerhalb des Rings' },
-    near: { cap: 0, word: -1, doc: 'Er betritt den Ring: sein Handy leuchtet, die Blase mit dem Sperrbildschirm springt heraus (Ton: ding). Genau jetzt steht er auf dem Rand des Rings, gut 10 m von der Tür. Auf "Nähe" o. ä.' },
+    walk: { at: 'start', offset: 0, doc: 'Der Kunde geht los, auf dem Gehweg am Platz auf der anderen Seite der Kreuzung (im Bild unten rechts, mit "ours": "right" unten links), noch außerhalb des Rings' },
+    near: { cap: 0, word: -1, doc: 'Er betritt den Ring: sein Handy leuchtet, die Blase mit dem Sperrbildschirm springt heraus (Töne: ding, pop). Genau jetzt steht er auf dem Rand des Rings, gut 10 m von der Tür. Auf "Nähe" o. ä.' },
     ...(p.then === 'dreht' || p.then === 'rein' ? { turn: { at: 'end', offset: -1.7, doc: 'Er dreht sich zur Tür des eigenen Ladens und geht los (vorher bleibt er stehen, wenn er die Ecke schon erreicht hat). Mindestens 0,4 s nach "near"' } } : {}),
-    ...(p.then === 'rein' ? { enter: { at: 'end', offset: -0.25, doc: 'Er steht auf der Schwelle und geht hinein, die Glocke schwingt (Ton: ding), der Laden leuchtet auf' } } : {})
+    ...(p.then === 'rein' ? { enter: { at: 'end', offset: -0.25, doc: 'Er steht auf der Schwelle und geht hinein, die Glocke schwingt (Ton: chime), der Laden leuchtet auf. Braucht Zeit nach "turn" (rund 9 m Weg, ab 5 m/s warnt der Bau): etwa 2 s' } } : {})
   } : {
     ...(p.heart && !p.back ? { crack: { cap: 0, word: -1, doc: 'Das Herz über dem eigenen Laden zerbricht (Ton: thud). Auf "betrogen" o. ä.' } } : {}),
     ...(p.walker ? {

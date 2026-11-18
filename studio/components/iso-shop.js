@@ -32,7 +32,7 @@
 // - Der Kunde haelt sein Handy am UNTEREN Rand (GRIP). In der ersten Fassung sass die Hand 20 cm unter der
 //   Mitte, also genau auf dem QR-Code: der Unterarm lag in der Nahaufnahme ueber einem Drittel des Codes,
 //   die Scan-Linie lief darunter (Abnahme 18.11.2026). Der Test misst das (Bild mit und ohne Arm).
-// - Was in der ganzen Ansicht nur ein Punkt waere, ist dort groesser (wie STAMP.size): Sprechblase 2,2-fach,
+// - Was in der ganzen Ansicht nur ein Punkt waere, ist dort groesser (wie STAMP.size): Sprechblase 2-fach,
 //   Papierkarte 1,3-fach. Die Blase mass vorher 84 x 71 px, am Handy rund 30 px, also ein weisser Fleck.
 // - Der Weg des Kunden fuehrt vorn um die Theke herum, nicht an ihr entlang: an der Theke entlang stand
 //   sein Kopf genau dann vor der Papierkarte, wenn sie sich knuellte. Die Kugel fliegt danach in den
@@ -43,8 +43,8 @@
 //   ueber dem Handy ist gross genug fuer das ganze Bild.
 // - Jedes Bild ist eine reine Funktion von t (Kamera, Wege, Arme, Knuellen, Stempel); Zufall nur aus festem
 //   Startwert beim Bauen. tools/test_3d_iso_shop.mjs prueft gleiche Pixel nach Spruengen und auf zwei Seiten.
-// - Rechenzeit (18.11.2026, SwiftShader ohne Grafikkarte): rund 0,8 bis 1 s je Bild auf einer Seite; die
-//   Probe videos/_probe-iso-shop (6 s, 179 Bilder) baute mit drei Seiten in 2 min 25 s.
+// - Rechenzeit (18.11.2026, SwiftShader ohne Grafikkarte): rund 0,7 bis 1,4 s je Bild auf einer Seite (je nach
+//   Last durch andere Laeufe); die Probe videos/_probe-iso-shop (6 s, 180 Bilder) baute in 3 min.
 import { ICONS } from '../engine/icons.js'
 import { QR } from '../engine/qr.js'
 
@@ -74,7 +74,7 @@ const SC = { w: 0.25, h: 0.44, d: 0.05 }                    // Handy des Inhaber
 const ARM_S = -2.38, ARM_Z = -0.44, ARM_S2 = -2.75, ARM_Z2 = -0.55
 const BIN = { x: -4.5, z: 2.45, r: 0.3, h: 0.72 }           // Papierkorb links neben der Theke (nur mit "paper")
 const PSIZE = [1.3, 1]    // Papierkarte: ganze Ansicht / Nahaufnahme (vorher rund 100 px breit, die Kugel 32 px)
-const BUB = [2.2, 1]      // Sprechblase: ganze Ansicht / Nahaufnahme
+const BUB = [2.0, 1]      // Sprechblase: ganze Ansicht / Nahaufnahme
 
 // Farben des Innenraums: Waende im Stampit-Lila, eine Stufe heller als die Stadt (drinnen ist Licht an),
 // Holz warm, damit der Raum gemuetlich wirkt und das Lila nicht kalt wird
@@ -106,7 +106,7 @@ const LOOK = {
 
 export default {
   title: 'Laden von innen in 3D: Theke, Inhaber, Kunde, Scan und Stempel',
-  use: 'Isometrischer Blick in einen Laden am Abend (Wände aufgeschnitten wie ein Puppenhaus), warmes Licht fällt durch Fenster und Glastür. Hinter der Theke der Inhaber, davor der Kunde; Einrichtung je Branche (Café, Döner, Friseur, Bäckerei, Eisdiele). Der Kunde kommt herein und bestellt, hält sein Handy hin, der Inhaber scannt es mit seinem Handy, ein Stempel springt mit dem Symbol des Ladens über dem Handy auf (B1, B2). Mit "paper" liegt eine Papierkarte auf der Theke, die sich zusammenknüllt. "close" fährt für Details an Theke oder Handys heran. Rechnet etwa 1 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.',
+  use: 'Isometrischer Blick in einen Laden am Abend (Wände aufgeschnitten wie ein Puppenhaus), warmes Licht fällt durch Fenster und Glastür. Hinter der Theke der Inhaber, davor der Kunde; Einrichtung je Branche (Café, Döner, Friseur, Bäckerei, Eisdiele). Der Kunde kommt herein und bestellt (Sprechblase), hält sein Handy hin, der Inhaber scannt es mit seinem Handy von rechts oben, ein Stempel springt mit dem Symbol des Ladens über dem Handy auf (B1, B2). Mit "paper" liegt eine Papierkarte auf der Theke, die sich zusammenknüllt und in den Papierkorb fliegt. "close" fährt für Details an Theke oder Handys heran. Rechnet etwa 1 bis 1,4 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.',
   params: {
     branch: { default: 'cafe', doc: 'Art des Ladens, bestimmt die Einrichtung: "cafe" (Siebträger, Tassen, Kuchenvitrine), "doener" (Drehspieß, Grill), "friseur" (Stuhl, Spiegel, Föhn, Schere im Regal), "baeckerei" (Brotregal, Brötchen in Körben), "eis" (Eistheke mit bunten Wannen)' },
     shop: { default: 'Café Mond', doc: 'Name auf dem Ladenschild, auf der Karte im Handy und auf der Papierkarte (höchstens etwa 14 Zeichen; lange Namen in zwei Zeilen: vorn klein, das letzte Wort groß)', same: 'Ladenname' },
@@ -115,7 +115,7 @@ export default {
     menu: { default: [], doc: 'Drei Wörter auf der Tafel an der rechten Wand (je höchstens etwa 10 Zeichen). Leer = passend zur Branche. Die Tafel ist Schmuck: am Handy sind die Wörter zu klein zum Lesen, also nichts Wichtiges darauf schreiben' },
     customer: { default: 0, doc: 'Aussehen des Kunden als Zahl: 0 = heller Mantel (wie der Stammkunde in iso-street), jede andere Zahl ein anderes, festes Aussehen (Mantel, Haar, Haut, Frisur)' },
     start: { default: 'counter', doc: '"counter": der Kunde steht schon an der Theke. "door": er kommt auf "enter" durch die Glastür herein und geht zur Theke' },
-    bubble: { default: true, doc: 'Sprechblase mit dem Bestellten über dem Kunden (Anker "order")' },
+    bubble: { default: true, doc: 'Sprechblase mit dem Bestellten über dem Kunden (Anker "order"), in der ganzen Ansicht doppelt so groß, damit sie am Handy zu sehen ist' },
     phone: { default: true, doc: 'Der Kunde hält sein Handy mit der Karte, der Inhaber scannt es (Anker "scan", "stamp")' },
     paper: { default: false, doc: 'Eine Papier-Stempelkarte liegt auf der Theke, links daneben steht ein Papierkorb (Anker "crumple": sie knüllt sich zusammen und fliegt in den Korb)' },
     stamps: { default: 6, doc: 'Felder auf der Karte (Papier und Handy), 4 bis 10. Das letzte ist das Gratis-Feld', same: 'Stempelzahl' },
@@ -124,19 +124,19 @@ export default {
     close: { default: '', doc: 'Nahaufnahme ab Anker "zoom": "" (ganzer Laden), "counter" (Theke mit Karte und Handys) oder "phone" (die beiden Handys und der Stempel; auf der Karte im Handy sind die Stempel zu zählen)' },
     push: { default: 0.06, doc: 'Wie weit die Kamera während der Szene heranfährt (0 bis 0,25). Sie endet immer im berechneten Ausschnitt; mehr heißt nur, dass sie weiter weg anfängt' },
     orbit: { default: 6, doc: 'Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 10)' },
-    tones: { default: true, doc: 'Eigene Töne (ding an der Tür, pop für Blase und Stempel, scan und ok, crumple). false, wenn das Skript Klänge aus der Bibliothek setzt' }
+    tones: { default: true, doc: 'Eigene Töne (ding an der Tür, pop für Blase und Stempel, scan und ok, crumple, drop im Papierkorb). false, wenn das Skript Klänge aus der Bibliothek setzt' }
   },
   captions: { min: 1 },
   anchors: p => ({
-    ...(p.start === 'door' ? { enter: { at: 'start', offset: 1.2, doc: 'Der Kunde tritt durch die Glastür herein (Ton: ding) und geht vorn um die Theke herum zu ihr (rund 3,5 s; liegt "scan" früher, geht er schneller). Die Tür geht rund 1 s vorher auf; liegt "enter" näher als das am Szenenanfang, steht sie schon im ersten Bild offen (Warnung)' } } : {}),
+    ...(p.start === 'door' ? { enter: { at: 'start', offset: 1.2, doc: 'Der Kunde tritt durch die Glastür herein (Ton: ding) und geht vorn um die Theke herum zu ihr (rund 3,8 s; liegt "scan" früher, geht er schneller). Die Tür geht rund 1 s vorher auf; liegt "enter" näher als das am Szenenanfang, steht sie schon im ersten Bild offen (Warnung)' } } : {}),
     ...(p.bubble ? { order: { cap: 0, word: -1, doc: 'Über dem Kunden springt eine Sprechblase mit dem Bestellten auf (Ton: pop), auch im Gehen; der Inhaber nickt und verbeugt sich leicht. Sie steht 1,4 s; mit "close" geht sie spätestens mit "zoom" (liegt "zoom" weniger als 1 s danach: Warnung)' } } : {}),
     ...(p.paper ? { crumple: { cap: 0, word: -1, offset: 0.2, doc: 'Die Papierkarte auf der Theke knüllt sich zu einer Kugel (Ton: crumple), die nach 0,55 s in den Papierkorb fliegt (Ton: drop, rund 1,1 s nach dem Anker). Steht der Kunde dabei vor der Karte, gibt es eine Warnung' } } : {}),
     ...(p.phone ? {
-      scan: { cap: -1, word: 0, doc: 'Der Kunde hält sein Handy über die Theke, der Inhaber hält seins darüber: Scan-Strahl und Scan-Linie (Ton: scan), dann ein Haken (Ton: ok). Handys heben sich 0,7 s vorher' },
+      scan: { cap: -1, word: 0, doc: 'Der Kunde hält sein Handy (am unteren Rand) über die Theke, der Inhaber hält seins rechts darüber, Karte und Code bleiben frei: Scan-Strahl und Scan-Linie (Ton: scan), dann ein Haken (Ton: ok). Handys heben sich 0,7 s vorher' },
       stamp: { cap: -1, word: -1, doc: 'Der Stempel springt mit dem Symbol des Ladens über dem Handy auf (Ton: pop), auf der Karte im Handy ist ein Stempel mehr. Mindestens 0,7 s nach "scan" (sonst wird er mit Warnung auf 0,7 s danach gelegt)' }
     } : {}),
     ...(p.close ? { zoom: { at: 'start', offset: 0, doc: 'Die Kamera fährt in 0,9 s an "close" heran. Am Anfang des Teils: von Anfang an nah' } } : {}),
-    ...(p.leaves ? { leave: { at: 'end', offset: -3.6, doc: 'Der Kunde dreht sich um und geht durch die Glastür hinaus (rund 3,3 s bis zur Tür, Ton: ding an der Tür)' } } : {})
+    ...(p.leaves ? { leave: { at: 'end', offset: -4.6, doc: 'Der Kunde dreht sich um und geht vorn um die Theke herum durch die Glastür hinaus (rund 4,1 s bis zur Tür, Ton: ding an der Tür)' } } : {})
   }),
   demo: {
     params: { branch: 'cafe', shop: 'Café Mond', icon: 'cup', bubble: false, close: '' },
@@ -530,12 +530,15 @@ export default {
         const sc = put(new THREE.SphereGeometry(0.17, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), S(tubs[i % tubs.length], { roughness: 0.6 }), x, top + 0.18, z); sc.scale.set(1.15, 0.6, 0.8)
       })
       // Waffeltueten stecken mit der Spitze in einem Holzblock mit Loechern (Ring um jedes Loch). Ohne Halter
-      // standen sie auf der Spitze auf der blanken Theke, das sah nach Zaubertrick aus (Abnahme 18.11.2026)
-      put(rbox(1.0, 0.16, 0.3, 0.04), S(IN.woodDark, { roughness: 0.7 }), -3.07, ctop + 0.08, cz + 0.05)
-      for (let i = 0; i < 4; i++) {
-        const x = -3.4 + i * 0.22
-        put(new THREE.TorusGeometry(0.085, 0.018, 6, 16), S(IN.wood), x, ctop + 0.165, cz + 0.05).rotation.x = Math.PI / 2
-        const c = put(new THREE.ConeGeometry(0.09, 0.32, 12), S('#D9A35E'), x, ctop + 0.25, cz + 0.05); c.rotation.x = Math.PI
+      // standen sie auf der Spitze auf der blanken Theke, das sah nach Zaubertrick aus (Abnahme 18.11.2026).
+      // Hinten auf der Theke, links vom Kopf des Kunden (von der Kamera aus): links vorn liegt die Papierkarte,
+      // weiter rechts stand er hinter dem Kopf (in drei Versuchen gemessen, nicht geschaetzt)
+      const hz = CNT.z0 + 0.15
+      put(rbox(0.62, 0.16, 0.26, 0.04), S(IN.woodDark, { roughness: 0.7 }), -1.75, ctop + 0.08, hz)
+      for (let i = 0; i < 3; i++) {
+        const x = -1.93 + i * 0.18
+        put(new THREE.TorusGeometry(0.085, 0.018, 6, 16), S(IN.wood), x, ctop + 0.165, hz).rotation.x = Math.PI / 2
+        const c = put(new THREE.ConeGeometry(0.09, 0.32, 12), S('#D9A35E'), x, ctop + 0.25, hz); c.rotation.x = Math.PI
       }
       for (let i = 0; i < 7; i++) mug(-3.35 + i * 0.42, shelfY[0], 0.2, tubs[i], 0.85)
       for (let i = 0; i < 5; i++) jar(-3.3 + i * 0.6, shelfY[1], 0.2, tubs[(i + 3) % 8], 0.3)
@@ -764,13 +767,15 @@ export default {
     const bubble = p.bubble ? (() => {
       const tex = kit.canvasTex(512, 440, (g, w, h) => {
         g.fillStyle = '#FFFFFF'; g.beginPath(); g.roundRect(14, 14, w - 28, h - 110, 90); g.fill()
-        g.beginPath(); g.moveTo(w * 0.3, h - 100); g.lineTo(w * 0.22, h - 16); g.lineTo(w * 0.48, h - 100); g.fill()
+        // Spitze knapp rechts der Mitte, genau ueber dem Kopf (die Blase sitzt fast mittig, siehe unten)
+        g.beginPath(); g.moveTo(w * 0.4, h - 100); g.lineTo(w * 0.55, h - 16); g.lineTo(w * 0.64, h - 100); g.fill()
         g.drawImage(icon.order, w / 2 - 120, (h - 96) / 2 - 112, 240, 240)
       }, { sharp: true })
       const g = billboard()
       // Unterkante (Spitze) am Ursprung der Gruppe, knapp ueber dem Kopf: so waechst die Blase mit BUB nach
-      // oben, nicht in den Kopf hinein
-      const m = put(new THREE.PlaneGeometry(0.78, 0.67), new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false }), 0.1, 0.335, 0, { parent: g, cast: false, recv: false })
+      // oben, nicht in den Kopf hinein. Fast mittig ueber dem Kopf: weiter rechts reichte sie an der Theke in die
+      // Knopfspalte (x 967)
+      const m = put(new THREE.PlaneGeometry(0.78, 0.67), new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false }), -0.05, 0.335, 0, { parent: g, cast: false, recv: false })
       return { g, m }
     })() : null
     let check = null, stamp = null
@@ -867,7 +872,8 @@ export default {
     if (p.tones) {
       if (T.enter != null) ctx.cue(T.enter - 0.05, 'ding', 0.5)
       if (T.order != null) ctx.cue(T.order, 'pop', 0.55, 1.2)
-      if (T.crumple != null) { ctx.cue(T.crumple, 'crumple', 0.85); ctx.cue(T.crumple + TOSS.t1, 'drop', 0.5) }
+      // "drop" nur, wenn die Kugel noch in dieser Szene im Korb landet (sonst faellt der Ton hinter das Video)
+      if (T.crumple != null) { ctx.cue(T.crumple, 'crumple', 0.85); if (T.crumple + TOSS.t1 < ctx.e) ctx.cue(T.crumple + TOSS.t1, 'drop', 0.5) }
       if (T.scan != null) { ctx.cue(T.scan + 0.02, 'scan', 0.6); ctx.cue(T.check, 'ok', 0.65) }
       if (T.stamp != null) ctx.cue(T.stamp, 'pop', 0.75, 1.05)
       if (walkOut) ctx.cue(walkOut.tDoor - 0.05, 'ding', 0.45)
@@ -925,7 +931,7 @@ export default {
     const overPhone = (el, k) => { const up = camUp(el), r = 0.33 * 1.05 * STAMP.size[k], c = phoneAt.clone().addScaledVector(up, STAMP.rise[k] + 0.08); return [c.clone().addScaledVector(up, r).addScaledVector(camRight, -r), c.clone().addScaledVector(up, r).addScaledVector(camRight, r)] }
     if (p.phone) wide.push(...overPhone(EL, 0))
     // Sprechblase in voller Groesse ueber dem Kunden an der Theke (Kopf 2,24 m, Blase BUB-fach)
-    if (p.bubble) for (const sx of [-0.3, 0.5]) wide.push(V(SPOT.x, 2.6 + 0.67 * BUB[0], SPOT.z).addScaledVector(camRight, sx * BUB[0]))
+    if (p.bubble) for (const sx of [-0.45, 0.35]) wide.push(V(SPOT.x, 2.6 + 0.67 * BUB[0], SPOT.z).addScaledVector(camRight, sx * BUB[0]))
     const FW = kit.fitFrame(wide, { ...camBase, aim: kit.aimAcross(wide, 1.6) })
     const aimW = kit.aimAcross(wide, 1.6)
     let FC = null, aimC = null
@@ -952,6 +958,23 @@ export default {
       // Dunst erst hinter dem Laden (die hintere Ecke liegt rund 6 m hinter dem Ziel)
       scene.fog.near = dist + 9; scene.fog.far = dist + 62
       return { a, e }
+    }
+
+    // Steht der Kunde beim Knuellen oder beim Wurf zwischen Kamera und Papier? Strahl von der Karte (und von
+    // der Kugel im Flug) zur Kamera gegen den Kunden (Rumpf 0,4 m bis 1,95 m hoch, Kopf 0,3 m bis 2,55 m). Mit dem Weg
+    // vorn um die Theke kommt das nicht vor; es faengt ab, wenn Weg, Platz oder Karte einmal verschoben werden
+    // (in der ersten Fassung lag sein Kopf genau dann vor der Karte, als sie sich knuellte).
+    if (T.crumple != null) {
+      const bad = []
+      for (let t = T.crumple; t <= T.crumple + TOSS.t1 + 1e-6; t += 0.05) {
+        const w = where(t), gp = path.getPointAt(clamp01(w.s / PL))
+        if (w.gone || gp.z <= OUTZ) continue
+        const k = clamp01((t - T.crumple - TOSS.t0) / (TOSS.t1 - TOSS.t0)), src = k <= 0 ? V(PC.x, ctop + 0.15, PC.z) : V(lerp(PC.x, BIN.x, smooth(k)), lerp(ctop, BIN.h, k) + 4 * TOSS.apex * k * (1 - k) + 0.15, lerp(PC.z, BIN.z, smooth(k)))
+        const el = THREE.MathUtils.degToRad((p.close && t >= T.zoom ? EL_C : EL)), az = THREE.MathUtils.degToRad(AZ)
+        const d = V(-Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el))
+        for (let q = 0.1; q < 9; q += 0.05) { const x = src.x + d.x * q, y = src.y + d.y * q, z = src.z + d.z * q; if (y > 2.55) break; if (Math.hypot(x - gp.x, z - gp.z) < (y < 1.95 ? 0.4 : 0.3)) { bad.push(+t.toFixed(2)); break } }
+      }
+      if (bad.length) ctx.warn(`Der Kunde steht bei ${bad[0].toFixed(2)} s zwischen Kamera und Papierkarte: Knüllen oder Wurf ("crumple") sind dann verdeckt. "crumple" früher oder später legen.`)
     }
 
     // ---------------------------------------------------------------- Pruefkaesten
@@ -1114,9 +1137,11 @@ export default {
       // Waehrend der Fahrt in die Nahaufnahme gleiten Schild und Tafel unter den Textzeilen durch: dort
       // dunkeln sie ab, dazu ein dunkler Verlauf oben (Abnahme 18.11.2026: "Handy" stand auf dem hellen
       // Schild, daneben angeschnittene Woerter der Tafel)
-      signMat.color.setScalar(lerp(1, 0.42, zk)); menuMat.color.copy(menuCol).multiplyScalar(lerp(1, 0.45, zk))
-      signHalo.material.opacity = 0.3 * (1 - zk)
-      if (zoomShade) zoomShade.style.opacity = (0.85 * Math.sin(Math.PI * zk)).toFixed(3)
+      // schon nach 40 % der Fahrt ganz abgedunkelt (die Textzeile wechselt oft mitten in der Fahrt)
+      const dk = smooth(clamp01(zk / 0.4))
+      signMat.color.setScalar(lerp(1, 0.22, dk)); menuMat.color.copy(menuCol).multiplyScalar(lerp(1, 0.25, dk))
+      signHalo.material.opacity = 0.3 * (1 - dk)
+      if (zoomShade) zoomShade.style.opacity = Math.min(1, 1.5 * Math.sin(Math.PI * zk)).toFixed(3)
       kit.sync()
       // ---- Pruefkaesten. In der Nahaufnahme zaehlen nur Handys, Haken, Stempel (und mit "counter" die Karte):
       // Schild, Tafel und Figuren sind dann angeschnitten, wie in jeder Nahaufnahme, und keine Aussage mehr.
@@ -1163,7 +1188,17 @@ export default {
         if (sPhone) o.scanner = r(sPhone.inner.localToWorld(V(0, 0, 0)))
         return o
       },
-      drawnBox: what => kit.drawnBox(things[what] ? things[what]() : null)
+      drawnBox: what => kit.drawnBox(things[what] ? things[what]() : null),
+      // Ecken des QR-Codes im Bild (Buehnenpunkte), und ein Ding fuer ein Bild aus- oder einblenden (danach
+      // neu gezeichnet): der Test vergleicht damit den Code mit und ohne Arm des Kunden, die Papierkarte mit
+      // und ohne Kunde. "arm" ist nur der Arm (samt Hand), nicht das Handy daran.
+      qrQuad: () => {
+        if (!gPhone) return null
+        kit.sync(); const v = V(0, 0, 0), o = []
+        for (const [x, y] of [[-QRX, QRY[0]], [QRX, QRY[0]], [QRX, QRY[1]], [-QRX, QRY[1]]]) { gPhone.inner.localToWorld(v.set(x, y, PH.d / 2 + 0.004)).project(camera); o.push([(v.x + 1) / 2 * K.W, (1 - v.y) / 2 * K.H]) }
+        return o
+      },
+      hide: (what, on) => { const o = what === 'arm' ? guest.armR.children[0] : things[what] && things[what](); if (o) { o.visible = !on; kit.render() } return !!o }
     }
   }
 }

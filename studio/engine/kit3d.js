@@ -63,7 +63,8 @@
 //   safeBox(key, label, apart), setSafe(key, rect|null), clearSafe(), project(points), corners(box3),
 //   meshBox(meshes)                                 unsichtbare Pruefkaesten (data-safe, data-apart)
 //   run(fn)                                         meldet ctx.place und ctx.frame an: fn(t) stellt die
-//                                                   Szene, gezeichnet wird nur, solange sie zu sehen ist
+//                                                   Szene, gezeichnet wird nur, solange ihr TEIL zu sehen
+//                                                   sein kann (seit 18.11.2026; vorher die ganze Szene)
 //   sync(), render(), drawnBox(obj)                 Matrizen; Bild rechnen; Pruefhilfe fuer Tests
 //
 // Vorbild fuer einen ganzen Baustein: components/iso-street.js (Stadt, zwei Laeden, Herz, Figur, Glocke, Kamera,
@@ -796,10 +797,17 @@ export async function createKit(ctx, opts = {}) {
     g2.transferFromImageBitmap(glc.transferToImageBitmap())
   }
   // fn(t) stellt die Szene auf t (Kamera, Figuren, Kaesten), ohne zu zeichnen; gezeichnet wird danach nur,
-  // solange die Szene zu sehen sein kann (mit pad Sekunden Luft fuer Ein- und Ausblenden). In der Ruhelage
+  // solange der TEIL zu sehen sein kann (mit pad Sekunden Luft fuer Ein- und Ausblenden). In der Ruhelage
   // (?rest=1, fuer die Pruefungen) steht die Szene auf ihrem Anfang.
+  // Warum der Teil und nicht die Szene (18.11.2026, "3D zuerst"): bis dahin rechnete jeder 3D-Teil, solange
+  // seine SZENE lief. Zwei 3D-Teile in einer Szene kosteten so doppelt, und die Regel lautete "jede 3D-Ansicht
+  // eine eigene Szene". Stil C will aber mindestens 12 Bildwechsel bei 5 bis 7 Szenen, und eine 2D-Kamera
+  // gibt es an 3D-Teilen nicht: ein Video fast ganz in 3D kam so nie auf seine Bildwechsel. Ein Teil ist
+  // hoechstens von part.s bis zum Ende der Blende in den naechsten (0,3 s nach dessen Anfang) zu sehen;
+  // pad 0,8 deckt das. Bei Szenen mit nur einem Teil sind ctx.s und ctx.e Anfang und Ende der Szene, dort
+  // aendert sich nichts (test_3d.mjs, Teil 11, prueft beides).
   kit.run = (fn, { pad = 0.8 } = {}) => {
-    const visibleFrom = ctx.sceneStart - pad, visibleTo = ctx.sceneEnd + pad
+    const visibleFrom = ctx.s - pad, visibleTo = ctx.e + pad
     ctx.place(t0 => {
       const t = ctx.rest ? ctx.s : t0
       kit.shown = t >= visibleFrom && t <= visibleTo
