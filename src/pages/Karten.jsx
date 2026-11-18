@@ -10,6 +10,7 @@ import WillkommenSettings from '../components/WillkommenSettings'
 import StufenSettings from '../components/StufenSettings'
 import EmpfehlungSettings from '../components/EmpfehlungSettings'
 import AufkleberSettings from '../components/AufkleberSettings'
+import NfcSettings from '../components/NfcSettings'
 import PaketSettings from '../components/PaketSettings'
 
 // Vier Kartentypen; MEMBER und PACKAGE brauchen weder Praemie noch Stempel-Design.
@@ -1172,6 +1173,8 @@ export default function Karten() {
           <StufenSettings cardId={editCard.id} t={t}/>
           {(istStempel || istPunktekarte) && <EmpfehlungSettings cardId={editCard.id} cardType={editTyp} t={t}/>}
           <AufkleberSettings cardId={editCard.id} t={t}/>
+          {/* NFC stempelt nur Stempelkarten - Punkte brauchen den Betrag. */}
+          {istStempel && <NfcSettings cardId={editCard.id} t={t}/>}
           {/* Gesperrte Karte, solange das Willkommensgeschenk an ist. Folgt
               dem Textfeld, damit der Laden vor dem Speichern sieht, was der
               neue Kunde bekommt. */}
