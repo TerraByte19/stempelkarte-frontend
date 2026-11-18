@@ -224,7 +224,8 @@ function KundenZeile({ kunde, t, datum, onChange }) {
       <div style={s.zeile}>
         <div style={s.zeileKopf}>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={s.name}>{kunde.name}</div>
+            {/* Kunde ohne Anmeldung hat keinen Namen - dann sagt die Zeile das. */}
+            <div style={s.name}>{kunde.name || t('profil_ohnemail_an')}</div>
             <div style={s.email}>{kunde.email}</div>
           </div>
           <div style={s.stand}>
