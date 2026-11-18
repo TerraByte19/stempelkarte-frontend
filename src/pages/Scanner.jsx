@@ -9,6 +9,7 @@ import Kiosk from './Kiosk'
 import { lade as ladeWahl, speichere as speichereWahl, rundeHinzu, naechsterGegner, messenJetzt, statusText } from '../lib/scannerWahl'
 import { starteLeser, verfuegbareLeser } from '../lib/scannerLeser'
 import { beobachteLage, lageDaten } from '../lib/scannerLage'
+import { neueSperre } from '../lib/scanSperre'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -46,6 +47,10 @@ export default function Scanner() {
   // Hoch- und Querformat: haelt die Leseflaeche des alten Lesers aktuell,
   // solange die Kamera laeuft (lib/scannerLage). Wert = Aufraeum-Funktion.
   const lageRef = useRef(null)
+  // Code des Kunden davor: nach Weiter/Abbrechen erst wieder angenommen,
+  // wenn er kurz aus dem Bild war (lib/scanSperre).
+  const letzterTrefferRef = useRef(null)
+  const sperreRef = useRef(neueSperre())
   const [wahlStatus, setWahlStatus] = useState(() => statusText(wahlRef.current))
   const navigate = useNavigate()
 
@@ -153,6 +158,7 @@ export default function Scanner() {
   }, [qrInput])
 
   async function handleQrScanned(payload) {
+    letzterTrefferRef.current = payload
     setQrInput('')
     // Waehrend einer Messrunde bleibt das Bild noch kurz an, damit der
     // zweite Leser seine Zeit melden kann; rundeBeenden pausiert dann.
@@ -203,10 +209,24 @@ export default function Scanner() {
     if (!gegner) return
     runde.gegner = gegner
     runde.messen = messen
-    runde.leser = starteLeser(gegner, video, text => treffer(gegner, text))
+    runde.leser = starteLeser(gegner, video, text => treffer(gegner, text), {
+      // Erst lesen, wenn html5-qrcode selbst wieder scannt. Nach resume()
+      // ist video.paused sofort false, im Video steht aber noch das
+      // eingefrorene Bild mit dem QR des Kunden davor. html5-qrcode wartet
+      // deshalb 200 ms nach "playing" (camera/core-impl.js), der
+      // Herausforderer las sofort - und der vorige Kunde bekam den Stempel
+      // des naechsten (Meldung aus einem Laden, 18.11.2026). Nebenbei kommen Treffer
+      // so nur noch im Zustand SCANNING; vorher griff pause() in
+      // kameraPausieren bei einem so fruehen Treffer nicht.
+      bereit: () => html5QrRef.current?.getState() === Html5QrcodeScannerState.SCANNING,
+    })
   }
 
   function treffer(art, text) {
+    // Code des Kunden davor, noch im Bild: verwerfen, der Leser liest
+    // weiter. Nur fuer einen neuen Scan - der zweite Leser einer Messrunde
+    // (scanningRef schon true) soll seine Zeit weiter melden.
+    if (!scanningRef.current && sperreRef.current.verwirft(text, performance.now())) return false
     const r = rundeRef.current
     const ms = r ? performance.now() - r.start : 0
     if (r) {
@@ -558,6 +578,7 @@ export default function Scanner() {
   function nextCustomer() {
     setResult(null)
     punkteZustandZuruecksetzen()
+    sperreRef.current.setze(letzterTrefferRef.current, performance.now())
     scanningRef.current = false
     kameraWeiter()
   }
@@ -565,6 +586,7 @@ export default function Scanner() {
   function cancelScan() {
     setPendingScan(null)
     punkteZustandZuruecksetzen()
+    sperreRef.current.setze(letzterTrefferRef.current, performance.now())
     scanningRef.current = false
     kameraWeiter()
   }

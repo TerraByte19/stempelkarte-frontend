@@ -1,6 +1,7 @@
 import { BarcodeDetector, prepareZXingModule } from 'barcode-detector/ponyfill'
 import zxingWasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url'
 import QrScanner from 'qr-scanner'
+import { leseSchleife } from './leseSchleife'
 
 /**
  * Die Herausforderer-Leser fuer die stille Messung im Scanner (scannerWahl):
@@ -38,10 +39,14 @@ export function verfuegbareLeser() {
 
 /**
  * Startet einen Leser auf dem Video-Element. Liest hoechstens alle
- * abstandMs ein Bild (schont das Handy), hoert nach dem ersten Treffer
- * oder bei stop() auf. onTreffer(text) hoechstens einmal.
+ * abstandMs ein Bild (schont das Handy), hoert nach dem ersten
+ * angenommenen Treffer oder bei stop() auf. Gibt onTreffer(text) false
+ * zurueck (Treffer verworfen), liest er weiter.
+ *
+ * bereit(): gelesen wird nur, solange das ja sagt - der Scanner gibt hier
+ * "html5-qrcode scannt wieder" mit (Grund in lib/leseSchleife).
  */
-export function starteLeser(art, video, onTreffer, { abstandMs = 120 } = {}) {
+export function starteLeser(art, video, onTreffer, { abstandMs = 120, bereit = () => true } = {}) {
   let lebt = true
   let worker = null
   let leinwand = null
@@ -79,14 +84,13 @@ export function starteLeser(art, video, onTreffer, { abstandMs = 120 } = {}) {
   ;(async () => {
     try {
       const lesen = await lesenBauen()
-      while (lebt) {
-        if (video.readyState >= 2 && !video.paused) {
-          const text = await lesen()
-          if (!lebt) break
-          if (text) { lebt = false; onTreffer(text); break }
-        }
-        await new Promise(resolve => setTimeout(resolve, abstandMs))
-      }
+      await leseSchleife({
+        lesen,
+        bereit: () => bereit() && video.readyState >= 2 && !video.paused,
+        onTreffer,
+        lebt: () => lebt,
+        warte: () => new Promise(resolve => setTimeout(resolve, abstandMs)),
+      })
     } catch {
       // Leser kaputt (kein WASM, kein Worker): still aufgeben, der alte
       // Scanner stempelt weiter.
