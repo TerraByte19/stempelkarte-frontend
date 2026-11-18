@@ -18,6 +18,17 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 // getippt, als man denkt.
 const NACHFRAGE_AB_CENTS = 50_000
 
+// Stille Scanner-Messung (lib/scannerWahl) ist aus. Sie liess die Kamera
+// nach dem Treffer noch bis 1,5 s laufen, damit der zweite Leser seine Zeit
+// melden kann - das Personal sah Kamera und Stempelmaske gleichzeitig. Die
+// Kamera geht jetzt beim Treffer sofort aus, damit laesst sich der zweite
+// Leser nicht mehr messen. Die Daten bis 18.11.2026 waren ohnehin verzerrt:
+// der Herausforderer las sofort nach resume(), und nach seinem Treffer wurde
+// "alt" nicht mehr gezaehlt (daher immer "+1500 ms"). Wieder einschalten nur
+// mit neuer Messmethode. Geraete, die schon umgeschaltet haben, behalten
+// ihren Leser (stand.aktiv).
+const MESSUNG_AN = false
+
 export default function Scanner() {
   const { t, lang } = useLang()
   const [qrInput, setQrInput] = useState('')
@@ -160,9 +171,9 @@ export default function Scanner() {
   async function handleQrScanned(payload) {
     letzterTrefferRef.current = payload
     setQrInput('')
-    // Waehrend einer Messrunde bleibt das Bild noch kurz an, damit der
-    // zweite Leser seine Zeit melden kann; rundeBeenden pausiert dann.
-    if (!rundeRef.current?.messen) kameraPausieren()
+    // Kamera sofort aus: das Personal soll nicht Kamera und Stempelmaske
+    // gleichzeitig sehen (siehe MESSUNG_AN).
+    kameraPausieren()
     setPendingScan(payload)
     setSelectedCount(1)
     punkteZustandZuruecksetzen()
@@ -204,7 +215,7 @@ export default function Scanner() {
     rundeRef.current = runde
     const video = document.querySelector('#qr-reader video')
     if (!video) return
-    const messen = messenJetzt(stand)
+    const messen = MESSUNG_AN && messenJetzt(stand)
     const gegner = messen ? naechsterGegner(stand, verfuegbareLeser()) : stand.aktiv
     if (!gegner) return
     runde.gegner = gegner
@@ -671,7 +682,9 @@ export default function Scanner() {
         {cameraActive && (
             <>
               <p style={styles.camHint}>Auf den QR-Code halten &middot; bei Unschaerfe aufs Bild tippen</p>
-              <p style={{ ...styles.camHint, opacity: .6 }} title={t('scan_wahl_hint')}>{t('scan_wahl_status', { status: wahlStatus })}</p>
+              {MESSUNG_AN && (
+                  <p style={{ ...styles.camHint, opacity: .6 }} title={t('scan_wahl_hint')}>{t('scan_wahl_status', { status: wahlStatus })}</p>
+              )}
               <button style={styles.btnStop} onClick={stopCamera}>{t('scan_stop_camera')}</button>
             </>
         )}
