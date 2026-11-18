@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// test_3d.mjs - prueft den 3D-Baustein iso-street (und damit den Weg ctx.frame -> seek(t) -> WebGL).
+// test_3d.mjs - prueft den 3D-Baustein iso-street, den 3D-Baukasten engine/kit3d.js und damit den Weg
+// ctx.frame -> seek(t) -> WebGL.
 //
 //   node studio/tools/test_3d.mjs
 //
@@ -33,6 +34,11 @@
 //     Doener-Videos einzeilig auf 0,38 der Schildhoehe, auf dem Handy kaum lesbar.
 //  9. Folgt eine Szene, dunkelt die Stadt beim Wechsel ab (als letzte Szene und in der Ruhelage nicht).
 //     Vorher stand die halb durchsichtige naechste Szene rund 0,25 s lang ueber der hellen Stadt.
+// 10. Der 3D-Baukasten engine/kit3d.js (seit 17.11.2026, abends; iso-street baut darauf): in Node
+//     importierbar mit festen reinen Funktionen (rng, walkCycle, splitName); EIN Renderer fuer 20 Szenen
+//     auf einer Seite, ohne dass eine ihr Bild verliert (Chromium haelt nur 16 WebGL-Kontexte je Seite, mit
+//     einem Renderer je Szene waeren die ersten schwarz); fitFrame haelt Punkte ueber die ganze Fahrt im
+//     Rahmen und fuellt ihn.
 //
 // Kein Netz, keine Kosten, etwa zwei Minuten. Laeuft seit dem 17.11.2026 (abends) auch in
 // tools/selftest.mjs mit; vorher arbeitete dort eine andere Sitzung.
@@ -254,5 +260,78 @@ for (const lim of limits) {
     check(`${tag}: Stammkunde berührt kein Türblatt (Abstand bei "walk" und "enter" in 0,05-s-Schritten über 3 cm)`, gaps.length > 20 && worst[1] > 0.03, `${gaps.length} Bilder, knappster Abstand ${worst[1]} m bei ${worst[0]} s`)
   } finally { await st.close() }
 }
+// ---- 10. Der Baukasten selbst (engine/kit3d.js)
+// a) In Node importierbar und die reinen Funktionen fest: Katalog und Selbsttest laden Bausteine in Node, und
+//    ein Baustein, der kit3d.js oben importierte, haette sonst three.js (700 KB, braucht eine Seite) mitgezogen.
+//    rng muss in jedem Lauf dieselbe Folge geben, sonst steht die Stadt in jedem Video anders.
+{
+  const K = await import('../engine/kit3d.js')
+  const R = K.rng(20261117), seq = [R(), R(), R()].map(x => x.toFixed(6)).join(' ')
+  const R2 = K.rng(20261117), same = [R2(), R2(), R2()].map(x => x.toFixed(6)).join(' ') === seq
+  const w1 = K.walkCycle(2.2, true), w2 = K.walkCycle(2.2, true), still = K.walkCycle(2.2, false)
+  check('Baukasten: in Node importierbar, rng fest, walkCycle rein, splitName teilt das letzte Wort ab',
+    typeof K.createKit === 'function' && same && seq === '0.876016 0.086642 0.997853' && JSON.stringify(w1) === JSON.stringify(w2) && still.legL === 0 && still.bob === 0 &&
+    JSON.stringify(K.splitName('Döner Nordwind')) === '["Döner","Nordwind"]' && K.splitName('Palast') === null, `rng ${seq}`)
+}
+// b) Geteilter Renderer: 20 Szenen auf einer Seite. Chromium haelt je Seite hoechstens 16 WebGL-Kontexte und
+//    nimmt beim 17. dem aeltesten sein Bild (gemessen 17.11.2026: von 24 waren die ersten 8 verloren). Mit
+//    einem Renderer je Szene waeren hier die ersten vier schwarz. Jede Szene zeigt eine eigene Farbe; danach
+//    wird Szene 1 noch einmal gerechnet und muss Pixel fuer Pixel gleich sein (kein Zustand von den anderen).
+// c) fitFrame: der berechnete Ausschnitt haelt Punkte ueber die ganze Fahrt (push 0,25, orbit 12) im Rahmen
+//    und fuellt ihn (Breite oder Hoehe zu mindestens 97 % genutzt), sonst ist das 9:16-Bild halb leer.
+{
+  const sc = { meta: { title: 'test kit', slug: 'test-kit' }, scenes: [{ component: 'big-number', params: { value: '3', label: 'Probe' }, captions: [{ lines: ['Drei.'] }] }] }
+  const st = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
+  const msgs = []
+  try {
+    const pg = await st.page()
+    pg.on('console', m => msgs.push(m.text()))
+    // Ein verlorener Kontext laesst three.js beim Rechnen werfen: das soll als gescheiterte Pruefung erscheinen
+    const r = await pg.evaluate(async () => {
+      const K = await import('/engine/kit3d.js')
+      const placers = [], drawers = []
+      const fake = i => {
+        const root = document.createElement('div'); root.style.cssText = 'position:absolute;left:0;top:0;width:1080px;height:1920px'; document.body.append(root)
+        return { root, el: (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e }, fail: m => { throw new Error(m) }, warn: () => {}, place: f => placers.push(f), frame: f => drawers.push(f), s: 0, e: 2, sceneStart: 0, sceneEnd: 2, rest: false, isLast: true, i }
+      }
+      const kits = []
+      for (let i = 0; i < 20; i++) {
+        const kit = await K.createKit(fake(i), { calm: false, vignette: false, dim: false })
+        const { THREE } = kit
+        // Flaeche quer zur Kamera, eigene Farbe, ohne Tonwertkurve: in der Bildmitte steht genau diese Farbe
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshBasicMaterial({ color: new THREE.Color(`hsl(${i * 18}, 80%, 50%)`), toneMapped: false, side: THREE.DoubleSide }))
+        const cam = kit.isoCamera({ frame: { dist: 100, dx: 0, dy: 0 } }); cam.set(1, { push: 0, orbit: 0 })
+        m.lookAt(cam.camera.position); kit.scene.add(m)
+        kit.run(t => { cam.set(t, {}); kit.sync() })
+        kits.push(kit)
+      }
+      const center = c => { const g = document.createElement('canvas'); g.width = 8; g.height = 8; const x = g.getContext('2d'); x.drawImage(c, 536, 956, 8, 8, 0, 0, 8, 8); return Array.from(x.getImageData(4, 4, 1, 1).data.slice(0, 3)) }
+      const full = c => { const g = document.createElement('canvas'); g.width = c.width; g.height = c.height; const x = g.getContext('2d'); x.drawImage(c, 0, 0); const d = x.getImageData(0, 0, c.width, c.height).data; let h = 0x811c9dc5; for (let i = 0; i < d.length; i += 7) { h ^= d[i]; h = Math.imul(h, 0x01000193) >>> 0 } return h }
+      for (const f of placers) f(1); for (const f of drawers) f(1)
+      const colors = kits.map(k => center(k.canvas)), first = full(kits[0].canvas)
+      kits[0].render(); const again = full(kits[0].canvas)
+      // fitFrame an drei Laeden-grossen Kisten, mit Fahrt und Drehung
+      const kit = kits[0], { THREE } = kit, pts = []
+      for (const [x, z] of [[-9, -3], [3, 8], [6, -6]]) for (const dx of [-2.5, 2.5]) for (const y of [0, 9]) for (const dz of [-2.5, 2.5]) pts.push(new THREE.Vector3(x + dx, y, z + dz))
+      const o = { push: 0.25, orbit: 12, az: 45, el: 34, elDrop: 1.5, aim: kit.aimAcross(pts, 3) }
+      const fr = kit.fitFrame(pts, o), cam = kit.isoCamera({ frame: fr }), F = K.FIT
+      let worst = 0, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9
+      for (let t = 0; t <= 2.0001; t += 0.05) {
+        cam.set(t, o); cam.camera.updateMatrixWorld()
+        const [a, b, c, d] = kit.project(pts)
+        worst = Math.max(worst, F.left - a, c - F.right, F.top - b, d - F.bottom)
+        if (t > 1.999) { x0 = a; x1 = c; y0 = b; y1 = d }
+      }
+      const use = Math.max((x1 - x0) / (F.right - F.left), (y1 - y0) / (F.bottom - F.top))
+      return { colors, same: first === again, frame: fr, worst, use }
+    }).catch(e => ({ error: e.message.split('\n')[0], colors: [], same: false, frame: null, worst: Infinity, use: 0 }))
+    const distinct = new Set(r.colors.map(c => c.join(','))).size, dark = r.colors.filter(c => c[0] + c[1] + c[2] < 60).length
+    const lost = msgs.filter(m => /Too many active WebGL|Kontext verloren/.test(m))
+    check('Geteilter Renderer: 20 Szenen auf einer Seite, keine verliert ihr Bild (Chromium hält nur 16 WebGL-Kontexte)', !r.error && distinct === 20 && dark === 0 && !lost.length, r.error || `${distinct} verschiedene Farben, ${dark} dunkel${lost.length ? ', ' + lost[0] : ''}`)
+    check('Geteilter Renderer: Szene 1 nach den anderen neu gerechnet, Pixel für Pixel gleich', r.same)
+    check('fitFrame: Punkte über die ganze Fahrt (push 0,25, orbit 12) im Rahmen, Rahmen zu mindestens 97 % genutzt', r.worst <= 0.5 && r.use >= 0.97, `Ausschnitt ${JSON.stringify(r.frame)}, schlimmster Überstand ${r.worst.toFixed(2)} px, genutzt ${(r.use * 100).toFixed(1)} %`)
+  } finally { await st.close() }
+}
+
 console.log(failed ? `${failed} Prüfung(en) gescheitert` : 'Alle Prüfungen bestanden')
 process.exit(failed ? 1 : 0)

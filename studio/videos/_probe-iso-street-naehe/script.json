@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "title": "Probe 3D: Kunde in der Nähe, Karte meldet sich",
+    "slug": "probe-iso-street-naehe",
+    "language": "de",
+    "_hinweis": "Kein Video zum Posten: Probe für iso-street mit mode 'nah' (C1), ohne Stimme gebaut. Szene 1 im Ausschnitt des Döner-Videos: Ring um den eigenen Laden, der Kunde betritt ihn auf der anderen Seite der Kreuzung, die Blase mit dem Sperrbildschirm springt aus seinem Handy, er dreht sich zur Tür und geht hinein. Szene 2 weit (frame 'stadt'): der ganze Ring, der Kunde bleibt mit dem Handy stehen. Laden und Namen sind eigene Beispiele."
+  },
+  "timing": {
+    "lead": 0.2,
+    "hold": 0.7,
+    "maxGap": 0.25
+  },
+  "captionStyle": {
+    "mode": "wort"
+  },
+  "scenes": [
+    {
+      "_hinweis": "Er geht ab dem ersten Bild, betritt den Ring auf 'Nähe' (Blase springt auf), dreht sich auf 'sein' zur Tür und ist am Ende der Szene drin.",
+      "component": "iso-street",
+      "params": {
+        "mode": "nah",
+        "frame": "laden",
+        "then": "rein",
+        "shop": "Döner Palast",
+        "icon": "kebab",
+        "rival": "Imbiss Sonne",
+        "rivalIcon": "kebab",
+        "reward": "Gratis-Döner",
+        "left": 2
+      },
+      "anchors": {
+        "walk": { "at": "start", "offset": 0 },
+        "near": { "cap": 0, "word": 2, "offset": 0.05 },
+        "turn": { "cap": 1, "word": 0, "offset": 0.27 },
+        "enter": { "at": "end", "offset": -0.12 }
+      },
+      "captions": [
+        { "lines": ["In der *Nähe"], "instant": true },
+        { "lines": ["zeigt sein Handy | deine *Karte."] }
+      ]
+    },
+    {
+      "_hinweis": "Weit: der ganze Ring, beide Läden. Er betritt den Ring auf 'selbst' und bleibt mit dem Handy stehen.",
+      "component": "iso-street",
+      "params": {
+        "mode": "nah",
+        "frame": "stadt",
+        "then": "weiter",
+        "shop": "Döner Palast",
+        "icon": "kebab",
+        "rival": "Imbiss Sonne",
+        "rivalIcon": "kebab",
+        "reward": "Gratis-Döner",
+        "left": 2
+      },
+      "anchors": {
+        "walk": { "at": "start", "offset": 0 },
+        "near": { "cap": 0, "word": 1, "offset": 0.05 }
+      },
+      "captions": [
+        { "lines": ["Von *selbst."] }
+      ]
+    }
+  ]
+}
