@@ -62,6 +62,7 @@ export default function Profil() {
         <Sperrbildschirm t={t} shop={shop} />
         <Rueckhol t={t} shop={shop} />
         <GoogleBewertung t={t} shop={shop} />
+        <AnmeldungOhneMail t={t} shop={shop} />
         <Anmeldefelder t={t} shop={shop} />
         {/* Geburtstagsgruss zaehlt zu den automatischen Nachrichten (ab Pro). */}
         <AbPro funktion="auto_nachrichten" titel={t('profil_bday_title')}><Geburtstagsgruss t={t} shop={shop} /></AbPro>
@@ -211,6 +212,7 @@ function NamensFarbe({ t, shop, name }) {
     stampColor: karte.stampColor || '#6F4E37',
     emptyStampStyle: karte.emptyStampStyle || 'number',
     stampIconUrl: karte.stampIconUrl || '',
+    stampIconUrls: karte.stampIconUrls || [],
   }
   const schwelle = karte?.rewardThreshold || 10
 
@@ -516,6 +518,65 @@ function FeldAuswahl({ t, werte, label, wert, setWert }) {
               </button>
           ))}
         </div>
+      </div>
+  )
+}
+
+/**
+ * Karte ohne Anmeldung: der Kunde tippt nichts ein, ein Tipp auf "Karte
+ * holen" reicht. Speichert sofort beim Umschalten. Die Folgen stehen offen
+ * dabei (kein Name, kein Newsletter, kein Zurueckholen, kein Geschenk) -
+ * der Laden soll wissen, was er abwaehlt.
+ */
+function AnmeldungOhneMail({ t, shop }) {
+  // Aelteres Backend kennt den Schalter nicht: dann gar nicht anzeigen,
+  // sonst saehe er aus wie "aus" und das Speichern liefe ins Leere.
+  const bekannt = typeof shop.signupOhneMail === 'boolean'
+  const [an, setAn] = useState(!!shop.signupOhneMail)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
+  if (!bekannt) return null
+
+  async function setze(wert) {
+    if (saving || wert === an) return
+    setError('')
+    setSaving(true)
+    try {
+      const res = await api.put('/api/shop/me/anmeldung-ohne-mail', { enabled: wert })
+      setAn(!!res.data?.signupOhneMail)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.error || t('profil_save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.cardTitle}>{t('profil_ohnemail_title')}</h2>
+        <p style={{ ...s.hint, margin: '0 0 16px' }}>{t('profil_ohnemail_hint')}</p>
+
+        {saved && (
+            <div style={{ ...s.success, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="check" size={15} strokeWidth={2.4} />{t('profil_saved')}
+            </div>
+        )}
+        {error && <div style={s.errorBox}>{error}</div>}
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          {[false, true].map(wert => (
+              <button key={String(wert)} type="button" disabled={saving} onClick={() => setze(wert)}
+                      style={{ ...s.btnSecondary, flex: 1,
+                        background: an === wert ? '#3C3489' : '#f0eeff',
+                        color: an === wert ? 'white' : '#3C3489' }}>
+                {t(wert ? 'profil_ohnemail_an' : 'profil_ohnemail_aus')}
+              </button>
+          ))}
+        </div>
+        {an && <p style={s.hint}>{t('profil_ohnemail_folgen')}</p>}
       </div>
   )
 }

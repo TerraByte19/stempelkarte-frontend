@@ -255,7 +255,8 @@ function KundenZeile({ kunde, t, datum, onChange }) {
           {voll && <span style={{ ...s.badge, background: '#ddf2e6', color: '#1e7a4c' }}>{t('kunden_badge_full')}</span>}
           {kunde.apple && <span style={s.badge}>{t('kunden_badge_apple')}</span>}
           {kunde.marketingConsent && <span style={s.badge}>{t('kunden_badge_consent')}</span>}
-          {!kunde.emailConfirmed && <span style={{ ...s.badge, background: '#f4e1e1', color: '#8a3b3b' }}>{t('kunden_badge_unconfirmed')}</span>}
+          {/* Kunde ohne Anmeldung hat keine E-Mail - da gibt es nichts zu bestaetigen. */}
+          {!kunde.emailConfirmed && kunde.email && <span style={{ ...s.badge, background: '#f4e1e1', color: '#8a3b3b' }}>{t('kunden_badge_unconfirmed')}</span>}
         </div>
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

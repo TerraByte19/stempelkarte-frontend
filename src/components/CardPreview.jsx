@@ -12,7 +12,7 @@
  * Vorschauen niemand benutzt.
  */
 
-import { DEFAULT_DESIGN } from '../lib/cardDesign'
+import { DEFAULT_DESIGN, stempelBilder } from '../lib/cardDesign'
 import { formatierePunkte } from '../lib/pointsOf'
 
 
@@ -46,7 +46,9 @@ function PresetIcon({ preset, cx, cy, size, color, alpha=1, useUpload, stampIcon
   }
 }
 
-function StempelRaster({ stamps, threshold, stampColor, emptyStyle, preset, useUpload, stampIconUrl }) {
+// bilder: eigene Stempel-Bilder in Reihenfolge. Feld 1 = Bild 1, Feld 2 =
+// Bild 2, danach wieder von vorn - genauso zeichnet der Server den Streifen.
+function StempelRaster({ stamps, threshold, stampColor, emptyStyle, preset, useUpload, bilder=[] }) {
   const cols = threshold<=5 ? threshold : Math.ceil(threshold/2)
   const rows = Math.ceil(threshold/cols)
   const cellSize = Math.min(200/cols, 75/rows)*.85
@@ -54,11 +56,12 @@ function StempelRaster({ stamps, threshold, stampColor, emptyStyle, preset, useU
   const items = Array.from({length:threshold},(_,i)=>{
     const col=i%cols,row=Math.floor(i/cols)
     const rowOffset=((cols-Math.min(cols,threshold-row*cols))*cellSize)/2
-    return {cx:8+rowOffset+col*cellSize+cellSize/2, cy:5+row*cellSize+cellSize/2, filled:i<stamps, num:i+1}
+    return {cx:8+rowOffset+col*cellSize+cellSize/2, cy:5+row*cellSize+cellSize/2, filled:i<stamps, num:i+1,
+      stampIconUrl: bilder.length ? bilder[i%bilder.length] : ''}
   })
   return (
       <svg width={w} height={h} style={{overflow:'visible'}}>
-        {items.map(({cx,cy,filled,num})=>(
+        {items.map(({cx,cy,filled,num,stampIconUrl})=>(
             <g key={num}>
               {filled ? (<>{!(useUpload && stampIconUrl) && <circle cx={cx} cy={cy} r={r} fill="rgba(255,255,255,0.92)"/>}<PresetIcon preset={preset} cx={cx} cy={cy} size={r*1.1} color={stampColor} useUpload={useUpload} stampIconUrl={stampIconUrl}/></>) :
                   emptyStyle==='number' ? (<><circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth={1}/><text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.6)" fontSize={r*.85} fontWeight="700">{num}</text></>) :
@@ -312,7 +315,8 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
     ...(wd.colorBackground ? { colorBackground: wd.colorBackground } : {}),
     ...(wd.colorForeground ? { colorForeground: wd.colorForeground } : {}),
     ...(wd.colorLabel ? { colorLabel: wd.colorLabel } : {})}
-  const useUpload = d.stampIconType==='upload' && d.stampIconUrl
+  const bilder = stempelBilder(d)
+  const useUpload = d.stampIconType==='upload' && bilder.length>0
   const punkte = cardType==='POINTS'
   const ziel = punkte ? naechstesZiel(rewards, pointsX100) : null
   const grid = !punkte && d.walletStyle==='grid'
@@ -331,7 +335,7 @@ export function ApplePreview({ design, stamps, threshold, rewardText, cardName, 
   } else if (grid) {
     streifen = (
       <div style={{width:'100%',aspectRatio:'375 / 144',display:'flex',alignItems:'center',justifyContent:'center',transform:'scale(1.1)'}}>
-        <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={useUpload} stampIconUrl={d.stampIconUrl}/>
+        <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={useUpload} bilder={bilder}/>
       </div>
     )
   } else if (streifenStil) {
@@ -484,7 +488,7 @@ export function GooglePreview({ design, stamps, threshold, rewardText, cardName,
             {/* Stempel-Raster, falls gewählt. Bei Punkten gibt es nichts zu rastern. */}
             {!punkte && !willkommen && d.walletStyle==='grid' && (
                 <div style={{padding:'0 14px 12px',display:'flex',justifyContent:'center'}}>
-                  <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={d.stampIconType==='upload'&&d.stampIconUrl} stampIconUrl={d.stampIconUrl}/>
+                  <StempelRaster stamps={stamps} threshold={threshold} stampColor={d.stampColor} emptyStyle={d.emptyStampStyle} preset={d.stampPreset} useUpload={d.stampIconType==='upload'&&stempelBilder(d).length>0} bilder={stempelBilder(d)}/>
                 </div>
             )}
 

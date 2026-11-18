@@ -14,7 +14,7 @@ import PaketSettings from '../components/PaketSettings'
 
 // Vier Kartentypen; MEMBER und PACKAGE brauchen weder Praemie noch Stempel-Design.
 const TYPEN = { STAMP: 'cards_type_stamp', POINTS: 'cards_type_points', MEMBER: 'cards_type_member', PACKAGE: 'cards_type_package' }
-import { DEFAULT_DESIGN } from '../lib/cardDesign'
+import { DEFAULT_DESIGN, MAX_STEMPEL_BILDER, stempelBilder } from '../lib/cardDesign'
 import { blobZuBase64 } from '../lib/bild'
 import { formatierePunkte } from '../lib/pointsOf'
 
@@ -67,6 +67,7 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, onStripF
   const logoRef = useRef()
   const heroRef = useRef()
   const stampRef = useRef()
+  const stampMehrRef = useRef()
   const stripRef = useRef()
   const [uploading, setUploading] = useState('')
   // Bild-Zuschnitt-Dialog: {datei, form, ratio, ausgabe, aufFertig}
@@ -90,8 +91,36 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, onStripF
       // Original mitschicken -> spaeter erneut zuschneidbar
       if (originalBlob) body.originalBase64 = await blobZuBase64(originalBlob)
       const res = await api.post(endpoint, body)
+      // Der einzelne Stempel-Upload ersetzt das erste Bild. Den Knopf gibt
+      // es nur bei hoechstens einem Bild - die Liste ist danach genau dieses.
+      const liste = field==='stamp' && res.data.stampIconUrl
+          ? { stampIconUrls: [res.data.stampIconUrl] } : {}
+      onChange({ ...d, ...res.data, ...liste })
+    } catch { alert(t('common_upload_failed')) }
+    setUploading('')
+  }
+
+  // Weiteres Stempel-Bild anhaengen. Die Bilder wechseln sich im Raster ab.
+  async function weiteresStempelBild(blob) {
+    if (!blob || !cardId) return
+    setUploading('stamp')
+    try {
+      const base64 = await blobZuBase64(blob)
+      const res = await api.post(`/api/shop/cards/${cardId}/stamp-icons`, { base64, extension: 'png' })
       onChange({ ...d, ...res.data })
     } catch { alert(t('common_upload_failed')) }
+    setUploading('')
+  }
+
+  // Reihenfolge aendern oder ein Bild entfernen: der Server bekommt die
+  // neue Liste und nimmt nur Bilder an, die schon an der Karte haengen.
+  async function ordneStempelBilder(urls) {
+    if (!cardId) return
+    setUploading('stamp')
+    try {
+      const res = await api.put(`/api/shop/cards/${cardId}/stamp-icons`, { urls })
+      onChange({ ...d, ...res.data })
+    } catch { alert(t('common_error_generic')) }
     setUploading('')
   }
 
@@ -326,7 +355,29 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, onStripF
                 ))}
               </div>
           )}
-          {d.stampIconType==='upload' && (
+          {d.stampIconType==='upload' && stempelBilder(d).length>1 && (
+              <div style={{marginTop:8}}>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                  {stempelBilder(d).map((url,i,alle)=>(
+                      <div key={url} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+                        <img src={url} alt="" style={{width:40,height:40,borderRadius:8,objectFit:'cover',border:'2px solid #e0e0e0'}}/>
+                        <div style={{fontSize:10,fontWeight:700,color:'#888'}}>{i+1}</div>
+                        <div style={{display:'flex',gap:3}}>
+                          {i>0 && (
+                              <button style={dp.miniBtn} disabled={uploading==='stamp'} title={t('design_stamp_earlier')} aria-label={t('design_stamp_earlier')}
+                                      onClick={()=>{ const n=[...alle]; [n[i-1],n[i]]=[n[i],n[i-1]]; ordneStempelBilder(n) }}>
+                                {document.documentElement.dir==='rtl'?'›':'‹'}
+                              </button>
+                          )}
+                          <button style={dp.miniBtn} disabled={uploading==='stamp'} title={t('common_remove')} aria-label={t('common_remove')}
+                                  onClick={()=>ordneStempelBilder(alle.filter((_,j)=>j!==i))}>×</button>
+                        </div>
+                      </div>
+                  ))}
+                </div>
+              </div>
+          )}
+          {d.stampIconType==='upload' && stempelBilder(d).length<=1 && (
               <div style={{display:'flex',alignItems:'center',gap:10,marginTop:8,flexWrap:'wrap'}}>
                 {d.stampIconUrl && <img src={d.stampIconUrl} alt="" style={{width:36,height:36,borderRadius:8,objectFit:'cover',border:'2px solid #e0e0e0'}}/>}
                 <button style={dp.uploadBtn} onClick={()=>stampRef.current?.click()} disabled={uploading==='stamp'}>
@@ -342,6 +393,22 @@ function DesignPanel({ design, onChange, cardId=null, onStampFile=null, onStripF
                 <input ref={stampRef} type="file" accept="image/*" style={{display:'none'}}
                        onChange={e=>waehleBild(e, { form:'kreis', ausgabe:600,
                          aufFertig:(b,orig)=>handleStampFile(b,orig) })}/>
+              </div>
+          )}
+          {/* Weitere Bilder erst an einer gespeicherten Karte und nur, wenn
+             der Server Listen kennt (mehrereStempelBilder kommt aus der
+             Design-Antwort). */}
+          {d.stampIconType==='upload' && cardId && d.mehrereStempelBilder && stempelBilder(d).length>=1 && (
+              <div style={{marginTop:8}}>
+                {stempelBilder(d).length<MAX_STEMPEL_BILDER && (
+                    <button style={dp.uploadBtn} onClick={()=>stampMehrRef.current?.click()} disabled={uploading==='stamp'}>
+                      {uploading==='stamp'?t('common_loading'):t('design_stamp_more')}
+                    </button>
+                )}
+                <div style={{fontSize:11,color:'#aaa',marginTop:4}}>{t('design_stamp_multi_hint',{n:MAX_STEMPEL_BILDER})}</div>
+                <input ref={stampMehrRef} type="file" accept="image/*" style={{display:'none'}}
+                       onChange={e=>waehleBild(e, { form:'kreis', ausgabe:600,
+                         aufFertig:(b)=>weiteresStempelBild(b) })}/>
               </div>
           )}
         </div>
@@ -390,6 +457,7 @@ const dp = {
   cardDesc: {fontSize:10,color:'#999'},
   preset: {padding:'5px 11px',borderRadius:16,border:'2px solid #e0e0e0',fontSize:12,fontWeight:600,cursor:'pointer',background:'#fafafa'},
   presetActive: {border:'2px solid #3C3489',background:'#f0eeff',color:'#3C3489'},
+  miniBtn: {width:22,height:22,padding:0,borderRadius:6,border:'1px solid #d0d0d0',background:'white',color:'#555',fontSize:13,lineHeight:1,cursor:'pointer'},
   uploadBtn: {padding:'7px 14px',borderRadius:7,border:'2px solid #3C3489',background:'white',color:'#3C3489',fontSize:12,fontWeight:600,cursor:'pointer'},
   removeBtn: {padding:'7px 14px',borderRadius:7,border:'2px solid #c00',background:'white',color:'#c00',fontSize:12,fontWeight:600,cursor:'pointer'},
 }
@@ -722,6 +790,7 @@ export default function Karten() {
       stampColor: card.stampColor||'#6F4E37',
       emptyStampStyle: card.emptyStampStyle||'number',
       stampIconUrl: card.stampIconUrl||'',
+      stampIconUrls: card.stampIconUrls||[],
     })
     setMode('edit')
     // Die Karten-Liste enthaelt die *OriginalUrl-Felder nicht - ohne die
@@ -734,6 +803,10 @@ export default function Karten() {
         logoOriginalUrl: r.data.logoOriginalUrl || '',
         heroOriginalUrl: r.data.heroOriginalUrl || '',
         stampIconOriginalUrl: r.data.stampIconOriginalUrl || '',
+        // Fehlt das Feld, laeuft noch ein aelterer Server: dann gibt es
+        // nur das eine Bild und keinen Knopf fuer weitere.
+        ...(Array.isArray(r.data.stampIconUrls)
+            ? { stampIconUrls: r.data.stampIconUrls, mehrereStempelBilder: true } : {}),
       }))
     } catch { /* Liste-Werte reichen als Fallback */ }
   }
