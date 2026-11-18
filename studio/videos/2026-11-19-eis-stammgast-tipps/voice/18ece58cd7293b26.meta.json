@@ -1,0 +1,22 @@
+{
+ "key": "18ece58cd7293b26",
+ "text": "Wenn ich eine Eisdiele hätte, wüsste ich, wer freitags fehlt. Drei Dinge reichen dafür. Eins: Kenn seinen Rhythmus. Freitag, Freitag, Freitag. Bleibt einer leer, fällt es dir sofort auf. Dann frag beim nächsten Mal, ob alles gut ist. Zwei: Merk dir seine Sorte. Nicht auf einem Zettel, sondern im Kopf. Pistazie, wie immer? Und er weiß: Du kennst ihn. Drei: Sag ihm, wie weit er ist. Noch zwei Stempel, dann ist die Kugel gratis. So hat er ein Ziel direkt vor Augen. Bei Eis am Markt trägt er den Stand in der Wallet. Gleich probieren? Dann kommentiere jetzt Eis, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 591,
+ "audio": "18ece58cd7293b26.mp3",
+ "audio_sha256": "7895129a6d9d7c36a93afbfda2128ae4fd279536aa9d5fd111dfbe720b69f977",
+ "spent": 591
+}
