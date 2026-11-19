@@ -75,8 +75,22 @@ wartet auf dich"). Die Landing Page und ein alter Kommentar in `Shop.java`
 sagen nur "voll"; das ist zu wenig, nicht falsch. Ein Video sagt "in der
 Nähe" ohne Entfernung und ohne, wie oft. Der Laden kann die Funktion
 abschalten, sie braucht seine Adresse. Dass das Handy dabei vibriert, zeigen
-die Videos auf Wunsch des Betreibers als Stilmittel. Jede andere Nachricht
-(nach langer Pause, zum Geburtstag, ein Angebot) ist Klasse 2.
+die Videos auf Wunsch des Betreibers als Stilmittel. Automatische Nachrichten
+(nach langer Pause, zum Geburtstag, ein Angebot) sind Klasse 2; was der Laden
+selbst an seine Kunden schickt, ist C3.
+
+| Nr. | Aussage | Wortlaut der Landing Page | Schlüssel | Im Video |
+|---|---|---|---|---|
+| C3 | Der Laden kann seinen Kunden Push-Nachrichten schicken (Push-Kampagnen an Kundengruppen, planbar, mit Vorlagen). Sie erscheinen als Mitteilung der Karte auf dem Handy. Text höchstens 160 Zeichen; nur in Tarifen mit Kampagnen. | "Push-Kampagnen an Kundengruppen", "Push-Kampagnen, planbar, mit Vorlagen" | `lp_price_c_kampagnen`, `lp_price_f_kampagnen`, `lp_price_f_gruppen` | kein Bild (eine Mitteilung des Ladens auf dem Sperrbildschirm bekommt `phone-3d` gerade; bis dahin nur in begleiteten Sitzungen) |
+
+Zu C3: Am 19.11.2026 vom Betreiber bestätigt ("Wir können auch Nachrichten
+schreiben"). Im Backend `controller/KampagnenController.java` und
+`model/Kampagne.java` ("ein Text vom Laden an eine Zielgruppe seiner
+Kunden", höchstens 160 Zeichen), im Panel `src/components/KampagnenSection.jsx`,
+freigeschaltet über den Tarif (`TarifPruefung`, Funktion KAMPAGNEN). Ein Video
+sagt "Nachrichten" oder "Mitteilung aufs Handy", nicht "SMS" oder "WhatsApp"
+(N9), und verspricht keine Wirkung. Automatische Nachrichten (Geburtstag,
+lange Pause) bleiben Klasse 2 (C4, C2).
 
 ### Gestalten
 
@@ -139,7 +153,6 @@ Zeile ohne Umbenennen nach oben wandern kann.
 | B5 | Kundenliste, in der sich Stempel korrigieren lassen. | "Kundenliste mit Stempel-Korrektur" | `lp_price_f_liste` |
 | B6 | QR-Aufkleber zum Ausdrucken. | "QR-Aufkleber zum Ausdrucken" | `lp_price_f_aufkleber` |
 | C2 | Einfache Push-Benachrichtigungen: in der Nähe des Ladens, nach jedem Stempel, und wenn Kunden länger nicht da waren. | "Einfache Push-Benachrichtigungen", "In der Nähe des Ladens", "Nach jedem Stempel", "Wenn Kunden länger nicht da waren" | `lp_price_c_auto`, `lp_price_g_auto`, `lp_price_f_nah`, `lp_price_f_stempel`, `lp_price_f_rueckhol` |
-| C3 | Push-Kampagnen an Kundengruppen, planbar und mit Vorlagen. | "Push-Kampagnen an Kundengruppen", "Push-Kampagnen, planbar, mit Vorlagen" | `lp_price_c_kampagnen`, `lp_price_f_kampagnen`, `lp_price_f_gruppen` |
 | C4 | Automatische Nachrichten, zum Beispiel zum Geburtstag oder nach dem zweiten Besuch. | "Automatische Nachrichten, z. B. zum Geburtstag", "Automatische Nachrichten (Geburtstag, zweiter Besuch …)" | `lp_price_c_autonachr`, `lp_price_f_autonachr` |
 | C5 | Ein Tagesangebot kann auf der Karte stehen. | "Tagesangebot auf der Karte", "Tagesangebot und Newsletter" | `lp_price_f_tagesangebot`, `lp_price_c_angebot` |
 | C6 | Eigene Automationen im Baukasten. | "Eigene Automationen im Baukasten" | `lp_price_f_baukasten` |
@@ -182,7 +195,7 @@ entscheiden muss").
 | N11 | Weitere Sprachen, zum Beispiel Türkisch | `lp_feat_5_b` nennt Deutsch, Englisch und Arabisch. `branchen.json` nennt zusätzlich Türkisch; solange das nicht unter einem `lp_`-Schlüssel steht, bleibt es draußen. |
 | N12 | Zahl der Läden oder Kunden, die Stampit nutzen, Kundenstimmen, "Marktführer", "Nummer 1", Vergleiche mit Mitbewerbern beim Namen | Nichts davon ist belegt. |
 | N13 | "Funktioniert ohne Internet", "auf jedem Handy", "kein eigenes Gerät nötig" | Belegt sind Apple Wallet und Google Wallet (A1) und das Scannen mit der Handy-Kamera (B1). Mehr zum Gerät steht nur in Klasse 2 (B3). |
-| N14 | Dass die Karte sich meldet, wenn ein Kunde lange nicht da war, Geburtstag hat oder ein Angebot läuft; dass der Laden selbst Nachrichten schickt | Klasse 2 (C2 bis C5). Gesichert ist allein, dass die Karte in der Nähe des Ladens auf dem Sperrbildschirm erscheint (C1). |
+| N14 | Dass die Karte sich meldet, wenn ein Kunde lange nicht da war, Geburtstag hat oder ein Angebot läuft | Klasse 2 (C2, C4, C5). Dass der Laden selbst Nachrichten schickt, ist seit 19.11.2026 Klasse 1 (C3). Gesichert ist allein, dass die Karte in der Nähe des Ladens auf dem Sperrbildschirm erscheint (C1). |
 | N15 | Willkommensgeschenk, Kunde wirbt Kunde, Stufen, Punkte-, Mitglieds- oder 10er-Karte, Zugänge für Aushilfen | Klasse 2 (A5, B4, D3 bis D5). |
 
 Ist ein Satz weder in Klasse 1 erlaubt noch hier verboten: er ist nicht
