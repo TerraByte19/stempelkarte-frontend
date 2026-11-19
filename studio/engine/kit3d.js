@@ -40,7 +40,7 @@
 //   col(c), std(c, o), lam(c, o), basic(c, o)      Farben und Materialien (Standard rau, ohne Metall)
 //   canvasTex(w, h, draw, { srgb, sharp })          Textur aus einer 2D-Leinwand; sharp nur fuer Schrift
 //   blobTex, glow(color, size, pos, opacity)        weicher Fleck; Schein als additive Sprite
-//   nightLights(o)                                  Himmel (Umgebung), Mond von hinten (Kante + Schatten),
+//   nightLights(o)                                  Himmel (Umgebung, o.sky), Mond von hinten (Kante + Schatten),
 //                                                   schwache Aufhellung von vorn -> { hemi, moon, fill }
 //   pointLight(parent, pos, color, intensity, dist, decay)   warmes Licht vor einem Laden
 //   groundMap({ origin, size, px })                 Boden als EINE gemalte Karte: gx(m), m, worldMapped(mat),
@@ -119,6 +119,32 @@ export const PAL = {
   shopOurs: { light: '#E9E2FF', halo: '#9F95FF', front: '#B9B0FF' }, shopRival: { light: '#FFD7A0', halo: '#FFB46A', front: '#FFB46A' }
 }
 
+// Palette "neon" (seit 19.11.2026, Nachbau "zwei Cafés" Fassung 2, "look": "neon" im Skript): die fast schwarze
+// Nacht des Vorbilds. Gemessen dort (tappi-nachbau-v2/look.md): Dunst und leere Flaechen #000006 bis #0C0C18,
+// Haeuser nachtblau-grau, der volle Laden kaltes Neonblau (Lichtsee #243CA8 bis #304ED2), der leere warmes
+// Orange, Laternen beige statt gelb, Median-Helligkeit 7 bis 16 von 255. Fassung 1 lag mit unserer lila Welt bei
+// rund 50, und der Betreiber sah darin "unsere Videos von vorher". Ohne "look" gilt PAL, alles bleibt gleich.
+// Die Zusatzschluessel (wallOurs ... lights) gibt es nur hier; kit.shop und nightLights fragen PAL.neon ab.
+export const PAL_NEON = {
+  ...PAL,
+  night: '#03040A', night2: '#070912', fog: '#04050B',
+  road: '#0B0D15', walk: '#161925', curb: '#262A3E', mark: '#2A2E40', zebra: '#6A6F86',
+  pave: '#141722', lawn: '#0D171C',
+  city: ['#1B1E2C', '#202334', '#181B28', '#24283A', '#1D202F'], roof: '#12141E',
+  winWarm: ['#E8C48A', '#D9A866', '#C99050'], winCool: '#7A8CC8', winOff: '#0B0D16',
+  tree: ['#1E3140', '#232F40', '#1B3838', '#2A3048'], trunk: '#0E0E16', lamp: '#FFE8C4', pole: '#15171F', lampGlow: '#FFD9A8',
+  bench: '#2A2D3A', cars: ['#262B3D', '#5A1F26', '#20343A'],
+  sky: '#2C3354', ground: '#05060C', moon: '#8FA0D8', fill: '#3A4570',
+  poolLamp: '205,180,145', poolOurs: '52,88,255', poolRival: '255,138,48',
+  shopOurs: { light: '#C4D3FF', halo: '#2F5BFF', front: '#3B66FF' }, shopRival: { light: '#FFB873', halo: '#D0681E', front: '#C2621C' },
+  wallOurs: '#20253A', wallRival: '#30231F', awnOurs: ['#E9EDFF', '#141826'], awnRival: ['#F6E7D2', '#231915'],
+  winOurs: ['#E4EDFF', '#3D6BFF'], winRival: ['#FFE1B0', '#D9782A'],
+  signBg: '#0C0E18', signOurs: '#B4C6FF', signRival: '#FFC891',
+  lights: { hemi: 0.55, moon: 1.15, fill: 0.25 },
+  calm: '3,4,10', neon: true
+}
+export const LOOK_PAL = { standard: PAL, neon: PAL_NEON }
+
 // Rahmen fuer die wichtigen Dinge (fitFrame): oben unter den Textzeilen (Stil C, ein Wort oben, plus 40 px
 // Textabstand), unten ueber der Sperrzone, links 60 px Rand, rechts vor der Knopfspalte von TikTok und Reels
 // (ab x = 950; iso-street haelt 940). Ein Baustein darf einen eigenen Rahmen nehmen.
@@ -177,11 +203,19 @@ const CSS = `
 .k3-vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 90% 64% at 50% 52%, rgba(14,10,36,0) 62%, rgba(14,10,36,.42) 100%), linear-gradient(180deg, rgba(14,10,36,0) 80%, rgba(14,10,36,.3) 100%); }
 /* Abblenden beim Szenenwechsel (siehe run): liegt ueber Bild, Verlaeufen und Pruefkaesten */
 .k3-dim { position: absolute; inset: 0; pointer-events: none; background: ${BRAND.night}; opacity: 0; }
+/* "look": "neon": dieselben Verlaeufe, aber im fast schwarzen Blau des Vorbilds statt im lila Nachtblau */
+.k3-calm.k3-neon { background: linear-gradient(180deg, rgba(${PAL_NEON.calm},.96) 0%, rgba(${PAL_NEON.calm},.82) 18%, rgba(${PAL_NEON.calm},.45) 36%, rgba(${PAL_NEON.calm},.12) 58%, rgba(${PAL_NEON.calm},0) 80%); }
+.k3-vig.k3-neon { background: radial-gradient(ellipse 90% 64% at 50% 52%, rgba(${PAL_NEON.calm},0) 55%, rgba(${PAL_NEON.calm},.6) 100%), linear-gradient(180deg, rgba(${PAL_NEON.calm},0) 76%, rgba(${PAL_NEON.calm},.5) 100%); }
+.k3-dim.k3-neon { background: ${PAL_NEON.night}; }
 `
 
 export async function createKit(ctx, opts = {}) {
   const { name = 'kit3d', prefix = null, ss = 1, exposure = 1.05, fog = [98, 172], calm = 760, vignette = true, dim = true } = opts
-  const cls = base => base + (prefix ? ` ${prefix}-${base.slice(3)}` : '')
+  // Aussehen der Welt: aus dem Skript ("look", ctx.look), ein Baustein darf es mit opts.look festlegen
+  const look = opts.look || ctx.look || 'standard'
+  if (!LOOK_PAL[look]) ctx.fail(`3D-Baukasten: "look" "${look}" gibt es nicht. Erlaubt: ${Object.keys(LOOK_PAL).join(', ')}`)
+  const P = LOOK_PAL[look]
+  const cls = base => base + (prefix ? ` ${prefix}-${base.slice(3)}` : '') + (P.neon && ['k3-calm', 'k3-vig', 'k3-dim'].includes(base) ? ' k3-neon' : '')
   // three.js erst hier laden: so bleibt kit3d.js (und jeder Baustein) in Node ohne die 700 KB importierbar
   const THREE = await import('./vendor/three.module.min.js')
   const { RoundedBoxGeometry } = await import('./vendor/RoundedBoxGeometry.js')
@@ -221,10 +255,11 @@ export async function createKit(ctx, opts = {}) {
   const g2 = canvas.getContext('bitmaprenderer')
 
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(PAL.fog)
-  if (fog) scene.fog = new THREE.Fog(PAL.fog, fog[0], fog[1])
+  scene.background = new THREE.Color(P.fog)
+  if (fog) scene.fog = new THREE.Fog(P.fog, fog[0], fog[1])
 
-  const kit = { THREE, RoundedBoxGeometry, scene, renderer, canvas, wrap, ss, camera: null, shown: false }
+  // PAL: die Palette dieser Welt (PAL oder PAL_NEON). Bausteine nehmen kit.PAL statt K.PAL, sonst bleiben sie lila.
+  const kit = { THREE, RoundedBoxGeometry, scene, renderer, canvas, wrap, ss, camera: null, shown: false, PAL: P, look }
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3(), eul = new THREE.Euler()
 
   // ---------------------------------------------------------------- Farben, Materialien, Texturen
@@ -258,9 +293,13 @@ export async function createKit(ctx, opts = {}) {
   // gesaettigt: die Stadt soll grau-lila bleiben, damit die Helden leuchten. Die Aufhellung von der Kamera
   // her ist schwach und ohne Schatten: sonst saufen die Fronten ganz ab.
   // Schaut die Kamera aus einer anderen Richtung, moon.pos und fill.pos mitdrehen (Mond bleibt hinten).
-  kit.nightLights = ({ hemi = 1.3, moon = {}, fill = {} } = {}) => {
-    const h = new THREE.HemisphereLight(PAL.sky, PAL.ground, hemi); scene.add(h)
-    const mo = { color: PAL.moon, intensity: 2.4, pos: [30, 46, -40], shadow: true, size: 2048, box: 40, near: 10, far: 150, ...moon }
+  // "neon": alles deutlich schwaecher (P.lights), damit nur Laeden, Laternen und Fenster leuchten (Kontrast des Vorbilds)
+  const LD = P.lights || { hemi: 1.3, moon: 2.4, fill: 0.6 }
+  // sky: Farbe des Himmelslichts (Vorgabe die Palette, P.sky). iso-street "reise" nimmt ein fast neutrales Grau: das Blau von
+  // PAL_NEON faerbte bei doppelter Staerke alle flachen Daecher satt nachtblau (Review Fassung 3, Runde 2)
+  kit.nightLights = ({ hemi = LD.hemi, moon = {}, fill = {}, sky = P.sky } = {}) => {
+    const h = new THREE.HemisphereLight(sky, P.ground, hemi); scene.add(h)
+    const mo = { color: P.moon, intensity: LD.moon, pos: [30, 46, -40], shadow: true, size: 2048, box: 40, near: 10, far: 150, ...moon }
     const m = new THREE.DirectionalLight(mo.color, mo.intensity)
     m.position.set(...mo.pos); m.target.position.set(0, 0, 0)
     if (mo.shadow) {
@@ -270,7 +309,7 @@ export async function createKit(ctx, opts = {}) {
       m.shadow.bias = -0.0005; m.shadow.normalBias = 0.04; m.shadow.radius = 2.5
     }
     scene.add(m, m.target)
-    const fo = { color: PAL.fill, intensity: 0.6, pos: [-30, 25, 30], ...fill }
+    const fo = { color: P.fill, intensity: LD.fill, pos: [-30, 25, 30], ...fill }
     const f = new THREE.DirectionalLight(fo.color, fo.intensity); f.position.set(...fo.pos); scene.add(f)
     return { hemi: h, moon: m, fill: f }
   }
@@ -331,13 +370,16 @@ export async function createKit(ctx, opts = {}) {
     mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh); return mesh
   }
   // Aufbauten auf Daechern: [x, y, z, w, h, d] (y = Dachhoehe)
-  kit.roofs = (list, color = PAL.roof) => {
+  kit.roofs = (list, color = P.roof) => {
     const mesh = new THREE.InstancedMesh(new RoundedBoxGeometry(1, 1, 1, 1, 0.08), lam(color), list.length)
     list.forEach(([x, y, z, w, h, d], k) => { m4.compose(v3.set(x, y + h / 2, z), q.identity(), s3.set(w, h, d)); mesh.setMatrixAt(k, m4) })
     mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh); return mesh
   }
   // Fensterfarbe aus einer Zufallszahl: etwa ein Drittel warm, ein paar kuehl (Fernseher), der Rest dunkel
-  const windowTint = kit.windowTint = on => on < 0.34 ? col(PAL.winWarm[Math.floor(on * 100) % 3]).multiplyScalar(1.1) : on < 0.4 ? col(PAL.winCool).multiplyScalar(0.75) : col(PAL.winOff)
+  // "neon": nur jedes zehnte Fenster an statt jedes dritten, die Stadt bleibt dunkel wie im Vorbild (dort fast nur
+  // dunkle Bloecke; mit einem Viertel sah die erste Probe aus wie eine Stadt voller Lichterketten)
+  const winOn = P.neon ? 0.1 : 0.34, winTv = P.neon ? 0.13 : 0.4
+  const windowTint = kit.windowTint = on => on < winOn ? col(P.winWarm[Math.floor(on * 100) % 3]).multiplyScalar(1.1) : on < winTv ? col(P.winCool).multiplyScalar(0.75) : col(P.winOff)
   // Fenster: { x, y, z, ry, on } in einem Netz. Nur an Seiten setzen, die zur Kamera zeigen.
   kit.windows = list => {
     const mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.8, 1.05), new THREE.MeshBasicMaterial({ color: '#FFFFFF' }), list.length)
@@ -350,11 +392,11 @@ export async function createKit(ctx, opts = {}) {
   // Baeume: [x, z, Groesse, Farbe 0..3]. Runde, facettierte Kronen (wie Spielzeug), Gruen ins Lila gezogen.
   kit.trees = (list, { y0 = 0 } = {}) => {
     const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), lam('#FFFFFF', { flatShading: true }), list.length)
-    const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.14, 1, 6), lam(PAL.trunk), list.length)
+    const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.14, 1, 6), lam(P.trunk), list.length)
     list.forEach(([x, z, s, c], k) => {
       m4.compose(v3.set(x, y0 + 0.8 * s, z), q.identity(), s3.set(s, 1.6 * s, s)); trunk.setMatrixAt(k, m4)
       m4.compose(v3.set(x, y0 + 2.3 * s, z), q.identity(), s3.set(1.15 * s, 1.3 * s, 1.15 * s)); crown.setMatrixAt(k, m4)
-      crown.setColorAt(k, col(PAL.tree[c]))
+      crown.setColorAt(k, col(P.tree[c]))
     })
     crown.castShadow = trunk.castShadow = true; crown.receiveShadow = true; scene.add(crown, trunk)
     return { crown, trunk }
@@ -362,20 +404,20 @@ export async function createKit(ctx, opts = {}) {
   // Laternen: [x, z]. Mast und leuchtender Kopf; der Lichtkegel gehoert gemalt in die Bodenkarte (spot).
   // glowIf(k): welche einen Schein bekommen (jede Sprite kostet ein wenig, also nur die im Bild).
   kit.lamps = (list, { y0 = 0, glowIf = () => true } = {}) => {
-    const pole = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07, 0.1, 4.4, 6), lam(PAL.pole), list.length)
-    const head = new THREE.InstancedMesh(new THREE.SphereGeometry(0.26, 12, 8), new THREE.MeshBasicMaterial({ color: col(PAL.lamp).multiplyScalar(1.5) }), list.length)
+    const pole = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07, 0.1, 4.4, 6), lam(P.pole), list.length)
+    const head = new THREE.InstancedMesh(new THREE.SphereGeometry(0.26, 12, 8), new THREE.MeshBasicMaterial({ color: col(P.lamp).multiplyScalar(1.5) }), list.length)
     list.forEach(([x, z], k) => {
       m4.compose(v3.set(x, y0 + 2.2, z), q.identity(), s3.set(1, 1, 1)); pole.setMatrixAt(k, m4)
       m4.compose(v3.set(x, y0 + 4.5, z), q.identity(), s3.set(1, 1, 1)); head.setMatrixAt(k, m4)
-      if (glowIf(k)) glow(PAL.lampGlow, 2.6, new THREE.Vector3(x, y0 + 4.5, z), 0.55)
+      if (glowIf(k)) glow(P.lampGlow, 2.6, new THREE.Vector3(x, y0 + 4.5, z), 0.55)
     })
     pole.castShadow = true; scene.add(pole, head)
     return { pole, head }
   }
   // Bank (r = 0 oder Math.PI / 2) und geparktes Auto: Kleinkram, an dem man die Groesse abliest
   kit.bench = (parent, x, z, r, { y0 = 0 } = {}) => {
-    const bench = new THREE.Mesh(new RoundedBoxGeometry(1.8, 0.16, 0.6, 1, 0.05), lam(PAL.bench)); bench.position.set(x, y0 + 0.5, z); bench.rotation.y = r; parent.add(bench)
-    const back = new THREE.Mesh(new RoundedBoxGeometry(1.8, 0.5, 0.12, 1, 0.05), lam(PAL.bench)); back.position.set(x - (r ? 0.28 : 0), y0 + 0.8, z - (r ? 0 : 0.28)); back.rotation.y = r; parent.add(back)
+    const bench = new THREE.Mesh(new RoundedBoxGeometry(1.8, 0.16, 0.6, 1, 0.05), lam(P.bench)); bench.position.set(x, y0 + 0.5, z); bench.rotation.y = r; parent.add(bench)
+    const back = new THREE.Mesh(new RoundedBoxGeometry(1.8, 0.5, 0.12, 1, 0.05), lam(P.bench)); back.position.set(x - (r ? 0.28 : 0), y0 + 0.8, z - (r ? 0 : 0.28)); back.rotation.y = r; parent.add(back)
     return { bench, back }
   }
   kit.car = (parent, x, z, ry, color) => {
@@ -455,31 +497,67 @@ export async function createKit(ctx, opts = {}) {
   // Ende der Front (fuer einen gespiegelten Laden, der sonst in die Strasse hineinragte).
   // ours: eigener Laden (Wand im Stampit-Lila, kuehles Licht, Markise Lila im Wechsel) oder fremder (warm).
   // signs: Liste, in die die Schildmasse (info) kommen, fuer die Warnung "sehr klein".
-  kit.shop = async ({ name: shopName, icon, accent, ours = true, pos = new THREE.Vector3(), rot = 0, flip = false, size = { w: 5.6, d: 6, h: 9, door: 1.25 }, light = 18, signs = null }) => {
+  // hollow (seit 20.11.2026, Fassung 3 des Nachbaus "zwei Cafés"): der Laden ist innen hohl. Boden, Rueckwand und die Wand
+  // zur Ecke (beide zeigen von der Kamera weg) bleiben stehen; alles andere (Front mit Schild, Markise, Schaufenster und
+  // Tuer, die Seitenwand zur Kamera, Obergeschoss, Gesims, Schornstein) haengt an "lid" und kann als Ganzes abheben.
+  // Warum: im Vorbild hebt das Haus ueber dem vollen Café in derselben Einstellung ab und gibt den Raum frei; Fassung 2
+  // blendete dafuer in einen anderen Baustein (iso-shop) und zeigte einen nackten Kasten im Schwarzen. Der Deckel wirft
+  // keinen Schatten (der Schatten wird einmal geworfen und muss auch ohne Deckel stimmen), seine Materialien sind
+  // durchsichtig schaltbar (lidSet). hollow = { gf (Hoehe des Erdgeschosses), wt (Wanddicke), inner, cap } oder false.
+  // Ohne hollow wird der Laden genau wie vorher gebaut.
+  kit.shop = async ({ name: shopName, icon, accent, ours = true, pos = new THREE.Vector3(), rot = 0, flip = false, size = { w: 5.6, d: 6, h: 9, door: 1.25 }, light = 18, signs = null, hollow = false }) => {
     const g = new THREE.Group(); g.position.copy(pos); g.rotation.y = rot; scene.add(g)
-    const acc = col(accent), wallC = ours ? col(BRAND.brand).lerp(col('#2A2166'), 0.2) : col('#46325F')
-    const put = (mesh, x, y, z, cast = true) => { mesh.position.set(x, y, z); mesh.castShadow = cast; mesh.receiveShadow = true; g.add(mesh); return mesh }
+    const lid = hollow ? new THREE.Group() : null
+    if (lid) g.add(lid)
+    const acc = col(accent), wallC = P.neon ? col(ours ? P.wallOurs : P.wallRival) : ours ? col(BRAND.brand).lerp(col('#2A2166'), 0.2) : col('#46325F')
+    const put = (mesh, x, y, z, cast = true) => { mesh.position.set(x, y, z); mesh.castShadow = lid ? false : cast; mesh.receiveShadow = true; (lid || g).add(mesh); return mesh }
     const { w, d, h } = size
     // a = Abstand von der Ecke, entlang der Front -> x im Laden
     // open: Drehrichtung des Tuerblatts nach aussen (das Blatt reicht von der Angel weg von der Ecke)
     const ax = a => flip ? -w + a : -a, dx = ax(size.door), open = flip ? -1 : 1
-    // Haus: abgerundeter Block; Erdgeschoss ist der Laden, darueber zwei Etagen Wohnungen
-    put(new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, 0.16), std(wallC)), -w / 2, h / 2, -d / 2)
+    const GF = hollow ? (hollow.gf || 5) : 0, WT = hollow ? (hollow.wt || 0.3) : 0
+    // Wand zur Ecke (bleibt stehen) und die Seitenwand zur Kamera (hebt ab): ohne flip liegt die Ecke bei x = 0
+    const cornerX = flip ? -w + WT / 2 : -WT / 2, farX = flip ? -WT / 2 : -w + WT / 2
+    if (!hollow) {
+      // Haus: abgerundeter Block; Erdgeschoss ist der Laden, darueber zwei Etagen Wohnungen
+      put(new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, 0.16), std(wallC)), -w / 2, h / 2, -d / 2)
+    } else {
+      const wallM = std(wallC)
+      put(new THREE.Mesh(new RoundedBoxGeometry(w, GF, WT, 2, 0.06), wallM), -w / 2, GF / 2, -WT / 2)
+      put(new THREE.Mesh(new RoundedBoxGeometry(WT, GF, d, 2, 0.06), wallM), farX, GF / 2, -d / 2)
+      put(new THREE.Mesh(new RoundedBoxGeometry(w, h - GF, d, 3, 0.16), wallM), -w / 2, GF + (h - GF) / 2, -d / 2)
+      // Was stehen bleibt: Rueckwand und Wand zur Ecke, innen in der Farbe des Raums, oben eine helle Schnittkante
+      // (Puppenhaus: sagt sofort "aufgeschnitten", nicht "dunkler Raum ohne Decke", wie in iso-shop)
+      const inM = std(hollow.inner || '#5E6AA6', { roughness: 0.9 }), capM = std(hollow.cap || '#D9E1FF', { roughness: 0.7, emissive: hollow.cap || '#D9E1FF', emissiveIntensity: 0.18 })
+      const keep = (mesh, x, y, z) => { mesh.position.set(x, y, z); mesh.castShadow = true; mesh.receiveShadow = true; g.add(mesh); return mesh }
+      keep(new THREE.Mesh(new RoundedBoxGeometry(w - 0.02, GF - 0.1, WT, 2, 0.04), inM), -w / 2, (GF - 0.1) / 2, -d + WT / 2)
+      keep(new THREE.Mesh(new RoundedBoxGeometry(WT, GF - 0.1, d - WT, 2, 0.04), inM), cornerX, (GF - 0.1) / 2, -d / 2 + WT / 2)
+      keep(new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, WT + 0.04), capM), -w / 2, GF - 0.05, -d + WT / 2)
+      keep(new THREE.Mesh(new THREE.BoxGeometry(WT + 0.04, 0.1, d - WT), capM), cornerX, GF - 0.05, -d / 2 + WT / 2)
+    }
     // Gesims oben, Band ueber dem Laden, Sockel: liest sich wie ein gebautes Haus, nicht wie eine Kiste
     put(new THREE.Mesh(new RoundedBoxGeometry(w + 0.3, 0.36, d + 0.3, 2, 0.12), std(wallC.clone().lerp(col('#FFFFFF'), 0.14))), -w / 2, h + 0.08, -d / 2)
     put(new THREE.Mesh(new RoundedBoxGeometry(w + 0.12, 0.24, 0.3, 2, 0.08), std(wallC.clone().lerp(col('#FFFFFF'), 0.1))), -w / 2, 4.85, 0.05, false)
-    put(new THREE.Mesh(new RoundedBoxGeometry(w + 0.1, 0.42, d + 0.1, 2, 0.1), std(wallC.clone().multiplyScalar(0.62))), -w / 2, 0.21, -d / 2, false)
-    // Wohnungsfenster, warm erleuchtet (nicht alle: bewohnt, aber nicht festlich)
-    for (const [x, y, on] of [[ax(w - 1.1), 6.05, 1], [-w / 2, 6.05, 0], [ax(1.1), 6.05, 1], [ax(w - 1.1), 7.85, 0], [-w / 2, 7.85, 1], [ax(1.1), 7.85, 1]]) {
+    // Sockel: beim hohlen Laden zugleich der Boden des Raums (bleibt stehen)
+    const sockel = put(new THREE.Mesh(new RoundedBoxGeometry(w + 0.1, 0.42, d + 0.1, 2, 0.1), std(wallC.clone().multiplyScalar(0.62))), -w / 2, 0.21, -d / 2, false)
+    if (lid) { lid.remove(sockel); g.add(sockel) }
+    // Wohnungsfenster, warm erleuchtet (nicht alle: bewohnt, aber nicht festlich). Beim hohlen Laden nur eine Reihe
+    // in der Mitte des Obergeschosses (es ist dort niedriger), dafuer ueber die ganze Breite
+    const flats = hollow
+      ? Array.from({ length: Math.max(3, Math.floor(w / 2.3)) }, (_, i, n = Math.max(3, Math.floor(w / 2.3))) => [ax(1.1 + i * (w - 2.2) / (n - 1)), GF + (h - GF) / 2 + 0.1, (i * 5 + 2) % 3 !== 0 ? 1 : 0])
+      : [[ax(w - 1.1), 6.05, 1], [-w / 2, 6.05, 0], [ax(1.1), 6.05, 1], [ax(w - 1.1), 7.85, 0], [-w / 2, 7.85, 1], [ax(1.1), 7.85, 1]]
+    for (const [x, y, on] of flats) {
       put(new THREE.Mesh(new RoundedBoxGeometry(1.1, 1.25, 0.14, 2, 0.04), std('#191340')), x, y, 0.02, false)
       put(new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.98), new THREE.MeshBasicMaterial({ color: on ? col(PAL.winWarm[1]).multiplyScalar(1.15) : col(PAL.winOff) })), x, y, 0.1, false)
     }
     // Schaufenster: leuchtet von innen, mit Theke und Kasse als Schattenriss
     const winW = w - size.door - 1.55, winX = ax(size.door + 0.85 + winW / 2)
     put(new THREE.Mesh(new RoundedBoxGeometry(winW + 0.3, 2.2, 0.22, 2, 0.06), std('#140F33')), winX, 1.55, 0.02, false)
-    const lit = ours ? PAL.shopOurs : PAL.shopRival, lightC = lit.light
+    const lit = ours ? P.shopOurs : P.shopRival, lightC = lit.light
+    // "neon": Schaufenster im Ladenlicht des Vorbilds (oben fast weiss, unten kraeftig blau bzw. orange)
+    const winG = P.neon ? (ours ? P.winOurs : P.winRival) : ['#FFF7EA', ours ? '#CFC6FF' : '#FFB872']
     const winTex = canvasTex(512, 256, (c2, cw, chh) => {
-      const gr = c2.createLinearGradient(0, 0, 0, chh); gr.addColorStop(0, '#FFF7EA'); gr.addColorStop(1, ours ? '#CFC6FF' : '#FFB872')
+      const gr = c2.createLinearGradient(0, 0, 0, chh); gr.addColorStop(0, winG[0]); gr.addColorStop(1, winG[1])
       c2.fillStyle = gr; c2.fillRect(0, 0, cw, chh)
       c2.fillStyle = ours ? 'rgba(48,36,110,.55)' : 'rgba(90,40,30,.5)'
       c2.fillRect(0, chh * 0.72, cw, chh * 0.28)                                               // Theke
@@ -503,19 +581,24 @@ export async function createKit(ctx, opts = {}) {
     // seinen Weg, sein Arm steckte bei "enter" im Glas, und das offene Blatt verdeckte genau den Moment, in dem
     // er hineinging. Jetzt steht es im Bild neben der Tuer, nicht davor.
     const hingeA = size.door - 0.57
-    const hinge = new THREE.Group(); hinge.position.set(ax(hingeA), 0, 0.17); g.add(hinge)
+    const hinge = new THREE.Group(); hinge.position.set(ax(hingeA), 0, 0.17); (lid || g).add(hinge)
     const lx = flip ? 0.56 : -0.56
     const leaf = new THREE.Mesh(new RoundedBoxGeometry(1.12, 2.32, 0.08, 2, 0.03), std(wallC.clone().multiplyScalar(0.55))); leaf.position.set(lx, 1.2, 0); hinge.add(leaf)
     const paneMat = new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(0.92) })
     const pane = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.2), paneMat); pane.position.set(lx, 1.45, 0.05); hinge.add(pane)
     // Markise nur ueber dem Schaufenster (ueber der Tuer haengt die Glocke): Ladenfarbe im Wechsel mit Lila
     // (eigener Laden) oder Papier (gegenueber), wie auf einer Stempelkarte
-    const awTex = canvasTex(512, 64, (c2, cw, chh) => { for (let i = 0; i < 8; i++) { c2.fillStyle = i % 2 ? (ours ? BRAND.lilac : BRAND.paper) : '#' + acc.getHexString(); c2.fillRect(i * cw / 8, 0, cw / 8 + 1, chh) } })
+    // "neon": weiss-dunkle Streifen wie im Vorbild (die Farbe kommt dort vom Licht, nicht vom Stoff)
+    const awC = P.neon ? (ours ? P.awnOurs : P.awnRival) : [ours ? BRAND.lilac : BRAND.paper, '#' + acc.getHexString()]
+    const awTex = canvasTex(512, 64, (c2, cw, chh) => { for (let i = 0; i < 8; i++) { c2.fillStyle = i % 2 ? awC[0] : awC[1]; c2.fillRect(i * cw / 8, 0, cw / 8 + 1, chh) } })
     const aw = put(new THREE.Mesh(new RoundedBoxGeometry(winW + 0.5, 0.12, 1.35, 2, 0.05), std('#FFFFFF', { map: awTex, roughness: 0.7 })), winX, 2.86, 0.62)
     aw.rotation.x = 0.36
     // Schild ueber dem Laden (signTexture, mit der Zwei-Zeilen-Regel fuer lange Namen)
-    const signW = w - 0.3, signH = 1.5
-    const { tex: signTex, info: signInfo } = kit.signTexture(shopName, { w: signW, h: signH, px: 2048, accent: acc })
+    // hohler Laden (breiter): das Schild nicht ueber die ganze Front, sonst stuende "Café 1" auf einer 9 m langen Tafel
+    const signW = hollow ? Math.min(w - 0.3, 5.4) : w - 0.3, signH = 1.5
+    // "neon": dunkles Schild mit leuchtender Schrift in der Farbe des Ladenlichts statt Papier und Tinte
+    const signCols = P.neon ? { bg: P.signBg, fg: ours ? P.signOurs : P.signRival } : {}
+    const { tex: signTex, info: signInfo } = kit.signTexture(shopName, { w: signW, h: signH, px: 2048, accent: acc, ...signCols })
     if (signs) signs.push(signInfo)
     put(new THREE.Mesh(new RoundedBoxGeometry(signW + 0.18, signH + 0.18, 0.24, 2, 0.07), std('#1A1440')), -w / 2, 3.95, 0.12, false)
     const signMat = new THREE.MeshBasicMaterial({ map: signTex, toneMapped: false })
@@ -527,6 +610,20 @@ export async function createKit(ctx, opts = {}) {
     put(new THREE.Mesh(new RoundedBoxGeometry(0.7, 1.3, 0.7, 2, 0.08), std(wallC.clone().multiplyScalar(0.8))), ax(w - 1.1), h + 0.75, -d + 1.2)
     const pl = kit.pointLight(g, [-w / 2, 2.1, 1.7], lightC, light, 8, 1.6)
     g.updateMatrixWorld(true)
+    // Deckel des hohlen Ladens: Materialien einmal durchsichtig schalten (Opazitaet 1 sieht aus wie undurchsichtig), damit
+    // lidSet ihn beim Abheben ausblenden kann. lidSet(lift, k): lift Meter nach oben, k Deckkraft (0 = weg). Der Schein
+    // ums Schild (halo) setzt shine jedes Bild neu, deshalb wird er nur mit k multipliziert.
+    let lidSet = null
+    if (lid) {
+      const mats = new Set()
+      lid.traverse(o => { if (o.isMesh) { const ms = Array.isArray(o.material) ? o.material : [o.material]; for (const m of ms) { m.transparent = true; mats.add(m) } } })
+      const base = new Map([...mats].map(m => [m, m.opacity]))
+      lidSet = (lift, k) => {
+        lid.position.y = lift; lid.visible = k > 0.002
+        for (const m of mats) if (m !== halo.material) m.opacity = base.get(m) * k
+        halo.material.opacity *= k
+      }
+    }
     const world = (x, y, z) => g.localToWorld(new THREE.Vector3(x, y, z))
     const front = glow(lit.front, 5.5, world(-w / 2, 1.6, 1.0), 0.28)
     // Weg durch diese Tuer: etwas von der Angel weg versetzt, damit Schulter und Arm am offenen Blatt
@@ -535,6 +632,8 @@ export async function createKit(ctx, opts = {}) {
     const SWING = Math.PI / 2 + 0.06 // etwas ueber quer: das Blatt neigt sich von der Tuer weg
     return {
       g, hinge, leaf, open, light: pl, rot, name: shopName, sign: signInfo,
+      // nur mit hollow: der Deckel, sein Schalter und der Raum innen (in Koordinaten des Ladens: x0..x1, z0..z1, Boden y)
+      lid, lidSet, room: hollow ? { x0: -w + WT, x1: -WT, z0: -d + WT, z1: 0, y: 0.42, gf: GF, wt: WT, cornerX } : null,
       // fuer Lichtwechsel (shine); doorMat und paneMat (Licht in der Tuer) fuer iso-street "dark", shine
       // selbst laesst sie, wie sie sind
       signMat, winMat, halo, front, doorMat, paneMat, flip,

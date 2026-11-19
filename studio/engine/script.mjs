@@ -58,8 +58,16 @@ export const MIX = { voice: 1.5, sfx: 0.45, limit: 0.89, level: false, lufs: nul
 //   pair     zwei normale Woerter teilen sich eine Tafel, wenn sie zusammen hoechstens so viele Zeichen haben (0 = nie)
 //   size     Schriftgroesse normaler Woerter, keySize die der Schluesselwoerter (px)
 //   minShow  eine Tafel, die kuerzer stuende, wird mit der naechsten zusammengelegt (s)
-export const CAPTION = { mode: 'zeile', pair: 10, size: 70, keySize: 136, minShow: 0.16 }
+// box      nur im Modus "wort" (seit 19.11.2026, Nachbau "zwei Cafés" Fassung 2): Tafeln wie im Vorbild, alle
+//          Woerter gleich gross, weiss und fett, jedes erscheint mit der Stimme; Schluesselwoerter (*Wort) stehen
+//          in einem gefuellten blauen Kasten, **Wort in einem orangen. Ein "/" bricht innerhalb der Tafel in die
+//          naechste Zeile um. Tafeln teilen sich nur an "|" und an Zeilen des Skripts (keine Paare von selbst).
+// boxSize  nur mit "box" (seit 20.11.2026, Fassung 3): Schriftgroesse der Tafeln in px (Vorgabe 84 wie bisher). Das Review
+//          von Fassung 2 mass die Grossbuchstaben bei rund 60 px gegen rund 66 px im Vorbild; 92 trifft es. Der
+//          Zeilenabstand bleibt bei rund 101 px wie im Vorbild gemessen (bei 84 also wie vorher 1,2).
+export const CAPTION = { mode: 'zeile', pair: 10, size: 70, keySize: 136, minShow: 0.16, box: false, boxSize: 84 }
 export const CAPTION_MODES = ['zeile', 'wort']
+export const LOOKS = ['standard', 'neon']
 // Bis zu drei Schluesselwoerter hintereinander bleiben zusammen ("vor deiner Tür")
 const KEY_RUN = 3
 
@@ -68,18 +76,19 @@ const KEY_RUN = 3
 // ein Baeckerei-Video zeigte dann "Café Nordwind". Namen mit "_" am Anfang
 // sind Hinweise und werden ueberall ignoriert.
 const KEYS = {
-  script: ['meta', 'voice', 'timing', 'say', 'poster', 'sound', 'mix', 'scenes', 'captionStyle', 'pace', 'progress'],
-  timing: ['lead', 'hold', 'maxGap'],
+  script: ['meta', 'voice', 'timing', 'say', 'poster', 'sound', 'mix', 'scenes', 'captionStyle', 'pace', 'progress', 'look'],
+  timing: ['lead', 'hold', 'maxGap', 'draft'],
+  draft: ['step', 'pause'],
   captionStyle: Object.keys(CAPTION),
   pace: ['maxStill', 'minChanges'],
-  progress: ['words'],
+  progress: ['words', 'style'],
   chapter: ['n', 'word', 'offset'],
   camera: ['cap', 'word', 'offset', 'at', 'zoom', 'focus', 'to', 'dur', 'whoosh'],
   sound: [...Object.keys(SOUND), ...Object.keys(LIBSOUND)],
   sounds: ['sound', 'cap', 'word', 'offset', 'at', 'anchor', 'vol', 'duck'],
   mix: Object.keys(MIX),
   voice: ['voice_id', 'model_id', 'language_code', 'output_format', 'seed', 'voice_settings', 'stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost'],
-  scene: ['component', 'params', 'anchors', 'captions', 'enter', 'camera', 'sounds'],
+  scene: ['component', 'params', 'anchors', 'captions', 'enter', 'camera', 'sounds', 'lead'],
   parts: ['parts'],
   caption: ['lines', 'accent', 'keep', 'role', 'instant', 'mode', 'scale', 'gapBefore', 'chapter']
 }
@@ -135,16 +144,23 @@ function parseWortCaption(c, sayMap, where, style) {
   if (c.keep) fail(`${where}: "keep" gibt es im Modus "wort" nicht (dort steht immer nur eine Tafel). Für eine Zeile, die stehen bleibt: "mode": "zeile"`)
   const scale = c.scale == null ? 1 : num(c.scale, 0.5, 2, `${where}: "scale"`)
   const words = [], say = [], key = [], lines = [], groups = []
+  // Nur mit "box": warm = Schluesselwort im orangen Kasten (**Wort), brk = Wort beginnt eine neue Zeile der Tafel ("/")
+  const box = !!style.box, warm = [], brk = []
   c.lines.forEach((line, li) => {
     const raw = Array.isArray(line) ? line : String(line).trim().split(/\s+/)
     if (!raw.length || raw[0] === '') fail(`${where}: Zeile ${li + 1} ist leer`)
-    const explicit = raw.includes('|'), row = []
-    let cur = null
+    // Mit "box" teilen sich Tafeln nur dort, wo das Skript es sagt: im Vorbild steht "Gleiche Straße. Zwei
+    // Cafés." als EINE Tafel in zwei Zeilen; die Paar-Regel von "wort" haette sie zerlegt
+    const explicit = box || raw.includes('|'), row = []
+    let cur = null, rowBreak = false
     for (const x of raw) {
-      if (x === '|') { cur = null; continue }
-      const star = typeof x === 'string' && x.startsWith('*')
-      const w = parseWord(star ? x.slice(1) : x, sayMap, `${where}, Zeile ${li + 1}`), isKey = star || !!(x && typeof x === 'object' && x.key)
+      if (x === '|') { cur = null; rowBreak = false; continue }
+      if (box && x === '/') { if (!cur) fail(`${where}, Zeile ${li + 1}: "/" (neue Zeile in der Tafel) braucht ein Wort davor in derselben Tafel`); rowBreak = true; continue }
+      const star2 = box && typeof x === 'string' && x.startsWith('**')
+      const star = star2 || (typeof x === 'string' && x.startsWith('*'))
+      const w = parseWord(star2 ? x.slice(2) : star ? x.slice(1) : x, sayMap, `${where}, Zeile ${li + 1}`), isKey = star || !!(x && typeof x === 'object' && x.key)
       const k = words.length; words.push(w.show); say.push(w.say); key.push(isKey); row.push(w)
+      warm.push(star2); brk.push(rowBreak); rowBreak = false
       // Von selbst zusammen: zwei kurze normale Woerter, oder Schluesselwoerter in Folge.
       // Nie ueber ein Satzzeichen hinweg: dort macht die Stimme eine Pause.
       const prev = cur && words[cur[cur.length - 1]]
@@ -159,7 +175,10 @@ function parseWortCaption(c, sayMap, where, style) {
   // "instant": alle Zeilen als eine Tafel, jede Zeile eine Reihe
   let k = 0
   const rows = lines.map(l => l.map(() => k++))
-  return { lines, words, say, accent: words.length, keep: false, role: null, instant: !!c.instant, mode: 'wort', scale, key, groups: c.instant ? null : groups, rows }
+  // Mit "box" bleiben die Tafeln auch bei "instant" getrennt: dort steht nur die erste Zeile der ersten Tafel ab
+  // Bild 0 da (der Einstieg), der Rest kommt mit der Stimme, wie im Vorbild ("Gleiche Straße." ab Bild 0,
+  // "Zwei Cafés." darunter auf das Wort)
+  return { lines, words, say, accent: words.length, keep: false, role: null, instant: !!c.instant, mode: 'wort', scale, key, groups: c.instant && !box ? null : groups, rows, ...(box ? { box: true, warm, brk } : {}) }
 }
 
 function parseCaption(c, sayMap, where, style = CAPTION) {
@@ -238,10 +257,30 @@ export function normalize(script) {
   const t = script.timing || {}
   const timing = { ...TIMING, ...(t.lead != null ? { lead: +t.lead } : {}), ...(t.hold != null ? { hold: +t.hold } : {}) }
   if (t.maxGap != null) timing.maxGap = num(t.maxGap, 0.15, 3, '"timing.maxGap"')
+  // "timing.draft" (seit 19.11.2026, Nachbau "zwei Cafés" Fassung 2): wie der Entwurf OHNE Stimme die Zeiten
+  // schaetzt. step = Sekunden je Wort, pause = Pause zwischen zwei Textzeilen; dazu zaehlt dann "gapBefore"
+  // als Pause vor seiner Textzeile. Warum: die Vorgabe (0,36 s je Wort, 0,5 s Pause, gapBefore unbeachtet) lag
+  // beim Nachbau rund 6 s hinter dem Vorbild, und die Kamerafahrten, die an Woertern haengen, liessen sich im
+  // Entwurf nicht gegen die Sekunden des Vorbilds pruefen. Gilt nur fuer --no-voice und --stills ohne Aufnahme;
+  // mit Stimme zaehlen die Zeiten der Aufnahme. Ohne "draft" bleibt die Schaetzung, wie sie war.
+  if (t.draft != null) {
+    if (typeof t.draft !== 'object' || Array.isArray(t.draft)) fail('"timing.draft" muss ein Objekt sein, z. B. { "step": 0.33, "pause": 0.3 }')
+    onlyKeys(t.draft, KEYS.draft, '"timing.draft"')
+    timing.draft = { step: t.draft.step == null ? TIMING.step : num(t.draft.step, 0.15, 0.8, '"timing.draft.step"'), pause: t.draft.pause == null ? TIMING.capPause : num(t.draft.pause, 0, 2, '"timing.draft.pause"') }
+  }
   const captionStyle = { ...CAPTION, ...Object.fromEntries(Object.entries(script.captionStyle || {}).filter(([k]) => !k.startsWith('_'))) }
   if (!CAPTION_MODES.includes(captionStyle.mode)) fail(`"captionStyle.mode" muss ${CAPTION_MODES.map(m => `"${m}"`).join(' oder ')} sein (bekam ${JSON.stringify(captionStyle.mode)})`)
   num(captionStyle.pair, 0, 40, '"captionStyle.pair"'); num(captionStyle.size, 30, 140, '"captionStyle.size"')
   num(captionStyle.keySize, 40, 260, '"captionStyle.keySize"'); num(captionStyle.minShow, 0, 1, '"captionStyle.minShow"')
+  if (typeof captionStyle.box !== 'boolean') fail(`"captionStyle.box" muss true oder false sein (bekam ${JSON.stringify(captionStyle.box)})`)
+  if (captionStyle.box && captionStyle.mode !== 'wort') fail('"captionStyle.box" gibt es nur zusammen mit "mode": "wort" (die Tafeln mit | und *)')
+  num(captionStyle.boxSize, 50, 140, '"captionStyle.boxSize"')
+  if (captionStyle.boxSize !== CAPTION.boxSize && !captionStyle.box) fail('"captionStyle.boxSize" gilt nur zusammen mit "box": true')
+  // "look": das Aussehen der 3D-Welt und der Buehne (seit 19.11.2026, Nachbau "zwei Cafés" Fassung 2). "neon" ist
+  // die fast schwarze Nacht des Vorbilds, kaltes Blau gegen warmes Orange (engine/kit3d.js, PAL_NEON). Ohne
+  // "look" bleibt alles, wie es war ("standard", die lila Abendwelt).
+  const look = script.look == null ? 'standard' : script.look
+  if (!LOOKS.includes(look)) fail(`"look" muss ${LOOKS.map(x => `"${x}"`).join(' oder ')} sein (bekam ${JSON.stringify(script.look)})`)
   // "pace": Richtwerte fuer den Bildwechsel (nur Warnungen): laengstes stehendes Bild und Mindestzahl der Wechsel
   let pace = null
   if (script.pace) pace = { maxStill: script.pace.maxStill == null ? null : num(script.pace.maxStill, 0.5, 60, '"pace.maxStill"'), minChanges: script.pace.minChanges == null ? null : num(script.pace.minChanges, 0, 200, '"pace.minChanges"') }
@@ -256,7 +295,12 @@ export function normalize(script) {
     const w = script.progress.words
     if (!Array.isArray(w) || w.length < 2 || w.length > 5) fail('"progress.words" muss eine Liste mit 2 bis 5 Kapitelwörtern sein, z. B. ["WALLET", "VON SELBST", "DESIGN", "DEIN ZUG"]')
     for (const x of w) if (typeof x !== 'string' || !x.trim() || x.length > 14) fail(`"progress.words": "${x}" muss ein kurzer Text sein (1 bis 14 Zeichen); die Leiste hat oben eine Zeile für alle Kapitel`)
-    progress = { words: w.map(x => x.trim()) }
+    // "style": "stempel" (Vorgabe: Stempelfeld und Wort je Kapitel, die Karte fuellt sich) oder "worte" (wie im
+    // Vorbild: nur gesperrte Woerter mit Punkten dazwischen, nur das aktuelle Kapitel leuchtet blau, erledigte
+    // werden wieder grau, Kapitel 0 laesst alle grau stehen statt abzudunkeln)
+    const style = script.progress.style == null ? 'stempel' : script.progress.style
+    if (!['stempel', 'worte'].includes(style)) fail(`"progress.style" muss "stempel" oder "worte" sein (bekam ${JSON.stringify(script.progress.style)})`)
+    progress = { words: w.map(x => x.trim()), style }
   }
   const sound = { ...SOUND, ...(script.sound || {}) }
   num(sound.sceneWhoosh, 0, 1, '"sound.sceneWhoosh"')
@@ -292,6 +336,11 @@ export function normalize(script) {
       if (p.enter != null && pi === 0) fail(`${where}: "enter" gilt nur für Teile nach dem ersten. Der erste Teil einer Szene schiebt immer herein`)
       const camera = parseCamera(p.camera, where)
       const sounds = parseSounds(p.sounds, where)
+      // "lead" (seit 21.11.2026, Nachbau "zwei Cafés" Fassung 3): so viele Sekunden vor seinem ersten Wort beginnt dieser Teil
+      // (Vorgabe 0,3, mit "cut" 0,1). Im Vorbild beginnt die Blende ins Schlussbild 0,6 s vor dem ersten Wort, bei uns lag sie
+      // 0,3 s spaeter. Nur an Teilen nach dem ersten; ohne "lead" wie vorher.
+      if (p.lead != null && pi === 0) fail(`${where}: "lead" gilt nur für Teile nach dem ersten (der erste beginnt mit der Szene)`)
+      const lead = p.lead == null ? null : num(p.lead, 0.1, 1.2, `${where}: "lead"`)
       const idx = p.captions.map((c, ci) => {
         const cap = parseCaption(c, sayMap, `${where}, Text ${ci + 1}`, captionStyle)
         // "gapBefore": die Pause vor dieser Textzeile bekommt genau diese Laenge (gekuerzt oder
@@ -311,7 +360,8 @@ export function normalize(script) {
           const ch = typeof c.chapter === 'number' ? { n: c.chapter } : c.chapter
           if (!ch || typeof ch !== 'object' || Array.isArray(ch)) fail(`${w2} muss eine Zahl oder { "n": ..., "word": ... } sein`)
           onlyKeys(ch, KEYS.chapter, w2)
-          if (!Number.isInteger(ch.n) || ch.n < 0 || ch.n > progress.words.length) fail(`${w2}: "n" muss eine ganze Zahl von 0 bis ${progress.words.length} sein (0 = kein Kapitel, Leiste abgedunkelt)`)
+          // -1: die Leiste verschwindet (das Endbild im Vorbild hat keine Leiste mehr)
+          if (!Number.isInteger(ch.n) || ch.n < -1 || ch.n > progress.words.length) fail(`${w2}: "n" muss eine ganze Zahl von -1 bis ${progress.words.length} sein (0 = kein Kapitel, Leiste abgedunkelt; -1 = Leiste weg)`)
           const wi = ch.word ?? 0
           if (!Number.isInteger(wi) || wi >= cap.words.length || wi < -cap.words.length) fail(`${w2}: "word" ${wi} gibt es nicht, die Textzeile hat ${cap.words.length} Wörter`)
           cap.chapter = { n: ch.n, word: wi < 0 ? wi + cap.words.length : wi, offset: ch.offset == null ? 0 : num(ch.offset, -2, 2, `${w2}: "offset"`) }
@@ -319,14 +369,14 @@ export function normalize(script) {
         cap.scene = si; cap.part = pi; cap.k = ci; cap.id = `s${si + 1}${rawParts.length > 1 ? 'abcdefgh'[pi] : ''}.${ci + 1}`
         caps.push(cap); return caps.length - 1
       })
-      return { component: p.component, params: p.params || {}, anchors: p.anchors || {}, caps: idx, enter, camera, ...(sounds.length ? { sounds } : {}) }
+      return { component: p.component, params: p.params || {}, anchors: p.anchors || {}, caps: idx, enter, camera, ...(sounds.length ? { sounds } : {}), ...(lead != null ? { lead } : {}) }
     })
     scenes.push({ parts })
   })
   if (progress && !caps.some(c => c.chapter)) fail('"progress" braucht mindestens eine Textzeile mit "chapter" (dort beginnt Kapitel 1); ohne bliebe die Leiste unsichtbar')
   const spoken = caps.flatMap(c => c.say).join(' ')
   return {
-    meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, sound, mix, poster: script.poster ?? null, captionStyle, pace, progress,
+    meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, sound, mix, poster: script.poster ?? null, captionStyle, pace, progress, look,
     scenes, caps, spoken, words: caps.reduce((n, c) => n + c.words.length, 0)
   }
 }
@@ -334,10 +384,12 @@ export function normalize(script) {
 /** Wort-Zeiten ohne Stimme: 0,36 s pro Wort, damit ein Entwurf nichts kostet. */
 export function estimateTimes(norm) {
   const T = norm.timing; let t = T.lead
+  // "timing.draft": eigenes Tempo, und "gapBefore" ersetzt die Pause vor seiner Textzeile (siehe normalize)
+  const D = T.draft, step = D ? D.step : T.step
   return norm.caps.map((c, i) => {
-    if (i > 0) t += T.capPause + (norm.caps[i - 1].scene !== c.scene ? T.scenePause : 0)
-    const row = c.words.map((_, k) => +(t + k * T.step).toFixed(3))
-    t = row[row.length - 1] + T.step
+    if (i > 0) t += D ? (c.gapBefore != null ? c.gapBefore : D.pause) : T.capPause + (norm.caps[i - 1].scene !== c.scene ? T.scenePause : 0)
+    const row = c.words.map((_, k) => +(t + k * step).toFixed(3))
+    t = row[row.length - 1] + step
     return row
   })
 }
@@ -400,7 +452,7 @@ export function timeline(norm, times) {
   const scenes = norm.scenes.map((sc, n) => ({
     index: n,
     s: n === 0 ? 0 : caps[sc.parts[0].caps[0]].t[0] - T.sceneLead,
-    parts: sc.parts.map((p, j) => ({ ...p, s: j === 0 ? null : caps[p.caps[0]].t[0] - (p.enter === 'cut' ? T.cutLead : T.sceneLead) }))
+    parts: sc.parts.map((p, j) => ({ ...p, s: j === 0 ? null : caps[p.caps[0]].t[0] - (p.lead ?? (p.enter === 'cut' ? T.cutLead : T.sceneLead)) }))
   }))
   scenes.forEach((sc, n) => {
     sc.e = n + 1 < scenes.length ? scenes[n + 1].s : caps[caps.length - 1].e

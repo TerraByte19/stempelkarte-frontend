@@ -81,7 +81,7 @@ selbst an seine Kunden schickt, ist C3.
 
 | Nr. | Aussage | Wortlaut der Landing Page | Schlüssel | Im Video |
 |---|---|---|---|---|
-| C3 | Der Laden kann seinen Kunden Push-Nachrichten schicken (Push-Kampagnen an Kundengruppen, planbar, mit Vorlagen). Sie erscheinen als Mitteilung der Karte auf dem Handy. Text höchstens 160 Zeichen; nur in Tarifen mit Kampagnen. | "Push-Kampagnen an Kundengruppen", "Push-Kampagnen, planbar, mit Vorlagen" | `lp_price_c_kampagnen`, `lp_price_f_kampagnen`, `lp_price_f_gruppen` | kein Bild (eine Mitteilung des Ladens auf dem Sperrbildschirm bekommt `phone-3d` gerade; bis dahin nur in begleiteten Sitzungen) |
+| C3 | Der Laden kann seinen Kunden Push-Nachrichten schicken (Push-Kampagnen an Kundengruppen, planbar, mit Vorlagen). Sie erscheinen als Mitteilung der Karte auf dem Handy. Text höchstens 160 Zeichen; nur in Tarifen mit Kampagnen. | "Push-Kampagnen an Kundengruppen", "Push-Kampagnen, planbar, mit Vorlagen" | `lp_price_c_kampagnen`, `lp_price_f_kampagnen`, `lp_price_f_gruppen` | `phone-3d` `"mode": "lock"` mit `"message"` (Mitteilung des Ladens auf dem Sperrbildschirm); `iso-street` `"phoneUi": "message"` (der Laden tippt, die Mitteilung kommt auf der Straße an). Beide seit 19.11.2026 |
 
 Zu C3: Am 19.11.2026 vom Betreiber bestätigt ("Wir können auch Nachrichten
 schreiben"). Im Backend `controller/KampagnenController.java` und

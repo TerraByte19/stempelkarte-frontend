@@ -41,6 +41,9 @@ async function build(state) {
 
   const norm = normalize(data.script), TL = timeline(norm, data.times), DUR = TL.duration, S = TL.scenes
   const stage = document.getElementById('stage'), capsEl = document.getElementById('caps'), progEl = document.getElementById('prog')
+  // "look": "neon" (fast schwarze Nacht des Vorbilds): Buehne und Grund dunkel statt lila. Die 3D-Welt liest es
+  // aus ctx.look (engine/kit3d.js). Ohne "look" bekommt die Buehne keine Klasse und bleibt Pixel fuer Pixel gleich.
+  if (norm.look !== 'standard') { stage.classList.add('look-' + norm.look); document.documentElement.classList.add('look-' + norm.look) }
 
   // ---- Animationen
   const anims = []
@@ -133,7 +136,8 @@ async function build(state) {
     const LEAD = 0.12
     progEl.classList.add('words')
     const ev = TL.caps.filter(c => c.chapter).map(c => ({ t: Math.max(0, c.t[c.chapter.word] + c.chapter.offset - LEAD), n: c.chapter.n, cap: c.id, word: c.words[c.chapter.word] })).sort((a, b) => a.t - b.t)
-    state.progress = { words: norm.progress.words, events: ev.map(e => ({ ...e, t: +e.t.toFixed(3) })) }
+    state.progress = { words: norm.progress.words, style: norm.progress.style, events: ev.map(e => ({ ...e, t: +e.t.toFixed(3) })) }
+    if (norm.progress.style === 'worte') return wordBarWorte(ev)
     const words = norm.progress.words.map((w, i) => {
       const st = el('div', 'st'), p = el('div', 'p', '<i></i>'), b = el('b'); b.textContent = w
       st.append(p, b); progEl.append(st); dots.push(p)
@@ -142,11 +146,11 @@ async function build(state) {
     const OFF = { opacity: 0.42, color: '#FFFFFF', textShadow: '0 0 0px rgba(185,176,255,0)' }
     const ON = { opacity: 1, color: BRAND.lilac, textShadow: '0 0 22px rgba(185,176,255,0.85)' }
     const DONE = { opacity: 0.78, color: '#FFFFFF', textShadow: '0 0 0px rgba(185,176,255,0)' }
-    // Ganze Leiste: unsichtbar bis zum ersten Kapitel, abgedunkelt bei Kapitel 0
+    // Ganze Leiste: unsichtbar bis zum ersten Kapitel, abgedunkelt bei Kapitel 0, weg bei -1
     const bar = [[0, { opacity: 0 }]]
     let lit = 0
     for (const e of ev) {
-      const target = e.n === 0 ? 0.38 : 1
+      const target = e.n === 0 ? 0.38 : e.n < 0 ? 0 : 1
       if (target !== lit) { bar.push([e.t, { opacity: lit }, EASE.OUT], [e.t + 0.3, { opacity: target }]); lit = target }
     }
     key(progEl, bar)
@@ -164,6 +168,85 @@ async function build(state) {
       const first = ev.find(e => e.n === w.n)
       if (first) pop(w.p.firstChild, first.t, 0.38)
     }
+  }
+
+  // ---- Wortleiste im Stil "worte" (seit 19.11.2026, Nachbau "zwei Cafés" Fassung 2): wie im Vorbild nur
+  // gesperrte Grossbuchstaben mit Punkten dazwischen, ohne Stempelfelder. Nur das aktuelle Kapitel leuchtet
+  // hellblau, erledigte werden wieder grau (etwas heller als kommende), Kapitel 0 laesst alle grau stehen (die
+  // Leiste bleibt da), -1 blendet sie aus (Endbild). Warum eigen und nicht "stempel" mit anderen Farben: der
+  // Betreiber fand Fassung 1 "wie unsere alten Videos"; die Stempelfelder waren genau das Merkmal.
+  function wordBarWorte(ev) {
+    progEl.classList.add('worte')
+    const words = norm.progress.words.map((w, i) => {
+      const st = el('div', 'st'), b = el('b'); b.textContent = w
+      if (i > 0) { const dot = el('i', 'sep'); dot.textContent = '\u00B7'; progEl.append(dot) }
+      st.append(b); progEl.append(st)
+      return { b, n: i + 1 }
+    })
+    const OFF = { opacity: 0.3, color: '#FFFFFF', textShadow: '0 0 0px rgba(70,100,255,0)' }
+    const ON = { opacity: 1, color: '#8AA2FC', textShadow: '0 0 18px rgba(70,100,255,0.95)' }
+    const DONE = { opacity: 0.55, color: '#FFFFFF', textShadow: '0 0 0px rgba(70,100,255,0)' }
+    const bar = [[0, { opacity: 0 }]]
+    let lit = 0
+    for (const e of ev) {
+      const target = e.n < 0 ? 0 : 1
+      if (target !== lit) { bar.push([e.t, { opacity: lit }, EASE.OUT], [e.t + 0.3, { opacity: target }]); lit = target }
+    }
+    key(progEl, bar)
+    for (const w of words) {
+      const fr = [[0, OFF]]
+      let cur = OFF, seen = false
+      for (const e of ev) {
+        if (e.n < 0) continue
+        const next = e.n === w.n ? ON : (seen || e.n > w.n) ? DONE : OFF
+        if (e.n === w.n) seen = true
+        if (next !== cur) { fr.push([e.t, cur, EASE.OUT], [e.t + 0.25, next]); cur = next }
+      }
+      key(w.b, fr)
+    }
+  }
+
+  // ---- Tafeln im Stil "box" (captionStyle.box, seit 19.11.2026): wie im Vorbild weisse, fette Woerter, alle gleich
+  // gross, jedes erscheint mit der Stimme (kurz grau, dann weiss) an seinem festen Platz, die Tafel baut sich so
+  // auf und bleibt stehen, bis die naechste kommt. Schluesselwoerter stehen in einem gefuellten Kasten (blau, mit
+  // ** orange). Gemessen am Vorbild: rund 84 px Schrift, Zeilenabstand 102 px, erste Zeile ab 314 px (look.md).
+  const BOX_SIZE = norm.captionStyle.boxSize || 84, BOX_LINE = Math.min(1.2, 101 / BOX_SIZE)
+  function boxCaption(c, first) {
+    const box = el('div', 'capw capb'); box.dataset.cap = c.id
+    capsEl.append(box)
+    c.chunks.forEach((ch, i) => {
+      const chunk = el('div', 'chunk'), spans = []
+      let row = null, firstRow = null
+      ch.words.forEach((k, j) => {
+        if (!row || (j > 0 && c.brk[k])) { row = el('div', 'row'); if (BOX_LINE < 1.2) row.style.lineHeight = BOX_LINE.toFixed(3); chunk.append(row); if (!firstRow) firstRow = row }
+        const sp = el('span', 'w' + (c.key[k] ? ' key' + (c.warm[k] ? ' warm' : '') : '')); sp.textContent = c.words[k]
+        sp.dataset.size = BOX_SIZE * c.scale; sp.style.fontSize = sp.dataset.size + 'px'; row.append(sp); spans.push({ sp, k, top: row === firstRow })
+      })
+      box.append(chunk)
+      // Zu breite Zeile: alle Woerter der Tafel im selben Verhaeltnis kleiner (wie im Modus "wort")
+      const width = () => Math.max(...[...chunk.children].map(r => [...r.children].reduce((w, sp) => { const m = getComputedStyle(sp); return w + sp.offsetWidth + parseFloat(m.marginLeft) + parseFloat(m.marginRight) }, 0)))
+      let f = 1, w = width()
+      for (let n = 0; w > capRoom && n < 30; n++) {
+        f = Math.floor(f * Math.min(0.98, capRoom / w) * 1000) / 1000
+        for (const { sp } of spans) sp.style.fontSize = (sp.dataset.size * f).toFixed(1) + 'px'
+        w = width()
+      }
+      const text = [...chunk.children].map(r => [...r.children].map(sp => sp.textContent).join(' ')).join(' / ')
+      ch.fit = f; ch.text = text
+      const least = cls => { const v = spans.filter(x => x.sp.classList.contains('key') === cls).map(x => parseFloat(x.sp.style.fontSize)); return v.length ? +Math.min(...v).toFixed(1) : null }
+      state.capFit.push({ id: c.id, text, factor: f, width: Math.round(w), word: least(false), keyWord: least(true) })
+      const last = i === c.chunks.length - 1, out = last ? 0.07 : 0.001
+      // Einstieg ("instant" an der ersten Textzeile): die erste Zeile der ersten Tafel steht ab Bild 0
+      const hook = c.instant && first && i === 0
+      if (hook) { chunk.style.opacity = 1; key(chunk, [[ch.e, { opacity: 1 }], [ch.e + out, { opacity: 0 }]]) }
+      else key(chunk, [[ch.s - 0.001, { opacity: 0 }], [ch.s, { opacity: 1 }], [ch.e, { opacity: 1 }], [ch.e + out, { opacity: 0 }]])
+      for (const { sp, k, top } of spans) {
+        if (hook && top) { sp.style.opacity = 1; continue }
+        const t = c.t[k] - 0.03
+        if (c.key[k]) key(sp, [[t, { opacity: 0, scale: 0.92 }, EASE.OUT], [t + 0.12, { opacity: 1, scale: 1 }]])
+        else key(sp, [[t, { opacity: 0, color: '#8C8C99' }, EASE.OUT], [t + 0.06, { opacity: 1, color: '#8C8C99' }], [t + 0.2, { opacity: 1, color: '#FFFFFF' }]])
+      }
+    })
   }
 
   // ---- Textzeilen oben. Zeilen mit "role" zeichnet der Baustein selbst.
@@ -219,7 +302,7 @@ async function build(state) {
 
   for (const c of TL.caps) {
     if (c.role) continue
-    if (c.mode === 'wort') { wortCaption(c, c === TL.caps.find(x => !x.role)); continue }
+    if (c.mode === 'wort') { (c.box ? boxCaption : wortCaption)(c, c === TL.caps.find(x => !x.role)); continue }
     const box = el('div', 'cap'); box.dataset.cap = c.id; let k = 0
     // "instant": der ganze Satz steht auf einmal da statt Wort fuer Wort. Bei der
     // allerersten Textzeile schon im ersten Bild: dort entscheidet sich, ob jemand
@@ -373,6 +456,8 @@ async function build(state) {
         // Ende der Blende ganz stehen und dunkelt nicht ab (kit3d run)
         nextEnter: j + 1 < sc.parts.length ? sc.parts[j + 1].enter : null,
         isFirst: n === 0, isLast: n === S.length - 1, rest,
+        // Aussehen der Welt ("look" im Skript): "standard" oder "neon" (engine/kit3d.js liest es)
+        look: norm.look,
         w: (c, k) => {
           const cap = caps[c < 0 ? c + caps.length : c]
           if (!cap) throw new Error(`${by}: Text ${c + 1} gibt es nicht`)

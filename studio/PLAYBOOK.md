@@ -489,6 +489,10 @@ Oben steht immer nur eine Tafel, jede löst die vorige im Takt der Stimme ab.
   "zwei Cafés" lief jedes Bild beim Wechsel 0,3 bis 0,5 s durchs Dunkle (Helligkeit 50 auf 33), am Handy wie
   ein Blinzeln. Nicht für 2D-Teile mit durchsichtigem Grund (der alte Teil schiene durch).
 
+- `"lead": 0.55` an einem Teil (nicht am ersten einer Szene, seit 21.11.2026): so viele Sekunden vor seinem ersten Wort
+  beginnt der Teil (0,1 bis 1,2; Vorgabe 0,3, mit `"cut"` 0,1). Im Nachbau "zwei Cafés" beginnt so die Blende ins
+  Schlussbild wie im Vorbild 0,55 s vor "Kommentiere", ohne das Wort zu verschieben.
+
 - `"camera": [ ... ]` an einem Teil oder einer Szene:
 
   ```json
@@ -710,6 +714,61 @@ kippen. Alle bis zum Bildrand gezeichnet, je Teil ein Zustand (`show`,
   in der Wallet, ohne Ton und ohne Anker `card`), für einen zweiten, kurzen
   Teil nach einem Schnitt, in dem nur ein Stempel landet:
   `{ "before": 5, "after": 6, "scan": false, "rise": false, "drop": false }`
+
+### Aussehen des Vorbilds "zwei Cafés" als Schalter (Fassung 2, seit 19.11.2026 abends)
+
+Der Betreiber sah in Fassung 1 des Nachbaus "unsere Videos von vorher" und wollte es "mehr wie er". Dafür gibt
+es Schalter, die alle aus sind, solange ein Skript sie nicht setzt (`tools/test_nachbau_v2.mjs`,
+`tools/test_3d_nachbau_v2.mjs`, beide in `selftest.mjs`). Beispiel: `videos/2026-11-21-zwei-cafes-v2`,
+Messungen im Scratchpad `tappi-nachbau-v2/look.md`.
+
+- Skript: `"look": "neon"` (fast schwarze Nacht, kaltes Blau gegen warmes Orange, niedrige dunkle Stadt),
+  `"captionStyle": { "mode": "wort", "box": true }` (weiße Wörter gleich groß, `*Wort` im blauen Kasten,
+  `**Wort` im orangen, `/` zweite Zeile der Tafel), `"progress": { ..., "style": "worte" }` (gesperrte Wörter,
+  nur das aktuelle Kapitel blau; `"chapter": -1` blendet die Leiste aus), `"timing": { "draft": { "step": 0.29,
+  "pause": 0.3 } }` (Entwurf ohne Stimme in einem eigenen Tempo, `gapBefore` zählt dann mit).
+- `iso-street` (Duell): `"camera"`: `"descent"` (Sinkflug, Anker `pan`), `"front"`, `"top"`, `"kran"`;
+  `"tags"`, `"boards"`, `"crowd"` bis 12; `"phoneUi"`: `"lock"` (Sperrbildschirm, C1) oder `"message"` mit
+  `"message"` (der Laden schreibt, C3; nie "SMS"/"WhatsApp").
+- `iso-shop`: `"roof"` (Haus hebt ab), `"view": "haus"` (ganzer Raum von oben), `"standing"`, `"tone"`
+  (`"kalt"`/`"warm"`, nur mit neon), `"phoneUi": "wallet"` (flaches Handy: QR, "Zu Apple Wallet hinzufügen",
+  Wallet, kein Download), `"trash"` (Korb, Papierkarte und E-Mail fallen hinein; nur ohne Kunden).
+- `phone-3d`: `"message"` im Modus `"lock"` (Mitteilung des Ladens statt der Erinnerung, C3).
+- `cta-comment`: `"look": "partikel"` (Feld leuchtender Personen-Symbole, Stichwort riesig).
+
+**Fassung 3 (seit 20.11.2026, nach dem Review "6 von 10": sechs Überblendungen statt drei, Kamera bis 0,5 s
+neben dem Vorbild, Dach als Blende in einen Kasten im Schwarzen).** Das Vorbild ist EINE Einstellung; dafür gibt
+es `iso-street` `"camera": "reise"`: die ganze Geschichte in einem Teil (Sinkflug, Schwenk, heran, Front und
+Obergeschoss des eigenen Ladens heben ab und geben den vollen Raum frei, Wallet, zurück auf die Straße mit
+Sperrbildschirm, Fenster mit der Nachricht, Fahrt zum Laden gegenüber, dessen Dach abhebt, Korb mit Papierkarte
+und E-Mail, Kran, Name). Anker `pan`, `roof`, `wallet` ... `kran` (Vorgabe: Sekunde im Vorbild ab Anfang des
+Teils; im Skript an Wörter hängen, **immer mit `offset`, auch 0**, sonst erbt der Anker den Versatz der
+Vorgabe). Mit "reise": hohle, größere Läden (`kit.shop({ hollow })`), kein Brunnenplatz, Verkehr, graue
+Figuren; `"phoneUi"` bleibt leer. Dazu `"captionStyle": { ..., "boxSize": 92 }` (Tafelschrift, Vorgabe 84),
+in "neon" ist der Name nach rund einer Sekunde wieder aus und die Tafeln mit Tasse stehen unter den Wörtern.
+Test: `tools/test_3d_nachbau_v3.mjs` (in `selftest.mjs`). Ein Teil von 34 s rechnet rund 40 Minuten.
+
+**Fassung 3, Runde 1 (21.11.2026, nach dem Review mit Stimme).** Alles nur mit `"camera": "reise"` (alte Videos bleiben
+Pixel für Pixel gleich, geprüft an drei Videos gegen HEAD): an jeder Straße bis 48 m beidseitig Laternen mit Schein (rund
+alle 9 m, statt elf, von denen fünf leuchteten), geparkte Autos in den Lichtkegeln (nie auf einer Fahrspur des Verkehrs, nie
+vor dem eigenen Laden), jedes vierte Fenster hell, Häuser heller und mehr Himmels- und Mondlicht (die untere Bildhälfte lag
+bei Helligkeit 3 bis 14, im Vorbild 16 bis 27), Kamera weiter weg (Front 72 m, Räume 72 bis 76 m und 66 bis 70 m), Fahrt zum
+Laden gegenüber in zwei Stücken, Kran schnell los, Räume gedämpft (graulila und altrosa, feine Kacheln, Menütafeln, Uhr),
+der Schein vor der Front geht mit dem Deckel, Name ohne Logo, blau und groß bei y 900, dunkler Korb auf dem Gehweg (geht mit
+dem Deckel), roter Bus mit Fenstern mitten im Bild, Tafeln 25 % größer. Neu und für alle Videos nutzbar (Vorgabe wie vorher):
+`"lead"` an einem Teil (siehe "Bildwechsel") und in `engine/phone-ui.js` die Option `veil` (wie stark die Straße hinter dem
+Fenster "message" abdunkelt, Vorgabe 0,55; "reise" nimmt 0,42).
+
+**Fassung 3, Runde 2 (22.11.2026).** Wieder nur mit `"camera": "reise"` (drei alte Videos an je vier Zeitpunkten Pixel für
+Pixel gleich wie HEAD): beide Läden stehen jetzt im Norden an derselben Ost-West-Straße, Fronten nach Süden, links und rechts
+der Nord-Süd-Straße wie im Vorbild (vorher lagen die Straßen als schräges X im Bild); der hohle Laden ist zur Kreuzung hin
+offen, in den eigenen Raum schaut die Kamera von Südwesten (Theke links), in den gegenüber von Südosten. Von oben ist die
+Kamera rund doppelt so weit weg (die Cafés waren doppelt so groß wie im Vorbild). Dächer fast schwarz (eine unbeleuchtete
+Platte je Dach), Himmelslicht fast neutral: neu in `engine/kit3d.js` ist `nightLights({ sky })` (Vorgabe die Palette, alle
+anderen Bausteine unverändert). Dazu nachgestellte Zeiten (Wallet bis "back" + 0,35 s, Deckel senkt sich 0,5 s nach "back",
+Sperrbildschirm blendet ins Fenster über, Name 0,9 s), ein Deckel, der fest aus dem Bild steigt, Schildchen 25 % größer und
+weg, solange der Name leuchtet, ein größerer Korb mit dunklem Mantel und ein Partikelfeld ("partikel"), das in der Mitte so
+hell ist wie im Vorbild.
 
 ### Wortleiste oben (`progress`, `chapter`) und Schriftzug über der Straße (seit 19.11.2026)
 
@@ -1421,6 +1480,8 @@ Textzeilen: mindestens 1, davon eine mit `"role": "cta"`. Datei: `components/cta
 | `bubble` | `""` | Wort in der Sprechblase. Leer = das Stichwort aus dem Text (ohne Satzzeichen) |
 | `brand` | `"Stampit"` | Schriftzug neben dem Logo |
 | `logo` | `true` | Logo und Schriftzug unten zeigen |
+| `tones` | `true` | Eigene Töne (pop auf dem Stichwort, chime am Logo). false, wenn das Skript Klänge aus der Bibliothek setzt |
+| `look` | `"standard"` | "standard" (lila Grund, Stichwort in der weißen Sprechblase) oder "partikel" (wie im Vorbild "zwei Cafés": schwarzer Grund voller kleiner leuchtender Personen-Symbole, die langsam treiben, darüber klein die Zeile über der Blase, das Stichwort riesig und weiß mit blauem Schein, darunter klein der Rest). "partikel" malt seinen Grund selbst und kann deshalb auch als Teil mit "enter": "kreuz" über das letzte Bild blenden |
 
 | Anker | Vorgabe | Wann |
 |---|---|---|
@@ -1540,9 +1601,16 @@ Textzeilen: mindestens 1. Datei: `components/iso-shop.js`
 | `customer` | `0` | Aussehen des Kunden als Zahl: 0 = heller Mantel (wie der Stammkunde in iso-street), jede andere Zahl ein anderes, festes Aussehen (Mantel, Haar, Haut, Frisur) |
 | `start` | `"counter"` | "counter": der Kunde steht schon an der Theke. "door": er kommt auf "enter" durch die Glastür herein und geht zur Theke. "none": kein Kunde, nur der Inhaber hinter der Theke (der leere Laden; braucht "phone": false und "bubble": false) |
 | `guests` | `0` | Gäste, die an Tischen sitzen und sich unterhalten (0 bis 6): ab 1 steht links ein zweiter Tisch. Für den vollen Laden ("bei uns ist Betrieb"); 0 = nur der leere Tisch vorn wie bisher |
+| `tone` | `""` | Nur mit "look": "neon" oben im Skript: "kalt" (das volle Café: Blaugrau, Kachelboden, kühles Licht) oder "warm" (das leere: Rostrot, gedimmt). Leer = "warm" mit "dim", sonst "kalt" |
+| `standing` | `0` | Gäste, die im Raum stehen und reden (0 bis 6), zusätzlich zu "guests": für das gedrängt volle Café |
+| `roof` | `false` | Am Anfang steht das Haus mit Dach und Obergeschossen über dem Laden; auf den Anker "roof" hebt es ab und gibt den Blick hinein frei (wie im Vorbild "zwei Cafés", ohne Schnitt) |
+| `phoneUi` | `""` | "wallet": rechts schiebt sich ein flaches Handy über das Bild (die 3D-Welt läuft dahinter weiter): erst der Scanner mit QR-Code (Anker "ui"), dann das Blatt mit der Karte und "Zu Apple Wallet hinzufügen" ("uiAdd"), dann die Wallet mit der Karte ("uiCard"); links springt ein durchgestrichenes Download-Zeichen auf ("uiNoApp"). Leer = keins |
+| `reward` | `"Gratis-Kaffee"` | Nur mit "phoneUi": die Belohnung auf der Karte im Handy ("10 Stempel = 1 Gratis-Kaffee") |
 | `dim` | `false` | Gedimmtes Licht: weniger Licht im Raum, Lampe über der Theke und Wandleuchten schwach, nur das Abendlicht fällt warm durchs Fenster. Für den leeren Laden gegenüber (mit "start": "none") |
 | `bubble` | `true` | Sprechblase mit dem Bestellten über dem Kunden (Anker "order"), in der ganzen Ansicht doppelt so groß, damit sie am Handy zu sehen ist |
 | `phone` | `true` | Der Kunde hält sein Handy mit der Karte, der Inhaber scannt es (Anker "scan", "stamp") |
+| `view` | `""` | "haus": der ganze Raum von weiter oben (46 statt 34 Grad), wie das aufgeschnittene Puppenhaus im Vorbild "zwei Cafés" (der Raum füllt die Bildbreite, die Straße davor ist zu sehen). Leer = der vermessene Ausschnitt um Theke, Schild und Tür. Nicht zusammen mit "close" |
+| `trash` | `false` | Ein großer Drahtkorb steigt mitten im Raum auf (Anker "trash"), darüber erscheinen eine Papier-Stempelkarte ("trashCard") und eine E-Mail ("trashMail"), beide schweben und fallen auf "trashDrop" hinein (wie im Vorbild "zwei Cafés": Papierkarten und E-Mails landen im Müll). Für den leeren Laden gegenüber, mit "start": "none" und ohne "paper" |
 | `paper` | `false` | Eine Papier-Stempelkarte liegt auf der Theke, links daneben steht ein Papierkorb (Anker "crumple": sie knüllt sich zusammen und fliegt in den Korb) |
 | `stamps` | `6` | Felder auf der Karte (Papier und Handy), 4 bis 10. Das letzte ist das Gratis-Feld |
 | `have` | `3` | Stempel, die schon auf der Karte sind (0 bis stamps - 1). Auf "stamp" kommt im Handy einer dazu |
@@ -1593,15 +1661,21 @@ Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 | `push` | `0.05` | Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25). Sie endet immer im selben Ausschnitt, in dem beide Läden ganz zu sehen sind; mehr "push" heißt nur, dass sie weiter weg anfängt |
 | `orbit` | `7` | Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12) |
 | `after` | `true` | Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf ("nah": nur der eigene leuchtet auf). false, wenn die Szene gleich danach endet |
-| `crowd` | `0` | Nur Duell: so viele Gäste (0 bis 6) stehen vor dem eigenen Laden, drei in einer Schlange zur Tür, die übrigen in einer Gruppe daneben, und unterhalten sich. Für "bei uns ist Betrieb" |
+| `crowd` | `0` | Nur Duell: so viele Gäste (0 bis 12) stehen vor dem eigenen Laden, drei in einer Schlange zur Tür, die übrigen in einer Gruppe daneben, ab 7 auch auf dem Gehweg und an der Bordsteinkante davor, und unterhalten sich. Für "bei uns ist Betrieb" |
+| `camera` | `"standard"` | Nur Duell: der Kameraweg. "standard" (langsam heran, ein paar Grad gedreht; "push" und "orbit" gelten). "descent": hoch über beiden Läden sinkt sie langsam, auf den Anker "pan" schwenkt sie auf den eigenen Laden und fährt nah und tiefer an seine Front. "front": schräg hoch über dem eigenen Laden, der links im Bild steht (rechts Platz für "phoneUi": "lock"). "top": fast senkrecht über beiden Läden, treibt kaum. "kran": von der Front des Ladens gegenüber in 2,4 s hinauf bis fast senkrecht über beide, dann wie "top". "reise" (Fassung 3): die ganze Geschichte des Vorbilds "zwei Cafés" in einer Einstellung ohne Schnitt: Sinkflug, Schwenk, heran, Dach des eigenen Ladens hebt ab (voller Raum, flaches Handy mit Wallet), zurück auf die Straße (Sperrbildschirm), Fenster mit "message", Fahrt zum Laden gegenüber, dessen Dach abhebt (leerer Raum, Korb mit Papierkarte und E-Mail), Kran hinauf, Name. Größere hohle Läden, Verkehr, kein Brunnenplatz, graue Figuren; Anker siehe Liste. "phoneUi" bleibt dabei leer (die drei Handybilder gehören zu "reise") |
+| `tags` | `""` | Nur Duell: kleine Schildchen über den Läden, "eigener,gegenüber", z. B. "CAFÉ 2,CAFÉ 1" (je höchstens 12 Zeichen), mit einem Punkt in der Ladenfarbe. Springen auf den Anker "tags" auf; mit "camera": "descent" verschwinden sie beim Schwenk. Leer = keine |
+| `phoneUi` | `""` | Nur Duell: "lock" (C1): rechts schiebt sich ein flaches Handy herein (Anker "ui"), auf "uiNotify" wacht der Sperrbildschirm mit der Mitteilung der Karte auf ("Noch {left} Stempel bis: {reward}"), eine gestrichelte Linie führt von einem leuchtenden Punkt auf der Straße (dem Kunden, gut 10 m von der Tür) zum Handy. "message" (C3): ein Fenster des eigenen Ladens über der abgedunkelten Straße (Anker "ui"), die Nachricht aus "message" tippt sich ("uiType"), "Senden" wird "Gesendet" ("uiSend"), das Fenster geht ("uiOut"), und über Leuten auf der Straße springen Mitteilungen der Karte mit dieser Nachricht auf. Leer = keins |
+| `message` | `"Frischer Kuchen ist da!"` | Nur "phoneUi": "message": die Nachricht des Ladens (1 bis 60 Zeichen; nie "SMS" oder "WhatsApp", PRODUKT.md N9) |
+| `boards` | `""` | Nur Duell: über beiden Läden springt je eine gleiche dunkle Tafel mit diesem Symbol auf (cup, bread, scissors, star, heart, check, kebab), Anker "boards"; auf "lines" zeichnen sich drei Zeilen mit Preisen darauf, auf "boardsOut" verschwinden beide. Für "gleicher Kaffee, gleiche Preise". Leer = keine |
 | `dark` | `0` | Nur Duell: wie viel dunkler der gedimmte Laden wird (0 bis 1, zusätzlich zu "after"). 1 = Schaufenster, Tür und Schild fast aus, kein Licht davor: der leere Laden. Mit Stammkunde gilt das für den Laden, den er verlassen hat, ab "enter"; ohne ("walker": false) für den Laden gegenüber, von Anfang an (der eigene leuchtet dann) |
 | `tones` | `true` | Eigene Töne (Duell: thud beim Zerbrechen, ding an der Tür; "nah": ding und pop, wenn sich die Karte meldet, chime an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt |
 | `mode` | `"duell"` | "duell": zwei Läden, Herz, Stammkunde geht rüber (wie bisher). "nah": C1, Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch {left} Stempel bis: {reward}" (Anker "walk", "near", "turn", "enter"). In "nah" gibt es kein Herz; "heart", "walker", "back", "from" gelten nur in "duell" |
 | `frame` | `"laden"` | Nur "nah": "laden" = derselbe Ausschnitt wie im Duell (beide Läden, Kreuzung, der Ring links angeschnitten). "stadt" = weiter weg und höher: der ganze Ring, beide Läden und mehr Stadt, für "das Handy macht das von selbst" (PRODUKT.md C1: "ohne dass du etwas tust"). Nie dazu sagen, der Laden sehe nicht, wo jemand ist: das ist nicht belegt (N2) |
 | `then` | `"weiter"` | Nur "nah": was der Kunde nach der Benachrichtigung tut. "weiter": geht noch ein paar Schritte und bleibt mit dem Handy stehen. "dreht": bleibt stehen, dreht sich zur Tür und geht auf sie zu (Anker "turn"). "rein": dazu geht er hinein, die Glocke klingelt, der Laden leuchtet auf (Anker "turn" und "enter") |
-| `reward` | `"Gratis-Döner"` | Nur "nah": die Belohnung, kurz (höchstens etwa 16 Zeichen), steht in der Benachrichtigung: "Noch 2 Stempel bis: Gratis-Döner" |
-| `left` | `2` | Nur "nah": wie viele Stempel noch fehlen (1 bis 20). 0 = die Karte ist voll, dann steht dort "{reward} wartet auf dich" (C1) |
-| `clock` | `"18:42"` | Nur "nah": Uhrzeit oben auf dem Sperrbildschirm in der Blase |
+| `reward` | `"Gratis-Döner"` | Nur "nah" und "phoneUi": "lock": die Belohnung, kurz (höchstens etwa 16 Zeichen), steht in der Benachrichtigung: "Noch 2 Stempel bis: Gratis-Döner" |
+| `left` | `2` | Nur "nah" und "phoneUi": "lock": wie viele Stempel noch fehlen (1 bis 20). 0 = die Karte ist voll, dann steht dort "{reward} wartet auf dich" (C1) |
+| `clock` | `"18:42"` | Nur "nah" und "phoneUi": "lock": Uhrzeit oben auf dem Sperrbildschirm |
+| `date` | `""` | Nur "phoneUi": "lock": Datumszeile über der Uhr (höchstens etwa 24 Zeichen), leer = keine |
 
 | Anker | Vorgabe | Wann |
 |---|---|---|
@@ -1650,6 +1724,7 @@ Textzeilen: mindestens 1. Datei: `components/phone-3d.js`
 | `reward` | `"Gratis-Döner"` | Die Belohnung, kurz (höchstens etwa 16 Zeichen). Steht auf der Karte ("10 Stempel = 1 Gratis-Döner") und in der Benachrichtigung ("Noch 2 Stempel bis: Gratis-Döner") |
 | `line` | `""` | Eigene Belohnungszeile auf der Karte (höchstens etwa 30 Zeichen). Leer = "{stamps} Stempel = 1 {reward}" |
 | `left` | `2` | Nur "lock": wie viele Stempel noch fehlen. 0 = die Karte ist voll, dann steht "{reward} wartet auf dich" da (C1) |
+| `message` | `""` | Nur "lock": eine Nachricht des Ladens statt der Erinnerung (C3: der Laden schreibt seinen Kunden, sie kommt als Mitteilung der Karte an), z. B. "Frischer Kuchen ist da!" (1 bis 60 Zeichen, nie "SMS" oder "WhatsApp"). Leer = die Erinnerung aus C1 mit "left" und "reward" |
 | `clock` | `"18:42"` | Nur "lock": Uhrzeit auf dem Sperrbildschirm |
 | `date` | `"Dienstag, 17. November"` | Nur "lock": Datumszeile über der Uhr, ohne Jahr (höchstens etwa 24 Zeichen) |
 | `when` | `"jetzt"` | Nur "lock": Zeitangabe rechts oben in der Benachrichtigung |

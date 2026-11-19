@@ -5,7 +5,10 @@
 //           Scan-Rahmen faehrt ueber den QR-Code und setzt einen Haken (A1, A3, B1, B2)
 //   lock    der Sperrbildschirm: die Karte meldet sich von selbst, genau mit dem Wortlaut aus C1
 //           ("Noch 2 Stempel bis: Gratis-Döner" oder "Gratis-Döner wartet auf dich"), mit einem
-//           sanften Lichtpuls. Nie "vibriert" o. ae. im Bild (PRODUKT.md, C1)
+//           sanften Lichtpuls. Nie "vibriert" o. ae. im Bild (PRODUKT.md, C1). Mit "message" steht dort statt
+//           der Erinnerung eine Nachricht des Ladens (C3, seit 19.11.2026 Klasse 1: der Laden schreibt seinen
+//           Kunden, die Nachricht kommt als Mitteilung der Karte an), z. B. "Frischer Kuchen ist da!"; Absender
+//           bleibt der Laden. Gesperrt sind "SMS" und "WhatsApp" (N9) und alles ueber 60 Zeichen
 //   design  die Karte entsteht: erst grau, auf "paint" die Farben, auf "logo" das Logo, auf "symbol"
 //           die Symbole in den Stempelfeldern (D1), wie die Option "design" von wallet-pass
 // Warum ein eigener Baustein statt wallet-pass/lock-notification: der Betreiber will "so wenig 2D wie
@@ -75,6 +78,7 @@ export default {
     reward: { default: 'Gratis-Döner', doc: 'Die Belohnung, kurz (höchstens etwa 16 Zeichen). Steht auf der Karte ("10 Stempel = 1 Gratis-Döner") und in der Benachrichtigung ("Noch 2 Stempel bis: Gratis-Döner")' },
     line: { default: '', doc: 'Eigene Belohnungszeile auf der Karte (höchstens etwa 30 Zeichen). Leer = "{stamps} Stempel = 1 {reward}"' },
     left: { default: 2, doc: 'Nur "lock": wie viele Stempel noch fehlen. 0 = die Karte ist voll, dann steht "{reward} wartet auf dich" da (C1)' },
+    message: { default: '', doc: 'Nur "lock": eine Nachricht des Ladens statt der Erinnerung (C3: der Laden schreibt seinen Kunden, sie kommt als Mitteilung der Karte an), z. B. "Frischer Kuchen ist da!" (1 bis 60 Zeichen, nie "SMS" oder "WhatsApp"). Leer = die Erinnerung aus C1 mit "left" und "reward"' },
     clock: { default: '18:42', doc: 'Nur "lock": Uhrzeit auf dem Sperrbildschirm' },
     date: { default: 'Dienstag, 17. November', doc: 'Nur "lock": Datumszeile über der Uhr, ohne Jahr (höchstens etwa 24 Zeichen)' },
     when: { default: 'jetzt', doc: 'Nur "lock": Zeitangabe rechts oben in der Benachrichtigung' },
@@ -131,7 +135,14 @@ export default {
     const D = DEV[p.device], android = p.device === 'android'
     const line = p.line || `${p.stamps} Stempel = 1 ${p.reward}`
     // Wortlaut aus C1 (Backend: ApplePassService, sperrbildschirmOrte), Stempel ist Einzahl wie Mehrzahl
-    const msg = p.left > 0 ? `Noch ${p.left} Stempel bis: ${p.reward}` : `${p.reward} wartet auf dich`
+    const msg = p.message ? String(p.message).trim() : p.left > 0 ? `Noch ${p.left} Stempel bis: ${p.reward}` : `${p.reward} wartet auf dich`
+    // "message" (C3): kurz, ohne Gedankenstrich, nie "SMS"/"WhatsApp" (N9), und nur auf dem Sperrbildschirm
+    if (p.message) {
+      if (p.mode !== 'lock') ctx.fail('"message" gibt es nur mit "mode": "lock" (die Nachricht kommt als Mitteilung auf dem Sperrbildschirm an)')
+      if (!msg || msg.length > 60) ctx.fail('"message" muss 1 bis 60 Zeichen haben (auf dem Sperrbildschirm stehen höchstens zwei Zeilen)')
+      if (/\b(sms|whatsapp)\b/i.test(msg)) ctx.fail('"message": eine Nachricht des Ladens heißt nie SMS oder WhatsApp (PRODUKT.md N9)')
+      if (DASH.test(msg)) ctx.fail('"message" enthält einen Gedankenstrich. Normalen Bindestrich nehmen.')
+    }
     const title = p.walletTitle || D.title
     for (const [k, v] of [['shop', p.shop], ['reward', p.reward], ['line', line], ['date', p.date], ['walletTitle', title]]) if (DASH.test(v)) ctx.fail(`"${k}" enthält einen Gedankenstrich. Normalen Bindestrich nehmen.`)
     if (/vibrier|brumm|summ/i.test(msg + line)) ctx.fail('Die Benachrichtigung sagt nie, dass das Handy vibriert (PRODUKT.md, C1)')

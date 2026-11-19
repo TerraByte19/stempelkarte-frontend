@@ -87,10 +87,22 @@ const BUB = [2.0, 1]      // Sprechblase: ganze Ansicht / Nahaufnahme
 
 // Farben des Innenraums: Waende im Stampit-Lila, eine Stufe heller als die Stadt (drinnen ist Licht an),
 // Holz warm, damit der Raum gemuetlich wirkt und das Lila nicht kalt wird
-const IN = {
+const IN_STD = {
   wall: '#4C4196', wallLow: '#30296F', trim: '#8F84E8', cap: '#D9D2FF', floor: '#7A5A6C',
   wood: '#8E5E4E', woodDark: '#5A3A35', top: '#F2EADB', counterTop: '#6F5552', dark: '#1B1542', metal: '#CFCBEA'
 }
+// "look": "neon" (Fassung 2 des Nachbaus "zwei Cafés", 19.11.2026): Innenraum wie im Vorbild. "kalt" ist das volle
+// Café (kuehles Blaugrau, gemessen #4E5484 bis #546096, Boden schwarz-weiss gekachelt), "warm" das leere (Rostrot
+// #6C4230, Altrosa #725454, gedimmt). Ohne "look" gilt IN_STD, das Bild bleibt, wie es war.
+const IN_NEON = {
+  kalt: { wall: '#5E6AA6', wallLow: '#2E365C', trim: '#8F9FE0', cap: '#D9E1FF', floor: '#2A2E3E', tileHi: '#D2D7E6', tileLo: '#2A2F44', rug: '#2B3F9A',
+    wood: '#5A5872', woodDark: '#2E2C3E', top: '#E9ECF4', counterTop: '#3A3F56', dark: '#0E1020', metal: '#CFD6EA', moon: '#7F9BFF', lamp: '#DCE6FF', capGlow: '#22307A' },
+  warm: { wall: '#8A5640', wallLow: '#4A2E26', trim: '#B88066', cap: '#F0D2BA', floor: '#3A2826', tileHi: null, tileLo: null, rug: '#5A3428',
+    wood: '#6E4A3C', woodDark: '#3A2620', top: '#E6D8C6', counterTop: '#4A3430', dark: '#1A1012', metal: '#D8CCC0', moon: '#FF9A50', lamp: '#FFC890', capGlow: '#5A2A18' }
+}
+// Stehende Gaeste ("standing", Fassung 2): im Vorbild ist das volle Café gedraengt voll. Plaetze [x, z] links und
+// vorn, keiner naeher als 1,5 m am Weg des Kunden und an den Tischen, keiner rechts vom vorderen Tisch (Knopfspalte)
+const STAND = [[-6.1, 2.1], [-5.7, 4.7], [-10.3, 2.9], [-6.6, 8.0], [-9.7, 7.1], [-2.9, 7.4]]
 
 // Branchen: Symbol (Vorschlag), Name (Vorschlag), Tafel, was in der Sprechblase steht
 const BRANCH = {
@@ -125,9 +137,16 @@ export default {
     customer: { default: 0, doc: 'Aussehen des Kunden als Zahl: 0 = heller Mantel (wie der Stammkunde in iso-street), jede andere Zahl ein anderes, festes Aussehen (Mantel, Haar, Haut, Frisur)' },
     start: { default: 'counter', doc: '"counter": der Kunde steht schon an der Theke. "door": er kommt auf "enter" durch die Glastür herein und geht zur Theke. "none": kein Kunde, nur der Inhaber hinter der Theke (der leere Laden; braucht "phone": false und "bubble": false)' },
     guests: { default: 0, doc: 'Gäste, die an Tischen sitzen und sich unterhalten (0 bis 6): ab 1 steht links ein zweiter Tisch. Für den vollen Laden ("bei uns ist Betrieb"); 0 = nur der leere Tisch vorn wie bisher' },
+    tone: { default: '', doc: 'Nur mit "look": "neon" oben im Skript: "kalt" (das volle Café: Blaugrau, Kachelboden, kühles Licht) oder "warm" (das leere: Rostrot, gedimmt). Leer = "warm" mit "dim", sonst "kalt"' },
+    standing: { default: 0, doc: 'Gäste, die im Raum stehen und reden (0 bis 6), zusätzlich zu "guests": für das gedrängt volle Café' },
+    roof: { default: false, doc: 'Am Anfang steht das Haus mit Dach und Obergeschossen über dem Laden; auf den Anker "roof" hebt es ab und gibt den Blick hinein frei (wie im Vorbild "zwei Cafés", ohne Schnitt)' },
+    phoneUi: { default: '', doc: '"wallet": rechts schiebt sich ein flaches Handy über das Bild (die 3D-Welt läuft dahinter weiter): erst der Scanner mit QR-Code (Anker "ui"), dann das Blatt mit der Karte und "Zu Apple Wallet hinzufügen" ("uiAdd"), dann die Wallet mit der Karte ("uiCard"); links springt ein durchgestrichenes Download-Zeichen auf ("uiNoApp"). Leer = keins' },
+    reward: { default: 'Gratis-Kaffee', doc: 'Nur mit "phoneUi": die Belohnung auf der Karte im Handy ("10 Stempel = 1 Gratis-Kaffee")' },
     dim: { default: false, doc: 'Gedimmtes Licht: weniger Licht im Raum, Lampe über der Theke und Wandleuchten schwach, nur das Abendlicht fällt warm durchs Fenster. Für den leeren Laden gegenüber (mit "start": "none")' },
     bubble: { default: true, doc: 'Sprechblase mit dem Bestellten über dem Kunden (Anker "order"), in der ganzen Ansicht doppelt so groß, damit sie am Handy zu sehen ist' },
     phone: { default: true, doc: 'Der Kunde hält sein Handy mit der Karte, der Inhaber scannt es (Anker "scan", "stamp")' },
+    view: { default: '', doc: '"haus": der ganze Raum von weiter oben (46 statt 34 Grad), wie das aufgeschnittene Puppenhaus im Vorbild "zwei Cafés" (der Raum füllt die Bildbreite, die Straße davor ist zu sehen). Leer = der vermessene Ausschnitt um Theke, Schild und Tür. Nicht zusammen mit "close"' },
+    trash: { default: false, doc: 'Ein großer Drahtkorb steigt mitten im Raum auf (Anker "trash"), darüber erscheinen eine Papier-Stempelkarte ("trashCard") und eine E-Mail ("trashMail"), beide schweben und fallen auf "trashDrop" hinein (wie im Vorbild "zwei Cafés": Papierkarten und E-Mails landen im Müll). Für den leeren Laden gegenüber, mit "start": "none" und ohne "paper"' },
     paper: { default: false, doc: 'Eine Papier-Stempelkarte liegt auf der Theke, links daneben steht ein Papierkorb (Anker "crumple": sie knüllt sich zusammen und fliegt in den Korb)' },
     stamps: { default: 6, doc: 'Felder auf der Karte (Papier und Handy), 4 bis 10. Das letzte ist das Gratis-Feld', same: 'Stempelzahl' },
     have: { default: 3, doc: 'Stempel, die schon auf der Karte sind (0 bis stamps - 1). Auf "stamp" kommt im Handy einer dazu' },
@@ -147,6 +166,19 @@ export default {
       stamp: { cap: -1, word: -1, doc: 'Der Stempel springt mit dem Symbol des Ladens über dem Handy auf (Ton: pop), auf der Karte im Handy ist ein Stempel mehr. Mindestens 0,7 s nach "scan" (sonst wird er mit Warnung auf 0,7 s danach gelegt)' }
     } : {}),
     ...(p.close ? { zoom: { at: 'start', offset: 0, doc: 'Die Kamera fährt in 0,9 s an "close" heran. Am Anfang des Teils: von Anfang an nah' } } : {}),
+    ...(p.roof ? { roof: { cap: 0, word: 0, doc: 'Dach und Obergeschosse heben ab (0,8 s) und geben den Blick in den Laden frei' } } : {}),
+    ...(p.trash ? {
+      trash: { cap: -1, word: 0, doc: 'Der Drahtkorb steigt aus dem Boden auf (0,45 s)' },
+      trashCard: { cap: -1, word: 1, doc: 'Die Papier-Stempelkarte erscheint über dem Korb und schwebt' },
+      trashMail: { cap: -1, word: 2, doc: 'Die E-Mail (Briefumschlag mit @) erscheint daneben und schwebt' },
+      trashDrop: { cap: -1, word: -1, doc: 'Karte und E-Mail fallen in den Korb (0,5 s)' }
+    } : {}),
+    ...(p.phoneUi ? {
+      ui: { cap: 1, word: 0, doc: 'Das flache Handy schiebt sich rechts ins Bild, im Scanner der QR-Code des Ladens' },
+      uiAdd: { cap: 1, word: -1, doc: 'Das Handy zeigt das Blatt mit der Karte und "Zu Apple Wallet hinzufügen"' },
+      uiCard: { cap: 2, word: -1, doc: 'Die Karte liegt in der Wallet (Stempel wie "have")' },
+      uiNoApp: { cap: -1, word: 0, doc: 'Links springt ein durchgestrichenes Download-Zeichen auf (keine App)' }
+    } : {}),
     ...(p.leaves ? { leave: { at: 'end', offset: -4.6, doc: 'Der Kunde dreht sich um und geht vorn um die Theke herum durch die Glastür hinaus (rund 4,1 s bis zur Tür, Ton: ding an der Tür)' } } : {})
   }),
   demo: {
@@ -162,6 +194,13 @@ export default {
     // Ohne Kunden gibt es niemanden, der bestellt, sein Handy hinhaelt oder hinausgeht
     if (p.start === 'none' && (p.phone || p.bubble || p.leaves)) ctx.fail('"start": "none" (kein Kunde) geht nur mit "phone": false, "bubble": false und "leaves": false')
     if (!Number.isInteger(p.guests) || p.guests < 0 || p.guests > 6) ctx.fail('"guests" muss eine ganze Zahl von 0 bis 6 sein')
+    if (!Number.isInteger(p.standing) || p.standing < 0 || p.standing > STAND.length) ctx.fail(`"standing" muss eine ganze Zahl von 0 bis ${STAND.length} sein`)
+    if (!['', 'kalt', 'warm'].includes(p.tone)) ctx.fail('"tone" muss "", "kalt" oder "warm" sein')
+    if (!['', 'haus'].includes(p.view)) ctx.fail('"view" muss "" oder "haus" sein')
+    if (p.view && p.close) ctx.fail('"view": "haus" (ganzer Raum) und "close" (Nahaufnahme) widersprechen sich')
+    if (p.trash && (p.paper || p.start !== 'none')) ctx.fail('"trash" (Korb mitten im Raum) geht nur mit "start": "none" und "paper": false: sonst stünde der Kunde davor, und zwei Papierkarten erzählten dasselbe zweimal')
+    if (!['', 'wallet'].includes(p.phoneUi)) ctx.fail('"phoneUi" muss "" oder "wallet" sein')
+    if (p.phoneUi && p.phone) ctx.fail('"phoneUi" (flaches Handy über dem Bild) und "phone" (Handy in der Hand des Kunden) zusammen zeigen zwei Handys: "phone": false setzen')
     if (p.dim && p.guests > 0) ctx.warn('"dim" (gedimmt, der leere Laden) zusammen mit "guests": gemeint ist meist das eine oder das andere')
     if (!['', 'counter', 'phone'].includes(p.close)) ctx.fail('"close" muss "", "counter" oder "phone" sein')
     if (!Number.isInteger(p.stamps) || p.stamps < 4 || p.stamps > 10) ctx.fail('"stamps" muss eine ganze Zahl von 4 bis 10 sein')
@@ -180,13 +219,20 @@ export default {
     if (menu.length !== 3) ctx.fail('"menu" braucht genau drei Wörter (oder leer für die Vorgabe der Branche)')
 
     const K = await import('../engine/kit3d.js')
-    const { PAL, rng, clamp01, smooth, lerp, walkCycle } = K
+    const { rng, clamp01, smooth, lerp, walkCycle } = K
     // Dunst legt der Baustein selbst an (bei der Stadt draussen), mit eigenem Abstand: der Dunst des Baukastens
     // ist fuer die Kreuzung bemessen und haette die Rueckwand des Ladens schon eingetruebt
     // "dim": niedrigere Belichtung dunkelt Waende, Boden und Figuren gleichmaessig ab; Schild und Tafel (ohne
     // Tonemapping) bleiben lesbar. Nur Lampen herunterzudrehen reichte nicht: das Himmelslicht traegt den Raum.
-    const kit = await K.createKit(ctx, { name: 'iso-shop', prefix: 'ish', exposure: p.dim ? 0.74 : 1.05, fog: false, calm: 760 })
+    // "neon": heller belichtet (der Raum ist im Vorbild nach den Laeden das Hellste im Bild; mit 1,05 lag er in der
+    // dunklen Palette bei Helligkeit 30 von 255 statt rund 80)
+    const NEON = ctx.look === 'neon'
+    const kit = await K.createKit(ctx, { name: 'iso-shop', prefix: 'ish', exposure: NEON ? (p.dim ? 1.0 : 1.45) : p.dim ? 0.74 : 1.05, fog: false, calm: 760 })
     const { THREE, RoundedBoxGeometry, scene, col, std, lam, glow } = kit
+    // Palette der Welt ("look"); mit "neon" der Innenraum des Vorbilds (IN_NEON, kalt oder warm)
+    const PAL = kit.PAL, NE = !!PAL.neon, TONE = p.tone || (p.dim ? 'warm' : 'kalt')
+    if (p.tone && !NE) ctx.warn('"tone" gilt nur mit "look": "neon" oben im Skript')
+    const IN = NE ? IN_NEON[TONE] : IN_STD
     const V = (x, y, z) => new THREE.Vector3(x, y, z)
 
     // ---------------------------------------------------------------- kleine Helfer
@@ -224,6 +270,8 @@ export default {
     const icon = {
       brand: await icoImg(p.icon, PAL.brand), white: await icoImg(p.icon, '#FFFFFF', 2.2),
       faint: await icoImg(p.icon, 'rgba(185,176,255,.45)'), paperOn: await icoImg(p.icon, PAL.paper, 2.4),
+      // Stempel auf der Papierkarte im Korb ("trash"): Tinte auf Pappe
+      ink: await icoImg(p.icon, '#6A4A2A', 2.4),
       order: await icoImg(BR.order, PAL.brand, 2.1), check: await svgImg(ICONS.check, '#FFFFFF', 3), checkBrand: await svgImg(ICONS.check, PAL.brand, 3)
     }
 
@@ -236,8 +284,8 @@ export default {
     const RC = V(-3.5, 0, 3.5) // Mitte des Raums im Bild: dorthin zielt das Abendlicht
     const lights = kit.nightLights({
       hemi: 1.25,
-      moon: { color: '#FFB06A', intensity: 3.4, pos: [RC.x + 10, 13.5, RC.z - 17], box: 13, near: 4, far: 60, size: 2048 },
-      fill: { color: PAL.fill, intensity: 0.7, pos: [-30, 22, 32] }
+      moon: { color: NE ? IN.moon : '#FFB06A', intensity: NE ? 2.6 : 3.4, pos: [RC.x + 10, 13.5, RC.z - 17], box: 13, near: 4, far: 60, size: 2048 },
+      fill: { color: PAL.fill, intensity: 0.7, pos: [-30, 22, 32] }, ...(NE ? { hemi: 1.3 } : {})
     })
     lights.moon.target.position.copy(RC); lights.moon.shadow.bias = -0.0004; lights.moon.shadow.normalBias = 0.03
     // Warmes Licht ueber der Theke (das einzige echte Punktlicht: es faerbt Figuren, Theke und Handys)
@@ -246,7 +294,7 @@ export default {
     // Mond und Sonne sahen innen gleich aus, nur Schild und Theke waren anders).
     if (p.dim) { lights.hemi.intensity *= 0.55; lights.fill.intensity *= 0.5 }
     const LAMP = p.dim ? 9 : 26
-    const lamp = kit.pointLight(scene, [-2.3, 3.4, 2.5], '#FFD9A8', LAMP, 9, 1.5)
+    const lamp = kit.pointLight(scene, [-2.3, 3.4, 2.5], NE ? IN.lamp : '#FFD9A8', LAMP, 9, 1.5)
 
     // ---------------------------------------------------------------- Dach, das nur Schatten wirft
     // Ohne Dach fiel das Abendlicht ueber die Mauerkronen auf den halben Boden (eine helle Flaeche vorn, die
@@ -321,8 +369,13 @@ export default {
         }
         g.fillStyle = 'rgba(40,20,40,.5)'; g.fillRect(0, fz(z), FN, 3)
       }
+      // "neon", "kalt": schwarz-weisse Kacheln wie im Vorbild (ueber die Dielen gemalt)
+      if (NE && IN.tileHi) {
+        const TL = 0.62
+        for (let z = FZ0, r = 0; z < FZ0 + FS; z += TL, r++) for (let x = FX0, c = 0; x < FX0 + FS; x += TL, c++) { g.fillStyle = (r + c) % 2 ? IN.tileHi : IN.tileLo; g.fillRect(fx(x), fz(z), TL * fm + 1, TL * fm + 1) }
+      }
       // Teppich vor der Theke: dort steht der Kunde, und der Platz liest sich als "hier wird bedient"
-      g.fillStyle = '#5A4BB0'; g.beginPath(); g.roundRect(fx(-4.1), fz(3.2), 3.9 * fm, 1.9 * fm, 0.3 * fm); g.fill()
+      g.fillStyle = NE ? IN.rug : '#5A4BB0'; g.beginPath(); g.roundRect(fx(-4.1), fz(3.2), 3.9 * fm, 1.9 * fm, 0.3 * fm); g.fill()
       g.strokeStyle = IN.trim; g.lineWidth = 0.07 * fm; g.beginPath(); g.roundRect(fx(-3.95), fz(3.35), 3.6 * fm, 1.6 * fm, 0.22 * fm); g.stroke()
       // Fussmatte innen vor der Tuer
       g.fillStyle = '#6A4E8C'; g.beginPath(); g.roundRect(fx(DOOR.x - 0.9), fz(0.15), 1.8 * fm, 1.05 * fm, 0.12 * fm); g.fill()
@@ -338,7 +391,7 @@ export default {
     floor.rotation.x = -Math.PI / 2; floor.renderOrder = 2
 
     // ---------------------------------------------------------------- Waende (aufgeschnitten, mit Oeffnungen)
-    const wallM = std('#FFFFFF', { vertexColors: true, color: IN.wall, roughness: 0.9 }), lowM = S(IN.wallLow, { roughness: 0.85 }), trimM = S(IN.trim, { roughness: 0.6 }), capM = S(IN.cap, { roughness: 0.7, emissive: '#3A3180', emissiveIntensity: 0.25 })
+    const wallM = std('#FFFFFF', { vertexColors: true, color: IN.wall, roughness: 0.9 }), lowM = S(IN.wallLow, { roughness: 0.85 }), trimM = S(IN.trim, { roughness: 0.6 }), capM = S(IN.cap, { roughness: 0.7, emissive: NE ? IN.capGlow : '#3A3180', emissiveIntensity: 0.25 })
     // Rueckwand: Stuecke um Tuer und Fenster, jedes [x0, x1, y0, y1]
     const dx0 = DOOR.x - DOOR.w / 2, dx1 = DOOR.x + DOOR.w / 2
     const backParts = [[-ROOM, dx0, 0, HW], [dx0, dx1, DOOR.h, HW], [dx1, WIN.x0, 0, HW], [WIN.x0, WIN.x1, 0, WIN.y0], [WIN.x0, WIN.x1, WIN.y1, HW], [WIN.x1, WT, 0, HW]]
@@ -649,6 +702,16 @@ export default {
         f.fig.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true } })
         sitters.push({ f, ph: k * 1.9 + 0.4, cup: k % 2 === 0 })
       })
+    }
+
+    // Stehende Gaeste ("standing", Fassung 2): reden miteinander, zur Theke gewandt
+    for (let k = 0; k < p.standing; k++) {
+      const RG = rng(7310 + k * 2203), pk = arr => arr[Math.floor(RG() * arr.length)]
+      const f = kit.person({ coat: pk(LOOK.coat.slice(1)), legs: pk(LOOK.legs), hair: pk(LOOK.hair), skin: pk(LOOK.skin), scale: 1.3, y0: 0 })
+      const [x, z] = STAND[k]
+      f.at(x, z, Math.atan2(-2.4 - x, 2.4 - z) + (k % 2 ? 0.5 : -0.4))
+      f.fig.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true } })
+      sitters.push({ f, ph: k * 1.3 + 2.1, cup: k % 3 === 0, stand: true })
     }
 
     // ---------------------------------------------------------------- Handys
@@ -967,14 +1030,18 @@ export default {
     // Nahaufnahme der Theke steiler von oben (50 Grad): die Waende mit Schild und Tafel gehen aus dem Bild, statt
     // oben angeschnitten hinter den Textzeilen zu stehen. Die Handys nur wenig steiler (36 Grad): bei 50 Grad
     // rueckte die Kamera so nah heran, dass der Stempel das ganze Handy zudeckte.
-    const AZ = 45, EL = 34, ELDROP = 1.5, EL_C = p.close === 'counter' ? 50 : 36
+    // "view": "haus" (Fassung 2 des Nachbaus): steiler und weiter, der ganze Raum wie ein aufgeschnittenes Puppenhaus
+    const AZ = 45, EL = p.view === 'haus' ? 46 : 34, ELDROP = 1.5, EL_C = p.close === 'counter' ? 50 : 36
     // Oben und rechts im Bild, in Weltrichtungen, fuer einen Blickwinkel (Grad): Stempel und Haken steigen
     // entlang "oben im Bild" auf, nicht senkrecht. Senkrecht lagen sie in der steilen Nahaufnahme auf dem Handy.
     const camUp = (el, out = V(0, 0, 0)) => { const e = THREE.MathUtils.degToRad(el), a = THREE.MathUtils.degToRad(AZ); return out.set(Math.sin(e) * Math.sin(a), Math.cos(e), -Math.sin(e) * Math.cos(a)) }
     const camRight = V(Math.cos(THREE.MathUtils.degToRad(AZ)), 0, Math.sin(THREE.MathUtils.degToRad(AZ)))
     const STAMP = { rise: [1.0, 0.82], size: [1.4, 1] } // ganze Ansicht / Nahaufnahme: im ganzen Laden groesser, sonst nur ein Punkt
     const camBase = { push: p.push, orbit: p.orbit, az: AZ, el: EL, elDrop: ELDROP }
-    const wide = [...signCorners, ...menuCorners, V(dx0 - 0.1, DOOR.h + 0.15, 0), V(dx0 - 0.1, 0, 0), V(DOOR.x, 2.6, 1.2), V(DOOR.x, 0, 1.2),
+    const wide = p.view === 'haus'
+      // Der ganze Raum: Boden bis vor die Tische und beide Mauerkronen (im Vorbild fuellt das Puppenhaus die Breite)
+      ? [V(-10.5, 0, 0), V(0.4, 0, 0), V(-10.5, 0, 9.2), V(0.4, 0, 9.2), V(-10.5, HW, 0), V(0.4, HW, 0), V(0.4, HW, 6)]
+      : [...signCorners, ...menuCorners, V(dx0 - 0.1, DOOR.h + 0.15, 0), V(dx0 - 0.1, 0, 0), V(DOOR.x, 2.6, 1.2), V(DOOR.x, 0, 1.2),
       V(SPOT.x - 0.5, 0, SPOT.z + 0.4), V(SPOT.x + 0.4, 0, SPOT.z + 0.4), V(SPOT.x, 3.35, SPOT.z), V(OWNER.x, 2.65, OWNER.z), V(CNT.x0, 0, CNT.z1), V(CNT.x1, 0, CNT.z1)]
     // Mitte des gehobenen Handys (gemessen: isoShop.spots) und seine Ecken: Oberkante zum Inhaber, um 28 Grad
     // gekippt. Die erste Schaetzung lag 20 cm daneben, und in der Nahaufnahme ragte das Handy 4 px unter die Sperrzone.
@@ -988,7 +1055,9 @@ export default {
     if (p.phone) wide.push(...overPhone(EL, 0))
     // Sprechblase in voller Groesse ueber dem Kunden an der Theke (Kopf 2,24 m, Blase BUB-fach)
     if (p.bubble) for (const sx of [-0.45, 0.35]) wide.push(V(SPOT.x, 2.6 + 0.67 * BUB[0], SPOT.z).addScaledVector(camRight, sx * BUB[0]))
-    const FW = kit.fitFrame(wide, { ...camBase, aim: kit.aimAcross(wide, 1.6) })
+    // "haus": der Raum fuellt die Breite und steht hoeher (im Vorbild y 0,3 bis 0,75 des Bildes); rechts darf er unter
+    // das flache Handy und die Knopfspalte reichen, dort steht nur Boden und Wand, nichts zu lesen
+    const FW = kit.fitFrame(wide, { ...camBase, aim: kit.aimAcross(wide, 1.6), ...(p.view === 'haus' ? { rect: { left: 20, right: 1060, top: 400, bottom: 1300 } } : {}) })
     const aimW = kit.aimAcross(wide, 1.6)
     let FC = null, aimC = null
     if (p.close) {
@@ -1008,8 +1077,13 @@ export default {
     const zoomK = t => FC ? (T.zoom <= ctx.s + 0.05 ? 1 : smooth((t - T.zoom) / 0.9)) : 0
     const setCam = t => {
       const u = K.travel(t, ctx.s, ctx.e), z = zoomK(t)
-      const a = THREE.MathUtils.degToRad(AZ + p.orbit / 2 - p.orbit * u), e = THREE.MathUtils.degToRad(lerp(EL, EL_C, z) - ELDROP * u)
-      aimW(a, tW); let dist = FW.dist * (1 + p.push * (1 - u)), dxo = FW.dx, dyo = FW.dy
+      // "haus" mit "roof": vor dem Abheben flacher (36 Grad, man sieht die leuchtende Front statt des Dachs), mit dem
+      // Abheben steigt die Kamera auf 46 Grad, wie im Vorbild, wo sie beim Abheben ueber den Raum faehrt
+      // Dazu steht sie vorher weiter weg (1,7-fach): das Haus steht dann als Laden an der Strasse im Bild statt als
+      // dunkles Dach, das das ganze Bild fuellt (erste Probe)
+      const kLift = p.view === 'haus' && cover ? 1 - smooth((t - cover.tR + 0.1) / 1.1) : 0, lift = -10 * kLift
+      const a = THREE.MathUtils.degToRad(AZ + p.orbit / 2 - p.orbit * u), e = THREE.MathUtils.degToRad(lerp(EL, EL_C, z) - ELDROP * u + lift)
+      aimW(a, tW); let dist = FW.dist * (1 + p.push * (1 - u)) * (1 + 0.7 * kLift), dxo = FW.dx, dyo = FW.dy
       if (FC) { aimC(a, tC); tW.lerp(tC, z); dist = Math.pow(dist, 1 - z) * Math.pow(FC.dist * (1 + p.push * 0.5 * (1 - u)), z); dxo = lerp(FW.dx, FC.dx, z); dyo = lerp(FW.dy, FC.dy, z) }
       tgt.copy(tW)
       camera.position.set(tgt.x - dist * Math.cos(e) * Math.sin(a), tgt.y + dist * Math.sin(e), tgt.z + dist * Math.cos(e) * Math.cos(a))
@@ -1048,8 +1122,116 @@ export default {
     const pop = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 + 2.2 * Math.pow(x - 1, 3) + 1.2 * Math.pow(x - 1, 2) // Ueberschwingen wie EASE.BACK
     const bump = x => x <= 0 || x >= 1 ? 0 : Math.sin(Math.PI * x)
     const live = {} // fuer Tests: was gerade zu sehen ist
+    // ---------------------------------------------------------------- Dach, das abhebt ("roof", Fassung 2)
+    // Ein Haus ueber dem ganzen Raum: Block mit Dach, Obergeschossen und leuchtendem Schaufensterband an den zwei
+    // Seiten zur Kamera. Auf "roof" steigt es in 0,8 s nach oben und blendet dabei aus: der Blick faellt in den
+    // Laden, ohne Schnitt (im Vorbild 9,1 bis 9,7 s). Es wirft keinen Schatten (der Schatten des Raums wird einmal
+    // gerechnet und muss ohne Haus stimmen) und steht nach dem Abheben unsichtbar.
+    let cover = null
+    if (p.roof) {
+      const tR = ctx.at('roof'), g = new THREE.Group(); scene.add(g)
+      const X0 = -ROOM - WT - 0.05, X1 = WT + 0.05, Z0 = -WT - 0.05, Z1 = ROOM + 0.05, HH = HW + (NE ? 3.2 : 6.2)
+      const wallC = NE ? (TONE === 'kalt' ? '#1E2338' : '#2E211E') : '#3A3170', mats = []
+      const mk = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = false; m.receiveShadow = false; g.add(m); mats.push(mat); mat.transparent = true; return m }
+      mk(new RoundedBoxGeometry(X1 - X0, HH, Z1 - Z0, 2, 0.12), lam(wallC), (X0 + X1) / 2, HH / 2, (Z0 + Z1) / 2)
+      mk(new RoundedBoxGeometry(X1 - X0 + 0.3, 0.4, Z1 - Z0 + 0.3, 2, 0.12), lam(NE ? '#14172A' : '#2A2260'), (X0 + X1) / 2, HH + 0.2, (Z0 + Z1) / 2)
+      const shopC = NE ? (TONE === 'kalt' ? '#9FB8FF' : '#FFB46A') : '#D9D2FF'
+      // Schaufensterband unten an beiden Seiten zur Kamera, darueber Fenster der Wohnungen (warm, manche aus)
+      mk(new THREE.PlaneGeometry(X1 - X0 - 1.2, 2.2), new THREE.MeshBasicMaterial({ color: shopC, toneMapped: false }), (X0 + X1) / 2, 1.5, Z1 + 0.02)
+      const side = mk(new THREE.PlaneGeometry(Z1 - Z0 - 1.2, 2.2), new THREE.MeshBasicMaterial({ color: shopC, toneMapped: false }), X0 - 0.02, 1.5, (Z0 + Z1) / 2); side.rotation.y = -Math.PI / 2
+      const winM = [new THREE.MeshBasicMaterial({ color: '#E8C48A' }), new THREE.MeshBasicMaterial({ color: NE ? '#0B0D16' : '#221B4A' })]
+      for (let f = 0; f < (NE ? 1 : 2); f++) for (let i = 0; i < 6; i++) {
+        const y = HW + 1.2 + f * 2.8, on = (i * 7 + f * 3) % 5 < 2
+        mk(new THREE.PlaneGeometry(1.1, 1.4), winM[on ? 0 : 1].clone(), X0 + 1.2 + i * 2.2, y, Z1 + 0.02)
+        const w2 = mk(new THREE.PlaneGeometry(1.1, 1.4), winM[(i + f) % 3 === 0 ? 0 : 1].clone(), X0 - 0.02, y, Z0 + 1.2 + i * 2.2); w2.rotation.y = -Math.PI / 2
+      }
+      // Schein vor dem Schaufenster auf dem Gehweg (additiv), damit das Haus wie der Laden auf der Strasse leuchtet
+      const halo = glow(NE ? (TONE === 'kalt' ? '#2F5BFF' : '#D0681E') : '#9F95FF', 16, V((X0 + X1) / 2, 0.5, Z1 + 2.5), 0.55)
+      cover = { g, mats, halo, tR }
+    }
+    // ---------------------------------------------------------------- Korb mit Papierkarte und E-Mail ("trash")
+    // Im Vorbild steigt im leeren Café ein grosser Drahtkorb auf, darueber schweben eine Papier-Stempelkarte und ein
+    // Briefumschlag und fallen hinein: "Papierkarten und E-Mails landen im Muell". Der kleine Papierkorb von "paper"
+    // ist dafuer zu klein (rund 60 px im ganzen Laden). Deshalb hier ein Korb in Spielzeuggroesse (2,6 m hoch) mitten
+    // im Raum, Karte und Umschlag als flache Tafeln, die immer zur Kamera schauen (so bleiben sie in jedem Winkel
+    // lesbar). Wirft keinen Schatten: der Schatten des Raums wird einmal gerechnet und muss ohne Korb stimmen.
+    let trash = null
+    if (p.trash) {
+      const T0 = { up: ctx.at('trash'), card: ctx.at('trashCard'), mail: ctx.at('trashMail'), drop: ctx.at('trashDrop') }
+      if (!(T0.card >= T0.up && T0.mail >= T0.card && T0.drop > T0.mail + 0.3)) ctx.fail(`"trash": Anker "trash", "trashCard", "trashMail", "trashDrop" in dieser Reihenfolge, fallen mindestens 0,3 s nach der E-Mail (jetzt ${[T0.up, T0.card, T0.mail, T0.drop].map(x => x.toFixed(2)).join(', ')} s)`)
+      const at0 = V(-6.9, 0, 6.2), BR = 1.9, BH2 = 4.4
+      const g = new THREE.Group(); g.position.copy(at0); scene.add(g)
+      // Drahtgitter: Rauten auf durchsichtigem Grund (alphaTest statt Mischen: kein Sortierproblem, keine Kosten)
+      const wire = kit.canvasTex(512, 256, (c, w, h) => {
+        c.strokeStyle = '#C9CCD6'; c.lineWidth = 7
+        for (let i = -16; i <= 32; i++) { c.beginPath(); c.moveTo(i * 32, 0); c.lineTo(i * 32 + h, h); c.stroke(); c.beginPath(); c.moveTo(i * 32, h); c.lineTo(i * 32 + h, 0); c.stroke() }
+      }, { sharp: true })
+      wire.wrapS = THREE.RepeatWrapping; wire.repeat.set(2, 1)
+      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(BR, BR * 0.8, BH2, 40, 1, true), std('#FFFFFF', { map: wire, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.5, metalness: 0.3, color: '#7C8090' }))
+      mesh.position.y = BH2 / 2; g.add(mesh)
+      const rimM = std(NE ? '#B8893C' : '#8F84E8', { roughness: 0.4, metalness: 0.5 })
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(BR, 0.07, 8, 48), rimM); rim.rotation.x = Math.PI / 2; rim.position.y = BH2; g.add(rim)
+      const foot = new THREE.Mesh(new THREE.TorusGeometry(BR * 0.8, 0.05, 8, 40), rimM); foot.rotation.x = Math.PI / 2; foot.position.y = 0.04; g.add(foot)
+      const bottom = new THREE.Mesh(new THREE.CircleGeometry(BR * 0.8, 32), lam('#1A1A22')); bottom.rotation.x = -Math.PI / 2; bottom.position.y = 0.03; g.add(bottom)
+      g.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false } })
+      // Papierkarte: Kopf "STEMPELKARTE", zehn Felder, drei mit dem Symbol des Ladens gestempelt (wie im Vorbild)
+      const cardTex = kit.canvasTex(640, 400, (c, w, h) => {
+        c.fillStyle = '#EFE3C4'; c.beginPath(); c.roundRect(0, 0, w, h, 28); c.fill()
+        c.strokeStyle = 'rgba(120,90,50,.35)'; c.lineWidth = 4; c.beginPath(); c.roundRect(14, 14, w - 28, h - 28, 20); c.stroke()
+        c.fillStyle = '#5A4630'; c.font = `700 34px ${ctx.B.body}`; c.textBaseline = 'middle'; c.fillText('STEMPELKARTE', 46, 66)
+        for (let i = 0; i < 10; i++) {
+          const x = 92 + (i % 5) * 114, y = 180 + Math.floor(i / 5) * 116
+          c.strokeStyle = '#7A6448'; c.lineWidth = 4; c.setLineDash([9, 8]); c.beginPath(); c.arc(x, y, 40, 0, Math.PI * 2); c.stroke(); c.setLineDash([])
+          if (i < 3) c.drawImage(icon.ink, x - 30, y - 30, 60, 60)
+        }
+      }, { sharp: true })
+      const mailTex = kit.canvasTex(560, 400, (c, w, h) => {
+        c.fillStyle = '#F4F5F8'; c.beginPath(); c.roundRect(0, 0, w, h, 22); c.fill()
+        c.strokeStyle = '#B9BCC8'; c.lineWidth = 7; c.lineJoin = 'round'
+        c.beginPath(); c.moveTo(18, 22); c.lineTo(w / 2, h * 0.56); c.lineTo(w - 18, 22); c.stroke()
+        c.beginPath(); c.moveTo(18, h - 22); c.lineTo(w * 0.4, h * 0.48); c.moveTo(w - 18, h - 22); c.lineTo(w * 0.6, h * 0.48); c.stroke()
+        c.fillStyle = '#8A8EA0'; c.font = `700 58px ${ctx.B.body}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('@', w * 0.82, h * 0.8)
+      }, { sharp: true })
+      const flat = (tex, w, h) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false, depthWrite: false, fog: false })); m.renderOrder = 9; m.visible = false; scene.add(m); return m }
+      const card = flat(cardTex, 3.5, 2.19), mail = flat(mailTex, 2.9, 2.07)
+      trash = { g, card, mail, T0, at0, BH2 }
+      kit.safeBox('trash', 'Korb')
+    }
+    // ---------------------------------------------------------------- Flaches Handy ueber dem Bild ("phoneUi")
+    if (p.phoneUi) {
+      const { buildPhoneUi } = await import('../engine/phone-ui.js')
+      await buildPhoneUi(ctx, { shop: p.shop, icon: p.icon, accent: p.accent, stamps: p.stamps, have: p.have, reward: p.reward,
+        t: { in: ctx.at('ui'), add: ctx.at('uiAdd'), card: ctx.at('uiCard'), noApp: ctx.at('uiNoApp') } })
+    }
     kit.run(t => {
+      if (cover) {
+        const k = smooth((t - cover.tR) / 0.8)
+        cover.g.visible = cover.halo.visible = k < 0.999
+        cover.g.position.y = 16 * k * k
+        for (const m of cover.mats) m.opacity = 1 - smooth((t - cover.tR - 0.2) / 0.6)
+        cover.halo.material.opacity = 0.55 * (1 - k)
+      }
       const { a, e } = setCam(t), zk = zoomK(t)
+      // ---- Korb mit Papierkarte und E-Mail ("trash"): Korb steigt auf (mit Ueberschwingen), Karte und Umschlag
+      // schweben schraeg ueber ihm und fallen auf "trashDrop" hinein; jede Stellung nur aus t
+      if (trash) {
+        const { T0: Tt, g, card, mail, at0, BH2 } = trash
+        const up = pop(clamp01((t - Tt.up) / 0.45))
+        g.visible = t >= Tt.up; g.scale.set(Math.max(0.01, up), Math.max(0.01, up), Math.max(0.01, up))
+        const fall = clamp01((t - Tt.drop) / 0.5), fallE = fall * fall
+        const put = (m, t0, dx, y0, tilt, ph) => {
+          const k = pop(clamp01((t - t0) / 0.35))
+          m.visible = t >= t0 && fall < 1
+          if (!m.visible) return
+          const bob = 0.08 * Math.sin((t - t0) * 2.2 + ph)
+          m.position.set(at0.x, lerp(BH2 + y0 + bob, BH2 * 0.55, fallE), at0.z).addScaledVector(camera.getWorldDirection(new THREE.Vector3()).cross(camera.up).normalize(), lerp(dx, 0, fallE))
+          m.quaternion.copy(camera.quaternion); m.rotateZ(tilt * (1 - fallE))
+          m.scale.setScalar(Math.max(0.01, k * lerp(1, 0.6, fallE)))
+        }
+        put(card, Tt.card, -1.9, 2.3, 0.1, 0); put(mail, Tt.mail, 1.9, 2.55, -0.12, 1.3)
+        if (g.visible) kit.setSafe('trash', kit.meshBox([g]))
+        else kit.setSafe('trash', null)
+      }
       const upNow = V(Math.sin(e) * Math.sin(a), Math.cos(e), -Math.sin(e) * Math.cos(a)), rightNow = V(Math.cos(a), 0, Math.sin(a))
       // ---- Kunde
       const w = where(t)
@@ -1105,7 +1287,7 @@ export default {
       for (const g2 of sitters) {
         const ph = t * 1.25 + g2.ph, talk = Math.max(0, Math.sin(ph)), lift = smooth(clamp01((Math.sin(ph * 0.55) - 0.35) / 0.4))
         g2.f.body.rotation.z = 0.035 * Math.sin(ph * 0.8)
-        g2.f.body.rotation.x = 0.06 + 0.03 * Math.sin(ph * 0.6)
+        g2.f.body.rotation.x = (g2.stand ? 0 : 0.06) + 0.03 * Math.sin(ph * 0.6)
         g2.f.armR.rotation.x = g2.cup ? lerp(-0.45, -1.75, lift) : -0.5 - 0.6 * talk
         g2.f.armR.rotation.z = g2.cup ? lerp(0, 0.35, lift) : 0.15 * talk
         g2.f.armL.rotation.x = -0.55 + 0.05 * Math.sin(ph * 1.3)
@@ -1234,6 +1416,10 @@ export default {
     kit.canvas.isoShop = {
       sign: { ...signInfo }, times: { ...T, walkIn, walkOut }, frames: { wide: FW, close: FC },
       live: () => ({ ...live }),
+      // Fassung 2 (tools/test_3d_nachbau_v2.mjs): Haus ueber dem Raum ("roof"), Korb mit Karte und E-Mail ("trash")
+      cover: () => cover ? { visible: cover.g.visible, y: +cover.g.position.y.toFixed(3) } : null,
+      trash: () => trash ? { bin: trash.g.visible ? +trash.g.scale.y.toFixed(3) : 0, card: trash.card.visible, mail: trash.mail.visible, cardY: +trash.card.position.y.toFixed(3) } : null,
+      camEl: () => +(Math.atan2(camera.position.y - tgt.y, Math.hypot(camera.position.x - tgt.x, camera.position.z - tgt.z)) * 180 / Math.PI).toFixed(2),
       // Kleinster Abstand (Meter) zwischen Kunde und Tuerblatt in diesem Bild; negativ = er steckt darin.
       // Wie doorGap in iso-street: der Test prueft damit die Tuer in 0,05-s-Schritten, ohne Bilder zu rechnen.
       doorGap: () => {

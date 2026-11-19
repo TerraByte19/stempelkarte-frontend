@@ -102,7 +102,7 @@ let times, voice = null
 report.elevenLabs = { chars, cached: false, wouldSpend: chars, spent: 0 }
 if (noVoice) {
   times = estimateTimes(norm)
-  log(`Stimme: aus (--no-voice), Zeiten geschätzt mit ${TIMING.step} s je Wort. Eine Aufnahme würde ${chars} Zeichen kosten.`)
+  log(`Stimme: aus (--no-voice), Zeiten geschätzt mit ${norm.timing.draft ? norm.timing.draft.step : TIMING.step} s je Wort${norm.timing.draft ? ' (timing.draft)' : ''}. Eine Aufnahme würde ${chars} Zeichen kosten.`)
 } else {
   const textFile = path.join(work, 'spoken.txt'), setFile = path.join(work, 'voice-settings.json'), py = path.join(STUDIO_ROOT, 'tools', 'voice.py')
   writeFileSync(textFile, norm.spoken); writeFileSync(setFile, JSON.stringify(norm.voice))

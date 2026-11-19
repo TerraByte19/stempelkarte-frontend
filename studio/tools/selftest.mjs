@@ -639,7 +639,13 @@ for (const [datei, kurz, was] of [
   ['test_3d_iso_street_naehe.mjs', '3d-naehe', 'iso-street "nah" (gleiche Pixel, Ring, Abstand zur Tür, Blase im Streifen und aus der Knopfspalte, Text, "stadt")'],
   // seit 19.11.2026 (Nachbau "zwei Cafés", Wunsch des Betreibers): Schriftzug ueber der Kreuzung und Wortleiste
   ['test_3d_iso_street_name.mjs', '3d-name', 'iso-street Schriftzug "name" (nicht oben als Tafel, Zünden, Kasten im Streifen und über den Schildern, gleiche Pixel, Ton, nicht in "nah")'],
-  ['test_wortleiste.mjs', 'leiste', 'Wortleiste "progress"/"chapter" (Skript streng, alte Stempelreihe unverändert, Kapitel, Abdunkeln, Lage)']
+  ['test_wortleiste.mjs', 'leiste', 'Wortleiste "progress"/"chapter" (Skript streng, alte Stempelreihe unverändert, Kapitel, Abdunkeln, Lage)'],
+  // seit 19.11.2026 abends (Nachbau "zwei Cafés" Fassung 2, "mach es mehr wie er"): Schalter fuer das Aussehen des
+  // Vorbilds, alle aus, solange ein Skript sie nicht setzt
+  ['test_nachbau_v2.mjs', 'v2-seite', 'Fassung 2: timing.draft, look neon, Tafeln "box", Leiste "worte", Schlussbild "partikel" (und ohne Schalter wie vorher)'],
+  ['test_3d_nachbau_v2.mjs', 'v2-3d', 'Fassung 2 in 3D: Nacht "neon", Kamerawege, Schildchen, Tafeln, Sperrbildschirm, Nachricht, Dach, Wallet, Korb, phone-3d "message"'],
+  // seit 20.11.2026 (Fassung 3 nach dem Review, 6 von 10): eine Einstellung statt sechs Ueberblendungen
+  ['test_3d_nachbau_v3.mjs', 'v3-3d', 'Fassung 3: Tafeln "boxSize", iso-street "reise" (Kamera an den Ankern, Deckel, Räume, Verkehr, kein Brunnenplatz, drei Handybilder ohne Doppelbild, Korb, Name aus, Tafeln unter den Wörtern, gleiche Pixel; Runde 1: Laternen und Autos, Fenster, Korb, Kran, Name, "veil", Teil-"lead"; Runde 2: beide Läden an einer Straße, Kamera von Süden, Theke links, Dachplatten, Himmelslicht "sky", Zeiten von Wallet, Deckel und Name, Schildchen, Korb, Partikelfeld)']
 ]) {
   const r = await run('node', [path.join(STUDIO_ROOT, 'tools', datei)], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
   process.stdout.write(r.out.split('\n').filter(l => l.startsWith('FEHLER')).map(l => `  [${kurz}] ` + l).join('\n') + (/^FEHLER/m.test(r.out) ? '\n' : ''))

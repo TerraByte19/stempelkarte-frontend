@@ -74,3 +74,23 @@ svg.ico { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: rou
 #prog.words .st { display: flex; align-items: center; gap: 10px; }
 #prog.words .p { width: 28px; height: 28px; border-width: 3px; flex: none; }
 #prog.words b { font: 600 24px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; color: #fff; opacity: .42; }
+
+/* "look": "neon" (seit 19.11.2026, Nachbau "zwei Cafés" Fassung 2): fast schwarze Nacht wie im Vorbild
+   (gemessen #000006 bis #0C0C18). Ohne "look" bekommt die Buehne keine Klasse. */
+html.look-neon, html.look-neon body { background: #03040A; }
+#stage.look-neon { background: linear-gradient(180deg, #03040A 0%, #070912 100%); }
+
+/* Tafeln im Stil "box" (captionStyle.box): weisse, fette Woerter wie im Vorbild (Hanken Grotesk 700 kommt Inter
+   am naechsten), alle gleich gross, Schluesselwort im gefuellten blauen Kasten (#1842EA, gemessen), mit **
+   orange (#D8963C) und dunkler Schrift. Erste Zeile oben fest (nicht mittig): im Vorbild steht die erste Zeile
+   jeder Tafel an derselben Stelle, die zweite kommt darunter dazu. */
+.capw.capb { top: 290px; height: 300px; place-items: start center; font-family: var(--body); letter-spacing: -0.025em; }
+.capb .row { line-height: 1.2; }
+.capb .w { font-weight: 700; color: #FFFFFF; margin: 0 .11em; text-shadow: 0 3px 16px rgba(0,0,0,.7); }
+.capb .w.key { color: #FFFFFF; background: #1842EA; border-radius: 12px; padding: 0 .13em; margin: 0 .05em; text-shadow: none; }
+.capb .w.key.warm { background: #D8963C; color: #17120C; }
+
+/* Wortleiste im Stil "worte": gesperrte Grossbuchstaben, Punkte dazwischen, Mitte bei y 237 wie im Vorbild */
+#prog.words.worte { top: 224px; gap: 20px; }
+#prog.worte b { font: 700 23px/1 var(--body); letter-spacing: .2em; opacity: .3; }
+#prog.worte .sep { font: 700 23px/1 var(--body); color: #FFFFFF; opacity: .3; font-style: normal; }

@@ -53,7 +53,8 @@ const throws = (label, s, re) => {
   const s = mk(); for (const p of s.scenes[0].parts) for (const c of p.captions) delete c.chapter
   throws('"progress" ohne "chapter" bricht ab', s, /mindestens eine Textzeile mit "chapter"/)
 }
-throws('Kapitel 5 bei vier Wörtern bricht ab', mk([{ lines: ['Und bei Sonne?'], chapter: 5 }]), /"n" muss eine ganze Zahl von 0 bis 4/)
+// Seit Fassung 2 des Nachbaus (19.11.2026 abends) beginnt der Bereich bei -1 (Leiste weg, tools/test_nachbau_v2.mjs)
+throws('Kapitel 5 bei vier Wörtern bricht ab', mk([{ lines: ['Und bei Sonne?'], chapter: 5 }]), /"n" muss eine ganze Zahl von (-1|0) bis 4/)
 throws('Wort, das es nicht gibt, bricht ab', mk([{ lines: ['Und bei Sonne?'], chapter: { n: 3, word: 7 } }]), /"word" 7 gibt es nicht/)
 throws('Tippfehler im Objekt bricht ab', mk([{ lines: ['Und bei Sonne?'], chapter: { n: 3, wort: 1 } }]), /"wort" gibt es nicht/)
 throws('Zu langes Kapitelwort bricht ab', mk(null, { progress: { words: ['WALLET', 'GANZ VON ALLEIN DA'] } }), /1 bis 14 Zeichen/)
