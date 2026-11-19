@@ -291,11 +291,11 @@ welche Schlüssel es gibt. Ein neues Video beginnt immer mit der Kopie von
 ```
 
 Erlaubt sind oben genau `meta`, `voice`, `timing`, `say`, `poster`, `sound`,
-`mix`, `captionStyle`, `pace`, `scenes`; in einer Szene oder einem Teil
+`mix`, `captionStyle`, `pace`, `progress`, `scenes`; in einer Szene oder einem Teil
 `component`, `params`, `anchors`, `captions`, `enter`, `camera` (oder nur
 `parts`); in einer Textzeile `lines`, `accent`, `keep`, `role`, `instant`,
-`mode`, `scale`, `gapBefore`. Was `captionStyle`, `pace`, `enter`, `camera`,
-`mode`, `scale` und `gapBefore` tun, steht unter "Stil C". **Jeder andere
+`mode`, `scale`, `gapBefore`, `chapter`. Was `captionStyle`, `pace`, `enter`, `camera`,
+`mode`, `scale`, `gapBefore`, `progress` und `chapter` tun, steht unter "Stil C". **Jeder andere
 Name bricht den Bau ab** (Code 2): früher wurde ein
 Tippfehler wie `parms` still übergangen, und die Szene zeigte die Vorgaben
 eines anderen Ladens. Namen, die mit `_` beginnen (`_hinweis`), sind Notizen
@@ -482,6 +482,12 @@ Oben steht immer nur eine Tafel, jede löst die vorige im Takt der Stimme ab.
   ```json
   { "component": "stamp-check", "enter": "cut", "params": { "icon": "check" }, "captions": [ ... ] }
   ```
+
+- `"enter": "kreuz"` (seit 19.11.2026): echte Überblendung zwischen zwei **3D-Teilen**. Der neue Teil blendet
+  in 0,4 s über den alten, der bis zum Ende der Blende ganz stehen bleibt und davor nicht abdunkelt. Mit der
+  Vorgabe `"fade"` werden beide zugleich durchsichtig, dazu dunkelt ein 3D-Teil an seinem Ende ab: im Nachbau
+  "zwei Cafés" lief jedes Bild beim Wechsel 0,3 bis 0,5 s durchs Dunkle (Helligkeit 50 auf 33), am Handy wie
+  ein Blinzeln. Nicht für 2D-Teile mit durchsichtigem Grund (der alte Teil schiene durch).
 
 - `"camera": [ ... ]` an einem Teil oder einer Szene:
 
@@ -704,6 +710,47 @@ kippen. Alle bis zum Bildrand gezeichnet, je Teil ein Zustand (`show`,
   in der Wallet, ohne Ton und ohne Anker `card`), für einen zweiten, kurzen
   Teil nach einem Schnitt, in dem nur ein Stempel landet:
   `{ "before": 5, "after": 6, "scan": false, "rise": false, "drop": false }`
+
+### Wortleiste oben (`progress`, `chapter`) und Schriftzug über der Straße (seit 19.11.2026)
+
+Gebaut für den Nachbau "zwei Cafés" (`videos/2026-11-21-zwei-cafes`, auf ausdrücklichen Wunsch des
+Betreibers), nutzbar für jedes Video aus langen Kamerafahrten. Ohne diese Angaben baut alles wie vorher
+(`tools/test_wortleiste.mjs`, `tools/test_3d_iso_street_name.mjs`, beide in `selftest.mjs`).
+
+```json
+"progress": { "words": ["WALLET", "VON SELBST", "DESIGN", "DEIN ZUG"] },
+...
+{ "lines": ["Eine *Sache | fällt auf."], "chapter": { "n": 1, "word": -1 } },
+{ "lines": ["*Nah bei *Mond ..."], "chapter": 2 },
+{ "lines": ["Und bei *Sonne?"], "chapter": 0 }
+```
+
+- **Wortleiste:** statt der Stempelreihe (ein Punkt je Szene) je Kapitel ein Stempelfeld und ein Wort in
+  einer Zeile, Mitte bei 230 px (knapp unter der oberen Sperrzone, über den Tafeln). Warum: ein Video aus
+  langen Kamerafahrten hat fast alles in EINER Szene (Teile blenden ineinander), die Stempelreihe zeigte dort
+  einen einzigen Punkt. 2 bis 5 Wörter, je höchstens 14 Zeichen, eigene Wörter (nie die eines Vorbilds).
+- **`chapter` an einer Textzeile:** ab hier gilt Kapitel n, 0,12 s vor ihrem ersten Wort (als Zahl) oder vor
+  einem bestimmten Wort (`{ "n": 1, "word": -1, "offset": 0 }`). Das Kapitel bekommt seinen Stempel (er
+  bleibt), sein Wort leuchtet lila, erledigte bleiben hell, kommende grau. `0` dunkelt die Leiste ab (ein
+  Gegenbild gehört zu keinem Kapitel). Vor dem ersten Kapitel ist die Leiste unsichtbar. Im Schlussbild
+  (`cta-comment`) pulsen die Felder wie die Stempelreihe. Der Bericht nennt die Zeiten unter `progress`.
+- **Schriftzug über der Straße:** eine Textzeile `{ "role": "name", "lines": ["Stampit."], "gapBefore": 1.15 }`
+  in einem `iso-street` im Duell steht nicht oben als Tafel, sondern leuchtet auf ihr Wort (Anker `name`) als
+  lila Leuchtschrift mit Logo über der Kreuzung auf (Streifen y 612 bis 842, wie die Blase in "nah"), mit
+  Stempelschlag (`thud`, mit `"tones": false` keiner). Das Herz stünde im selben Streifen: ohne
+  `"heart": false` bricht der Bau ab (die Prüfung `ueberdeckung` misst in der Ruhelage, dort ist der Schriftzug
+  noch aus, sie sähe es nicht). Mit `"mode": "nah"` bricht der Bau ebenfalls ab.
+- **Voller und leerer Laden (seit 19.11.2026):** "bei uns ist Betrieb" braucht ein Bild, sonst steht der Satz
+  über einer Straße mit einer einzigen kleinen Figur (Abnahme des Nachbaus). Auf der Straße `"crowd": 6` am
+  `iso-street` (Schlange und Gruppe vor dem eigenen Laden) und `"dark": 1` (der andere Laden wird fast dunkel;
+  ohne Stammkunden, `"walker": false`, ist er es von Anfang an). Im Laden `"guests": 5` am `iso-shop` (Gäste an
+  zwei Tischen) gegen `"start": "none", "dim": true` (kein Kunde, gedimmtes Licht). Nie dazu sagen, dass die
+  Karte den Laden voll macht (PRODUKT.md N5): der volle Laden ist Erzählung, der Unterschied ist die Karte.
+- **Papier in der Nahaufnahme:** `"paper": true` mit `"close": "counter"` und Anker `zoom` kurz vor
+  `crumple` (im Nachbau auf "Pappe", rund 1 s davor). In der ganzen Ansicht ist die Karte am Handy nur 3 mm
+  groß; die Nahaufnahme nimmt den Papierkorb mit ins Bild.
+- **`pace` bei langen Fahrten:** ein Teil, der 8 bis 9 s steht, ist hier gewollt. `pace` dann ausdrücklich
+  höher setzen und im Skript begründen (`_hinweis`), statt die Warnung `bildwechsel` stehen zu lassen.
 
 ### Sätze von außerhalb des Studios (`tools/clip-in.py`)
 
@@ -1491,7 +1538,9 @@ Textzeilen: mindestens 1. Datei: `components/iso-shop.js`
 | `accent` | `"#7366E8"` | Farbe des Ladens (Theke, Streifen am Schild, Stempel) |
 | `menu` | `[]` | Drei Wörter auf der Tafel an der rechten Wand (je höchstens etwa 10 Zeichen). Leer = passend zur Branche. Die Tafel ist Schmuck: am Handy sind die Wörter zu klein zum Lesen, also nichts Wichtiges darauf schreiben |
 | `customer` | `0` | Aussehen des Kunden als Zahl: 0 = heller Mantel (wie der Stammkunde in iso-street), jede andere Zahl ein anderes, festes Aussehen (Mantel, Haar, Haut, Frisur) |
-| `start` | `"counter"` | "counter": der Kunde steht schon an der Theke. "door": er kommt auf "enter" durch die Glastür herein und geht zur Theke |
+| `start` | `"counter"` | "counter": der Kunde steht schon an der Theke. "door": er kommt auf "enter" durch die Glastür herein und geht zur Theke. "none": kein Kunde, nur der Inhaber hinter der Theke (der leere Laden; braucht "phone": false und "bubble": false) |
+| `guests` | `0` | Gäste, die an Tischen sitzen und sich unterhalten (0 bis 6): ab 1 steht links ein zweiter Tisch. Für den vollen Laden ("bei uns ist Betrieb"); 0 = nur der leere Tisch vorn wie bisher |
+| `dim` | `false` | Gedimmtes Licht: weniger Licht im Raum, Lampe über der Theke und Wandleuchten schwach, nur das Abendlicht fällt warm durchs Fenster. Für den leeren Laden gegenüber (mit "start": "none") |
 | `bubble` | `true` | Sprechblase mit dem Bestellten über dem Kunden (Anker "order"), in der ganzen Ansicht doppelt so groß, damit sie am Handy zu sehen ist |
 | `phone` | `true` | Der Kunde hält sein Handy mit der Karte, der Inhaber scannt es (Anker "scan", "stamp") |
 | `paper` | `false` | Eine Papier-Stempelkarte liegt auf der Theke, links daneben steht ein Papierkorb (Anker "crumple": sie knüllt sich zusammen und fliegt in den Korb) |
@@ -1523,7 +1572,7 @@ Textzeilen: mindestens 1. Datei: `components/iso-shop.js`
 
 <img src="docs/components/iso-street.png" width="270" alt="Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber">
 
-Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Mit "mode": "nah" dieselbe Kreuzung für C1: ein Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, und über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch 2 Stempel bis: Gratis-Döner"; der 3D-Ersatz für shop-map und shop-street. Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.
+Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Mit "mode": "nah" dieselbe Kreuzung für C1: ein Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, und über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch 2 Stempel bis: Gratis-Döner"; der 3D-Ersatz für shop-map und shop-street. Im Duell kann eine Textzeile mit "role": "name" (etwa "Stampit.") statt oben als Tafel als lila Leuchtschrift über der Kreuzung aufleuchten (Anker "name"). Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.
 
 Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 
@@ -1544,6 +1593,8 @@ Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 | `push` | `0.05` | Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25). Sie endet immer im selben Ausschnitt, in dem beide Läden ganz zu sehen sind; mehr "push" heißt nur, dass sie weiter weg anfängt |
 | `orbit` | `7` | Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12) |
 | `after` | `true` | Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf ("nah": nur der eigene leuchtet auf). false, wenn die Szene gleich danach endet |
+| `crowd` | `0` | Nur Duell: so viele Gäste (0 bis 6) stehen vor dem eigenen Laden, drei in einer Schlange zur Tür, die übrigen in einer Gruppe daneben, und unterhalten sich. Für "bei uns ist Betrieb" |
+| `dark` | `0` | Nur Duell: wie viel dunkler der gedimmte Laden wird (0 bis 1, zusätzlich zu "after"). 1 = Schaufenster, Tür und Schild fast aus, kein Licht davor: der leere Laden. Mit Stammkunde gilt das für den Laden, den er verlassen hat, ab "enter"; ohne ("walker": false) für den Laden gegenüber, von Anfang an (der eigene leuchtet dann) |
 | `tones` | `true` | Eigene Töne (Duell: thud beim Zerbrechen, ding an der Tür; "nah": ding und pop, wenn sich die Karte meldet, chime an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt |
 | `mode` | `"duell"` | "duell": zwei Läden, Herz, Stammkunde geht rüber (wie bisher). "nah": C1, Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch {left} Stempel bis: {reward}" (Anker "walk", "near", "turn", "enter"). In "nah" gibt es kein Herz; "heart", "walker", "back", "from" gelten nur in "duell" |
 | `frame` | `"laden"` | Nur "nah": "laden" = derselbe Ausschnitt wie im Duell (beide Läden, Kreuzung, der Ring links angeschnitten). "stadt" = weiter weg und höher: der ganze Ring, beide Läden und mehr Stadt, für "das Handy macht das von selbst" (PRODUKT.md C1: "ohne dass du etwas tust"). Nie dazu sagen, der Laden sehe nicht, wo jemand ist: das ist nicht belegt (N2) |
@@ -1569,6 +1620,13 @@ Textzeilen: mindestens 1. Datei: `components/iso-street.js`
 | `enter` | `{"at":"end","offset":-0.25}` | Er steht auf der Schwelle und geht hinein, die Glocke schwingt (Ton: chime), der Laden leuchtet auf. Braucht Zeit nach "turn" (rund 9 m Weg, ab 5 m/s warnt der Bau): etwa 2 s |
 
 Mit `"then": "weiter"` gibt es nur `walk` und `near`, mit `"dreht"` dazu `turn`.
+
+| Anker (nur im Duell, mit einer Textzeile `"role": "name"`) | Vorgabe | Wann |
+|---|---|---|
+| `name` | `{"cap":<Textzeile "name">,"word":0,"offset":-0.04}` | Nur mit einer Textzeile "role": "name": der Schriftzug (ihr Text, z. B. "Stampit.") leuchtet über der Kreuzung auf wie eine Neonröhre, die Kreuzung bekommt einen lila Schein (Ton: thud). Vorgabe: ihr erstes Wort |
+
+(Diese Tabelle steht von Hand hier, weil `tools/catalog.mjs` die Anker ohne Textzeilen abfragt und `name` dann
+nicht kennt; beim nächsten Lauf des Katalogs wieder einsetzen.)
 
 ### `phone-3d` - Handy in 3D: Wallet-Karte, Sperrbildschirm oder Kartendesign
 

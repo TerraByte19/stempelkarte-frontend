@@ -41,6 +41,11 @@
 // 13. Das Knuellen ist zu sehen: die Papierkarte mit und ohne Kunde gezeichnet gibt fast dieselben Pixel (er
 //     steht nicht davor), flach mindestens 120 px, als Kugel mindestens 40 px breit. Vorher stand sein Kopf
 //     genau beim Knuellen vor der Karte, die Kugel war 32 px gross.
+// 14. Voller und leerer Laden (Nachbau "zwei Cafés", 19.11.2026): mit "guests" sitzen Gaeste im Bild (das
+//     Bild ist ein anderes als ohne), mit "start": "none" ist kein Kunde da, mit "dim" ist der Raum deutlich
+//     dunkler. Vorher sahen Mond (voll) und Sonne (leer) innen gleich aus, und bei Sonne stand sogar ein Gast.
+//     Dazu das Knuellen in der Nahaufnahme "counter": Karte, Flug und Papierkorb bleiben ganz im Bild (in der
+//     ganzen Ansicht war die Karte am Handy 3 mm gross, die Kugel 25 px; in der Nahaufnahme rund 250 px).
 //
 // Kein Netz, keine Kosten, etwa zwei Minuten (rechnet rund 30 Bilder).
 import { createHash } from 'node:crypto'
@@ -281,7 +286,8 @@ try {
 
 // ---- 10. Falsche Angaben
 {
-  for (const [params, want] of [[{ branch: 'kino' }, /"branch" gibt es nicht/], [{ phone: false, close: 'phone' }, /"close": "phone" braucht "phone": true/], [{ have: 6 }, /"have" muss/]]) {
+  for (const [params, want] of [[{ branch: 'kino' }, /"branch" gibt es nicht/], [{ phone: false, close: 'phone' }, /"close": "phone" braucht "phone": true/], [{ have: 6 }, /"have" muss/],
+    [{ start: 'none' }, /"start": "none" \(kein Kunde\) geht nur mit/], [{ guests: 7, phone: false }, /"guests" muss/], [{ branch: 'friseur', icon: 'scissors', guests: 2, phone: false, bubble: false }, /"guests" gibt es beim Friseur/]]) {
     const sc = { meta: { title: 'test fehler', slug: 'test-fehler' }, scenes: [{ component: 'iso-shop', params, captions: [{ lines: ['Probe'] }] }] }
     const s4 = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
     try {
@@ -301,6 +307,54 @@ try {
       check(`Warnung bei ${label}`, !st.errors.length && st.warnings.some(w => want.test(w)), [...st.errors, ...st.warnings].join(' | ').slice(0, 300))
     } finally { await s5.close() }
   }
+}
+
+// ---- 14. Voller und leerer Laden, Knuellen in der Nahaufnahme
+{
+  const base = { branch: 'cafe', icon: 'cup', bubble: false, phone: false }
+  const sc = {
+    meta: { title: 'test voll leer', slug: 'test-voll-leer' }, timing: { lead: 0.3, hold: 3 }, captionStyle: { mode: 'wort' },
+    scenes: [
+      { component: 'iso-shop', params: { ...base, shop: 'Café Mond' }, captions: [{ lines: ['Ohne Gäste.'], instant: true }] },
+      { component: 'iso-shop', params: { ...base, shop: 'Café Mond', guests: 5 }, captions: [{ lines: ['Mit Gästen.'] }] },
+      { component: 'iso-shop', params: { ...base, shop: 'Café Sonne', accent: '#E58A45', start: 'none', dim: true, paper: true, close: 'counter' }, anchors: { zoom: { at: 'start', offset: 0.6 }, crumple: { at: 'start', offset: 1.7 } }, captions: [{ lines: ['Leer und dunkel.'] }] }
+    ]
+  }
+  const s6 = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
+  try {
+    const pg = await s6.page(), st = await s6.state(pg)
+    const warn = st.warnings.filter(w => !/nicht in allen Szenen gleich/.test(w))
+    check('Voll und leer: baut ohne Fehler und Warnung', !st.errors.length && !s6.problems.length && !warn.length, [...st.errors, ...s6.problems, ...warn].join(' | ').slice(0, 300))
+    // mittlere Helligkeit der Leinwand i
+    const luma = i => pg.evaluate(i => {
+      const c = document.querySelectorAll('canvas.ish-canvas')[i], g = document.createElement('canvas'); g.width = c.width; g.height = c.height
+      const x = g.getContext('2d', { willReadFrequently: true }); x.drawImage(c, 0, 0); const d = x.getImageData(0, 0, c.width, c.height).data
+      let sum = 0, n = 0; for (let k = 0; k < d.length; k += 16) { sum += 0.2126 * d[k] + 0.7152 * d[k + 1] + 0.0722 * d[k + 2]; n++ } return sum / n
+    }, i)
+    // Gleicher Blick (Szenenanfang, Ruhe der Kamera ist hier egal: beide Szenen fahren gleich), einmal mit Gaesten
+    const at = k => st.scenes[k].s + 0.35
+    await seek(pg, at(0)); const empty = await canvasStats(pg, 0), l0 = await luma(0)
+    await seek(pg, at(1)); const full = await canvasStats(pg, 1)
+    check('"guests": das Bild mit Gästen ist ein anderes als ohne', !!empty && !!full && empty.hash !== full.hash)
+    const n = await pg.evaluate(() => document.querySelectorAll('canvas.ish-canvas')[1].isoShop.live())
+    check('"guests": der Kunde steht trotzdem an der Theke', !!n.guest)
+    const t2 = st.scenes[2].s + 0.3
+    await seek(pg, t2); const l2 = await luma(2)
+    const none = await pg.evaluate(t => { window.seek(t, { paint: false }); return document.querySelectorAll('canvas.ish-canvas')[2].isoShop.live() }, t2)
+    check('"start": "none": kein Kunde im Bild', none.guest === null, JSON.stringify(none.guest))
+    check('"dim": der leere Laden ist deutlich dunkler (höchstens 75 % der Helligkeit)', l2 < 0.75 * l0, `${l2.toFixed(1)} gegen ${l0.toFixed(1)}`)
+    // Nahaufnahme: Karte beim Knuellen, Kugel im Flug und im Korb ganz im Bild
+    const tm = await pg.evaluate(() => document.querySelectorAll('canvas.ish-canvas')[2].isoShop.times)
+    const boxes = []
+    for (const dt of [0.05, 0.3, 0.8, 1.15]) {
+      await seek(pg, tm.crumple + dt)
+      boxes.push(await pg.evaluate(() => document.querySelectorAll('canvas.ish-canvas')[2].isoShop.drawnBox('paper')))
+    }
+    const inside = boxes.every(b => b && b.left >= 20 && b.right <= 1060 && b.top >= 0 && b.bottom <= 1900)
+    check('Nahaufnahme "counter": Karte, Flug und Kugel im Korb ganz im Bild', inside, boxes.map(b => b ? `${Math.round(b.left)}-${Math.round(b.right)} / ${Math.round(b.top)}-${Math.round(b.bottom)}` : 'fehlt').join(', '))
+    // Gemessen 249 px (ganze Ansicht: rund 120 px, im Nachbau mit "push" 0,25 sogar nur 60 px)
+    check('Nahaufnahme "counter": die flache Karte ist mindestens 200 px breit', !!boxes[0] && boxes[0].right - boxes[0].left >= 200, boxes[0] ? `${Math.round(boxes[0].right - boxes[0].left)} px` : 'fehlt')
+  } finally { await s6.close() }
 }
 
 console.log(failed ? `${failed} Prüfung(en) gescheitert` : 'Alle Prüfungen bestanden')

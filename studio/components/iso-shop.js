@@ -73,6 +73,15 @@ const SC = { w: 0.25, h: 0.44, d: 0.05 }                    // Handy des Inhaber
 // Scan, danach noch hoeher und weiter nach innen, bevor er sinkt (gemessen mit isoShop.spots)
 const ARM_S = -2.38, ARM_Z = -0.44, ARM_S2 = -2.75, ARM_Z2 = -0.55
 const BIN = { x: -4.5, z: 2.45, r: 0.3, h: 0.72 }           // Papierkorb links neben der Theke (nur mit "paper")
+const TABLE = { x: -4.7, z: 6.6 }                          // kleiner Tisch vorn (nicht beim Friseur)
+const TABLE2 = { x: -8.2, z: 4.3 }                         // zweiter Tisch links, nur mit "guests". Kommt der Kunde mit
+                                                           // "start": "door" herein, geht er im Bild ueber die Koepfe
+                                                           // dieser Gaeste hinweg (weiter links war der Tisch angeschnitten)
+// Plaetze der sitzenden Gaeste ("guests"), in dieser Reihenfolge besetzt: [Tisch, Winkel um den Tisch]. Die
+// ersten beiden am vorderen Tisch sind seine Hocker von immer; abwechselnd links und vorn, damit schon zwei
+// Gaeste nach "voll" aussehen statt nach einem Paerchen. Kein Platz liegt naeher als 1,6 m am Weg des Kunden,
+// und keiner rechts vom vorderen Tisch (dort beginnt die Knopfspalte).
+const SEATS = [[TABLE, 2.2], [TABLE2, -0.3], [TABLE, 4.0], [TABLE2, 1.6], [TABLE, 5.6], [TABLE2, 3.6]]
 const PSIZE = [1.3, 1]    // Papierkarte: ganze Ansicht / Nahaufnahme (vorher rund 100 px breit, die Kugel 32 px)
 const BUB = [2.0, 1]      // Sprechblase: ganze Ansicht / Nahaufnahme
 
@@ -114,7 +123,9 @@ export default {
     accent: { default: '#7366E8', doc: 'Farbe des Ladens (Theke, Streifen am Schild, Stempel)' },
     menu: { default: [], doc: 'Drei Wörter auf der Tafel an der rechten Wand (je höchstens etwa 10 Zeichen). Leer = passend zur Branche. Die Tafel ist Schmuck: am Handy sind die Wörter zu klein zum Lesen, also nichts Wichtiges darauf schreiben' },
     customer: { default: 0, doc: 'Aussehen des Kunden als Zahl: 0 = heller Mantel (wie der Stammkunde in iso-street), jede andere Zahl ein anderes, festes Aussehen (Mantel, Haar, Haut, Frisur)' },
-    start: { default: 'counter', doc: '"counter": der Kunde steht schon an der Theke. "door": er kommt auf "enter" durch die Glastür herein und geht zur Theke' },
+    start: { default: 'counter', doc: '"counter": der Kunde steht schon an der Theke. "door": er kommt auf "enter" durch die Glastür herein und geht zur Theke. "none": kein Kunde, nur der Inhaber hinter der Theke (der leere Laden; braucht "phone": false und "bubble": false)' },
+    guests: { default: 0, doc: 'Gäste, die an Tischen sitzen und sich unterhalten (0 bis 6): ab 1 steht links ein zweiter Tisch. Für den vollen Laden ("bei uns ist Betrieb"); 0 = nur der leere Tisch vorn wie bisher' },
+    dim: { default: false, doc: 'Gedimmtes Licht: weniger Licht im Raum, Lampe über der Theke und Wandleuchten schwach, nur das Abendlicht fällt warm durchs Fenster. Für den leeren Laden gegenüber (mit "start": "none")' },
     bubble: { default: true, doc: 'Sprechblase mit dem Bestellten über dem Kunden (Anker "order"), in der ganzen Ansicht doppelt so groß, damit sie am Handy zu sehen ist' },
     phone: { default: true, doc: 'Der Kunde hält sein Handy mit der Karte, der Inhaber scannt es (Anker "scan", "stamp")' },
     paper: { default: false, doc: 'Eine Papier-Stempelkarte liegt auf der Theke, links daneben steht ein Papierkorb (Anker "crumple": sie knüllt sich zusammen und fliegt in den Korb)' },
@@ -147,7 +158,11 @@ export default {
     const { p } = ctx
     const BR = BRANCH[p.branch]
     if (!BR) ctx.fail(`"branch" gibt es nicht: "${p.branch}". Erlaubt: ${Object.keys(BRANCH).join(', ')}`)
-    if (!['counter', 'door'].includes(p.start)) ctx.fail('"start" muss "counter" oder "door" sein')
+    if (!['counter', 'door', 'none'].includes(p.start)) ctx.fail('"start" muss "counter", "door" oder "none" sein')
+    // Ohne Kunden gibt es niemanden, der bestellt, sein Handy hinhaelt oder hinausgeht
+    if (p.start === 'none' && (p.phone || p.bubble || p.leaves)) ctx.fail('"start": "none" (kein Kunde) geht nur mit "phone": false, "bubble": false und "leaves": false')
+    if (!Number.isInteger(p.guests) || p.guests < 0 || p.guests > 6) ctx.fail('"guests" muss eine ganze Zahl von 0 bis 6 sein')
+    if (p.dim && p.guests > 0) ctx.warn('"dim" (gedimmt, der leere Laden) zusammen mit "guests": gemeint ist meist das eine oder das andere')
     if (!['', 'counter', 'phone'].includes(p.close)) ctx.fail('"close" muss "", "counter" oder "phone" sein')
     if (!Number.isInteger(p.stamps) || p.stamps < 4 || p.stamps > 10) ctx.fail('"stamps" muss eine ganze Zahl von 4 bis 10 sein')
     if (!Number.isInteger(p.have) || p.have < 0 || p.have > p.stamps - 1) ctx.fail('"have" muss zwischen 0 und stamps - 1 liegen (auf "stamp" kommt einer dazu)')
@@ -168,7 +183,9 @@ export default {
     const { PAL, rng, clamp01, smooth, lerp, walkCycle } = K
     // Dunst legt der Baustein selbst an (bei der Stadt draussen), mit eigenem Abstand: der Dunst des Baukastens
     // ist fuer die Kreuzung bemessen und haette die Rueckwand des Ladens schon eingetruebt
-    const kit = await K.createKit(ctx, { name: 'iso-shop', prefix: 'ish', exposure: 1.05, fog: false, calm: 760 })
+    // "dim": niedrigere Belichtung dunkelt Waende, Boden und Figuren gleichmaessig ab; Schild und Tafel (ohne
+    // Tonemapping) bleiben lesbar. Nur Lampen herunterzudrehen reichte nicht: das Himmelslicht traegt den Raum.
+    const kit = await K.createKit(ctx, { name: 'iso-shop', prefix: 'ish', exposure: p.dim ? 0.74 : 1.05, fog: false, calm: 760 })
     const { THREE, RoundedBoxGeometry, scene, col, std, lam, glow } = kit
     const V = (x, y, z) => new THREE.Vector3(x, y, z)
 
@@ -224,7 +241,12 @@ export default {
     })
     lights.moon.target.position.copy(RC); lights.moon.shadow.bias = -0.0004; lights.moon.shadow.normalBias = 0.03
     // Warmes Licht ueber der Theke (das einzige echte Punktlicht: es faerbt Figuren, Theke und Handys)
-    const lamp = kit.pointLight(scene, [-2.3, 3.4, 2.5], '#FFD9A8', 26, 9, 1.5)
+    // Mit "dim" (leerer Laden): Himmelslicht und Lampe schwach, das warme Abendlicht durchs Fenster bleibt. So
+    // liest sich der Raum als "kaum Betrieb", nicht als derselbe Laden in anderer Farbe (Abnahme 19.11.2026:
+    // Mond und Sonne sahen innen gleich aus, nur Schild und Theke waren anders).
+    if (p.dim) { lights.hemi.intensity *= 0.55; lights.fill.intensity *= 0.5 }
+    const LAMP = p.dim ? 9 : 26
+    const lamp = kit.pointLight(scene, [-2.3, 3.4, 2.5], '#FFD9A8', LAMP, 9, 1.5)
 
     // ---------------------------------------------------------------- Dach, das nur Schatten wirft
     // Ohne Dach fiel das Abendlicht ueber die Mauerkronen auf den halben Boden (eine helle Flaeche vorn, die
@@ -554,11 +576,16 @@ export default {
     if (p.branch !== 'friseur') {
       // Kleiner Tisch mit zwei Hockern vorn: fuellt den Boden unten, ohne vom Tresen abzulenken (rechts vorn
       // war er vom Bildrand angeschnitten)
-      const tx = -4.7, tz = 6.6
+      const tx = TABLE.x, tz = TABLE.z
       put(cyl(0.6, 0.6, 0.08, 24), S(IN.top), tx, 1.05, tz); put(cyl(0.06, 0.06, 1.0, 10), S(IN.dark), tx, 0.52, tz); put(cyl(0.35, 0.35, 0.05, 16), S(IN.dark), tx, 0.03, tz)
       for (const a of [2.2, 4.0]) { const sx = tx + Math.cos(a) * 1.0, sz = tz + Math.sin(a) * 1.0; put(cyl(0.3, 0.3, 0.12, 18), S(accHex), sx, 0.72, sz); put(cyl(0.05, 0.05, 0.68, 8), S(IN.dark), sx, 0.34, sz) }
       if (p.branch === 'cafe' || p.branch === 'eis') mug(tx + 0.15, 1.09, tz - 0.1, '#FFFFFF', 0.9)
     }
+
+    // Gedimmt: Schild, Tafel und alle Scheine (Wandleuchten, Lichtstreifen, Fenster) schwaecher. Die Scheine sind
+    // additive Flaechen ohne Licht, die Belichtung allein dunkelt sie kaum ab.
+    const SIGNK = p.dim ? 0.72 : 1, HALO = p.dim ? 0.1 : 0.3
+    if (p.dim) scene.traverse(o => { if (o.isSprite) o.material.opacity *= 0.4 })
 
     // ---------------------------------------------------------------- Figuren
     // Inhaber: dunkles Hemd, Schuerze in der Ladenfarbe (sofort als "der hinter der Theke" zu lesen)
@@ -594,6 +621,35 @@ export default {
       put(new THREE.SphereGeometry(0.07, 10, 8), S('#F4EEE2'), 0, 2.02, 0, { parent: guest.body, cast: false })
     }
     for (const f of [owner, guest]) f.fig.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true } })
+
+    // ---------------------------------------------------------------- Sitzende Gaeste ("guests")
+    // Warum: im Nachbau "zwei Cafés" (19.11.2026) sollte Mond innen "voll" sein, zu sehen war aber nur EIN Kunde,
+    // genau wie im leeren Laden gegenueber. Ein paar Gaeste an Tischen sagen "hier ist Betrieb", ohne vom Weg des
+    // Kunden und von der Theke abzulenken (sie sitzen vorn und links, in gedeckten Farben, bewegen sich wenig).
+    // Spielzeugfiguren haben keine Knie: die Beine zeigen schraeg nach vorn unter den Tisch, der Rumpf sitzt auf
+    // dem Hocker (Unterkante des Rumpfs auf 0,78 m, der Sitzhoehe).
+    const sitters = []
+    if (p.guests > 0) {
+      if (p.branch === 'friseur') ctx.fail('"guests" gibt es beim Friseur (noch) nicht: dort steht statt der Tische der Stuhl')
+      const stool = (x, z) => { put(cyl(0.3, 0.3, 0.12, 18), S(accHex), x, 0.72, z); put(cyl(0.05, 0.05, 0.68, 8), S(IN.dark), x, 0.34, z) }
+      // Zweiter Tisch wie der vordere, mit Tasse
+      put(cyl(0.6, 0.6, 0.08, 24), S(IN.top), TABLE2.x, 1.05, TABLE2.z); put(cyl(0.06, 0.06, 1.0, 10), S(IN.dark), TABLE2.x, 0.52, TABLE2.z); put(cyl(0.35, 0.35, 0.05, 16), S(IN.dark), TABLE2.x, 0.03, TABLE2.z)
+      mug(TABLE2.x - 0.12, 1.09, TABLE2.z + 0.15, '#FFFFFF', 0.9); mug(TABLE2.x + 0.2, 1.09, TABLE2.z - 0.1, '#F4EEE2', 0.9)
+      const used = SEATS.slice(0, p.guests)
+      // Hocker: am vorderen Tisch stehen zwei immer (siehe oben), am zweiten immer zwei; der dritte je Tisch nur,
+      // wenn dort jemand sitzt (ein leerer Hocker mehr sah nach Stuhllager aus)
+      SEATS.forEach(([tb, a], i) => { if ((tb === TABLE2 && i < 4) || i < p.guests && i >= 4) stool(tb.x + Math.cos(a), tb.z + Math.sin(a)) })
+      used.forEach(([tb, a], k) => {
+        const RG = rng(5150 + k * 3571), pk = arr => arr[Math.floor(RG() * arr.length)]
+        const f = kit.person({ coat: pk(LOOK.coat.slice(1)), legs: pk(LOOK.legs), hair: pk(LOOK.hair), skin: pk(LOOK.skin), scale: 1.3, y0: -0.05 })
+        const x = tb.x + Math.cos(a), z = tb.z + Math.sin(a)
+        f.at(x, z, Math.atan2(tb.x - x, tb.z - z))
+        f.legL.rotation.x = f.legR.rotation.x = -1.2
+        f.blob.visible = false // der Hocker steht schon im Schatten des Tisches; ein Fleck unter ihm sah nach Loch aus
+        f.fig.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true } })
+        sitters.push({ f, ph: k * 1.9 + 0.4, cup: k % 2 === 0 })
+      })
+    }
 
     // ---------------------------------------------------------------- Handys
     // Karte im Handy des Kunden: wie wallet-pass (Kopf mit Symbol und Name, Stempelfelder, QR-Code). Zwei
@@ -938,7 +994,10 @@ export default {
     if (p.close) {
       const pts = p.close === 'phone'
         ? [...phoneCorners, V(phoneAt.x - 0.4, phoneAt.y + 0.45, phoneAt.z - 0.7), ...overPhone(EL_C, 1), scanAt.clone().addScaledVector(camRight, 0.28).add(V(0, 0.15, 0)), scanAt.clone().addScaledVector(camRight, 0.28).add(V(0, -0.15, 0))]
-        : [V(CNT.x0 - 0.05, ctop, CNT.z1 + 0.05), V(CNT.x1 + 0.05, ctop, CNT.z1 + 0.05), V(CNT.x0, ctop, CNT.z0), V(CNT.x1, ctop, CNT.z0), V(SPOT.x, 2.5, SPOT.z), V(OWNER.x, 2.5, OWNER.z), ...(p.phone ? overPhone(EL_C, 1) : [V(PC.x, ctop + 0.9, PC.z)])]
+        : [V(CNT.x0 - 0.05, ctop, CNT.z1 + 0.05), V(CNT.x1 + 0.05, ctop, CNT.z1 + 0.05), V(CNT.x0, ctop, CNT.z0), V(CNT.x1, ctop, CNT.z0), V(SPOT.x, 2.5, SPOT.z), V(OWNER.x, 2.5, OWNER.z), ...(p.phone ? overPhone(EL_C, 1) : [V(PC.x, ctop + 0.9, PC.z)]),
+          // Mit Papier auch der Papierkorb samt Flugbogen der Kugel: ohne ihn endete der Wurf am linken Bildrand
+          // (Abnahme 19.11.2026: das Knuellen sollte in die Nahaufnahme, der Korb mit ins Bild)
+          ...(p.paper ? [V(BIN.x - BIN.r - 0.1, 0, BIN.z + BIN.r), V(BIN.x - BIN.r - 0.1, BIN.h, BIN.z - BIN.r), V((PC.x + BIN.x) / 2, ctop + TOSS.apex + 0.3, (PC.z + BIN.z) / 2)] : [])]
       aimC = kit.aimAcross(pts, ctop + 0.3)
       FC = kit.fitFrame(pts, { ...camBase, el: EL_C, push: p.push * 0.5, aim: aimC })
     }
@@ -968,7 +1027,7 @@ export default {
       const bad = []
       for (let t = T.crumple; t <= T.crumple + TOSS.t1 + 1e-6; t += 0.05) {
         const w = where(t), gp = path.getPointAt(clamp01(w.s / PL))
-        if (w.gone || gp.z <= OUTZ) continue
+        if (w.gone || gp.z <= OUTZ || p.start === 'none') continue
         const k = clamp01((t - T.crumple - TOSS.t0) / (TOSS.t1 - TOSS.t0)), src = k <= 0 ? V(PC.x, ctop + 0.15, PC.z) : V(lerp(PC.x, BIN.x, smooth(k)), lerp(ctop, BIN.h, k) + 4 * TOSS.apex * k * (1 - k) + 0.15, lerp(PC.z, BIN.z, smooth(k)))
         const el = THREE.MathUtils.degToRad((p.close && t >= T.zoom ? EL_C : EL)), az = THREE.MathUtils.degToRad(AZ)
         const d = V(-Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el))
@@ -1000,7 +1059,7 @@ export default {
       if (w.dir < 0 && w.turn < 1) ry = angleTo(Math.PI, backDir, w.turn)
       if (!walkIn && w.dir > 0) ry = Math.PI
       guest.at(pos.x, pos.z, ry)
-      const shown = !w.gone && pos.z > OUTZ
+      const shown = !w.gone && pos.z > OUTZ && p.start !== 'none'
       guest.fig.visible = guest.blob.visible = shown
       const wc = walkCycle(w.s, w.moving)
       guest.pose(wc)
@@ -1042,6 +1101,15 @@ export default {
       const kout = p.phone ? smooth((t - (T.stamp - 0.08)) / 0.4) : 0, kdown = p.phone ? smooth((t - (T.stamp + 0.32)) / 0.55) : 0
       const ko = kin * (1 - kout)
       owner.body.rotation.z = 0.025 * Math.sin(t * 1.3 + 1)
+      // Sitzende Gaeste: wiegen sich leicht, einer hebt ab und zu die Tasse, der andere erzaehlt mit der Hand
+      for (const g2 of sitters) {
+        const ph = t * 1.25 + g2.ph, talk = Math.max(0, Math.sin(ph)), lift = smooth(clamp01((Math.sin(ph * 0.55) - 0.35) / 0.4))
+        g2.f.body.rotation.z = 0.035 * Math.sin(ph * 0.8)
+        g2.f.body.rotation.x = 0.06 + 0.03 * Math.sin(ph * 0.6)
+        g2.f.armR.rotation.x = g2.cup ? lerp(-0.45, -1.75, lift) : -0.5 - 0.6 * talk
+        g2.f.armR.rotation.z = g2.cup ? lerp(0, 0.35, lift) : 0.15 * talk
+        g2.f.armL.rotation.x = -0.55 + 0.05 * Math.sin(ph * 1.3)
+      }
       // Nicken am Hals und eine kleine Verbeugung: so ist "verstanden" auch in der ganzen Ansicht zu sehen
       const nod = T.order != null ? 0.5 * bump((t - T.order - 0.1) / 0.45) + 0.3 * bump((t - T.order - 0.55) / 0.4) : 0
       const bow = T.order != null ? 0.12 * bump((t - T.order - 0.05) / 0.95) : 0
@@ -1133,14 +1201,14 @@ export default {
         live.bubble = bubble.g.visible; live.bubbleScale = bubble.g.visible ? +sc.toFixed(3) : 0
       }
       // Licht ueber der Theke atmet ein wenig mit dem Stempel (sonst steht das Bild zwischen den Ankern still)
-      lamp.intensity = 26 + (p.phone ? 10 * bump((t - T.stamp) / 0.6) : 0)
+      lamp.intensity = LAMP + (p.phone ? 10 * bump((t - T.stamp) / 0.6) : 0)
       // Waehrend der Fahrt in die Nahaufnahme gleiten Schild und Tafel unter den Textzeilen durch: dort
       // dunkeln sie ab, dazu ein dunkler Verlauf oben (Abnahme 18.11.2026: "Handy" stand auf dem hellen
       // Schild, daneben angeschnittene Woerter der Tafel)
       // schon nach 40 % der Fahrt ganz abgedunkelt (die Textzeile wechselt oft mitten in der Fahrt)
       const dk = smooth(clamp01(zk / 0.4))
-      signMat.color.setScalar(lerp(1, 0.22, dk)); menuMat.color.copy(menuCol).multiplyScalar(lerp(1, 0.25, dk))
-      signHalo.material.opacity = 0.3 * (1 - dk)
+      signMat.color.setScalar(lerp(SIGNK, 0.22, dk)); menuMat.color.copy(menuCol).multiplyScalar(lerp(SIGNK, 0.25, dk))
+      signHalo.material.opacity = HALO * (1 - dk)
       if (zoomShade) zoomShade.style.opacity = Math.min(1, 1.5 * Math.sin(Math.PI * zk)).toFixed(3)
       kit.sync()
       // ---- Pruefkaesten. In der Nahaufnahme zaehlen nur Handys, Haken, Stempel (und mit "counter" die Karte):

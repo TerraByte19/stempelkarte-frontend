@@ -495,7 +495,8 @@ export async function createKit(ctx, opts = {}) {
     put(new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.15), new THREE.MeshBasicMaterial({ map: icoTex, transparent: true, toneMapped: false })), winX + (flip ? 0.55 : -0.55), 1.62, 0.16, false)
     // Tuer: Rahmen, dahinter das Licht des Ladens, davor das Tuerblatt (dreht auf, wenn jemand kommt)
     put(new THREE.Mesh(new RoundedBoxGeometry(1.42, 2.6, 0.22, 2, 0.06), std('#140F33')), dx, 1.3, 0.02, false)
-    put(new THREE.Mesh(new THREE.PlaneGeometry(1.14, 2.36), new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(1.1) })), dx, 1.2, 0.135, false)
+    const doorMat = new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(1.1) })
+    put(new THREE.Mesh(new THREE.PlaneGeometry(1.14, 2.36), doorMat), dx, 1.2, 0.135, false)
     // Angel an der Seite ZUR Ecke, das Blatt reicht von der Ecke weg und schwingt nach aussen auf, bis es quer
     // zur Front steht. Warum: wer von der Ecke her kommt und gerade auf die Tuer zugeht, laeuft so nicht in
     // das Blatt. In der ersten Probe von iso-street sass die Angel auf der anderen Seite: das Blatt schwang in
@@ -505,7 +506,8 @@ export async function createKit(ctx, opts = {}) {
     const hinge = new THREE.Group(); hinge.position.set(ax(hingeA), 0, 0.17); g.add(hinge)
     const lx = flip ? 0.56 : -0.56
     const leaf = new THREE.Mesh(new RoundedBoxGeometry(1.12, 2.32, 0.08, 2, 0.03), std(wallC.clone().multiplyScalar(0.55))); leaf.position.set(lx, 1.2, 0); hinge.add(leaf)
-    const pane = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.2), new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(0.92) })); pane.position.set(lx, 1.45, 0.05); hinge.add(pane)
+    const paneMat = new THREE.MeshBasicMaterial({ color: col(lightC).multiplyScalar(0.92) })
+    const pane = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 1.2), paneMat); pane.position.set(lx, 1.45, 0.05); hinge.add(pane)
     // Markise nur ueber dem Schaufenster (ueber der Tuer haengt die Glocke): Ladenfarbe im Wechsel mit Lila
     // (eigener Laden) oder Papier (gegenueber), wie auf einer Stempelkarte
     const awTex = canvasTex(512, 64, (c2, cw, chh) => { for (let i = 0; i < 8; i++) { c2.fillStyle = i % 2 ? (ours ? BRAND.lilac : BRAND.paper) : '#' + acc.getHexString(); c2.fillRect(i * cw / 8, 0, cw / 8 + 1, chh) } })
@@ -533,8 +535,9 @@ export async function createKit(ctx, opts = {}) {
     const SWING = Math.PI / 2 + 0.06 // etwas ueber quer: das Blatt neigt sich von der Tuer weg
     return {
       g, hinge, leaf, open, light: pl, rot, name: shopName, sign: signInfo,
-      // fuer Lichtwechsel (shine)
-      signMat, winMat, halo, front,
+      // fuer Lichtwechsel (shine); doorMat und paneMat (Licht in der Tuer) fuer iso-street "dark", shine
+      // selbst laesst sie, wie sie sind
+      signMat, winMat, halo, front, doorMat, paneMat, flip,
       // Ecken des Schildes in der Welt (fuer den Pruefkasten: kit.project(shop.signCorners))
       signCorners: [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => world(-w / 2 + sx * (signW + 0.18) / 2, 3.95 + sy * (signH + 0.18) / 2, 0.25)),
       hingeWorld: world(ax(hingeA), 0, 0.17),
@@ -817,8 +820,9 @@ export async function createKit(ctx, opts = {}) {
       // Dunkel; im Doener-Video (17.11.2026) stand die halb durchsichtige Wochenleiste dagegen rund 0,25 s
       // lang ueber der hellen 3D-Stadt, und "Woche 1" bis "Woche 4" waren davor kaum zu lesen. Nicht am Ende
       // des Videos: dort folgt nichts, und das Schlussbild soll stehen bleiben.
+      // Vor einem Teil mit "enter": "kreuz" nicht: der neue blendet ueber diesen, der dafuer ganz stehen bleibt.
       if (dimEl) {
-        const leaves = !(ctx.isLast && ctx.e >= ctx.sceneEnd - 1e-6)
+        const leaves = !(ctx.isLast && ctx.e >= ctx.sceneEnd - 1e-6) && ctx.nextEnter !== 'kreuz'
         dimEl.style.opacity = leaves && t > ctx.e - 0.06 ? (0.8 * smooth((t - ctx.e + 0.06) / 0.2)).toFixed(3) : '0'
       }
       // 2D-Kamerafahrt der Szene aufheben (siehe .k3-wrap)

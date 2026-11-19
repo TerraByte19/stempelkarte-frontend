@@ -33,6 +33,8 @@
 //     einer Szene rechnen nicht doppelt
 //   - die 3D-Bausteine iso-shop, phone-3d und iso-street "nah" (seit 18.11.2026, "3D zuerst") je mit
 //     eigenem Test: gleiche Pixel, Anker, Pruefkaesten, Knopfspalte, Wortlaut C1 (zusammen rund vier Minuten)
+//   - der Schriftzug ueber der Kreuzung (iso-street, Textzeile "role": "name") und die Wortleiste oben
+//     ("progress", "chapter"), beide seit 19.11.2026 (tools/test_3d_iso_street_name.mjs, tools/test_wortleiste.mjs)
 import { readFileSync, existsSync, mkdtempSync, writeFileSync, rmSync, readdirSync, cpSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
@@ -239,6 +241,10 @@ await failsWith('Prüfung schlägt an: Video zu kurz', s => { s.scenes = [s.scen
   // Ein Teil mit "cut" beginnt 0,1 s vor seinem Wort statt 0,3 s
   const tc = timeline(two({ enter: 'cut' }), [[1], [3]]), tf = timeline(two({}), [[1], [3]])
   check('Harter Schnitt sitzt 0,1 s vor dem ersten Wort des Teils, die Überblendung beginnt wie bisher 0,3 s davor', Math.abs(tc.scenes[0].parts[1].s - 2.9) < 1e-9 && Math.abs(tf.scenes[0].parts[1].s - 2.7) < 1e-9)
+  // "kreuz" (seit 19.11.2026): echte Ueberblendung zweier 3D-Teile; beginnt wie "fade", unbekannte Werte brechen ab
+  const tk = timeline(two({ enter: 'kreuz' }), [[1], [3]])
+  check('"enter": "kreuz" wird angenommen und beginnt wie die Überblendung 0,3 s vor dem Wort; "blende" wird abgelehnt',
+    Math.abs(tk.scenes[0].parts[1].s - 2.7) < 1e-9 && tk.scenes[0].parts[1].enter === 'kreuz' && /"enter" muss "fade", "cut" oder "kreuz" sein/.test(throws(() => two({ enter: 'blende' })) || ''))
 }
 {
   // Das zweite Video ist das Muster fuer alles Neue: es muss mit geschaetzten Zeiten ohne Fehler und ohne Warnung durchlaufen
@@ -630,7 +636,10 @@ check('tools/test_3d.mjs: 3D-Baustein iso-street (gleiche Pixel je Bild, Szene n
 for (const [datei, kurz, was] of [
   ['test_3d_iso_shop.mjs', '3d-laden', '3D-Baustein iso-shop (gleiche Pixel, Anker, QR frei, Blase, Papier, Prüfkästen, Knopfspalte, Tür, Branchen)'],
   ['test_3d_phone_3d.mjs', '3d-handy', '3D-Baustein phone-3d (gleiche Pixel, Anker, Prüfkästen, Lesbarkeit, Ausschnitt in drei Ansichten, Wortlaut C1)'],
-  ['test_3d_iso_street_naehe.mjs', '3d-naehe', 'iso-street "nah" (gleiche Pixel, Ring, Abstand zur Tür, Blase im Streifen und aus der Knopfspalte, Text, "stadt")']
+  ['test_3d_iso_street_naehe.mjs', '3d-naehe', 'iso-street "nah" (gleiche Pixel, Ring, Abstand zur Tür, Blase im Streifen und aus der Knopfspalte, Text, "stadt")'],
+  // seit 19.11.2026 (Nachbau "zwei Cafés", Wunsch des Betreibers): Schriftzug ueber der Kreuzung und Wortleiste
+  ['test_3d_iso_street_name.mjs', '3d-name', 'iso-street Schriftzug "name" (nicht oben als Tafel, Zünden, Kasten im Streifen und über den Schildern, gleiche Pixel, Ton, nicht in "nah")'],
+  ['test_wortleiste.mjs', 'leiste', 'Wortleiste "progress"/"chapter" (Skript streng, alte Stempelreihe unverändert, Kapitel, Abdunkeln, Lage)']
 ]) {
   const r = await run('node', [path.join(STUDIO_ROOT, 'tools', datei)], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
   process.stdout.write(r.out.split('\n').filter(l => l.startsWith('FEHLER')).map(l => `  [${kurz}] ` + l).join('\n') + (/^FEHLER/m.test(r.out) ? '\n' : ''))

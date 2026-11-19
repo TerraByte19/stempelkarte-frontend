@@ -42,6 +42,11 @@
 // 11. Zwei 3D-Teile in einer Szene (seit 18.11.2026): jeder rechnet nur, solange sein Teil zu sehen sein
 //     kann. Vorher rechneten beide die ganze Szene lang, und ein Video fast ganz in 3D kam nicht auf die
 //     Bildwechsel von Stil C.
+// 12. Voller und leerer Laden (seit 19.11.2026, Nachbau "zwei Cafés"): "crowd" stellt Gaeste vor den eigenen
+//     Laden (das Bild aendert sich), "dark" ohne Stammkunden dunkelt den Laden gegenueber von Anfang an ab (im
+//     Kasten seines Schildes hoechstens halb so viele helle Pixel). Vorher stand "nur bei Mond ist Betrieb"
+//     ueber einer Strasse mit einer einzigen kleinen Figur, und der verlassene Laden blieb warm erleuchtet.
+//     Ohne die beiden Angaben bleibt das Bild Pixel fuer Pixel, wie es war (Teil 1 prueft das Bild wie immer).
 //
 // Kein Netz, keine Kosten, etwa zwei Minuten. Laeuft seit dem 17.11.2026 (abends) auch in
 // tools/selftest.mjs mit; vorher arbeitete dort eine andere Sitzung.
@@ -367,6 +372,30 @@ for (const lim of limits) {
     check('Geteilter Renderer: 20 Szenen auf einer Seite, keine verliert ihr Bild (Chromium hält nur 16 WebGL-Kontexte)', !r.error && distinct === 20 && dark === 0 && !lost.length, r.error || `${distinct} verschiedene Farben, ${dark} dunkel${lost.length ? ', ' + lost[0] : ''}`)
     check('Geteilter Renderer: Szene 1 nach den anderen neu gerechnet, Pixel für Pixel gleich', r.same)
     check('fitFrame: Punkte über die ganze Fahrt (push 0,25, orbit 12) im Rahmen, Rahmen zu mindestens 97 % genutzt', r.worst <= 0.5 && r.use >= 0.97, `Ausschnitt ${JSON.stringify(r.frame)}, schlimmster Überstand ${r.worst.toFixed(2)} px, genutzt ${(r.use * 100).toFixed(1)} %`)
+  } finally { await st.close() }
+}
+
+// ---- 12. Voller und leerer Laden ("crowd", "dark")
+{
+  const variant = async extra => {
+    const sc = { meta: { title: 'test voll', slug: 'test-voll' }, scenes: [{ component: 'iso-street', params: { ...script.scenes[0].params, heart: false, walker: false, ...extra }, captions: [{ lines: ['Bei uns ist Betrieb.'], instant: true }] }] }
+    const st = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
+    try {
+      const pg = await st.page(), s0 = await st.state(pg)
+      await seek(pg, 0.8)
+      return { problems: [...s0.errors, ...st.problems, ...s0.warnings], stats: await canvasStats(pg), boxes: await boxStats(pg) }
+    } finally { await st.close() }
+  }
+  const plain = await variant({}), busy = await variant({ crowd: 6, dark: 1 })
+  check('"crowd" und "dark": baut ohne Fehler und Warnung', !plain.problems.length && !busy.problems.length, [...plain.problems, ...busy.problems].join(' | ').slice(0, 300))
+  check('"crowd": Gäste vor dem eigenen Laden ändern das Bild', !!plain.stats && !!busy.stats && plain.stats.hash !== busy.stats.hash)
+  const riv = v => (v.boxes || []).find(it => it.what === 'Schild Imbiss Sonne') || { bright: NaN }
+  check('"dark" ohne Stammkunden: das Schild gegenüber ist von Anfang an dunkel (höchstens halb so viele helle Pixel)', riv(plain).bright > 0.05 && riv(busy).bright <= 0.5 * riv(plain).bright, `${(riv(plain).bright * 100).toFixed(1)} % gegen ${(riv(busy).bright * 100).toFixed(1)} %`)
+  const sc = { meta: { title: 'test nah', slug: 'test-nah' }, scenes: [{ component: 'iso-street', params: { ...script.scenes[0].params, mode: 'nah', crowd: 2 }, captions: [{ lines: ['In der Nähe.'], instant: true }] }] }
+  const st = await openStudio({ script: sc, times: estimateTimes(normalize(sc)) })
+  try {
+    const pg = await st.page(), s0 = await st.state(pg)
+    check('"crowd" mit "mode": "nah" bricht verständlich ab', s0.errors.some(e => /nur im Duell/.test(e)), s0.errors.join(' | ').slice(0, 200))
   } finally { await st.close() }
 }
 

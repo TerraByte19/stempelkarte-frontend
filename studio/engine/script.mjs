@@ -68,10 +68,12 @@ const KEY_RUN = 3
 // ein Baeckerei-Video zeigte dann "Café Nordwind". Namen mit "_" am Anfang
 // sind Hinweise und werden ueberall ignoriert.
 const KEYS = {
-  script: ['meta', 'voice', 'timing', 'say', 'poster', 'sound', 'mix', 'scenes', 'captionStyle', 'pace'],
+  script: ['meta', 'voice', 'timing', 'say', 'poster', 'sound', 'mix', 'scenes', 'captionStyle', 'pace', 'progress'],
   timing: ['lead', 'hold', 'maxGap'],
   captionStyle: Object.keys(CAPTION),
   pace: ['maxStill', 'minChanges'],
+  progress: ['words'],
+  chapter: ['n', 'word', 'offset'],
   camera: ['cap', 'word', 'offset', 'at', 'zoom', 'focus', 'to', 'dur', 'whoosh'],
   sound: [...Object.keys(SOUND), ...Object.keys(LIBSOUND)],
   sounds: ['sound', 'cap', 'word', 'offset', 'at', 'anchor', 'vol', 'duck'],
@@ -79,7 +81,7 @@ const KEYS = {
   voice: ['voice_id', 'model_id', 'language_code', 'output_format', 'seed', 'voice_settings', 'stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost'],
   scene: ['component', 'params', 'anchors', 'captions', 'enter', 'camera', 'sounds'],
   parts: ['parts'],
-  caption: ['lines', 'accent', 'keep', 'role', 'instant', 'mode', 'scale', 'gapBefore']
+  caption: ['lines', 'accent', 'keep', 'role', 'instant', 'mode', 'scale', 'gapBefore', 'chapter']
 }
 
 // Die Marke wird "Stampit" geschrieben, aber englisch "Stamp It" gesprochen.
@@ -243,6 +245,19 @@ export function normalize(script) {
   // "pace": Richtwerte fuer den Bildwechsel (nur Warnungen): laengstes stehendes Bild und Mindestzahl der Wechsel
   let pace = null
   if (script.pace) pace = { maxStill: script.pace.maxStill == null ? null : num(script.pace.maxStill, 0.5, 60, '"pace.maxStill"'), minChanges: script.pace.minChanges == null ? null : num(script.pace.minChanges, 0, 200, '"pace.minChanges"') }
+  // "progress": die Wortleiste oben (seit 19.11.2026, Nachbau "zwei Cafés"). Statt eines Stempels je Szene
+  // stehen dort Kapitel mit je einem Wort, und ein Kapitel beginnt an einer Textzeile ("chapter"), nicht an
+  // einer Szene. Grund: ein Video aus langen Kamerafahrten hat fast alles in EINER Szene (Teile blenden
+  // ineinander, Szenen schieben seitlich), die Stempelreihe zeigte dort einen einzigen Punkt. Ohne "progress"
+  // bleibt die Stempelreihe, wie sie war (tools/regress.mjs haelt die alten Videos Bild fuer Bild fest).
+  let progress = null
+  if (script.progress != null) {
+    onlyKeys(script.progress, KEYS.progress, '"progress"')
+    const w = script.progress.words
+    if (!Array.isArray(w) || w.length < 2 || w.length > 5) fail('"progress.words" muss eine Liste mit 2 bis 5 Kapitelwörtern sein, z. B. ["WALLET", "VON SELBST", "DESIGN", "DEIN ZUG"]')
+    for (const x of w) if (typeof x !== 'string' || !x.trim() || x.length > 14) fail(`"progress.words": "${x}" muss ein kurzer Text sein (1 bis 14 Zeichen); die Leiste hat oben eine Zeile für alle Kapitel`)
+    progress = { words: w.map(x => x.trim()) }
+  }
   const sound = { ...SOUND, ...(script.sound || {}) }
   num(sound.sceneWhoosh, 0, 1, '"sound.sceneWhoosh"')
   if (sound.duck != null) num(sound.duck, -40, 0, '"sound.duck"')
@@ -266,9 +281,14 @@ export function normalize(script) {
       if (!p.component || !/^[a-z0-9-]+$/.test(p.component)) fail(`${where}: "component" fehlt oder hat unerlaubte Zeichen`)
       if (!Array.isArray(p.captions) || !p.captions.length) fail(`${where}: braucht mindestens eine Textzeile in "captions" (die Zeit hängt an den Wörtern)`)
       // "enter": wie ein Teil erscheint. "fade" (Vorgabe) blendet ueber, "cut" schneidet hart.
+      // "kreuz" blendet den neuen Teil UEBER den alten, der bis zum Ende der Blende ganz stehen bleibt (und ein
+      // 3D-Teil dunkelt davor nicht ab): fuer zwei 3D-Bilder hintereinander. Mit "fade" werden beide zugleich
+      // durchsichtig, und das Bild lief bei jedem Wechsel kurz durchs Dunkle (Nachbau "zwei Cafés", 19.11.2026:
+      // Helligkeit von rund 50 auf 33 fuer 0,3 bis 0,5 s, am Handy wie ein Blinzeln). Nicht fuer 2D-Teile mit
+      // durchsichtigem Grund: durch sie saehe man den alten Teil, bis er nach der Blende verschwindet.
       // Der erste Teil einer Szene schiebt immer von der Seite herein, dort gibt es nichts zu waehlen.
       const enter = p.enter ?? 'fade'
-      if (!['fade', 'cut'].includes(enter)) fail(`${where}: "enter" muss "fade" oder "cut" sein (bekam ${JSON.stringify(p.enter)})`)
+      if (!['fade', 'cut', 'kreuz'].includes(enter)) fail(`${where}: "enter" muss "fade", "cut" oder "kreuz" sein (bekam ${JSON.stringify(p.enter)})`)
       if (p.enter != null && pi === 0) fail(`${where}: "enter" gilt nur für Teile nach dem ersten. Der erste Teil einer Szene schiebt immer herein`)
       const camera = parseCamera(p.camera, where)
       const sounds = parseSounds(p.sounds, where)
@@ -282,6 +302,20 @@ export function normalize(script) {
           if (!caps.length) fail(`${where}, Text ${ci + 1}: "gapBefore" an der ersten Textzeile des Videos geht nicht, davor wird nichts gesprochen`)
           cap.gapBefore = num(c.gapBefore, 0.15, 1.5, `${where}, Text ${ci + 1}: "gapBefore"`)
         }
+        // "chapter": ab dieser Textzeile gilt Kapitel n der Wortleiste ("progress"); 0 = keins, die Leiste
+        // dunkelt ab (das Gegenbild). Als Zahl beginnt das Kapitel mit dem ersten Wort, als Objekt
+        // { "n": 1, "word": -1, "offset": 0 } auf einem bestimmten Wort (die Pointe "anders" am Satzende).
+        if (c.chapter != null) {
+          const w2 = `${where}, Text ${ci + 1}: "chapter"`
+          if (!progress) fail(`${w2} gilt nur zusammen mit "progress" oben im Skript (die Kapitelwörter)`)
+          const ch = typeof c.chapter === 'number' ? { n: c.chapter } : c.chapter
+          if (!ch || typeof ch !== 'object' || Array.isArray(ch)) fail(`${w2} muss eine Zahl oder { "n": ..., "word": ... } sein`)
+          onlyKeys(ch, KEYS.chapter, w2)
+          if (!Number.isInteger(ch.n) || ch.n < 0 || ch.n > progress.words.length) fail(`${w2}: "n" muss eine ganze Zahl von 0 bis ${progress.words.length} sein (0 = kein Kapitel, Leiste abgedunkelt)`)
+          const wi = ch.word ?? 0
+          if (!Number.isInteger(wi) || wi >= cap.words.length || wi < -cap.words.length) fail(`${w2}: "word" ${wi} gibt es nicht, die Textzeile hat ${cap.words.length} Wörter`)
+          cap.chapter = { n: ch.n, word: wi < 0 ? wi + cap.words.length : wi, offset: ch.offset == null ? 0 : num(ch.offset, -2, 2, `${w2}: "offset"`) }
+        }
         cap.scene = si; cap.part = pi; cap.k = ci; cap.id = `s${si + 1}${rawParts.length > 1 ? 'abcdefgh'[pi] : ''}.${ci + 1}`
         caps.push(cap); return caps.length - 1
       })
@@ -289,9 +323,10 @@ export function normalize(script) {
     })
     scenes.push({ parts })
   })
+  if (progress && !caps.some(c => c.chapter)) fail('"progress" braucht mindestens eine Textzeile mit "chapter" (dort beginnt Kapitel 1); ohne bliebe die Leiste unsichtbar')
   const spoken = caps.flatMap(c => c.say).join(' ')
   return {
-    meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, sound, mix, poster: script.poster ?? null, captionStyle, pace,
+    meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, sound, mix, poster: script.poster ?? null, captionStyle, pace, progress,
     scenes, caps, spoken, words: caps.reduce((n, c) => n + c.words.length, 0)
   }
 }

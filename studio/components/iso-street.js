@@ -64,6 +64,18 @@
 //   von Westen kommend laege der Eintritt unter dem eigenen Laden, und die Blase deckte dessen Schild zu.
 // - Ohne mode "nah" bleibt alles wie vorher (Standbilder des Doener-Videos vorher und nachher Pixel fuer
 //   Pixel verglichen, 18.11.2026).
+//
+// ================================================================================================ Schriftzug
+// Seit dem 19.11.2026 (Nachbau "zwei Cafés, eine Straße", auf Wunsch des Betreibers) kann das Duell den Namen
+// der Marke ueber der Kreuzung aufleuchten lassen: eine Textzeile mit "role": "name" (meist "Stampit.") steht
+// dann nicht oben als Tafel, sondern leuchtet auf ihr erstes Wort (Anker "name") als lila Leuchtschrift mit
+// dem Stempel-Logo im Streifen zwischen Textzeilen und Schildern auf, und die Kreuzung darunter bekommt einen
+// lila Schein. Warum so und nicht als Tafel oben: im Vorbild steht der Name gross ueber der Strasse und oben
+// gerade nichts; eine Tafel "Stampit." oben hiesse, der Name stuende im Textbereich wie jedes andere Wort.
+// Wie die Blase in "nah" hat der Schriftzug eine feste Groesse im BILD (sonst waere er bei "push" am Anfang
+// winzig) und steht physisch vor der Stadt (60 % des Wegs zur Kreuzung), damit kein Haus ihn verdeckt. Er
+// zuendet wie eine Neonroehre (zweimal Flackern, dann an) und bleibt bis zum Ende des Teils an. Ohne Textzeile
+// mit "role": "name" bleibt das Duell Pixel fuer Pixel, wie es war (tools/test_3d_iso_street_name.mjs).
 import { ICONS } from '../engine/icons.js'
 
 const SS = 1 // Bildpunkte je Buehnenpunkt; 2 waere glatter, kostet aber das Dreifache
@@ -94,10 +106,16 @@ const DASH = /[\u2012-\u2015]/
 // schneiden, und die Stadt steht still an ihrem Platz.
 const FRAME = { dist: 100, dx: 46, dy: 108 }
 const aimDuell = (az, target) => { const c = SHOP.w * (Math.sin(az) - Math.cos(az)) / 2; target.set(c * Math.cos(az), 1.6, c * Math.sin(az)) }
+// Schriftzug (Kopf der Datei): welche Textzeile ihn traegt, und wo er im Bild steht. NAME_BOX in Bildpunkten:
+// Oberkante 612 (die Textzeilen enden mit Luft bei 600, wie bei der Blase in "nah"), Unterkante 842 (das
+// oberste Schild beginnt im Duell bei rund 925), links und rechts 150 und 850 (Knopfspalte ab 950, und das Bild
+// ist um FRAME.dx nach links geschoben, daher die Mitte bei 500 statt 540)
+const nameIndex = caps => (caps || []).findIndex(c => c && c.role === 'name')
+const NAME_BOX = { cx: 500, top: 612, w: 700, h: 230 }
 
 export default {
   title: 'Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber',
-  use: 'Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Mit "mode": "nah" dieselbe Kreuzung für C1: ein Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, und über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch 2 Stempel bis: Gratis-Döner"; der 3D-Ersatz für shop-map und shop-street. Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.',
+  use: 'Isometrische Nachtszene in 3D: der eigene Laden und der Laden gegenüber an einer Kreuzung, beide Fronten zueinander. Über dem eigenen Laden zerbricht ein Herz, der Stammkunde geht über die Kreuzung und verschwindet gegenüber durch die Tür, die Ladenglocke schwingt. Die Kamera fährt langsam heran und dreht sich ein paar Grad. Für "Dein Stammkunde ... gegenüber", wenn es nach den großen Mitbewerbern aussehen soll. Mit "mode": "nah" dieselbe Kreuzung für C1: ein Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, und über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch 2 Stempel bis: Gratis-Döner"; der 3D-Ersatz für shop-map und shop-street. Im Duell kann eine Textzeile mit "role": "name" (etwa "Stampit.") statt oben als Tafel als lila Leuchtschrift über der Kreuzung aufleuchten (Anker "name"). Rechnet etwa 1,3 s je Bild (ohne Grafikkarte), also deutlich länger als die 2D-Bausteine.',
   params: {
     shop: { default: 'Döner Palast', doc: 'Name des eigenen Ladens auf seinem Schild (höchstens etwa 14 Zeichen). Passt er in einer Zeile nur klein, steht er in zwei Zeilen: vorn klein, das letzte Wort groß ("Döner" über "Nordwind")', same: 'Ladenname' },
     icon: { default: 'kebab', doc: 'Symbol des eigenen Ladens: cup, bread, scissors, star, heart, check, kebab', same: 'Symbol' },
@@ -114,6 +132,8 @@ export default {
     push: { default: 0.05, doc: 'Wie weit die Kamera während der Szene heranfährt (0 = steht, 0,05 = 5 % näher, höchstens 0,25). Sie endet immer im selben Ausschnitt, in dem beide Läden ganz zu sehen sind; mehr "push" heißt nur, dass sie weiter weg anfängt' },
     orbit: { default: 7, doc: 'Um wie viele Grad sich die Kamera während der Szene dreht (0 bis 12)' },
     after: { default: true, doc: 'Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf ("nah": nur der eigene leuchtet auf). false, wenn die Szene gleich danach endet' },
+    crowd: { default: 0, doc: 'Nur Duell: so viele Gäste (0 bis 6) stehen vor dem eigenen Laden, drei in einer Schlange zur Tür, die übrigen in einer Gruppe daneben, und unterhalten sich. Für "bei uns ist Betrieb"' },
+    dark: { default: 0, doc: 'Nur Duell: wie viel dunkler der gedimmte Laden wird (0 bis 1, zusätzlich zu "after"). 1 = Schaufenster, Tür und Schild fast aus, kein Licht davor: der leere Laden. Mit Stammkunde gilt das für den Laden, den er verlassen hat, ab "enter"; ohne ("walker": false) für den Laden gegenüber, von Anfang an (der eigene leuchtet dann)' },
     tones: { default: true, doc: 'Eigene Töne (Duell: thud beim Zerbrechen, ding an der Tür; "nah": ding und pop, wenn sich die Karte meldet, chime an der Tür). false, wenn das Skript Klänge aus der Bibliothek setzt' },
     mode: { default: 'duell', doc: '"duell": zwei Läden, Herz, Stammkunde geht rüber (wie bisher). "nah": C1, Lichtring um den eigenen Laden, ein Kunde betritt ihn auf der anderen Seite der Kreuzung, über ihm springt aus seinem Handy der Sperrbildschirm mit "Noch {left} Stempel bis: {reward}" (Anker "walk", "near", "turn", "enter"). In "nah" gibt es kein Herz; "heart", "walker", "back", "from" gelten nur in "duell"' },
     frame: { default: 'laden', doc: 'Nur "nah": "laden" = derselbe Ausschnitt wie im Duell (beide Läden, Kreuzung, der Ring links angeschnitten). "stadt" = weiter weg und höher: der ganze Ring, beide Läden und mehr Stadt, für "das Handy macht das von selbst" (PRODUKT.md C1: "ohne dass du etwas tust"). Nie dazu sagen, der Laden sehe nicht, wo jemand ist: das ist nicht belegt (N2)' },
@@ -123,13 +143,15 @@ export default {
     clock: { default: '18:42', doc: 'Nur "nah": Uhrzeit oben auf dem Sperrbildschirm in der Blase' }
   },
   captions: { min: 1 },
-  anchors: p => p.mode === 'nah' ? {
+  anchors: (p, caps) => p.mode === 'nah' ? {
     walk: { at: 'start', offset: 0, doc: 'Der Kunde geht los, auf dem Gehweg am Platz auf der anderen Seite der Kreuzung (im Bild unten rechts, mit "ours": "right" unten links), noch außerhalb des Rings' },
     near: { cap: 0, word: -1, doc: 'Er betritt den Ring: sein Handy leuchtet, die Blase mit dem Sperrbildschirm springt heraus (Töne: ding, pop). Genau jetzt steht er auf dem Rand des Rings, gut 10 m von der Tür. Auf "Nähe" o. ä.' },
     ...(p.then === 'dreht' || p.then === 'rein' ? { turn: { at: 'end', offset: -1.7, doc: 'Er dreht sich zur Tür des eigenen Ladens und geht los (vorher bleibt er stehen, wenn er die Ecke schon erreicht hat). Mindestens 0,4 s nach "near"' } } : {}),
     ...(p.then === 'rein' ? { enter: { at: 'end', offset: -0.25, doc: 'Er steht auf der Schwelle und geht hinein, die Glocke schwingt (Ton: chime), der Laden leuchtet auf. Braucht Zeit nach "turn" (rund 9 m Weg, ab 5 m/s warnt der Bau): etwa 2 s' } } : {})
   } : {
     ...(p.heart && !p.back ? { crack: { cap: 0, word: -1, doc: 'Das Herz über dem eigenen Laden zerbricht (Ton: thud). Auf "betrogen" o. ä.' } } : {}),
+    // Nur mit einer Textzeile "role": "name" (Schriftzug, siehe Kopf der Datei)
+    ...(nameIndex(caps) >= 0 ? { name: { cap: nameIndex(caps), word: 0, offset: -0.04, doc: 'Nur mit einer Textzeile "role": "name": der Schriftzug (ihr Text, z. B. "Stampit.") leuchtet über der Kreuzung auf wie eine Neonröhre, die Kreuzung bekommt einen lila Schein (Ton: thud). Vorgabe: ihr erstes Wort' } } : {}),
     ...(p.walker ? {
       walk: { at: 'start', offset: 0, doc: 'Der Stammkunde geht los (von "from" aus); die Tür, aus der er kommt, geht kurz vorher auf' },
       cross: { at: 'start', offset: 0, doc: 'Er tritt an die Bordsteinkante und geht auf die Fahrbahn. Vorgabe: gleich mit "walk", dann geht er gleichmäßig durch. Auf ein Wort gesetzt, ist er genau dann an der Kante' },
@@ -153,6 +175,14 @@ export default {
     if (!(p.orbit >= 0 && p.orbit <= 12)) ctx.fail('"orbit" muss zwischen 0 und 12 Grad liegen (mehr zeigt den Rand der Stadt)')
     if (!['duell', 'nah'].includes(p.mode)) ctx.fail('"mode" muss "duell" oder "nah" sein')
     const nah = p.mode === 'nah'
+    if (!(Number.isInteger(p.crowd) && p.crowd >= 0 && p.crowd <= 6)) ctx.fail('"crowd" muss eine ganze Zahl von 0 bis 6 sein')
+    if (!(p.dark >= 0 && p.dark <= 1)) ctx.fail('"dark" muss zwischen 0 und 1 liegen')
+    if (nah && (p.crowd || p.dark)) ctx.fail('"crowd" und "dark" gibt es nur im Duell, nicht mit "mode": "nah"')
+    const nameCap = ctx.cap('name')
+    if (nameCap && nah) ctx.fail('Eine Textzeile mit "role": "name" (Schriftzug über der Kreuzung) gibt es nur im Duell, nicht mit "mode": "nah": dort steht im selben Streifen die Blase mit dem Sperrbildschirm')
+    // Das Herz schwebt im selben Streifen ueber dem eigenen Laden. Die Pruefung "ueberdeckung" saehe das nicht: sie
+    // misst in der Ruhelage (Anfang des Teils), und dort ist der Schriftzug noch aus. Deshalb hier gleich ablehnen.
+    if (nameCap && p.heart) ctx.fail('Schriftzug ("role": "name") und Herz stehen im selben Streifen über den Läden. "heart": false setzen')
     // Wortlaut aus C1 (Backend: ApplePassService, sperrbildschirmOrte); "Stempel" ist Einzahl wie Mehrzahl
     const msg = p.left > 0 ? `Noch ${p.left} Stempel bis: ${p.reward}` : `${p.reward} wartet auf dich`
     if (nah) {
@@ -383,6 +413,35 @@ export default {
     // Ab hier geht mode "nah" eigene Wege (Ring, Kunde, Blase, Kamera; siehe buildNah unten). Alles davor, die
     // ganze Stadt, ist in beiden Modi dieselbe.
     if (nah) { await buildNah({ ctx, p, K, kit, our, riv, oursSide, signs, bell, msg, smoke, chat }); return }
+    // Gaeste vor dem eigenen Laden ("crowd"). Warum: im Nachbau "zwei Cafés" (19.11.2026) stand der Satz "nur bei
+    // Mond ist Betrieb" ueber einer Strasse, auf der man den Betrieb nicht sah (eine 30 px kleine Figur und eine
+    // hellere Front). Drei stehen in einer Schlange vor dem Schaufenster zur Tuer hin, die uebrigen als Gruppe
+    // weiter aussen. Gemessen im Laden (a = Abstand von der Ecke entlang der Front, z = vor der Front): die
+    // Schlange beginnt 1,2 m neben dem Weg des Stammkunden (a = 1,39), der Gehweg ist nur 1,25 m tief.
+    const crowd = []
+    if (p.crowd > 0) {
+      const SPOTS = [[2.6, 0.62, 'door'], [3.4, 0.6, 'door'], [4.2, 0.66, 'door'], [5.1, 0.42, 0.9], [5.4, 1.02, 2.6], [5.95, 0.62, -1.9]]
+      const COATS = ['#5FA39B', '#C9786A', '#5B86D6', '#D9839F', '#E2AE4D', '#8C6BC8'], HAIRS = ['#2A1A2E', '#5A3A2A', '#B9783A', '#18142A']
+      const toDoor = our.flip ? -Math.PI / 2 : Math.PI / 2
+      SPOTS.slice(0, p.crowd).forEach(([a, z, face], k) => {
+        const f = kit.person({ coat: COATS[k], hair: HAIRS[k % 4], scale: 1.15 + 0.05 * (k % 3), y0: CURB })
+        const w = our.g.localToWorld(new THREE.Vector3(our.flip ? -SHOP.w + a : -a, 0, z))
+        f.at(w.x, w.z, our.rot + (face === 'door' ? toDoor : (our.flip ? -face : face)))
+        crowd.push({ f, ph: k * 1.7, queue: face === 'door' })
+      })
+    }
+    // "dark": zusaetzlich abdunkeln (k 0 bis 1), nach shine. Schaufenster und Tuerlicht fast aus, Schild matt,
+    // kein Licht davor. Warum: im Nachbau war der verlassene Laden mit "after" nur gedimmt und im Schlussbild
+    // noch warm erleuchtet; der Satz zum leeren Laden hatte kein Bild.
+    // Tuerlicht immer neu setzen (auch bei k = 0): shine laesst es aus, und jedes Bild muss nur von t abhaengen,
+    // auch wenn rueckwaerts gesprungen wird
+    const darken = (s, k) => {
+      s.doorMat.color.copy(s.doorBase).multiplyScalar(1 - 0.8 * k); s.paneMat.color.copy(s.paneBase).multiplyScalar(1 - 0.8 * k)
+      if (!(k > 0)) return
+      s.signMat.color.multiplyScalar(1 - 0.55 * k); s.winMat.color.multiplyScalar(1 - 0.88 * k)
+      s.halo.material.opacity *= 1 - k; s.front.material.opacity *= 1 - k; s.light.intensity *= 1 - 0.85 * k
+    }
+    for (const s of [our, riv]) { s.doorBase = s.doorMat.color.clone(); s.paneBase = s.paneMat.color.clone() }
     // Der Stammkunde: hell gekleidet (Papierfarbe), damit er auf dem dunklen Platz sofort zu sehen ist
     let walker = null
     if (p.walker) {
@@ -442,12 +501,14 @@ export default {
     // Pixel bleibt, wie es vermessen ist.
     const aim = aimDuell
     const camOpts = { push: p.push, orbit: p.orbit, az: 45, el: 34, elDrop: 1.5, aim, fog: [24, 118] }
+    const nameSign = nameCap ? await buildName({ ctx, K, kit, cap: nameCap, t0: ctx.at('name'), tones: p.tones }) : null
 
     // ---------------------------------------------------------------- Pruefkaesten (siehe Kopf der Datei)
     // Schilder und Herz bilden eine data-apart-Gruppe: sie duerfen sich im Bild nicht ueberdecken.
     kit.safeBox('ourSign', 'Schild ' + our.name, true); kit.safeBox('rivSign', 'Schild ' + riv.name, true)
     if (p.heart) kit.safeBox('heart', 'Herz', true)
     if (p.walker) kit.safeBox('walker', 'Stammkunde', false)
+    if (nameSign) kit.safeBox('name', 'Schriftzug ' + nameSign.text, true)
 
     // Tuerblatt: wie weit die Figur von seiner Angel weg ist
     const fromHinge = (shop, pos) => Math.hypot(pos.x - shop.hingeWorld.x, pos.z - shop.hingeWorld.z)
@@ -483,6 +544,18 @@ export default {
         // der verlassene Laden dunkler und der andere bleibt heller. Vorher stand das Bild nach "enter" still.
         const fin = p.after ? smooth((t - w.tE - 0.3) / 1.5) : 0
         origin.shine(-fin); goal.shine(fin, opening(t, w.tE - 0.25, w.tE + 0.35))
+        darken(origin, p.dark * fin)
+      } else if (p.dark > 0) {
+        // Ohne Stammkunden: von Anfang an das Schlussbild (gegenueber dunkel, der eigene leuchtet)
+        riv.shine(-1); our.shine(1); darken(riv, p.dark)
+      }
+      // Gaeste vor dem Laden: wiegen sich, die in der Schlange ruecken kaum merklich, die Gruppe gestikuliert
+      for (const c of crowd) {
+        const ph = t * 1.9 + c.ph
+        c.f.body.rotation.z = 0.04 * Math.sin(ph)
+        c.f.armR.rotation.x = c.queue ? -0.15 * Math.max(0, Math.sin(ph * 0.5)) : -0.55 * Math.max(0, Math.sin(ph * 0.9))
+        c.f.armR.rotation.z = c.queue ? 0 : 0.2 * Math.max(0, Math.sin(ph * 0.9))
+        c.f.armL.rotation.x = c.queue ? 0 : -0.25 * Math.max(0, Math.sin(ph * 0.7 + 2))
       }
       // Die zwei am Brunnen wiegen sich leicht und gestikulieren abwechselnd
       chat.forEach((c, i) => { const ph = t * 2.2 + i * 2; c.body.rotation.z = 0.04 * Math.sin(ph); c.armR.rotation.x = -0.5 * Math.max(0, Math.sin(ph * 0.9 + i * 3)); c.armR.rotation.z = 0.2 * Math.max(0, Math.sin(ph * 0.9 + i * 3)) })
@@ -492,6 +565,7 @@ export default {
       kit.setSafe('ourSign', kit.project(our.signCorners)); kit.setSafe('rivSign', kit.project(riv.signCorners))
       kit.setSafe('heart', heartMeshes.length ? kit.meshBox(heartMeshes) : null)
       kit.setSafe('walker', walker && walker.fig.visible ? kit.meshBox([walker.fig]) : null)
+      if (nameSign) kit.setSafe('name', nameSign.update(t))
     })
 
     // Nur fuer tools/test_3d.mjs. doorGap: kleinster Abstand zwischen Stammkunde und den Tuerblaettern in diesem
@@ -501,7 +575,9 @@ export default {
     kit.canvas.isoDebug = {
       // Wie die Namen auf den Schildern stehen (Zeilen, Groesse relativ zur Schildhoehe)
       signs: signs.map(x => ({ ...x })),
-      drawnBox(what) { return kit.drawnBox(what === 'walker' ? walker && walker.fig : what === 'heart' ? heart && heart.grp : null) },
+      name: nameSign ? { text: nameSign.text, t0: nameSign.t0, size: nameSign.size } : null,
+      nameOn(t) { return nameSign ? nameSign.on(t) : null },
+      drawnBox(what) { return kit.drawnBox(what === 'walker' ? walker && walker.fig : what === 'heart' ? heart && heart.grp : what === 'name' ? nameSign && nameSign.plate : null) },
       doorGap() {
         if (!walker || !walker.fig.visible) return null
         scene.updateMatrixWorld()
@@ -521,6 +597,90 @@ export default {
       }
     }
   }
+}
+
+// ================================================================================================ Schriftzug
+// Leuchtschrift mit Logo ueber der Kreuzung (warum so: Kopf der Datei). update(t) stellt sie fuer Bild t und gibt
+// ihren Umriss im Bild zurueck (fuer den Pruefkasten), oder null, solange sie aus ist.
+async function buildName({ ctx, K, kit, cap, t0, tones }) {
+  const { THREE, scene, canvasTex } = kit
+  const { W, H, clamp01, smooth } = K
+  const FD = ctx.B.display, { cx: CX, top: TOP, w: NW, h: NH } = NAME_BOX
+  const text = cap.words.join(' ').replace(/[.,!?:;]+$/, '')
+  if (!text || text.length > 12) ctx.fail(`Der Schriftzug "${text}" muss 1 bis 12 Zeichen haben (eine Zeile über der Kreuzung)`)
+  if (/[\u2012-\u2015]/.test(text)) ctx.fail('Der Schriftzug enthält einen Gedankenstrich. Normalen Bindestrich nehmen.')
+  await kit.fonts(text)
+  // Schriftgroesse: so gross, dass Logo und Wort mit Rand in die Flaeche passen
+  const mc = document.createElement('canvas').getContext('2d'), LOGO = 0.8, GAP = 0.22
+  const span = s => { mc.font = `700 ${s}px ${FD}`; return mc.measureText(text).width + s * (LOGO + GAP) }
+  let size = 168
+  while (span(size) > NW - 90 && size > 60) size -= 4
+  // Logo aus brand.js: helle Kachel, der Stempel darin dunkel. Additiv gemischt wird Dunkel durchsichtig, der
+  // Stempel steht also als Aussparung in der leuchtenden Kachel, wie eine Neonroehre um ein Zeichen
+  const img = new Image()
+  // ohne xmlns laesst sich ein SVG nicht als Bild laden ("cannot be decoded"); logoSvg ist fuer HTML gebaut
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(ctx.logoSvg(256, '#EEEAFF', '#120E30').replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" '))
+  await img.decode()
+  const TS = 2
+  const tex = canvasTex(NW * TS, NH * TS, g => {
+    g.scale(TS, TS); g.fillStyle = '#000'; g.fillRect(0, 0, NW, NH)
+    const x0 = (NW - span(size)) / 2, cy = NH / 2, ls = size * LOGO, tx = x0 + ls + size * GAP
+    g.font = `700 ${size}px ${FD}`; g.textBaseline = 'middle'
+    const draw = () => { g.fillText(text, tx, cy + size * 0.03); g.drawImage(img, x0, cy - ls / 2, ls, ls) }
+    // Schein in drei Stufen (weit und lila, mittel, eng und hell), dann der helle Kern der Roehre
+    for (const [blur, c] of [[44, 'rgba(140,124,255,.95)'], [22, 'rgba(185,176,255,.95)'], [8, 'rgba(225,220,255,1)']]) {
+      g.save(); g.shadowColor = c; g.shadowBlur = blur; g.fillStyle = c; draw(); g.restore()
+    }
+    g.fillStyle = '#F7F5FF'; draw()
+  }, { sharp: true })
+  const add = (map, color, w, h, order) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map, color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, toneMapped: false, fog: false }))
+    m.renderOrder = order; m.frustumCulled = false; m.visible = false; scene.add(m); return m
+  }
+  const halo = add(kit.blobTex, '#8F82FF', NW * 1.45, NH * 2.3, 7)
+  const plate = add(tex, '#FFFFFF', NW, NH, 8)
+  // Schein auf der Kreuzung (auf der Fahrbahn; die Gehwege liegen hoeher und decken ihn dort ab)
+  const pool = new THREE.Mesh(new THREE.PlaneGeometry(26, 26), new THREE.MeshBasicMaterial({ map: kit.blobTex, color: '#8C7EFF', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }))
+  pool.rotation.x = -Math.PI / 2; pool.position.set(0, 0.05, 0); pool.renderOrder = 4; pool.visible = false; scene.add(pool)
+  if (tones) ctx.cue(t0 + 0.02, 'thud', 0.8)
+  // Zuenden: zweimal Flackern, dann an; danach atmet er kaum merklich (eine Roehre steht nie ganz still)
+  const FLICK = [[0, 0], [0.04, 0.9], [0.08, 0.15], [0.12, 1], [0.17, 0.4], [0.25, 1]]
+  const on = t => {
+    const d = t - t0
+    if (d < 0) return 0
+    if (d >= FLICK[FLICK.length - 1][0]) return 0.95 + 0.05 * Math.sin(d * 2.4)
+    for (let i = 1; i < FLICK.length; i++) if (d <= FLICK[i][0]) { const [a, va] = FLICK[i - 1], [b, vb] = FLICK[i]; return va + (vb - va) * (d - a) / (b - a) }
+    return 1
+  }
+  const ndc = new THREE.Vector3(), dir = new THREE.Vector3(), fwd = new THREE.Vector3(), tilt = new THREE.Quaternion(), eul = new THREE.Euler()
+  const toWorld = (sx, sy, depth, out) => {
+    const cm = kit.camera
+    ndc.set(sx / W * 2 - 1, 1 - sy / H * 2, 0.5).unproject(cm)
+    dir.copy(ndc).sub(cm.position).normalize(); cm.getWorldDirection(fwd)
+    return out.copy(cm.position).addScaledVector(dir, depth / dir.dot(fwd))
+  }
+  const corners = [[-NW / 2, -NH / 2], [NW / 2, -NH / 2], [-NW / 2, NH / 2], [NW / 2, NH / 2]].map(([x, y]) => new THREE.Vector3(x, y, 0)), cw = corners.map(() => new THREE.Vector3())
+  const origin = new THREE.Vector3(0, 0, 0)
+  const update = t => {
+    const k = on(t), show = k > 0.001
+    plate.visible = halo.visible = pool.visible = show
+    if (!show) return null
+    const cm = kit.camera; cm.getWorldDirection(fwd)
+    const D = 0.6 * origin.clone().sub(cm.position).dot(fwd)
+    const grow = 0.94 + 0.06 * smooth((t - t0) / 0.3)
+    const wpp = 2 * D * Math.tan(THREE.MathUtils.degToRad(cm.fov / 2)) / H
+    for (const m of [plate, halo]) {
+      toWorld(CX, TOP + NH / 2, D + (m === halo ? 2 : 0), m.position)
+      // kaum gedreht: eine Spur Koerper, aber lesbar wie ein Schild von vorn
+      m.quaternion.copy(cm.quaternion).multiply(tilt.setFromEuler(eul.set(0, 0.1 + 0.02 * Math.sin(t * 0.9), 0)))
+      m.scale.setScalar(wpp * grow)
+      m.updateMatrixWorld(true)
+    }
+    plate.material.opacity = k; halo.material.opacity = 0.42 * k; pool.material.opacity = 0.5 * smooth((t - t0) / 0.5) * Math.min(1, k + 0.2)
+    // Umriss im Bild aus den vier Ecken der Flaeche (der weiche Schein dahinter zaehlt nicht)
+    return k > 0.5 ? kit.project(corners.map((c, i) => cw[i].copy(c).applyMatrix4(plate.matrixWorld))) : null
+  }
+  return { text, t0, size, plate, on, update }
 }
 
 // ================================================================================================ mode "nah"

@@ -113,12 +113,58 @@ async function build(state) {
 
   // ---- Stempelreihe: ein Stempel pro Szene, die Schluss-Szene zaehlt nicht mit
   const dots = []
-  for (let i = 0; i < S.length - 1; i++) {
-    const p = el('div', 'p', '<i></i>'); progEl.append(p); dots.push(p)
-    if (i === 0) p.firstChild.style.opacity = 1
-    else pop(p.firstChild, S[i].s + 0.2)
-  }
+  if (!norm.progress) {
+    for (let i = 0; i < S.length - 1; i++) {
+      const p = el('div', 'p', '<i></i>'); progEl.append(p); dots.push(p)
+      if (i === 0) p.firstChild.style.opacity = 1
+      else pop(p.firstChild, S[i].s + 0.2)
+    }
+  } else wordBar()
   const progressPulse = t => dots.forEach((p, i) => key(p, [[t + i * 0.08, { scale: 1 }, EASE.OUT], [t + 0.18 + i * 0.08, { scale: 1.35 }, EASE.OUT], [t + 0.5 + i * 0.08, { scale: 1 }]]))
+
+  // ---- Wortleiste ("progress", seit 19.11.2026): je Kapitel ein Stempelfeld und ein Wort, in einer Zeile.
+  // Ein Kapitel beginnt an einer Textzeile mit "chapter" (script.mjs), kurz VOR ihrem Wort: so springt die
+  // Leiste um, bevor die neue Tafel steht, und das Auge ist schon oben, wenn das Wort kommt. Das neue
+  // Kapitel bekommt seinen Stempel (er bleibt, die Karte fuellt sich), sein Wort leuchtet lila; erledigte
+  // Woerter bleiben hell, kommende grau. Kapitel 0 dunkelt die ganze Leiste ab (das Gegenbild gehoert zu
+  // keinem Kapitel). Vor dem ersten Kapitel ist sie unsichtbar: der Einstieg soll frei stehen.
+  // Die Kreise sind die "dots" der Stempelreihe, damit progressPulse im Schlussbild sie pulsieren laesst.
+  function wordBar() {
+    const LEAD = 0.12
+    progEl.classList.add('words')
+    const ev = TL.caps.filter(c => c.chapter).map(c => ({ t: Math.max(0, c.t[c.chapter.word] + c.chapter.offset - LEAD), n: c.chapter.n, cap: c.id, word: c.words[c.chapter.word] })).sort((a, b) => a.t - b.t)
+    state.progress = { words: norm.progress.words, events: ev.map(e => ({ ...e, t: +e.t.toFixed(3) })) }
+    const words = norm.progress.words.map((w, i) => {
+      const st = el('div', 'st'), p = el('div', 'p', '<i></i>'), b = el('b'); b.textContent = w
+      st.append(p, b); progEl.append(st); dots.push(p)
+      return { st, p, b, n: i + 1 }
+    })
+    const OFF = { opacity: 0.42, color: '#FFFFFF', textShadow: '0 0 0px rgba(185,176,255,0)' }
+    const ON = { opacity: 1, color: BRAND.lilac, textShadow: '0 0 22px rgba(185,176,255,0.85)' }
+    const DONE = { opacity: 0.78, color: '#FFFFFF', textShadow: '0 0 0px rgba(185,176,255,0)' }
+    // Ganze Leiste: unsichtbar bis zum ersten Kapitel, abgedunkelt bei Kapitel 0
+    const bar = [[0, { opacity: 0 }]]
+    let lit = 0
+    for (const e of ev) {
+      const target = e.n === 0 ? 0.38 : 1
+      if (target !== lit) { bar.push([e.t, { opacity: lit }, EASE.OUT], [e.t + 0.3, { opacity: target }]); lit = target }
+    }
+    key(progEl, bar)
+    for (const w of words) {
+      // Wort: nach jedem Ereignis ist das eigene Kapitel aktiv, ein schon dagewesenes erledigt, sonst kommend
+      const fr = [[0, OFF]]
+      let cur = OFF, seen = false
+      for (const e of ev) {
+        if (e.n === w.n) seen = true
+        const next = e.n === w.n ? ON : seen ? DONE : OFF
+        if (next !== cur) { fr.push([e.t, cur, EASE.OUT], [e.t + 0.25, next]); cur = next }
+      }
+      key(w.b, fr)
+      // Stempel: springt beim ersten Mal, wenn das Kapitel beginnt, in sein Feld und bleibt
+      const first = ev.find(e => e.n === w.n)
+      if (first) pop(w.p.firstChild, first.t, 0.38)
+    }
+  }
 
   // ---- Textzeilen oben. Zeilen mit "role" zeichnet der Baustein selbst.
   // Modus "wort": oben steht immer nur EINE Tafel (ein Wort, zwei kurze, oder bei "instant"
@@ -200,6 +246,7 @@ async function build(state) {
   const loaded = new Map()
   // Alles, was ein Zuschauer lesen kann: fuer die Pruefung "schreibweise"
   state.texts = TL.caps.map(c => ({ where: `Textzeile ${c.id}`, text: c.words.join(' ') }))
+  if (norm.progress) state.texts.push({ where: 'Wortleiste ("progress")', text: norm.progress.words.join(' ') })
   const collectTexts = (v, where) => {
     if (typeof v === 'string') { if (v) state.texts.push({ where, text: v }) }
     else if (v && typeof v === 'object') for (const x of Object.values(v)) collectTexts(x, where)
@@ -235,7 +282,8 @@ async function build(state) {
         // von Anfang an sichtbar gewesen (bei zwei Teilen fiel das nie auf).
         const fr = []
         if (j > 0) fr.push(...(part.enter === 'cut' ? [[part.s - 0.001, { opacity: 0 }], [part.s, { opacity: 1 }]] : [[part.s + 0.1, { opacity: 0 }], [part.s + 0.5, { opacity: 1 }]]))
-        if (j + 1 < sc.parts.length) { const nx = sc.parts[j + 1], t2 = nx.s; fr.push(...(nx.enter === 'cut' ? [[t2 - 0.001, { opacity: 1 }], [t2, { opacity: 0 }]] : [[t2, { opacity: 1 }], [t2 + 0.3, { opacity: 0 }]])) }
+        // "kreuz": der alte Teil steht ganz, bis der neue ueber ihm ganz eingeblendet ist (siehe script.mjs)
+        if (j + 1 < sc.parts.length) { const nx = sc.parts[j + 1], t2 = nx.s; fr.push(...(nx.enter === 'cut' ? [[t2 - 0.001, { opacity: 1 }], [t2, { opacity: 0 }]] : nx.enter === 'kreuz' ? [[t2 + 0.5, { opacity: 1 }], [t2 + 0.501, { opacity: 0 }]] : [[t2, { opacity: 1 }], [t2 + 0.3, { opacity: 0 }]])) }
         if (fr.length) key(root, fr)
         if (j > 0) state.pictures.push({ t: +(part.enter === 'cut' ? part.s : part.s + 0.1).toFixed(3), kind: 'teil', how: part.enter === 'cut' ? 'schnitt' : 'blende', scene: n + 1, part: j + 1, component: part.component })
       }
@@ -321,6 +369,9 @@ async function build(state) {
       const ctx = {
         root, scene, p, caps,
         s: part.s, e: part.e, sceneStart: sc.s, sceneEnd: sc.e, duration: DUR,
+        // wie der naechste Teil dieser Szene hereinkommt (null: keiner); "kreuz" heisst, dieser bleibt bis zum
+        // Ende der Blende ganz stehen und dunkelt nicht ab (kit3d run)
+        nextEnter: j + 1 < sc.parts.length ? sc.parts[j + 1].enter : null,
         isFirst: n === 0, isLast: n === S.length - 1, rest,
         w: (c, k) => {
           const cap = caps[c < 0 ? c + caps.length : c]

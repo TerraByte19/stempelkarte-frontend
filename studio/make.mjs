@@ -215,7 +215,9 @@ try {
     scenes: state.scenes, captions: state.caps, anchors: state.anchors,
     // Bildwechsel der Reihe nach: Szenen, Teile, Kamerabewegungen (was innerhalb eines Bildes passiert, steht bei den Ankern)
     pictures: state.pictures, pictureCount: (state.pictures || []).length,
-    cues: state.cues, cueCount: state.cues.length
+    cues: state.cues, cueCount: state.cues.length,
+    // nur mit "progress" im Skript: wann welches Kapitel der Wortleiste beginnt
+    ...(state.progress ? { progress: state.progress } : {})
   })
   log(`Länge ${state.duration} s, ${state.scenes.length} Szenen, ${state.cues.length} Töne${res.wpm ? `, Stimme ${res.wpm} Wörter/Minute` : ''}${voiceInfo && voiceInfo.pauses ? `, ${voiceInfo.pauses.count} Pausen ab 0,5 s (zusammen ${voiceInfo.pauses.seconds} s)` : ''}`)
   showChecks(res)
