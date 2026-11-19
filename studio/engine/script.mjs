@@ -90,7 +90,7 @@ const KEYS = {
   voice: ['voice_id', 'model_id', 'language_code', 'output_format', 'seed', 'voice_settings', 'stability', 'similarity_boost', 'style', 'speed', 'use_speaker_boost'],
   scene: ['component', 'params', 'anchors', 'captions', 'enter', 'camera', 'sounds', 'lead'],
   parts: ['parts'],
-  caption: ['lines', 'accent', 'keep', 'role', 'instant', 'mode', 'scale', 'gapBefore', 'chapter']
+  caption: ['lines', 'accent', 'keep', 'role', 'instant', 'mode', 'scale', 'gapBefore', 'chapter', 'outWithBar']
 }
 
 // Die Marke wird "Stampit" geschrieben, aber englisch "Stamp It" gesprochen.
@@ -366,6 +366,15 @@ export function normalize(script) {
           if (!Number.isInteger(wi) || wi >= cap.words.length || wi < -cap.words.length) fail(`${w2}: "word" ${wi} gibt es nicht, die Textzeile hat ${cap.words.length} Wörter`)
           cap.chapter = { n: ch.n, word: wi < 0 ? wi + cap.words.length : wi, offset: ch.offset == null ? 0 : num(ch.offset, -2, 2, `${w2}: "offset"`) }
         }
+        // "outWithBar" (seit 23.11.2026, Nachbau "zwei Cafés" Fassung 3, Runde 4): die Textzeile geht zusammen mit der Wortleiste (beim
+        // naechsten Kapitel -1) und blendet in 0,15 s aus, statt bis kurz vor der naechsten Textzeile zu stehen. Im Vorbild verschwinden
+        // die letzte Frage und die Leiste zugleich (33,85 bis 34,0 s); bei uns stand "willst du / sein?" 0,5 s laenger ueber den Partikeln
+        // des Schlussbilds. Ohne die Angabe bleibt alles wie vorher.
+        if (c.outWithBar != null) {
+          if (c.outWithBar !== true) fail(`${where}, Text ${ci + 1}: "outWithBar" ist entweder true oder fehlt`)
+          if (!progress) fail(`${where}, Text ${ci + 1}: "outWithBar" gilt nur zusammen mit "progress" oben im Skript (die Wortleiste)`)
+          cap.outWithBar = true
+        }
         cap.scene = si; cap.part = pi; cap.k = ci; cap.id = `s${si + 1}${rawParts.length > 1 ? 'abcdefgh'[pi] : ''}.${ci + 1}`
         caps.push(cap); return caps.length - 1
       })
@@ -374,6 +383,7 @@ export function normalize(script) {
     scenes.push({ parts })
   })
   if (progress && !caps.some(c => c.chapter)) fail('"progress" braucht mindestens eine Textzeile mit "chapter" (dort beginnt Kapitel 1); ohne bliebe die Leiste unsichtbar')
+  caps.forEach((c, i) => { if (c.outWithBar && !caps.slice(i + 1).some(d => d.chapter && d.chapter.n === -1)) fail(`Textzeile ${c.id}: "outWithBar" braucht eine spätere Textzeile mit "chapter": -1 (dort verschwindet die Leiste)`) })
   const spoken = caps.flatMap(c => c.say).join(' ')
   return {
     meta: { language: 'de', ...meta }, voice: script.voice || {}, timing, sound, mix, poster: script.poster ?? null, captionStyle, pace, progress, look,
@@ -439,6 +449,8 @@ export function wortChunks(c, minShow = CAPTION.minShow) {
   return list.map((x, i) => ({ rows: [x.words], words: x.words, s: +(start(x) - LEAD).toFixed(3), e: +(i + 1 < list.length ? start(list[i + 1]) - LEAD : c.e).toFixed(3), merged: x.merged }))
 }
 
+// So viel (s) vor ihrem Wort springt die Wortleiste um (wie LEAD in engine.js, wordBar); fuer "outWithBar"
+const BAR_LEAD = 0.12
 /** Der Zeitplan: wann jede Textzeile, jeder Teil und jede Szene beginnt und endet. */
 export function timeline(norm, times) {
   const T = norm.timing
@@ -448,6 +460,13 @@ export function timeline(norm, times) {
     return { ...c, t, last: t[t.length - 1] }
   })
   caps.forEach((c, i) => { c.e = i + 1 < caps.length ? caps[i + 1].t[0] - T.capGap : c.last + T.hold })
+  // "outWithBar": Ende beim naechsten Kapitel -1, so wie die Wortleiste es zeigt (engine.js, wordBar: 0,12 s vor Wort + offset)
+  caps.forEach((c, i) => {
+    if (!c.outWithBar) return
+    const d = caps.slice(i + 1).find(x => x.chapter && x.chapter.n === -1), tb = d.t[d.chapter.word] + d.chapter.offset - BAR_LEAD
+    if (tb < c.last + 0.2) fail(`Textzeile ${c.id}: "outWithBar" - die Leiste geht schon ${(c.last - tb).toFixed(2)} s vor dem letzten Wort, das Wort wäre nicht zu lesen`)
+    c.e = Math.min(c.e, tb); c.fadeOut = 0.15
+  })
   for (const c of caps) if (c.mode === 'wort') c.chunks = wortChunks(c, (norm.captionStyle || CAPTION).minShow)
   const scenes = norm.scenes.map((sc, n) => ({
     index: n,

@@ -503,7 +503,8 @@ export async function createKit(ctx, opts = {}) {
   // Warum: im Vorbild hebt das Haus ueber dem vollen Café in derselben Einstellung ab und gibt den Raum frei; Fassung 2
   // blendete dafuer in einen anderen Baustein (iso-shop) und zeigte einen nackten Kasten im Schwarzen. Der Deckel wirft
   // keinen Schatten (der Schatten wird einmal geworfen und muss auch ohne Deckel stimmen), seine Materialien sind
-  // durchsichtig schaltbar (lidSet). hollow = { gf (Hoehe des Erdgeschosses), wt (Wanddicke), inner, cap } oder false.
+  // durchsichtig schaltbar (lidSet). hollow = { gf (Hoehe des Erdgeschosses), wt (Wanddicke), inner, cap, parapet } oder false.
+  // parapet (seit Runde 3 des Nachbaus, freiwillig): { h (ueber dem Boden, Vorgabe 0,9 m), color, glow, k } niedrige Bruestung, die stehen bleibt.
   // Ohne hollow wird der Laden genau wie vorher gebaut.
   kit.shop = async ({ name: shopName, icon, accent, ours = true, pos = new THREE.Vector3(), rot = 0, flip = false, size = { w: 5.6, d: 6, h: 9, door: 1.25 }, light = 18, signs = null, hollow = false }) => {
     const g = new THREE.Group(); g.position.copy(pos); g.rotation.y = rot; scene.add(g)
@@ -534,6 +535,15 @@ export async function createKit(ctx, opts = {}) {
       keep(new THREE.Mesh(new RoundedBoxGeometry(WT, GF - 0.1, d - WT, 2, 0.04), inM), cornerX, (GF - 0.1) / 2, -d / 2 + WT / 2)
       keep(new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, WT + 0.04), capM), -w / 2, GF - 0.05, -d + WT / 2)
       keep(new THREE.Mesh(new THREE.BoxGeometry(WT + 0.04, 0.1, d - WT), capM), cornerX, GF - 0.05, -d / 2 + WT / 2)
+      // hollow.parapet (Runde 3 des Nachbaus, nur wenn gesetzt): niedrige, dunkle Bruestung an Front und Seitenwand, die beim Abheben
+      // stehen bleibt. Im Vorbild bleibt nach dem Abheben ein dunkles Gelaender als niedrige Wand um den Raum; bei uns war die ganze
+      // Front weg. Etwas duenner als die Wand, damit sie bei geschlossenem Deckel ganz darin steckt.
+      if (hollow.parapet) {
+        const pp = hollow.parapet, ph = 0.42 + (pp.h || 0.9)
+        const pM = std(pp.color || '#22348A', { roughness: 0.3, emissive: pp.glow || '#3A5CE0', emissiveIntensity: pp.k == null ? 0.9 : pp.k })
+        keep(new THREE.Mesh(new RoundedBoxGeometry(w - 0.06, ph, WT - 0.06, 2, 0.03), pM), -w / 2, ph / 2, -WT / 2).name = 'bruestung'
+        keep(new THREE.Mesh(new RoundedBoxGeometry(WT - 0.06, ph, d - WT - 0.06, 2, 0.03), pM), farX, ph / 2, -d / 2 - WT / 2).name = 'bruestung'
+      }
     }
     // Gesims oben, Band ueber dem Laden, Sockel: liest sich wie ein gebautes Haus, nicht wie eine Kiste
     put(new THREE.Mesh(new RoundedBoxGeometry(w + 0.3, 0.36, d + 0.3, 2, 0.12), std(wallC.clone().lerp(col('#FFFFFF'), 0.14))), -w / 2, h + 0.08, -d / 2)

@@ -117,6 +117,12 @@
 // (die Cafés waren doppelt so gross wie im Vorbild), Daecher fast schwarz (eine unbeleuchtete Platte je Dach) bei fast neutralem
 // Himmelslicht (kit.nightLights "sky"), und mehrere Zeiten am Vorbild nachgestellt (Wallet, Deckel, Sperrbildschirm, Name, Kran).
 // Ein Skript mit "ours": "left" bekommt das Spiegelbild (sg in PATH.reise).
+//
+// Runde 3 nach dem Review, alles nur mit "reise": die Stadt war ein dichter Teppich kleiner Haeuser mit rund 156 Laternen auf jeder Strasse
+// und zwischen den Cafés nur eine Gasse; im Vorbild wenige grosse, fast schwarze Bloecke und EINE breite, beleuchtete Allee zwischen den
+// Cafés. Jetzt: Allee (AVE_REISE je Seite), 2 x 2 Massen je Block, rund 30 Laternen nur an Allee und Strasse vor den Cafés, geparkte Autos
+// an den Bordsteinen der Allee. Kamera am Fluss des Vorbilds nachgestellt (Wege 'soft', 'reise', 'kran' in camSet), Sicht von oben flacher
+// und fast gerade von Sueden, niedrige Bruestung am vollen Café (kit.shop hollow.parapet), Korb ohne dunklen Mantel, leerer Raum gedeckter.
 import { ICONS } from '../engine/icons.js'
 
 // Kamerawege im Duell (Fassung 2 und 3, siehe Kopf); "standard" ist der vermessene Ausschnitt von vorher
@@ -124,6 +130,10 @@ const CAMERAS = ['standard', 'descent', 'front', 'top', 'kran', 'reise']
 // "reise": Laden groesser (im Vorbild ist der Raum etwa zehn Figuren breit; in 5,6 m stand ein Gast so breit wie der
 // halbe Raum) und niedriger (zwei Geschosse statt drei, wie die Stadt in "neon")
 const SHOP_REISE = { w: 9.6, d: 8.4, h: 8.2, door: 1.25 }
+// "reise" (Review Fassung 3, Runde 3): so viel (m) ist die Nord-Sued-Strasse zwischen den beiden Cafés auf jeder Seite breiter
+// (Allee). Im Vorbild liegen zwischen den Fronten rund 1,4 Café-Breiten (32 % der Bildbreite) mit Zebrastreifen, geparkten Autos
+// und Laternen paarweise; bei uns waren es 6,3 m gegen ein 9,6 m breites Café (13 %), die Strasse las sich als Gasse.
+const AVE_REISE = 4
 // Anker von "reise" mit ihrer Vorgabe: die Sekunde im Vorbild, gerechnet ab Anfang des Teils (taktkarte.md, look.md)
 const REISE = [
   ['pan', 5.2, 'Schneller Schwenk von beiden Läden auf den eigenen (0,5 s), danach heran und tiefer an seine Front'],
@@ -132,14 +142,14 @@ const REISE = [
   ['walletAdd', 11.6, 'Blatt mit der Karte und "Zu Apple Wallet hinzufügen"'],
   ['walletCard', 12.5, 'Die Karte liegt in der Wallet'],
   ['walletNoApp', 14.5, 'Links springt das durchgestrichene Download-Zeichen auf'],
-  ['back', 15.5, 'Zurück nach oben auf die Straße (0,45 s), der Deckel senkt sich wieder, das Handy mit der Wallet blendet aus'],
+  ['back', 15.5, 'Zurück nach oben auf die Straße (weich von 0,3 s davor bis 1,1 s danach, wie im Vorbild), der Deckel senkt sich wieder, das Handy mit der Wallet blendet aus'],
   ['lock', 16.2, 'Schwarzes Handy schiebt sich rechts herein, der Kunde auf der Straße leuchtet auf'],
   ['lockNotify', 16.8, 'Sperrbildschirm mit der Mitteilung der Karte (C1), Linie vom Kunden zum Handy'],
   ['msg', 19.7, 'Weiche Blende: Straße dunkelt ab, das Fenster des Ladens kommt (das Handy ist dann schon weg); dahinter steigt die Kamera fast senkrecht'],
   ['msgType', 20.0, 'Die Nachricht tippt sich'],
   ['msgSend', 21.45, '"Senden" wird "Gesendet"'],
   ['msgOut', 21.7, 'Das Fenster geht, über Leuten auf der Straße springen die Mitteilungen auf'],
-  ['travel', 22.6, 'Schnelle Fahrt zum Laden gegenüber (0,9 s)'],
+  ['travel', 22.6, 'Fahrt zum Laden gegenüber und ohne Halt hinein in seinen Raum (weich ab 0,25 s davor, am schnellsten rund 0,8 s danach, steht nach 2,6 s); die Mitteilungen über der Straße gehen 0,4 s danach'],
   ['roof2', 23.5, 'Dessen Deckel hebt ab: der leere, warme Raum'],
   ['trash', 24.5, 'Der Drahtkorb steigt vorn im leeren Raum auf'],
   ['trashCard', 25.0, 'Die Papier-Stempelkarte erscheint über dem Korb'],
@@ -206,9 +216,11 @@ const NAME_ON_REISE = 0.9
 const WALLET_OUT = 0.35, OUR_LID_DOWN = 0.5
 // "reise", Runde 2: so hoch (m) hebt der Deckel ab. Mit 26 m stand er beim Ausblenden noch halb durchsichtig ueber Raum und Textzeile
 // (9,4 bis 9,5 s); im Vorbild steigt das Obergeschoss als fester Block aus dem oberen Bildrand
-const LID_LIFT = 48
+const LID_LIFT = 48, LID_UP = 0.4
 // "reise", Runde 2: Schildchen 25 % groesser (im Vorbild rund 142 px breit bei 2,5 s, unsere 115 px)
 const TAG_REISE = 1.25
+// "reise", Runde 4: Bildverschiebung beim Sperrbildschirm (px nach links), so steht das Café links neben dem Handy
+const LOCK_OX = 80
 
 export default {
   title: 'Zwei Läden gegenüber in 3D: Kreuzung bei Nacht, Stammkunde geht rüber',
@@ -364,16 +376,24 @@ export default {
     // und "Wand zur Ecke", kit.shop) liegen dabei aussen, die offene Seite zeigt zur Kreuzung wie im Vorbild: der rechte Laden ohne
     // flip mit seiner Ecke im Osten (man schaut von Suedwesten hinein, Theke an der Rueckwand links im Bild), der linke mit flip
     // und seiner Ecke im Westen (man schaut von Suedosten hinein, wie im Vorbild bei 23,5 bis 28 s).
-    if (reise) { lots.left = { pos: new THREE.Vector3(-B, CURB, -B), rot: 0, flip: true }; lots.right = { pos: new THREE.Vector3(B + SH.w, CURB, -B), rot: 0, flip: false } }
+    // Runde 3: beide um AV nach aussen, die Nord-Sued-Strasse dazwischen ist eine breite Allee (AVE_REISE, Kopf der Datei)
+    const AV = reise ? AVE_REISE : 0
+    if (reise) { lots.left = { pos: new THREE.Vector3(-B - AV, CURB, -B), rot: 0, flip: true }; lots.right = { pos: new THREE.Vector3(B + AV + SH.w, CURB, -B), rot: 0, flip: false } }
     const oursSide = p.ours, rivalSide = p.ours === 'left' ? 'right' : 'left'
     // Grundflaeche eines Ladens in Weltkoordinaten (fuer Bodentextur und Freihalten)
-    const shopRect = side => side === 'left' ? [-B - SH.w, -B, -B - SH.d, -B] : reise ? [B, B + SH.w, -B - SH.d, -B] : [B, B + SH.d, B, B + SH.w]
+    const shopRect = side => reise ? (side === 'left' ? [-B - AV - SH.w, -B - AV, -B - SH.d, -B] : [B + AV, B + AV + SH.w, -B - SH.d, -B]) : side === 'left' ? [-B - SH.w, -B, -B - SH.d, -B] : [B, B + SH.d, B, B + SH.w]
 
     // ---------------------------------------------------------------- Stadt planen (vor dem Malen des Bodens)
     const R = rng(20261117)
     const N = 4 // Bloecke je Richtung um die Kreuzung
     const blocks = []
-    for (let i = -N; i < N; i++) for (let j = -N; j < N; j++) blocks.push({ i, j, x0: i * P + RH, x1: (i + 1) * P - RH, z0: j * P + RH, z1: (j + 1) * P - RH })
+    for (let i = -N; i < N; i++) for (let j = -N; j < N; j++) {
+      const b = { i, j, x0: i * P + RH, x1: (i + 1) * P - RH, z0: j * P + RH, z1: (j + 1) * P - RH }
+      // "reise": die Bloecke beidseits der Allee (x = 0) um AV schmaler, ueber die ganze Laenge; der Streifen wird Fahrbahn
+      if (reise && i === -1) b.x1 -= AV
+      if (reise && i === 0) b.x0 += AV
+      blocks.push(b)
+    }
     const overlaps = (a, b) => a[1] > b[0] && a[0] < b[1] && a[3] > b[2] && a[2] < b[3]
     const keepFree = [shopRect('left'), shopRect('right')].map(([x0, x1, z0, z1]) => [x0 - 0.6, x1 + 0.6, z0 - 0.6, z1 + 0.6])
     // "reise": die Haeuser sueds der Ost-West-Strasse gegenueber beiden Laeden niedrig (siehe Stadt unten), damit die Kamera auf die
@@ -392,8 +412,14 @@ export default {
         for (let k = 0; k < nW; k++) windows.push({ x: x - w / 2 + (k + 0.5) * w / nW, y, z: z + d / 2 + 0.03, ry: 0, on: R() })
         for (let k = 0; k < nD; k++) windows.push({ x: x - w / 2 - 0.03, y, z: z - d / 2 + (k + 0.5) * d / nD, ry: -Math.PI / 2, on: R() })
       }
-      if (R() < 0.65) { const bw = 0.8 + R() * 1.4; roofBits.push([x + (R() - 0.5) * (w - bw - 0.6), CURB + h, z + (R() - 0.5) * (d - bw - 0.6), bw, 0.5 + R() * 0.9, bw * (0.6 + R() * 0.6)]) }
+      // "reise" (Runde 3): nur jedes fuenfte Dach mit Aufbau; die Kaesten machten aus den Bloecken einen kleinteiligen Teppich
+      if (R() < (reise ? 0.2 : 0.65)) { const bw = 0.8 + R() * 1.4; roofBits.push([x + (R() - 0.5) * (w - bw - 0.6), CURB + h, z + (R() - 0.5) * (d - bw - 0.6), bw, 0.5 + R() * 0.9, bw * (0.6 + R() * 0.6)]) }
     }
+    // "reise": Nachbarhaeuser direkt neben den Cafés (siehe unten), schon hier, damit die Massen der Bloecke um sie herum geschnitten werden
+    // Runde 2 (beide Laeden im Norden, Front nach Sueden): je ein niedriges Haus aussen neben dem Laden und ein hoeheres dahinter
+    // Runde 3: mit der Allee um AV nach aussen
+    const nbReise = [[-B - AV - SH.w - 3.9, -B - 3.1, 7.2, 6.2, 6.6], [-B - AV - 3.1 - SH.w / 2, -B - SH.d - 3.9, 6.2, 7.2, 9.0], [B + AV + SH.w + 3.9, -B - 3.1, 7.2, 6.2, 6.6], [B + AV + 3.1 + SH.w / 2, -B - SH.d - 3.9, 6.2, 7.2, 9.0]]
+    const freeReise = reise ? [...keepFree, ...nbReise.map(([x, z, w, d]) => [x - w / 2 - 0.3, x + w / 2 + 0.3, z - d / 2 - 0.3, z + d / 2 + 0.3])] : []
     for (const b of blocks) {
       // Platz vorn: dort stuende ein Haus vor der Kreuzung. Mit "reise" stehen dort niedrige Haeuser (ein Geschoss): der
       // Brunnenplatz war im Review das Merkmal "unsere Welt", und das Vorbild zeigt dort dichte dunkle Bloecke
@@ -408,8 +434,25 @@ export default {
       // "neon": die Stadt so niedrig wie die Laeden (hoechstens drei Geschosse), wie im Vorbild, wo die zwei Cafés
       // zwischen gleich hohen dunklen Bloecken stehen; sonst ragten im Sinkflug Tuerme ueber die Laeden
       const maxFloors = Math.min(NE ? 3 : 6, nearCam > 20 ? 2 : nearCam > 4 ? 3 : 6)
+      // "reise" (Review Fassung 3, Runde 3): im Vorbild ist jeder Block eine grosse, fast schwarze Masse (zwei bis drei Café-Breiten),
+      // bei uns standen 3 x 3 Haeuschen von rund 5 m je Block (halbe Café-Breite), ein kleinteiliger Teppich. Deshalb 2 x 2 Massen ohne
+      // Hof, knapp aneinander (Fugen 0,2 bis 0,5 m) und verschieden hoch: der Block liest sich als ein Koerper mit Hoehenstufen. Wo ein
+      // Café oder ein Nachbarhaus (nbReise) steht, wird die Masse auf das groesste freie Stueck zugeschnitten statt zu entfallen.
+      // Runde 4 (Review: die 2 x 2 gleichen Massen lasen sich als flache schwarze Platten mit einem Fugenkreuz in der Mitte; im Vorbild ist
+      // jeder Block EINE schieferblaue Masse): zwei Teile ohne Fuge, quer oder laengs geteilt, der zweite ein Geschoss hoeher oder
+      // niedriger. So hat der Block eine einzige Stufe an einer Seite und kein Kreuz.
+      if (reise) {
+        const alongX = R() < 0.5, f = 0.35 + R() * 0.3, floors = 2 + Math.floor(R() * (maxFloors - 1)), cc = CITY[Math.floor(R() * CITY.length)]
+        const xm = bx0 + (bx1 - bx0) * f, zm = bz0 + (bz1 - bz0) * f
+        const parts = alongX ? [[bx0, xm, bz0, bz1], [xm, bx1, bz0, bz1]] : [[bx0, bx1, bz0, zm], [bx0, bx1, zm, bz1]]
+        parts.forEach((r0, pi) => {
+          const r = clipFree(r0, freeReise)
+          const fl = pi === 0 ? floors : floors < maxFloors ? floors + 1 : floors - 1, h = lowBlock ? 3.6 : fl * 3 + 0.6
+          if (r) addHouse((r[0] + r[1]) / 2, (r[2] + r[3]) / 2, r[1] - r[0], r[3] - r[2], h, cc)
+        })
+      }
       const nx = 3, nz = 3, cw = (bx1 - bx0) / nx, cd = (bz1 - bz0) / nz
-      for (let a = 0; a < nx; a++) for (let c = 0; c < nz; c++) {
+      for (let a = 0; a < nx && !reise; a++) for (let c = 0; c < nz; c++) {
         if (a === 1 && c === 1) continue // Hof
         const w = cw - 0.2 - R() * 0.7, d = cd - 0.2 - R() * 0.7
         const x = bx0 + a * cw + cw / 2, z = bz0 + c * cd + cd / 2
@@ -433,8 +476,7 @@ export default {
     // "reise": das Nachbarhaus neben dem eigenen Laden auf der Seite zur Kamera entfaellt (rechts nb[2], links das Spiegelbild
     // nb[0]), dazu die Haeuser des Blocks dahinter (keepFree oben): beim Blick in den vollen Raum standen sie als schwarzer Block
     // vor dessen vorderer Ecke (Review Fassung 3, Runde 1). Dort liegt jetzt ein leerer, beleuchteter Platz.
-    // Runde 2 (beide Laeden im Norden, Front nach Sueden): je ein niedriges Haus aussen neben dem Laden und ein hoeheres dahinter
-    const nbReise = [[-B - SH.w - 3.9, -B - 3.1, 7.2, 6.2, 6.6], [-B - 3.1 - SH.w / 2, -B - SH.d - 3.9, 6.2, 7.2, 9.0], [B + SH.w + 3.9, -B - 3.1, 7.2, 6.2, 6.6], [B + 3.1 + SH.w / 2, -B - SH.d - 3.9, 6.2, 7.2, 9.0]]
+    // (nbReise steht oben vor den Bloecken)
     for (const [x, z, w, d, h] of reise ? nbReise : nb) addHouse(x, z, w, d, h, CITY[3])
     // Platz vorn (suedwestlicher Block): kleine Baeume, Baenke, Laternen
     // Mitte des Platzes: ein runder Brunnen; Baeume locker drumherum, nicht als Wand
@@ -457,30 +499,33 @@ export default {
     const plazaLamps = reise ? [] : [[FOUNT[0] + 1.0, FOUNT[1] - 4.4], [FOUNT[0] - 1.0, FOUNT[1] + 4.4], [FOUNT[0] + 4.4, FOUNT[1] + 1.0], [FOUNT[0] - 4.4, FOUNT[1] - 1.0]]
     lamps.push(...plazaLamps)
     // "reise" (Review Fassung 3, Runde 1): die untere Bildhaelfte war schwarz (Helligkeit 3 bis 14 gegen 16 bis 27 im Vorbild),
-    // weil dort nur flache dunkle Daecher lagen und von elf Laternen fuenf leuchteten. Im Vorbild laeuft durch die untere
-    // Haelfte eine Strasse mit beigen Lichtkegeln, geparkten Autos und hellen Fenstern. Deshalb hier: an jeder Strasse bis
-    // 48 m vom Ursprung beidseitig zwei Laternen je Block (rund alle 9 m), alle mit Schein, und in jedem zweiten Kegel ein
-    // geparktes Auto an der Bordsteinkante. Frei bleiben die Fronten der Laeden (Menge, Tuer) und die Kreuzungen; Autos nur
-    // dort, wo kein Verkehr faehrt (Plan in buildTraffic: Ost-West-Strasse z = 0 beide Spuren, Nord-Sued x = 0 die Spur x < 0).
+    // weil dort nur flache dunkle Daecher lagen und von elf Laternen fuenf leuchteten. Runde 1 setzte deshalb an jede Strasse bis
+    // 48 m zwei Laternen je Block, alle mit Schein, und in jeden zweiten Kegel ein geparktes Auto.
+    // Runde 3 (Review: so waren es rund 156 Laternen auf jeder Strasse; im Vorbild stehen 10 bis 12 Laternenkoepfe im Bild, jeder mit
+    // grossem beigen Kegel, und nur die Allee zwischen den Cafés und die Strasse vor ihnen sind beleuchtet, die Nebenstrassen dunkel):
+    // Laternen nur noch an der Allee (x = 0) und an der Ost-West-Strasse vor den Cafés (z = 0), paarweise gegenueber alle 12 m bis
+    // rund 44 m, geparkte Autos an beiden Bordsteinen der Allee. Frei bleiben die Fronten der Laeden (Menge, Tuer) und die Kreuzungen.
     const parked = []
+    // "reise", Runde 4: Laternen als { x, z (Mast), ax, az (Richtung des Arms zur Fahrbahn) }, siehe buildLampsReise
+    const lampsR = []
     if (reise) {
       lamps.length = 0
-      const nearShop = (x, z, m) => [shopRect('left'), shopRect('right')].some(([x0, x1, z0, z1]) => x > x0 - m && x < x1 + m && z > z0 - m && z < z1 + m)
-      for (let k = -2; k <= 2; k++) for (let j = -2; j < 2; j++) for (const u of [7.5, 16.5]) for (const sd of [-1, 1]) {
-        const s = j * P + u, o = sd * (B - 0.45)
-        // Nord-Sued-Strasse x = k * P (Laterne bei x = k * P + o) und Ost-West-Strasse z = k * P
-        for (const [x, z, ns] of [[k * P + o, s, true], [s, k * P + o, false]]) {
-          if (nearShop(x, z, 1.6)) continue
-          lamps.push([x, z])
-          // Auto in jedem zweiten Kegel, quer versetzt (die Haelfte der Bloecke), an der Bordsteinkante dieser Seite
-          if ((k + j + (u > 10 ? 1 : 0) + (sd > 0 ? 1 : 0)) % 2) continue
-          const lane = sd * 1.0, cx = ns ? k * P + lane : s + 2.2, cz = ns ? s + 2.2 : k * P + lane
-          if (!ns && k === 0) continue                       // Ost-West-Hauptstrasse: Bus und zwei Autos
-          if (ns && k === 0 && lane < 0) continue             // Nord-Sued-Hauptstrasse: dort faehrt ein Auto auf x < 0 (die Menge steht
-                                                                // seit Runde 2 an der Ost-West-Strasse, nearShop haelt ihre Front frei)
-          if (nearShop(cx, cz, 2.6)) continue
-          parked.push([cx, cz, ns ? 0 : Math.PI / 2])
-        }
+      // Runde 4 (Review: 16 bis 18 Laternenkoepfe bei 33 s, im Vorbild 8; Paare auf der Allee 12 m auseinander, im Vorbild rund 0,30 der
+      // Bildhoehe, also rund 30 m; dazu sieben Paare an der Strasse vor den Cafés). Gemessen am Vorbild (Standbilder 2,5 / 22 / 33 s, mit
+      // unserer Kamera in Weltpunkte umgerechnet): auf der Allee ein Paar hinter den Cafés und eins rund 28 m suedlich, an der Strasse vor
+      // den Cafés nur je eine Laterne aussen neben jedem Café (x = +-21) und eine gegenueber dem vollen. Das Paar steht bei z = -13, nicht
+      // auf halber Tiefe der Cafés (-7,5 wie im Vorbild): dort stand die Laterne beim Blick in den vollen Raum (9,8 bis 15,5 s) mit
+      // hellem Kopf und beigem See am linken Ende der Theke; im Vorbild ist der Raum nur blau und die Laterne ausserhalb des Bildes.
+      const xp = RH + AV + 0.25, zp = RH + 0.25, sgO = oursSide === 'right' ? 1 : -1
+      for (const s of LAMP_AVE_REISE) for (const sd of [-1, 1]) lampsR.push({ x: sd * xp, z: s, ax: -sd, az: 0 })
+      for (const [x, sd] of [[-21, -1], [21, -1], [sgO * 17.5, 1]]) lampsR.push({ x, z: sd * zp, ax: 0, az: -sd })
+      for (const l of lampsR) lamps.push([l.x, l.z])
+      // geparkte Autos an beiden Bordsteinen der Allee (x = +-4,3), alle 7 m mit Luecken; das fahrende Auto nimmt die Spur x = -2,2
+      // (buildTraffic), Bus und Autos der Ost-West-Strasse fahren quer durch die Kreuzung
+      const xc = RH + AV - 1.1
+      for (const seg of [-2, -1, 0, 1]) for (const k of [0, 1, 2]) for (const sd of [-1, 1]) {
+        if ((k + (sd > 0 ? 1 : 0) + seg + 4) % 3 === 2) continue
+        parked.push([sd * xc, seg * P + (seg < 0 ? P - RH - 3.6 - k * 7 : RH + 3.6 + k * 7), 0])
       }
     }
 
@@ -489,11 +534,12 @@ export default {
     const map = kit.groundMap({ origin: GO, size: GS, px: GN }), gx = map.gx
     const shopGlow = { [oursSide]: C.poolOurs, [rivalSide]: C.poolRival }
     const groundTex = kit.canvasTex(GN, GN, g => {
-      g.fillStyle = reise ? '#131620' : C.road; g.fillRect(0, 0, GN, GN)
+      // Runde 4: Fahrbahn und Gehwege mit "reise" etwas blauer (siehe CITY_REISE)
+      g.fillStyle = reise ? '#121726' : C.road; g.fillRect(0, 0, GN, GN)
       // Gehwege mit eckigen Ecken: die Platten darauf (slabs) sind eckig. Gemalt waren sie gerundet, und an
       // jeder Ecke stand die eckige Platte ueber den runden Rand hinaus.
       for (const b of blocks) {
-        g.fillStyle = reise ? '#1E2130' : C.walk; g.fillRect(gx(b.x0), gx(b.z0), gx(b.x1) - gx(b.x0), gx(b.z1) - gx(b.z0))
+        g.fillStyle = reise ? '#1C2134' : C.walk; g.fillRect(gx(b.x0), gx(b.z0), gx(b.x1) - gx(b.x0), gx(b.z1) - gx(b.z0))
         g.strokeStyle = C.curb; g.lineWidth = 0.2 * GN / GS; g.strokeRect(gx(b.x0 + 0.12), gx(b.z0 + 0.12), gx(b.x1) - gx(b.x0) - 0.24 * GN / GS, gx(b.z1) - gx(b.z0) - 0.24 * GN / GS)
       }
       // Platz: vier Rasenstuecke, dazwischen helle Wege ueber Kreuz und ein gepflasterter Ring um den Brunnen
@@ -519,7 +565,12 @@ export default {
       // "reise": noch etwas groesser und heller (die Kegel tragen dort die untere Bildhaelfte, Review Fassung 3, Runde 1)
       // Runde 2: etwas schwaecher (0,62 statt 0,74); seit die Kamera die Nord-Sued-Strasse durch die untere Haelfte zeigt, war das Bild
       // oben ueber der Stadt heller als das Vorbild (untere Haelfte bei 29,5 s 21 gegen 14)
-      for (const [x, z] of lamps) spot(x, z, reise ? 5.0 : NE ? 4.4 : 3.6, C.poolLamp, reise ? 0.62 : NE ? 0.62 : 0.4)
+      // Runde 3: nur noch rund 30 Laternen (Allee und Strasse vor den Cafés), dafuer grosse, kraeftige Kegel wie im Vorbild
+      // Runde 4: der See liegt unter dem Kopf (ueber der Fahrbahn) und ist quer zur Strasse 1,5-mal so breit wie laengs; die Seen
+      // eines Paars fliessen in der Mitte zu EINEM beigen Band ueber die Allee wie im Vorbild (dort #54463A in der Mitte des Bands).
+      // Vorher lag unter jedem Mast ein runder Fleck auf dem Bordstein, die Strasse las sich wie gepunktet.
+      if (reise) for (const l of lampsR) bandSpot(g, map, l.x + l.ax * LAMP_ARM, l.z + l.az * LAMP_ARM, l.ax !== 0, C.poolLamp, 0.6)
+      else for (const [x, z] of lamps) spot(x, z, NE ? 4.4 : 3.6, C.poolLamp, NE ? 0.62 : 0.4)
       for (const [x, z] of plazaLamps) spot(x, z, 3.2, '255,196,130', 0.22)
       // Schein des Brunnens auf dem Pflaster (Lila wie das Wasser; "neon": schwach blau)
       if (!reise) spot(FOUNT[0], FOUNT[1], 4.6, NE ? '40,70,190' : '150,138,255', NE ? 0.12 : 0.24)
@@ -554,11 +605,18 @@ export default {
     for (let k = -N; k <= N; k++) for (let s = -N * P; s < N * P; s += 3) {
       const m = ((s % P) + P) % P
       if (m < RH + 1.6 || m > P - RH - 1.6) continue // nicht in Kreuzungen
-      stripes.push([k * P, s + 0.8, 0.14, 1.5, C.mark], [s + 0.8, k * P, 1.5, 0.14, C.mark])
+      stripes.push([k * P, s + 0.8, 0.14, 1.5, C.mark])
+      // "reise": die Kreuzungen mit der Allee (x = 0) sind breiter; dort keine Mittelstriche der Ost-West-Strassen
+      if (!(reise && Math.abs(s + 0.8) < RH + AV + 1.6)) stripes.push([s + 0.8, k * P, 1.5, 0.14, C.mark])
+    }
+    // "reise" (Runde 3): ueber die breite Allee 15 Streifen statt 5, die Zebras ueber die Ost-West-Strasse an ihren Rand gerueckt
+    if (reise) {
+      for (let k = -7; k <= 7; k++) { const o = k * (RH + AV - 0.45) / 7; stripes.push([o, -RH - 0.95, 0.4, 1.3, C.zebra], [o, RH + 0.95, 0.4, 1.3, C.zebra]) }
+      for (let k = 0; k < 5; k++) { const o = (k - 2) * (RH - 0.45) / 2; stripes.push([-RH - AV - 0.95, o, 1.3, 0.4, C.zebra], [RH + AV + 0.95, o, 1.3, 0.4, C.zebra]) }
     }
     // Fuenf Streifen mittig auf der Fahrbahn, 0,25 m Abstand zum Bordstein. Vorher reichte der aeussere
     // Streifen 0,13 m unter die Gehwegplatte und endete dort zackig.
-    for (let k = 0; k < 5; k++) {
+    for (let k = 0; k < 5 && !reise; k++) {
       const o = (k - 2) * (RH - 0.45) / 2
       stripes.push([o, -RH - 0.95, 0.4, 1.3, C.zebra], [o, RH + 0.95, 0.4, 1.3, C.zebra], [-RH - 0.95, o, 1.3, 0.4, C.zebra], [RH + 0.95, o, 1.3, 0.4, C.zebra])
     }
@@ -577,17 +635,28 @@ export default {
     // ueber jedem Dach dunkelt nur die Dachflaeche ab; die Waende behalten ihre Farbe und ihr Licht.
     if (reise) {
       // ohne Tonwertkurve: sonst wurde aus #0A0B10 ein fast schwarzes #000108 (gemessen); so steht die Farbe des Vorbilds im Bild
-      const tops = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: '#08090F', toneMapped: false }), houses.length)
+      // Runde 4: #070B18 statt #08090F (im Vorbild blauer, siehe CITY_REISE)
+      const tops = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: '#070B18', toneMapped: false }), houses.length)
       q.setFromAxisAngle(v3.set(1, 0, 0), -Math.PI / 2)
       houses.forEach((h, k) => { m4.compose(v3.set(h.x, CURB + h.h + 0.02, h.z), q, s3.set(h.w - 0.2, h.d - 0.2, 1)); tops.setMatrixAt(k, m4) })
       tops.name = 'dachplatten'; scene.add(tops)
     }
     kit.roofs(roofBits, reise ? '#16171D' : undefined)
-    kit.windows(windows)
+    // Runde 4: mit "reise" groessere Fenster, und die dunklen als schwaches Graublau sichtbar: im Vorbild stehen auf den Fassaden zur
+    // Kamera ganze Fensterraster, bei uns lagen nur einzelne helle Quadrate auf schwarzen Waenden
+    if (reise) buildWindowsReise(kit, windows)
+    else kit.windows(windows)
     kit.trees(trees, { y0: CURB })
     // Nur die Laternen nahe der Kreuzung und auf dem Platz bekommen einen Schein (die anderen liegen im Dunst)
     // "reise": alle Laternen mit Schein (siehe oben, das Raster ersetzt die elf Laternen)
-    kit.lamps(lamps, { y0: CURB, glowIf: k => reise || k < (nah ? 4 : 5) || k >= lamps.length - plazaLamps.length })
+    if (reise) {
+      buildLampsReise(kit, lampsR, CURB)
+      // Runde 4: Ampel an der Ecke des vollen Cafés zur Allee, gelb an; im Vorbild steht sie dort beim Blick in den vollen Raum
+      // (9,8 bis 15,5 s), an derselben Stelle stand bei uns eine Laterne mit beigem See
+      const sgO = oursSide === 'right' ? 1 : -1
+      buildTrafficLight(kit, sgO * (RH + AV + 0.45), -(RH + 0.45), CURB)
+    }
+    else kit.lamps(lamps, { y0: CURB, glowIf: k => k < (nah ? 4 : 5) || k >= lamps.length - plazaLamps.length })
     // Baenke auf dem Platz und drei geparkte Autos: Kleinkram, an dem man die Groesse abliest
     const props = new THREE.Group(); scene.add(props)
     if (!reise) for (const [x, z, r] of [[-9.2, 8.6, 0], [-14.8, 9.6, 0], [-8.6, 12.6, Math.PI / 2]]) kit.bench(props, x, z, r, { y0: CURB })
@@ -620,10 +689,12 @@ export default {
     const signs = []
     const S = {}
     // "reise": hohl (kit.shop hollow), innen in den Farben des Raums aus iso-shop ("kalt" das volle, "warm" das leere Café)
-    const holl = ours => reise ? { gf: 5, wt: 0.3, inner: ROOM_TONE[ours ? 'kalt' : 'warm'].wall, cap: ROOM_TONE[ours ? 'kalt' : 'warm'].cap } : false
+    // Runde 3: das volle Café behaelt beim Abheben eine niedrige dunkle Bruestung an Front und Seite (wie im Vorbild bei 9,8 bis 15 s)
+    const holl = ours => reise ? { gf: 5, wt: 0.3, inner: ROOM_TONE[ours ? 'kalt' : 'warm'].wall, cap: ROOM_TONE[ours ? 'kalt' : 'warm'].cap, ...(ours ? { parapet: { h: 0.9, color: '#141A33', glow: '#1C2A70', k: 0.35 } } : {}) } : false
     S[oursSide] = await kit.shop({ name: p.shop, icon: p.icon, accent: p.accent, ours: true, ...lots[oursSide], size: SH, light: LIGHT, signs, hollow: holl(true) })
     S[rivalSide] = await kit.shop({ name: p.rival, icon: p.rivalIcon, accent: p.rivalAccent, ours: false, ...lots[rivalSide], size: SH, light: LIGHT, signs, hollow: holl(false) })
     const our = S[oursSide], riv = S[rivalSide]
+    if (reise) { dressShopReise(kit, K, our, { full: true, accent: '#6F8BFF', SH }); dressShopReise(kit, K, riv, { full: false, accent: '#E8A060', SH, fadeSign: true }) }
     // "reise" (Runde 2): auch die Daecher der beiden Cafés fast schwarz wie im Vorbild (das helle Gesims lag sonst als hellste Flaeche
     // im Bild). Die Platte sitzt am Deckel und hebt mit ihm ab.
     if (reise) for (const s of [our, riv]) { const top = new THREE.Mesh(new THREE.PlaneGeometry(SH.w + 0.3, SH.d + 0.3), new THREE.MeshBasicMaterial({ color: '#0A0B11', toneMapped: false })); top.rotation.x = -Math.PI / 2; top.position.set(-SH.w / 2, SH.h + 0.27, -SH.d / 2); s.lid.add(top) }
@@ -667,11 +738,13 @@ export default {
         [0.45, 0.7, 2.4], [2.9, 1.9, 3.0], [4.5, 2.1, -0.5], [6.7, 1.2, 1.7], [7.3, 2.0, -2.4], [0.6, 2.3, -2.8]]
       const COATS = ['#5FA39B', '#C9786A', '#5B86D6', '#D9839F', '#E2AE4D', '#8C6BC8', '#7FA0C8', '#B86A5A', '#4E8A7E', '#C9A0D0', '#6A7FB0', '#D8B070'], HAIRS = ['#2A1A2E', '#5A3A2A', '#B9783A', '#18142A']
       const toDoor = our.flip ? -Math.PI / 2 : Math.PI / 2
-      // "reise": kleine graue Figuren wie im Vorbild (dort dunkle, gleichfoermige Silhouetten im blauen Licht); die bunten
-      // Maentel lasen sich im Review als Spielfiguren unserer alten Welt. Auf der breiten Front mit mehr Abstand.
-      const GREY = ['#4A4E5E', '#3A3E4C', '#5A5E6E', '#2E3240', '#555A6A', '#40444F', '#626676', '#363A48', '#4C5060', '#2A2E3A', '#585C6C', '#3E4250']
+      // "reise": kleinere Figuren in gedeckten Farben wie im Vorbild; die bunten Maentel lasen sich im Review als Spielfiguren unserer
+      // alten Welt (Runde 1 machte sie grau, Runde 4 gedeckt bunt, siehe unten). Auf der breiten Front mit mehr Abstand.
       SPOTS.slice(0, p.crowd).forEach(([a, z, face], k) => {
-        const f = kit.person(reise ? { coat: GREY[k], legs: '#1E2028', hair: '#16171C', skin: '#8A7A70', scale: 0.95, y0: CURB } : { coat: COATS[k], hair: HAIRS[k % 4], scale: 1.15 + 0.05 * (k % 3), y0: CURB })
+        // Runde 4: gedeckt bunt mit Hautfarbe wie die Gaeste im Raum (ROOM_TONE.kalt.muted), so gross wie sie, Schattenscheibe schwach
+        const RT = ROOM_TONE.kalt
+        const f = kit.person(reise ? { coat: RT.muted[(k + 3) % RT.muted.length], legs: '#22242C', hair: RT.hair[k % RT.hair.length], skin: RT.skin[(k * 3 + 1) % RT.skin.length], scale: 0.85, y0: CURB } : { coat: COATS[k], hair: HAIRS[k % 4], scale: 1.15 + 0.05 * (k % 3), y0: CURB })
+        if (reise) f.blob.material.opacity = 0.3
         const w = our.g.localToWorld(new THREE.Vector3(our.flip ? -SH.w + a * (reise ? 1.3 : 1) : -a * (reise ? 1.3 : 1), 0, z))
         f.at(w.x, w.z, our.rot + (face === 'door' ? toDoor : (our.flip ? -face : face)))
         crowd.push({ f, ph: k * 1.7, queue: face === 'door' })
@@ -806,46 +879,102 @@ export default {
           // Sperrbildschirm hoch ueber der Strasse mit dem Laden links, hinter dem Fenster fast senkrecht, der leere Raum von Suedosten,
           // nach "trashDrop" ganz nah (der Korb vorn, unten Gehweg und Zebrastreifen), Kran bis fast senkrecht.
           return [
-            { t: S0, d: 160, az: sg * 12, el: 64, at: 'mid', ox: 0, oy: 40 },
-            { t: tPan, d: 150, az: sg * 15, el: 60, at: 'mid', ox: 0, oy: 40 },
-            { t: tPan + 0.5, d: 130, az: sg * 18, el: 57, at: 'front', ox: 0, oy: 0 },
-            { t: tR - 0.02, d: 72, az: sg * 22, el: 40, at: 'front', ox: 0, oy: 20 },
-            { t: tR + 0.6, d: 76, az: sg * 40, el: 44, at: 'in', ox: 60, oy: 50 },
-            { t: tB, d: 72, az: sg * 44, el: 46, at: 'in', ox: 60, oy: 50 },
-            { t: tB + 0.45, d: 140, az: sg * 14, el: 56, at: 'front', ox: 80, oy: 10 },
-            { t: tM, d: 136, az: sg * 14, el: 57, at: 'front', ox: 80, oy: 10 },
-            { t: tM + 1.8, d: 200, az: sg * 10, el: 74, at: 'mid', ox: 0, oy: 40 },
-            { t: tT, d: 195, az: sg * 10, el: 73, at: 'mid', ox: 0, oy: 40 },
-            { t: tT + 0.75, d: 96, az: -sg * 30, el: 46, at: 'rin', ox: 0, oy: 20 },
-            { t: tT + 2.4, d: 66, az: -sg * 36, el: 43, at: 'rin', ox: 0, oy: 100 },
-            { t: tD, d: 56, az: -sg * 38, el: 42, at: 'rin', ox: -60, oy: 60 },
-            { t: tK, d: 55, az: -sg * 38, el: 43, at: 'rin', ox: -60, oy: 60, ease: 'out' },
-            { t: Math.min(E0 - 0.5, tK + 2.4), d: 225, az: sg * 10, el: 75, at: 'mid', ox: 0, oy: 0 },
-            { t: E0, d: 215, az: sg * 12, el: 73, at: 'mid', ox: 0, oy: 0 }
+            // Runde 3: flacher und fast gerade von Sueden wie im Vorbild (Fassaden der Cafés sichtbar, Allee senkrecht im Bild); der Sinkflug
+            // naehert sich um rund 14 % und dreht 4 Grad (Vorbild: Zoom 16 % mit sichtbarer Drehung, bei uns waren es 5 % ohne Drehung)
+            // Runde 4 (Review, Fluss gemessen): im Vorbild beginnt der Sinkflug sofort (Zoom 10/50/90 % bei 0,40/1,63/4,47 s, bei uns
+            // 1,37/2,70/3,97), naehert sich um 20 % (bei uns 5 %) und dreht das Bild um 10 Grad zurueck, bis die Allee senkrecht steht (am
+            // Anfang liegt sie rund 20 Grad schraeg). Deshalb 'out' (schnell los, langer Auslauf), 176 auf 138 m und 16 auf 5 Grad.
+            { t: S0, d: 176, az: sg * 16, el: 58, at: 'mid', ox: 0, oy: 40, ease: 'out' },
+            // (die Art des Verlaufs steht an der Stellung, an der ein Wegstueck beginnt)
+            { t: tPan, d: 138, az: sg * 5, el: 55, at: 'mid', ox: 0, oy: 40, ease: 'drift' },
+            // Runde 4 (Review, Fluss gemessen): der Schwenk auf das volle Café ist im Vorbild ein gerades Gleiten nach rechts ueber rund 2 s
+            // (10/50/90 % bei 5,30/6,23/7,23 s), ohne Drehung; die Drehung (rund 26 Grad) kommt erst beim Heranfahren, fast ganz zwischen 8,0
+            // und 9,4 s, und das Heranfahren selbst kommt spaet (50 % bei 8,9 s, bei 9,4 s noch in voller Fahrt). Bei uns: Schwenk in 0,5 s
+            // mit 9 Grad Drehung (Spitze 5,47 s), Heranfahren weich ab 5,7 s (50 % bei 8,1 s), danach 16 Grad Drehung ueber dem Raum.
+            // Jetzt: Schwenk 2 s fast gleichmaessig ('drift') ohne Drehung, Heranfahren mit Drehung spaet ('late', x hoch 2).
+            // (2 s, bei kurzem Abstand zwischen "pan" und "roof" hoechstens gut die Haelfte davon)
+            { t: tPan + Math.min(2.0, 0.55 * (tR - 0.02 - tPan)), d: 128, az: sg * 5, el: 56, at: 'front', ox: 0, oy: 0, ease: 'late' },
+            // Ziel beim Abheben halb zwischen Front und Raum: die Bewegung danach war doppelt so gross wie im Vorbild (Fluss 9,4 bis 10,4 s)
+            // Danach 'out': schnell weiter (das Heranfahren endet in voller Fahrt), dann weich in die Drift ueber dem Raum
+            { t: tR - 0.02, d: 73, az: sg * 35, el: 41, at: 'frontIn', ox: 30, oy: 35, ease: 'out' },
+            // Runde 3: ueber dem Raum und beim Sperrbildschirm eine langsame Drift (Vorbild 0,17 bis 0,22 px je Bild, bei uns stand die
+            // Kamera mit 0,03 fast still): rund 10 % naeher und 8 Grad gedreht ueber 5 s
+            // Runde 4: die Drift fast gleichmaessig ('drift'; K.travel stand am Anfang fast still: 0,8 % Zoom in 10,0 bis 11,3 s gegen 4,1 %)
+            // und etwas staerker (78 auf 68 m)
+            // Runde 4: die Bewegung nach dem Abheben kuerzer (Vorbild: am schnellsten bei 9,57 s, steht um 10,0 s; bei uns Spitze 9,78 s)
+            { t: tR + 0.45, d: 78, az: sg * 38, el: 44, at: 'in', ox: 60, oy: 50, ease: 'drift' },
+            // Runde 3 (Review, Fluss gemessen): "zurueck auf die Strasse" dauerte 0,45 s (15,5 bis 15,95 s), im Vorbild rund 1,05 s
+            // (sichtbar 15,40 bis 16,45 s, 10/50/90 % bei 15,40/15,90/16,30 s, um 16,2 s noch in Fahrt, waehrend das Handy schon da ist).
+            // Deshalb weich ('soft') von 0,3 s vor "back" bis 1,1 s danach; Wallet und Deckel bleiben an "back" (WALLET_OUT, OUR_LID_DOWN).
+            { t: tB - 0.3, d: 68, az: sg * 46, el: 46, at: 'in', ox: 60, oy: 50, ease: 'soft' },
+            // Runde 3: der Sperrbildschirm stand rund 1,6-mal zu weit weg (Front 25 % der Bildbreite, fast von Sueden; im Vorbild 42 %, von
+            // Suedwesten mit der Glaswand an der Seite)
+            // Runde 4: das war zu viel: 1,4-mal zu nah (Dach 0,58 der Bildbreite, im Vorbild 0,41; Figuren 85 px gegen 43 px) und die Front
+            // 15 Grad schraeg. Im Vorbild liegt die Markise waagrecht, links die Glaswand. Also weiter weg und fast von Sueden (11 Grad),
+            // mit derselben gleichmaessigen Drift wie ueber dem Raum (Vorbild 0,16 px je Bild, bei uns 0,04).
+            { t: tB + 1.1, d: 125, az: sg * 7, el: 58, at: 'front', ox: LOCK_OX, oy: 60, ease: 'drift' },
+            { t: tM, d: 106, az: sg * 9, el: 60, at: 'front', ox: LOCK_OX - 30, oy: 60 },
+            // Runde 3: von oben die Cafés hoeher im Bild (y rund 0,40, im Vorbild 0,38 bis 0,45) und darunter die Allee bis zum unteren Rand
+            // Runde 4: 100 px tiefer (Markisen bei 22 s auf y 0,40, im Vorbild 0,47)
+            { t: tM + 1.8, d: 170, az: sg * 4, el: 54, at: 'mid', ox: 0, oy: -60 },
+            // Runde 3: Fahrt zum Café gegenueber und hinein in den Raum als EINE Bewegung wie im Vorbild (Fluss: los bei rund 22,45 s, am
+            // schnellsten 23,2 bis 23,6 s, 75 % bei 24,0 s, steht bei 25 s). Vorher zwei Fahrten: schnell vorne (Spitze 23,0 s), Halt bei
+            // 23,4 bis 23,8 s, dann ein zweiter Schub mit Spitze 24,25 s. 'reise' = spaeter Anlauf, langer Auslauf; 'geo': Abstand
+            // geometrisch, damit der sichtbare Zoom dem Fortschritt folgt (linear kam die Naeherung erst am Ende)
+            // Runde 4: Ziel und Bildverschiebung schneller als der Abstand ('aim': nach 45 % des Wegs, also rund 0,9 s nach "travel", am
+            // Raum gegenueber), die Drehung frueher (x hoch 0,6). Vorher stand der Raum bei 23,3 bis 23,6 s oben links am Rand unter den
+            // Woertern und kam erst bei 24 s in die Mitte, und die Drehung lag 0,47 s hinter dem Vorbild (10/50/90 % bei 22,63/23,30/24,00 s).
+            { t: tT - 0.25, d: 165, az: sg * 4, el: 53, at: 'mid', ox: 0, oy: -60, ease: 'reise', geo: true, aim: 0.45 },
+            { t: tT + 2.6, d: 64, az: -sg * 36, el: 43, at: 'rin', ox: 0, oy: 100 },
+            // Runde 4: im Vorbild faehrt die Kamera schon ab 26,2 bis 26,4 s zurueck und ohne Halt in den Kran (bei uns ab 26,85 s, Halt 27,35
+            // bis 27,6 s): der naechste Punkt 0,4 s vor "trashDrop", danach fast gleichmaessig ('drift') bis "kran"
+            { t: Math.max(tT + 2.7, tD - 0.4), d: 53, az: -sg * 38, el: 42, at: 'rin', ox: -60, oy: 60, ease: 'drift' },
+            // Runde 3: im Vorbild faehrt die Kamera nach dem Fallen schon ein Stueck zurueck (26,8 bis 27,6 s, Zoom -17 %), bevor der Kran steigt
+            { t: tK, d: 66, az: -sg * 38, el: 43, at: 'rin', ox: -60, oy: 60, ease: 'kran', geo: true },
+            // Runde 3: Kran-Ende fast gerade von Sueden und flacher (Allee im Vorbild fast senkrecht im Bild, Fassaden der Cafés sichtbar; mit
+            // 10 Grad und 75 Grad lag sie schraeg und man sah nur Daecher). Am Ende des Krans das Bild 80 px hoeher und 40 px weiter links,
+            // danach sinkt es langsam auf -30 px: so laeuft das eigene Schild beim Hereinkommen von rechts (28,8 s) ueber der Knopfspalte
+            // Runde 4: danach eine deutliche Drift heran (Vorbild: Abstand der Cafés im Bild von 31,6 bis 33,6 s 1,28-fach, bei uns 1,05), fast gleichmaessig
+            { t: Math.min(E0 - 0.5, tK + 2.4), d: 215, az: sg * 4, el: 52, at: 'mid', ox: 40, oy: -80, ease: 'drift' },
+            // und mit ihr sinkt das Bild wie im Vorbild (Cafés bei 30,8 s auf y 0,38, bei 33 s auf 0,47)
+            { t: E0, d: 162, az: sg * 6, el: 50, at: 'mid', ox: 40, oy: 120 }
           ]
         }
       }
       const keys = PATH[p.camera]()
       // "reise": jede Stellung muss nach der vorigen kommen, sonst springt die Kamera zurueck (Anker in falscher Reihenfolge)
-      if (reise) for (let i = 1; i < keys.length; i++) if (!(keys[i].t > keys[i - 1].t + 0.05)) ctx.fail(`"camera": "reise": Anker in falscher Reihenfolge oder zu dicht (Stellung ${i + 1} bei ${keys[i].t.toFixed(2)} s, die vorige bei ${keys[i - 1].t.toFixed(2)} s). Reihenfolge: pan, roof, back, msg, travel, trashDrop, kran; dazwischen mindestens 0,6 s nach roof, 0,45 s nach back, 1,8 s nach msg, 2,4 s nach travel bis trashDrop`)
+      if (reise) for (let i = 1; i < keys.length; i++) if (!(keys[i].t > keys[i - 1].t + 0.05)) ctx.fail(`"camera": "reise": Anker in falscher Reihenfolge oder zu dicht (Stellung ${i + 1} bei ${keys[i].t.toFixed(2)} s, die vorige bei ${keys[i - 1].t.toFixed(2)} s). Reihenfolge: pan, roof, back, msg, travel, trashDrop, kran; dazwischen mindestens 0,45 s nach roof bis 0,3 s vor back, 1,1 s nach back bis msg, 1,8 s nach msg bis 0,25 s vor travel, 2,6 s nach travel bis trashDrop`)
       cm.setViewOffset(K.W, K.H, OFF[p.camera][0], -OFF[p.camera][1], K.W, K.H)
       // Ziele: Zahl (0 Mitte, 1 eigener Laden, -1 gegenueber, wie bisher) oder Name ("reise")
       const roomMid = shop => shop.room ? shop.g.localToWorld(new THREE.Vector3((shop.room.x0 + shop.room.x1) / 2, 1.0, (shop.room.z0 + shop.room.z1) / 2 - 0.4)) : before(shop)
-      const TG = { mid: T0, front: T1, rfront: TR, midFront: T0.clone().lerp(T1, 0.6), in: roomMid(our), rin: roomMid(riv) }
+      const TG = { mid: T0, front: T1, rfront: TR, midFront: T0.clone().lerp(T1, 0.6), in: roomMid(our), rin: roomMid(riv), frontIn: T1.clone().lerp(roomMid(our), 0.5) }
       const goal = (m, out) => typeof m === 'string' ? out.copy(TG[m]) : m >= 0 ? out.copy(T0).lerp(T1, m) : out.copy(T0).lerp(TR, -m)
       const g0 = new THREE.Vector3(), g1 = new THREE.Vector3()
       camSet = t => {
         let i = 0
         while (i < keys.length - 2 && t > keys[i + 1].t) i++
-        // ease 'out' (nur "reise", Kran): schnell los, weich an. Mit dem weichen Anlauf an beiden Enden stand die Kamera bei 28,0
-        // bis 28,2 s noch nah vor der Front gegenueber, im Vorbild ist sie da schon hoch ueber beiden (Review Fassung 3, Runde 1)
-        const a = keys[i], b = keys[i + 1], u = a.ease === 'out' ? 1 - Math.pow(1 - clamp01((t - a.t) / Math.max(0.1, b.t - a.t)), 3) : K.travel(t, a.t, b.t)
-        // Runde 2 (Kran): Winkel schnell los wie bisher, aber Abstand, Ziel und Bildverschiebung erst 0,15 s spaeter: im Vorbild ist die
-        // Kamera bei 28,0 s noch recht nah am offenen Raum und bei 28,5 s schon hoch ueber beiden; bei uns stand der Raum bei 28,0 s schon klein
-        const ud = a.ease === 'out' ? 1 - Math.pow(1 - clamp01((t - a.t - 0.15) / Math.max(0.1, b.t - a.t - 0.15)), 3) : u
-        goal(a.at, g0); goal(b.at, g1); tg.copy(g0).lerp(g1, ud)
-        if (a.ox != null) cm.setViewOffset(K.W, K.H, lerp(a.ox, b.ox, ud), -lerp(a.oy, b.oy, ud), K.W, K.H)
-        return place(lerp(a.d, b.d, ud), lerp(a.az, b.az, u), lerp(a.el, b.el, u), tg)
+        // Weg durch eine Stellung: ohne "ease" weich an beiden Enden (K.travel), sonst nur "reise" (Review Fassung 3, Runde 3, am Fluss
+        // des Vorbilds gemessen):
+        // 'soft' (zurueck auf die Strasse): kubisch, breiter in der Mitte als K.travel (Vorbild fast gleich schnell von 15,6 bis 16,25 s)
+        // 'reise' (Fahrt zum Café gegenueber und hinein): K.travel ueber x hoch 0,8, Spitze im ersten Drittel, langer Auslauf
+        // 'kran': K.travel ueber x hoch 0,6: Spitze rund 0,5 s nach "kran", halber Weg nach 0,75 s, 90 % nach 1,5 s (Fluss: im Vorbild und
+        // bei uns 50 % bei 28,0 s, 80 % bei 28,6 s). Runde 1 und 2 fuhren schnell los und weich an (Spitze 27,8 s, bei 28,0 s war der Raum
+        // schon auf 70 % geschrumpft); ein schnelleres Ziel (x hoch 0,4) gab bei 27,7 s einen Ruck
+        // "geo": Abstand geometrisch, so folgt der sichtbare Zoom dem Fortschritt (linear kam die Naeherung erst am Ende)
+        const a = keys[i], b = keys[i + 1], x = clamp01((t - a.t) / Math.max(0.1, b.t - a.t))
+        // Runde 4: 'drift' fast gleichmaessig (70 % linear, 30 % weich; Schwenk und Driften ueber Raum, Sperrbildschirm und nach dem Kran),
+        // 'late' spaet und am Ende in voller Fahrt (x hoch 2; Heranfahren an die Front bis "roof"), 'out' schnell los mit langem Auslauf (Sinkflug,
+        // nach dem Abheben)
+        const u = a.ease === 'soft' ? x * x * (3 - 2 * x) : a.ease === 'reise' ? smooth(Math.pow(x, 0.8)) : a.ease === 'kran' ? smooth(Math.pow(x, 0.6))
+          : a.ease === 'drift' ? 0.7 * x + 0.3 * smooth(x) : a.ease === 'late' ? Math.pow(x, 2) : a.ease === 'out' ? 1 - Math.pow(1 - x, 2.2) : K.travel(t, a.t, b.t)
+        // 'reise': Winkel weich an beiden Enden (smooth(x)), Abstand und Ziel frueher (x hoch 0,8). So folgt der Zoom im Fluss dem Vorbild
+        // (50 % bei 23,65 s, 75 % bei 24,15 s; Vorbild 23,63 und 24,15). Mit demselben Verlauf fuer alles kam bei 24,0 s ein zweiter Schub
+        // Runde 4: mit "aim" die Winkel frueher (smooth(x hoch 0,6)), Ziel und Bildverschiebung nach dem Anteil "aim" des Wegs schon da
+        const ua = a.ease === 'reise' ? (a.aim ? smooth(Math.pow(x, 0.6)) : smooth(x)) : u
+        const uo = a.aim ? smooth(x / a.aim) : u
+        goal(a.at, g0); goal(b.at, g1); tg.copy(g0).lerp(g1, uo)
+        if (a.ox != null) cm.setViewOffset(K.W, K.H, lerp(a.ox, b.ox, uo), -lerp(a.oy, b.oy, uo), K.W, K.H)
+        return place(a.geo ? a.d * Math.pow(b.d / a.d, u) : lerp(a.d, b.d, u), lerp(a.az, b.az, ua), lerp(a.el, b.el, ua), tg)
       }
     }
     // "neon" (Fassung 3): der Name ist nach rund einer Sekunde wieder aus wie im Vorbild (30,2 bis 31,2 s); in Fassung 2 stand
@@ -891,13 +1020,15 @@ export default {
       if (!(T3.msgOut < T3.travel && T3.trash > T3.roof2 && T3.trashDrop < T3.kran)) ctx.fail('"camera": "reise": Reihenfolge msg ... msgOut vor "travel", Korb zwischen "roof2" und "kran"')
       const rooms = [await buildRoom({ kit, K, shop: our, tone: 'kalt', full: true, SH, CURB, mirror: true }), await buildRoom({ kit, K, shop: riv, tone: 'warm', full: false, SH, CURB })]
       const trash = await buildTrash({ ctx, kit, K, shop: riv, SH, CURB, T: { up: T3.trash, card: T3.trashCard, mail: T3.trashMail, drop: T3.trashDrop, gone: T3.kran + KRAN_LID }, icon: p.rivalIcon })
-      const traffic = buildTraffic({ kit, K, C })
-      // Deckel: hebt auf "roof" ab (0,6 s, beschleunigt) und senkt sich auf "back" + OUR_LID_DOWN wieder (0,45 s); gegenueber auf
+      const traffic = buildTraffic({ kit, K, C, nsLane: -2.2 })
+      // Deckel: hebt auf "roof" ab (LID_UP, beschleunigt) und senkt sich auf "back" + OUR_LID_DOWN wieder (0,45 s); gegenueber auf
       // "roof2" und "kran". Reine Funktion von t. Runde 2: er bleibt fest (k = 1), bis er 85 % seines Wegs hinter sich hat und damit
       // ueber dem oberen Bildrand steht, erst dann blendet er aus; vorher blendete er ab 0,25 s und hing als Geist ueber dem Raum.
+      // Runde 4: in 0,4 s statt 0,6 s (Vorbild: das Obergeschoss hebt ab 9,44 s ab und ist um 9,8 s aus dem Bild; gegenueber 23,20 bis
+      // 23,33 s), bei uns hing es bei 9,8 s noch am oberen Rand
       const lidAt = (t, up, down) => {
         if (t < up) return { lift: 0, k: 1 }
-        if (t < down) { const u = clamp01((t - up) / 0.6); return { lift: LID_LIFT * u * u, k: 1 - smooth((u - 0.85) / 0.15) } }
+        if (t < down) { const u = clamp01((t - up) / LID_UP); return { lift: LID_LIFT * u * u, k: 1 - smooth((u - 0.85) / 0.15) } }
         const u = clamp01((t - down) / 0.45); return { lift: LID_LIFT * (1 - u) * (1 - u), k: smooth((t - down) / 0.3) }
       }
       const { buildPhoneUi } = await import('../engine/phone-ui.js')
@@ -922,10 +1053,11 @@ export default {
       const ui2 = await buildPhoneUi(ctx, { mode: 'lock', host: host(), tones: p.tones, shop: p.shop, icon: p.icon, accent: p.accent, reward: p.reward, left: p.left, clock: p.clock, date: p.date,
         dot: pick.q.clone(), t: { in: T3.lock, notify: T3.lockNotify, out: T3.msg + 0.15 } })
       const ui3 = await buildPhoneUi(ctx, { mode: 'message', host: host(), tones: p.tones, veil: 0.42, shop: p.shop, icon: p.icon, accent: p.accent, message: p.message,
-        spots: [before(our).setY(3.2), before(riv).setY(3.2), Pt(-1.2, 1.4, 2.6), Pt(0, -B - 9, 2.6)], t: { in: T3.msg, type: T3.msgType, send: T3.msgSend, out: T3.msgOut, popOut: T3.travel } })
+        // Runde 3: Mitteilungen bis 0,4 s nach "travel" (im Vorbild bei 23,0 s noch da, bei 23,4 s weg; sie fahren mit der Strasse mit)
+        spots: [before(our).setY(3.2), before(riv).setY(3.2), Pt(-1.2, 1.4, 2.6), Pt(0, -B - 9, 2.6)], t: { in: T3.msg, type: T3.msgType, send: T3.msgSend, out: T3.msgOut, popOut: T3.travel + 0.4 } })
       R3 = { T3, rooms, trash, traffic, lidAt, uis: [ui1, ui2, ui3], base: [our, riv].map(s => [s, s.front.material.opacity, s.light.intensity]) }
     }
-    const deco = (tagNames || p.boards) ? await buildDeco({ ctx, K, kit, p, our, riv, tagNames, hideOn: reise && nameSign ? nameSign.on : null, tPan: (p.camera === 'descent' || reise) ? ctx.at('pan') : null, tBack: reise ? ctx.at('kran') + 0.9 : null, top: reise ? SH.h : null, boardScale: reise ? BOARD_REISE : 1, tagScale: reise ? TAG_REISE : 1 }) : null
+    const deco = (tagNames || p.boards) ? await buildDeco({ ctx, K, kit, p, our, riv, tagNames, hideOn: reise && nameSign ? nameSign.on : null, tPan: (p.camera === 'descent' || reise) ? ctx.at('pan') : null, tBack: reise ? ctx.at('kran') + 0.9 : null, top: reise ? SH.h : null, boardScale: reise ? BOARD_REISE : 1, tagScale: reise ? TAG_REISE : 1, edge: reise ? 40 : null }) : null
 
     // ---------------------------------------------------------------- Pruefkaesten (siehe Kopf der Datei)
     // Schilder und Herz bilden eine data-apart-Gruppe: sie duerfen sich im Bild nicht ueberdecken.
@@ -1028,7 +1160,7 @@ export default {
     kit.canvas.isoDebug = {
       // Wie die Namen auf den Schildern stehen (Zeilen, Groesse relativ zur Schildhoehe)
       signs: signs.map(x => ({ ...x })),
-      name: nameSign ? { text: nameSign.text, t0: nameSign.t0, size: nameSign.size } : null,
+      name: nameSign ? { text: nameSign.text, t0: nameSign.t0, size: nameSign.size, fill: nameSign.fill ? nameSign.fill.material.blending === THREE.NormalBlending : false } : null,
       nameOn(t) { return nameSign ? nameSign.on(t) : null },
       // Fassung 2 (tools/test_3d_nachbau_v2.mjs): Kamera im zuletzt gestellten Bild (Stellung, Hoehenwinkel ueber der
       // Kreuzung) und wo die Mitten beider Schilder im Bild liegen
@@ -1042,11 +1174,19 @@ export default {
         lid: t => ({ ours: R3.lidAt(t, R3.T3.roof, R3.T3.back + OUR_LID_DOWN), rival: R3.lidAt(t, R3.T3.roof2, R3.T3.kran + KRAN_LID) }),
         rooms: () => R3.rooms.map(r => ({ people: r.people, tables: r.tables, counter: r.counterAt() })),
         // Runde 2: Grundflaechen beider Laeden [x0, x1, z0, z1], Drehung, Dachplatten und Farbe des Himmelslichts
-        layout: () => ({ ours: shopRect(oursSide), rival: shopRect(rivalSide), rot: [our.rot, riv.rot], roofPlates: (scene.getObjectByName('dachplatten') || { count: 0 }).count, houses: houses.length, sky: '#' + lights.hemi.color.getHexString() }),
+        layout: () => ({ ours: shopRect(oursSide), rival: shopRect(rivalSide), rot: [our.rot, riv.rot], roofPlates: (scene.getObjectByName('dachplatten') || { count: 0 }).count, houses: houses.length, sky: '#' + lights.hemi.color.getHexString(),
+          // Runde 3: Allee (AV), Grundflaeche der Haeuser (Median, m2) und die Bruestung des vollen Cafés
+          av: AV, houseArea: +houses.map(h => h.w * h.d).sort((x, y) => x - y)[Math.floor(houses.length / 2)].toFixed(1), parapet: our.g.children.filter(o => o.name === 'bruestung').length + riv.g.children.filter(o => o.name === 'bruestung').length,
+          // Runde 4: Ampel, braune Fassade an beiden Cafés, Glaswand nur am vollen
+          ampel: !!scene.getObjectByName('ampel'), fassade: [our, riv].map(s => s.lid.children.filter(o => o.name === 'fassade').length), glas: [our, riv].map(s => s.lid.children.filter(o => o.name === 'glaswand').length) }),
         traffic: t => R3.traffic.at(t),
         trash: () => R3.trash.state(),
         // Runde 1 nach dem Review: Laternen (alle mit Schein), geparkte Autos [x, z, Drehung], Anteil heller Fenster
-        city: () => ({ lamps: lamps.length, parked: parked.map(a => a.map(v => +v.toFixed(2))), lit: +(windows.filter(w => w.on < 0.13).length / windows.length).toFixed(3) }),
+        city: () => ({ lamps: lamps.length, lampAt: lamps.map(a => a.map(v => +v.toFixed(2))), parked: parked.map(a => a.map(v => +v.toFixed(2))), lit: +(windows.filter(w => w.on < 0.13).length / windows.length).toFixed(3),
+          // Runde 4: Koepfe der Laternen [x, y, z] (ueber der Fahrbahn) und die Zahl der Scheiben dahinter
+          heads: lampsR.map(l => [+(l.x + l.ax * LAMP_ARM).toFixed(2), +(CURB + LAMP_H).toFixed(2), +(l.z + l.az * LAMP_ARM).toFixed(2)]), halos: scene.children.filter(o => o.name === 'laterne').length }),
+        // Runde 4: Deckkraft der Schilder (eigenes, gegenueber) im zuletzt gestellten Bild
+        signs: () => [our.signMat.opacity, riv.signMat.opacity],
         trashAt: () => { const g = R3.trash.group; return [+g.position.x.toFixed(2), +g.position.z.toFixed(2)] },
         anchors: R3.T3
       } : null,
@@ -1121,8 +1261,21 @@ async function buildName({ ctx, K, kit, cap, t0, tOut = null, tones, reise = fal
     for (const [blur, c] of glowC) {
       g.save(); g.shadowColor = c; g.shadowBlur = blur; g.fillStyle = c; draw(); g.restore()
     }
-    g.fillStyle = reise ? '#8AA2FC' : NE ? '#DCE5FF' : '#F7F5FF'; draw()
+    // "reise": die Fuellung steht auf einer eigenen Flaeche (fillTex unten)
+    if (!reise) { g.fillStyle = NE ? '#DCE5FF' : '#F7F5FF'; draw() }
   }, { sharp: true })
+  // "reise", Runde 4: die Buchstaben waren durchsichtig. Die Platte wird additiv gemischt (der Schein soll leuchten), und so schienen
+  // Zebrastreifen, Markise und Laternen durch die Fuellung: Buchstaben im Mittel (153,180,245), Streuung 69/61 je Kanal, im Vorbild eine
+  // satte Fuellung #8CA5FC (Streuung 0 im Stamm des T). Jetzt die Fuellung auf einer eigenen Flaeche mit normaler Mischung und
+  // durchsichtigem Grund, ueber dem Schein; der Schein bleibt additiv darunter.
+  const fillTex = reise ? canvasTex(NW * TS, NH * TS, g => {
+    g.scale(TS, TS)
+    const x0 = (NW - span(size)) / 2, cy = NH / 2, tx = x0
+    g.font = `700 ${size}px ${FD}`; g.textBaseline = 'middle'
+    if (LS) g.letterSpacing = `${(LS * size).toFixed(2)}px`
+    g.fillStyle = '#8AA2FC'; g.fillText(text, tx + BOLD * size / 2, cy + size * 0.03)
+    if (BOLD) { g.lineWidth = BOLD * size; g.lineJoin = 'round'; g.strokeStyle = '#8AA2FC'; g.strokeText(text, tx + BOLD * size / 2, cy + size * 0.03) }
+  }, { sharp: true }) : null
   const add = (map, color, w, h, order) => {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map, color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, toneMapped: false, fog: false }))
     m.renderOrder = order; m.frustumCulled = false; m.visible = false; scene.add(m); return m
@@ -1130,6 +1283,8 @@ async function buildName({ ctx, K, kit, cap, t0, tOut = null, tones, reise = fal
   // "reise", Runde 2: groesserer Schein wie im Vorbild
   const halo = add(kit.blobTex, reise ? '#1230A8' : NE ? '#2E52FF' : '#8F82FF', NW * (reise ? 1.7 : 1.45), NH * (reise ? 2.8 : 2.3), 7)
   const plate = add(tex, '#FFFFFF', NW, NH, 8)
+  const fill = fillTex ? add(fillTex, '#FFFFFF', NW, NH, 9) : null
+  if (fill) { fill.material.blending = THREE.NormalBlending; fill.name = 'name-fuellung' }
   // Schein auf der Kreuzung (auf der Fahrbahn; die Gehwege liegen hoeher und decken ihn dort ab)
   const pool = new THREE.Mesh(new THREE.PlaneGeometry(26, 26), new THREE.MeshBasicMaterial({ map: kit.blobTex, color: NE ? '#2A4BFF' : '#8C7EFF', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }))
   pool.rotation.x = -Math.PI / 2; pool.position.set(0, 0.05, 0); pool.renderOrder = 4; pool.visible = false; scene.add(pool)
@@ -1159,23 +1314,24 @@ async function buildName({ ctx, K, kit, cap, t0, tOut = null, tones, reise = fal
   const update = t => {
     const k = on(t), show = k > 0.001
     plate.visible = halo.visible = pool.visible = show
+    if (fill) fill.visible = show
     if (!show) return null
     const cm = kit.camera; cm.getWorldDirection(fwd)
     const D = 0.6 * origin.clone().sub(cm.position).dot(fwd)
     const grow = 0.94 + 0.06 * smooth((t - t0) / 0.3)
     const wpp = 2 * D * Math.tan(THREE.MathUtils.degToRad(cm.fov / 2)) / H
-    for (const m of [plate, halo]) {
+    for (const m of fill ? [plate, halo, fill] : [plate, halo]) {
       toWorld(CX, TOP + NH / 2, D + (m === halo ? 2 : 0), m.position)
       // kaum gedreht: eine Spur Koerper, aber lesbar wie ein Schild von vorn
       m.quaternion.copy(cm.quaternion).multiply(tilt.setFromEuler(eul.set(0, 0.1 + 0.02 * Math.sin(t * 0.9), 0)))
       m.scale.setScalar(wpp * grow)
       m.updateMatrixWorld(true)
     }
-    plate.material.opacity = k; halo.material.opacity = 0.42 * k; pool.material.opacity = 0.5 * smooth((t - t0) / 0.5) * Math.min(1, k + 0.2)
+    plate.material.opacity = k; halo.material.opacity = 0.42 * k; if (fill) fill.material.opacity = k; pool.material.opacity = 0.5 * smooth((t - t0) / 0.5) * Math.min(1, k + 0.2)
     // Umriss im Bild aus den vier Ecken der Flaeche (der weiche Schein dahinter zaehlt nicht)
     return k > 0.5 ? kit.project(corners.map((c, i) => cw[i].copy(c).applyMatrix4(plate.matrixWorld))) : null
   }
-  return { text, t0, size, plate, on, update }
+  return { text, t0, size, plate, fill, on, update }
 }
 
 // ================================================================================================ mode "nah"
@@ -1581,7 +1737,9 @@ const DECO_CSS = `
 `
 // hideOn ("reise", Runde 2): Funktion von t (0 bis 1); solange sie an ist, sind die Schildchen weg. Im Vorbild verschwinden sie, solange der
 // Name leuchtet (30,2 bis 31,4 s), und kommen danach wieder; bei uns lagen sie als HTML ueber dem Namen.
-async function buildDeco({ ctx, K, kit, p, our, riv, tagNames, tPan, tBack = null, top = null, boardScale = 1, tagScale = 1, hideOn = null }) {
+// edge ("reise", Runde 3): Tafeln bleiben mindestens so viele Bildpunkte vom linken und rechten Rand. Seit die Allee die Cafés weiter
+// auseinander stellt, hing die linke Tafel bei 4 s ueber den Bildrand hinaus; sie rueckt dann zur Mitte. Ohne edge wie vorher.
+async function buildDeco({ ctx, K, kit, p, our, riv, tagNames, tPan, tBack = null, top = null, boardScale = 1, tagScale = 1, hideOn = null, edge = null }) {
   const { THREE } = kit, { clamp01, smooth } = K
   if (!document.getElementById('iso-street-deco-css')) { const st = document.createElement('style'); st.id = 'iso-street-deco-css'; st.textContent = DECO_CSS; document.head.append(st) }
   const pop = x => { x = clamp01(x); const u = x - 1; return 1 + 2.7 * u * u * u + 1.7 * u * u } // aufspringen mit Ueberschwingen
@@ -1621,7 +1779,7 @@ async function buildDeco({ ctx, K, kit, p, our, riv, tagNames, tPan, tBack = nul
   // "neon": Oberkante der Tafeln nie ueber y 470. In Fassung 2 standen sie ab y 300 und stiessen an die Woerter oben
   // ("Gleicher", "gleiche Preise."); im Vorbild haengen sie darunter. Die Pruefungen sahen das nicht, weil die Tafeln
   // keinen Pruefkasten haben. Ohne "neon" wie vorher.
-  const BOARD_TOP = kit.PAL.neon ? 470 : -Infinity, BOARD_H = 262
+  const BOARD_TOP = kit.PAL.neon ? 470 : -Infinity, BOARD_H = 262, BOARD_W = 230
   return {
     items,
     update(t) {
@@ -1629,10 +1787,11 @@ async function buildDeco({ ctx, K, kit, p, our, riv, tagNames, tPan, tBack = nul
         const k = it.show(t)
         if (!(k > 0.01)) { it.e.style.opacity = '0'; it.e.style.display = 'none'; continue }
         v.copy(it.at).project(kit.camera)
-        const x = (v.x + 1) / 2 * K.W
+        let x = (v.x + 1) / 2 * K.W
         let y = (1 - v.y) / 2 * K.H
         const sc = Math.max(0, Math.min(1.2, k)) * (it.sc || 1)
         if (it.kind === 'board') y = Math.max(y, BOARD_TOP + BOARD_H * sc)
+        if (it.kind === 'board' && edge != null) { const hw = BOARD_W / 2 * (it.sc || 1); x = Math.min(K.W - edge - hw, Math.max(edge + hw, x)) }
         it.e.style.display = 'block'
         if (it.kind === 'tag') it.e.style.display = 'flex'
         // Mitte unten des Elements auf dem Punkt; Tafeln leicht gedreht wie schraeg gehaengt
@@ -1656,13 +1815,143 @@ async function buildDeco({ ctx, K, kit, p, our, riv, tagNames, tPan, tBack = nul
 // Runde 2: der Kachelboden las sich noch zu hart (p20/p80 bei 10,5 s #0C1338 / #7079A4 gegen #2A262A / #444864 im Vorbild): Kacheln
 // naeher beieinander, im kalten Raum weniger Eigenleuchten
 const ROOM_TONE = {
-  kalt: { wall: '#6A6E8E', cap: '#D9E1FF', tileHi: '#50546A', tileLo: '#464A5E', wood: '#4A4C62', top: '#E9ECF4', counter: '#3A3F56', metal: '#CFD6EA', lamp: '#DCE0F2', lampI: 40, floorE: 0.6, glass: '#101A40', frame: '#9FB0E8', pool: '140,165,255', poolK: 0.5, coats: ['#2E3446', '#3E4560', '#4C5472', '#262A3A', '#5A6282', '#363C52', '#454C68', '#2A3044'] },
-  warm: { wall: '#7A5450', cap: '#F0D2BA', tileHi: '#6E5652', tileLo: '#54403E', wood: '#6E4A3C', top: '#E6D8C6', counter: '#4A3430', metal: '#D8CCC0', lamp: '#F2D4C2', lampI: 20, floorE: 0.32, glass: '#24140E', frame: '#C89070', pool: '255,170,100', poolK: 0.5, coats: ['#3A2A26'] }
+  kalt: { wall: '#6A6E8E', cap: '#D9E1FF', tileHi: '#50546A', tileLo: '#464A5E', wood: '#4A4C62', top: '#E9ECF4', counter: '#3A3F56', metal: '#CFD6EA', lamp: '#DCE0F2', lampI: 40, floorE: 0.6, glass: '#101A40', frame: '#9FB0E8', pool: '140,165,255', poolK: 0.5, coats: ['#2E3446', '#3E4560', '#4C5472', '#262A3A', '#5A6282', '#363C52', '#454C68', '#2A3044'],
+    // Runde 4: Kleidung gedeckt bunt (grau, beige, braun, marine) mit Hautfarbe am Kopf wie im Vorbild bei 10,5 s; vorher alle schwarz
+    // oder marine und dazu auf dunklen Schattenscheiben, der Raum las sich wie voller Spielfiguren
+    muted: ['#6B6F78', '#8A7A66', '#4A4F5C', '#7D6A5A', '#5E6672', '#9A8B76', '#3F4553', '#6E5D50'], hair: ['#15161C', '#4A3226', '#2A2220', '#6A5040'], skin: ['#C9A28A', '#B88E74', '#D8B49C', '#9E7660'] },
+  // Runde 3: gedeckt altrosa statt ziegelrot (gerendert bei 25,5 s Rueckwand #75392B, Saettigung 0,63; im Vorbild #5F4B4D bis #705652,
+  // 0,21 bis 0,27; Boden #3F2D2F bis #473D41): Wand, Kacheln und Lichtsee grauer, Licht im Raum fast weiss
+  warm: { wall: '#6A5A58', cap: '#E8D6CA', tileHi: '#564A4C', tileLo: '#443C40', wood: '#6E4A3C', top: '#E6D8C6', counter: '#4A3430', metal: '#D8CCC0', lamp: '#E8D8D0', lampI: 26, floorE: 0.32, glass: '#24140E', frame: '#B89080', pool: '235,200,180', poolK: 0.5, coats: ['#3A2A26'] }
 }
 const TILE = 0.3
+// "reise", Runde 4: Laternenpaare auf der Allee (z in m; Nebenstrassen bei +-24 und +-48 bleiben frei) und Laenge des Arms (m)
+const LAMP_AVE_REISE = [-40, -13, 15.5, 44]
+const LAMP_ARM = 1.1, LAMP_H = 4.6
+// Lichtsee einer Laterne in die Leuchttextur (globalCompositeOperation 'lighter'): Ellipse, quer zur Strasse (across: x bei der Allee)
+// 7,5 m, laengs 5 m, innen fast flach. Zwei Seen eines Paars (Koepfe rund 10 m auseinander) ergeben in der Mitte zusammen rund 0,8 des
+// Spitzenwerts: ein durchgehendes Band ueber die Fahrbahn wie im Vorbild, keine zwei runden Flecken.
+function bandSpot(g, map, x, z, acrossX, rgb, a) {
+  const rx = acrossX ? 6.8 : 5, rz = acrossX ? 5 : 6.8, m = map.m
+  g.save(); g.translate(map.gx(x), map.gx(z)); g.scale(rx * m, rz * m)
+  const gr = g.createRadialGradient(0, 0, 0, 0, 0, 1)
+  gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(0.5, `rgba(${rgb},${a * 0.62})`); gr.addColorStop(1, `rgba(${rgb},0)`)
+  g.fillStyle = gr; g.fillRect(-1, -1, 2, 2); g.restore()
+}
+// "reise", Runde 4: Laternen wie im Vorbild. Dort liest sich eine Laterne von oben als heller, beiger Scheibenschein (Kern rund 25 px,
+// Schein rund 45 px bei 33 s, Farbe #C6B49D) mit schwarzem Kopf und schwarzem Arm zur Fahrbahn; der Mast ist nicht zu sehen. Unsere
+// (kit.lamps) waren ein beleuchteter Mast, der von oben wie ein Streichholz von 70 px aussah, mit 10 px kleiner Kugel und rundem
+// Schein. Hier: dunkler, duenner Mast, Arm und Kopf schwarz (MeshBasic, unbeleuchtet), dahinter eine zur Kamera gedrehte Scheibe
+// ohne Tonwertkurve (sonst kam die Farbe des Vorbilds verschoben an). Die Scheibe sitzt 0,6 m unter dem Kopf: so liegt sie im
+// Tiefentest hinter Kopf und Arm, und beide stehen schwarz auf ihr. kit.lamps bleibt fuer alle anderen Wege unveraendert.
+function buildLampsReise(kit, list, y0) {
+  const { THREE, scene } = kit
+  const n = list.length, m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), s = new THREE.Vector3(1, 1, 1)
+  const pole = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.035, 0.045, LAMP_H, 6), new THREE.MeshBasicMaterial({ color: '#0A0B10' }), n)
+  const arm = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 0.14, 0.14), new THREE.MeshBasicMaterial({ color: '#07080B' }), n)
+  const head = new THREE.InstancedMesh(new THREE.BoxGeometry(0.46, 0.2, 0.46), new THREE.MeshBasicMaterial({ color: '#050608' }), n)
+  const halo = kit.canvasTex(128, 128, (g, w) => {
+    const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2)
+    r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.38, 'rgba(255,255,255,.95)'); r.addColorStop(0.52, 'rgba(255,255,255,.55)'); r.addColorStop(0.78, 'rgba(255,255,255,.12)'); r.addColorStop(1, 'rgba(255,255,255,0)')
+    g.fillStyle = r; g.fillRect(0, 0, w, w)
+  })
+  const haloMat = new THREE.SpriteMaterial({ map: halo, color: '#CDBBA2', transparent: true, opacity: 0.95, depthWrite: false, toneMapped: false })
+  list.forEach(({ x, z, ax, az }, k) => {
+    const hx = x + ax * LAMP_ARM, hz = z + az * LAMP_ARM
+    m4.compose(v.set(x, y0 + LAMP_H / 2, z), q.identity(), s.set(1, 1, 1)); pole.setMatrixAt(k, m4)
+    q.setFromAxisAngle(v.set(0, 1, 0), az !== 0 ? Math.PI / 2 : 0)
+    m4.compose(v.set(x + ax * LAMP_ARM / 2, y0 + LAMP_H, z + az * LAMP_ARM / 2), q, s.set(LAMP_ARM + 0.1, 1, 1)); arm.setMatrixAt(k, m4)
+    m4.compose(v.set(hx, y0 + LAMP_H - 0.05, hz), q.identity(), s.set(1, 1, 1)); head.setMatrixAt(k, m4)
+    const sp = new THREE.Sprite(haloMat); sp.scale.set(3.0, 3.0, 1); sp.position.set(hx, y0 + LAMP_H - 0.6, hz); sp.name = 'laterne'; scene.add(sp)
+  })
+  scene.add(pole, arm, head)
+  return { pole, arm, head }
+}
+// "reise", Runde 4: Aussenseite der Cafés wie im Vorbild. Dort ist das Obergeschoss braun mit drei gerahmten Fenstern (eins hell), die
+// Markise weiss und in der Ladenfarbe gestreift und leuchtet von unten, und das volle Café hat ein Erdgeschoss aus hellblauem Glas, an
+// der Front und an der Seite zur Allee (bei 9,0 bis 9,6 s leuchtet diese Ecke). Bei uns: schwarzes Obergeschoss mit vier kleinen
+// Quadraten, Markise schwarz und weiss, keine Glaswand. kit.shop bleibt unveraendert (alte Videos); hier wird der fertige Laden
+// umgebaut. Alles haengt am Deckel und hebt mit ihm ab; lidSet wird so erweitert, dass die neuen Teile mit ausblenden.
+// fadeSign: der Name auf dem Schild verblasst, sobald der Deckel abhebt (gegenueber: im Vorbild ist bei 23,3 bis 23,5 s nur der Raum
+// zu sehen, bei uns stand das steigende "Café 2" in der zweiten Textzeile).
+function dressShopReise(kit, K, shop, { full, accent, SH, fadeSign = false }) {
+  const { THREE, std, canvasTex, RoundedBoxGeometry } = kit
+  const { w, h } = SH, GF = shop.room.gf, extra = []
+  const add = (mesh, x, y, z, ry = 0) => { mesh.position.set(x, y, z); mesh.rotation.y = ry; mesh.castShadow = false; mesh.receiveShadow = false; shop.lid.add(mesh); const ms = Array.isArray(mesh.material) ? mesh.material : [mesh.material]; for (const m of ms) { m.transparent = true; extra.push(m) } return mesh }
+  const ax = a => shop.flip ? -w + a : -a
+  // Markise: weiss und Ladenfarbe, leuchtet (Material des Ladens an Ort und Stelle umgestellt, damit lidSet es weiter ausblendet)
+  const aw = shop.lid.children.find(o => o.isMesh && Math.abs(o.rotation.x - 0.36) < 1e-6)
+  if (aw) {
+    const tex = canvasTex(512, 64, (g, cw, chh) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#F4EFE6' : accent; g.fillRect(i * cw / 8, 0, cw / 8 + 1, chh) } })
+    aw.material.map = tex; aw.material.emissive = new THREE.Color('#FFFFFF'); aw.material.emissiveMap = tex; aw.material.emissiveIntensity = 0.5; aw.material.needsUpdate = true
+  }
+  // Obergeschoss: braune Fassade vor den alten kleinen Fenstern, drei gerahmte Fenster, das mittlere hell
+  const yU = GF + (h - GF) / 2 + 0.05
+  add(new THREE.Mesh(new THREE.PlaneGeometry(w - 0.2, h - GF - 0.45), std('#4A3432', { roughness: 0.9, emissive: '#3A2A2C', emissiveIntensity: 0.45 })), -w / 2, yU, 0.115).name = 'fassade'
+  const frameM = std('#B9B2AA', { roughness: 0.6, emissive: '#B9B2AA', emissiveIntensity: 0.25 })
+  for (const [i, a] of [w * 0.2, w * 0.5, w * 0.8].entries()) {
+    add(new THREE.Mesh(new RoundedBoxGeometry(1.45, 1.7, 0.08, 2, 0.03), frameM), ax(a), yU, 0.16)
+    add(new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.4), new THREE.MeshBasicMaterial({ color: i === 1 ? '#EEC48A' : '#1B2234', toneMapped: false })), ax(a), yU, 0.205)
+  }
+  // Volles Café: Glas an der Seite zur Allee (Seitenwand zur Kamera, farX) und ueber die ganze Front, von innen hellblau
+  if (full) {
+    const glassTex = canvasTex(256, 128, (g, cw, chh) => {
+      const gr = g.createLinearGradient(0, 0, 0, chh); gr.addColorStop(0, '#A9BCFF'); gr.addColorStop(0.55, '#5878F0'); gr.addColorStop(1, '#2F4BD0')
+      g.fillStyle = gr; g.fillRect(0, 0, cw, chh); g.fillStyle = 'rgba(20,28,70,.75)'
+      for (let i = 1; i < 6; i++) g.fillRect(i * cw / 6 - 2, 0, 4, chh)
+    })
+    const side = shop.flip ? 0.012 : -w - 0.012, D = SH.d, gh = GF - 1.5
+    add(new THREE.Mesh(new THREE.PlaneGeometry(D - 0.7, gh), new THREE.MeshBasicMaterial({ map: glassTex, toneMapped: false })), side, 0.42 + 0.25 + gh / 2, -D / 2, shop.flip ? Math.PI / 2 : -Math.PI / 2).name = 'glaswand'
+  }
+  const sign = shop.signMat, base = shop.lidSet
+  shop.lidSet = (lift, k) => {
+    base(lift, k)
+    for (const m of extra) m.opacity = k
+    if (fadeSign) sign.opacity *= 1 - K.smooth(lift / 5)
+  }
+  return shop
+}
+// "reise", Runde 4: Ampel (Mast, Kasten, drei Lichter nach Sueden, das gelbe an, mit kleinem Schein)
+function buildTrafficLight(kit, x, z, y0) {
+  const { THREE, scene, RoundedBoxGeometry } = kit
+  const g = new THREE.Group(); g.position.set(x, y0, z); g.name = 'ampel'; scene.add(g)
+  const dark = new THREE.MeshLambertMaterial({ color: '#16171D' })
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 3.0, 8), dark); pole.position.y = 1.5; g.add(pole)
+  const box = new THREE.Mesh(new RoundedBoxGeometry(0.34, 0.95, 0.28, 2, 0.05), dark); box.position.y = 3.35; g.add(box)
+  for (const [k, c] of [[1, '#3A1012'], [0, '#FFB43A'], [-1, '#0E2A18']]) {
+    const l = new THREE.Mesh(new THREE.CircleGeometry(0.1, 14), new THREE.MeshBasicMaterial({ color: c, toneMapped: false })); l.position.set(0, 3.35 + k * 0.29, 0.145); g.add(l)
+  }
+  kit.glow('#FFB43A', 1.0, new THREE.Vector3(x, y0 + 3.35, z + 0.3), 0.45)
+  g.traverse(o => { if (o.isMesh) o.castShadow = false })
+  return g
+}
+// "reise", Runde 4: Fenster wie kit.windows, aber 1,0 x 1,25 m und die dunklen in #1A2132 statt fast schwarz (on wie kit.windowTint)
+function buildWindowsReise(kit, list) {
+  const { THREE, scene } = kit
+  const mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1.0, 1.25), new THREE.MeshBasicMaterial({ color: '#FFFFFF' }), list.length)
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), s = new THREE.Vector3(1, 1, 1), off = new THREE.Color('#1A2132')
+  list.forEach((wd, k) => {
+    m4.compose(v.set(wd.x, wd.y, wd.z), q.setFromEuler(e.set(0, wd.ry, 0)), s); mesh.setMatrixAt(k, m4)
+    mesh.setColorAt(k, wd.on < 0.13 ? kit.windowTint(wd.on) : off)
+  })
+  scene.add(mesh); return mesh
+}
 // "reise": Farben der Stadt (siehe build, CITY)
-const CITY_REISE = ['#30323E', '#383A47', '#2C2E3A', '#3C3E4B', '#333541']
+// Runde 4: blauer (Review: Daecher und Fassaden im Median #07070F gegen #050A15 im Vorbild, unten links (5,6,12) gegen (7,8,17))
+const CITY_REISE = ['#2A3148', '#323950', '#272E44', '#363D55', '#2E354C']
 const PARKED = ['#3A4250', '#4A3E44', '#34444A', '#46464F', '#3E3A4C']
+// "reise" (Runde 3): Rechteck [x0, x1, z0, z1] ohne die Flaechen in free. Das groesste freie Stueck (beide Seiten mindestens 3 m),
+// oder null. So bleibt hinter und neben einem Café eine Masse stehen, statt dass der ganze Viertelblock entfaellt.
+function clipFree(r, free) {
+  const ov = (a, b) => a[1] > b[0] && a[0] < b[1] && a[3] > b[2] && a[2] < b[3]
+  const hit = free.filter(k => ov(r, k))
+  if (!hit.length) return r
+  let best = null
+  for (const k of hit) for (const c of [[r[0], Math.min(r[1], k[0]), r[2], r[3]], [Math.max(r[0], k[1]), r[1], r[2], r[3]], [r[0], r[1], r[2], Math.min(r[3], k[2])], [r[0], r[1], Math.max(r[2], k[3]), r[3]]]) {
+    if (c[1] - c[0] < 3 || c[3] - c[2] < 3 || free.some(f => ov(c, f))) continue
+    if (!best || (c[1] - c[0]) * (c[3] - c[2]) > (best[1] - best[0]) * (best[3] - best[2])) best = c
+  }
+  return best
+}
 // Ruecklicht von kit.car in "reise": statt des 1,4 m breiten leuchtenden Streifens zwei kleine, matte Punkte. Der Streifen war
 // im Bild das Einzige, was man vom Auto sah, und stand neben den Woertern wie ein roter Strich (Review Fassung 3, Runde 1).
 // kit.car selbst bleibt unveraendert (alte Videos), hier wird das fertige Auto umgebaut.
@@ -1763,7 +2052,10 @@ async function buildRoom({ kit, K, shop, tone, full, SH, CURB, mirror = false })
   // ---- Leute (in der Welt, wie alle Figuren des Baukastens)
   const people = [], wp = new THREE.Vector3()
   const place = (u, v, ry, sit, k) => {
-    const f = kit.person({ coat: T.coats[k % T.coats.length], legs: '#181A22', hair: k % 3 ? '#15161C' : '#4A3226', skin: '#B89A86', scale: 0.8, y0: CURB + Y })
+    const f = T.muted ? kit.person({ coat: T.muted[k % T.muted.length], legs: '#22242C', hair: T.hair[k % T.hair.length], skin: T.skin[(k * 3) % T.skin.length], scale: 0.8, y0: CURB + Y })
+      : kit.person({ coat: T.coats[k % T.coats.length], legs: '#181A22', hair: k % 3 ? '#15161C' : '#4A3226', skin: '#B89A86', scale: 0.8, y0: CURB + Y })
+    // Runde 4: Schattenscheibe nur noch angedeutet (0,3 statt 0,7)
+    f.blob.material.opacity = 0.3
     g.localToWorld(wp.set(LX(u), 0, LZ(v)))
     f.at(wp.x, wp.z, shop.rot + ry)
     if (sit) { f.fig.position.y = CURB + Y - 0.12; f.legL.rotation.x = f.legR.rotation.x = -1.45 }
@@ -1773,10 +2065,12 @@ async function buildRoom({ kit, K, shop, tone, full, SH, CURB, mirror = false })
   // Inhaber hinter der Theke, schaut nach vorn
   place(UB(2.8), D - 1.3, 0, false, 0)
   if (full) {
+    // Runde 4: 14 Leute im Raum statt 18 (Review: im Vorbild rund 22 Leute im ganzen Bild, bei uns rund 40 mit der Menge davor): an
+    // jedem zweiten Tisch nur einer, eine Person steht statt zwei
     let k = 1
-    for (const [u, v] of tables) for (const s of [-1, 1]) { place(u + s * 0.78, v, face(u + s * 0.78, v, u, v), true, k++) }
+    tables.forEach(([u, v], ti) => { for (const s of ti % 2 ? [1] : [-1, 1]) place(u + s * 0.78, v, face(u + s * 0.78, v, u, v), true, k++) })
     for (const u of [1.6, 2.7, 3.8]) place(UB(u), CV - 1.15, Math.atan2(0, LZ(CV) - LZ(CV - 1.15)), false, k++)
-    place(UB(5.0), 5.1, face(UB(5.0), 5.1, UB(4.2), 5.2), false, k++); place(UB(4.2), 5.2, face(UB(4.2), 5.2, UB(5.0), 5.1), false, k++)
+    place(UB(5.0), 5.1, face(UB(5.0), 5.1, UB(4.2), 5.2), false, k++)
   }
   return {
     people: people.length, tables: tables.length,
@@ -1796,8 +2090,9 @@ async function buildRoom({ kit, K, shop, tone, full, SH, CURB, mirror = false })
 }
 
 // Drahtkorb vor dem leeren Café ("reise"): steigt auf dem Gehweg vor der offenen Front auf (unten in der Bildmitte), links
-// darueber eine Papier-Stempelkarte und eine E-Mail, die hineinfallen (wie iso-shop "trash"). Wie im Vorbild dunkles Gitter
-// mit braunem Rand; in der ersten Fassung 3 stand er hell und silbern mitten im Raum (Review Runde 1). Er geht mit dem Deckel
+// darueber eine Papier-Stempelkarte und eine E-Mail, die hineinfallen (wie iso-shop "trash"). In der ersten Fassung 3 stand er
+// silbern mitten im Raum (Review Runde 1), in Runde 2 als dunkler Eimer; seit Runde 3 wie im Vorbild ein heller, durchsichtiger
+// Drahtkorb mit duennem goldenem Rand vorn an der Kante. Er geht mit dem Deckel
 // (T.gone): im Vorbild ist er weg, sobald das Dach wieder drauf ist. Karte und Umschlag sind flache Tafeln, die zur Kamera
 // schauen. state()/box() fuer Tests und Pruefkasten.
 async function buildTrash({ ctx, kit, K, shop, SH, CURB, T: T0, icon }) {
@@ -1818,14 +2113,16 @@ async function buildTrash({ ctx, kit, K, shop, SH, CURB, T: T0, icon }) {
   // Gitter war dicht, dunkel und liess den Boden durchscheinen (Median #0D0B1A, p90 51): bei 27,4 s nur ein dunkler Fleck. Deshalb
   // groebere Rauten, hellerer Draht und innen ein dunkler Mantel (nur Innenseite), der den Boden verdeckt.
   wire.wrapS = THREE.RepeatWrapping; wire.repeat.set(1, 1)
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(BR, BR * 0.82, BH, 40, 1, true), std('#FFFFFF', { map: wire, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.6, metalness: 0.2, color: '#9EA2AA', emissive: '#5A5E66', emissiveMap: wire, emissiveIntensity: 0.8 }))
+  // Runde 3: ohne den dunklen Mantel innen und mit hellerem Draht. Der Mantel las sich als schwarzer Eimer mit grosser schwarzer
+  // Oeffnung (bei 540 x 960 ein Fleck von 150 x 110 px); im Vorbild ist es ein heller Drahtkorb, durch den die Kacheln scheinen, mit
+  // duennem goldenem Rand
+  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(BR, BR * 0.82, BH, 40, 1, true), std('#FFFFFF', { map: wire, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.6, metalness: 0.2, color: '#B8BCC4', emissive: '#6A6E78', emissiveMap: wire, emissiveIntensity: 0.8 }))
   mesh.position.y = BH / 2; g.add(mesh)
-  const inner = new THREE.Mesh(new THREE.CylinderGeometry(BR * 0.97, BR * 0.82 * 0.97, BH * 0.99, 40, 1, true), lam('#1A1C20', { side: THREE.BackSide }))
-  inner.position.y = BH / 2; g.add(inner)
-  const rimM = std('#7A5A3A', { roughness: 0.5, metalness: 0.2, emissive: '#3A2616', emissiveIntensity: 0.6 })
+  const rimM = std('#B08A48', { roughness: 0.4, metalness: 0.3, emissive: '#4A3410', emissiveIntensity: 0.6 })
   const rim = new THREE.Mesh(new THREE.TorusGeometry(BR, 0.07, 8, 48), rimM); rim.rotation.x = Math.PI / 2; rim.position.y = BH; g.add(rim)
   const foot = new THREE.Mesh(new THREE.TorusGeometry(BR * 0.82, 0.05, 8, 40), rimM); foot.rotation.x = Math.PI / 2; foot.position.y = 0.04; g.add(foot)
-  const bottom = new THREE.Mesh(new THREE.CircleGeometry(BR * 0.82, 32), lam('#1A1A22')); bottom.rotation.x = -Math.PI / 2; bottom.position.y = 0.03; g.add(bottom)
+  // Boden in der Farbe der Kacheln des leeren Raums, nicht als dunkle Scheibe
+  const bottom = new THREE.Mesh(new THREE.CircleGeometry(BR * 0.82, 32), lam(ROOM_TONE.warm.tileLo)); bottom.rotation.x = -Math.PI / 2; bottom.position.y = 0.03; g.add(bottom)
   g.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false } })
   const img = new Image()
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 24 24" fill="none" stroke="#6A4A2A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${ICONS[icon]}</svg>`)
@@ -1871,7 +2168,7 @@ async function buildTrash({ ctx, kit, K, shop, SH, CURB, T: T0, icon }) {
     },
     group: g,
     box: () => g.visible ? kit.meshBox([g]) : null,
-    state: () => ({ bin: g.visible ? +g.scale.y.toFixed(3) : 0, card: card.visible, mail: mail.visible, r: BR, h: BH, inner: !!inner })
+    state: () => ({ bin: g.visible ? +g.scale.y.toFixed(3) : 0, card: card.visible, mail: mail.visible, r: BR, h: BH, inner: false, wire: '#' + mesh.material.color.getHexString() })
   }
 }
 
@@ -1879,7 +2176,8 @@ async function buildTrash({ ctx, kit, K, shop, SH, CURB, T: T0, icon }) {
 // leeren Café durch, spaeter ein Auto mit hellen Lichtern). Jede Lage ist eine reine Funktion von t (Fahrplan unten), kein
 // Zustand. Fahrplan so gelegt, dass sich nie zwei auf der Kreuzung treffen und keiner durch die Menge vor dem vollen Café
 // faehrt (die steht bis 2,3 m vor der Front, also bis an die Fahrspur x = +1,05).
-function buildTraffic({ kit, K, C }) {
+// nsLane: Spur des Autos auf der Nord-Sued-Strasse (Runde 3: auf der breiten Allee x = -2,2 statt -1,05, die geparkten stehen bei -4,3)
+function buildTraffic({ kit, K, C, nsLane = -1.05 }) {
   const { THREE, RoundedBoxGeometry, std, lam, blobTex } = kit
   // axis 'x': faehrt auf der Ost-West-Strasse (z = lane), 'z': auf der Nord-Sued-Strasse (x = lane); s(t) = s0 + dir * v * (t - t0)
   const PLAN = [
@@ -1887,7 +2185,7 @@ function buildTraffic({ kit, K, C }) {
     // fuhr er erst bei 3 bis 5,5 s am linken Bildrand und las sich als dunkler Kasten)
     // Runde 2: wie im Vorbild bei 2,5 s vor dem Café gegenueber, bei 4 s auf der Kreuzung, bei 5 s vor dem vollen Café und bei 6 s vorbei
     { kind: 'bus', color: '#B3262E', axis: 'x', lane: 1.05, dir: 1, v: 7, s0: -24, t0: 0 },
-    { kind: 'car', color: C.cars[0], axis: 'z', lane: -1.05, dir: 1, v: 7.2, s0: -62, t0: 0 },
+    { kind: 'car', color: C.cars[0], axis: 'z', lane: nsLane, dir: 1, v: 7.2, s0: -62, t0: 0 },
     { kind: 'car', color: '#5A1F26', axis: 'x', lane: 1.05, dir: 1, v: 7, s0: -70, t0: 14 },
     // Runde 2: auf der suedlichen Spur nach Osten (vorher nach Westen auf der noerdlichen): seit beide Cafés an der Ost-West-Strasse
     // stehen, reicht die Menge vor dem vollen Café bis auf die noerdliche Spur. So faehrt er bei 25 bis 27 s vor dem leeren Café

@@ -770,6 +770,30 @@ Sperrbildschirm blendet ins Fenster über, Name 0,9 s), ein Deckel, der fest aus
 weg, solange der Name leuchtet, ein größerer Korb mit dunklem Mantel und ein Partikelfeld ("partikel"), das in der Mitte so
 hell ist wie im Vorbild.
 
+**Fassung 3, Runde 3.** Wieder nur mit `"camera": "reise"` (vier alte Ordner an je vier Zeitpunkten Pixel für Pixel gleich
+wie HEAD): zwischen den Cafés liegt jetzt eine breite Allee (je Seite 4 m breiter) mit Zebrastreifen, Laternen paarweise und
+geparkten Autos an beiden Bordsteinen; Laternen nur noch an der Allee und an der Straße vor den Cafés (rund 30 statt 156),
+die Nebenstraßen bleiben dunkel; jeder Block ist eine große Masse aus vier Teilen mit Höhenstufen statt 3 x 3 Häuschen.
+Die Kamerafahrten sind am optischen Fluss des Vorbilds nachgestellt: "zurück auf die Straße" weich über rund 1,4 s (0,3 s
+vor "back" bis 1,1 s danach), die Fahrt zum Café gegenüber und hinein als EINE Bewegung (ab 0,25 s vor "travel", halber
+Zoom nach rund 1 s), der Kran mit der Spitze rund 0,5 s nach "kran"; die Sicht von oben flacher (50 bis 58 Grad, Fassaden
+sichtbar) und fast gerade von Süden. Neu und für alle nutzbar, aber aus, solange nicht gesetzt: `kit.shop({ hollow: {
+parapet } })`, eine niedrige Brüstung, die beim Abheben stehen bleibt. Dazu ein heller Drahtkorb ohne Mantel, ein gedeckter
+leerer Raum und ein Partikelfeld mit weißen Kernen.
+
+**Fassung 3, Runde 4.** Wieder nur mit `"camera": "reise"` bzw. `"look": "partikel"` (alte Ordner Pixel für Pixel
+gleich wie HEAD): Laternen wie im Vorbild (11 statt 30: vier Paare auf der Allee rund 28 m auseinander, je eine außen
+neben den Cafés und eine gegenüber dem vollen; von oben eine helle beige Scheibe mit schwarzem Kopf und Arm, darunter
+ein Lichtband quer über die Fahrbahn statt runder Flecken am Bordstein), keine Laterne mehr im Bild des vollen Raums
+(dort eine Ampel), Blöcke als eine schieferblaue Masse mit einer Höhenstufe und Fensterrastern, die Cafés mit brauner
+Fassade, drei gerahmten Fenstern und leuchtender Markise in der Ladenfarbe, das volle mit Glaswand zur Allee, Gäste
+in gedeckten Farben ohne dunkle Schattenscheiben (14 im Raum, 8 davor), der Name satt gefüllt (die Füllung nicht mehr
+additiv), Partikel satt blau ohne weißen Kern und hinter dem Stichwort dünner. Kamera: Sinkflug näher und um 10 Grad
+zurückgedreht, Schwenk als gerades Gleiten über 2 s, die Drehung erst beim späten Heranfahren, Deckel in 0,4 s,
+langsame Drift über Raum, Sperrbildschirm (weiter weg und fast von Süden) und nach dem Kran, bei der Fahrt zum Café
+gegenüber Ziel und Drehung früher, nach dem Fallen ohne Halt in den Kran. Neu für alle Skripte, aber aus, solange nicht
+gesetzt: `"outWithBar"` an einer Textzeile (Abschnitt Wortleiste).
+
 ### Wortleiste oben (`progress`, `chapter`) und Schriftzug über der Straße (seit 19.11.2026)
 
 Gebaut für den Nachbau "zwei Cafés" (`videos/2026-11-21-zwei-cafes`, auf ausdrücklichen Wunsch des
@@ -793,6 +817,12 @@ Betreibers), nutzbar für jedes Video aus langen Kamerafahrten. Ohne diese Angab
   bleibt), sein Wort leuchtet lila, erledigte bleiben hell, kommende grau. `0` dunkelt die Leiste ab (ein
   Gegenbild gehört zu keinem Kapitel). Vor dem ersten Kapitel ist die Leiste unsichtbar. Im Schlussbild
   (`cta-comment`) pulsen die Felder wie die Stempelreihe. Der Bericht nennt die Zeiten unter `progress`.
+- **`"outWithBar": true` an einer Textzeile (seit 23.11.2026):** sie geht zusammen mit der Wortleiste, also
+  beim nächsten `"chapter": -1` (0,12 s vor dessen Wort plus `offset`), und blendet in 0,15 s aus, statt bis
+  kurz vor der nächsten Textzeile zu stehen. Für die letzte Frage über einer Fahrt, wenn das Schlussbild
+  danach überblendet: im Vorbild "zwei Cafés" verschwinden Frage und Leiste zugleich, bei uns stand die Frage
+  0,5 s über den Partikeln. Ohne spätere Leiste weg bricht der Bau ab; geht die Leiste vor dem letzten Wort
+  (weniger als 0,2 s danach), ebenfalls. Ohne die Angabe wie vorher.
 - **Schriftzug über der Straße:** eine Textzeile `{ "role": "name", "lines": ["Stampit."], "gapBefore": 1.15 }`
   in einem `iso-street` im Duell steht nicht oben als Tafel, sondern leuchtet auf ihr Wort (Anker `name`) als
   lila Leuchtschrift mit Logo über der Kreuzung auf (Streifen y 612 bis 842, wie die Blase in "nah"), mit

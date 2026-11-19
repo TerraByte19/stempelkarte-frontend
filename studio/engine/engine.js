@@ -235,7 +235,8 @@ async function build(state) {
       ch.fit = f; ch.text = text
       const least = cls => { const v = spans.filter(x => x.sp.classList.contains('key') === cls).map(x => parseFloat(x.sp.style.fontSize)); return v.length ? +Math.min(...v).toFixed(1) : null }
       state.capFit.push({ id: c.id, text, factor: f, width: Math.round(w), word: least(false), keyWord: least(true) })
-      const last = i === c.chunks.length - 1, out = last ? 0.07 : 0.001
+      // "outWithBar" (script.mjs): die letzte Tafel blendet mit der Wortleiste in c.fadeOut aus
+      const last = i === c.chunks.length - 1, out = last ? (c.fadeOut || 0.07) : 0.001
       // Einstieg ("instant" an der ersten Textzeile): die erste Zeile der ersten Tafel steht ab Bild 0
       const hook = c.instant && first && i === 0
       if (hook) { chunk.style.opacity = 1; key(chunk, [[ch.e, { opacity: 1 }], [ch.e + out, { opacity: 0 }]]) }
@@ -291,7 +292,7 @@ async function build(state) {
       // Die letzte einer Textzeile blendet aus, und zwar in 0,07 s: die Textzeile endet 0,12 s
       // vor der naechsten, deren erste Tafel 0,03 s vor ihrem Wort erscheint. Mit den 0,1 s der
       // Textzeilen bisher laegen beide ein Bild lang uebereinander.
-      const last = i === c.chunks.length - 1, out = last ? 0.07 : 0.001
+      const last = i === c.chunks.length - 1, out = last ? (c.fadeOut || 0.07) : 0.001
       // Hereinspringen in 0,12 s, bei einer sehr kurzen Tafel entsprechend schneller: sonst laege
       // das Ende des Hereinspringens hinter dem Verschwinden, und die Tafel tauchte wieder auf.
       const up = Math.min(0.12, Math.max(0.02, (ch.e - ch.s) * 0.6))

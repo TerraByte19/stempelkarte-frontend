@@ -35,7 +35,7 @@ export default {
   .k2 span { display: inline-block; margin: 0 .11em; opacity: 0; }
   /* "partikel" (Fassung 2 des Nachbaus, gemessen am Vorbild: kleines Wort bei y 740, Stichwort rund 200 px mit Mitte
      bei 955, kleiner Satz bei 1140; Partikel weiss mit blauem Schein #2442D8 auf Schwarz) */
-  .pk-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 45% at 50% 50%, #000 0%, #020309 60%, #04050C 100%); }
+  .pk-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 45% at 50% 50%, #000 0%, #010206 60%, #010104 100%); }
   .pk-cv { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
   .pk1 { left: 0; right: 0; top: 708px; text-align: center; font: 500 50px var(--body); color: #8AA2FC; }
   .pk1 span, .pk2 span { display: inline-block; margin: 0 .11em; opacity: 0; }
@@ -102,14 +102,18 @@ async function partikel(ctx, c, bi) {
   if (p.tones) cue(c.t[bi], 'pop', 0.8, 0.7)
   const tl = ctx.at('logo')
   if (p.logo) { ctx.$('.lock7 span').textContent = p.brand; rise('.lock7', tl + 0.5, 0.6); if (p.tones) cue(tl + 0.55, 'chime', 0.7) }
-  // Symbol einmal malen: Kopf und Schultern, kleiner weisser Kern, kraeftig blauer Schein #2442D8 wie im Vorbild (Review Fassung 3,
-  // Runde 1: unser Feld war weisser und flacher; Kern vorher 3,2 px, Schein heller und blasser)
-  const S = 40, spr = document.createElement('canvas'); spr.width = spr.height = S
-  { const g = spr.getContext('2d'); g.shadowColor = 'rgba(36,66,216,1)'; g.shadowBlur = 10; g.fillStyle = '#3A5CF0'
-    for (let i = 0; i < 2; i++) { g.beginPath(); g.arc(S / 2, 14, 5, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(S / 2, 28, 9, 6, 0, Math.PI, 0); g.fill() }
-    g.shadowBlur = 0; g.fillStyle = '#E8EEFF'; g.beginPath(); g.arc(S / 2, 14, 2.2, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(S / 2, 28, 4.6, 2.9, 0, Math.PI, 0); g.fill() }
-  const R = rng(20261119), N = 1300, pts = []
-  for (let i = 0; i < N; i++) pts.push({ x: R() * 1180 - 50, y: R() * 2020 - 50, z: 0.6 + R() * 0.9, vx: (R() - 0.5) * 14, vy: -6 - R() * 12, tw: R() * 6.28 })
+  // Symbol einmal malen. Runde 4 (Review: unsere Symbole lasen sich wie Laternen mit weissem oder beigem Kern und weissem Bogen, 25 bis
+  // 30 px, klein und dicht; im Vorbild ein flaches, sattes Blau #2A4BE8 fuer Kopf und Schultern, an einer Seite der Schultern ein kleines
+  // helles Quadrat #A8BCFF, weicher blauer Schein, rund 35 bis 40 px mit Schein, alle etwa gleich gross): Kopf und Schultern voll #2E4FF0
+  // ohne Kern, Schein 7 px #3050FF, rechts an den Schultern ein helles Quadrat mit eigenem kleinen Schein.
+  const S = 48, spr = document.createElement('canvas'); spr.width = spr.height = S
+  { const g = spr.getContext('2d')
+    const body = () => { g.beginPath(); g.arc(21, 15, 6, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(23, 36, 11.5, 12, 0, Math.PI, 0); g.closePath(); g.fill() }
+    g.shadowColor = 'rgba(48,80,255,1)'; g.shadowBlur = 7; g.fillStyle = '#2E4FF0'; body(); g.shadowBlur = 0; body()
+    g.shadowColor = 'rgba(157,178,255,1)'; g.shadowBlur = 4; g.fillStyle = '#B4C6FF'; g.beginPath(); g.roundRect(29.5, 28, 6, 6, 1.5); g.fill() }
+  // Runde 4: ein Viertel weniger Symbole (975 statt 1300), alle fast gleich gross (0,9- bis 1,15-fach statt 0,6- bis 1,5-fach)
+  const R = rng(20261119), N = 975, pts = []
+  for (let i = 0; i < N; i++) pts.push({ x: R() * 1180 - 50, y: R() * 2020 - 50, z: 0.9 + R() * 0.25, vx: (R() - 0.5) * 14, vy: -6 - R() * 12, tw: R() * 6.28, k: R() })
   const cv = ctx.$('.pk-cv'), g = cv.getContext('2d'), s0 = ctx.s
   // Erscheinen: das Feld zieht sich in 0,8 s von leicht vergroessert zusammen (die Stadt "loest sich auf")
   // Review Fassung 3, Runde 2: das Feld war in der Mitte halb so hell wie im Vorbild (Band y 0,25 bis 0,62: Helligkeit 6 bis 7 gegen 13
@@ -124,10 +128,18 @@ async function partikel(ctx, c, bi) {
       let x = q.x + q.vx * u, y = q.y + q.vy * u
       x = ((x + 50) % 1180 + 1180) % 1180 - 50; y = ((y + 50) % 2020 + 2020) % 2020 - 50
       x = 540 + (x - 540) * grow; y = 960 + (y - 960) * grow
-      const d = Math.hypot((x - 540) / 520, (y - 950) / 330), a = Math.min(1, 0.55 + 0.45 * Math.min(1, Math.max(0, (d - 0.6) / 0.6)))
-      const yy = Math.min(1, Math.max(0, y / 1920)), top = Math.min(1, Math.max(0, (yy - 0.14) / 0.12))
-      const low = 1 - 0.6 * Math.min(1, Math.max(0, (yy - 0.72) / 0.22))
-      g.globalAlpha = 0.9 * a * top * top * low * (0.75 + 0.25 * Math.sin(q.tw + u * 1.6)); const sz = S * q.z * (1.05 + 0.45 * yy)
+      // Review Fassung 3, Runde 3: im Vorbild ein knackiges Feld mit weissen Kernen (unten 99. Perzentil 193 gegen 124 bei uns), die Mitte
+      // heller (Band 0,5 bis 0,7: 42 bis 47 gegen 22 bis 35), oben ab rund 10 % schon vereinzelte, schwache Figuren und der Grund fast
+      // schwarz. Deshalb groesserer weisser Kern, voller Deckungsgrad, Mitte weniger zurueckgenommen, oben ab 9 % langsam einblenden (bis
+      // 35 % voll; mit 14 bis 26 % stand dort eine harte Kante, mit 8 bis 18 % war das Band 0,1 bis 0,35 doppelt so hell wie im Vorbild).
+      const d = Math.hypot((x - 540) / 520, (y - 950) / 330), a = Math.min(1, 0.85 + 0.15 * Math.min(1, Math.max(0, (d - 0.6) / 0.6)))
+      const yy = Math.min(1, Math.max(0, y / 1920)), top = Math.min(1, Math.max(0, (yy - 0.09) / 0.26))
+      const low = 1 - 0.5 * Math.min(1, Math.max(0, (yy - 0.72) / 0.22))
+      // Runde 4: hinter dem Stichwort (Mitte y 955) duenner wie im Vorbild: bis 0,15 der Bildhoehe darueber und darunter faellt bis zur
+      // Haelfte der Symbole weg (fest je Symbol, q.k)
+      const near = Math.max(0, 1 - Math.abs(y - 955) / 288)
+      if (q.k < 0.5 * near) continue
+      g.globalAlpha = a * top * top * low * (0.8 + 0.2 * Math.sin(q.tw + u * 1.6)); const sz = S * q.z * (1.0 + 0.2 * yy)
       g.drawImage(spr, x - sz / 2, y - sz / 2, sz, sz)
     }
     g.globalAlpha = 1
