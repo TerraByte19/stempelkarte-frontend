@@ -243,6 +243,9 @@ export default {
     after: { default: true, doc: 'Schlussbild nach "enter": der Laden, den er verlassen hat, wird dunkler, der andere leuchtet auf ("nah": nur der eigene leuchtet auf). false, wenn die Szene gleich danach endet' },
     crowd: { default: 0, doc: 'Nur Duell: so viele Gäste (0 bis 12) stehen vor dem eigenen Laden, drei in einer Schlange zur Tür, die übrigen in einer Gruppe daneben, ab 7 auch auf dem Gehweg und an der Bordsteinkante davor, und unterhalten sich. Für "bei uns ist Betrieb"' },
     camera: { default: 'standard', doc: 'Nur Duell: der Kameraweg. "standard" (langsam heran, ein paar Grad gedreht; "push" und "orbit" gelten). "descent": hoch über beiden Läden sinkt sie langsam, auf den Anker "pan" schwenkt sie auf den eigenen Laden und fährt nah und tiefer an seine Front. "front": schräg hoch über dem eigenen Laden, der links im Bild steht (rechts Platz für "phoneUi": "lock"). "top": fast senkrecht über beiden Läden, treibt kaum. "kran": von der Front des Ladens gegenüber in 2,4 s hinauf bis fast senkrecht über beide, dann wie "top". "reise" (Fassung 3): die ganze Geschichte des Vorbilds "zwei Cafés" in einer Einstellung ohne Schnitt: Sinkflug, Schwenk, heran, Dach des eigenen Ladens hebt ab (voller Raum, flaches Handy mit Wallet), zurück auf die Straße (Sperrbildschirm), Fenster mit "message", Fahrt zum Laden gegenüber, dessen Dach abhebt (leerer Raum, Korb mit Papierkarte und E-Mail), Kran hinauf, Name. Größere hohle Läden, Verkehr, kein Brunnenplatz, graue Figuren; Anker siehe Liste. "phoneUi" bleibt dabei leer (die drei Handybilder gehören zu "reise")' },
+    // kranDauer (20.11.2026, Nachbau "zwei Cafés"): der Betreiber fand die Pause vor dem Namen zu lang; mit der kuerzeren Pause leuchtet der Name
+    // rund 0,85 s frueher, und der Kran von 2,4 s waere dann noch in voller Fahrt. Vorgabe 2,4 s, damit "reise" ohne den Schalter bleibt, wie es war.
+    kranDauer: { default: 2.4, doc: 'Nur "camera": "reise": so viele Sekunden (1,5 bis 3) fährt der Kran ab dem Anker "kran" hinauf bis fast senkrecht, danach treibt die Kamera langsam heran. Vorgabe 2,4 s wie im Vorbild; kürzer, wenn der Name früh kommt und das Bild von oben stehen soll, wenn er aufleuchtet' },
     tags: { default: '', doc: 'Nur Duell: kleine Schildchen über den Läden, "eigener,gegenüber", z. B. "CAFÉ 2,CAFÉ 1" (je höchstens 12 Zeichen), mit einem Punkt in der Ladenfarbe. Springen auf den Anker "tags" auf; mit "camera": "descent" verschwinden sie beim Schwenk. Leer = keine' },
     phoneUi: { default: '', doc: 'Nur Duell: "lock" (C1): rechts schiebt sich ein flaches Handy herein (Anker "ui"), auf "uiNotify" wacht der Sperrbildschirm mit der Mitteilung der Karte auf ("Noch {left} Stempel bis: {reward}"), eine gestrichelte Linie führt von einem leuchtenden Punkt auf der Straße (dem Kunden, gut 10 m von der Tür) zum Handy. "message" (C3): ein Fenster des eigenen Ladens über der abgedunkelten Straße (Anker "ui"), die Nachricht aus "message" tippt sich ("uiType"), "Senden" wird "Gesendet" ("uiSend"), das Fenster geht ("uiOut"), und über Leuten auf der Straße springen Mitteilungen der Karte mit dieser Nachricht auf. Leer = keins' },
     message: { default: 'Frischer Kuchen ist da!', doc: 'Nur "phoneUi": "message": die Nachricht des Ladens (1 bis 60 Zeichen; nie "SMS" oder "WhatsApp", PRODUKT.md N9)' },
@@ -320,6 +323,8 @@ export default {
     const reise = p.camera === 'reise'
     if (reise && p.phoneUi) ctx.fail('"camera": "reise" bringt Wallet, Sperrbildschirm und Fenster selbst mit; "phoneUi" leer lassen')
     if (reise && (p.walker || p.heart)) ctx.fail('"camera": "reise" erzählt ohne Stammkunden und Herz: "walker": false und "heart": false setzen')
+    if (typeof p.kranDauer !== 'number' || !(p.kranDauer >= 1.5 && p.kranDauer <= 3)) ctx.fail('"kranDauer" muss zwischen 1,5 und 3 s liegen')
+    if (!reise && p.kranDauer !== 2.4) ctx.fail('"kranDauer" gilt nur mit "camera": "reise"')
     if (nah && p.phoneUi) ctx.fail('"phoneUi" gibt es nur im Duell, nicht mit "mode": "nah"')
     if (p.boards && !ICONS[p.boards]) ctx.fail(`"boards": Symbol "${p.boards}" gibt es nicht. Erlaubt: ${Object.keys(ICONS).join(', ')}`)
     if (!(p.dark >= 0 && p.dark <= 1)) ctx.fail('"dark" muss zwischen 0 und 1 liegen')
@@ -935,7 +940,8 @@ export default {
             // 10 Grad und 75 Grad lag sie schraeg und man sah nur Daecher). Am Ende des Krans das Bild 80 px hoeher und 40 px weiter links,
             // danach sinkt es langsam auf -30 px: so laeuft das eigene Schild beim Hereinkommen von rechts (28,8 s) ueber der Knopfspalte
             // Runde 4: danach eine deutliche Drift heran (Vorbild: Abstand der Cafés im Bild von 31,6 bis 33,6 s 1,28-fach, bei uns 1,05), fast gleichmaessig
-            { t: Math.min(E0 - 0.5, tK + 2.4), d: 215, az: sg * 4, el: 52, at: 'mid', ox: 40, oy: -80, ease: 'drift' },
+            // 20.11.2026: Dauer des Krans aus "kranDauer" (Vorgabe 2,4 s wie bisher), damit er steht, wenn der Name nach kuerzerer Pause aufleuchtet
+            { t: Math.min(E0 - 0.5, tK + p.kranDauer), d: 215, az: sg * 4, el: 52, at: 'mid', ox: 40, oy: -80, ease: 'drift' },
             // und mit ihr sinkt das Bild wie im Vorbild (Cafés bei 30,8 s auf y 0,38, bei 33 s auf 0,47)
             { t: E0, d: 162, az: sg * 6, el: 50, at: 'mid', ox: 40, oy: 120 }
           ]
@@ -981,6 +987,9 @@ export default {
     // er vier Sekunden ueber "Und du?" und der Schlussfrage. Fester Abstand zum Anker "name" statt eines eigenen Ankers: so
     // bleibt der Bericht alter Videos (Liste der Anker) unveraendert. Ohne "neon" bleibt er an wie vorher.
     const nameSign = nameCap ? await buildName({ ctx, K, kit, cap: nameCap, t0: ctx.at('name'), tOut: NE ? ctx.at('name') + (reise ? NAME_ON_REISE : NAME_ON_NEON) : null, tones: p.tones, reise }) : null
+    // "reise": der Name soll ueber einem ruhigen Bild von oben aufleuchten. Mit der kuerzeren Pause vor dem Namen (20.11.2026) kam er
+    // 0,85 s frueher, waehrend der Kran noch fuhr; das soll nicht wieder still passieren
+    if (reise && nameSign && ctx.at('name') < ctx.at('kran') + p.kranDauer - 0.15) ctx.warn(`Der Name leuchtet bei ${ctx.at('name').toFixed(2)} s, der Kran fährt aber bis ${(ctx.at('kran') + p.kranDauer).toFixed(2)} s. Anker "kran" früher legen oder "kranDauer" kürzen`)
     // Flaches Handy (Sperrbildschirm, C1) oder Fenster des Ladens (Nachricht, C3) ueber der Strasse (engine/phone-ui.js).
     // Der Punkt fuer "lock" ist der Kunde auf dem Gehweg gegenueber der Kreuzung, gut 10 m von der eigenen Tuer
     // (Naehe ist nie "vor der Tuer"); die Mitteilungen bei "message" springen ueber Leuten vor beiden Laeden und auf
@@ -1055,7 +1064,9 @@ export default {
       const ui3 = await buildPhoneUi(ctx, { mode: 'message', host: host(), tones: p.tones, veil: 0.42, shop: p.shop, icon: p.icon, accent: p.accent, message: p.message,
         // Runde 3: Mitteilungen bis 0,4 s nach "travel" (im Vorbild bei 23,0 s noch da, bei 23,4 s weg; sie fahren mit der Strasse mit)
         spots: [before(our).setY(3.2), before(riv).setY(3.2), Pt(-1.2, 1.4, 2.6), Pt(0, -B - 9, 2.6)], t: { in: T3.msg, type: T3.msgType, send: T3.msgSend, out: T3.msgOut, popOut: T3.travel + 0.4 } })
-      R3 = { T3, rooms, trash, traffic, lidAt, uis: [ui1, ui2, ui3], base: [our, riv].map(s => [s, s.front.material.opacity, s.light.intensity]) }
+      R3 = { T3, rooms, trash, traffic, lidAt, uis: [ui1, ui2, ui3], base: [our, riv].map(s => [s, s.front.material.opacity, s.light.intensity]),
+        // Farbe des Scheins um beide Schilder, wie gebaut (signFade unten setzt sie jedes Bild von hier aus neu)
+        haloC: [our, riv].map(s => s.halo.material.color.clone()) }
     }
     const deco = (tagNames || p.boards) ? await buildDeco({ ctx, K, kit, p, our, riv, tagNames, hideOn: reise && nameSign ? nameSign.on : null, tPan: (p.camera === 'descent' || reise) ? ctx.at('pan') : null, tBack: reise ? ctx.at('kran') + 0.9 : null, top: reise ? SH.h : null, boardScale: reise ? BOARD_REISE : 1, tagScale: reise ? TAG_REISE : 1, edge: reise ? 40 : null }) : null
 
@@ -1143,6 +1154,19 @@ export default {
         // Waehrend die Kamera beim Laden gegenueber ist (Fahrt bis Kran), ist das eigene Schild Hintergrund am Bildrand
         const atRival = t > R3.T3.travel + 0.3 && t < R3.T3.kran + 0.9
         kit.setSafe('ourSign', lidO.lift < 0.01 && !atRival && inFrame(so) ? so : null); kit.setSafe('rivSign', lidR.lift < 0.01 && inFrame(sr) ? sr : null)
+        // 20.11.2026 (Nachbau "zwei Cafés", Durchsicht nach Runde 4): bei 30,6 s stach das Schild "Café 1" oben in die leuchtenden
+        // Buchstaben des Namens, "Café 2" schien im "S" durch. Die Schildchen gehen mit hideOn schon weg, die Schilder an den Fronten
+        // nicht. Solange der Name leuchtet, verblasst jedes Schild, das im Bild in seiner Flaeche liegt, mit seinem Schein, so schnell
+        // wie die Schildchen (1,5-fach); danach kommt es wieder. Reine Funktion von t: lidSet setzt die Deckkraft jedes Bild neu, die
+        // Farbe des Scheins wird hier jedes Bild von der gebauten aus gesetzt. Ohne Namen bleibt alles, wie es war.
+        if (nameSign) {
+          const nk = Math.min(1, 1.5 * nameSign.on(t)), NB = NAME_BOX_REISE, M = 30
+          ;[[our, so], [riv, sr]].forEach(([s, r], i) => {
+            const hit = r[2] > NB.cx - NB.w / 2 - M && r[0] < NB.cx + NB.w / 2 + M && r[3] > NB.top - M && r[1] < NB.top + NB.h + M
+            const f = hit ? 1 - nk : 1
+            s.signMat.opacity *= f; s.halo.material.color.copy(R3.haloC[i]).multiplyScalar(f)
+          })
+        }
         kit.setSafe('trash', R3.trash.box())
       } else { kit.setSafe('ourSign', kit.project(our.signCorners)); kit.setSafe('rivSign', kit.project(riv.signCorners)) }
       kit.setSafe('heart', heartMeshes.length ? kit.meshBox(heartMeshes) : null)

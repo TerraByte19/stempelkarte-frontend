@@ -98,7 +98,12 @@ const KEYS = {
 // "StampIt" kam nicht verlaesslich englisch heraus (Doener-Video, 16.11.2026);
 // von vier Proben hat der Betreiber "Staemp-it" gewaehlt (Probe C). Die beiden
 // Referenzvideos setzen "StampIt" selbst im Skript und bleiben dadurch gleich.
-export const SAY_DEFAULT = { Stampit: 'Stämp-it' }
+//
+// "QR" las Liam englisch als "Kju-Ar" (Nachbau "zwei Cafés", 20.11.2026, vom Betreiber bemaengelt; gemessen:
+// F2 faellt am Anfang von rund 2000 Hz, das ist das englische "j" in "kju"). Drei Proben: "Kuh-Er" wurde zu
+// einem unklaren "er", "Q-R" blieb englisch, nur "Kuh-Err" ergab das deutsche "Ku-Ärr" (F2 650 Hz im "u" ohne
+// Gleiten, F2 rund 1930 Hz im "Err"). Kein anderes Video spricht "QR", die alten Aufnahmen bleiben gueltig.
+export const SAY_DEFAULT = { Stampit: 'Stämp-it', QR: 'Kuh-Err', 'QR-Code': 'Kuh-Err-Code', 'QR-Codes': 'Kuh-Err-Codes' }
 
 const PUNCT = /[.,!?:;]+$/
 

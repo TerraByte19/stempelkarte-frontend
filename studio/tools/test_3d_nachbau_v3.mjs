@@ -62,9 +62,21 @@
 //     im vollen Raum; Kamera: Sinkflug naeher und zurueckgedreht, Schwenk ohne Drehung, Drehung erst beim Heranfahren, Sperrbildschirm
 //     110 bis 130 m und fast von Sueden, bei der Fahrt der Raum gegenueber nach 0,9 s unter den Woertern, nach dem Fallen ohne Halt in
 //     den Kran.
+// 14. Runde 5 (20.11.2026, Wunsch des Betreibers): "die Pause ist zu lang" (zwischen "Dieses System heisst..." und "Stampit" lagen
+//     1,3 s Stille) und "anstatt so viele Figuren mein Logo sehr oft" im Schlussbild; dazu stach das Schild "Café 1" oben in die
+//     leuchtenden Buchstaben des Namens. Festgenagelt: cta-comment "figur": "logo" malt viele echte App-Symbole (Kachel #3C3489 mit
+//     weissem Stempel) zwischen 54 und 84 px, nie uebereinander, hinter den Zeilen dunkler, jedes Bild nur aus t; ohne "figur" bleibt
+//     das Feld mit Personen Pixel fuer Pixel (Vorgabe "person"); iso-street "kranDauer" (Vorgabe 2,4 s wie bisher) und eine Warnung,
+//     wenn der Name leuchtet, waehrend der Kran noch faehrt (mit der kuerzeren Pause kam er 0,85 s frueher); Schilder in der Flaeche
+//     des Namens verblassen, solange er leuchtet; im Nachbau selbst liegen zwischen "heisst" und "Stampit" 0,35 bis 0,5 s Stille,
+//     gemessen an der echten Aufnahme aus dem Cache (kostet nichts).
 // Kein Netz, keine Kosten, etwa drei bis fuenf Minuten.
-import { normalize, estimateTimes, timeline } from '../engine/script.mjs'
-import { openStudio, seek } from '../engine/render.mjs'
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs'
+import path from 'node:path'
+import os from 'node:os'
+import { normalize, estimateTimes, timeline, timesFromAlignment } from '../engine/script.mjs'
+import { openStudio, seek, run, STUDIO_ROOT } from '../engine/render.mjs'
+import { silences } from '../engine/mix.mjs'
 
 let failed = 0
 const check = (label, ok, info = '') => { console.log(`${ok ? 'ok    ' : 'FEHLER'} ${label}${info ? ' - ' + info : ''}`); if (!ok) failed++ }
@@ -290,6 +302,19 @@ const fails = async (label, s, re) => {
     const tagW = async t => { await at(pg, t); return pg.evaluate(() => [...document.querySelectorAll('.is-tag')].map(e => ({ r: e.getBoundingClientRect().width / e.offsetWidth, o: getComputedStyle(e).display === 'none' ? 0 : +getComputedStyle(e).opacity }))) }
     const tg1 = await tagW(A.tags + 0.6), tg2 = await tagW(A.name + 0.4)
     check('Runde 2: Schildchen 1,25-fach, und weg, solange der Name leuchtet', tg1.every(x => Math.abs(x.r - 1.25) < 0.03 && x.o > 0.9) && tg2.every(x => x.o === 0), JSON.stringify([tg1, tg2]))
+    // 14. Runde 5: Schilder an den Fronten, die im Bild in der Flaeche des Namens liegen (NAME_BOX_REISE, 30 px Rand), verblassen, solange
+    // er leuchtet, und kommen danach wieder (vorher stach "Café 1" oben in die Buchstaben). Schilder weit draussen bleiben, wie sie sind.
+    const NB = { x0: 80, x1: 950, y0: 710, y1: 1090 }, inside = ([x, y], m) => x > NB.x0 - m && x < NB.x1 + m && y > NB.y0 - m && y < NB.y1 + m
+    const cN = await cam(A.name + 0.4), sgN = await dbg(pg, 'reise.signs')
+    const sgB = (await at(pg, A.name - 0.3), await dbg(pg, 'reise.signs')), sgE = (await at(pg, A.name + 1.6), await dbg(pg, 'reise.signs'))
+    const mids = [cN.our, cN.riv], want = mids.map(m => inside(m, 0) ? 'weg' : inside(m, 120) ? null : 'da')
+    check('Runde 5: Schilder in der Fläche des Namens verblassen, solange er leuchtet, und kommen danach wieder (vorher stach "Café 1" in die Buchstaben)',
+      want.includes('weg') && want.every((w, i) => w === null || (w === 'weg' ? sgN[i] < 0.05 : sgN[i] > 0.99)) && sgB.every(o => o > 0.99) && sgE.every(o => o > 0.99),
+      JSON.stringify({ mids: mids.map(m => m.map(Math.round)), want, sgB, sgN, sgE }))
+    // Vorgabe "kranDauer" 2,4 s wie bisher: nach 1,8 s noch unterwegs, nach 2,4 s oben; ohne Warnung (Name 0,4 s nach dem Ende des Krans)
+    const kAt = async dt => (await cam(A.kran + dt)).pose.d
+    const [kv18, kv24] = [await kAt(1.8), await kAt(2.4)]
+    check('Runde 5: "kranDauer" fehlt: Kran 2,4 s wie bisher, keine Warnung zum Namen', kv18 < 214 && Math.abs(kv24 - 215) < 1e-6 && !st.warnings.some(w => /Der Name leuchtet bei/.test(w)), `${kv18.toFixed(2)} / ${kv24.toFixed(2)} m`)
     const tb = await trash(A.trashMail + 0.4)
     // Runde 3: der dunkle Mantel las sich als schwarzer Eimer; jetzt heller Draht ohne Mantel (im Vorbild sieht man die Kacheln durch)
     check('Runde 2 und 3: Korb 1,5 m Radius, 3,4 m hoch, heller Draht ohne dunklen Mantel', tb.r === 1.5 && tb.h === 3.4 && !tb.inner && tb.wire === '#b8bcc4', JSON.stringify(tb))
@@ -321,6 +346,97 @@ const fails = async (label, s, re) => {
     await seek(pg, A.roof2 + 1.5); const h3 = await canvasHash(pg, 'canvas.is-canvas')
     check('Gleiche Pixel nach Sprüngen, anderes Bild drüben', h1 === h2 && h3 !== h1, `${h1} / ${h2} / ${h3}`)
   } finally { await studio.close() }
+}
+
+// ---------------------------------------------------------------- 14. Runde 5: "kranDauer" und Warnung (iso-street "reise")
+{
+  // Kran 1,8 s, der Name schon 1,5 s nach "kran": der Kran steht nach 1,8 s oben, und der Bau warnt, dass der Name in die Fahrt faellt
+  const s = reiseScript({ kranDauer: 1.8 }, { ...A, name: A.kran + 1.5 })
+  const studio = await openStudio({ script: s, times: estimateTimes(normalize(s)) })
+  try {
+    const pg = await studio.page(), st = await studio.state(pg)
+    const kAt = async dt => { await at(pg, A.kran + dt); return (await dbg(pg, 'camera')).pose.d }
+    const [k12, k18] = [await kAt(1.2), await kAt(1.8)]
+    const warn = st.warnings.find(w => /Der Name leuchtet bei/.test(w)) || ''
+    check('Runde 5: "kranDauer" 1,8: der Kran steht nach 1,8 s oben (215 m), nach 1,2 s noch nicht; Warnung, wenn der Name vorher leuchtet', !st.errors.length && Math.abs(k18 - 215) < 1e-6 && k12 < 214 && /Kran fährt aber bis/.test(warn), `${k12.toFixed(2)} / ${k18.toFixed(2)} m; ${warn.slice(0, 140) || 'keine Warnung'}`)
+  } finally { await studio.close() }
+}
+
+// ---------------------------------------------------------------- 14. Runde 5: Schlussbild "partikel" mit "figur": "logo"
+{
+  const cta = params => ({ meta: { title: 't', slug: 't' }, scenes: [{ component: 'cta-comment', params: { look: 'partikel', logo: false, tones: false, ...params }, captions: [{ role: 'cta', lines: ['Kommentiere KARTE,', 'und wir melden uns.'] }] }] })
+  const page = async params => { const s = cta(params), studio = await openStudio({ script: s, times: estimateTimes(normalize(s)) }); const pg = await studio.page(), st = await studio.state(pg); return { studio, pg, st } }
+  // Pixel der Leinwand: Kachel-Lila (#3C3489), Weiss (Stempel), Personen-Blau (#2E4FF0); Deckkraft im Band hinter dem Stichwort und darunter
+  const stats = pg => pg.evaluate(() => {
+    const c = document.querySelector('.pk-cv'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data
+    let tile = 0, white = 0, person = 0
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 200) continue
+      const [r, g, b] = [d[i], d[i + 1], d[i + 2]]
+      if (Math.abs(r - 60) < 14 && Math.abs(g - 52) < 14 && Math.abs(b - 137) < 20) tile++
+      else if (r > 235 && g > 235 && b > 235) white++
+      else if (r < 90 && g > 60 && g < 110 && b > 220) person++
+    }
+    const band = (a, z) => { let n = 0, s = 0; for (let y = a; y < z; y += 2) for (let x = 0; x < c.width; x += 2) { s += d[(y * c.width + x) * 4 + 3]; n++ } return s / n }
+    return { tile, white, person, mid: band(800, 1036), below: band(1300, 1500), above: band(300, 650) }
+  })
+  const dbgL = pg => pg.evaluate(() => { const l = document.querySelector('.pk-cv').logoDebug; return l ? { placed: l.placed, last: l.last } : null })
+  // Kein Paar gemalter Kacheln ueberlappt (Abstand wie zwischen Quadraten: in x oder y mindestens die halben Seiten beider)
+  const overlaps = last => { const o = []; for (let i = 0; i < last.length; i++) for (let j = i + 1; j < last.length; j++) { const [a, b] = [last[i], last[j]]; if (Math.max(Math.abs(a[0] - b[0]), Math.abs(a[1] - b[1])) < (a[2] + b[2]) / 2) o.push([a, b]) } return o }
+
+  const P0 = await page({}), P1 = await page({ figur: 'person' }), PL = await page({ figur: 'logo' })
+  try {
+    const s0 = PL.st.scenes[0].s, e0 = PL.st.scenes[0].e, T = s0 + 1.5
+    await seek(P0.pg, T); await seek(P1.pg, T); await seek(PL.pg, T)
+    const [h0, h1] = [await canvasHash(P0.pg, '.pk-cv'), await canvasHash(P1.pg, '.pk-cv')], sp = await stats(P0.pg)
+    check('Runde 5: ohne "figur" dasselbe Feld mit Personen wie "figur": "person" (Vorgabe), ohne Logo-Kacheln', !P0.st.errors.length && h0 === h1 && sp.tile < 50 && sp.person > 2000 && (await dbgL(P0.pg)) === null, `${h0} / ${h1}, ${JSON.stringify(sp)}`)
+    const sl = await stats(PL.pg), dl = await dbgL(PL.pg), sizes = dl.last.map(x => x[2])
+    check('Runde 5: "figur": "logo" malt das App-Symbol sehr oft (über 120 gesetzt, über 80 im Bild), lila Kachel mit weißem Stempel, keine Personen', !PL.st.errors.length && dl.placed > 120 && dl.last.length > 80 && sl.tile > 20000 && sl.white > 3000 && sl.person < 50, `${dl.placed} gesetzt, ${dl.last.length} gemalt, ${JSON.stringify(sl)}`)
+    check('Runde 5: Logos auf dem Handy erkennbar groß (54 bis 84 px, keine Punkte)', Math.min(...sizes) >= 54 && Math.max(...sizes) <= 84, `${Math.min(...sizes)} bis ${Math.max(...sizes)} px`)
+    check('Runde 5: hinter dem Stichwort (y 800 bis 1036) höchstens 35 % so dicht wie weiter unten (die Zeilen bleiben lesbar)', sl.mid < 0.35 * sl.below, `${sl.mid.toFixed(1)} / ${sl.below.toFixed(1)}`)
+    // Erste Fassung war oben fast leer (Saum bis 35 % quadratisch plus breites Band): dort nur graue Geister statt Logos
+    check('Runde 5: über den Zeilen (y 300 bis 650) mindestens 60 % so kräftig wie darunter (Logos im ganzen Bild, nicht nur unten)', sl.above >= 0.6 * sl.below, `${sl.above.toFixed(1)} / ${sl.below.toFixed(1)}`)
+    const ov = [], cut = []
+    for (const t of [s0 + 0.05, T, e0 - 0.05]) {
+      await seek(PL.pg, t); const last = (await dbgL(PL.pg)).last
+      ov.push(overlaps(last).length)
+      // seitlich angeschnitten; die ersten 0,35 s ziehen die Kacheln von aussen zusammen, dort zaehlt es nicht
+      if (t > s0 + 0.4) cut.push(last.filter(([x, , s]) => x - s / 2 < 0 || x + s / 2 > 1080).length)
+    }
+    check('Runde 5: keine zwei Logos übereinander, am Anfang, in der Mitte und am Ende', ov.every(n => n === 0), ov.join(' / '))
+    check('Runde 5: kein Logo seitlich vom Bildrand angeschnitten (Mitte und Ende)', cut.every(n => n === 0), cut.join(' / '))
+    await seek(PL.pg, T); const g1 = await canvasHash(PL.pg, '.pk-cv')
+    await seek(PL.pg, e0 - 0.2); await seek(PL.pg, s0 + 0.1); await seek(PL.pg, T); const g2 = await canvasHash(PL.pg, '.pk-cv')
+    await seek(PL.pg, T + 1); const g3 = await canvasHash(PL.pg, '.pk-cv')
+    check('Runde 5: Logo-Feld nur aus t (gleiche Pixel nach Sprüngen), und es treibt (eine Sekunde später anders)', g1 === g2 && g3 !== g1, `${g1} / ${g2} / ${g3}`)
+  } finally { for (const x of [P0, P1, PL]) await x.studio.close() }
+  await fails('Runde 5: "figur": "stern" bricht ab', cta({ figur: 'stern' }), /"figur" muss "person" oder "logo" sein/)
+  await fails('Runde 5: "figur": "logo" ohne "partikel" bricht ab', cta({ figur: 'logo', look: 'standard' }), /"figur" gilt nur mit "look": "partikel"/)
+}
+
+// ---------------------------------------------------------------- 14. Runde 5: Pause vor dem Namen im Nachbau "zwei Cafés" (echte Aufnahme)
+{
+  // Derselbe Weg wie make.mjs: Aufnahme aus dem Cache (voice.py ensure, gesperrte Schnittstelle, kostet nichts), Pausen mit "gapBefore"
+  // stellen (tools/tighten.py), dann die Stille unter -40 dB direkt vor dem ersten Wort der Zeile "role": "name" messen.
+  const dir = path.join(STUDIO_ROOT, 'videos', '2026-11-21-zwei-cafes-v2'), tmp = mkdtempSync(path.join(os.tmpdir(), 'nachbau-v3-pause-'))
+  try {
+    const n = normalize(JSON.parse(readFileSync(path.join(dir, 'script.json'), 'utf8')))
+    writeFileSync(path.join(tmp, 'spoken.txt'), n.spoken); writeFileSync(path.join(tmp, 'set.json'), JSON.stringify(n.voice))
+    const en = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'voice.py'), 'ensure', '--dir', path.join(dir, 'voice'), '--text-file', path.join(tmp, 'spoken.txt'), '--settings', path.join(tmp, 'set.json'), '--work', tmp], { env: { ...process.env, STUDIO_VOICE_OFFLINE: '1' } })
+    let g = null, info = (en.err || en.out || '').trim().split('\n').pop().slice(0, 160)
+    if (en.code === 0) {
+      const got = JSON.parse(en.out.trim().split('\n').pop()), t0 = timesFromAlignment(n, JSON.parse(readFileSync(got.alignment, 'utf8'))).times, extra = []
+      n.caps.forEach((c, i) => { if (c.gapBefore != null) extra.push('--set', `${(t0[i][0] - n.timing.lead).toFixed(3)}=${c.gapBefore}`) })
+      const tw = path.join(tmp, 'tight.wav'), ta = path.join(tmp, 'tight.json')
+      const tg = await run('python3', [path.join(STUDIO_ROOT, 'tools', 'tighten.py'), got.audio, got.alignment, String(n.timing.maxGap), tw, ta, ...extra])
+      if (tg.code === 0) {
+        const ni = n.caps.findIndex(c => c.role === 'name'), w = timesFromAlignment(n, JSON.parse(readFileSync(ta, 'utf8'))).times[ni][0] - n.timing.lead
+        g = (await silences(tw, 0.1)).find(x => x.seconds != null && Math.abs(x.at + x.seconds - w) < 0.15) || null
+        info = g ? `${g.seconds} s Stille vor "${n.caps[ni].words[0]}" (Wort bei ${w.toFixed(3)} s der Aufnahme, Aufnahme ${got.key})` : `keine Stille vor dem Namen bei ${w.toFixed(3)} s gefunden`
+      } else info = (tg.err || tg.out).trim().slice(-160)
+    }
+    check('Runde 5: Nachbau "zwei Cafés": zwischen "heißt" und "Stampit" 0,35 bis 0,5 s Stille (Betreiber 20.11.2026: vorher 1,3 s, "die Pause ist zu lang")', !!g && g.seconds >= 0.35 && g.seconds <= 0.5, info)
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
 }
 
 // ---------------------------------------------------------------- Vorgaben unveraendert, Abbrueche
@@ -380,6 +496,8 @@ for (const tones of [true, false]) {
 await fails('"reise" mit "phoneUi" bricht ab', reiseScript({ phoneUi: 'lock' }), /"phoneUi" leer lassen/)
 await fails('"reise" mit Stammkunde bricht ab', reiseScript({ walker: true }), /ohne Stammkunden und Herz/)
 await fails('"reise": Anker in falscher Reihenfolge brechen ab', reiseScript({}, { ...A, back: 3.0 }), /Reihenfolge/)
+await fails('Runde 5: "kranDauer" 5 bricht ab', reiseScript({ kranDauer: 5 }), /"kranDauer" muss zwischen 1,5 und 3 s liegen/)
+await fails('Runde 5: "kranDauer" ohne "reise" bricht ab', { meta: { title: 't', slug: 't' }, scenes: [{ parts: [{ component: 'iso-street', params: { ...street, camera: 'descent', kranDauer: 2 }, captions: [{ lines: ['Zwei Cafés.'] }] }, tail] }] }, /"kranDauer" gilt nur mit "camera": "reise"/)
 
 console.log(failed ? `\n${failed} Prüfung(en) gescheitert` : '\nAlle Prüfungen bestanden')
 process.exit(failed ? 1 : 0)

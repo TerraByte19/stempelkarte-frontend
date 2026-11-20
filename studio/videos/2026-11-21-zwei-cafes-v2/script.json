@@ -18,7 +18,7 @@
   "look": "neon",
   "voice": { "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05 },
   "timing": {
-    "_hinweis": "lead 0,55 wie das Vorbild. Nach der Aufnahme (19.11.2026, Liam spricht mit 172 Wörtern je Minute langsamer als das Vorbild) sind die Pausen (gapBefore) auf die echten Wortzeiten gestellt: vorn 0,2 bis 0,3 s, ab 'Die Gäste' bis 'Da gibt's' das Minimum 0,15 s (die Sätze 6, 8 und 10 dauern rund 1 s länger als im Vorbild), vor 'Dieses System' 0,72 s, vor dem Namen 1,3 s (Name gesprochen ab 30,35 s, Anker 'name' 0,15 s davor bei 30,2 s, Schlag 30,18 s). hold 2,4: Länge 38,72 s (Vorbild 38,71). 'draft' gilt nur ohne Stimme.",
+    "_hinweis": "lead 0,55 wie das Vorbild. Nach der Aufnahme (19.11.2026, Liam spricht mit 172 Wörtern je Minute langsamer als das Vorbild) sind die Pausen (gapBefore) auf die echten Wortzeiten gestellt: vorn 0,2 bis 0,3 s, ab 'Die Gäste' bis 'Da gibt's' das Minimum 0,15 s (die Sätze 6, 8 und 10 dauern rund 1 s länger als im Vorbild), vor 'Dieses System' 0,72 s, vor dem Namen 0,45 s (Runde 5, Betreiber 20.11.2026: die 1,3 s waren zu lang; gemessen 0,45 s Stille unter -40 dB zwischen 'heißt' und 'Stampit', Name gesprochen ab 29,50 s, Anker 'name' 0,15 s davor bei 29,35 s, Schlag 29,33 s). Satz 6 seit 20.11.2026 neu gesprochen (Kuh-Err-Code, Schlüssel b54982be466a5f5b); er ist 0,66 s länger, die Pause darin wird aber auf maxGap gekürzt, danach liegt alles wie vorher. hold 2,4: Länge 37,87 s (vorher 38,72; Vorbild 38,71). 'draft' gilt nur ohne Stimme.",
     "lead": 0.55, "hold": 2.4, "maxGap": 0.5,
     "draft": { "step": 0.29, "pause": 0.3 }
   },
@@ -29,19 +29,19 @@
   },
   "mix": { "lufs": -14, "truePeak": -1 },
   "progress": {
-    "_hinweis": "Stil 'worte' wie im Vorbild. Mit der Aufnahme: Leiste grau (Kapitel 0) ab 9,5 s, Kapitel 1 bei 10,1 (Runde 3: vorher 9,5; im Vorbild erscheint die Leiste bei 9,5 grau, THE CARD leuchtet erst bei 10,10), 2 bei 15,5, 3 bei 19,7 (Vorbild 19,5; kurz vor dem Fenster bei 19,9), 0 (alle grau) bei 22,5, 4 bei 31,16 (Runde 4: vorher 30,9, KOMMENTAR leuchtete 0,27 s vor COMMENT bei 31,20), weg (-1) bei 33,83 s (Runde 3: vorher 34,2; Vorbild 33,85), jeweils über offset gelegt. Die letzte Frage geht mit der Leiste (outWithBar, Runde 4: vorher erst bei 34,4 s).",
+    "_hinweis": "Stil 'worte' wie im Vorbild. Mit der Aufnahme: Leiste grau (Kapitel 0) ab 9,5 s, Kapitel 1 bei 10,1 (Runde 3: vorher 9,5; im Vorbild erscheint die Leiste bei 9,5 grau, THE CARD leuchtet erst bei 10,10), 2 bei 15,5, 3 bei 19,7 (Vorbild 19,5; kurz vor dem Fenster bei 19,9), 0 (alle grau) bei 22,5, 4 bei 30,31 (Runde 5: mit der kürzeren Pause vor dem Namen 0,85 s früher, vorher 31,16), weg (-1) bei 32,98 s (Runde 5, vorher 33,83), jeweils über offset gelegt. Kapitel 1 seit dem neuen Satz 6 mit offset 0,731, damit es weiter bei 10,10 leuchtet. Die letzte Frage geht mit der Leiste (outWithBar, Runde 4: vorher erst bei 34,4 s).",
     "words": ["DIE KARTE", "IN DER NÄHE", "NACHRICHTEN", "KOMMENTAR"],
     "style": "worte"
   },
   "scenes": [
     { "parts": [
       {
-        "_hinweis": "Vorbild 0 bis 34,2 s in einer Einstellung (camera reise). Jede Kamerafahrt an einem Wort, mit offset auf die echte Aufnahme gestellt (Vorbild in Klammern, wo es abweicht): Schildchen 2,0; Tafeln 3,03 / 4,2 / 5,2 (Runde 4: vorher 3,3 / 4,0, Vorbild Tafeln 3,1, Zeilen 4,2); Schwenk 5,2; Dach 9,44 (Runde 3, gemessen: das Obergeschoss hebt im Vorbild erst ab 9,44 ab, nicht 9,1); Wallet 11,53 / 11,84 / 12,64 / 14,3 (Runde 3: das Handy kam 0,33 s zu früh, vorher 11,2 / 11,6; Runde 4: Karte in die Wallet wie im Vorbild 12,63, Download-Zeichen 14,3 statt 12,5 / 14,5); zurück auf die Straße 15,5; Sperrbildschirm 16,2 / 16,8; Fenster 19,7, Tippen 19,95 (Runde 4: vorher 20,2, im Vorbild tippt es ab 20,0), Gesendet 21,45, Fenster weg 21,7; Fahrt zum anderen Café 22,6; dessen Dach 23,11 (sichtbar 23,2 bis 23,4 wie im Vorbild, während der Fahrt; Runde 1: vorher 23,5, also 0,4 s zu spät); Korb 24,7 / 24,8 / 25,6 / 26,7 (Runde 4: vorher 24,5 / 25,0 / 25,7; Vorbild 24,77 / 24,83 / 25,70); Kran 27,6 (schnell los, Deckel gegenüber bis 27,95 offen); Name 30,2 (in neon nach 0,7 s ausgeblendet, aus bis 31,2). Alle höchstens 0,2 s neben dem Vorbild; Fenster und Tippen liegen 0,2 s später, weil der Satz davor in der Aufnahme länger dauert.",
+        "_hinweis": "Vorbild 0 bis 34,2 s in einer Einstellung (camera reise). Jede Kamerafahrt an einem Wort, mit offset auf die echte Aufnahme gestellt (Vorbild in Klammern, wo es abweicht): Schildchen 2,0; Tafeln 3,03 / 4,2 / 5,2 (Runde 4: vorher 3,3 / 4,0, Vorbild Tafeln 3,1, Zeilen 4,2); Schwenk 5,2; Dach 9,44 (Runde 3, gemessen: das Obergeschoss hebt im Vorbild erst ab 9,44 ab, nicht 9,1); Wallet 11,53 / 11,84 / 12,64 / 14,3 (Runde 3: das Handy kam 0,33 s zu früh, vorher 11,2 / 11,6; Runde 4: Karte in die Wallet wie im Vorbild 12,63, Download-Zeichen 14,3 statt 12,5 / 14,5; Runde 5: mit dem neuen Satz 6 beginnt 'Kuh-Err-Code' 0,23 s früher, die offsets halten dieselben Sekunden, das Handy kommt am Ende von 'Code'); zurück auf die Straße 15,5; Sperrbildschirm 16,2 / 16,8; Fenster 19,7, Tippen 19,95 (Runde 4: vorher 20,2, im Vorbild tippt es ab 20,0), Gesendet 21,45, Fenster weg 21,7; Fahrt zum anderen Café 22,6; dessen Dach 23,11 (sichtbar 23,2 bis 23,4 wie im Vorbild, während der Fahrt; Runde 1: vorher 23,5, also 0,4 s zu spät); Korb 24,7 / 24,8 / 25,6 / 26,7 (Runde 4: vorher 24,5 / 25,0 / 25,7; Vorbild 24,77 / 24,83 / 25,70); Kran 27,31 bis 29,16 (Runde 5: kranDauer 1,85 und 0,3 s früher los, vorher 27,6 bis 30,0; der Name kommt mit der kürzeren Pause 0,85 s früher und soll über einem ruhigen Bild von oben aufleuchten); Name 29,35 (nach 0,9 s ausgeblendet, aus bis 30,55; die Schilder an den Fronten verblassen, solange er leuchtet). Alle höchstens 0,2 s neben dem Vorbild; Fenster und Tippen liegen 0,2 s später, weil der Satz davor in der Aufnahme länger dauert.",
         "component": "iso-street",
         "params": {
           "shop": "Café 1", "icon": "cup", "accent": "#2F5BFF", "rival": "Café 2", "rivalIcon": "cup", "rivalAccent": "#E58A45",
           "ours": "right", "heart": false, "walker": false, "smoke": false, "after": true, "crowd": 8, "dark": 0.5,
-          "camera": "reise", "tags": "CAFÉ 1,CAFÉ 2", "boards": "cup", "tones": false,
+          "camera": "reise", "kranDauer": 1.85, "tags": "CAFÉ 1,CAFÉ 2", "boards": "cup", "tones": false,
           "reward": "Gratis-Kaffee", "left": 2, "clock": "19:12", "date": "Samstag, 21. November", "message": "Frischer Kuchen ist da!"
         },
         "anchors": {
@@ -51,9 +51,9 @@
           "boardsOut": { "cap": 2, "word": 0, "offset": -0.08 },
           "pan": { "cap": 2, "word": 0, "offset": -0.08 },
           "roof": { "cap": 4, "word": 3, "offset": 0.592 },
-          "wallet": { "cap": 5, "word": 4, "offset": 0.666 },
-          "walletAdd": { "cap": 5, "word": 5, "offset": 0.093 },
-          "walletCard": { "cap": 5, "word": 8, "offset": 0.25 },
+          "wallet": { "cap": 5, "word": 4, "offset": 0.9 },
+          "walletAdd": { "cap": 5, "word": 5, "offset": 0.048 },
+          "walletCard": { "cap": 5, "word": 8, "offset": 0.228 },
           "walletNoApp": { "cap": 6, "word": 0, "offset": 0.1 },
           "back": { "cap": 7, "word": 0, "offset": -0.02 },
           "lock": { "cap": 7, "word": 3, "offset": 0.02 },
@@ -68,7 +68,7 @@
           "trashCard": { "cap": 11, "word": 3, "offset": -0.19 },
           "trashMail": { "cap": 11, "word": 4, "offset": -0.16 },
           "trashDrop": { "cap": 11, "word": 8, "offset": 0.09 },
-          "kran": { "cap": 12, "word": 0, "offset": -0.3 },
+          "kran": { "cap": 12, "word": 0, "offset": -0.6 },
           "name": { "cap": 13, "word": 0, "offset": -0.15 }
         },
         "sounds": [
@@ -81,7 +81,7 @@
           { "lines": ["Aber eins / ist immer *voll."], "gapBefore": 0.2 },
           { "lines": ["Weißt du, / warum?"], "gapBefore": 0.25 },
           { "lines": ["Es hat / ein *System."], "gapBefore": 0.3, "chapter": { "n": 0, "word": -1, "offset": 0.77 } },
-          { "lines": ["Die Gäste scannen / einen *QR-Code, | und die Karte / des Cafés | landet in / ihrem *Handy."], "gapBefore": 0.15, "chapter": { "n": 1, "word": 0, "offset": 0.702 } },
+          { "lines": ["Die Gäste scannen / einen *QR-Code, | und die Karte / des Cafés | landet in / ihrem *Handy."], "gapBefore": 0.15, "chapter": { "n": 1, "word": 0, "offset": 0.731 } },
           { "lines": ["Nichts / herunterladen."], "gapBefore": 0.15 },
           { "lines": ["Sind sie / in der *Nähe, | erscheint sie / auf dem *Sperrbildschirm."], "gapBefore": 0.15, "chapter": { "n": 2, "word": 0, "offset": 0.1 } },
           { "lines": ["Als *Erinnerung, / dass sie da ist."], "gapBefore": 0.15 },
@@ -89,17 +89,17 @@
           { "lines": ["Gegenüber?"], "gapBefore": 0.15, "chapter": { "n": 0, "word": 0, "offset": -0.902 } },
           { "lines": ["Da gibt's noch / Papierkarten | und E-Mails, / die im **Müll landen."], "gapBefore": 0.15 },
           { "lines": ["Dieses System / heißt…"], "gapBefore": 0.72 },
-          { "role": "name", "lines": ["Stampit."], "gapBefore": 1.3 },
+          { "role": "name", "lines": ["Stampit."], "gapBefore": 0.45 },
           { "lines": ["Und *du?"], "gapBefore": 0.45, "chapter": { "n": 4, "word": 0, "offset": -0.02 } },
           { "lines": ["Welches der / beiden *Cafés | willst du / sein?"], "gapBefore": 0.34, "outWithBar": true }
         ]
       },
       {
-        "_hinweis": "Vorbild 34,2 bis 38,7 s: die Stadt löst sich in das Partikel-Feld auf (kreuz), darüber klein 'Kommentiere', riesig KARTE, klein 'und wir melden uns.'. Kein Angebot, kein 'kostenlos'. Die Leiste verschwindet (Kapitel -1) bei 33,83 s (Runde 3: vorher 34,2; im Vorbild 33,83 bis 34,0). Blende wie im Vorbild bei 34,0 bis 34,3 s: lead 0,55 (der Teil beginnt 0,55 s vor 'Kommentiere' bei 34,5 s, also bei 33,95 s; Runde 1: vorher 0,3 s später). Dumpfer Stoß wie im Vorbild bei 34,3 s (offset 0,35 ab Anfang des Teils).",
+        "_hinweis": "Vorbild 34,2 bis 38,7 s: die Stadt löst sich in das Partikel-Feld auf (kreuz), darüber klein 'Kommentiere', riesig KARTE, klein 'und wir melden uns.'. Kein Angebot, kein 'kostenlos'. Die Leiste verschwindet (Kapitel -1) 0,67 s vor 'Kommentiere'. Blende lead 0,55 (der Teil beginnt 0,55 s vor 'Kommentiere'), dumpfer Stoß 0,35 s nach dem Anfang des Teils. Runde 5 (Betreiber 20.11.2026: 'anstatt so viele Figuren mein Logo sehr oft'): figur 'logo', ein Feld aus vielen App-Symbolen (lila Kachel mit weißem Stempel) statt der Personen; mit der kürzeren Pause vor dem Namen liegt alles 0,85 s früher ('Kommentiere' bei 33,65 s, der Teil ab 33,10 s, die Leiste weg bei 32,98 s).",
         "component": "cta-comment",
         "enter": "kreuz",
         "lead": 0.55,
-        "params": { "look": "partikel", "logo": false, "tones": false },
+        "params": { "look": "partikel", "figur": "logo", "logo": false, "tones": false },
         "sounds": [ { "sound": "vine-boom", "at": "start", "offset": 0.35, "vol": 0.3 } ],
         "captions": [
           { "role": "cta", "lines": ["Kommentiere KARTE,{Karte,}", "und wir melden uns."], "gapBefore": 0.75, "chapter": { "n": -1, "word": 0, "offset": -0.55 } }
