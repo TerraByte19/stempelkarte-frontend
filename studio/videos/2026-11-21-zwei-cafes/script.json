@@ -1,0 +1,441 @@
+{
+  "meta": {
+    "title": "Café Mond und Café Sonne",
+    "slug": "zwei-cafes",
+    "language": "de",
+    "datum": "2026-11-21",
+    "format": "F06",
+    "beleg_kern": "papier",
+    "studie": "",
+    "thema": "zwei-cafes-nachbau",
+    "branche": "cafe",
+    "hook_muster": "",
+    "meme": "",
+    "beleg": "A1/A2/A3 (Takt 6: Karte im Handy, einmal scannen, Wallet, ohne App), C1 (Takt 7: nah beim Laden von selbst, Blase mit 'Noch 2 Stempel bis: Gratis-Kuchen'), D1 (Takt 8: Farben, Logo, Symbol), A4 (Takt 9: Pappe zerknittert, irgendwann weg)",
+    "idee": "Nachbau auf ausdrücklichen Wunsch des Betreibers (19.11.2026, 'Mach es nach ... es ist ein Reel, keine geschaltete Werbung'): übernommen sind Aufbau Takt für Takt, Länge (38,7 s), Tempo, die Stelle von Frage, Antwort und Name, lange Kamerafahrten durch eine Nachtstraße statt Schnitten und eine Wortleiste oben. Eigen sind alle Sätze (keine Übersetzung), die Läden Café Mond und Café Sonne, die Bilder aus unseren Bausteinen (iso-street, iso-shop, phone-3d), die Wörter und die Form der Leiste (Stempelfelder), der Ersatz-Takt D1 statt 'Nachrichten an Kunden' (verboten, PRODUKT.md N14), nur Papier statt E-Mails im Gegenbild und unser Schluss mit KARTE. Kein Erfolgsversprechen (PRODUKT.md N5): die Frage lautet 'Was ist bei Mond anders?', nicht 'Woran liegt's?', und die Antwort 'Eine Sache fällt auf.' nennt den sichtbaren Unterschied, nicht die Ursache für den vollen Laden (Abnahme 19.11.2026, Weg b).",
+    "_hinweis": "Entwurf ohne Stimme. Taktkarte und Text mit Zuordnung je Takt: scratchpad tappi-nachbau/taktkarte.md und text.md. Das Datum 2026-11-21 ist vorläufig. Format F06 nur als nächstes Format (Kern-Bild duell, Kernaussage papier); als Nachbau auf Wunsch hält das Video die Takte von F06 nicht ein (Einstieg iso-street statt versus-split, eine Runde zur Nähe), abwechslung.mjs meldet das. Alle Teile nach dem ersten kommen mit 'enter': 'kreuz' (echte Überblendung ohne Abdunkeln, Abnahme 19.11.2026)."
+  },
+  "voice": {
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "lead 0,55 wie das Vorbild (erstes Wort bei 0,56 s). hold 1,7 wie das Vorbild (stilles Schlussbild nach dem letzten Wort); nach der Aufnahme so nachstellen, dass die Länge bei rund 38,7 s liegt.",
+    "lead": 0.55,
+    "hold": 1.7,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "mode": "wort"
+  },
+  "pace": {
+    "_hinweis": "Bewusst langsamer als Stil C (maxStill 5, minChanges 12): der Betreiber will das Vorbild nachgebaut haben, und das lebt von langen Kamerafahrten in einer Welt (0 harte Schnitte, 3 weiche, mittlere Einstellung 9,7 s, längste 19,7 s). Bei uns ist jeder Teil eine eigene Fahrt (push und orbit der 3D-Bausteine), die Teile blenden ineinander. Der längste Teil (Straße, Takt 1 bis 4) steht bis rund 8,8 s; 9 s und 7 Wechsel sind die Werte dieses Rhythmus, damit 'bildwechsel' nur bei echten Abweichungen warnt.",
+    "maxStill": 9,
+    "minChanges": 7
+  },
+  "mix": {
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "progress": {
+    "_hinweis": "Eigene Wörter, keins übersetzt eins des Vorbilds. Kapitel 1 auf 'anders' (die Antwort), 2 mit der Nähe, 3 mit dem Kartendesign, 0 (abgedunkelt) im Gegenbild Sonne und beim Namen, 4 auf 'Und dein Laden?'.",
+    "words": [
+      "WALLET",
+      "VON SELBST",
+      "DESIGN",
+      "DEIN ZUG"
+    ]
+  },
+  "scenes": [
+    {
+      "_hinweis": "Eine Szene, sieben 3D-Teile, die ineinander blenden (kein Schnitt, wie im Vorbild). Jeder Teil fährt selbst (push, orbit).",
+      "parts": [
+        {
+          "_hinweis": "Takt 1 bis 4 (0 bis 8,7 s): die Kreuzung bei Nacht, eine lange Fahrt von weit weg heran (push 0,25) mit Drehung (orbit 12). Vor Mond stehen von Bild 0 an sechs Gäste (crowd: drei in der Schlange, drei in einer Gruppe), vor Sonne niemand. Ein Gast tritt ab Bild 0 aus Café Sonne, geht über die Kreuzung und auf 'Betrieb' bei Mond hinein: Mond leuchtet auf, Sonne wird fast dunkel (dark 1). Kein Herz (das Duell ist hier kein Verlust).",
+          "component": "iso-street",
+          "params": {
+            "shop": "Café Mond",
+            "icon": "cup",
+            "accent": "#7366E8",
+            "rival": "Café Sonne",
+            "rivalIcon": "cup",
+            "rivalAccent": "#E58A45",
+            "ours": "left",
+            "heart": false,
+            "walker": true,
+            "back": true,
+            "from": 0,
+            "smoke": false,
+            "push": 0.25,
+            "orbit": 12,
+            "after": true,
+            "crowd": 6,
+            "dark": 1
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": 0
+            },
+            "cross": {
+              "cap": 2,
+              "word": 3,
+              "offset": 0
+            },
+            "enter": {
+              "cap": 3,
+              "word": 5,
+              "offset": 0
+            }
+          },
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.8
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Café *Mond",
+                "und Café *Sonne."
+              ],
+              "instant": true
+            },
+            {
+              "lines": [
+                "Schräg | *gegenüber."
+              ]
+            },
+            {
+              "lines": [
+                "Bei beiden: | guter *Kuchen, | faire *Preise."
+              ]
+            },
+            {
+              "lines": [
+                "Trotzdem ist | nur bei *Mond | *Betrieb."
+              ]
+            },
+            {
+              "lines": [
+                "Was ist | bei *Mond | *anders?"
+              ]
+            }
+          ]
+        },
+        {
+          "_hinweis": "Takt 5 und Anfang 6: Blick ins volle Café Mond (unser Gegenstück zum abhebenden Dach: Blende von der Straße hinein, Fahrt heran). Fünf Gäste sitzen an zwei Tischen (guests), ein Kunde steht an der Theke und bestellt (Blase auf 'Die'). Er steht schon dort, statt hereinzukommen: auf dem Weg von der Tür ging er im Bild genau über die Köpfe der Gäste am linken Tisch. Kapitel 1 der Leiste springt auf 'auf' an. Kein Handy, kein Scan (V11).",
+          "component": "iso-shop",
+          "params": {
+            "branch": "cafe",
+            "shop": "Café Mond",
+            "icon": "cup",
+            "accent": "#7366E8",
+            "start": "counter",
+            "bubble": true,
+            "phone": false,
+            "paper": false,
+            "stamps": 10,
+            "have": 1,
+            "customer": 0,
+            "push": 0.25,
+            "orbit": 8,
+            "guests": 5
+          },
+          "anchors": {
+            "order": {
+              "cap": 1,
+              "word": 0,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Eine *Sache | fällt auf."
+              ],
+              "gapBefore": 0.45,
+              "chapter": {
+                "n": 1,
+                "word": -1
+              }
+            },
+            {
+              "lines": [
+                "Die *Gäste | haben"
+              ]
+            }
+          ],
+          "enter": "kreuz"
+        },
+        {
+          "_hinweis": "Takt 6: die Karte gleitet auf 'Handy' in die Wallet (im Vorbild 12,5 s). Ohne Scan-Rahmen und ohne neuen Stempel (before = after), damit das Motiv 'scan' nicht dazukommt. Farben wie im Kartendesign von Takt 8.",
+          "component": "phone-3d",
+          "params": {
+            "mode": "wallet",
+            "shop": "Café Mond",
+            "icon": "cup",
+            "colors": "#7366E8,#2E2A7A",
+            "stamps": 10,
+            "before": 1,
+            "after": 1,
+            "reward": "Gratis-Kuchen",
+            "scan": false,
+            "drop": true,
+            "rise": true,
+            "angle": 14
+          },
+          "anchors": {
+            "rise": {
+              "at": "start",
+              "offset": 0
+            },
+            "card": {
+              "cap": 0,
+              "word": 3,
+              "offset": -0.1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "ihre *Karte | im *Handy."
+              ]
+            },
+            {
+              "lines": [
+                "Einmal *scannen, | ab in die *Wallet, | ohne *App."
+              ]
+            }
+          ],
+          "enter": "kreuz"
+        },
+        {
+          "_hinweis": "Takt 7: dieselbe Kreuzung weit von oben (frame 'stadt'), der Ring um Mond; ein Kunde betritt ihn auf der anderen Seite, über ihm der Sperrbildschirm mit 'Noch 2 Stempel bis: Gratis-Kuchen' (C1). then 'weiter': er bleibt mit dem Handy stehen, die Blase steht bis zum Ende des Teils (mit 'dreht' ging sie schon bei 'von selbst' zurück). Der Kunde ist ein anderer als der mit der frischen Karte in Takt 6 (Textregel 9). Uhrzeit abends, die Welt ist Abend.",
+          "component": "iso-street",
+          "params": {
+            "mode": "nah",
+            "frame": "stadt",
+            "shop": "Café Mond",
+            "icon": "cup",
+            "accent": "#7366E8",
+            "rival": "Café Sonne",
+            "rivalIcon": "cup",
+            "rivalAccent": "#E58A45",
+            "ours": "left",
+            "smoke": false,
+            "reward": "Gratis-Kuchen",
+            "left": 2,
+            "clock": "19:12",
+            "then": "weiter",
+            "push": 0.12,
+            "orbit": 10
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": 0
+            },
+            "near": {
+              "cap": 0,
+              "word": 2,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "*Nah bei *Mond | zeigt das Handy | die *Karte | *von *selbst."
+              ],
+              "chapter": 2
+            }
+          ],
+          "enter": "kreuz"
+        },
+        {
+          "_hinweis": "Takt 8, Ersatz für 'Nachrichten an alle Kunden' (bei uns verboten, PRODUKT.md N14): der Laden gestaltet seine Karte selbst (D1). Gleiche Rolle (etwas, das der Laden in der Hand hat), gleiche Länge, danach 0,55 s Luft wie im Vorbild (gapBefore am nächsten Teil).",
+          "component": "phone-3d",
+          "params": {
+            "mode": "design",
+            "shop": "Café Mond",
+            "icon": "cup",
+            "colors": "#7366E8,#2E2A7A",
+            "stamps": 10,
+            "before": 3,
+            "reward": "Gratis-Kuchen",
+            "rise": true,
+            "angle": -12
+          },
+          "anchors": {
+            "rise": {
+              "at": "start",
+              "offset": 0
+            },
+            "paint": {
+              "cap": 0,
+              "word": 0,
+              "offset": 0
+            },
+            "logo": {
+              "cap": 0,
+              "word": 1,
+              "offset": 0
+            },
+            "symbol": {
+              "cap": 0,
+              "word": 2,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "*Farben, | *Logo, | *Symbol: | Mond gestaltet | die *Karte."
+              ],
+              "chapter": 3
+            }
+          ],
+          "enter": "kreuz"
+        },
+        {
+          "_hinweis": "Takt 9, Gegenbild: Café Sonne von innen, leer und gedimmt (start 'none', dim): nur der Inhaber hinter der Theke, eine Papierkarte liegt darauf. Auf 'Pappe' fährt die Kamera an die Theke heran (close 'counter', der Papierkorb ist mit im Bild), auf 'zerknittert' knüllt sich die Karte und fliegt rund 1,1 s später in den Korb (A4). Nur Papier, keine E-Mails: Stampit verschickt selbst Newsletter (E2). Die Leiste dunkelt ab (Kapitel 0).",
+          "component": "iso-shop",
+          "params": {
+            "branch": "cafe",
+            "shop": "Café Sonne",
+            "icon": "cup",
+            "accent": "#E58A45",
+            "start": "none",
+            "paper": true,
+            "stamps": 6,
+            "push": 0.1,
+            "orbit": 6,
+            "bubble": false,
+            "phone": false,
+            "dim": true,
+            "close": "counter"
+          },
+          "anchors": {
+            "zoom": {
+              "cap": 1,
+              "word": 3,
+              "offset": 0
+            },
+            "crumple": {
+              "cap": 2,
+              "word": 1,
+              "offset": 0.1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und bei *Sonne?"
+              ],
+              "gapBefore": 0.55,
+              "chapter": 0
+            },
+            {
+              "lines": [
+                "Da wird auf *Pappe | gestempelt."
+              ]
+            },
+            {
+              "lines": [
+                "Die *zerknittert | im *Portemonnaie | und ist | irgendwann *weg."
+              ]
+            }
+          ],
+          "enter": "kreuz"
+        },
+        {
+          "_hinweis": "Takt 10 und 11: zurück auf die Kreuzung (zweite und letzte Duell-Ansicht), ohne Stammkunden: von Anfang an das Schlussbild, Mond hell mit den Gästen davor, Sonne fast dunkel (walker false, dark 1). Nach 1,15 s Stille leuchtet 'Stampit' als Leuchtschrift über der Kreuzung auf (Textzeile mit role 'name', Stempelschlag als Ton), dann die Frage an den Zuschauer, Kapitel 4.",
+          "component": "iso-street",
+          "params": {
+            "shop": "Café Mond",
+            "icon": "cup",
+            "accent": "#7366E8",
+            "rival": "Café Sonne",
+            "rivalIcon": "cup",
+            "rivalAccent": "#E58A45",
+            "ours": "left",
+            "heart": false,
+            "smoke": false,
+            "push": 0.2,
+            "orbit": 12,
+            "after": true,
+            "walker": false,
+            "crowd": 6,
+            "dark": 1
+          },
+          "anchors": {
+            "name": {
+              "cap": 1,
+              "word": 0,
+              "offset": -0.04
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und diese | eine *Sache?"
+              ]
+            },
+            {
+              "role": "name",
+              "lines": [
+                "Stampit."
+              ],
+              "gapBefore": 1.15
+            },
+            {
+              "lines": [
+                "Und dein *Laden?"
+              ],
+              "gapBefore": 0.3,
+              "chapter": 4
+            },
+            {
+              "lines": [
+                "Eher *Mond | oder eher *Sonne?"
+              ]
+            }
+          ],
+          "enter": "kreuz"
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Lieber Mond?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Kommentiere KARTE,{Karte,}",
+            "und wir melden uns."
+          ],
+          "gapBefore": 0.4
+        }
+      ]
+    }
+  ]
+}

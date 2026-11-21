@@ -1,0 +1,181 @@
+{
+  "meta": {
+    "title": "Ist das koscher?",
+    "slug": "ist-das-koscher",
+    "language": "de",
+    "date": "2026-11-16",
+    "fassung": 3,
+    "idee": "Viele fragen sich, ob ein Laden sie verfolgt, wenn sich das Handy genau vor der Tür meldet. Das Video sagt, wie es wirklich ist: das Handy zeigt die volle Karte von selbst an, der Laden schickt nichts und sieht nichts. Anregung: die Machart des stärksten Vorbilds (ein Wort auf einmal, schnelle Bildwechsel, kaum Pausen, laute Mischung) und der bekannte Spruch 'Ist das koscher? Natürlich ist das koscher!' als Rahmen. Text, Bilder, Stimme und Töne sind eigene; es wird keine fremde Aufnahme verwendet.",
+    "_hinweis": "Der gesprochene Text ist vom Betreiber Wort für Wort freigegeben (videos/GEPLANT-benachrichtigung.md). Kein Wort ändern, ergänzen oder streichen: das wäre eine neue, kostenpflichtige Aufnahme und ein anderer Text als der freigegebene. Die Zeichen * und | stehen nur für das Bild (Schlüsselwort, Grenze zwischen zwei Tafeln) und werden nicht gesprochen."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern.",
+    "stability": 0.35, "similarity_boost": 0.75, "style": 0.6, "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme, die länger sind, werden beim Bau auf diese Länge gekürzt (tools/tighten.py). Die Aufnahme im Ordner voice/ bleibt dabei unverändert. Einzelne Pausen stellt 'gapBefore' an der Textzeile danach ein: der Atemzug nach der Pointe und der zwischen Schlussfrage und Aufforderung.",
+    "lead": 0.35, "hold": 3.2, "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal. *Wort = Schlüsselwort (groß, lila). | = Grenze zwischen zwei Tafeln.",
+    "mode": "wort"
+  },
+  "pace": { "maxStill": 5, "minChanges": 12 },
+  "mix": {
+    "_hinweis": "Lauter als das erste Video: Ziel -14 LUFS, wahre Spitze höchstens -1 dBTP. Gemessen wird am fertigen Ton, das Ergebnis steht in out/report.json unter audio.",
+    "lufs": -14, "truePeak": -1
+  },
+  "scenes": [
+    {
+      "_hinweis": "Einstieg. Die Frage steht ab dem allerersten Bild groß da ('instant'), das Handy steht schon ('rise': false) und brummt zweimal. Auf 'Handy' springt die Kamera auf die Benachrichtigung. Danach harter Schnitt auf die Straße. Fassung 2: die Figur geht auf der ANDEREN Straßenseite vorbei ('across'), der Laden steht klein im Hintergrund. In Fassung 1 ging sie direkt an der Ladenfront entlang, und das sah aus, als müsse man vor der Tür stehen. Fassung 3: sie bleibt früher stehen ('via' 0.13, 'to' 0.15) und der Laden steht ganz rechts ('shopAt' 0.7), damit zwischen Benachrichtigung und Laden deutlich Luft bleibt (vorher rund 50 px bis zur Hauswand).",
+      "parts": [
+        {
+          "component": "lock-notification",
+          "params": { "clock": "08:14", "date": "Donnerstag, 10. September", "title": "Café Nordwind", "body": "6 von 6, dein Kaffee wartet", "icon": "cup", "pin": false, "rise": false, "buzzes": 2, "waves": true },
+          "anchors": { "notify": { "at": "start", "offset": 0.15 } },
+          "camera": [ { "cap": 1, "word": 0, "zoom": 1.32, "focus": [540, 1030] } ],
+          "captions": [
+            { "lines": ["Ist das", "*koscher?"], "instant": true, "scale": 1.2 },
+            { "lines": ["Dein *Handy | meldet sich,"] }
+          ]
+        },
+        {
+          "component": "shop-street",
+          "enter": "cut",
+          "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "right", "across": true, "shopAt": 0.7, "circle": false, "notify": true, "note": "6 von 6", "from": -0.08, "via": 0.13, "to": 0.15 },
+          "anchors": { "walk": { "at": "start" }, "buzz": { "cap": 0, "word": 5, "offset": -0.1 }, "arrive": { "cap": 0, "word": 6, "offset": 0.25 } },
+          "captions": [
+            { "lines": ["genau | wenn du | an deinem | *Lieblingscafé | vorbeigehst."] }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Die Sorge und ihre Auflösung, jetzt auf der Karte von oben: 'verfolgt werden' ist ein Punkt auf einer Karte, dem jemand zusieht. Auge an der Ortsnadel, Blicklinie zur Kundin, die eine Straße weiter von rechts kommt. Auf 'Nein.' reißt die Linie ab. Auf 'Dein Handy' fährt die Kamera heran, auf 'sendet' brummt das Handy: weit weg von der Nadel, beide bleiben im Bild. Dann harter Schnitt auf die Pointe.",
+      "parts": [
+        {
+          "component": "shop-map",
+          "params": { "shop": "Café Nordwind", "icon": "cup", "circle": false, "notify": true, "note": "6 von 6, dein Kaffee wartet", "track": true, "path": [[3.7, 1], [2.68, 1]] },
+          "anchors": { "walk": { "at": "start" }, "eye": { "cap": 0, "word": 0 }, "no": { "cap": 1, "word": 0 }, "buzz": { "cap": 2, "word": 2 }, "arrive": { "cap": 2, "word": 4, "offset": 0.2 } },
+          "camera": [ { "at": "start", "dur": 0, "zoom": 1.1, "focus": [792, 1040], "to": [540, 1060] }, { "cap": 2, "word": 0, "zoom": 1.36, "focus": [664, 985], "to": [540, 1066], "dur": 0.3 } ],
+          "captions": [
+            { "lines": ["Verfolgt | dich das | *Café?"] },
+            { "lines": ["*Nein."] },
+            { "lines": ["Dein *Handy | sendet die | Benachrichtigung | *selbst."] }
+          ]
+        },
+        {
+          "component": "stamp-check",
+          "enter": "cut",
+          "params": { "icon": "check" },
+          "anchors": { "hit": { "cap": 0, "word": 0, "offset": 0.3 } },
+          "captions": [
+            { "lines": ["*Natürlich | ist das | *koscher!"], "scale": 1.15 }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Woher die Karte kommt: selbst gespeichert, einmal gescannt, ohne App. Kamera auf den QR-Code beim Scannen, danach auf den Kopf der Wallet.",
+      "component": "wallet-pass",
+      "params": { "shop": "Café Nordwind", "location": "HH-OTTENSEN", "reward": "6 Stempel = 1 Kaffee gratis", "stamps": 6, "before": 2, "after": 2, "icon": "cup" },
+      "anchors": { "card": { "cap": 0, "word": 3 }, "scan": { "cap": 1, "word": 0 }, "ok": { "cap": 1, "word": 2 } },
+      "camera": [
+        { "cap": 1, "word": 0, "zoom": 1.5, "focus": [540, 1343], "to": [540, 1150] },
+        { "cap": 2, "word": 0, "zoom": 1.2, "focus": [540, 900], "to": [540, 930], "dur": 0.3 }
+      ],
+      "captions": [
+        { "lines": ["Du hast die | *Stempelkarte | *selbst | gespeichert."], "gapBefore": 0.55 },
+        { "lines": ["Einmal | gescannt, | *ohne *App,"] },
+        { "lines": ["in Apple | oder Google | *Wallet."] }
+      ]
+    },
+    {
+      "_hinweis": "Das Schlüsselbild. Erst: in der Karte steht der Ort (Nadel auf der Karte, Nadel auf dem Laden). Dann: die Karte wird voll. Dann die Karte von oben: der Kreis 'in der Nähe' um die Ortsnadel, die Kundin geht eine Straße weiter (nicht an der Tür vorbei), tritt in den Kreis, und dort, sichtbar entfernt von der Nadel, zeigt ihr Handy die Karte. Die Kamera fährt nur leicht heran (Fassung 3: 1,2 statt 1,34), damit der ganze Kreis im Bild bleibt, mit Nadel, Rand des Kreises und Kundin. Nirgends eine Entfernung in Zahlen.",
+      "parts": [
+        {
+          "component": "shop-street",
+          "params": { "shop": "Café Nordwind", "icon": "cup", "walker": false, "circle": false, "notify": false, "card": true },
+          "anchors": { "card": { "at": "start", "offset": 0.15 }, "pin": { "cap": 0, "word": 4 } },
+          "captions": [
+            { "lines": ["In der | *Karte | steht, | wo der | *Laden | ist."] }
+          ]
+        },
+        {
+          "component": "wallet-pass",
+          "enter": "cut",
+          "params": { "shop": "Café Nordwind", "location": "HH-OTTENSEN", "reward": "6 Stempel = 1 Kaffee gratis", "stamps": 6, "before": 5, "after": 6, "icon": "cup", "scan": false, "rise": false, "drop": false },
+          "anchors": { "stamp1": { "at": "start", "offset": 0.2 } },
+          "camera": [ { "at": "start", "dur": 0, "zoom": 1.34, "focus": [540, 1082], "to": [540, 1080] } ],
+          "captions": [
+            { "lines": ["Ist die | Karte | *voll"] }
+          ]
+        },
+        {
+          "component": "shop-map",
+          "enter": "cut",
+          "params": { "shop": "Café Nordwind", "icon": "cup", "circle": true, "notify": true, "note": "6 von 6, dein Kaffee wartet", "path": [[-0.1, 1], [0.55, 1]] },
+          "anchors": { "circle": { "at": "start", "offset": 0.05 }, "walk": { "at": "start" }, "buzz": { "cap": 1, "word": 0, "offset": -0.1 }, "arrive": { "at": "end", "offset": -0.5 } },
+          "camera": [ { "cap": 1, "word": 0, "zoom": 1.2, "focus": [560, 1166], "to": [540, 1211], "dur": 0.3 } ],
+          "captions": [
+            { "lines": ["und du | kommst | in die *Nähe,"] },
+            { "lines": ["zeigt | dein *Handy | sie | *von *selbst | an."] }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Was NICHT passiert: zwei durchgestrichene Zeichen am Laden (Senden, Sehen), die Figur geht unbehelligt vorbei. Fassung 3: sie geht auf der ANDEREN Straßenseite ('across'), der Laden steht klein im Hintergrund, die Zeichen links und rechts daneben. Bis Fassung 2 ging sie hier noch direkt an der Ladentür vorbei. Auf 'Und sieht' fährt die Kamera auf Laden und Zeichen, die Figur bleibt vorn im Bild. Keine Zahl, keine Behauptung über Daten, die über den Text hinausgeht.",
+      "component": "shop-street",
+      "params": { "shop": "Café Nordwind", "icon": "cup", "direction": "left", "across": true, "shopAt": 0.4, "circle": false, "notify": false, "privacy": true, "from": 0.1, "to": 0.9 },
+      "anchors": { "walk": { "at": "start" }, "arrive": { "at": "end", "offset": 0 }, "nosend": { "cap": 0, "word": 3 }, "nosee": { "cap": 1, "word": 2 } },
+      "camera": [ { "cap": 1, "word": 0, "zoom": 1.22, "focus": [432, 690], "to": [540, 770], "dur": 0.25 } ],
+      "captions": [
+        { "lines": ["Der Laden | schickt | *nichts."] },
+        { "lines": ["Und sieht | *nicht, | wo du | bist."] }
+      ]
+    },
+    {
+      "_hinweis": "Seitenwechsel: der Zuschauer ist jetzt der Betreiber. Erst sein Laden (er tritt in die Tür), dann der Sperrbildschirm eines Stammkunden, dann die Karte von oben: rund um seinen Laden leuchten vier Handys auf, alle im Kreis, keines vor der Tür. Fassung 3: die beiden unteren Kunden stehen weiter außen ('spread').",
+      "parts": [
+        {
+          "component": "shop-street",
+          "params": { "shop": "Café Nordwind", "icon": "cup", "view": "owner", "phones": 0, "circle": false },
+          "anchors": { "shine": { "cap": 0, "word": 3 } },
+          "camera": [ { "at": "start", "dur": 0, "zoom": 1.3, "focus": [540, 1010], "to": [540, 1060] } ],
+          "captions": [
+            { "lines": ["Und wenn | es *dein *Laden | ist?"] }
+          ]
+        },
+        {
+          "component": "lock-notification",
+          "enter": "cut",
+          "params": { "clock": "08:14", "date": "Donnerstag, 10. September", "title": "Café Nordwind", "body": "6 von 6, dein Kaffee wartet", "icon": "cup", "pin": false },
+          "anchors": { "notify": { "cap": 0, "word": 5, "offset": -0.15 } },
+          "camera": [ { "cap": 0, "word": 6, "zoom": 1.3, "focus": [540, 1030] } ],
+          "captions": [
+            { "lines": ["Dann | stehst du | auf dem | *Sperrbildschirm | deiner | Stammkunden."] }
+          ]
+        },
+        {
+          "component": "shop-map",
+          "enter": "cut",
+          "params": { "shop": "Café Nordwind", "icon": "cup", "view": "owner", "phones": 4, "circle": true, "spread": true },
+          "anchors": { "circle": { "at": "start", "offset": 0.05 }, "shine": { "at": "start", "offset": 0.02 }, "phone1": { "cap": 0, "word": 0, "offset": 0.1 }, "phone2": { "cap": 0, "word": 1, "offset": 0 }, "phone3": { "cap": 0, "word": 2, "offset": 0 }, "phone4": { "cap": 0, "word": 3, "offset": -0.06 } },
+          "captions": [
+            { "lines": ["Genau | *vor *deiner *Tür."] }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Schluss in der Form des Betreibers. Die Frage bleibt oben stehen, deshalb hier der Modus 'zeile'.",
+      "component": "cta-comment",
+      "anchors": { "logo": { "cap": -1, "word": -1 } },
+      "captions": [
+        { "lines": ["Klingt interessant?"], "accent": 1, "keep": true, "mode": "zeile" },
+        { "role": "cta", "lines": ["Dann kommentiere jetzt KARTE,{Karte,}", "und wir melden uns bei dir."], "gapBefore": 0.65 }
+      ]
+    }
+  ]
+}

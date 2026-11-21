@@ -1,0 +1,22 @@
+{
+ "key": "9797258f67410978",
+ "text": "Café Mond und Café Sonne. Schräg gegenüber. Bei beiden: guter Kuchen, faire Preise. Trotzdem ist nur bei Mond Betrieb. Was ist bei Mond anders? Eine Sache fällt auf. Die Gäste haben ihre Karte im Handy. Einmal scannen, ab in die Wallet, ohne App. Nah bei Mond zeigt das Handy die Karte von selbst. Farben, Logo, Symbol: Mond gestaltet die Karte. Und bei Sonne? Da wird auf Pappe gestempelt. Die zerknittert im Portemonnaie und ist irgendwann weg. Und diese eine Sache? Stämp-it. Und dein Laden? Eher Mond oder eher Sonne? Lieber Mond? Kommentiere Karte, und wir melden uns.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 573,
+ "audio": "9797258f67410978.mp3",
+ "audio_sha256": "3ff3d98305d7e2cf4cb8cd6fdc4640afcbfb003c33404129216e051036f0074b",
+ "spent": 573
+}

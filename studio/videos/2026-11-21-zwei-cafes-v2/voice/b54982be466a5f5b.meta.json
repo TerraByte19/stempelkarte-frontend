@@ -1,0 +1,32 @@
+{
+ "key": "b54982be466a5f5b",
+ "text": "In derselben Straße gibt es zwei Cafés. Gleicher Kaffee, gleiche Preise. Aber eins ist immer voll. Weißt du, warum? Es hat ein System. Die Gäste scannen einen Kuh-Err-Code, und die Karte des Cafés landet in ihrem Handy. Nichts herunterladen. Sind sie in der Nähe, erscheint sie auf dem Sperrbildschirm. Als Erinnerung, dass sie da ist. Und das Café kann ihnen Nachrichten schicken, direkt aufs Handy. Gegenüber? Da gibt's noch Papierkarten und E-Mails, die im Müll landen. Dieses System heißt… Stämp-it. Und du? Welches der beiden Cafés willst du sein? Kommentiere Karte, und wir melden uns.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "splice",
+ "chars": 591,
+ "base": "7a495d3b30a83bca",
+ "cut": [
+  135,
+  213
+ ],
+ "sentence": "Die Gäste scannen einen Kuh-Err-Code, und die Karte des Cafés landet in ihrem Handy.",
+ "clip": "b54982be466a5f5b.clip.mp3",
+ "clip_sha256": "29e9033c01bd17d12388b93a0f5778b06dab8ad0fc3a7300a3f704f4efc5a5bd",
+ "gain": 1.1443917751312256,
+ "shift": 0.657,
+ "cut_from": 10.061,
+ "cut_to": 14.791,
+ "spent": 84
+}

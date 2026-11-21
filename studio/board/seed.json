@@ -1,0 +1,64 @@
+{
+  "hinweis": [
+    "Diese Datei ist die Vorlage für die ersten Dokumente des Boards. Sie wird einmal direkt nach dem ersten Veröffentlichen geschrieben (LIESMICH.md, Schritt 0).",
+    "\"writes\" hat genau die Form, die das Werkzeug ArtifactData bei action \"batch\" erwartet: ArtifactData({ action: \"batch\", url: <Adresse des Boards>, writes: <dieses Feld> }). Beim Anlegen gehört kein if_version dazu.",
+    "Vor dem Schreiben fünf Platzhalter ersetzen: (1) asset_id durch die id, die das Hochladen der für das Streamen umgepackten Kopie von launch-video/Stampit-Werbevideo-v10.mp4 zurückgibt, (2) poster_asset_id durch die id des Standbilds aus demselben Video (beide Befehle stehen in LIESMICH.md, Schritt 0), (3) erstellt und geaendert des Videos, (4) letzter_lauf im Stand, (5) zeit im Protokoll-Eintrag. Für (3) bis (5) denselben Zeitpunkt nehmen. Solange Platzhalter stehen, zeigt die Seite \"Zu diesem Video ist keine Datei gespeichert.\" und keine Uhrzeit, sie bricht aber nicht.",
+    "Das erste Video steht mit status \"freigegeben\" da: der Nutzer hat Version 10 schon freigegeben (studio/PLAYBOOK.md). Mit \"neu\" läge ein längst entschiedenes Video unter \"Zur Freigabe\". Will der Nutzer die Knöpfe einmal ausprobieren, geht das über \"Freigabe zurücknehmen\" unter \"Freigegeben\".",
+    "Bewusst leer oder weggelassen, weil es dafür keinen belegten Wert gibt: stand.naechstes_video (leer), stand.konten (leer), stand.stimme_zeichen_monat (fehlt: die Seite schreibt dann \"noch kein Verbrauch gemeldet\"), laeufe.sitzung (fehlt, ist freiwillig; die Sitzung, die einrichtet, darf ihre eigene Adresse eintragen), laeufe.dauer_min 0 (nicht gemessen, die Seite zeigt dann keine Dauer).",
+    "zeichen 698 ist die Länge des gesprochenen Textes, also eine Aufnahme. Für Version 10 wurden drei Aufnahmen gemacht (A, B, C); der tatsächliche Verbrauch steht in keiner Datei.",
+    "start_satz verweist auf studio/START.md und den Branch ccr-816d9995-jhzqdq. Beides muss es geben, wenn der Nutzer den Satz benutzt; ändert sich der Branch, schreibt die Automation den Satz neu.",
+    "Die Sammlung ideen bekommt hier keinen Eintrag: Ideen legt die Automation an, erfundene Beispiele gehören nicht in die Datenbank."
+  ],
+  "writes": [
+    {
+      "op": "set",
+      "collection": "stand",
+      "doc_id": "aktuell",
+      "data": {
+        "letzter_lauf": "<jetzt als ISO 8601 UTC, z. B. 2026-11-15T10:30:00Z>",
+        "modus": "manuell",
+        "meldung": "Das Board ist eingerichtet. Das erste Video ist hochgeladen und freigegeben.",
+        "problem": "",
+        "naechstes_video": "",
+        "stimme_limit_monat": 30000,
+        "start_satz": "Lies studio/START.md im Repo stempelkarte-frontend (Branch ccr-816d9995-jhzqdq) und mach dort weiter.",
+        "konten": []
+      }
+    },
+    {
+      "op": "set",
+      "collection": "videos",
+      "doc_id": "2026-11-15-kaffee-aufs-haus-v1",
+      "data": {
+        "datum": "2026-11-15",
+        "titel": "Der sechste Kaffee geht aufs Haus",
+        "hook": "Der sechste Kaffee geht aufs Haus.",
+        "text": "Der sechste Kaffee geht aufs Haus. Warum eigentlich? Weil der Gratis-Kaffee vielleicht einen Euro kostet. Und du dafür wiederkommst. Nur die Papierkarte macht nicht mit. Zerknickt, vergessen, verloren. Und das Café merkt nie, wer fast schon Stammgast war. Mit StampIt liegt die Karte in Apple und Google Wallet. Einmal scannen, kein Download. Jeder Besuch ein Stempel, sofort auf dem Handy. Ist die Karte voll, meldet sie sich von selbst, in Ladennähe. Und das lohnt sich! Bleiben dir pro Kaffee zwei Euro fünfzig, und fünfzig Stammkunden kommen einmal mehr pro Woche, sind das sechstausendfünfhundert Euro mehr im Jahr. Klingt interessant? Dann kommentiere jetzt Karte, und wir melden uns bei dir.",
+        "quelle": "Eigene Idee, Aufbau angelehnt an ein Reel eines Mitbewerbers (Frage, Rechnung, Problem, Lösung)",
+        "asset_id": "<id der hochgeladenen Videodatei>",
+        "poster_asset_id": "<id des hochgeladenen Standbilds>",
+        "dauer_s": 50.3,
+        "version": 1,
+        "status": "freigegeben",
+        "feedback": "",
+        "antwort": "",
+        "ordner": "2026-11-15-kaffee-aufs-haus",
+        "zeichen": 698,
+        "erstellt": "<jetzt als ISO 8601 UTC, z. B. 2026-11-15T10:30:00Z>",
+        "geaendert": "<jetzt als ISO 8601 UTC, z. B. 2026-11-15T10:30:00Z>"
+      }
+    },
+    {
+      "op": "set",
+      "collection": "laeufe",
+      "doc_id": "einrichtung",
+      "data": {
+        "zeit": "<jetzt als ISO 8601 UTC, z. B. 2026-11-15T10:30:00Z>",
+        "modus": "manuell",
+        "ergebnis": "Das Board wurde eingerichtet.",
+        "problem": "",
+        "dauer_min": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+ "key": "0d5157c66e3842da",
+ "text": "Stempelkarte im Salon? Meine Kundinnen kommen zu selten. Mit zehn Stempeln, ja. Die Zahl legst du aber selbst fest. Kommt eine Kundin einmal im Monat, wartet sie zehn Monate. Fast ein Jahr, für einen Schnitt! Bei Stämp-it machst du fünf daraus. Dann ist der Gratis-Schnitt schon im Frühling da. So sieht deine Karte im Handy aus: deine Farben, dein Logo und Scheren als Stempel. Und meine Kundinnen ohne iPhone? Na klar, das geht genauso. Die Karte liegt in Google Wallet. Nicht sie kommt zu selten. Deine Karte war zu lang! Noch Fragen? Dann kommentiere jetzt Karte, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 595,
+ "audio": "0d5157c66e3842da.mp3",
+ "audio_sha256": "aa87195d8b89185589dd0967a20d61b3675d5d4b932c111db34ae37360ecd0bd",
+ "spent": 595
+}

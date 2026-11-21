@@ -1,0 +1,10 @@
+# Nur die Quellen des ersten, von Hand gebauten Videos bleiben im Repo
+# (Vergleichsbasis fuer studio/tools/regress.mjs). Videos, Tonspuren und
+# Hoerproben sind gross und neu erzeugbar.
+*.mp4
+*.wav
+build/check/
+build/stills/
+final-build/check/
+stimmen/
+voices.json

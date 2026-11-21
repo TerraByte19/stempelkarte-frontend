@@ -1,0 +1,488 @@
+{
+  "meta": {
+    "title": "Wer freitags fehlt",
+    "slug": "eis-stammgast-tipps",
+    "language": "de",
+    "datum": "2026-11-19",
+    "format": "F01",
+    "beleg_kern": "tipps",
+    "studie": "",
+    "thema": "stammkunden-tipps",
+    "branche": "eiscafe",
+    "themen_nr": "T28",
+    "idee_id": "20261118-eis-stammgast-tipps",
+    "hook_muster": "H08",
+    "hook_punkte": 11,
+    "hook_kandidaten": [
+      {
+        "satz": "Wenn ich eine Eisdiele hätte, wüsste ich, wer freitags fehlt.",
+        "muster": "H08",
+        "punkte": 11,
+        "gruende": "S1 Glocke und Zettel leuchtet auf, S2 sein Stammgast, S3 Verlust (fehlt), K1 Eisdiele, K2 ohne Vorwissen, K3 fünf Wörter, W1 seine Sorge, W2 0 (Antwort Rhythmus eher erwartbar), W3 Wochenleiste mit leerem Freitag bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Jeden Freitag eine Kugel Pistazie. Und wenn er fehlt, wer merkt das?",
+        "muster": "H05",
+        "punkte": 11,
+        "gruende": "S1 Glocke und Zettel, S2 sein Stammgast, S3 Verlust, K1 Kugel Pistazie, K2 ja, K3 fünf Wörter, W1 Sorge, W2 0, W3 Wochenleiste bis 10 s. Gleichstand, nicht gewählt: Bauart nah an H02 (Person, Rhythmus, Bruch), das in F01 nicht vorgesehen ist",
+        "raus": ""
+      },
+      {
+        "satz": "Was macht aus einem Gast einen Stammgast?",
+        "muster": "H05",
+        "punkte": 7,
+        "gruende": "S1 ja, S2 ja, S3 0 keine Reibung, K1 0 kein Gegenstand, K2 ja, K3 ja, W1 0, W2 0, W3 erster Rat bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Wenn ich eine Eisdiele hätte, würde ich mir jede Sorte merken.",
+        "muster": "H08",
+        "punkte": 8,
+        "gruende": "S1 ja, S2 ja, S3 0 keine Reibung, K1 Eisdiele und Sorte, K2 ja, K3 ja, W1 0, W2 0, W3 Rat bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Unter uns: Dein Stammgast merkt, ob du seine Sorte kennst.",
+        "muster": "H14",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "erste Tafel über 8 Wörter, der Satz lässt sich nach 1.4 nicht als ganzer Satz teilen"
+      },
+      {
+        "satz": "Unter uns: Die Waffel ist nicht dein bestes Argument.",
+        "muster": "H14",
+        "punkte": 9,
+        "gruende": "S1 ja, S2 ja, S3 Provokation, K1 Waffel, K2 ja, K3 ja, W1 0, W2 ja, W3 0 (der erste Rat handelt nicht von der Waffel)",
+        "raus": ""
+      }
+    ],
+    "meme": "",
+    "kern_bild": "zettel",
+    "einstieg": "tip-cards",
+    "motive": [],
+    "schluss": "Gleich probieren?",
+    "beleg": "Drei wahre Tipps ohne Produktaussage (F01). Produkt nur im letzten Satz vor dem Schluss: A1 (Karte in der Wallet) und B2 (der Stand, also die Stempel, ist auf seinem Handy). Keine Nähe, kein Papier, kein Scan.",
+    "idee": "Eigene Idee aus THEMEN.md T28: drei Tipps, wie aus einem Gast ein Stammgast wird (Rhythmus kennen, Sorte merken, sagen, wie weit er ist), erzählt an Eis am Markt im Winter, ohne Sommerbild."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "parts": [
+        {
+          "component": "tip-cards",
+          "params": {
+            "head": "3 Tipps für Stammgäste",
+            "rise": false,
+            "show": 1,
+            "items": [
+              {
+                "title": "Kenn seinen Rhythmus."
+              },
+              {
+                "title": "Merk dir seine Sorte."
+              },
+              {
+                "title": "Sag ihm, wie weit er ist."
+              }
+            ]
+          },
+          "anchors": {
+            "card": {
+              "at": "start",
+              "offset": 0.15
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.2,
+              "focus": [
+                500,
+                1040
+              ],
+              "to": [
+                540,
+                1080
+              ],
+              "dur": 0.3
+            }
+          ],
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.8
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Wenn ich eine",
+                "*Eisdiele hätte,"
+              ],
+              "instant": true,
+              "scale": 1.2
+            },
+            {
+              "lines": [
+                "wüsste ich, | wer *freitags | fehlt."
+              ]
+            },
+            {
+              "lines": [
+                "Drei Dinge | reichen *dafür."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "week-strip",
+          "params": {
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "weeks": 4,
+            "days": [
+              4
+            ],
+            "filled": 3,
+            "rivalWeek": 0
+          },
+          "anchors": {
+            "week1": {
+              "cap": 1,
+              "word": 0
+            },
+            "week2": {
+              "cap": 1,
+              "word": 1
+            },
+            "week3": {
+              "cap": 1,
+              "word": 2
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 2,
+              "zoom": 1.15,
+              "focus": [
+                580,
+                600
+              ],
+              "to": [
+                540,
+                610
+              ]
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "*Eins: | Kenn seinen | *Rhythmus."
+              ]
+            },
+            {
+              "lines": [
+                "Freitag, | Freitag, | *Freitag."
+              ]
+            },
+            {
+              "lines": [
+                "Bleibt einer | *leer, | fällt es dir | sofort auf."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "eis",
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "phone": false,
+            "paper": false,
+            "start": "door",
+            "bubble": false,
+            "stamps": 10,
+            "have": 8
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Dann frag | beim nächsten Mal, | ob alles | *gut ist."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "tip-cards",
+          "params": {
+            "head": "3 Tipps für Stammgäste",
+            "rise": true,
+            "show": 2,
+            "items": [
+              {
+                "title": "Kenn seinen Rhythmus."
+              },
+              {
+                "title": "Merk dir seine Sorte."
+              },
+              {
+                "title": "Sag ihm, wie weit er ist."
+              }
+            ]
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 0
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.2,
+              "focus": [
+                500,
+                1040
+              ],
+              "to": [
+                540,
+                1080
+              ],
+              "dur": 0.3
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "*Zwei: | Merk dir | seine *Sorte."
+              ]
+            },
+            {
+              "lines": [
+                "Nicht auf | einem Zettel, | sondern im *Kopf."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "eis",
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "phone": false,
+            "paper": false,
+            "start": "counter",
+            "bubble": true,
+            "customer": 0,
+            "push": 0.15,
+            "orbit": 10,
+            "stamps": 10,
+            "have": 8
+          },
+          "anchors": {
+            "order": {
+              "cap": 0,
+              "word": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "*Pistazie, | wie immer?"
+              ]
+            },
+            {
+              "lines": [
+                "Und er weiß: | Du *kennst ihn."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "tip-cards",
+          "params": {
+            "head": "3 Tipps für Stammgäste",
+            "rise": true,
+            "show": 3,
+            "items": [
+              {
+                "title": "Kenn seinen Rhythmus."
+              },
+              {
+                "title": "Merk dir seine Sorte."
+              },
+              {
+                "title": "Sag ihm, wie weit er ist."
+              }
+            ]
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "*Drei: | Sag ihm, | wie *weit | er ist."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "enter": "cut",
+          "params": {
+            "value": "2",
+            "from": "",
+            "sub": "Stempel",
+            "label": "noch bis zur Gratis-Kugel"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": 1
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.15,
+              "focus": [
+                540,
+                820
+              ],
+              "to": [
+                540,
+                860
+              ],
+              "dur": 0.3
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Noch *zwei{zwei} | Stempel, | dann ist die | Kugel *gratis."
+              ]
+            },
+            {
+              "lines": [
+                "So hat er | ein *Ziel | direkt vor Augen."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "phone-3d",
+      "params": {
+        "mode": "wallet",
+        "shop": "Eis am Markt",
+        "icon": "heart",
+        "stamps": 10,
+        "before": 8,
+        "after": 8,
+        "reward": "Gratis-Kugel",
+        "scan": false,
+        "rise": true,
+        "drop": true
+      },
+      "anchors": {
+        "card": {
+          "cap": 0,
+          "word": 7
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Bei Eis am Markt | trägt er den *Stand | in der *Wallet."
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Gleich probieren?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt EIS,{Eis,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ]
+}

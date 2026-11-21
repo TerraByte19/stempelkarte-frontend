@@ -1,0 +1,96 @@
+/* Buehne und alles, was mehrere Bausteine teilen. Die Farben kommen als
+   CSS-Variablen aus brand.js (engine.js setzt sie auf :root). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--night); }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: #fff;
+  font-family: var(--body); background: linear-gradient(180deg, var(--night) 0%, var(--night2) 100%); }
+.scene { position: absolute; inset: 0; opacity: 0; }
+/* .ill traegt die langsame Kamerafahrt; der Drehpunkt liegt etwas unter der Mitte,
+   dort wo in fast allen Bildern der Gegenstand sitzt. */
+.ill { position: absolute; inset: 0; transform-origin: 50% 62%; }
+/* Eine Szene kann aus mehreren Teilen bestehen, die ineinander ueberblenden. */
+.part { position: absolute; inset: 0; }
+.abs { position: absolute; }
+svg.ico { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+
+/* Stempelreihe oben: fuellt sich mit jeder Szene, am Schluss ist die Karte voll.
+   Liegt absichtlich in der oberen Sperrzone (Instagram verdeckt sie teils) -
+   sie ist Schmuck, kein Inhalt. */
+#prog { position: absolute; top: 176px; left: 0; right: 0; display: flex; justify-content: center; gap: 18px; z-index: 30; }
+#prog .p { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,.32); position: relative; }
+#prog .p i { position: absolute; inset: -3px; border-radius: 50%; background: var(--lilac); opacity: 0; }
+
+/* Textzeile: ein Satz zur Zeit, Wort fuer Wort zur Stimme */
+#caps { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.cap { position: absolute; left: 70px; right: 70px; top: 258px; text-align: center;
+  font: 700 82px/1.12 var(--display); letter-spacing: -0.02em; text-shadow: 0 4px 28px rgba(14,10,36,.7); }
+.cap .w { display: inline-block; opacity: 0; margin: 0 .11em; }
+.cap .acc { color: var(--lilac); }
+
+/* Textzeile im Modus "wort": immer nur EINE Tafel, mittig im Textbereich. Normale
+   Woerter klein und hell, Schluesselwoerter (.key) gross und lila. Alle Tafeln einer
+   Textzeile liegen im selben Rasterfeld uebereinander; sichtbar ist immer nur eine. */
+.capw { position: absolute; left: 70px; right: 70px; top: 236px; height: 272px; display: grid; place-items: center;
+  text-align: center; font-family: var(--display); letter-spacing: -0.02em; }
+.capw .chunk { grid-area: 1 / 1; opacity: 0; }
+.capw .row { white-space: nowrap; line-height: 1.06; }
+.capw .w { display: inline-block; margin: 0 .1em; font-weight: 500; color: #E8E5F3; text-shadow: 0 4px 24px rgba(14,10,36,.8); }
+.capw .w.key { font-weight: 700; color: var(--lilac); text-shadow: 0 6px 30px rgba(14,10,36,.85), 0 0 70px rgba(142,130,245,.4); }
+/* Kamera: .cam traegt Vergroesserung und Verschiebung eines Teils, .camview (die Ebene
+   darueber, unbewegt) blendet zum Textbereich hin aus. */
+.cam { position: absolute; inset: 0; transform-origin: 540px 960px; }
+.camview { -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 522px, #000 580px); mask-image: linear-gradient(180deg, transparent 0, transparent 522px, #000 580px); }
+
+/* ---------- Kulisse: Lichtschein und Theke ---------- */
+.glow { border-radius: 50%; background: radial-gradient(closest-side, rgba(185,176,255,.24), rgba(185,176,255,0)); }
+.counter { left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #2C2269 0%, #1A1345 70%); border-top: 7px solid #4A40A8; }
+
+/* ---------- Papierkarte: Stempelfelder (paper-card, wallet-vanish) ---------- */
+.slot { width: 124px; height: 124px; border-radius: 50%; border: 4px dashed rgba(26,26,46,.22); position: relative;
+  display: grid; place-items: center; font: 700 21px var(--body); letter-spacing: .12em; color: rgba(26,26,46,.42); }
+.ink { position: absolute; inset: -4px; border-radius: 50%; border: 8px solid var(--brand); color: var(--brand);
+  display: grid; place-items: center; background: var(--paper); }
+.ink svg { width: 66px; }
+.freeglow { position: absolute; inset: -46px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, rgba(126,112,245,.85), rgba(126,112,245,0)); }
+.freeon { position: absolute; inset: -4px; border-radius: 50%; background: var(--brand); color: #fff; opacity: 0;
+  display: grid; place-items: center; font: 700 21px var(--body); letter-spacing: .12em; }
+
+/* ---------- Handy (wallet-pass, lock-notification) ---------- */
+.glow4 { left: -60px; top: 480px; width: 1200px; height: 1200px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(90,79,207,.55), rgba(90,79,207,0)); }
+.phone { left: 270px; top: 600px; width: 540px; height: 930px; border-radius: 82px; padding: 14px; background: #06041A;
+  border: 3px solid rgba(185,176,255,.42); box-shadow: 0 50px 90px rgba(0,0,0,.55); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 66px; overflow: hidden;
+  background: linear-gradient(180deg, #17123A, #0B0822); }
+.island { position: absolute; top: 20px; left: 50%; margin-left: -76px; width: 152px; height: 38px; border-radius: 19px; background: #000; }
+
+/* Wortleiste ("progress" im Skript, seit 19.11.2026): je Kapitel ein Stempelfeld und ein Wort in EINER
+   Zeile, knapp unter der oberen Sperrzone (Mitte bei 230 px; bei 212 lag sie im Bereich, in dem TikTok oben
+   seine Reiter zeigt). Die Tafeln darunter beginnen bei 236 px, eine einreihige Tafel steht aber mittig in
+   236 bis 508 (Schrift ab rund 300 px), also frei davon. Vor dem ersten Kapitel unsichtbar
+   (engine.js, wordBar); ohne "progress" gilt die Stempelreihe oben. */
+#prog.words { top: 215px; gap: 30px; align-items: center; }
+#prog.words .st { display: flex; align-items: center; gap: 10px; }
+#prog.words .p { width: 28px; height: 28px; border-width: 3px; flex: none; }
+#prog.words b { font: 600 24px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; color: #fff; opacity: .42; }
+
+/* "look": "neon" (seit 19.11.2026, Nachbau "zwei Cafés" Fassung 2): fast schwarze Nacht wie im Vorbild
+   (gemessen #000006 bis #0C0C18). Ohne "look" bekommt die Buehne keine Klasse. */
+html.look-neon, html.look-neon body { background: #03040A; }
+#stage.look-neon { background: linear-gradient(180deg, #03040A 0%, #070912 100%); }
+
+/* Tafeln im Stil "box" (captionStyle.box): weisse, fette Woerter wie im Vorbild (Hanken Grotesk 700 kommt Inter
+   am naechsten), alle gleich gross, Schluesselwort im gefuellten blauen Kasten (#1842EA, gemessen), mit **
+   orange (#D8963C) und dunkler Schrift. Erste Zeile oben fest (nicht mittig): im Vorbild steht die erste Zeile
+   jeder Tafel an derselben Stelle, die zweite kommt darunter dazu. */
+.capw.capb { top: 290px; height: 300px; place-items: start center; font-family: var(--body); letter-spacing: -0.025em; }
+.capb .row { line-height: 1.2; }
+.capb .w { font-weight: 700; color: #FFFFFF; margin: 0 .11em; text-shadow: 0 3px 16px rgba(0,0,0,.7); }
+.capb .w.key { color: #FFFFFF; background: #1842EA; border-radius: 12px; padding: 0 .13em; margin: 0 .05em; text-shadow: none; }
+.capb .w.key.warm { background: #D8963C; color: #17120C; }
+
+/* Wortleiste im Stil "worte": gesperrte Grossbuchstaben, Punkte dazwischen, Mitte bei y 237 wie im Vorbild */
+#prog.words.worte { top: 224px; gap: 20px; }
+#prog.worte b { font: 700 23px/1 var(--body); letter-spacing: .2em; opacity: .3; }
+#prog.worte .sep { font: 700 23px/1 var(--body); color: #FFFFFF; opacity: .3; font-style: normal; }

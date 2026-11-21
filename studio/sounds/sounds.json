@@ -1,0 +1,666 @@
+{
+ "_hinweis": "Klangbibliothek des Studios. original/ = Dateien genau wie von ElevenLabs geliefert (nur umbenannt), <name>.flac = bearbeitete Fassung (tools/soundlib.py rebuild: Stille an beiden Enden weg, Spitze -1 dBFS, 48 kHz mono, 16 bit). Benutzt nur, wenn ein Skript \"sounds\" setzt. Messwerte (duration, lufs, rmsDb, peakDb, truePeakDb) gelten für die bearbeitete Fassung.",
+ "sounds": [
+  {
+   "name": "vine-boom",
+   "file": "vine-boom.flac",
+   "original": "original/vine-boom.mp3",
+   "what": "tiefer Bass-Schlag mit kurzem Hall (Meme \"Vine-Boom\")",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "deep cinematic bass boom hit with short reverb tail, meme reaction impact",
+   "request": {
+    "duration_seconds": 1.2,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.2,
+   "duration": 1.2,
+   "trim": [
+    0.0,
+    1.2
+   ],
+   "gainDb": 3.78,
+   "peakDb": -1.0,
+   "rmsDb": -16.75,
+   "lufs": -23.4,
+   "truePeakDb": -1.0,
+   "sha256Original": "8580f914eab91cde63cac258908040c02518d5a370637f8916a0148c65180a4d",
+   "sha256": "1792ab7aee31500d1b8b7f370635bcfd5cd808e40e1bea56a38b5ae815dc5a95",
+   "pcmSha256": "95b6254a66696a45f06b64557928ad35ccfede971a177e7af2168c89987537df"
+  },
+  {
+   "name": "plattenkratzer",
+   "file": "plattenkratzer.flac",
+   "original": "original/plattenkratzer.mp3",
+   "what": "Kratzer über eine Schallplatte, Musik bricht ab",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "vinyl record scratch, abrupt music stop",
+   "request": {
+    "duration_seconds": 1.0,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.0,
+   "duration": 1.0,
+   "trim": [
+    0.0,
+    1.0
+   ],
+   "gainDb": -4.46,
+   "peakDb": -1.0,
+   "rmsDb": -14.0,
+   "lufs": -12.0,
+   "truePeakDb": -0.8,
+   "sha256Original": "5293755a706d2a01eef6421f23be41ea0d710450ee81e825fd7fa24f4efc3db3",
+   "sha256": "ad3cf7d29a10732d8037981e849f7d71ccc96029b8ac41c38c4de2ff6639935c",
+   "pcmSha256": "8348d084126d45b71f9c25db61370874b57d60e4dd14dc02c28fed09fdb87d44"
+  },
+  {
+   "name": "publikum-keucht",
+   "file": "publikum-keucht.flac",
+   "original": "original/publikum-keucht.mp3",
+   "what": "kleines Publikum keucht erschrocken",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "small studio audience gasping in shock together",
+   "request": {
+    "duration_seconds": 1.5,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.48,
+   "duration": 1.328,
+   "trim": [
+    0.0,
+    1.3277
+   ],
+   "gainDb": -4.1,
+   "peakDb": -1.0,
+   "rmsDb": -13.9,
+   "lufs": -11.7,
+   "truePeakDb": -1.0,
+   "sha256Original": "122397c9365448c4c0d0dcddf31c49b960f255fc01287e9cb3f21574d039d263",
+   "sha256": "a0e211f4ffad88c3290937a41bb936d8352163bf75b9cd695b571ca00797e0ec",
+   "pcmSha256": "3441ec2d55483f16f33e114312b6727fb8411e9d812fb56d547b15020f863833"
+  },
+  {
+   "name": "publikum-ooh",
+   "file": "publikum-ooh.flac",
+   "original": "original/publikum-ooh.mp3",
+   "what": "Publikum macht \"Oooh\"",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "studio audience going ooooh, teasing reaction",
+   "request": {
+    "duration_seconds": 1.8,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.76,
+   "duration": 1.76,
+   "trim": [
+    0.0,
+    1.76
+   ],
+   "gainDb": -4.31,
+   "peakDb": -1.0,
+   "rmsDb": -10.97,
+   "lufs": -10.3,
+   "truePeakDb": -1.0,
+   "sha256Original": "b312cc989cbc13d3c6d0bdd18b68ae1f48ecb22df3ed344b7d7fe9fec865f175",
+   "sha256": "82375fed00b8ca76f240c4627527538b04a835a4495ba3e4577843d5a1d8a8f0",
+   "pcmSha256": "187dd5c2ef18d2b56c948ec6dc813f39c70be71c3a5c9c16164c1f5083087964"
+  },
+  {
+   "name": "drama-stoss",
+   "file": "drama-stoss.flac",
+   "original": "original/drama-stoss.mp3",
+   "what": "dramatischer Orchesterstoß \"dun dun dunnn\"",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "dramatic orchestral sting, dun dun dunnn",
+   "request": {
+    "duration_seconds": 2.5,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 2.48,
+   "duration": 2.48,
+   "trim": [
+    0.0,
+    2.48
+   ],
+   "gainDb": -3.74,
+   "peakDb": -1.0,
+   "rmsDb": -15.72,
+   "lufs": -13.0,
+   "truePeakDb": -1.0,
+   "sha256Original": "1b607b700e486ce57748955459152f1e75f8b3bc0fc51ef3d25efc5f18960a71",
+   "sha256": "27f5e2171be50dc2c69d0338b79bd2f414542f664e52c59fafa4a4329d517e0c",
+   "pcmSha256": "73877bb107917e68e752571484643d78d114e6c3f950ba8c80503d5ca9883531"
+  },
+  {
+   "name": "grillen-stille",
+   "file": "grillen-stille.flac",
+   "original": "original/grillen-stille.mp3",
+   "what": "Grillen zirpen in peinlicher Stille",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "crickets chirping in an awkward silence",
+   "request": {
+    "duration_seconds": 2.5,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 2.48,
+   "duration": 2.479,
+   "trim": [
+    0.0007,
+    2.4795
+   ],
+   "gainDb": -0.08,
+   "peakDb": -1.0,
+   "rmsDb": -18.79,
+   "lufs": -15.4,
+   "truePeakDb": -0.8,
+   "sha256Original": "c8d35aba9246a8e50ef58aa926190946804461420427dc95158068a23bd19131",
+   "sha256": "f48be158a25af25af798f075202a04d6b5543f754078394889019ceefac5ef07",
+   "pcmSha256": "bf168f2fc2436a1438524dcfdec6659580fe997097ea2435cdb8512d04586003"
+  },
+  {
+   "name": "kasse",
+   "file": "kasse.flac",
+   "original": "original/kasse.mp3",
+   "what": "alte Registrierkasse \"Ka-tsching\"",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "old cash register cha-ching",
+   "request": {
+    "duration_seconds": 1.2,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.2,
+   "duration": 1.2,
+   "trim": [
+    0.0,
+    1.2
+   ],
+   "gainDb": -2.81,
+   "peakDb": -1.0,
+   "rmsDb": -29.28,
+   "lufs": -26.4,
+   "truePeakDb": -0.8,
+   "sha256Original": "39b5c3e0789d8263970bfd6a597833502ad07860ed70468d3117135fcc738c95",
+   "sha256": "0f350557ccea6b6879e35f5a276900e1f702452e1bfa337425836f9810f20c79",
+   "pcmSha256": "78b107f1d630cccc358c19cb69ed2993f6e9b77944822e192697a5ebd99d1a30"
+  },
+  {
+   "name": "muenzen",
+   "file": "muenzen.flac",
+   "original": "original/muenzen.mp3",
+   "what": "Handvoll Münzen fällt auf eine Holztheke",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "handful of coins dropping onto a wooden counter",
+   "request": {
+    "duration_seconds": 1.5,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.48,
+   "duration": 1.259,
+   "trim": [
+    0.0,
+    1.259
+   ],
+   "gainDb": -4.95,
+   "peakDb": -1.0,
+   "rmsDb": -24.18,
+   "lufs": -21.9,
+   "truePeakDb": -1.0,
+   "sha256Original": "fcf923cdfefb293904a09a4b560889b638da3921452212d83070850266c4af17",
+   "sha256": "395923fdccae55c6cc8cde3ac985e39a1ea57fb969b374bfb38cf358928acfc7",
+   "pcmSha256": "1c52b99a3fb3a99ae7e5dd45d4ff9270529d264788b0a987053295005b25476f"
+  },
+  {
+   "name": "ladenglocke",
+   "file": "ladenglocke.flac",
+   "original": "original/ladenglocke.mp3",
+   "what": "Türglocke eines Ladens, die Tür geht auf",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "shop door bell jingling as a door opens",
+   "request": {
+    "duration_seconds": 1.5,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.48,
+   "duration": 1.48,
+   "trim": [
+    0.0,
+    1.48
+   ],
+   "gainDb": 2.27,
+   "peakDb": -1.0,
+   "rmsDb": -16.97,
+   "lufs": -12.5,
+   "truePeakDb": -1.0,
+   "sha256Original": "c68314312ebba048bc9d1d05e96bb2d8454a73831d4950e6af4c26976f1561e2",
+   "sha256": "97e2ce40626f2bf5f41cc831c30fe679ad8cd77481f6468cd341f8483b33b09f",
+   "pcmSha256": "db9dfe7055233dca10fc6231c02e3fcb106f4e4af64496e94928f8c41613d5a0"
+  },
+  {
+   "name": "grill-brutzeln",
+   "file": "grill-brutzeln.flac",
+   "original": "original/grill-brutzeln.mp3",
+   "what": "Fleisch brutzelt auf einem heißen Dönergrill",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "meat sizzling on a hot kebab grill",
+   "request": {
+    "duration_seconds": 2.0,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 2.0,
+   "duration": 2.0,
+   "trim": [
+    0.0,
+    2.0
+   ],
+   "gainDb": -2.98,
+   "peakDb": -1.0,
+   "rmsDb": -17.79,
+   "lufs": -14.3,
+   "truePeakDb": -1.0,
+   "sha256Original": "194ab8be9479bc2b0bec0428fd9ae7f1c67fe8bb96a0825fc431e720e5d49c59",
+   "sha256": "440e3784d64d2caabf8d30b275d884d81522e790137d7b3f6efa238cc991dcf7",
+   "pcmSha256": "a6939e023a88c0feec0bcea1f85c7a6057b3abf518b1b3933263a76aef29d09c"
+  },
+  {
+   "name": "papier-knuellen",
+   "file": "papier-knuellen.flac",
+   "original": "original/papier-knuellen.mp3",
+   "what": "ein Blatt Papier wird zerknüllt",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "sheet of paper being crumpled into a ball",
+   "request": {
+    "duration_seconds": 1.2,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.2,
+   "duration": 1.2,
+   "trim": [
+    0.0,
+    1.2
+   ],
+   "gainDb": 3.52,
+   "peakDb": -1.0,
+   "rmsDb": -25.11,
+   "lufs": -22.5,
+   "truePeakDb": -0.9,
+   "sha256Original": "ccc41d6298fc505971765b8a6e8a9da0dc10c70935e942edd47b40759ef42dee",
+   "sha256": "53f169d5b2c18e925014a21073f07cd194c8b1892feea63342d9875b20ffd5bc",
+   "pcmSha256": "327081d1343604f4c4ac6c5b42902cba8d461c2d5219cc51dd6933792e38e59b"
+  },
+  {
+   "name": "muelleimer",
+   "file": "muelleimer.flac",
+   "original": "original/muelleimer.mp3",
+   "what": "Deckel eines Treteimers fällt zu",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "pedal trash bin lid closing with a thud",
+   "request": {
+    "duration_seconds": 0.8,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 0.8,
+   "duration": 0.512,
+   "trim": [
+    0.0413,
+    0.5538
+   ],
+   "gainDb": -0.62,
+   "peakDb": -1.0,
+   "rmsDb": -21.96,
+   "lufs": -24.7,
+   "truePeakDb": -1.0,
+   "sha256Original": "ab291ec31cf2c562cc04dfde13b9ebd4ce35c644099b94327b89a269ae8726d9",
+   "sha256": "9dae291c1e973e9e4f2a1098a4465d99e5ee311e4b96217cffec4b3fdf9e439a",
+   "pcmSha256": "cd64799ea25d559aee52fa3f59535f3a6d95df01de20f9dec2d7328669279c60"
+  },
+  {
+   "name": "trauriger-trompeter",
+   "file": "trauriger-trompeter.flac",
+   "original": "original/trauriger-trompeter.mp3",
+   "what": "traurige Posaune \"wah wah wah waaah\"",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "sad trombone, wah wah wah waaah",
+   "request": {
+    "duration_seconds": 2.5,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 2.48,
+   "duration": 2.243,
+   "trim": [
+    0.0222,
+    2.2653
+   ],
+   "gainDb": -3.96,
+   "peakDb": -1.0,
+   "rmsDb": -14.39,
+   "lufs": -13.2,
+   "truePeakDb": -0.9,
+   "sha256Original": "16be22f34e37b4eb43304f8edb337a5d51d02c0a249216380db8f825e942aaec",
+   "sha256": "656e8b59236d329c1c101657bc6a0528f5cf52290e03e72e9ab2274b748d30d6",
+   "pcmSha256": "5b231360d6ef7d0edfff850658e04e781c61bd71223b8707e801026ec5859c94"
+  },
+  {
+   "name": "erfolg-pling",
+   "file": "erfolg-pling.flac",
+   "original": "original/erfolg-pling.mp3",
+   "what": "heller, fröhlicher Erfolgston",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "bright cheerful success ding chime",
+   "request": {
+    "duration_seconds": 0.8,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 0.8,
+   "duration": 0.8,
+   "trim": [
+    0.0,
+    0.8
+   ],
+   "gainDb": 8.6,
+   "peakDb": -1.0,
+   "rmsDb": -17.0,
+   "lufs": -17.1,
+   "truePeakDb": -1.0,
+   "sha256Original": "6b59c7359e610eecc3ce05b9a3444cd5c7a5da46d9e95e484dda1510a4b9ae48",
+   "sha256": "39c16bc6de675639f9e9e22361af4d4036e3e9913bcf64fab3262404fe2d2470",
+   "pcmSha256": "90801ed9f659ce512b67180a71985f1e7cb3448fba22ce99abbd9675a787598c"
+  },
+  {
+   "name": "wischer",
+   "file": "wischer.flac",
+   "original": "original/wischer.mp3",
+   "what": "schneller, sauberer Wischer für einen Übergang",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "fast clean whoosh transition",
+   "request": {
+    "duration_seconds": 0.6,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 0.6,
+   "duration": 0.6,
+   "trim": [
+    0.0,
+    0.6
+   ],
+   "gainDb": 0.36,
+   "peakDb": -1.0,
+   "rmsDb": -27.89,
+   "lufs": -23.9,
+   "truePeakDb": -0.8,
+   "sha256Original": "08fa02084e931141236b78a4b33ae14f6c443a26cfeb820baff8bb7e2f845d3f",
+   "sha256": "cd4c4252c6aa2ec8825728a81c44cb087d5612da9bbe2d76447ec1868760dbe6",
+   "pcmSha256": "e04b016bfe455c95bf0b8b4caa81077a14d952bf78de3c131635f7f265141bcd"
+  },
+  {
+   "name": "handy-vibriert",
+   "file": "handy-vibriert.flac",
+   "original": "original/handy-vibriert.mp3",
+   "what": "Handy vibriert zweimal auf einem Tisch",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "smartphone vibrating on a table, two short buzzes",
+   "request": {
+    "duration_seconds": 1.0,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.0,
+   "duration": 1.0,
+   "trim": [
+    0.0,
+    1.0
+   ],
+   "gainDb": -4.01,
+   "peakDb": -1.0,
+   "rmsDb": -6.44,
+   "lufs": -7.5,
+   "truePeakDb": -0.9,
+   "sha256Original": "ee4e175df350c29153b152e976aad2f567806f35c5bf349afe0399a3e71d487b",
+   "sha256": "313008c7f50b01e8ceff8d636344841fefc76fae6c76c007b7717e04018bdecf",
+   "pcmSha256": "8743a6db12472c5badd6eb48d8fcf4b3e2e854350106f6829b102cade4f382ce"
+  },
+  {
+   "name": "herzschlag",
+   "file": "herzschlag.flac",
+   "original": "original/herzschlag.mp3",
+   "what": "einzelner angespannter Herzschlag",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "single tense heartbeat thump",
+   "request": {
+    "duration_seconds": 1.0,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.0,
+   "duration": 1.0,
+   "trim": [
+    0.0,
+    1.0
+   ],
+   "gainDb": 9.74,
+   "peakDb": -1.0,
+   "rmsDb": -19.91,
+   "lufs": -21.5,
+   "truePeakDb": -1.0,
+   "sha256Original": "a7fbd9afcd1bbad10ddacfdad48ac367525fbd2a2f85f7c93210f94432db44f7",
+   "sha256": "b81d62346c20f487ca3653f443c84c06de921251e5cf81e372cadb90fd4fd855",
+   "pcmSha256": "3622e78242bd54f24404e18d562f15e732f080363a874c44ea6073b0f3e2ce6c"
+  },
+  {
+   "name": "applaus",
+   "file": "applaus.flac",
+   "original": "original/applaus.mp3",
+   "what": "kurzer begeisterter Applaus mit Jubel",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "short enthusiastic applause and cheers",
+   "request": {
+    "duration_seconds": 2.0,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 2.0,
+   "duration": 2.0,
+   "trim": [
+    0.0,
+    2.0
+   ],
+   "gainDb": -3.85,
+   "peakDb": -1.0,
+   "rmsDb": -12.35,
+   "lufs": -10.3,
+   "truePeakDb": -1.0,
+   "sha256Original": "a11fc2b40fc6741596e3db2041a7f478f67f51b33b404ada40080fe7b1348a3e",
+   "sha256": "435df0fcec09dbbc48616e8391a73d7d80b407368d2d7daeb2685f16355a93eb",
+   "pcmSha256": "100fcda179bf3627c0cc541857c1e41ba639e8f648b0a2233a542f29338e44ee"
+  },
+  {
+   "name": "keuchen-1",
+   "file": "keuchen-1.flac",
+   "original": "original/keuchen-1.mp3",
+   "what": "geschocktes Einatmen, unsere Stimme",
+   "source": "ElevenLabs TTS eleven_v3, Stimme Liam",
+   "prompt": "[sharp shocked gasp] Oh!",
+   "cut": "Ausschnitt: nur das Einatmen vor \"Oh!\" (Aufnahme K2, ab 0,10 s; per Abgleich der Abtastwerte bestätigt)",
+   "request": {
+    "model_id": "eleven_v3",
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "language_code": "de",
+    "voice_settings": {
+     "stability": 0.0
+    },
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 0.56,
+   "duration": 0.56,
+   "trim": [
+    0.0,
+    0.56
+   ],
+   "gainDb": 0.27,
+   "peakDb": -1.0,
+   "rmsDb": -16.16,
+   "lufs": -17.2,
+   "truePeakDb": -1.0,
+   "sha256Original": "b0dfd4c9997d56705afe916a7589f7d3e6dbe78fcfb85e603de0064caa53918e",
+   "sha256": "c3332f25c63591cb957612400e319d7087f4dc78254f27f98f5a12d4421c603f",
+   "pcmSha256": "e10a94eeff7553951a795c2aeee88fc9887c6f0cc143c368442b332fdf3c6f7a"
+  },
+  {
+   "name": "keuchen-2",
+   "file": "keuchen-2.flac",
+   "original": "original/keuchen-2.mp3",
+   "what": "dramatisches Einatmen, unsere Stimme",
+   "source": "ElevenLabs TTS eleven_v3, Stimme Liam",
+   "prompt": "[dramatic gasp] Nein!",
+   "cut": "Ausschnitt: nur das Einatmen vor \"Nein!\" (Aufnahme K3, ab 0,08 s; per Abgleich der Abtastwerte bestätigt)",
+   "request": {
+    "model_id": "eleven_v3",
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "language_code": "de",
+    "voice_settings": {
+     "stability": 0.0
+    },
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 0.54,
+   "duration": 0.54,
+   "trim": [
+    0.0,
+    0.54
+   ],
+   "gainDb": 0.34,
+   "peakDb": -1.0,
+   "rmsDb": -15.49,
+   "lufs": -16.3,
+   "truePeakDb": -1.0,
+   "sha256Original": "0c6d8299d069bf2ff36c31aa55f19add75845088990a918a2069882d877fc9b0",
+   "sha256": "0c473f875c5f8aa816567b41a113f5cca2f1495aa7745b4fa46e427775e96659",
+   "pcmSha256": "37c8e4eba110e21d921c35f53c9bd1a8fc67be31d8372b0babcf186632ae50fb"
+  },
+  {
+   "name": "keuchen-3",
+   "file": "keuchen-3.flac",
+   "original": "original/keuchen-3.mp3",
+   "what": "kurzes erschrockenes Einatmen, unsere Stimme",
+   "source": "ElevenLabs TTS eleven_v3, Stimme Liam",
+   "prompt": null,
+   "cut": "Aufnahme, aus der der Ausschnitt stammt, nicht überliefert; vermutlich K1 mit der Anweisung \"[gasps loudly in shock]\" (NICHT bestätigt, K1 liegt nicht mehr vor)",
+   "request": {
+    "model_id": "eleven_v3",
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "language_code": "de",
+    "voice_settings": {
+     "stability": 0.0
+    },
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 0.341,
+   "duration": 0.341,
+   "trim": [
+    0.0,
+    0.3407
+   ],
+   "gainDb": 0.11,
+   "peakDb": -1.0,
+   "rmsDb": -17.62,
+   "lufs": -19.3,
+   "truePeakDb": -1.0,
+   "sha256Original": "514248013aa7c81a998c01a701e19e7180a765cac7a562908474b8f4c4bcd03e",
+   "sha256": "23b8593273f68cb09255b96112e6bc24b311fb244acc5f8b517f57bf85209e9b",
+   "pcmSha256": "4b16b6647eddf383877ffe8bf2ca4966eb43b7bd5ecca39ca756176d2d8ee785"
+  },
+  {
+   "name": "herz-zerspringt",
+   "file": "herz-zerspringt.flac",
+   "original": "original/herz-zerspringt.mp3",
+   "what": "zerbrechliches Glasherz zerspringt in Stücke (für ein zerbrechendes Herz, vom Betreiber gewählt)",
+   "source": "ElevenLabs Sound Effects",
+   "prompt": "fragile glass heart breaking and shattering into pieces",
+   "request": {
+    "duration_seconds": 1.2,
+    "prompt_influence": 0.6,
+    "output_format": "mp3_44100_128"
+   },
+   "date": "2026-11-16",
+   "licence": "kommerzielle Nutzung mit dem bezahlten Tarif des Betreibers",
+   "durationOriginal": 1.2,
+   "duration": 1.2,
+   "trim": [
+    0.0,
+    1.2
+   ],
+   "gainDb": -4.41,
+   "peakDb": -1.0,
+   "rmsDb": -21.25,
+   "lufs": -17.0,
+   "truePeakDb": -0.3,
+   "sha256Original": "96c74c5606fe8f806decc63d6d6fe22dfe8a880e518e16827ce80e059a51d23b",
+   "sha256": "24a058e1e8933ed0a5c997558dcae1037589d861a38c5f737fa00d41dabce88e",
+   "pcmSha256": "cf7ce7f928074ddde239c8d84d993dbb0325ed12a2fd0ed4a639a732b58e6479"
+  }
+ ],
+ "format": {
+  "sampleRate": 48000,
+  "channels": 1,
+  "bits": 16,
+  "codec": "flac",
+  "peakDb": -1.0,
+  "trim": "Stille = leiser als -60 dB unter der Spitze oder -70 dBFS; 5 ms davor und 20 ms danach bleiben, mit Blende"
+ }
+}

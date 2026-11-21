@@ -1,0 +1,10 @@
+{
+  "dauer_min": 45,
+  "ergebnis": "Video für Donnerstag mit Stimme gebaut (F01, Eis am Markt, 41,7 s, 591 Zeichen), 2 neue Ideen aus Reels, 1 eigene Idee, Idee für Freitag vorgemerkt.",
+  "modus": "produktion",
+  "problem": "Auf der Maschine passte Pillow nicht zu python3 (3.11); gebaut wurde mit python3.12 und dafür installiertem numpy.",
+  "push": "ok",
+  "stimme_zeichen": 591,
+  "video_id": "2026-11-19-eis-stammgast-tipps-v1",
+  "zeit": "2026-11-18T06:33:09Z"
+}

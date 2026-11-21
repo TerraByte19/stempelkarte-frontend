@@ -1,0 +1,22 @@
+{
+ "key": "c98d9cadf529ac51",
+ "text": "Neun Haarschnitte bei dir. Den zehnten macht ein anderer. Und gemerkt hat es keiner. Was kostet dich so ein Abschied eigentlich? Laut Harvard Business Review ist ein neuer Kunde fünf- bis fünfundzwanzigmal so teuer wie einer, der bleibt. Flyer, Rabatte, Werbung: alles nur für den ersten Besuch. Deine Stammkundin dagegen ist schon da. Sie musst du nicht neu gewinnen, nur halten. Also: Kümmer dich zuerst um die, die wiederkommen. Frag sie nach dem nächsten Termin, und merk dir, wie sie ihren Schnitt mag. Ihre Karte liegt in der Wallet. Da geht kein Stempel verloren. Überrascht? Dann kommentiere jetzt Salon, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 640,
+ "audio": "c98d9cadf529ac51.mp3",
+ "audio_sha256": "3a58f795a9d6870bf6ed40444d47b633f0f578309df2880442a6b2426b4cdb3f",
+ "spent": 640
+}

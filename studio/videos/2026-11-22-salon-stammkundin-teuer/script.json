@@ -1,0 +1,461 @@
+{
+  "meta": {
+    "title": "Den zehnten macht ein anderer",
+    "slug": "salon-stammkundin-teuer",
+    "language": "de",
+    "datum": "2026-11-22",
+    "format": "F10",
+    "beleg_kern": "studie",
+    "studie": "S3",
+    "thema": "verlorener-stammkunde",
+    "branche": "friseur",
+    "idee_id": "20261117-salon-karte-zerknickt",
+    "hook_muster": "H02",
+    "hook_punkte": 12,
+    "hook_kandidaten": [
+      {
+        "satz": "Neun Haarschnitte bei dir. Den zehnten macht ein anderer.",
+        "muster": "H02",
+        "punkte": 12,
+        "gruende": "S1 Ladenglocke bei 0 s, Sprechblase bei 0,3 s; S2 seine Stammkundin; S3 Verlust; K1 Haarschnitte; K2 ohne Vorwissen; K3 vier Wörter auf der ersten Tafel; W1 seine Sorge; W2 die Studienzahl kennt er kaum; W3 Studie S3 bis 10 s im Bild. Gewählt: bei Gleichstand der Satz mit Zahl, die zur Karte mit neun Stempeln am Ende passt",
+        "raus": ""
+      },
+      {
+        "satz": "Jeden Monat Spitzen schneiden. Seit Oktober nicht mehr.",
+        "muster": "H02",
+        "punkte": 12,
+        "gruende": "S1 Glocke und Blase; S2 seine Kundin; S3 Verlust; K1 Spitzen schneiden; K2 ja; K3 fünf Wörter; W1 Sorge; W2 Studie neu; W3 Studie bis 10 s. Gleichstand, nicht gewählt: ohne Zahl kein Bogen zur Karte am Ende",
+        "raus": ""
+      },
+      {
+        "satz": "Deine Stammkundin geht fremd. Mit dem Salon an der Ecke.",
+        "muster": "H12",
+        "punkte": 11,
+        "gruende": "S1 ja; S2 seine Stammkundin; S3 Drama; K1 Salon; K2 ja; K3 vier Wörter; W1 Sorge; W2 0, das Bild vom Fremdgehen ist erwartbar; W3 Studie bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Was kostet dich eine Stammkundin, die nicht wiederkommt?",
+        "muster": "H05",
+        "punkte": 10,
+        "gruende": "S1 ja; S2 seine Kundin; S3 Verlust; K1 0, kein Gegenstand im Satz; K2 ja; K3 0, acht Wörter in einem langen Satz; W1 Sorge; W2 die Antwort kennt er kaum; W3 Studie bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Wer ist teurer: die Neue im Stuhl oder deine Stammkundin?",
+        "muster": "H05",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "erste Tafel über 8 Wörter, als ganzer Satz nicht teilbar; dazu nah am Beispiel aus FORMATE.md F10"
+      }
+    ],
+    "meme": "",
+    "kern_bild": "zahl",
+    "einstieg": "iso-shop",
+    "motive": [],
+    "schluss": "Überrascht?",
+    "beleg": "Kernaussage Studie S3 (Harvard Business Review 2014, Spanne 5- bis 25-mal, Quelle nur gesprochen). Produkt nur im letzten Satz: A1 (Karte in der Wallet) und A4 (nichts geht verloren). Kein Papierbild, kein Scan, keine Nähe.",
+    "idee": "Angeregt durch ein Reel eines Mitbewerbers über den Stammkunden, der unbemerkt woanders hingeht. Eigener Dreh im Format F10: Salon Haarscharf, die Kosten eines neuen Kunden aus der Studie S3, als Rat, die zu halten, die schon da sind."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "friseur",
+            "shop": "Salon Haarscharf",
+            "icon": "scissors",
+            "phone": false,
+            "paper": false,
+            "start": "counter",
+            "bubble": true,
+            "customer": 0,
+            "stamps": 10,
+            "have": 9
+          },
+          "anchors": {
+            "order": {
+              "at": "start",
+              "offset": 0.3
+            }
+          },
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.8
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Neun *Haarschnitte",
+                "bei dir."
+              ],
+              "instant": true,
+              "scale": 1.2
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "friseur",
+            "shop": "Salon Haarscharf",
+            "icon": "scissors",
+            "phone": false,
+            "paper": false,
+            "start": "none",
+            "bubble": false,
+            "dim": true,
+            "push": 0.15,
+            "stamps": 10,
+            "have": 9
+          },
+          "captions": [
+            {
+              "lines": [
+                "Den *zehnten | macht ein *anderer."
+              ]
+            },
+            {
+              "lines": [
+                "Und *gemerkt | hat es | *keiner."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "friseur",
+            "shop": "Salon Haarscharf",
+            "icon": "scissors",
+            "phone": false,
+            "paper": false,
+            "start": "counter",
+            "bubble": false,
+            "customer": 0,
+            "push": 0.2,
+            "orbit": 10,
+            "stamps": 10,
+            "have": 9
+          },
+          "captions": [
+            {
+              "lines": [
+                "Was kostet dich | so ein *Abschied | eigentlich?"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "params": {
+            "value": "5-25×",
+            "from": "",
+            "sub": "",
+            "label": "teurer ist ein neuer Kunde"
+          },
+          "anchors": {
+            "show": {
+              "cap": 1,
+              "word": 4
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 7,
+              "zoom": 1.15,
+              "focus": [
+                540,
+                820
+              ],
+              "to": [
+                540,
+                860
+              ],
+              "dur": 0.3
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Laut *Harvard | Business Review"
+              ]
+            },
+            {
+              "lines": [
+                "ist ein *neuer Kunde | fünf- bis | fünfundzwanzigmal | so *teuer"
+              ]
+            },
+            {
+              "lines": [
+                "wie einer, | der *bleibt."
+              ]
+            }
+          ],
+          "enter": "cut"
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "friseur",
+            "shop": "Salon Haarscharf",
+            "icon": "scissors",
+            "phone": false,
+            "paper": false,
+            "start": "door",
+            "bubble": false,
+            "customer": 3,
+            "stamps": 10,
+            "have": 9
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Flyer, | Rabatte, | *Werbung:"
+              ]
+            },
+            {
+              "lines": [
+                "alles nur für | den *ersten Besuch."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "enter": "cut",
+          "params": {
+            "value": "9",
+            "from": "1",
+            "count": true,
+            "sub": "",
+            "label": "Haarschnitte bei dir"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Deine *Stammkundin | dagegen | ist schon *da."
+              ]
+            },
+            {
+              "lines": [
+                "Sie musst du | nicht neu *gewinnen, | nur *halten."
+              ]
+            }
+          ],
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.15,
+              "focus": [
+                540,
+                820
+              ],
+              "to": [
+                540,
+                860
+              ],
+              "dur": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "tip-cards",
+          "params": {
+            "head": "Der Rat für deinen Salon",
+            "rise": true,
+            "show": 1,
+            "numbered": false,
+            "items": [
+              {
+                "title": "Kümmer dich zuerst um die, die wiederkommen.",
+                "icon": "scissors"
+              }
+            ]
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 0
+            }
+          },
+          "camera": [
+            {
+              "cap": 0,
+              "word": 4,
+              "zoom": 1.2,
+              "focus": [
+                500,
+                1040
+              ],
+              "to": [
+                540,
+                1080
+              ],
+              "dur": 0.3
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Also: | Kümmer dich | *zuerst um die, | die *wiederkommen."
+              ]
+            },
+            {
+              "lines": [
+                "Frag sie | nach dem | *nächsten Termin,"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "friseur",
+            "shop": "Salon Haarscharf",
+            "icon": "scissors",
+            "phone": false,
+            "paper": false,
+            "start": "door",
+            "bubble": true,
+            "customer": 0,
+            "stamps": 10,
+            "have": 9
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            },
+            "order": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "und merk dir, | wie sie ihren | *Schnitt mag."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "phone-3d",
+      "params": {
+        "mode": "wallet",
+        "shop": "Salon Haarscharf",
+        "icon": "scissors",
+        "stamps": 10,
+        "before": 9,
+        "after": 9,
+        "reward": "Schnitt gratis",
+        "line": "10 Stempel = 1 Schnitt gratis",
+        "scan": false,
+        "rise": true,
+        "drop": true
+      },
+      "anchors": {
+        "card": {
+          "cap": 0,
+          "word": 1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Ihre *Karte | liegt in der *Wallet. | Da geht | kein Stempel | *verloren."
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Überrascht?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt SALON,{Salon,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ]
+}
