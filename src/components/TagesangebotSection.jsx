@@ -15,11 +15,17 @@ export default function TagesangebotSection() {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [meldung, setMeldung] = useState(null)
+  // Reichweite: dieselbe Zahl wie bei Kampagnen an "Alle". Wer heute schon
+  // eine Nachricht hatte, bekommt keine Mitteilung (eine pro Tag). null = unbekannt.
+  const [reichweite, setReichweite] = useState(null)
 
   function laden() {
     api.get('/api/shop/tagesangebot')
         .then(r => setStand(r.data && typeof r.data === 'object' ? r.data : false))
         .catch(() => setStand(false))
+    api.get('/api/shop/kampagnen')
+        .then(r => setReichweite((r.data?.gruppen || []).find(g => g.gruppe === 'ALLE') || null))
+        .catch(() => setReichweite(null))
   }
   useEffect(laden, [])
 
@@ -35,6 +41,7 @@ export default function TagesangebotSection() {
       setStand(r.data)
       setText('')
       setMeldung({ text: t('tag_sent', { n: r.data?.empfaenger ?? 0 }) })
+      laden()
     } catch (e) {
       setMeldung({ fehler: true, text: e.response?.data?.message || e.response?.data?.error || t('tag_err') })
     } finally { setBusy(false) }
@@ -76,6 +83,12 @@ export default function TagesangebotSection() {
           <button type="button" style={s.btn} onClick={setzen} disabled={busy || !text.trim()}>{t('tag_set')}</button>
         </div>
         <div style={s.zaehler}>{text.length}/{TEXT_MAX}</div>
+        {reichweite && (
+            <div style={s.reichweite}>
+              {t('tag_reach', { n: reichweite.empfaenger })}
+              {reichweite.heuteSchon > 0 && <> {t('tag_reach_today', { h: reichweite.heuteSchon })}</>}
+            </div>
+        )}
         {meldung && <div style={{ ...s.meldung, color: meldung.fehler ? '#b23b3b' : '#2d7a3e' }}>{meldung.text}</div>}
       </div>
   )
@@ -94,5 +107,6 @@ const s = {
   btn: { background: '#3C3489', color: 'white', border: 'none', borderRadius: 10, padding: '10px 16px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
   btnSekundaer: { background: 'white', color: '#3C3489', border: '1.5px solid #c9c4ee', borderRadius: 8, padding: '7px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
   zaehler: { fontSize: 11, color: '#aaa', marginTop: 4, textAlign: 'right' },
+  reichweite: { fontSize: 13, color: '#555', marginTop: 6, lineHeight: 1.5 },
   meldung: { fontSize: 13, marginTop: 8 },
 }

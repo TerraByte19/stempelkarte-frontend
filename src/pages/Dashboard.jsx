@@ -4,7 +4,6 @@ import { useLang } from '../LangContext'
 import api from '../api'
 import AktivitaetSection from '../components/AktivitaetSection'
 import FilialenSection from '../components/FilialenSection'
-import RueckmeldungenSection from '../components/RueckmeldungenSection'
 import KundengruppenSection from '../components/KundengruppenSection'
 import { useTarif } from '../tarif'
 
@@ -47,9 +46,6 @@ export default function Dashboard() {
   const [heute, setHeute] = useState(null)
   // Einrichtung: null = noch unbekannt, dann zeigt die Liste den Schritt nicht.
   const [zugaenge, setZugaenge] = useState(null)
-  const [rueckAktiv, setRueckAktiv] = useState(null)
-  const [rueckKey, setRueckKey] = useState(0)
-  const [rueckBusy, setRueckBusy] = useState(false)
   const [nachrichtenGesehen, setNachrichtenGesehen] = useState(() => lesen(NACHRICHTEN_GESEHEN) === 'true')
   // Standort-Pflicht: ohne hinterlegten Ladenort laeuft die Geo-Pruefung
   // ins Leere, deshalb sperrt das Backend irgendwann das Scannen.
@@ -104,16 +100,6 @@ export default function Dashboard() {
         .catch(() => setStandort(null))
   }, [])
 
-  async function rueckmeldungenEinschalten() {
-    setRueckBusy(true)
-    try {
-      await api.put('/api/shop/rueckmeldungen/aktiv', { aktiv: true })
-      setRueckAktiv(true)
-      setRueckKey(k => k + 1)   // Abschnitt neu laden, damit er erscheint
-    } catch { alert(t('common_error_generic')) }
-    setRueckBusy(false)
-  }
-
   function nachrichtenAbhaken() {
     try { localStorage.setItem(NACHRICHTEN_GESEHEN, 'true') } catch { /* nur Komfort */ }
     setNachrichtenGesehen(true)
@@ -132,16 +118,6 @@ export default function Dashboard() {
     schritte.push({
       key: 'scanner', titel: t('setup_scanner_title'), text: t('setup_scanner_text'),
       aktion: <Link to="/team" style={styles.btnSchritt}>{t('setup_scanner_btn')}</Link>,
-    })
-  }
-  if (rueckAktiv === false) {
-    schritte.push({
-      key: 'rueck', titel: t('setup_feedback_title'), text: t('rm_intro'), hinweis: t('rm_google_note'),
-      aktion: (
-          <button type="button" style={styles.btnSchritt} disabled={rueckBusy} onClick={rueckmeldungenEinschalten}>
-            {t('rm_on')}
-          </button>
-      ),
     })
   }
   if (!nachrichtenGesehen) {
@@ -273,10 +249,6 @@ export default function Dashboard() {
 
         {/* Zuletzt passiert: juengste Scans und neueste Kunden */}
         <AktivitaetSection />
-
-        {/* Private Rueckmeldungen der Kunden. Ausgeschaltet steht der Schritt
-            oben in der Einrichtung; hier erscheinen nur die Rueckmeldungen. */}
-        <RueckmeldungenSection key={rueckKey} nurWennAktiv onStand={setRueckAktiv} />
 
         {cards.length > 0 && (
             <div style={styles.grid}>
