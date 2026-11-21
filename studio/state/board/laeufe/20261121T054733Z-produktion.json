@@ -1,0 +1,11 @@
+{
+  "dauer_min": 47,
+  "ergebnis": "Video für Sonntag mit Stimme gebaut (41,9 s, 640 Zeichen), 3 Reels bewertet, 1 Idee für Montag vorgemerkt.",
+  "modus": "produktion",
+  "problem": "Der erste Bau scheiterte am Bildbogen (python3 im Pfad ohne funktionierendes Pillow), der zweite mit /usr/bin/python3 gelang.",
+  "push": "ausstehend",
+  "sitzung": "https://claude.ai/code/session_01EEzBTjxdqnwS7bxLVCyqSx",
+  "stimme_zeichen": 640,
+  "video_id": "2026-11-22-salon-stammkundin-teuer-v1",
+  "zeit": "2026-11-21T06:35:13Z"
+}
