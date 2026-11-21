@@ -74,7 +74,7 @@ export default function AktivitaetSection() {
                       <div key={i} style={s.zeile}>
                         <span style={s.zeit}>{zeit(scan.zeit)}</span>
                         <span style={s.wer}>
-                          <span style={s.name}>{scan.kunde || t('dash_act_unknown')}</span>
+                          <span style={s.name}>{scan.kunde || t(scan.anonym ? 'profil_ohnemail_an' : 'dash_act_unknown')}</span>
                           <span style={s.karte}>
                             {scan.karte}{scan.von ? ` · ${t('dash_act_by', { name: scan.von })}` : ''}
                           </span>
@@ -91,7 +91,7 @@ export default function AktivitaetSection() {
                     <div key={i} style={s.zeile}>
                       <span style={s.zeit}>{datum(k.seit)}</span>
                       <span style={s.wer}>
-                        <span style={s.name}>{k.name || t('dash_act_unknown')}</span>
+                        <span style={s.name}>{k.name || t(k.anonym ? 'profil_ohnemail_an' : 'dash_act_unknown')}</span>
                         <span style={s.karte}>{k.karte}</span>
                       </span>
                       {k.gesperrt && <span style={{ ...s.pill, color: '#9a5d00', background: '#fbecd2' }}>{t('dash_act_locked')}</span>}
