@@ -8,7 +8,7 @@ import PointsSettings from '../components/PointsSettings'
 import RewardCatalog from '../components/RewardCatalog'
 import WillkommenSettings from '../components/WillkommenSettings'
 import StufenSettings from '../components/StufenSettings'
-import EmpfehlungSettings from '../components/EmpfehlungSettings'
+
 import AufkleberSettings from '../components/AufkleberSettings'
 import NfcSettings from '../components/NfcSettings'
 import PaketSettings from '../components/PaketSettings'
@@ -1167,11 +1167,11 @@ export default function Karten() {
             </div>
           </div>
           )}
-          {/* Zusatzbloecke je Karte: Stufen (nicht Punkte), Kunde wirbt Kunde
-              (Stempel und Punkte), Aufkleber (alle). Jeder laedt sich selbst
+          {/* Zusatzbloecke je Karte: Stufen (nicht Punkte), Aufkleber (alle).
+              Jeder laedt sich selbst
+
               und bleibt bei einem aelteren Backend unsichtbar. */}
           <StufenSettings cardId={editCard.id} t={t}/>
-          {(istStempel || istPunktekarte) && <EmpfehlungSettings cardId={editCard.id} cardType={editTyp} t={t}/>}
           <AufkleberSettings cardId={editCard.id} t={t}/>
           {/* NFC stempelt nur Stempelkarten - Punkte brauchen den Betrag. */}
           {istStempel && <NfcSettings cardId={editCard.id} t={t}/>}
