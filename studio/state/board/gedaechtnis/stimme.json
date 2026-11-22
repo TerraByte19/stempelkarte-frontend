@@ -29,6 +29,16 @@
       "zeichen": 640,
       "zeit": "2026-11-21T06:19:24Z",
       "zweck": "neu"
+    },
+    {
+      "art": "voll",
+      "id": "20261122T062732Z-voll",
+      "stand": "bestaetigt",
+      "tag": "2026-11-22",
+      "video": "2026-11-23-eis-winterpause",
+      "zeichen": 637,
+      "zeit": "2026-11-22T06:27:32Z",
+      "zweck": "neu"
     }
   ],
   "format": 1

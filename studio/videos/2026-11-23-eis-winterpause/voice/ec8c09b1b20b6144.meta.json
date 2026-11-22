@@ -1,0 +1,22 @@
+{
+ "key": "ec8c09b1b20b6144",
+ "text": "Letzte Kugel, Tür zu, Winterpause. Rate mal, was aus acht Stempeln wird. Fängt deine Stammkundin im März wieder bei null an? Nein. Ihre Karte bleibt einfach im Handy! Im Herbst holte sie sich bei dir Stempel Nummer acht. Die Karte dazu liegt seit einem einzigen Scan im Handy. Jetzt bleibt dein Laden dunkel, bis zum Frühjahr. Ihre Karte liegt weiter in Apple oder Google Wallet. Kein Zettel in der Schublade. Alle acht Stempel bleiben. Im März geht deine Tür wieder auf. Sie bestellt zwei Kugeln, als wäre nichts gewesen. Und holt sich gleich Stempel Nummer neun. Richtig geraten? Dann kommentiere jetzt Eis, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 637,
+ "audio": "ec8c09b1b20b6144.mp3",
+ "audio_sha256": "61c53bf748c3aff2c1007655ec52f39b22bd8ee5b78bd5a9f854ad048af34a9a",
+ "spent": 637
+}

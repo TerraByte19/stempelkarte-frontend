@@ -1,0 +1,460 @@
+{
+  "meta": {
+    "title": "Rate mal, was aus acht Stempeln wird",
+    "slug": "eis-winterpause",
+    "language": "de",
+    "datum": "2026-11-23",
+    "format": "F07",
+    "beleg_kern": "ohne-app",
+    "thema": "karte-bleibt",
+    "branche": "eiscafe",
+    "idee_id": "20261121-eis-winterpause",
+    "hook_muster": "H10",
+    "hook_punkte": 12,
+    "hook_kandidaten": [
+      {
+        "satz": "Letzte Kugel, Tür zu, Winterpause. Rate mal, was aus acht Stempeln wird.",
+        "muster": "M05",
+        "punkte": 12,
+        "gruende": "S1 Ladenglocke bei 0 s, die Tür fällt bei 0,3 s zu; S2 sein Laden, seine Winterpause; S3 drohender Verlust der acht Stempel; K1 Kugel und Stempel; K2 trägt ohne Vorlage; K3 fünf Wörter auf der ersten Tafel; W1 seine Sorge vor dem Frühjahr; W2 die Antwort Nichts erwartet er nicht; W3 die Karte bleibt im Handy (A3) steht bis 10 s im Bild. Gewählt: die Tafel sagt Tür zu, und die Tür fällt zu",
+        "raus": ""
+      },
+      {
+        "satz": "Winterpause in deiner Eisdiele. Rate mal, wer im März bei null anfängt.",
+        "muster": "M05",
+        "punkte": 11,
+        "gruende": "S1 ja; S2 seine Eisdiele; S3 Verlust, bei null anfangen; K1 0, weder Karte noch Stempel im Satz; K2 ja; K3 vier Wörter; W1 Sorge; W2 die Antwort Niemand überrascht; W3 A3 bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Deine Eisdiele macht Winterpause. Rate mal, was mit den Stempelkarten passiert.",
+        "muster": "M05",
+        "punkte": 10,
+        "gruende": "S1 ja; S2 seine Eisdiele; S3 0, ein Rätsel, aber kein Verlust im Satz; K1 Stempelkarten; K2 ja; K3 vier Wörter; W1 Sorge; W2 die Antwort Nichts überrascht; W3 A3 bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Eis am Markt macht zu bis März. Rate mal, wo die Stempelkarten überwintern.",
+        "muster": "M05",
+        "punkte": 9,
+        "gruende": "S1 ja; S2 sein Laden; S3 0, keine Reibung; K1 Stempelkarten; K2 ja; K3 sieben Wörter; W1 Sorge; W2 0, die Antwort im Handy ist erwartbar; W3 A3 bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Rate mal, was deine Stempelkarten im Winter machen.",
+        "muster": "M05",
+        "punkte": 9,
+        "gruende": "S1 ja; S2 seine Karten; S3 0; K1 Stempelkarten; K2 ja; K3 acht Wörter, ein Gedanke; W1 0, kein Satz von der Theke; W2 ja; W3 A3 bis 10 s. Der Laden fehlt im Satz, er steht nur im Bild",
+        "raus": ""
+      }
+    ],
+    "meme": "M05",
+    "kern_bild": "meme",
+    "einstieg": "shop-door",
+    "motive": [],
+    "schluss": "Richtig geraten?",
+    "beleg": "Kernaussage A3 (einmal gescannt, die Karte bleibt auf dem Handy), dazu A1 als Ort (Apple oder Google Wallet) und A4 in einem Satz (kein Zettel). Kein Papierbild, kein Scan-Bild, keine Nähe.",
+    "idee": "Eigene Idee aus der Themenliste (T13): die Eisdiele in der Winterpause. Meme-Rahmen M05 (Rate mal), eigene Worte, Bilder und Stimme."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "parts": [
+        {
+          "component": "shop-door",
+          "params": {
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "accent": "#5A4FCF",
+            "guest": false,
+            "spit": false,
+            "tones": false
+          },
+          "anchors": {
+            "close": {
+              "at": "start",
+              "offset": 0.3
+            },
+            "sign": {
+              "at": "start",
+              "offset": 0.36
+            }
+          },
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.8
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Letzte *Kugel,",
+                "Tür zu,",
+                "*Winterpause."
+              ],
+              "instant": true
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "enter": "cut",
+          "params": {
+            "value": "8",
+            "from": "",
+            "sub": "Stempel",
+            "label": "auf der Karte deiner Stammkundin"
+          },
+          "anchors": {
+            "show": {
+              "at": "start",
+              "offset": 0.1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Rate mal, | was aus | *acht *Stempeln | wird."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "big-number",
+          "params": {
+            "value": "0",
+            "from": "8",
+            "count": true,
+            "sub": "Stempel",
+            "label": "wenn du im März wieder aufmachst?"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": 4
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Fängt deine | *Stammkundin | im März | wieder | bei *null an?"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "stamp-check",
+          "enter": "cut",
+          "params": {
+            "icon": "check"
+          },
+          "anchors": {
+            "hit": {
+              "cap": 0,
+              "word": -1,
+              "offset": 0.1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "*Nein. | Ihre Karte | *bleibt | einfach | im *Handy!"
+              ],
+              "scale": 1.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "eis",
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "phone": false,
+            "paper": false,
+            "stamps": 10,
+            "have": 8,
+            "start": "counter",
+            "bubble": true,
+            "customer": 2
+          },
+          "anchors": {
+            "order": {
+              "cap": 0,
+              "word": 2
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Im *Herbst | holte sie sich | bei dir | Stempel | *Nummer *acht."
+              ],
+              "gapBefore": 0.55
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "wallet",
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "stamps": 10,
+            "before": 8,
+            "after": 8,
+            "reward": "Gratis-Kugel",
+            "line": "10 Stempel = 1 Gratis-Kugel",
+            "scan": false,
+            "rise": true,
+            "drop": true
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Die *Karte dazu | liegt seit | einem | *einzigen *Scan | im Handy."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "eis",
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "phone": false,
+            "paper": false,
+            "stamps": 10,
+            "have": 8,
+            "start": "none",
+            "bubble": false,
+            "dim": true,
+            "push": 0.15
+          },
+          "captions": [
+            {
+              "lines": [
+                "Jetzt bleibt | dein Laden | *dunkel, | bis zum | *Frühjahr."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "wallet",
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "stamps": 10,
+            "before": 8,
+            "after": 8,
+            "reward": "Gratis-Kugel",
+            "line": "10 Stempel = 1 Gratis-Kugel",
+            "scan": false,
+            "device": "android",
+            "rise": false,
+            "drop": false,
+            "angle": -14
+          },
+          "captions": [
+            {
+              "lines": [
+                "Ihre Karte | liegt *weiter | in *Apple oder | *Google Wallet."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "enter": "cut",
+          "params": {
+            "value": "8",
+            "from": "",
+            "sub": "Stempel",
+            "label": "bleiben, ganz ohne Zettel"
+          },
+          "anchors": {
+            "show": {
+              "at": "start",
+              "offset": 0.1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Kein *Zettel | in der | *Schublade."
+              ]
+            },
+            {
+              "lines": [
+                "Alle *acht | Stempel | *bleiben."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "eis",
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "phone": false,
+            "paper": false,
+            "stamps": 10,
+            "have": 8,
+            "start": "door",
+            "bubble": false,
+            "customer": 2
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Im *März | geht | deine *Tür | wieder *auf."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "eis",
+            "shop": "Eis am Markt",
+            "icon": "heart",
+            "phone": false,
+            "paper": false,
+            "stamps": 10,
+            "have": 8,
+            "start": "counter",
+            "bubble": true,
+            "customer": 2,
+            "push": 0.2,
+            "orbit": 10
+          },
+          "anchors": {
+            "order": {
+              "cap": 0,
+              "word": 3
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Sie bestellt | zwei *Kugeln, | als wäre | *nichts | gewesen."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "enter": "cut",
+          "params": {
+            "value": "9",
+            "from": "8",
+            "count": true,
+            "sub": "Stempel",
+            "label": "es geht einfach weiter"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und holt sich | gleich | Stempel | *Nummer *neun."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Richtig geraten?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt EIS,{Eis,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ]
+}
