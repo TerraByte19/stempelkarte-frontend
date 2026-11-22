@@ -941,7 +941,8 @@ export default function Admin() {
             <div style={styles.gruppe}>
               <div style={styles.gruppeTitel}>Schalter</div>
               <Schalter an={!shop.mailsAus} titel="Mails"
-                        text="Aus: für diesen Laden geht keine E-Mail raus, Karten gibt es ohne Anmeldung. Push bleibt."
+                        text={shop.mailsAus ? 'Aus: für diesen Laden geht keine E-Mail raus, Karten gibt es ohne Anmeldung. Push bleibt.'
+                            : 'An: Bestätigung, Newsletter und Hinweise gehen per E-Mail raus.'}
                         onClick={() => setMails(shop, !shop.mailsAus)} />
               <Schalter an={!shop.geoBefreit} titel="Standort-Pflicht"
                         text={shop.geoBefreit ? 'Aus: scannt ohne Standort.'
@@ -977,7 +978,7 @@ export default function Admin() {
                   {shop.active ? 'Sperren' : 'Entsperren'}
                 </button>
               </div>
-              <button style={{ ...styles.btnToggle, background: 'none', color: '#c00', border: '1px solid #f5c6c2', marginTop: 14 }}
+              <button style={{ ...styles.btnToggle, flex: 'none', background: 'none', color: '#c00', border: '1px solid #f5c6c2', marginTop: 14 }}
                       onClick={() => deleteShop(shop.id, shop.name)}>
                 Laden löschen
               </button>
