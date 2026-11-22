@@ -62,8 +62,9 @@ export default function Profil() {
         <Sperrbildschirm t={t} shop={shop} />
         <Rueckhol t={t} shop={shop} />
         <GoogleBewertung t={t} shop={shop} />
-        <AnmeldungOhneMail t={t} shop={shop} />
-        <Anmeldefelder t={t} shop={shop} />
+        {/* Mails aus (Admin): Karten gibt es dann immer ohne Anmeldung - nichts zu waehlen. */}
+        {!shop.mailsAus && <AnmeldungOhneMail t={t} shop={shop} />}
+        {!shop.mailsAus && <Anmeldefelder t={t} shop={shop} />}
         {/* Geburtstagsgruss zaehlt zu den automatischen Nachrichten (ab Pro). */}
         <AbPro funktion="auto_nachrichten" titel={t('profil_bday_title')}><Geburtstagsgruss t={t} shop={shop} /></AbPro>
         <Kundengruppen t={t} />

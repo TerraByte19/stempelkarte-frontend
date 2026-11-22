@@ -3,6 +3,7 @@ import StatsView from '../components/StatsView'
 import { LogoZeichen } from '../components/Logo'
 import { ALLE, OHNE, auswahlOrdner, benutzteOrdner, imOrdner } from '../lib/adminOrdner'
 import { supportStarten } from '../lib/supportZugang'
+import AdminKette from '../components/AdminKette'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -15,6 +16,7 @@ export default function Admin() {
   const [changingPasswordFor, setChangingPasswordFor] = useState(null)
   const [changingEmailFor, setChangingEmailFor] = useState(null)
   const [expandedShopId, setExpandedShopId] = useState(null)
+  const [ketteOffen, setKetteOffen] = useState(null)   // Laden, dessen Ketten-Kasten offen ist
   const [draggedId, setDraggedId] = useState(null)   // Laden am Haken
   const [dragOverId, setDragOverId] = useState(null) // Zeile unter dem Zeiger
   // Eigener Zustand: das allgemeine `error` wird nur auf dem Login-Bildschirm
@@ -326,6 +328,24 @@ export default function Admin() {
       loadShops()
     } catch {
       alert('Fehler beim Umstellen der Schnittstelle')
+    }
+  }
+
+  // Mails je Laden: aus = keine E-Mail geht fuer diesen Laden raus (Bestaetigung,
+  // Newsletter, Testphase, Loeschung), Karten gibt es dort nur ohne Anmeldung.
+  async function setMails(shop, aus) {
+    if (aus && !confirm(`Mails für "${shop.name}" ausschalten?\n\nDann geht für diesen Laden keine E-Mail mehr raus, der Newsletter ist im Dashboard weg, und Kunden bekommen die Karte ohne Anmeldung. Push bleibt.`)) return
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/mails`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ aus })
+      })
+      if (!res.ok) throw new Error()
+      loadShops()
+    } catch {
+      alert('Fehler beim Umstellen der Mails')
     }
   }
 
@@ -993,6 +1013,20 @@ export default function Admin() {
                           style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
                                    background: shop.demo ? '#fff4e5' : '#f0f0f0', color: shop.demo ? '#b35c00' : '#777' }}
                       >Demo</button>
+                      <button
+                          title={shop.mailsAus ? 'Mails aus: für diesen Laden geht keine E-Mail raus. Klicken = einschalten' : 'Mails an. Klicken = ausschalten'}
+                          onClick={() => setMails(shop, !shop.mailsAus)}
+                          style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                                   background: shop.mailsAus ? '#fce8e6' : '#e6f4ea', color: shop.mailsAus ? '#c5221f' : '#2C5F2E' }}
+                      >{shop.mailsAus ? 'Mails aus' : 'Mails'}</button>
+                      {shop.tarif === 'KETTE' && (
+                          <button
+                              title="Kette: Filialen, Logins, Geräte je Filiale"
+                              onClick={() => setKetteOffen(ketteOffen === shop.id ? null : shop.id)}
+                              style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                                       background: ketteOffen === shop.id ? '#b35c00' : '#fff4e5', color: ketteOffen === shop.id ? 'white' : '#b35c00' }}
+                          >Kette</button>
+                      )}
                     </span>
                     <button
                         title={shop.geoBefreit
@@ -1073,6 +1107,7 @@ export default function Admin() {
                     </div>
                   </div>
                   {expanded && <ShopStatsExpanded shop={shop} />}
+                  {ketteOffen === shop.id && <AdminKette shop={shop} onChange={loadShops} />}
                 </Fragment>
             )
           })}

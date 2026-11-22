@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useLang } from '../LangContext'
+import KettenSection from '../components/KettenSection'
 import FilialenSection from '../components/FilialenSection'
 import TeamSection from '../components/TeamSection'
 import StandorteSection from '../components/StandorteSection'
@@ -13,15 +15,19 @@ import AbPro from '../components/AbPro'
  */
 export default function Team() {
   const { t } = useLang()
+  // Aendert die Kette ihre Filialen, laedt die Standort-Liste darunter neu.
+  const [stand, setStand] = useState(0)
   return (
       <div style={s.page}>
         <h1 style={s.title}>{t('team_title')}</h1>
         <p style={s.subtitle}>{t('team_subtitle')}</p>
         {/* Basic hat einen Standort: keine Filialen-Uebersicht, keine weiteren Orte. */}
         <AbPro funktion="filialen" titel={t('fil_title')}><FilialenSection /></AbPro>
+        {/* Nur Tarif Kette: Filialen schalten, Liste einfuegen, Filial-Logins. */}
+        <KettenSection onGeaendert={() => setStand(n => n + 1)} />
         <TeamSection />
         <ScannerSetupSection />
-        <AbPro funktion="filialen" titel={t('orte_title')}><StandorteSection /></AbPro>
+        <AbPro funktion="filialen" titel={t('orte_title')}><StandorteSection key={stand} /></AbPro>
       </div>
   )
 }

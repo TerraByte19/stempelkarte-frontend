@@ -5,6 +5,7 @@ import AutoNachrichtenSection from '../components/AutoNachrichtenSection'
 import AutomationenSection from '../components/AutomationenSection'
 import NewsletterSection from '../components/NewsletterSection'
 import AbPro from '../components/AbPro'
+import { useTarif } from '../tarif'
 
 /**
  * Alles, was auf den Handys der Kunden landet, auf einer Seite: das
@@ -14,6 +15,8 @@ import AbPro from '../components/AbPro'
  */
 export default function Nachrichten() {
   const { t } = useLang()
+  // Admin hat die Mails fuer diesen Laden abgeschaltet: kein Newsletter-Block.
+  const mailsAus = useTarif()?.funktionen?.mails === false
   return (
       <div>
         <h1 style={s.title}>{t('nachr_title')}</h1>
@@ -23,7 +26,7 @@ export default function Nachrichten() {
         <AbPro funktion="kampagnen" titel={t('kamp_title')}><KampagnenSection /></AbPro>
         <AbPro funktion="auto_nachrichten" titel={t('auto_title')}><AutoNachrichtenSection /></AbPro>
         <AbPro funktion="automationen" titel={t('autom_title')}><AutomationenSection /></AbPro>
-        <AbPro funktion="newsletter" titel={t('newsletter_title')}><NewsletterSection /></AbPro>
+        {!mailsAus && <AbPro funktion="newsletter" titel={t('newsletter_title')}><NewsletterSection /></AbPro>}
       </div>
   )
 }

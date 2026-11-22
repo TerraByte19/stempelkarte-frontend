@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import api from '../api'
 import { useLang } from '../LangContext'
 import StatsView from '../components/StatsView'
+import KettenStatistik from '../components/KettenStatistik'
 
 const infoStyle = {
   background: 'white', borderRadius: 14, padding: 40, textAlign: 'center',
@@ -25,10 +26,14 @@ export default function Statistik() {
   if (error || !data) return <div style={infoStyle}>{t('stat_load_error')}</div>
 
   return (
+    <>
+      {/* Nur Tarif Kette: Zahlen je Filiale. */}
+      <KettenStatistik />
       <StatsView
           data={data}
           fetchDay={date => api.get('/api/shop/stats/day', { params: { date } }).then(r => r.data)}
           onToggleExcludeSunday={enabled => api.put('/api/shop/stats/exclude-sunday', { enabled })}
       />
+    </>
   )
 }

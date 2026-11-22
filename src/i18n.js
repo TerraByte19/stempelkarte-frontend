@@ -1,4 +1,5 @@
 import { ausbau } from './i18n.ausbau.js'
+import { kette } from './i18n.kette.js'
 
 // Die Texte des Ausbau-Durchgangs (i18n.ausbau.js) werden je Sprache
 // eingemischt; sie liegen in einer eigenen Datei, damit diese hier nicht
@@ -6,6 +7,7 @@ import { ausbau } from './i18n.ausbau.js'
 export const translations = {
   de: {
     ...ausbau.de,
+    ...kette.de,
     // Navigation
     nav_scanner: 'Scanner', nav_dashboard: 'Dashboard', nav_cards: 'Karten',
     nav_stats: 'Statistik', nav_customers: 'Kunden',
@@ -684,6 +686,7 @@ export const translations = {
   },
   en: {
     ...ausbau.en,
+    ...kette.en,
     // Navigation
     nav_scanner: 'Scanner', nav_dashboard: 'Dashboard', nav_cards: 'Cards',
     nav_stats: 'Statistics', nav_customers: 'Customers',
@@ -1362,6 +1365,7 @@ export const translations = {
   },
   ar: {
     ...ausbau.ar,
+    ...kette.ar,
     // التنقل
     nav_scanner: 'الماسح الضوئي', nav_dashboard: 'لوحة التحكم', nav_cards: 'البطاقات',
     nav_stats: 'الإحصائيات', nav_customers: 'العملاء',
@@ -2039,6 +2043,7 @@ export const translations = {
   },
   tr: {
     ...ausbau.tr,
+    ...kette.tr,
     nav_scanner: 'Tarayıcı',
     nav_dashboard: 'Panel',
     nav_cards: 'Kartlar',

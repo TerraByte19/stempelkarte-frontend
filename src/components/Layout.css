@@ -90,3 +90,16 @@
   .mehr-eintrag.aktiv { color: #3C3489; font-weight: 700; }
   .mehr-eintrag:first-of-type { border-top: none; }
 }
+
+/* Unterkonto einer Filiale (FilialeLayout): Kopfzeile mit Kette, Filiale,
+   Sprache und Ausloggen nur auf dem Handy - am Rechner steht das in der
+   Seitenleiste. */
+.filiale-kopf {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .filiale-kopf {
+    display: flex;
+  }
+}

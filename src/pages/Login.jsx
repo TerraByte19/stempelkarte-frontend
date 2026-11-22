@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import api from '../api'
 import { LogoZeichen, MARKE } from '../components/Logo'
+import { istFiliale } from '../lib/rolle'
 
 export default function Login() {
   const { t } = useLang()
@@ -33,6 +34,22 @@ export default function Login() {
 
       localStorage.setItem('token', res.data.token)
       tarifVergessen()
+      // Nichts vom vorigen Konto mitnehmen: ein Scanner-Zugang eines anderen
+      // Ladens wuerde sonst dort stempeln.
+      localStorage.removeItem('staffToken')
+      localStorage.removeItem('staffTokenLabel')
+
+      // Unterkonto einer Filiale (Tarif Kette): eigener Bereich, eigene
+      // Endpunkte. Die des Inhabers darf es nicht aufrufen (403 = Abmeldung).
+      if (istFiliale(res.data.token)) {
+        localStorage.setItem('shop', JSON.stringify({
+          id: res.data.shopId, name: res.data.name, ortId: res.data.ortId, ortLabel: res.data.ortLabel,
+        }))
+        await filialScanner(res.data.ortLabel)
+        window.location.href = '/'
+        return
+      }
+
       localStorage.setItem('shop', JSON.stringify({ id: res.data.shopId, name: res.data.name }))
 
       try {
@@ -52,6 +69,21 @@ export default function Login() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Der Scanner braucht einen Geraete-Zugang der eigenen Filiale. Gibt es
+  // noch keinen, legt die Filiale ihren ersten an. Klappt das nicht, bleibt
+  // der Login trotzdem gueltig - Geraete lassen sich unter "Geraete" anlegen.
+  async function filialScanner(ortLabel) {
+    try {
+      const liste = await api.get('/api/filiale/geraete')
+      let geraet = Array.isArray(liste.data) ? liste.data.find(g => g.rolle !== 'KIOSK') : null
+      if (!geraet) {
+        const neu = await api.post('/api/filiale/geraete', { label: ortLabel || 'Scanner', rolle: 'MITARBEITER' })
+        geraet = neu.data
+      }
+      if (geraet?.token) localStorage.setItem('staffToken', geraet.token)
+    } catch { /* ohne Geraet: Scanner meldet sich, Statistik geht trotzdem */ }
   }
 
   // Token aus Setup-Link (?token=...) oder rohem Token extrahieren
@@ -122,8 +154,9 @@ export default function Login() {
           {/* --- Besitzer-Login --- */}
           <form onSubmit={handleLogin}>
             <div style={styles.field}>
-              <label style={styles.label}>{t('login_email')}</label>
-              <input style={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+              <label style={styles.label}>{t('login_kennung')}</label>
+              <input style={styles.input} type="text" inputMode="email" autoCapitalize="none" autoCorrect="off"
+                     autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
             <div style={styles.field}>
               <label style={styles.label}>{t('login_password')}</label>

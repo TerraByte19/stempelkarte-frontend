@@ -8,6 +8,8 @@ import Profil from './pages/Profil'
 import Layout from './components/Layout'
 import InstallBanner from './components/InstallBanner'
 import Landing from './pages/Landing/Landing'
+import FilialeLayout from './components/FilialeLayout'
+import { istFiliale } from './lib/rolle'
 
 // Nachgeladen statt mitgebundelt. Scanner zieht html5-qrcode (~3 MB) nach
 // sich, Statistik und Admin sind gross und werden selten als erstes geoeffnet.
@@ -19,6 +21,10 @@ const Kunden = lazy(() => import('./pages/Kunden'))
 const Nachrichten = lazy(() => import('./pages/Nachrichten'))
 const Team = lazy(() => import('./pages/Team'))
 const Demo = lazy(() => import('./pages/Demo'))
+// Unterkonto einer Filiale (Tarif Kette): eigene, kleine Seiten.
+const FilialeStatistik = lazy(() => import('./pages/filiale/FilialeStatistik'))
+const FilialeGeraete = lazy(() => import('./pages/filiale/FilialeGeraete'))
+const FilialeKorrektur = lazy(() => import('./pages/filiale/FilialeKorrektur'))
 // Branchenseiten der Werbeseite (/branchen/cafe usw.)
 const Branche = lazy(() => import('./pages/Landing/Branche'))
 // Textseiten: Impressum, Datenschutz, Vertrauen fuer Laeden, AVV-Muster.
@@ -33,6 +39,9 @@ const ScannerTest = lazy(() => import('./pages/ScannerTest'))
 function App() {
   const token = localStorage.getItem('token')
   const staffToken = localStorage.getItem('staffToken')
+  // Unterkonto einer Filiale: eigenes Menue, eigene Seiten. Nur Anzeige -
+  // was das Konto darf, entscheidet das Backend.
+  const filiale = istFiliale(token)
 
   // Scanner-Gerät = hat staffToken, aber KEIN Besitzer-Login (token)
   // → solche Geräte sollen direkt den Scanner sehen
@@ -48,6 +57,7 @@ function App() {
   // Root-Route abhängig vom Gerätetyp bestimmen
   function rootElement() {
     if (isScannerDevice) return <Navigate to="/scanner" replace />   // Scanner-Gerät
+    if (filiale) return <FilialeLayout />                             // Unterkonto einer Filiale
     if (token) return <Layout />                                      // Besitzer eingeloggt
     if (isStandalone()) return <Navigate to="/login" replace />       // installierte PWA
     return <Landing />                                                // Besucher
@@ -75,13 +85,25 @@ function App() {
         <Route path="/tools/bewertungslink" element={<BewertungslinkTool />} />
         <Route path="/scanner-test" element={<ScannerTest />} />
         <Route path="/" element={rootElement()}>
-          <Route index element={<Dashboard />} />
-          <Route path="karten" element={<Karten />} />
-          <Route path="kunden" element={<Kunden />} />
-          <Route path="nachrichten" element={<Nachrichten />} />
-          <Route path="team" element={<Team />} />
-          <Route path="statistik" element={<Statistik />} />
-          <Route path="profil" element={<Profil />} />
+          {filiale ? (
+            <>
+              <Route index element={<FilialeStatistik />} />
+              <Route path="geraete" element={<FilialeGeraete />} />
+              <Route path="korrektur" element={<FilialeKorrektur />} />
+              {/* Seiten des Inhabers gibt es hier nicht. */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          ) : (
+            <>
+              <Route index element={<Dashboard />} />
+              <Route path="karten" element={<Karten />} />
+              <Route path="kunden" element={<Kunden />} />
+              <Route path="nachrichten" element={<Nachrichten />} />
+              <Route path="team" element={<Team />} />
+              <Route path="statistik" element={<Statistik />} />
+              <Route path="profil" element={<Profil />} />
+            </>
+          )}
         </Route>
       </Routes>
       </Suspense>
