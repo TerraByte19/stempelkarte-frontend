@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { istFiliale } from './lib/rolle'
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
@@ -24,6 +25,13 @@ api.interceptors.response.use(
         // Nicht auf Login/Register-Fehler reagieren (401 = falsches Passwort)
         const isAuthRoute = error.config?.url?.includes('/api/auth/')
         if ((error.response?.status === 401 || error.response?.status === 403) && !isAuthRoute) {
+            // Unterkonto einer Filiale: der Geraete-Schluessel kam ueber diesen
+            // Login. Bliebe er liegen, scannt das Geraet nach einer Sperre des
+            // Logins als "Scanner-Geraet" einfach weiter.
+            if (istFiliale(localStorage.getItem('token'))) {
+                localStorage.removeItem('staffToken')
+                localStorage.removeItem('staffTokenLabel')
+            }
             localStorage.removeItem('token')
             localStorage.removeItem('shop')
             window.location.href = '/login'
