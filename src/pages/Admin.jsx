@@ -15,8 +15,8 @@ export default function Admin() {
   const [error, setError] = useState('')
   const [changingPasswordFor, setChangingPasswordFor] = useState(null)
   const [changingEmailFor, setChangingEmailFor] = useState(null)
-  const [expandedShopId, setExpandedShopId] = useState(null)
-  const [ketteOffen, setKetteOffen] = useState(null)   // Laden, dessen Ketten-Kasten offen ist
+  const [verwaltenId, setVerwaltenId] = useState(null)   // Laden, dessen Kasten "Verwalten" offen ist
+  const [statistikId, setStatistikId] = useState(null)   // Statistik im Kasten aufgeklappt
   const [draggedId, setDraggedId] = useState(null)   // Laden am Haken
   const [dragOverId, setDragOverId] = useState(null) // Zeile unter dem Zeiger
   // Eigener Zustand: das allgemeine `error` wird nur auf dem Login-Bildschirm
@@ -622,27 +622,11 @@ export default function Admin() {
               </button>
             </div>
             <div style={{ fontSize: 12, color: '#9A94A8', margin: '-8px 0 14px' }}>
-              Einordnen über die Auswahl unter dem Ladennamen. Ordner sind nur für dich, am Laden ändert sich nichts.
+              Einordnen über die Auswahl unter dem Ladennamen. Ordner sind nur für dich, am Laden ändert sich nichts. Tarif, Schalter und Konto stehen unter „Verwalten“.
             </div>
 
             {neuerLadenOffen && <CreateShop onCreated={loadShops} />}
 
-
-            {changingPasswordFor && (
-                <ChangePassword
-                    shop={changingPasswordFor}
-                    onDone={() => setChangingPasswordFor(null)}
-                />
-            )}
-
-            {changingEmailFor && (
-                <ChangeEmail
-                    key={changingEmailFor.id}
-                    shop={changingEmailFor}
-                    onChanged={loadShops}
-                    onDone={() => setChangingEmailFor(null)}
-                />
-            )}
 
             {sortError && (
                 <div style={styles.sortError}>
@@ -880,6 +864,143 @@ export default function Admin() {
       </div>
   )
 
+  // Schilder in der Zeile: nur lesen. Geaendert wird alles unter "Verwalten".
+  function schilder(shop) {
+    const tarif = shop.tarif ?? 'PRO'
+    const liste = [[tarif === 'BASIC' ? 'Basic' : tarif === 'KETTE' ? 'Kette' : 'Pro',
+                    tarif === 'BASIC' ? 'grau' : tarif === 'KETTE' ? 'orange' : 'blau']]
+    if (shop.testTage != null) liste.push(shop.testTage > 0 ? [`Test: ${shop.testTage} T`, 'blau'] : ['Test vorbei', 'rot'])
+    if (shop.mailsAus) liste.push(['Mails aus', 'rot'])
+    if (shop.apiFreigeschaltet) liste.push(['API', 'gruen'])
+    if (shop.demo) liste.push(['Demo', 'orange'])
+    if (shop.geoBefreit) liste.push(['Ohne Standort-Pflicht', 'orange'])
+    else if (!shop.standortGesetzt) liste.push(['Standort fehlt', 'rot'])
+    if (!shop.active) liste.push(['Gesperrt', 'rot'])
+    return liste
+  }
+
+  function renderVerwalten(shop) {
+    const feld = { fontSize: 13, padding: '5px 8px', borderRadius: 8, border: '1px solid #DDD9EE', background: 'white', minWidth: 150 }
+    return (
+        <div style={styles.verwalten}>
+          <div style={styles.verwaltenGruppen}>
+            <div style={styles.gruppe}>
+              <div style={styles.gruppeTitel}>Tarif</div>
+              <label style={styles.zeile}>
+                <span>Tarif</span>
+                <select value={shop.tarif ?? 'PRO'} onChange={e => setTarif(shop, e.target.value)} style={feld}>
+                  <option value="BASIC">Basic</option>
+                  <option value="PRO">Pro</option>
+                  <option value="KETTE">Kette</option>
+                </select>
+              </label>
+              <label style={styles.zeile}>
+                <span>
+                  Testphase
+                  <span style={styles.klein}>
+                    {shop.testBis ? `bis ${new Date(shop.testBis).toLocaleDateString('de-DE')}` : 'bezahlt, keine Testphase'}
+                  </span>
+                </span>
+                {/* Stand als Beschriftung, Auswahl = bezahlt oder verlaengern. */}
+                <select value="" onChange={e => { if (e.target.value !== '') setTest(shop, Number(e.target.value)) }} style={feld}>
+                  <option value="">{shop.testTage == null ? 'Bezahlt' : shop.testTage > 0 ? `Test: ${shop.testTage} T` : 'Test vorbei'}</option>
+                  {shop.testTage != null && <option value="0">Als bezahlt markieren</option>}
+                  <option value="7">Test: 7 Tage ab heute</option>
+                  <option value="14">Test: 14 Tage ab heute</option>
+                </select>
+              </label>
+              {/* Filialen = Hauptstandort + weitere Orte. Gespeichert wird die
+                  Zahl der weiteren Orte (0-9), angezeigt die Filialen. */}
+              <label style={styles.zeile}>
+                <span>
+                  Filialen im Tarif
+                  <span style={styles.klein}>Hauptstandort plus weitere Standorte</span>
+                </span>
+                <select value={shop.maxOrte ?? 0} onChange={e => setMaxOrte(shop.id, Number(e.target.value))} style={feld}>
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>{n + 1}</option>)}
+                </select>
+              </label>
+              <label style={styles.zeile}>
+                <span>
+                  Sprache
+                  <span style={styles.klein}>nur für die Anzeige im Admin</span>
+                </span>
+                <select value={shop.language ?? 'de'} onChange={e => setSprache(shop, e.target.value)} style={feld}>
+                  <option value="de">Deutsch</option>
+                  <option value="en">Englisch</option>
+                  <option value="ar">Arabisch</option>
+                  <option value="tr">Türkisch</option>
+                </select>
+              </label>
+              <div style={styles.zeile}>
+                <span>Scanner-Geräte</span>
+                <span style={{ fontWeight: 600 }}>{shop.maxTokens}</span>
+              </div>
+            </div>
+
+            <div style={styles.gruppe}>
+              <div style={styles.gruppeTitel}>Schalter</div>
+              <Schalter an={!shop.mailsAus} titel="Mails"
+                        text="Aus: für diesen Laden geht keine E-Mail raus, Karten gibt es ohne Anmeldung. Push bleibt."
+                        onClick={() => setMails(shop, !shop.mailsAus)} />
+              <Schalter an={!shop.geoBefreit} titel="Standort-Pflicht"
+                        text={shop.geoBefreit ? 'Aus: scannt ohne Standort.'
+                            : shop.standortGesetzt ? 'An: Scan nur im Laden.' : 'An, aber der Laden hat noch keinen Standort gesetzt.'}
+                        onClick={() => toggleGeoPflicht(shop.id)} />
+              <Schalter an={!!shop.apiFreigeschaltet} titel="Schnittstelle (API)"
+                        text="API-Schlüssel und Webhooks für diesen Laden."
+                        onClick={() => setApi(shop.id, !shop.apiFreigeschaltet)} />
+              <Schalter an={!!shop.demo} titel="Demo-Laden"
+                        text="Für die Website: Besucher holen sich eine Karte und stempeln sich selbst."
+                        onClick={() => setDemo(shop.id, !shop.demo)} />
+            </div>
+
+            <div style={styles.gruppe}>
+              <div style={styles.gruppeTitel}>Konto</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <button style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
+                        onClick={() => { setChangingEmailFor(null); setChangingPasswordFor(changingPasswordFor?.id === shop.id ? null : shop) }}>
+                  Passwort ändern
+                </button>
+                <button title="Login-Adresse des Ladens ändern"
+                        style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
+                        onClick={() => { setChangingPasswordFor(null); setChangingEmailFor(changingEmailFor?.id === shop.id ? null : shop) }}>
+                  Login-Mail ändern
+                </button>
+                <button style={{ ...styles.btnToggle, background: statistikId === shop.id ? '#3C3489' : '#eef2ff',
+                                 color: statistikId === shop.id ? 'white' : '#3C3489' }}
+                        onClick={() => setStatistikId(id => id === shop.id ? null : shop.id)}>
+                  {statistikId === shop.id ? 'Statistik schließen' : 'Statistik'}
+                </button>
+                <button style={{ ...styles.btnToggle, background: shop.active ? '#fce8e6' : '#e6f4ea', color: shop.active ? '#c00' : '#2C5F2E' }}
+                        onClick={() => toggleShop(shop.id)}>
+                  {shop.active ? 'Sperren' : 'Entsperren'}
+                </button>
+              </div>
+              <button style={{ ...styles.btnToggle, background: 'none', color: '#c00', border: '1px solid #f5c6c2', marginTop: 14 }}
+                      onClick={() => deleteShop(shop.id, shop.name)}>
+                Laden löschen
+              </button>
+            </div>
+          </div>
+
+          {changingPasswordFor?.id === shop.id && (
+              <ChangePassword shop={shop} onDone={() => setChangingPasswordFor(null)} />
+          )}
+          {changingEmailFor?.id === shop.id && (
+              <ChangeEmail key={shop.id} shop={shop} onChanged={loadShops} onDone={() => setChangingEmailFor(null)} />
+          )}
+          {statistikId === shop.id && <ShopStatsExpanded shop={shop} />}
+          {shop.tarif === 'KETTE' && (
+              <>
+                <div style={{ ...styles.gruppeTitel, marginTop: 18 }}>Kette: Filialen, Logins, Geräte je Filiale</div>
+                <AdminKette shop={shop} onChange={loadShops} />
+              </>
+          )}
+        </div>
+    )
+  }
+
   function renderShopTable(list) {
     return (
         <div style={styles.table}>
@@ -889,19 +1010,17 @@ export default function Admin() {
             <span>E-Mail</span>
             <span>Karten</span>
             <span>Kunden</span>
-            <span>Tokens · Orte</span>
-            <span>Standort</span>
-            <span>Status</span>
-            <span>Aktionen</span>
+            <span>Stand</span>
+            <span></span>
           </div>
           {list.map(shop => {
-            const expanded = expandedShopId === shop.id
+            const offen = verwaltenId === shop.id
             return (
                 <Fragment key={shop.id}>
                   <div
                       style={{
                         ...styles.tableRow,
-                        opacity: draggedId === shop.id ? 0.4 : (shop.active ? 1 : 0.5),
+                        opacity: draggedId === shop.id ? 0.4 : (shop.active ? 1 : 0.6),
                         // Linie zeigt, wo die Zeile landet
                         borderTop: dragOverId === shop.id && draggedId !== shop.id
                             ? '2px solid #3C3489' : styles.tableRow.borderTop,
@@ -941,7 +1060,7 @@ export default function Admin() {
                         <option value="__neu">+ Neuer Ordner…</option>
                       </select>
                     </span>
-                    <span style={styles.shopEmail}>{shop.email}</span>
+                    <span style={{ ...styles.shopEmail, overflow: 'hidden', textOverflow: 'ellipsis' }}>{shop.email}</span>
                     <span style={styles.cell}>{shop.cardCount}</span>
                     {/* Basic: Kunden gegen die Grenze, rot ab 100 (nur Hinweis, keine Sperre). */}
                     <span
@@ -950,107 +1069,12 @@ export default function Admin() {
                     >
                       {shop.kundenGrenze ? `${shop.customerCount} / ${shop.kundenGrenze}` : shop.customerCount}
                     </span>
-                    <span style={{ ...styles.cell, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      {shop.maxTokens}
-                      <select
-                          title="Tarif des Ladens"
-                          value={shop.tarif ?? 'PRO'}
-                          onChange={e => setTarif(shop, e.target.value)}
-                          style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd', fontWeight: 600,
-                                   background: shop.tarif === 'BASIC' ? '#f0f0f0' : shop.tarif === 'KETTE' ? '#fff4e5' : '#eef2ff' }}
-                      >
-                        <option value="BASIC">Basic</option>
-                        <option value="PRO">Pro</option>
-                        <option value="KETTE">Kette</option>
-                      </select>
-                      {/* Testphase: Stand als Beschriftung, Auswahl = bezahlt oder verlaengern. */}
-                      <select
-                          title={shop.testBis ? `Gratis-Test bis ${new Date(shop.testBis).toLocaleDateString('de-DE')}` : 'Bezahlt, keine Testphase'}
-                          value=""
-                          onChange={e => { if (e.target.value !== '') setTest(shop, Number(e.target.value)) }}
-                          style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd',
-                                   background: shop.testTage == null ? 'white' : shop.testTage > 0 ? '#eef2ff' : '#fce8e6',
-                                   color: shop.testTage === 0 ? '#c5221f' : '#333', fontWeight: shop.testTage === 0 ? 600 : 400 }}
-                      >
-                        <option value="">{shop.testTage == null ? 'Bezahlt' : shop.testTage > 0 ? `Test: ${shop.testTage} T` : 'Test vorbei'}</option>
-                        {shop.testTage != null && <option value="0">Als bezahlt markieren</option>}
-                        <option value="7">Test: 7 Tage ab heute</option>
-                        <option value="14">Test: 14 Tage ab heute</option>
-                      </select>
-                      {/* Sprache der Kundenseiten und Mails dieses Ladens. */}
-                      <select
-                          title="Sprache des Ladens, nur für die Anzeige im Admin. Kunden starten auf Deutsch und schalten auf der Karte selbst um."
-                          value={shop.language ?? 'de'}
-                          onChange={e => setSprache(shop, e.target.value)}
-                          style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd', background: 'white' }}
-                      >
-                        <option value="de">DE</option>
-                        <option value="en">EN</option>
-                        <option value="ar">AR</option>
-                        <option value="tr">TR</option>
-                      </select>
-                      {/* Filialen = Hauptstandort + weitere Orte (Tarif). Gespeichert
-                          wird die Zahl der weiteren Orte (0-9), angezeigt die Filialen. */}
-                      <select
-                          title="Filialen im Tarif: Hauptstandort plus weitere Standorte (bis 10)"
-                          value={shop.maxOrte ?? 0}
-                          onChange={e => setMaxOrte(shop.id, Number(e.target.value))}
-                          style={{ fontSize: 12, padding: '2px 4px', borderRadius: 6, border: '1px solid #ddd', background: (shop.maxOrte ?? 0) > 0 ? '#eef2ff' : 'white' }}
-                      >
-                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                            <option key={n} value={n}>{`Filialen: ${n + 1}`}</option>
-                        ))}
-                      </select>
-                      <button
-                          title={shop.apiFreigeschaltet ? 'Schnittstelle (API, Webhooks) frei. Klicken = sperren' : 'Schnittstelle gesperrt. Klicken = freischalten'}
-                          onClick={() => setApi(shop.id, !shop.apiFreigeschaltet)}
-                          style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                                   background: shop.apiFreigeschaltet ? '#e6f4ea' : '#f0f0f0', color: shop.apiFreigeschaltet ? '#2C5F2E' : '#777' }}
-                      >API</button>
-                      <button
-                          title={shop.demo ? 'Demo-Laden für die Website. Klicken = aus' : 'Als Demo-Laden für die Website markieren'}
-                          onClick={() => setDemo(shop.id, !shop.demo)}
-                          style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                                   background: shop.demo ? '#fff4e5' : '#f0f0f0', color: shop.demo ? '#b35c00' : '#777' }}
-                      >Demo</button>
-                      <button
-                          title={shop.mailsAus ? 'Mails aus: für diesen Laden geht keine E-Mail raus. Klicken = einschalten' : 'Mails an. Klicken = ausschalten'}
-                          onClick={() => setMails(shop, !shop.mailsAus)}
-                          style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                                   background: shop.mailsAus ? '#fce8e6' : '#e6f4ea', color: shop.mailsAus ? '#c5221f' : '#2C5F2E' }}
-                      >{shop.mailsAus ? 'Mails aus' : 'Mails'}</button>
-                      {shop.tarif === 'KETTE' && (
-                          <button
-                              title="Kette: Filialen, Logins, Geräte je Filiale"
-                              onClick={() => setKetteOffen(ketteOffen === shop.id ? null : shop.id)}
-                              style={{ fontSize: 11, padding: '3px 7px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                                       background: ketteOffen === shop.id ? '#b35c00' : '#fff4e5', color: ketteOffen === shop.id ? 'white' : '#b35c00' }}
-                          >Kette</button>
-                      )}
+                    <span style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                      {schilder(shop).map(([text, farbe]) => (
+                          <span key={text} style={{ ...styles.schild, ...SCHILD_FARBEN[farbe] }}>{text}</span>
+                      ))}
                     </span>
-                    <button
-                        title={shop.geoBefreit
-                            ? 'Befreit: scannt ohne Standort. Klicken = Pflicht einschalten'
-                            : 'Pflicht: Scan nur im Laden. Klicken = befreien'}
-                        style={{
-                          ...styles.status,
-                          border: 'none',
-                          cursor: 'pointer',
-                          background: shop.geoBefreit ? '#fff4e5' : '#e6f4ea',
-                          color: shop.geoBefreit ? '#b35c00' : '#2C5F2E',
-                        }}
-                        onClick={() => toggleGeoPflicht(shop.id)}
-                    >
-                      {shop.geoBefreit ? 'Befreit' : (shop.standortGesetzt ? 'Pflicht' : 'Pflicht · fehlt')}
-                    </button>
-                    <span style={{
-                      ...styles.status,
-                      background: shop.active ? '#e6f4ea' : '#fce8e6',
-                      color: shop.active ? '#2C5F2E' : '#c00',
-                    }}>
-                  {shop.active ? 'Aktiv' : 'Gesperrt'}
-                </span>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                       <button
                           title={shop.active
                               ? 'Dashboard dieses Ladens öffnen (1 Stunde, wird protokolliert)'
@@ -1068,52 +1092,47 @@ export default function Admin() {
                       <button
                           style={{
                             ...styles.btnToggle,
-                            background: expanded ? '#3C3489' : '#eef2ff',
-                            color: expanded ? 'white' : '#3C3489',
+                            background: offen ? '#3C3489' : '#eef2ff',
+                            color: offen ? 'white' : '#3C3489',
                           }}
-                          onClick={() => setExpandedShopId(id => id === shop.id ? null : shop.id)}
+                          onClick={() => setVerwaltenId(id => id === shop.id ? null : shop.id)}
                       >
-                        {expanded ? 'Schließen' : 'Statistik'}
-                      </button>
-                      <button
-                          style={{
-                            ...styles.btnToggle,
-                            background: shop.active ? '#fce8e6' : '#e6f4ea',
-                            color: shop.active ? '#c00' : '#2C5F2E',
-                          }}
-                          onClick={() => toggleShop(shop.id)}
-                      >
-                        {shop.active ? 'Sperren' : 'Entsperren'}
-                      </button>
-                      <button
-                          style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
-                          onClick={() => setChangingPasswordFor(shop)}
-                      >
-                        PW
-                      </button>
-                      <button
-                          title="Login-Adresse des Ladens ändern"
-                          style={{ ...styles.btnToggle, background: '#f0eeff', color: '#3C3489' }}
-                          onClick={() => setChangingEmailFor(shop)}
-                      >
-                        Mail
-                      </button>
-                      <button
-                          style={{ ...styles.btnToggle, background: '#1a1a1a', color: 'white' }}
-                          onClick={() => deleteShop(shop.id, shop.name)}
-                      >
-                        Löschen
+                        {offen ? 'Schließen' : 'Verwalten'}
                       </button>
                     </div>
                   </div>
-                  {expanded && <ShopStatsExpanded shop={shop} />}
-                  {ketteOffen === shop.id && <AdminKette shop={shop} onChange={loadShops} />}
+                  {offen && renderVerwalten(shop)}
                 </Fragment>
             )
           })}
         </div>
     )
   }
+}
+
+const SCHILD_FARBEN = {
+  grau: { background: '#f0f0f0', color: '#555' },
+  blau: { background: '#eef2ff', color: '#3C3489' },
+  orange: { background: '#fff4e5', color: '#b35c00' },
+  gruen: { background: '#e6f4ea', color: '#2C5F2E' },
+  rot: { background: '#fce8e6', color: '#c5221f' },
+}
+
+/** Ein beschrifteter Ein/Aus-Schalter im Kasten "Verwalten". */
+function Schalter({ an, titel, text, onClick }) {
+  return (
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '7px 0' }}>
+        <span style={{ fontSize: 13 }}>
+          <span style={{ fontWeight: 600 }}>{titel}</span>
+          <span style={{ display: 'block', fontSize: 12, color: '#6B6678', marginTop: 2 }}>{text}</span>
+        </span>
+        <button role="switch" aria-checked={an} aria-label={titel} onClick={onClick}
+                style={{ flexShrink: 0, width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', padding: 2,
+                         background: an ? '#2C8A4B' : '#C9C5D6', display: 'flex', justifyContent: an ? 'flex-end' : 'flex-start' }}>
+          <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'white', display: 'block' }} />
+        </button>
+      </div>
+  )
 }
 
 /**
@@ -1517,8 +1536,15 @@ const styles = {
   statNumber: { fontSize: '28px', fontWeight: '700', color: '#3C3489' },
   statLabel: { fontSize: '12px', color: '#888', marginTop: '4px' },
   table: { background: 'white', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'auto' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1.2fr 1fr 3.4fr', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '1110px' },
-  tableRow: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 1fr 1fr 1fr 1.2fr 1fr 3.4fr', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '1110px' },
+  tableHeader: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 0.6fr 0.8fr 2.4fr 200px', columnGap: '10px', padding: '12px 16px', background: '#f8f8f8', fontSize: '11px', fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', minWidth: '900px' },
+  tableRow: { display: 'grid', gridTemplateColumns: '28px 2fr 2fr 0.6fr 0.8fr 2.4fr 200px', columnGap: '10px', padding: '14px 16px', borderTop: '1px solid #f0f0f0', alignItems: 'center', minWidth: '900px' },
+  schild: { fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' },
+  verwalten: { padding: '16px 18px 20px', background: '#FAF9FD', borderTop: '1px solid #E4E1EF' },
+  verwaltenGruppen: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: '14px' },
+  gruppe: { background: 'white', border: '1px solid #E4E1EF', borderRadius: '12px', padding: '14px 16px', display: 'flex', flexDirection: 'column' },
+  gruppeTitel: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' },
+  zeile: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '6px 0', fontSize: '13px' },
+  klein: { display: 'block', fontSize: '12px', color: '#6B6678', marginTop: '2px' },
   dragHandle: { cursor: 'grab', color: '#bbb', fontSize: '16px', userSelect: 'none', lineHeight: 1 },
   sortError: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
