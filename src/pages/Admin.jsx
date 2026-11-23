@@ -392,19 +392,23 @@ Der Newsletter ist dann im Dashboard weg. Anmeldung und Bestätigungsmail der Ku
 
   // Testphase: 0 = bezahlt (Testphase weg), sonst ab heute noch so viele Tage.
   // Nach Ablauf wird nichts gesperrt, der Laden sieht nur einen Hinweis.
-  async function setTest(shop, tage) {
+  // bis (JJJJ-MM-TT): freies Enddatum; dann zaehlt tage nicht.
+  async function setTest(shop, tage, bis) {
     if (tage === 0 && !confirm(`"${shop.name}" als bezahlt markieren? Die Testphase ist dann vorbei.`)) return
     const t = sessionStorage.getItem('adminToken')
     try {
       const res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/test`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tage })
+        body: JSON.stringify(bis ? { tage: 0, bis } : { tage })
       })
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || '')
+      }
       loadShops()
-    } catch {
-      alert('Fehler beim Setzen der Testphase')
+    } catch (e) {
+      alert('Fehler beim Setzen der Testphase. ' + (e.message || ''))
     }
   }
 
@@ -911,6 +915,14 @@ Der Newsletter ist dann im Dashboard weg. Anmeldung und Bestätigungsmail der Ku
                   <option value="14">Test: 14 Tage ab heute</option>
                 </select>
               </label>
+              <label style={styles.zeile}>
+                <span>
+                  Test bis Datum
+                  <span style={styles.klein}>frei wählbar, gilt bis zum Ende des Tages</span>
+                </span>
+                <TestDatum key={shop.testBis || 'kein'} start={shop.testBis ? datumLokal(new Date(shop.testBis)) : ''}
+                           stil={feld} onSetzen={datum => setTest(shop, 0, datum)} />
+              </label>
               {/* Filialen = Hauptstandort + weitere Orte. Gespeichert wird die
                   Zahl der weiteren Orte (0-9), angezeigt die Filialen. */}
               <label style={styles.zeile}>
@@ -1111,6 +1123,33 @@ Der Newsletter ist dann im Dashboard weg. Anmeldung und Bestätigungsmail der Ku
         </div>
     )
   }
+}
+
+/** JJJJ-MM-TT in der Zeit des Browsers, fuer <input type="date">. */
+function datumLokal(d) {
+  const zwei = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${zwei(d.getMonth() + 1)}-${zwei(d.getDate())}`
+}
+
+/**
+ * Datum waehlen, dann "Setzen". Gespeichert wird erst auf den Knopf: beim
+ * Tippen eines Datums meldet das Feld sonst schon halbe Jahreszahlen.
+ */
+function TestDatum({ start, stil, onSetzen }) {
+  const [datum, setDatum] = useState(start)
+  return (
+      <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        <input type="date" style={{ ...stil, minWidth: 0 }} min={datumLokal(new Date())}
+               value={datum} onChange={e => setDatum(e.target.value)} />
+        <button type="button" disabled={!datum || datum === start} onClick={() => onSetzen(datum)}
+                style={{ fontSize: 12, fontWeight: 600, padding: '6px 10px', borderRadius: 8, border: 'none',
+                         background: '#eef2ff', color: '#3C3489',
+                         cursor: !datum || datum === start ? 'default' : 'pointer',
+                         opacity: !datum || datum === start ? 0.5 : 1 }}>
+          Setzen
+        </button>
+      </span>
+  )
 }
 
 const SCHILD_FARBEN = {
