@@ -89,6 +89,7 @@ function Kette({ onGeaendert }) {
           </label>
 
           {liste.length === 0 && <p style={s.hint}>{t('kette_fil_leer')}</p>}
+          {liste.some(o => o.bestaetigt === false) && <p style={s.hint}>{t('kette_fil_wartet_hint')}</p>}
           {liste.map(o => (
               <div key={o.id} style={{ ...s.zeile, opacity: o.aktiv ? 1 : 0.65 }}>
                 <span style={s.name}>
@@ -96,8 +97,10 @@ function Kette({ onGeaendert }) {
                   {o.adresse && <span style={s.meta}>{o.adresse}</span>}
                 </span>
                 <button type="button" style={s.btn} onClick={() => umbenennen(o)}>{t('kette_fil_rename')}</button>
-                <Schalter an={o.aktiv} t={t}
-                          onClick={() => orte(() => api.put(`/api/shop/me/orte/${o.id}`, { aktiv: !o.aktiv }))} />
+                {o.bestaetigt === false
+                    ? <span style={s.wartet}>{t('kette_fil_wartet')}</span>
+                    : <Schalter an={o.aktiv} t={t}
+                                onClick={() => orte(() => api.put(`/api/shop/me/orte/${o.id}`, { aktiv: !o.aktiv }))} />}
               </div>
           ))}
         </div>
@@ -105,7 +108,7 @@ function Kette({ onGeaendert }) {
         <ListeEinfuegen t={t} text={text}
                         onGespeichert={r => { setStand(r.data); setMeldung(t('kette_liste_gespeichert')); onGeaendert?.() }} />
 
-        <Logins t={t} liste={liste} logins={logins} hauptIstFiliale={stand.hauptIstFiliale} datum={datum}
+        <Logins t={t} liste={liste} logins={logins} datum={datum}
                 tun={tun} neuLaden={ladeLogins} />
 
         <div style={s.card}>
@@ -198,11 +201,12 @@ function ListeEinfuegen({ t, text, onGespeichert }) {
   )
 }
 
-function Logins({ t, liste, logins, hauptIstFiliale, datum, tun, neuLaden }) {
+function Logins({ t, liste, logins, datum, tun, neuLaden }) {
   const [name, setName] = useState('')
   const [pw, setPw] = useState('')
   const [ortId, setOrtId] = useState('')
-  const ziele = [...(hauptIstFiliale ? [{ id: 'HAUPT', label: t('team_filiale_haupt') }] : []), ...liste]
+  // Ein Login gehoert immer zu einer Filiale. Der Hauptstandort laeuft ueber das Hauptkonto.
+  const ziele = liste
   const ziel = ortId || ziele[0]?.id || ''
 
   async function anlegen(e) {
@@ -239,7 +243,7 @@ function Logins({ t, liste, logins, hauptIstFiliale, datum, tun, neuLaden }) {
                   {l.gesperrt && <span style={s.gesperrt}> · {t('kette_login_gesperrt')}</span>}
                 </span>
                 <span style={s.meta}>
-                  {l.ortId === 'HAUPT' ? t('team_filiale_haupt') : l.ortLabel} · {l.zuletztEingeloggt ? t('kette_login_zuletzt', { datum: datum(l.zuletztEingeloggt) }) : t('kette_login_nie')}
+                  {l.ortId === 'HAUPT' ? `${t('team_filiale_haupt')} (${t('kette_login_alt')})` : l.ortLabel} · {l.zuletztEingeloggt ? t('kette_login_zuletzt', { datum: datum(l.zuletztEingeloggt) }) : t('kette_login_nie')}
                 </span>
               </span>
               <button type="button" style={s.btn} onClick={() => passwort(l)}>{t('kette_login_pw_neu')}</button>
@@ -248,6 +252,7 @@ function Logins({ t, liste, logins, hauptIstFiliale, datum, tun, neuLaden }) {
             </div>
         ))}
 
+        {ziele.length === 0 && <p style={s.hint}>{t('kette_login_erst_filiale')}</p>}
         {ziele.length > 0 && (
             <form onSubmit={anlegen} style={s.form}>
               <input style={s.input} value={name} placeholder={t('kette_login_name')} maxLength={40}
@@ -265,6 +270,7 @@ function Logins({ t, liste, logins, hauptIstFiliale, datum, tun, neuLaden }) {
 }
 
 const s = {
+  wartet: { fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20, background: '#FBF3E2', color: '#7A5200', whiteSpace: 'nowrap' },
   card: { background: 'white', borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   title: { fontSize: 16, fontWeight: 600, margin: '0 0 6px', color: '#1a1a1a' },
   hint: { fontSize: 13, color: '#888', margin: '0 0 10px', lineHeight: 1.5 },

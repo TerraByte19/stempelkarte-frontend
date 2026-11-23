@@ -10,7 +10,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 export default function AdminKette({ shop, onChange }) {
   const [stand, setStand] = useState(null)
   const [fehler, setFehler] = useState('')
-  const [login, setLogin] = useState({ benutzername: '', passwort: '', ortId: 'HAUPT' })
+  const [login, setLogin] = useState({ benutzername: '', passwort: '', ortId: '' })
 
   async function ruf(pfad, body) {
     try {
@@ -48,12 +48,21 @@ export default function AdminKette({ shop, onChange }) {
 
   async function loginAnlegen(e) {
     e.preventDefault()
-    if (await ruf('/logins', login)) setLogin({ benutzername: '', passwort: '', ortId: login.ortId })
+    const ortId = login.ortId || filialen[0]?.id
+    if (!ortId) return
+    if (await ruf('/logins', { ...login, ortId })) setLogin({ benutzername: '', passwort: '', ortId })
   }
 
   function passwortNeu(l) {
     const neu = prompt(`Neues Passwort für ${l.benutzername} (mindestens 8 Zeichen)`)
     if (neu) ruf(`/logins/${l.id}/passwort`, { passwort: neu })
+  }
+
+  // Ein Login gehoert immer zu einer Filiale, nie zum Hauptstandort.
+  const filialen = stand ? stand.liste.filter(f => !f.haupt) : []
+
+  function ablehnen(f) {
+    if (confirm(`Filiale "${f.label}" ablehnen?\n\nSie wird entfernt, ihre Logins auch.`)) ruf(`/filialen/${f.id}/ablehnen`, {})
   }
 
   if (!stand) return <div style={s.kasten}>{fehler || 'Lädt…'}</div>
@@ -89,6 +98,7 @@ export default function AdminKette({ shop, onChange }) {
                 {f.logins.map(l => (
                     <div key={l.id} style={s.login}>
                       <code>{l.benutzername}</code>
+                      {f.haupt && <span style={s.rot}>alt, gilt nicht mehr</span>}
                       {l.gesperrt && <span style={s.rot}>gesperrt</span>}
                       <span style={s.klein}>{l.zuletztEingeloggt ? `zuletzt ${new Date(l.zuletztEingeloggt).toLocaleDateString('de-DE')}` : 'nie angemeldet'}</span>
                       <button style={s.btn} onClick={() => passwortNeu(l)}>Passwort neu</button>
@@ -98,7 +108,15 @@ export default function AdminKette({ shop, onChange }) {
                     </div>
                 ))}
               </div>
-              {!f.haupt && (
+              {!f.haupt && f.bestaetigt === false && (
+                  <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <span style={s.wartet}>wartet auf Bestätigung</span>
+                    <button style={{ ...s.btn, background: '#e6f4ea', color: '#2C5F2E', fontWeight: 600 }}
+                            onClick={() => ruf(`/filialen/${f.id}/bestaetigen`, {})}>Bestätigen</button>
+                    <button style={{ ...s.btn, color: '#c5221f' }} onClick={() => ablehnen(f)}>Ablehnen</button>
+                  </span>
+              )}
+              {!f.haupt && f.bestaetigt !== false && (
                   <button style={{ ...s.btn, background: f.aktiv ? '#e6f4ea' : '#f0f0f0' }}
                           onClick={() => ruf(`/filialen/${f.id}/aktiv`, { aktiv: !f.aktiv })}>
                     {f.aktiv ? 'An' : 'Aus'}
@@ -108,14 +126,17 @@ export default function AdminKette({ shop, onChange }) {
             </div>
         ))}
 
-        {stand.kette && (
+        {stand.kette && filialen.length === 0 && (
+            <div style={{ ...s.klein, marginTop: 10 }}>Noch keine Filiale. Ein Login gibt es erst für eine Filiale; der Hauptstandort läuft über das Hauptkonto.</div>
+        )}
+        {stand.kette && filialen.length > 0 && (
             <form onSubmit={loginAnlegen} style={s.form}>
               <input style={s.input} placeholder="Benutzername" value={login.benutzername}
                      onChange={e => setLogin({ ...login, benutzername: e.target.value })} autoComplete="off" />
               <input style={s.input} placeholder="Passwort (min. 8)" value={login.passwort}
                      onChange={e => setLogin({ ...login, passwort: e.target.value })} autoComplete="off" />
-              <select style={s.select} value={login.ortId} onChange={e => setLogin({ ...login, ortId: e.target.value })}>
-                {stand.liste.map(f => <option key={f.id} value={f.id}>{f.haupt ? 'Hauptstandort' : f.label}</option>)}
+              <select style={s.select} value={login.ortId || filialen[0].id} onChange={e => setLogin({ ...login, ortId: e.target.value })}>
+                {filialen.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
               </select>
               <button style={s.btn} type="submit" disabled={!login.benutzername || login.passwort.length < 8}>Login anlegen</button>
             </form>
@@ -131,6 +152,7 @@ const s = {
   zeile: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '8px 0', borderTop: '1px solid #f0e6d2' },
   klein: { fontSize: 11, color: '#888' },
   rot: { fontSize: 11, color: '#c5221f', fontWeight: 600 },
+  wartet: { fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20, background: '#FBF3E2', color: '#7A5200' },
   login: { display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', padding: '2px 0' },
   btn: { fontSize: 11, padding: '4px 8px', borderRadius: 6, border: '1px solid #ddd', background: 'white', cursor: 'pointer' },
   select: { fontSize: 12, padding: '3px 4px', borderRadius: 6, border: '1px solid #ddd', background: 'white' },

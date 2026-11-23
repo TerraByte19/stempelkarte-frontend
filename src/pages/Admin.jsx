@@ -31,6 +31,8 @@ export default function Admin() {
   const [offeneAnfrage, setOffeneAnfrage] = useState(null)
   // Zitate der Laeden fuer die Startseite - erst nach Freigabe hier live.
   const [stimmen, setStimmen] = useState([])
+  // Neue Filialen von Ketten, die auf meine Bestaetigung warten.
+  const [filialAnfragen, setFilialAnfragen] = useState([])
   // Terminanfragen fuer Vorfuehrungen von der Startseite.
   const [termine, setTermine] = useState([])
   // Reiter oben und Ordner-Filter im Reiter Laeden. Bleibt beim Neuladen der Seite.
@@ -157,6 +159,41 @@ export default function Admin() {
     }
   }
 
+  async function loadFilialAnfragen(token) {
+    const t = token || sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/kette/anfragen`, {
+        headers: { 'Authorization': `Bearer ${t}` }
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      setFilialAnfragen(Array.isArray(data) ? data : [])
+    } catch {
+      // Beiwerk, das Panel laeuft weiter.
+    }
+  }
+
+  // aktion: 'bestaetigen' | 'ablehnen'
+  async function entscheideFiliale(a, aktion) {
+    if (aktion === 'ablehnen' && !confirm(`Filiale "${a.label}" von "${a.shopName}" ablehnen?\n\nSie wird entfernt, ihre Logins auch.`)) return
+    const t = sessionStorage.getItem('adminToken')
+    try {
+      const res = await fetch(`${BASE_URL}/api/admin/shops/${a.shopId}/kette/filialen/${a.ortId}/${aktion}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
+        body: '{}'
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || '')
+      }
+      loadFilialAnfragen()
+      loadShops()
+    } catch (e) {
+      alert('Das hat nicht geklappt. ' + (e.message || ''))
+    }
+  }
+
   async function loadTermine(token) {
     const t = token || sessionStorage.getItem('adminToken')
     try {
@@ -214,6 +251,7 @@ export default function Admin() {
       loadAnfragen(t)
       loadStimmen(t)
       loadTermine(t)
+      loadFilialAnfragen(t)
     } catch (e) {
       setError('Fehler beim Laden')
     } finally {
@@ -577,7 +615,7 @@ Der Newsletter ist dann im Dashboard weg. Anmeldung und Bestätigungsmail der Ku
 
         <div style={styles.reiterLeiste}>
           {[
-            ['laeden', 'Läden', shops.length],
+            ['laeden', filialAnfragen.length > 0 ? `Läden · ${filialAnfragen.length} Filial-Anfrage${filialAnfragen.length === 1 ? '' : 'n'}` : 'Läden', shops.length],
             ['anfragen', 'Anfragen', anfragen.filter(a => !a.erledigt).length],
             ['vorfuehrungen', 'Vorführungen', termine.filter(x => x.status === 'OFFEN').length],
             ['stimmen', 'Stimmen', stimmen.filter(x => x.status === 'OFFEN').length],
@@ -594,6 +632,37 @@ Der Newsletter ist dann im Dashboard weg. Anmeldung und Bestätigungsmail der Ku
 
         {reiter === 'laeden' && (
           <>
+            {filialAnfragen.length > 0 && (
+              <div style={{ background: '#FBF3E2', border: '1px solid #E3B77E', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                  Neue Filialen warten auf deine Bestätigung ({filialAnfragen.length})
+                </div>
+                <div style={{ fontSize: 13, color: '#6B6678', marginBottom: 10 }}>
+                  Bis du bestätigst, kann dort nicht gestempelt werden und das Filial-Login geht nicht. Bestätigt = sofort eingeschaltet.
+                </div>
+                {filialAnfragen.map(a => (
+                  <div key={a.ortId} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'baseline',
+                                              padding: '8px 0', borderTop: '1px solid rgba(0,0,0,0.06)', fontSize: 13 }}>
+                    <span style={{ fontWeight: 700, minWidth: 140 }}>{a.shopName}</span>
+                    <span style={{ fontWeight: 600 }}>{a.label}</span>
+                    {a.adresse && <span style={{ color: '#6B6678' }}>{a.adresse}</span>}
+                    <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
+                      {new Date(a.angelegt).toLocaleString('de-DE')}
+                    </span>
+                    <button onClick={() => entscheideFiliale(a, 'bestaetigen')}
+                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer', fontWeight: 600,
+                                     border: '1px solid #BFE0C5', background: '#EAF3EA', color: '#2C5F2E' }}>
+                      Bestätigen
+                    </button>
+                    <button onClick={() => entscheideFiliale(a, 'ablehnen')}
+                            style={{ fontSize: 12, padding: '3px 10px', borderRadius: 6, cursor: 'pointer',
+                                     border: '1px solid #E8C4BE', background: '#FBEDEB', color: '#A32015' }}>
+                      Ablehnen
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div style={styles.stats}>
               <div style={styles.statCard}>
                 <div style={styles.statNumber}>{shops.length}</div>

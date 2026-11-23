@@ -101,6 +101,11 @@ export const kette = {
     kette_tab_filiale: 'Filiale',
     kette_tab_gesamt: 'Gesamt',
 
+    kette_fil_wartet: 'wartet auf Bestätigung',
+    kette_fil_wartet_hint: 'Neue Filialen schaltet Stampit frei. Bis dahin kann dort nicht gestempelt werden, und das Login der Filiale geht noch nicht.',
+    kette_login_erst_filiale: 'Lege zuerst eine Filiale an. Ein Login gehört immer zu einer Filiale; der Hauptstandort läuft über das Hauptkonto.',
+    kette_login_alt: 'gilt nicht mehr, bitte löschen',
+
     kette_nfc_title: 'NFC-Karten der Filialen',
     kette_nfc_hint: 'Jede NFC-Karte hat ihren eigenen Link. So steht jeder Stempel in der richtigen Filiale, und im Protokoll steht, an welcher NFC-Karte er vergeben wurde.',
     kette_nfc_leer: 'Noch keine NFC-Karte angelegt.',
@@ -228,6 +233,11 @@ export const kette = {
     kette_tab_title: 'Statistics per branch',
     kette_tab_filiale: 'Branch',
     kette_tab_gesamt: 'Total',
+
+    kette_fil_wartet: 'waiting for approval',
+    kette_fil_wartet_hint: 'New branches are activated by Stampit. Until then no stamping is possible there, and the branch login does not work yet.',
+    kette_login_erst_filiale: 'Create a branch first. A login always belongs to a branch; the main location runs through the main account.',
+    kette_login_alt: 'no longer valid, please delete',
 
     kette_nfc_title: 'NFC cards of the branches',
     kette_nfc_hint: 'Every NFC card has its own link. This way each stamp is counted at the right branch, and the log shows which NFC card gave it.',
@@ -357,6 +367,11 @@ export const kette = {
     kette_tab_filiale: 'الفرع',
     kette_tab_gesamt: 'الإجمالي',
 
+    kette_fil_wartet: 'بانتظار الموافقة',
+    kette_fil_wartet_hint: 'الفروع الجديدة تُفعَّل من Stampit. حتى ذلك الحين لا يمكن الختم هناك، ولا يعمل تسجيل دخول الفرع بعد.',
+    kette_login_erst_filiale: 'أنشئ فرعًا أولًا. تسجيل الدخول يتبع دائمًا فرعًا؛ الموقع الرئيسي يعمل عبر الحساب الرئيسي.',
+    kette_login_alt: 'لم يعد صالحًا، يرجى الحذف',
+
     kette_nfc_title: 'بطاقات NFC للفروع',
     kette_nfc_hint: 'لكل بطاقة NFC رابطها الخاص. هكذا يُحتسب كل ختم في الفرع الصحيح، ويظهر في السجل أي بطاقة NFC منحته.',
     kette_nfc_leer: 'لم تُنشأ أي بطاقة NFC بعد.',
@@ -484,6 +499,11 @@ export const kette = {
     kette_tab_title: 'Şubelere göre istatistik',
     kette_tab_filiale: 'Şube',
     kette_tab_gesamt: 'Toplam',
+
+    kette_fil_wartet: 'onay bekliyor',
+    kette_fil_wartet_hint: 'Yeni şubeleri Stampit açar. O zamana kadar orada damga verilemez ve şubenin girişi henüz çalışmaz.',
+    kette_login_erst_filiale: 'Önce bir şube oluştur. Giriş her zaman bir şubeye aittir; ana konum ana hesap üzerinden çalışır.',
+    kette_login_alt: 'artık geçerli değil, lütfen sil',
 
     kette_nfc_title: 'Şubelerin NFC kartları',
     kette_nfc_hint: 'Her NFC kartının kendi bağlantısı vardır. Böylece her damga doğru şubede sayılır ve kayıtta hangi NFC kartının verdiği görünür.',
