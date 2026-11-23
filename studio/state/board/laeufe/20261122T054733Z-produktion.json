@@ -3,7 +3,7 @@
   "ergebnis": "Video für Montag mit Stimme gebaut (40,8 s, 637 Zeichen), 1 Änderungswunsch beantwortet, 3 Reels bewertet, 1 neue Idee für Dienstag vorgemerkt.",
   "modus": "produktion",
   "problem": "Der erste Bau des Entwurfs brach am Übersichtsbild ab: python3 zeigte auf ein Python 3.11 mit kaputtem Pillow. Mit STUDIO_PYTHON=/usr/bin/python3.13 lief alles. Die Probe in engine/render.mjs prüft nur 'import PIL', das braucht einen Chat. Alte Vorschauen nicht aufgeräumt: der Auftrag erlaubt es nicht.",
-  "push": "ausstehend",
+  "push": "ok",
   "sitzung": "https://claude.ai/code/session_01EEzBTnzYm2NHzGUiYVUNX8",
   "stimme_zeichen": 637,
   "video_id": "2026-11-23-eis-winterpause-v1",

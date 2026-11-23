@@ -1,0 +1,11 @@
+{
+  "dauer_min": 62,
+  "ergebnis": "Video für Dienstag mit Stimme gebaut (48,4 s, 693 Zeichen), 2 verworfene Videos beantwortet, 3 Einträge beantwortet, 1 Reel bewertet, keine neue Idee, nächste Idee vorgemerkt.",
+  "modus": "produktion",
+  "problem": "Der erste Bau scheiterte an der Übersicht: python3 zeigte auf eine zweite Installation ohne Pillow. Mit /usr/bin vorn im PATH lief alles. Alte Vorschauen nicht aufgeräumt: der Auftrag erlaubt das Löschen nicht.",
+  "push": "ausstehend",
+  "sitzung": "https://claude.ai/code/session_01EEzBTkY8DypWjCGVzDgwDt",
+  "stimme_zeichen": 693,
+  "video_id": "2026-11-24-doener-stempelkissen-trocken-v1",
+  "zeit": "2026-11-23T06:50:00Z"
+}

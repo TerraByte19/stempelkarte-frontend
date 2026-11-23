@@ -1,0 +1,545 @@
+{
+  "meta": {
+    "title": "Das Stempelkissen ist schon wieder trocken",
+    "slug": "doener-stempelkissen-trocken",
+    "language": "de",
+    "datum": "2026-11-24",
+    "format": "F05",
+    "beleg_kern": "stempeln",
+    "thema": "team",
+    "branche": "doener",
+    "idee_id": "20261122-doener-tag-im-laden",
+    "hook_muster": "H15",
+    "hook_punkte": 11,
+    "hook_kandidaten": [
+      {
+        "satz": "Elf Uhr im Döner Palast. Das Stempelkissen ist schon wieder trocken.",
+        "muster": "H15",
+        "punkte": 11,
+        "gruende": "S1 Ladenglocke bei 0 s, die Zeiger laufen ab 0,05 s; S2 sein Laden, sein Stempelkissen; S3 kleines Unglück mit Witz; K1 Stempelkissen; K2 ohne Vorwissen; K3 fünf Wörter auf der ersten Tafel; W1 kennt er von der Theke; W2 0, die Antwort ahnt er vielleicht; W3 der Scan mit der Handy-Kamera (B1) steht bis 10 s im Bild. Gewählt: meiste Punkte, Laden im Satz",
+        "raus": ""
+      },
+      {
+        "satz": "Elf Uhr, Laden auf. Und wo ist der Stempel schon wieder?",
+        "muster": "H15",
+        "punkte": 10,
+        "gruende": "S1 Glocke und Zeiger; S2 seine Theke; S3 Suche als Witz; K1 Stempel; K2 ohne Vorwissen; K3 vier Wörter; W1 kennt er; W2 0 erwartbar; W3 0, das Video löst die Suche nicht wörtlich ein, es zeigt den Scan (B1)",
+        "raus": ""
+      },
+      {
+        "satz": "Elf Uhr. Der Spieß dreht sich, der erste Döner geht raus.",
+        "muster": "H01",
+        "punkte": 8,
+        "gruende": "S1 Glocke und Zeiger; S2 sein Laden; S3 0 keine Reibung; K1 Döner; K2 ja; K3 ja; W1 0; W2 0; W3 Scan bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Kurz vor elf. Rollladen hoch, Grill an, Stempelkarten bereit.",
+        "muster": "H01",
+        "punkte": 8,
+        "gruende": "S1 Glocke und Zeiger; S2 sein Morgen; S3 0 keine Reibung; K1 Stempelkarten; K2 ja; K3 ja; W1 0; W2 0; W3 Scan bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Elf Uhr, der Laden macht auf. Was fehlt heute an der Theke?",
+        "muster": "H05",
+        "punkte": 8,
+        "gruende": "S1 Glocke und Zeiger; S2 seine Theke; S3 0 nur ein Rätsel; K1 0 kein Gegenstand; K2 ja; K3 ja; W1 0; W2 ja; W3 die Antwort Stempelkissen kommt bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Elf Uhr im Döner Palast. Wie viele Stempel werden es bis Mitternacht?",
+        "muster": "H05",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "Die Frage beantwortet das Video nicht (1.6, Ausnahme a): eine Zahl der Stempel nennt es nie"
+      }
+    ],
+    "meme": "",
+    "kern_bild": "tag",
+    "einstieg": "day-clock",
+    "motive": [
+      "scan"
+    ],
+    "schluss": "Kennst du's?",
+    "beleg": [
+      "B1",
+      "B2",
+      "A3",
+      "A2",
+      "A1"
+    ],
+    "idee": "Eigene Idee aus der Themenliste (T10): ein Tag im Dönerladen in Uhrzeiten. Das trockene Stempelkissen am Morgen ist der rote Faden, gestempelt wird den ganzen Tag mit der Handy-Kamera."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "parts": [
+        {
+          "component": "day-clock",
+          "params": {
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "time": "11:00",
+            "from": "10:30",
+            "label": "Stempelkissen: trocken",
+            "open": 10,
+            "close": 24,
+            "events": [],
+            "tones": false
+          },
+          "anchors": {
+            "move": {
+              "at": "start",
+              "offset": 0.05
+            },
+            "event": {
+              "cap": 1,
+              "word": -1
+            }
+          },
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.8
+            }
+          ],
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.15,
+              "focus": [
+                520,
+                980
+              ],
+              "to": [
+                540,
+                1030
+              ],
+              "dur": 0.3
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Elf Uhr im",
+                "*Döner *Palast."
+              ],
+              "instant": true,
+              "scale": 1.2
+            },
+            {
+              "lines": [
+                "Das *Stempelkissen | ist schon wieder | *trocken."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "day-clock",
+          "params": {
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "time": "17:10",
+            "from": "11:00",
+            "label": "Stammkunde, Feierabend",
+            "open": 10,
+            "close": 24,
+            "events": [
+              "11:00"
+            ]
+          },
+          "anchors": {
+            "event": {
+              "cap": 0,
+              "word": 4
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Zehn nach fünf. | Dein *Stammkunde | hat *Feierabend | und Hunger."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "have": 6,
+            "start": "counter",
+            "close": "phone",
+            "bubble": false,
+            "customer": 0
+          },
+          "anchors": {
+            "zoom": {
+              "cap": 0,
+              "word": 2
+            },
+            "scan": {
+              "cap": 0,
+              "word": 5
+            },
+            "stamp": {
+              "cap": 1,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Das Kissen? | *Egal. | Du *scannst | seine Karte"
+              ]
+            },
+            {
+              "lines": [
+                "mit der *Handy-Kamera,"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "wallet",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "before": 6,
+            "after": 7,
+            "reward": "Gratis-Döner",
+            "scan": false,
+            "drop": false,
+            "rise": false
+          },
+          "anchors": {
+            "stamp1": {
+              "cap": 0,
+              "word": 3
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "und *Stempel | Nummer *sieben | leuchtet schon | auf seinem *Display."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "day-clock",
+          "params": {
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "time": "18:30",
+            "from": "17:10",
+            "label": "Eine Neue",
+            "open": 10,
+            "close": 24,
+            "events": [
+              "11:00",
+              "17:10"
+            ]
+          },
+          "anchors": {
+            "event": {
+              "cap": 0,
+              "word": 3
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Halb sieben. | Eine *Neue | fragt nach | der Stempelkarte."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "have": 0,
+            "start": "door",
+            "phone": false,
+            "customer": 3
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            },
+            "order": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Kein Problem. | An deiner *Theke | steht ein *Code,"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "wallet",
+            "device": "android",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "before": 0,
+            "after": 0,
+            "reward": "Gratis-Döner",
+            "scan": false,
+            "drop": true,
+            "rise": false,
+            "angle": -14
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 4
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "einmal *scannen, | und die Karte | liegt in ihrer *Wallet. | Ohne *App."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "day-clock",
+          "params": {
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "time": "20:00",
+            "from": "18:30",
+            "label": "Schlange bis zur Tür",
+            "open": 10,
+            "close": 24,
+            "events": [
+              "11:00",
+              "17:10",
+              "18:30"
+            ]
+          },
+          "anchors": {
+            "event": {
+              "cap": 0,
+              "word": 3
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Acht Uhr. | Die *Schlange | reicht bis | zur *Tür."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "have": 3,
+            "start": "counter",
+            "standing": 4,
+            "bubble": false,
+            "customer": 5,
+            "phone": false
+          },
+          "captions": [
+            {
+              "lines": [
+                "Geht trotzdem *flott:"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "have": 3,
+            "start": "counter",
+            "standing": 4,
+            "bubble": false,
+            "customer": 5,
+            "close": "phone"
+          },
+          "anchors": {
+            "zoom": {
+              "cap": 0,
+              "word": 0
+            },
+            "scan": {
+              "cap": 0,
+              "word": 2
+            },
+            "stamp": {
+              "cap": 0,
+              "word": 3
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Handy raus, | *Scan, | *Stempel, | der Nächste."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "day-clock",
+          "params": {
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "time": "23:00",
+            "from": "20:00",
+            "label": "Feierabend",
+            "open": 10,
+            "close": 24,
+            "events": [
+              "11:00",
+              "17:10",
+              "18:30",
+              "20:00"
+            ]
+          },
+          "anchors": {
+            "event": {
+              "cap": 0,
+              "word": 3
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Elf Uhr abends. | *Feierabend. | Grill aus, | Licht aus."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "stamp-check",
+          "enter": "cut",
+          "params": {
+            "icon": "check"
+          },
+          "anchors": {
+            "hit": {
+              "cap": 0,
+              "word": -1,
+              "offset": 0.1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Ein Tag | voller *Stempel, | und das Kissen | bleibt *trocken!"
+              ],
+              "scale": 1.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Kennst du's?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile",
+          "gapBefore": 0.55
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt IMBISS,{Imbiss,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ]
+}

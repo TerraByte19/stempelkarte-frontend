@@ -1,0 +1,22 @@
+{
+ "key": "3b764ffdcdf21efe",
+ "text": "Elf Uhr im Döner Palast. Das Stempelkissen ist schon wieder trocken. Zehn nach fünf. Dein Stammkunde hat Feierabend und Hunger. Das Kissen? Egal. Du scannst seine Karte mit der Handy-Kamera, und Stempel Nummer sieben leuchtet schon auf seinem Display. Halb sieben. Eine Neue fragt nach der Stempelkarte. Kein Problem. An deiner Theke steht ein Code, einmal scannen, und die Karte liegt in ihrer Wallet. Ohne App. Acht Uhr. Die Schlange reicht bis zur Tür. Geht trotzdem flott: Handy raus, Scan, Stempel, der Nächste. Elf Uhr abends. Feierabend. Grill aus, Licht aus. Ein Tag voller Stempel, und das Kissen bleibt trocken! Kennst du's? Dann kommentiere jetzt Imbiss, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 693,
+ "audio": "3b764ffdcdf21efe.mp3",
+ "audio_sha256": "9cb2801137cdc5a0ae4ac117bd754b568589008633c4e3687e149941dc8b6f83",
+ "spent": 693
+}
