@@ -62,6 +62,7 @@ export default function FilialeStandort({ t }) {
         <div style={s.titel}>{t('kette_ort_title')}</div>
         <p style={s.hint}>{t('kette_ort_hint')}</p>
         {stand.adresse && <p style={{ ...s.hint, color: '#1a1a1a' }}>{stand.adresse}</p>}
+        {stand.gesetzt === false && <p style={s.warn}>{t('kette_ort_fehlt')}</p>}
         <button type="button" style={{ ...s.btn, opacity: laeuft ? 0.6 : 1 }} onClick={uebernehmen} disabled={laeuft}>
           {laeuft ? t('common_loading') : t('kette_ort_knopf')}
         </button>
@@ -75,5 +76,6 @@ const s = {
   card: { background: 'white', borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   titel: { fontSize: 15, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 },
   hint: { fontSize: 13, color: '#888', margin: '0 0 12px', lineHeight: 1.5 },
+  warn: { fontSize: 13, color: '#7A5200', background: '#FBF3E2', padding: '10px 12px', borderRadius: 8, margin: '0 0 12px', lineHeight: 1.5 },
   btn: { background: '#3C3489', color: 'white', border: 'none', borderRadius: 8, padding: '9px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer' },
 }

@@ -22,6 +22,7 @@ function Kette({ onGeaendert }) {
   const [protokoll, setProtokoll] = useState([])
   const [fehler, setFehler] = useState('')
   const [meldung, setMeldung] = useState('')
+  const [listeOffen, setListeOffen] = useState(false)
 
   function ladeLogins() {
     api.get('/api/shop/filial-zugaenge').then(r => setLogins(Array.isArray(r.data) ? r.data : [])).catch(() => {})
@@ -74,6 +75,12 @@ function Kette({ onGeaendert }) {
         {fehler && <div style={s.fehler}>{fehler}</div>}
         {meldung && <div style={s.ok}>{meldung}</div>}
 
+        <NeueFiliale t={t} tun={tun} onAngelegt={() => {
+          api.get('/api/shop/me/orte').then(r => setStand(r.data)).catch(() => {})
+          ladeLogins()
+          onGeaendert?.()
+        }} />
+
         <div style={s.card}>
           <h2 style={s.title}>{t('kette_fil_title')}</h2>
           <p style={s.hint}>{t('kette_fil_hint')}</p>
@@ -95,6 +102,7 @@ function Kette({ onGeaendert }) {
                 <span style={s.name}>
                   <span style={{ fontWeight: 600 }}>{o.label}</span>
                   {o.adresse && <span style={s.meta}>{o.adresse}</span>}
+                  {o.ohneStandort && <span style={{ ...s.meta, color: '#7A5200' }}>{t('kette_fil_ohne_ort')}</span>}
                 </span>
                 <button type="button" style={s.btn} onClick={() => umbenennen(o)}>{t('kette_fil_rename')}</button>
                 {o.bestaetigt === false
@@ -105,8 +113,10 @@ function Kette({ onGeaendert }) {
           ))}
         </div>
 
-        <ListeEinfuegen t={t} text={text}
-                        onGespeichert={r => { setStand(r.data); setMeldung(t('kette_liste_gespeichert')); onGeaendert?.() }} />
+        {listeOffen
+            ? <ListeEinfuegen t={t} text={text}
+                              onGespeichert={r => { setStand(r.data); setMeldung(t('kette_liste_gespeichert')); onGeaendert?.() }} />
+            : <button type="button" style={s.linkKnopf} onClick={() => setListeOffen(true)}>{t('kette_liste_zeigen')}</button>}
 
         <Logins t={t} liste={liste} logins={logins} datum={datum}
                 tun={tun} neuLaden={ladeLogins} />
@@ -124,6 +134,43 @@ function Kette({ onGeaendert }) {
           ))}
         </div>
       </>
+  )
+}
+
+/** Neue Filiale in einem Schritt: Name, Benutzername, Passwort. Der Standort kommt spaeter von der Filiale. */
+function NeueFiliale({ t, tun, onAngelegt }) {
+  const [filiale, setFiliale] = useState('')
+  const [name, setName] = useState('')
+  const [pw, setPw] = useState('')
+  const [laeuft, setLaeuft] = useState(false)
+  const fertig = filiale.trim() && name.trim() && pw.length >= 8
+
+  async function anfragen(e) {
+    e.preventDefault()
+    if (!fertig || laeuft) return
+    setLaeuft(true)
+    const r = await tun(() => api.post('/api/shop/filial-zugaenge/filiale',
+        { filiale: filiale.trim(), benutzername: name.trim(), passwort: pw }), t('kette_neu_ok'))
+    setLaeuft(false)
+    if (r) { setFiliale(''); setName(''); setPw(''); onAngelegt() }
+  }
+
+  return (
+      <div style={s.card}>
+        <h2 style={s.title}>{t('kette_neu_title')}</h2>
+        <p style={s.hint}>{t('kette_neu_hint')}</p>
+        <form onSubmit={anfragen} style={s.form}>
+          <input style={s.input} value={filiale} placeholder={t('kette_neu_name')} maxLength={40}
+                 onChange={e => setFiliale(e.target.value)} />
+          <input style={s.input} value={name} placeholder={t('kette_login_name')} maxLength={40}
+                 autoCapitalize="none" autoCorrect="off" autoComplete="off" onChange={e => setName(e.target.value)} />
+          <input style={s.input} value={pw} placeholder={t('kette_login_pw')} autoComplete="off"
+                 onChange={e => setPw(e.target.value)} />
+          <button type="submit" style={{ ...s.primaer, opacity: fertig && !laeuft ? 1 : 0.5 }} disabled={!fertig || laeuft}>
+            {t('kette_neu_knopf')}
+          </button>
+        </form>
+      </div>
   )
 }
 
@@ -270,6 +317,7 @@ function Logins({ t, liste, logins, datum, tun, neuLaden }) {
 }
 
 const s = {
+  linkKnopf: { background: 'none', border: 'none', color: '#3C3489', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '0 0 16px', textAlign: 'start' },
   wartet: { fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20, background: '#FBF3E2', color: '#7A5200', whiteSpace: 'nowrap' },
   card: { background: 'white', borderRadius: 12, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   title: { fontSize: 16, fontWeight: 600, margin: '0 0 6px', color: '#1a1a1a' },

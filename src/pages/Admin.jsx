@@ -646,6 +646,9 @@ Der Newsletter ist dann im Dashboard weg. Anmeldung und Bestätigungsmail der Ku
                     <span style={{ fontWeight: 700, minWidth: 140 }}>{a.shopName}</span>
                     <span style={{ fontWeight: 600 }}>{a.label}</span>
                     {a.adresse && <span style={{ color: '#6B6678' }}>{a.adresse}</span>}
+                    {Array.isArray(a.logins) && a.logins.length > 0 && (
+                      <span style={{ color: '#6B6678' }}>Login: <code>{a.logins.join(', ')}</code></span>
+                    )}
                     <span style={{ color: '#9A94A8', marginLeft: 'auto' }}>
                       {new Date(a.angelegt).toLocaleString('de-DE')}
                     </span>

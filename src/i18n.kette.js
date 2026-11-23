@@ -101,6 +101,15 @@ export const kette = {
     kette_tab_filiale: 'Filiale',
     kette_tab_gesamt: 'Gesamt',
 
+    kette_neu_title: 'Neue Filiale',
+    kette_neu_hint: 'Name der Filiale und ein Login für sie. Stampit schaltet die Filiale frei. Danach meldet sie sich an und legt ihren Standort selbst fest (unter „Geräte“).',
+    kette_neu_name: 'Name der Filiale, z. B. Bahnhof',
+    kette_neu_knopf: 'Filiale anfragen',
+    kette_neu_ok: 'Angefragt. Die Filiale wartet jetzt auf die Bestätigung durch Stampit.',
+    kette_fil_ohne_ort: 'Standort fehlt noch. Die Filiale legt ihn nach dem Anmelden unter „Geräte“ fest.',
+    kette_liste_zeigen: 'Mehrere Filialen mit Adresse auf einmal eintragen',
+    kette_ort_fehlt: 'Für diese Filiale ist noch kein Standort gespeichert. Ohne ihn kann hier nicht gestempelt werden. Tippe im Laden auf den Knopf.',
+
     kette_fil_wartet: 'wartet auf Bestätigung',
     kette_fil_wartet_hint: 'Neue Filialen schaltet Stampit frei. Bis dahin kann dort nicht gestempelt werden, und das Login der Filiale geht noch nicht.',
     kette_login_erst_filiale: 'Lege zuerst eine Filiale an. Ein Login gehört immer zu einer Filiale; der Hauptstandort läuft über das Hauptkonto.',
@@ -233,6 +242,15 @@ export const kette = {
     kette_tab_title: 'Statistics per branch',
     kette_tab_filiale: 'Branch',
     kette_tab_gesamt: 'Total',
+
+    kette_neu_title: 'New branch',
+    kette_neu_hint: 'Name of the branch and a login for it. Stampit activates the branch. After that it signs in and sets its own location (under “Devices”).',
+    kette_neu_name: 'Branch name, e.g. Station',
+    kette_neu_knopf: 'Request branch',
+    kette_neu_ok: 'Requested. The branch is now waiting for approval by Stampit.',
+    kette_fil_ohne_ort: 'Location still missing. The branch sets it after signing in, under “Devices”.',
+    kette_liste_zeigen: 'Add several branches with addresses at once',
+    kette_ort_fehlt: 'No location has been saved for this branch yet. Without it, stamping is not possible here. Tap the button while you are in the shop.',
 
     kette_fil_wartet: 'waiting for approval',
     kette_fil_wartet_hint: 'New branches are activated by Stampit. Until then no stamping is possible there, and the branch login does not work yet.',
@@ -367,6 +385,15 @@ export const kette = {
     kette_tab_filiale: 'الفرع',
     kette_tab_gesamt: 'الإجمالي',
 
+    kette_neu_title: 'فرع جديد',
+    kette_neu_hint: 'اسم الفرع وتسجيل دخول له. Stampit يفعّل الفرع. بعد ذلك يسجّل الفرع الدخول ويحدّد موقعه بنفسه (تحت «الأجهزة»).',
+    kette_neu_name: 'اسم الفرع، مثل: المحطة',
+    kette_neu_knopf: 'طلب فرع',
+    kette_neu_ok: 'تم الطلب. الفرع ينتظر الآن موافقة Stampit.',
+    kette_fil_ohne_ort: 'الموقع غير محدّد بعد. يحدّده الفرع بعد تسجيل الدخول تحت «الأجهزة».',
+    kette_liste_zeigen: 'إضافة عدة فروع بعناوينها دفعة واحدة',
+    kette_ort_fehlt: 'لم يُحفظ موقع لهذا الفرع بعد. بدونه لا يمكن الختم هنا. اضغط الزر وأنت داخل المحل.',
+
     kette_fil_wartet: 'بانتظار الموافقة',
     kette_fil_wartet_hint: 'الفروع الجديدة تُفعَّل من Stampit. حتى ذلك الحين لا يمكن الختم هناك، ولا يعمل تسجيل دخول الفرع بعد.',
     kette_login_erst_filiale: 'أنشئ فرعًا أولًا. تسجيل الدخول يتبع دائمًا فرعًا؛ الموقع الرئيسي يعمل عبر الحساب الرئيسي.',
@@ -499,6 +526,15 @@ export const kette = {
     kette_tab_title: 'Şubelere göre istatistik',
     kette_tab_filiale: 'Şube',
     kette_tab_gesamt: 'Toplam',
+
+    kette_neu_title: 'Yeni şube',
+    kette_neu_hint: 'Şubenin adı ve onun için bir giriş. Şubeyi Stampit açar. Sonra şube giriş yapar ve konumunu kendisi belirler (“Cihazlar” altında).',
+    kette_neu_name: 'Şube adı, ör. İstasyon',
+    kette_neu_knopf: 'Şube iste',
+    kette_neu_ok: 'İstek gönderildi. Şube şimdi Stampit onayını bekliyor.',
+    kette_fil_ohne_ort: 'Konum henüz yok. Şube giriş yaptıktan sonra “Cihazlar” altında belirler.',
+    kette_liste_zeigen: 'Birden çok şubeyi adresleriyle birlikte ekle',
+    kette_ort_fehlt: 'Bu şube için henüz konum kaydedilmedi. Konum olmadan burada damga verilemez. Dükkandayken düğmeye dokun.',
 
     kette_fil_wartet: 'onay bekliyor',
     kette_fil_wartet_hint: 'Yeni şubeleri Stampit açar. O zamana kadar orada damga verilemez ve şubenin girişi henüz çalışmaz.',
