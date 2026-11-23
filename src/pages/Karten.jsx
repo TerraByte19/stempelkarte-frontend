@@ -10,7 +10,7 @@ import WillkommenSettings from '../components/WillkommenSettings'
 import StufenSettings from '../components/StufenSettings'
 
 import AufkleberSettings from '../components/AufkleberSettings'
-import NfcSettings from '../components/NfcSettings'
+import NfcFilialen from '../components/NfcFilialen'
 import KartenFilialen from '../components/KartenFilialen'
 import PaketSettings from '../components/PaketSettings'
 
@@ -1194,7 +1194,7 @@ export default function Karten() {
           <StufenSettings cardId={editCard.id} t={t}/>
           <AufkleberSettings cardId={editCard.id} t={t}/>
           {/* NFC stempelt nur Stempelkarten - Punkte brauchen den Betrag. */}
-          {istStempel && <NfcSettings cardId={editCard.id} t={t}/>}
+          {istStempel && <NfcFilialen key={editCard.id} cardId={editCard.id} t={t}/>}
           {/* Gesperrte Karte, solange das Willkommensgeschenk an ist. Folgt
               dem Textfeld, damit der Laden vor dem Speichern sieht, was der
               neue Kunde bekommt. */}
