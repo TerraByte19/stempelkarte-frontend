@@ -11,6 +11,7 @@ import StufenSettings from '../components/StufenSettings'
 
 import AufkleberSettings from '../components/AufkleberSettings'
 import NfcSettings from '../components/NfcSettings'
+import KartenFilialen from '../components/KartenFilialen'
 import PaketSettings from '../components/PaketSettings'
 
 // Vier Kartentypen; MEMBER und PACKAGE brauchen weder Praemie noch Stempel-Design.
@@ -493,6 +494,8 @@ export default function Karten() {
   const [paketForm, setPaketForm] = useState({ groesse: 10, einheit: '' })
   const [editRewards, setEditRewards] = useState([])
   const [editCard, setEditCard] = useState(null)
+  // Kette: Filialen der Karte, die gerade angelegt wird (KartenFilialen).
+  const [neueGeltung, setNeueGeltung] = useState({ alle: true, filialen: [] })
   const [editDesign, setEditDesign] = useState({...DEFAULT_DESIGN})
   const [editReward, setEditReward] = useState('')
   const [editStamps, setEditStamps] = useState(10)
@@ -540,6 +543,16 @@ export default function Karten() {
       return alert(t(nurName ? 'cards_err_required_points' : 'cards_err_required'))
     }
     setLoading(true)
+    // Kette: Auswahl der Filialen an die frisch angelegte Karte haengen.
+    // Ohne Auswahl gilt die Karte ueberall, dann ist nichts zu tun.
+    const setzeGeltung = async (id) => {
+      if (!id || neueGeltung.alle || neueGeltung.filialen.length === 0) return
+      try {
+        await api.put(`/api/shop/cards/${id}/filialen`, neueGeltung)
+      } catch {
+        alert(t('kette_karte_nach_anlegen'))
+      }
+    }
     try {
       // Falls ein eigenes Stempel-Bild ausgewählt wurde, ist stampIconUrl aktuell
       // eine lokale Data-URL (Vorschau) — die NICHT speichern. Wird nach dem
@@ -566,6 +579,7 @@ export default function Karten() {
             name: r.name, costPointsX100: r.costPointsX100,
           })
         }
+        await setzeGeltung(res.data?.id)
         zurueckZurListe()
         return
       }
@@ -577,12 +591,14 @@ export default function Karten() {
           colorLabel: designToSave.colorLabel, logoUrl: designToSave.logoUrl, heroImageUrl: designToSave.heroImageUrl,
         }
         if (cardType==='MEMBER') {
-          await api.post('/api/shop/cards/member', { name: form.name, description: form.description || form.name, ...farben })
+          const neu = await api.post('/api/shop/cards/member', { name: form.name, description: form.description || form.name, ...farben })
+          await setzeGeltung(neu.data?.id)
         } else {
-          await api.post('/api/shop/cards/package', {
+          const neu = await api.post('/api/shop/cards/package', {
             name: form.name, description: form.description || form.name,
             groesse: parseInt(paketForm.groesse) || 10, einheit: paketForm.einheit, ...farben,
           })
+          await setzeGeltung(neu.data?.id)
         }
         zurueckZurListe()
         return
@@ -594,6 +610,7 @@ export default function Karten() {
         rewardThreshold: parseInt(form.rewardThreshold),
         ...designToSave,
       })
+      await setzeGeltung(res.data?.id)
 
       // Stempel-Bild jetzt an die frisch erstellte Karte hochladen
       // (pendingStampFile = { blob: zugeschnitten, original: unbeschnitten })
@@ -660,6 +677,7 @@ export default function Karten() {
   }
 
   function zurueckZurListe() {
+    setNeueGeltung({ alle: true, filialen: [] })
     setMode('list')
     setForm({name:'',description:'',rewardThreshold:10,rewardText:''})
     setDesign({...DEFAULT_DESIGN})
@@ -1034,6 +1052,7 @@ export default function Karten() {
                   t={t}/>
               </>
             )}
+            <KartenFilialen value={neueGeltung} onChange={setNeueGeltung} t={t}/>
             <button style={s.btnCreate} onClick={createCard} disabled={loading}>
               {loading ? t('cards_creating') : (
                   <span style={{display:'inline-flex',alignItems:'center',gap:6}}>
@@ -1171,6 +1190,7 @@ export default function Karten() {
               Jeder laedt sich selbst
 
               und bleibt bei einem aelteren Backend unsichtbar. */}
+          <KartenFilialen key={editCard.id} cardId={editCard.id} t={t}/>
           <StufenSettings cardId={editCard.id} t={t}/>
           <AufkleberSettings cardId={editCard.id} t={t}/>
           {/* NFC stempelt nur Stempelkarten - Punkte brauchen den Betrag. */}
