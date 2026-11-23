@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import api from '../../api'
+import FilialeStandort from '../../components/FilialeStandort'
 import { useLang, localeTag } from '../../LangContext'
 
 /**
@@ -79,6 +80,8 @@ export default function FilialeGeraete() {
         <h1 style={s.title}>{t('kette_ger_title')}</h1>
         <p style={s.subtitle}>{t('kette_ger_hint')}</p>
         {fehler && <div style={s.fehler}>{fehler}</div>}
+
+        <FilialeStandort t={t} />
 
         <div style={s.card}>
           {geraete === null ? <p style={s.leer}>{t('common_loading')}</p>

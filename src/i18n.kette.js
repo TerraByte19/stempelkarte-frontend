@@ -101,6 +101,14 @@ export const kette = {
     kette_tab_filiale: 'Filiale',
     kette_tab_gesamt: 'Gesamt',
 
+    kette_ort_title: 'Standort der Filiale',
+    kette_ort_hint: 'Stempeln geht nur in der Nähe des gespeicherten Standorts. Steht dieses Gerät gerade in der Filiale, kannst du den genauen Punkt hier übernehmen.',
+    kette_ort_knopf: 'Standort hier übernehmen',
+    kette_ort_frage: 'Stehst du gerade in der Filiale? Der jetzige Ort dieses Geräts wird als Standort der Filiale gespeichert.',
+    kette_ort_ok: 'Standort gespeichert.',
+    kette_ort_kein_gps: 'Dieses Gerät kann keinen Standort liefern.',
+    kette_ort_verweigert: 'Der Standort wurde nicht freigegeben. Bitte im Browser erlauben und noch einmal versuchen.',
+
     kette_karte_title: 'Gilt in',
     kette_karte_hint: 'In welchen Filialen kann diese Karte gestempelt werden? Stempel der Kunden bleiben, auch wenn du die Auswahl später änderst.',
     kette_karte_alle: 'Alle Filialen',
@@ -209,6 +217,14 @@ export const kette = {
     kette_tab_title: 'Statistics per branch',
     kette_tab_filiale: 'Branch',
     kette_tab_gesamt: 'Total',
+
+    kette_ort_title: 'Branch location',
+    kette_ort_hint: 'Stamping only works near the saved location. If this device is in the branch right now, you can save the exact spot here.',
+    kette_ort_knopf: 'Use my current location',
+    kette_ort_frage: 'Are you in the branch right now? The current position of this device will be saved as the branch location.',
+    kette_ort_ok: 'Location saved.',
+    kette_ort_kein_gps: 'This device cannot provide a location.',
+    kette_ort_verweigert: 'Location access was denied. Please allow it in the browser and try again.',
 
     kette_karte_title: 'Valid at',
     kette_karte_hint: 'At which branches can this card be stamped? Customers keep their stamps, even if you change the selection later.',
@@ -319,6 +335,14 @@ export const kette = {
     kette_tab_filiale: 'الفرع',
     kette_tab_gesamt: 'الإجمالي',
 
+    kette_ort_title: 'موقع الفرع',
+    kette_ort_hint: 'الختم يعمل فقط بالقرب من الموقع المحفوظ. إذا كان هذا الجهاز داخل الفرع الآن، يمكنك حفظ النقطة الدقيقة هنا.',
+    kette_ort_knopf: 'استخدم موقعي الحالي',
+    kette_ort_frage: 'هل أنت داخل الفرع الآن؟ سيُحفظ الموقع الحالي لهذا الجهاز كموقع للفرع.',
+    kette_ort_ok: 'تم حفظ الموقع.',
+    kette_ort_kein_gps: 'هذا الجهاز لا يستطيع تحديد الموقع.',
+    kette_ort_verweigert: 'لم يُسمح بالوصول إلى الموقع. يرجى السماح في المتصفح والمحاولة مرة أخرى.',
+
     kette_karte_title: 'صالحة في',
     kette_karte_hint: 'في أي الفروع يمكن ختم هذه البطاقة؟ تبقى أختام العملاء حتى لو غيّرت الاختيار لاحقًا.',
     kette_karte_alle: 'كل الفروع',
@@ -427,6 +451,14 @@ export const kette = {
     kette_tab_title: 'Şubelere göre istatistik',
     kette_tab_filiale: 'Şube',
     kette_tab_gesamt: 'Toplam',
+
+    kette_ort_title: 'Şubenin konumu',
+    kette_ort_hint: 'Damgalama yalnızca kayıtlı konumun yakınında çalışır. Bu cihaz şu an şubedeyse tam noktayı buradan kaydedebilirsin.',
+    kette_ort_knopf: 'Şu anki konumu kullan',
+    kette_ort_frage: 'Şu an şubede misin? Bu cihazın şimdiki konumu şubenin konumu olarak kaydedilecek.',
+    kette_ort_ok: 'Konum kaydedildi.',
+    kette_ort_kein_gps: 'Bu cihaz konum veremiyor.',
+    kette_ort_verweigert: 'Konum izni verilmedi. Lütfen tarayıcıda izin ver ve tekrar dene.',
 
     kette_karte_title: 'Geçerli olduğu yer',
     kette_karte_hint: 'Bu kart hangi şubelerde damgalanabilir? Seçimi sonra değiştirsen de müşterilerin damgaları kalır.',
