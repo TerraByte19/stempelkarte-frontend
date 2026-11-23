@@ -64,7 +64,7 @@ export default function AdminKette({ shop, onChange }) {
           <strong>Kette</strong>
           <span>Filialen aktiv: {stand.filialenAktiv} von {stand.filialen}</span>
           <span>Logins: {stand.logins}</span>
-          <span>Mails: {stand.mailsAus ? 'aus' : 'an'}</span>
+          <span>Newsletter: {stand.mailsAus ? 'aus' : 'an'}</span>
           <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             Geräte je Filiale
             <select value={stand.geraeteJeFiliale} onChange={e => ruf('/geraete-je-filiale', { anzahl: Number(e.target.value) })} style={s.select}>

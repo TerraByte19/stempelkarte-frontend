@@ -331,10 +331,12 @@ export default function Admin() {
     }
   }
 
-  // Mails je Laden: aus = keine E-Mail geht fuer diesen Laden raus (Bestaetigung,
-  // Newsletter, Testphase, Loeschung), Karten gibt es dort nur ohne Anmeldung.
+  // Newsletter je Laden: aus = der Laden kann keinen Newsletter senden. Alle
+  // anderen Mails und die Anmeldung der Kunden bleiben. Feld heisst noch mailsAus.
   async function setMails(shop, aus) {
-    if (aus && !confirm(`Mails für "${shop.name}" ausschalten?\n\nDann geht für diesen Laden keine E-Mail mehr raus, der Newsletter ist im Dashboard weg, und Kunden bekommen die Karte ohne Anmeldung. Push bleibt.`)) return
+    if (aus && !confirm(`Newsletter für "${shop.name}" ausschalten?
+
+Der Newsletter ist dann im Dashboard weg. Anmeldung und Bestätigungsmail der Kunden bleiben wie bisher.`)) return
     const t = sessionStorage.getItem('adminToken')
     try {
       const res = await fetch(`${BASE_URL}/api/admin/shops/${shop.id}/mails`, {
@@ -345,7 +347,7 @@ export default function Admin() {
       if (!res.ok) throw new Error()
       loadShops()
     } catch {
-      alert('Fehler beim Umstellen der Mails')
+      alert('Fehler beim Umstellen des Newsletters')
     }
   }
 
@@ -870,7 +872,7 @@ export default function Admin() {
     const liste = [[tarif === 'BASIC' ? 'Basic' : tarif === 'KETTE' ? 'Kette' : 'Pro',
                     tarif === 'BASIC' ? 'grau' : tarif === 'KETTE' ? 'orange' : 'blau']]
     if (shop.testTage != null) liste.push(shop.testTage > 0 ? [`Test: ${shop.testTage} T`, 'blau'] : ['Test vorbei', 'rot'])
-    if (shop.mailsAus) liste.push(['Mails aus', 'rot'])
+    if (shop.mailsAus) liste.push(['Newsletter aus', 'rot'])
     if (shop.apiFreigeschaltet) liste.push(['API', 'gruen'])
     if (shop.demo) liste.push(['Demo', 'orange'])
     if (shop.geoBefreit) liste.push(['Ohne Standort-Pflicht', 'orange'])
@@ -940,9 +942,9 @@ export default function Admin() {
 
             <div style={styles.gruppe}>
               <div style={styles.gruppeTitel}>Schalter</div>
-              <Schalter an={!shop.mailsAus} titel="Mails"
-                        text={shop.mailsAus ? 'Aus: für diesen Laden geht keine E-Mail raus, Karten gibt es ohne Anmeldung. Push bleibt.'
-                            : 'An: Bestätigung, Newsletter und Hinweise gehen per E-Mail raus.'}
+              <Schalter an={!shop.mailsAus} titel="Newsletter"
+                        text={shop.mailsAus ? 'Aus: der Laden kann keinen Newsletter senden. Anmeldung und Bestätigungsmail bleiben.'
+                            : 'An: der Laden kann Newsletter an seine Kunden senden.'}
                         onClick={() => setMails(shop, !shop.mailsAus)} />
               <Schalter an={!shop.geoBefreit} titel="Standort-Pflicht"
                         text={shop.geoBefreit ? 'Aus: scannt ohne Standort.'
