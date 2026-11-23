@@ -227,8 +227,8 @@ h1 .sub { color: var(--band-soft); font-weight: 500; }
 .col-main, .col-side { display: contents; }
 .cols section { min-width: 0; }
 #sec-neu { order: 1; } #sec-aendern { order: 2; } #sec-eingang { order: 3; }
-#sec-ideen { order: 4; } #sec-frei { order: 5; } #sec-protokoll { order: 6; }
-#sec-weiter { order: 7; } #sec-rest { order: 8; } #sec-speicher { order: 9; }
+#sec-ideen { order: 4; } #sec-frei { order: 5; } #sec-gepostet { order: 6; } #sec-protokoll { order: 7; }
+#sec-weiter { order: 8; } #sec-rest { order: 9; } #sec-speicher { order: 10; }
 @media (min-width: 960px) {
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 40px; align-items: start; }
   .col-main, .col-side { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
@@ -538,6 +538,16 @@ textarea[readonly] { opacity: 0.75; }
     </details>
   </section>
 
+  <section id="sec-gepostet">
+    <details class="fold" id="fold-gepostet">
+      <summary><h2>Gepostet <span class="count" id="n-gepostet"></span></h2></summary>
+      <div class="fold-body">
+        <div class="rows" id="list-gepostet"></div>
+        <p class="loading" id="hint-gepostet" hidden></p>
+      </div>
+    </details>
+  </section>
+
   <section id="sec-protokoll" aria-labelledby="h-protokoll">
     <h2 id="h-protokoll">Protokoll</h2>
     <p class="sec-hint">Was die Automation zuletzt getan hat, neueste Läufe zuerst.</p>
@@ -630,7 +640,8 @@ textarea[readonly] { opacity: 0.75; }
   // ------------------------------------------------------------------
   // Datenvertrag (fest, siehe LIESMICH.md): Sammlungen "videos", "eingang",
   // "ideen", "laeufe" und das eine Dokument "stand/aktuell". Diese Seite
-  // schreibt nur videos.status, videos.feedback, videos.geaendert und
+  // schreibt nur videos.status, videos.feedback, videos.geaendert,
+  // videos.gepostet (Zeitpunkt oder leer, der Status bleibt "freigegeben") und
   // ideen.status und legt eingang-Dokumente an. Alles andere schreibt die
   // Automation, auch videos.caption (Beitragstext), den die Seite nur zeigt.
   // ------------------------------------------------------------------
@@ -832,6 +843,8 @@ textarea[readonly] { opacity: 0.75; }
     zurueckziehen: { laeuft: 'Anfrage wird zurückgezogen …', fertig: 'Anfrage zurückgezogen', toast: 'Anfrage zurückgezogen: ' },
     zuruecknehmen: { laeuft: 'Freigabe wird zurückgenommen …', fertig: 'Freigabe zurückgenommen', toast: 'Freigabe zurückgenommen: ' },
     wiederholen: { laeuft: 'Wird wieder zur Freigabe gelegt …', fertig: 'Liegt wieder zur Freigabe', toast: 'Wieder zur Freigabe: ' },
+    posten: { laeuft: 'Wird als gepostet gespeichert …', fertig: 'Gepostet', toast: 'Gepostet: ' },
+    nichtgepostet: { laeuft: 'Wird zurück zu Freigegeben gelegt …', fertig: 'Wieder bei Freigegeben', toast: 'Wieder bei Freigegeben: ' },
     rueck: { laeuft: 'Wird rückgängig gemacht …', fertig: 'Rückgängig gemacht', toast: 'Rückgängig gemacht: ' },
     text: { laeuft: 'Änderungswunsch wird gespeichert …', fertig: 'Gespeichert', toast: '' }
   };
@@ -1110,6 +1123,7 @@ textarea[readonly] { opacity: 0.75; }
     var mitFeedback = Object.prototype.hasOwnProperty.call(erste.patch, 'feedback');
     var aenderung = { status: erste.vorher.status };
     if (mitFeedback) aenderung.feedback = erste.vorher.feedback;
+    if (Object.prototype.hasOwnProperty.call(erste.patch, 'gepostet')) aenderung.gepostet = typeof erste.vor.gepostet === 'string' ? erste.vor.gepostet : '';
     var op = starte({
       id: erste.id, titel: erste.titel, ort: c.mode,
       status: typeof erste.patch.status === 'string' ? erste.patch.status : erste.vorher.status,
@@ -1613,7 +1627,9 @@ textarea[readonly] { opacity: 0.75; }
   }
 
   // --- Freigegeben ---
-  function cardFrei(id) {
+  function cardFrei(id, modus) {
+    modus = modus || 'frei';
+    var istGepostet = modus === 'gepostet';
     var k = kopf();
     var aktuell = null;
     var st = zustand();
@@ -1626,6 +1642,15 @@ textarea[readonly] { opacity: 0.75; }
     // Eine Freigabe laesst sich auch spaeter noch zuruecknehmen. "Rueckgaengig"
     // in der Meldung unten gibt es nur ein paar Sekunden lang.
     var btnNimm = el('button', { type: 'button', class: 'linkbtn entscheid', text: 'Freigabe zurücknehmen' });
+    // "Gepostet" ist kein eigener Status: das Video bleibt freigegeben und
+    // bekommt den Zeitpunkt in videos.gepostet. So aendert sich fuer die
+    // Automation nichts, und die Zeile wandert nur in den Bereich "Gepostet".
+    var btnPost = el('button', { type: 'button', class: istGepostet ? 'linkbtn entscheid' : 'btn soft entscheid', text: istGepostet ? 'Doch nicht gepostet' : 'Als gepostet markieren' });
+    var postInfo = el('p', { class: 'meta', hidden: true });
+    btnPost.addEventListener('click', function () {
+      if (!aktuell || zuFrueh()) return;
+      starte(aktuell, istGepostet ? 'nichtgepostet' : 'posten', { gepostet: istGepostet ? '' : nowIso() });
+    });
     function sag(text) { setText(hinweis, text); show(hinweis, !!text); }
     // downloads.d.ts: "unavailable" heisst, Speichern geht in dieser Ansicht
     // nicht, und unbekannte Codes sind genauso zu behandeln. Dann den eigenen
@@ -1665,16 +1690,16 @@ textarea[readonly] { opacity: 0.75; }
       starte(aktuell, 'zuruecknehmen', { status: 'neu' });
     });
     var item = el('article', { class: 'item' }, [
-      el('div', { class: 'item-head' }, [k.eyebrow, k.title]),
+      el('div', { class: 'item-head' }, [k.eyebrow, k.title, postInfo]),
       antwort.el,
       beitrag.el,
-      el('div', { class: 'row' }, [fold.btn, btnLaden, link, btnNimm]),
+      el('div', { class: 'row' }, [fold.btn, btnLaden, link, btnPost, btnNimm]),
       st.el,
       hinweis,
       fold.slot
     ]);
     return {
-      mode: 'frei', el: item,
+      mode: modus, el: item,
       titel: function () { return aktuell ? aktuell.titel : ''; },
       update: function (v) {
         aktuell = v;
@@ -1684,8 +1709,13 @@ textarea[readonly] { opacity: 0.75; }
         fold.set(v);
         show(fold.btn, !!v.asset);
         show(btnLaden, !!v.asset && link.hidden);
-        show(btnNimm, !S.readOnly);
+        show(btnNimm, !S.readOnly && !istGepostet);
         btnNimm.disabled = !!v.vorgang && beschaeftigt(v.vorgang);
+        show(btnPost, !S.readOnly);
+        btnPost.disabled = btnNimm.disabled;
+        var wann = istGepostet ? parseZeit(v.gepostet) : null;
+        setText(postInfo, wann ? 'Gepostet am ' + fmtBerlinKurz.format(wann) : '');
+        show(postInfo, !!wann);
         st.set(v.vorgang);
         if (!v.asset) sag('Zu diesem Video ist keine Datei gespeichert.');
         else if (hinweis.textContent === 'Zu diesem Video ist keine Datei gespeichert.') sag('');
@@ -1746,7 +1776,7 @@ textarea[readonly] { opacity: 0.75; }
     };
   }
 
-  var BAUER = { neu: cardNeu, aendern: cardAendern, frei: cardFrei, rest: cardRest };
+  var BAUER = { neu: cardNeu, aendern: cardAendern, frei: cardFrei, gepostet: function (id) { return cardFrei(id, 'gepostet'); }, rest: cardRest };
 
   // ------------------------------------------------------------------
   // Videos zeichnen
@@ -1761,6 +1791,7 @@ textarea[readonly] { opacity: 0.75; }
       dauer: num(d.dauer_s), version: num(d.version),
       status: str(d.status), feedback: str(d.feedback), antwort: str(d.antwort),
       caption: str(d.caption).trim(),
+      gepostet: str(d.gepostet),
       erstellt: str(d.erstellt),
       vorgang: null, ort: '', fest: ''
     };
@@ -1775,7 +1806,7 @@ textarea[readonly] { opacity: 0.75; }
     function tag(v) { return parseTag(v.datum) ? v.datum : '\uffff'; }
     return vgl(tag(a), tag(b)) || ((b.version || 0) - (a.version || 0)) || vgl(b.erstellt, a.erstellt) || vgl(a.id, b.id);
   }
-  function gruppe(status) { return status === 'neu' ? 'neu' : status === 'aendern' ? 'aendern' : status === 'freigegeben' ? 'frei' : 'rest'; }
+  function gruppe(status, gepostet) { return status === 'neu' ? 'neu' : status === 'aendern' ? 'aendern' : status === 'freigegeben' ? (gepostet ? 'gepostet' : 'frei') : 'rest'; }
 
   // Zeigt der Schnappschuss noch genau den Stand von vor dem eigenen Schreiben?
   function nochAlt(roh, b) {
@@ -1794,7 +1825,7 @@ textarea[readonly] { opacity: 0.75; }
       if (b && (Date.now() > b.bis || !nochAlt(roh, b))) { S.bekannt.delete(d.id); b = null; }
       var v = sicht(d.id, b ? mische(roh, b.patch) : roh);
       var op = S.vorgang.get(d.id) || null;
-      var natur = gruppe(v.status);
+      var natur = gruppe(v.status, v.gepostet);
       // Ein Fehler gehoert an die Stelle, an der getippt wurde. Ist das Video
       // inzwischen woanders (jemand anderes hat es geaendert), ist er ueberholt.
       // "natur" stammt aus dem gespeicherten Stand: die eigene, abgelehnte
@@ -1863,7 +1894,8 @@ textarea[readonly] { opacity: 0.75; }
   var LEER = {
     neu: 'Gerade wartet kein Video auf dich.',
     aendern: 'Keine offenen Änderungswünsche.',
-    frei: 'Noch ist kein Video freigegeben.',
+    frei: 'Kein freigegebenes Video wartet aufs Posten.',
+    gepostet: 'Noch ist kein Video als gepostet markiert.',
     rest: 'Hier liegt noch nichts.'
   };
   function bereichsHinweis(name, anzahl, da) {
@@ -1880,7 +1912,7 @@ textarea[readonly] { opacity: 0.75; }
 
   function renderVideos() {
     var da = S.videos !== null;
-    var g = { neu: [], aendern: [], frei: [], rest: [] };
+    var g = { neu: [], aendern: [], frei: [], gepostet: [], rest: [] };
     var alle = da ? aktuelleVideos() : [];
     var ids = new Set();
     var fremd = 0;
@@ -1895,6 +1927,7 @@ textarea[readonly] { opacity: 0.75; }
     setze($('list-aendern'), g.aendern, 'aendern');
     setze($('list-frei'), frei.oben, 'frei');
     setze($('list-frei-alt'), frei.unten, 'frei');
+    setze($('list-gepostet'), g.gepostet, 'gepostet');
     setze($('list-rest'), g.rest, 'rest');
     Object.keys(g).forEach(function (name) { bereichsHinweis(name, g[name].length, da); });
     show($('fold-frei-alt'), frei.unten.length > 0);

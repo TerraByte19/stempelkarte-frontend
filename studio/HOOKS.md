@@ -24,6 +24,17 @@ oben im Bild (Stil C). **Lauf** = der unbeaufsichtigte tägliche Lauf.
 
 ---
 
+**Seit dem 23.11.2026** (Chat mit dem Betreiber): (1) Jedes Video mit einer
+Vorlage schreibt seine Kandidaten **im Hook-Muster der Vorlage**
+(`AUTOMATIK.md` 5a); der Takt aus 1.7.2 und "nicht das Muster der letzten
+zwei Videos" gelten dann nicht, alles andere hier schon. (2) **Das Wort
+"Stempelkissen" kommt in keinem Hook und keinem Text mehr vor**: der
+Betreiber hat das Video vom 24.11. verworfen ("was ist ein Stempelkissen").
+Die Beispiele unten mit diesem Wort (H14, H07, Bogen 1.8) bleiben nur als
+Messwerte der Jury-Runde stehen und sind keine Kandidaten mehr. (3) Ein Hook
+sagt eine Sache, die man beim ersten Hören versteht; ein Witz, den erst das
+Ende auflöst, zählt im Bogen bei K3 als 0.
+
 ## 0. Ablauf für den Lauf
 
 Seit dem 17.11.2026, abends: **mindestens fünf Kandidaten statt einem Satz**,
@@ -377,7 +388,7 @@ der Block `sound` oben im Skript. Immer mit Absenkung unter der Stimme
 | Wofür | Klang | `vol` (ungehört) |
 |---|---|---|
 | jeder Laden, Tür auf | `ladenglocke` | 0,8 |
-| Döner Palast | `grill-brutzeln` | 1,0 |
+| Döner Palast | `ladenglocke` (bis 22.11.2026 `grill-brutzeln`: der Betreiber ließ es am 23.11.2026 aus dem Döner-Video nehmen, "muss raus"; seitdem nie mehr als erster Ton) | 0,8 |
 | Papier im ersten Satz | `papier-knuellen` | 1,5 (leise Datei, -22,5 LUFS) |
 | Spannung, Verlust | `herzschlag` | 1,5 (leise Datei, -21,5 LUFS) |
 | leerer Laden (H15) | `grillen-stille` | 0,8 |

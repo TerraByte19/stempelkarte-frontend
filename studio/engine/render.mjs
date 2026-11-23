@@ -130,13 +130,17 @@ export async function renderVideo(pages, { duration, fps, out, onFrame, log = ()
 // beim Kontaktbogen ab; /usr/bin/python3 (3.13) hatte alles. Deshalb wird
 // einmal geprueft, welches Python numpy und PIL laden kann, und dieses fuer
 // jeden Aufruf von "python3" benutzt. STUDIO_PYTHON setzt es von Hand.
+// Die Probe laedt seit dem 23.11.2026 wirklich, was die Werkzeuge brauchen:
+// "import PIL" allein gelang auch dem falschen Python (das Paket lag da, aber
+// fuer eine andere Python-Version gebaut), erst "from PIL import Image"
+// scheiterte, und fast jeder Lauf brach beim ersten Bau am Kontaktbogen ab.
 let PYTHON = null
 function python() {
   if (PYTHON) return PYTHON
   const kandidaten = [process.env.STUDIO_PYTHON, 'python3', '/usr/bin/python3', 'python3.13', 'python3.12'].filter(Boolean)
   for (const k of kandidaten) {
     try {
-      const r = spawnSync(k, ['-c', 'import numpy, PIL'], { stdio: 'ignore' })
+      const r = spawnSync(k, ['-c', 'import numpy; from PIL import Image, ImageDraw, ImageFont; Image.new("RGB", (2, 2))'], { stdio: 'ignore' })
       if (r.status === 0) return (PYTHON = k)
     } catch (e) { /* naechster Kandidat */ }
   }

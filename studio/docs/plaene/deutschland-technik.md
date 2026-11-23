@@ -230,7 +230,7 @@ Ausdrucken, unterschreiben, einscannen. So digital ist Deutschland. 📠
 Deine Stempelkarte muss nicht auf Pappe bleiben: Sie liegt in Apple und Google Wallet. Einmal scannen, kein Download.
 👉 Kommentiere KARTE und wir melden uns.
 
-#bäckerei #cafe #berlincity #kleinunternehmen #stempelkarte
+#bäckerei #cafe #berlincity #kleinunternehmen #stammkunden
 ```
 
 ## 6. Beim Bau prüfen

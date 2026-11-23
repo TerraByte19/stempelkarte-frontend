@@ -80,9 +80,17 @@ Dokument-id: `<datum>-<slug>-v<version>`, zum Beispiel
 | `zeichen` | Zahl | verbrauchte Zeichen der Stimme | Automation |
 | `erstellt` | Text, ISO 8601 UTC | angelegt am | Automation |
 | `geaendert` | Text, ISO 8601 UTC | zuletzt geändert | Automation und Nutzer |
+| `gepostet` | Text, ISO 8601 UTC, oder leer, freiwillig | wann der Nutzer das Video gepostet hat. Seit dem 23.11.2026 (Seite in der Fassung 1795423671-09bb): der Knopf "Als gepostet markieren" an einem freigegebenen Video schreibt den Zeitpunkt, "Doch nicht gepostet" leert das Feld. **Der Status bleibt `freigegeben`**; die Seite zeigt das Video dann im Bereich "Gepostet" statt unter "Freigegeben". Die Automation liest das Feld nur und überschreibt es nie (`../AUTOMATIK.md`, Regel 14) | Nutzer |
 | `caption` | Text mit Zeilenumbrüchen (`\n`), freiwillig | der fertige Beitragstext für Instagram, Facebook und TikTok: Hook, ein bis zwei Sätze, "👉 Kommentiere STICHWORT und wir melden uns.", Leerzeile, genau 5 Hashtags. Regeln: `../AUTOMATIK.md`, Abschnitt 6.6, geprüft mit `../tools/beitrag.mjs`. Seit dem 16.11.2026; ältere Dokumente haben das Feld nicht | Automation |
 | `vorschau_teile` | Zahl, freiwillig | wie viele Teile der kleinen Fassung fürs iPhone in der Sammlung `vorschau` liegen (unten). 0 oder fehlt: keine Vorschau. Die Seite liest es (als `vorschau`, höchstens 40) und setzt die Teile zusammen, wenn sie die Datei selbst nicht laden kann. Seit dem 17.11.2026 | Automation |
 | `vorschau_rest` | Zahl, freiwillig | nur nach einem abgebrochenen Schreiben der Vorschau: so viele Teile liegen schon in `vorschau`, ohne dass `vorschau_teile` gesetzt ist. Die Seite liest es nicht; die Automation findet daran die Teile zum Aufräumen | Automation |
+
+"Gepostet" ist **kein** sechster Status: ein gepostetes Video ist
+`freigegeben` mit gefülltem `gepostet`. Die Repo-Kopie `index.html` ist am
+23.11.2026 von der Live-Seite geholt worden (`Artifact` mit
+`action: "read"`), nicht umgekehrt: wer die Seite ändert, liest zuerst die
+Live-Fassung und baut darauf auf, sonst verschwindet der Bereich "Gepostet"
+wieder.
 
 `status` hat genau fünf Werte:
 

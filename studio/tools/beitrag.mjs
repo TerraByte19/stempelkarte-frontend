@@ -70,6 +70,10 @@ export function pruefe(text, { b, erwartet, stichwort, hook }) {
   if (tags.length !== b.hashtags_anzahl) fehler.push(`Es sind ${tags.length} Hashtags, es müssen genau ${b.hashtags_anzahl} sein (Grenze von Instagram).`)
   if (new Set(tags.map(x => x.toLowerCase())).size !== tags.length) fehler.push('Ein Hashtag steht doppelt.')
   const fremd = tags.filter(x => !b.hashtags.includes(x))
+  // Feste Regel des Betreibers (23.11.2026): ein verbotener Hashtag steht nirgends im Text,
+  // auch nicht mitten im Satz oder gross geschrieben.
+  const verboten = (b.hashtags_verboten || []).filter(x => t.toLowerCase().includes(String(x).toLowerCase()))
+  if (verboten.length) fehler.push(`Verbotener Hashtag im Text: ${verboten.join(" ")}. Er darf nie in einem Beitragstext stehen.`)
   if (fremd.length) fehler.push(`Nicht in der Liste aus konfig.json: ${fremd.join(' ')}.`)
   if (erwartet && tags.join(' ') !== erwartet.join(' ')) fehler.push(`Die Hashtags müssen genau diese sein: ${erwartet.join(' ')}.`)
   const wort = String(stichwort || '').trim()
@@ -115,7 +119,9 @@ function selbsttest() {
   // Der Text des Betreibers fuer das zweite Video (Cafe, eigene Hashtags) muss nach denselben Regeln gelten
   const bsp = pruefe(b.beispiel, { b, erwartet: ['#baristalife', '#cafe', ...b.hashtags_immer], stichwort: 'KARTE', hook: 'Ist das koscher?' })
   soll('das Beispiel des Betreibers geht durch', bsp.ok, true)
-  soll('die ersten fünf der Liste sind die des Betreibers', b.hashtags.slice(0, 5).join(' '), '#baristalife #cafe #berlincity #kleinunternehmen #stempelkarte')
+  soll('die ersten fünf der Liste (vier vom Betreiber, #stammkunden statt #stempelkarte)', b.hashtags.slice(0, 5).join(' '), '#baristalife #cafe #berlincity #kleinunternehmen #stammkunden')
+  soll('#stempelkarte fällt durch, auch groß geschrieben', p(gut.replace('#berlincity', '#Stempelkarte')).ok, false)
+  soll('kein verbotener Hashtag in der Liste', (b.hashtags_verboten || []).some(x => b.hashtags.includes(x)), false)
   soll('sechs Hashtags fallen durch', p(gut + ' #eisdiele').ok, false)
   soll('ein fremder Hashtag fällt durch', p(gut.replace('#cafe', '#coffee')).ok, false)
   soll('Hashtags einer anderen Branche fallen durch', p(gut.replace(hashtagsFuer(b, 'cafe').slice(0, 2).join(' '), hashtagsFuer(b, 'friseur').slice(0, 2).join(' '))).ok, false)

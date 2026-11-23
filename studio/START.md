@@ -110,6 +110,33 @@ müssen:
   noch nicht (alles unter `studio/` ist nicht committet). Was offen ist:
   "Inbetriebnahme" unten.
 
+## Stand am 23.11.2026 (Chat mit dem Betreiber)
+
+- **Vorlage zuerst:** jedes neue Video nimmt Hook-Muster und Aufbau eines
+  der besten Reels von @trytappi, @evecoo.digital, @gobonki oder
+  @loyaltify.io, mit eigenem Wortlaut, eigenen Bildern und eigenem Ton
+  (`AUTOMATIK.md` 5a). Takt, Länge und Bilder eines Reels kennt der Lauf
+  nur, wenn eine begleitete Sitzung sie am Reel eingetragen hat
+  (`reels/<id>.aufbau`); dazu zeigt der Betreiber das Reel im Chat.
+- **Überwiegend neue Bilder:** V12 in `FORMATE.md`, geprüft von
+  `tools/abwechslung.mjs`. Gehen die neuen Bilder aus, braucht es neue
+  Bausteine oder Ansichten, und die baut nur eine begleitete Sitzung.
+- **`#stempelkarte` ist verboten** (`konfig.json`,
+  `beitrag.hashtags_verboten`); der fünfte Hashtag ist `#stammkunden`.
+- **"Stempelkissen" versteht keiner:** der Betreiber hat das Video vom
+  24.11. deshalb verworfen. Das Wort kommt in keinem Text mehr vor, auch
+  nicht in Hooks (`HOOKS.md`, H14: das Beispiel "Unter uns: Dein
+  Stempelkissen ..." nicht mehr benutzen). Texte: eine klare Aussage,
+  einfache Sätze, kein Rätsel.
+- **Der Ortsklang am Anfang ist nicht heilig:** im Döner-Video musste das
+  Grill-Brutzeln bei 0 s raus (Fassung 4). `grill-brutzeln` nicht mehr als
+  ersten Ton nehmen.
+- **Board:** die Seite hat den Bereich "Gepostet" (`videos.gepostet`, der
+  Status bleibt `freigegeben`). `board/index.html` ist die Live-Fassung
+  1795423671-09bb.
+- **Python:** `engine/render.mjs` wählt das Python, das Pillow wirklich
+  laden kann (die alte Probe "import PIL" ließ das falsche durch).
+
 ## Zu Beginn jeder begleiteten Sitzung
 
 Die Automatik kann manches nicht allein und legt es für einen Chat zurück.
@@ -202,7 +229,7 @@ für Ton mit beiden Fassungen).
   (`shop-map`). Das war seine Korrektur am zweiten Video.
 - **Beitragstext:** kurz. Hook, ein bis zwei Sätze, "👉 Kommentiere
   STICHWORT und wir melden uns.", dann 5 Hashtags. Seine Wahl fürs zweite
-  Video: #baristalife #cafe #berlincity #kleinunternehmen #stempelkarte (die
+  Video: #baristalife #cafe #berlincity #kleinunternehmen #stammkunden (die
   ersten vier hat er selbst ausgesucht).
 - **Nur behaupten, was die App kann:** Aussagen kommen aus `PRODUKT.md`,
   Klasse 1. Keine Geviertstriche in sichtbarem Text.

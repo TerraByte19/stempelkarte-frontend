@@ -86,6 +86,18 @@ Ein neues Video muss **alle** Regeln erfüllen:
 | V9 | `beleg_kern` ist eine Kernaussage des Formats und nicht die eines der letzten zwei Videos. Eine Studie (F10) nicht, wenn sie in den letzten 30 Tagen schon in einem Video war |
 | V10 | Die Sätze sind neu: mit dem gesprochenen Text jedes der letzten drei Videos höchstens **zwei** gleiche Gruppen aus vier Wörtern (ohne Schlussfrage, Aufforderung und Ladenname); der Hook stand in den letzten 60 Tagen an keinem Video |
 | V11 | Nie alle drei Motive `naehe`, `papier`, `scan` in einem Video (das war der alte Bogen). F07 hat höchstens `papier`, F08 nie `papier` |
+| V12 | **Überwiegend neue Bilder** (seit 23.11.2026): mehr als die Hälfte der Teile des Videos (ohne den Schluss) zeigt ein Bild, das in keinem der **letzten fünf** Videos vorkam. Ein Bild ist sein Schlüssel aus Baustein und Ansicht (`abwechslung.mjs felder`, Feld `bilder`: zum Beispiel `phone-3d mode=wallet`, `iso-shop branch=doener start=door`); ein anderer Ladenname, eine andere Stempelzahl oder ein anderer Text machen kein neues Bild. Wiederverwenden ist die Ausnahme |
+
+Zu V12: Der Betreiber am 23.11.2026, als er das Eis-Video vom selben Tag
+verwarf: "Du nimmst einfach die Frames von anderen Videos und machst neue
+Geschichten dazu." Nachgemessen: dort waren 5 von 9 Bildern schon in den
+fünf Videos davor (Fallblatt, Pinnwand, Karte im Handy); im Döner-Video vom
+24.11., dessen Bilder ihm gefielen, 9 von 12 neu. V12 fällt nie weg. Erfüllt
+sie kein Format mehr, fehlen neue Bausteine oder Ansichten: dann baut der
+Lauf das Video mit dem höchsten Anteil neuer Bilder, vermerkt es in
+`pruefung`, und `meldung` sagt: "Mir gehen die neuen Bilder aus. Im Chat
+können wir neue bauen." Neue Bausteine entstehen nur in einer begleiteten
+Sitzung (`AUTOMATIK.md`, Regel 11).
 
 Dazu gelten: Themenpause (7 Tage je `thema`) und **dasselbe Thema mit demselben
 Laden frühestens nach 21 Tagen** (`AUTOMATIK.md` 5), Meme nur in F07 (`HOOKS.md`
@@ -155,7 +167,7 @@ Stammkunden behalten?". Die Idee
 3. **Passt nichts:** es fallen weg, in dieser Reihenfolge, bis etwas passt:
    V7, V6, V4, dann die Themenpause von 7 Tagen (dann kommt das Thema mit der
    längsten Pause, nur nicht das vom Vortag), dann gilt V9 nur noch gegen das
-   letzte Video, zuletzt fallen V1 und V9 ganz weg. V2, V3, V5, V8, V10, V11
+   letzte Video, zuletzt fallen V1 und V9 ganz weg. V2, V3, V5, V8, V10, V11, V12
    und "Thema mit Laden" fallen nie weg: Papier, Scan und Nähe kommen nie
    öfter als in einem von drei Videos, und der Laden wechselt immer. Was
    weggefallen ist, steht in `pruefung` am Video. In 30 durchgespielten Tagen

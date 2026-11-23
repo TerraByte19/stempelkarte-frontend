@@ -54,7 +54,7 @@ export const FORMATE = {
 export const BELEGE = ['ohne-app', 'stempeln', 'papier', 'naehe', 'gestalten', 'studie', 'rechnung', 'tipps']
 
 // Fenster der Regeln (FORMATE.md 2). Zahlen = so viele der letzten Videos zaehlen.
-export const FENSTER = { format: 5, formatLaden: 10, motiv: 2, einstieg: 2, kernBild: 3, schluss: 2, beleg: 2, saetze: 3, gruppen: 2, hookTage: 60, studieTage: 30, themaTage: 7, themaLadenTage: 21 }
+export const FENSTER = { format: 5, formatLaden: 10, motiv: 2, einstieg: 2, kernBild: 3, schluss: 2, beleg: 2, saetze: 3, gruppen: 2, hookTage: 60, studieTage: 30, themaTage: 7, themaLadenTage: 21, bilder: 5, bilderNeu: 0.5 }
 
 const NAEHE = ['shop-map', 'shop-street', 'lock-notification']
 const PAPIER = ['paper-card', 'guest-ghost', 'wallet-vanish', 'card-bin', 'versus-split']
@@ -65,6 +65,21 @@ function teile(script) {
   return (script.scenes || []).flatMap(sc => Array.isArray(sc.parts) ? sc.parts : [sc]).filter(p => p && p.component !== 'cta-comment')
     .map(p => ({ component: p.component, params: p.params || {} }))
 }
+
+/**
+ * Bild-Schluessel eines Teils (V12, seit 23.11.2026): Baustein plus die Angaben, die das Bild
+ * sichtbar zu einem anderen machen (Ansicht, Blick, Laden von innen je Branche). Zwei Teile mit
+ * demselben Schluessel sehen fuer den Zuschauer wie dasselbe Bild aus, auch wenn Ladenname,
+ * Stempelzahl oder Text andere sind. Der Betreiber am 23.11.2026: "Du nimmst einfach die Frames
+ * von anderen Videos und machst neue Geschichten dazu."
+ */
+const BILD_ANGABEN = ["mode", "frame", "view", "scene", "start", "close", "device", "paper", "phone", "design", "phoneUi", "trash", "roof", "look", "branch", "across", "verdict", "typed", "numbered", "label"]
+export function bildSchluessel(p) {
+  const a = BILD_ANGABEN.filter(k => p.params[k] != null && p.params[k] !== "" && p.params[k] !== false && !(k === "label" && p.component !== "tip-cards"))
+    .map(k => k + "=" + (k === "label" ? "ja" : p.params[k]))
+  return [p.component, ...a].join(" ")
+}
+export function bilderAus(parts) { return parts.map(bildSchluessel) }
 
 /** Motive aus den Bausteinen (FORMATE.md 2): naehe, papier, scan. */
 export function motiveAus(parts) {
@@ -142,7 +157,7 @@ export function felderAus(script) {
     format, kern_bild: f ? f.kern_bild : 'naehe', einstieg: parts[0] ? parts[0].component : '',
     motive: motiveAus(parts), beleg_kern: meta.beleg_kern || '', schluss: frage,
     branche: meta.branche || '', thema: meta.thema || '', meme: meta.meme || '', hook_muster: meta.hook_muster || '', studie: meta.studie || '',
-    hook, text: norm.spoken
+    hook, text: norm.spoken, bilder: bilderAus(parts)
   }
 }
 
@@ -176,6 +191,8 @@ function vervollstaendige(v, alt, videos) {
     const s = felderAus(JSON.parse(readFileSync(datei, 'utf8')))
     for (const k of Object.keys(s)) if (k === 'motive' ? d.motive == null : fehlt(k)) d[k] = s[k]
   }
+  // V12: die Bilder eines alten Videos stehen nicht auf dem Board, sie kommen aus seinem Skript im Repo
+  if (!Array.isArray(d.bilder)) d.bilder = datei && existsSync(datei) ? felderAus(JSON.parse(readFileSync(datei, "utf8"))).bilder : []
   // Ein Video im Format F07 ohne Feld meme gilt als Meme-Video (HOOKS.md 4.1); das alte Motiv papier-knick heisst papier
   if (!d.meme && d.format === 'F07') d.meme = 'F07'
   d.motive = [...new Set((d.motive || []).map(m => m === 'papier-knick' ? 'papier' : m))]
@@ -246,6 +263,14 @@ export function pruefeFelder(neu, vorher, ziel) {
   r('V11', !alle, `Motive ${neu.motive.join(', ') || 'keine'} (nie alle drei: das war der alte Bogen)`)
   if (neu.format === 'F07') r('V11', !neu.motive.includes('naehe') && !neu.motive.includes('scan') && neu.motive.length <= 1, `F07 zeigt keine Nähe, keinen Scan und höchstens ein Papier-Motiv: ${neu.motive.join(', ') || 'keine'}`)
   if (neu.format === 'F08') r('V11', !neu.motive.includes('papier'), `F08 zeigt kein Papier: ${neu.motive.join(', ') || 'keine'}`)
+  // V12 (seit 23.11.2026): mehr als die Haelfte der Bilder ist neu, also in keinem der letzten fuenf Videos
+  // mit demselben Bild-Schluessel vorgekommen. Wiederverwenden ist die Ausnahme.
+  if (Array.isArray(neu.bilder) && neu.bilder.length) {
+    const alt = new Set(n(W.bilder).flatMap(v => v.bilder || []))
+    const neue = neu.bilder.filter(b => !alt.has(b)), anteil = neue.length / neu.bilder.length
+    const wieder = [...new Set(neu.bilder.filter(b => alt.has(b)))]
+    r('V12', anteil > W.bilderNeu, `${neue.length} von ${neu.bilder.length} Bildern sind neu gegenüber den letzten ${W.bilder} Videos (nötig: mehr als die Hälfte)${wieder.length ? "; wiederverwendet: " + wieder.join(" | ") : ""}`)
+  }
   r('meme', neu.format === 'F07' ? !!neu.meme : !neu.meme, neu.format === 'F07' ? `F07 braucht ein Meme (meta.meme): "${neu.meme}"` : `Meme nur im Format F07: "${neu.meme || ''}"`)
   const t7 = tageVor(ziel, W.themaTage), tp = vorher.filter(v => v.datum >= t7 && v.thema && v.thema === neu.thema)
   r('themenpause', !tp.length, `Thema ${neu.thema} in den letzten ${W.themaTage} Tagen: ${tp.map(v => v.datum).join(', ') || 'nein'}`)
@@ -345,6 +370,13 @@ function selbsttest() {
   const salon = felderAus(JSON.parse(readFileSync(path.join(STUDIO, 'videos', '2026-11-18-salon-karte-im-handy', 'script.json'), 'utf8')))
   soll('Salon 18.11.: abgelesene Felder', [salon.format, salon.einstieg, salon.motive, salon.schluss], ['A0', 'wallet-pass', ['naehe', 'papier', 'scan'], 'Klingt interessant?'])
   soll('Salon 18.11.: Altbestand stimmt mit den Bausteinen überein', alt['2026-11-18-salon-karte-im-handy'].motive, salon.motive)
+  // V12: neue Bilder. Schluessel aus Baustein und Ansicht; mehr als die Haelfte muss neu sein.
+  soll('V12: Schlüssel nennt Baustein und Ansicht, nicht Laden oder Text', bildSchluessel({ component: 'phone-3d', params: { mode: 'lock', shop: 'Döner Palast', left: 2 } }), 'phone-3d mode=lock')
+  soll('V12: iso-shop unterscheidet die Branche', bildSchluessel({ component: 'iso-shop', params: { branch: 'eis', phone: false } }) === bildSchluessel({ component: 'iso-shop', params: { branch: 'doener', phone: false } }), false)
+  const v12 = (bilder, alte) => pruefeFelder({ format: 'F05', motive: [], schluss: 'Kennst du\'s?', text: '', hook: '', bilder }, [{ datum: '2026-01-01', motive: [], bilder: alte, text: '' }], '2026-01-02').filter(c => c.regel === 'V12').map(c => c.ok)
+  soll('V12: drei von vier Bildern neu besteht', v12(['a', 'b', 'c', 'x'], ['x']), [true])
+  soll('V12: genau die Hälfte neu reicht nicht', v12(['a', 'b', 'x', 'y'], ['x', 'y']), [false])
+  soll('V12: alles wiederverwendet fällt durch', v12(['x', 'x'], ['x']), [false])
   if (schlecht) { console.error(`abwechslung.mjs: ${schlecht} von ${n} Fällen falsch`); return 1 }
   console.log(`abwechslung.mjs: Selbsttest bestanden (${n} Fälle)`)
   return 0
