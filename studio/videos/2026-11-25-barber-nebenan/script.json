@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "So holst du die Stammkunden vom Barber nebenan",
+    "title": "So klaust du dem Barber nebenan die Stammkunden",
     "slug": "barber-nebenan",
     "language": "de",
     "datum": "2026-11-25",
@@ -100,9 +100,9 @@
           "captions": [
             {
               "lines": [
-                "So holst du die",
-                "*Stammkunden",
-                "vom Barber *nebenan."
+                "So *klaust du",
+                "dem Barber nebenan",
+                "die *Stammkunden."
               ],
               "instant": true
             },
@@ -427,19 +427,19 @@
           "anchors": {
             "walk": {
               "at": "start",
-              "offset": -1.2
+              "offset": -2.9
             },
             "near": {
               "at": "start",
-              "offset": -0.6
+              "offset": -2.3
             },
             "turn": {
               "at": "start",
-              "offset": 0.1
+              "offset": -1.6
             },
             "enter": {
               "at": "end",
-              "offset": -0.25
+              "offset": -0.15
             }
           },
           "sounds": [
