@@ -49,6 +49,16 @@
       "zeichen": 693,
       "zeit": "2026-11-23T06:27:24Z",
       "zweck": "neu"
+    },
+    {
+      "art": "voll",
+      "id": "20261124T061620Z-voll",
+      "stand": "bestaetigt",
+      "tag": "2026-11-24",
+      "video": "2026-11-25-baeckerei-zehn-stempel",
+      "zeichen": 632,
+      "zeit": "2026-11-24T06:16:20Z",
+      "zweck": "neu"
     }
   ],
   "format": 1

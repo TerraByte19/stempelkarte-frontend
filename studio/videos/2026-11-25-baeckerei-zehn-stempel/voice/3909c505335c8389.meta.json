@@ -1,0 +1,22 @@
+{
+ "key": "3909c505335c8389",
+ "text": "Zehn Stempel für ein Gratis-Brötchen? Das macht man eben so. Stimmt nicht. Wie viele Stempel es braucht, legst du selbst fest. Sechs reichen völlig aus. Deine Stammkundin holt jeden Samstag ihre Brötchen bei dir. Zehn Stempel heißt zehn Wochen warten, sechs nur sechs. Jede Stempelkarte im Handy sieht doch gleich aus. Stimmt auch nicht. Farben und Logo wählst du. Als Symbol ein Brot. Genau das, was sie bei dir holt. Und das klappt bestimmt nur mit dem iPhone. Stimmt wieder nicht. Die Karte liegt in Apple Wallet. Oder in Google Wallet, je nach ihrem Handy. Alles gewusst? Dann kommentiere jetzt Brot, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 632,
+ "audio": "3909c505335c8389.mp3",
+ "audio_sha256": "9f64de6b2c9990192841cf1115adc5b38a1cef8b9822aa7e238fbcb8a40cf89d",
+ "spent": 632
+}

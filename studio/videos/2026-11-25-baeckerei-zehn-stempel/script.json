@@ -1,0 +1,321 @@
+{
+  "meta": {
+    "title": "Zehn Stempel für ein Gratis-Brötchen?",
+    "slug": "baeckerei-zehn-stempel",
+    "language": "de",
+    "datum": "2026-11-25",
+    "format": "F09",
+    "kern_bild": "kommentar",
+    "einstieg": "comment-thread",
+    "motive": [],
+    "schluss": "Alles gewusst?",
+    "beleg_kern": "gestalten",
+    "studie": "",
+    "thema": "stempelzahl",
+    "branche": "cafe",
+    "idee_id": "20261118-baeckerei-stempelzahl",
+    "hook_muster": "H03",
+    "hook_punkte": 11,
+    "hook_kandidaten": [
+      {
+        "satz": "Zehn Stempel für ein Gratis-Brötchen? Das macht man eben so.",
+        "muster": "H03",
+        "punkte": 11,
+        "gruende": "S1 Ladenglocke bei 0 s, das Tippen läuft ab 0,05 s; S2 seine Karte an seiner Theke; S3 Behauptung, die gleich den Stempel Stimmt nicht bekommt; K1 Stempel und Brötchen; K2 ohne Vorwissen; K3 fünf Wörter auf der ersten Tafel, ein Gedanke; W1 so denkt er selbst; W2 0, die Antwort ahnt er vielleicht; W3 die Zahl legt er selbst fest (D2), bis 10 s zählt die Tafel von 10 auf 6. Gewählt: meiste Punkte, klarste Aussage",
+        "raus": ""
+      },
+      {
+        "satz": "Eine Stempelkarte hat immer zehn Felder. Stimmt nicht.",
+        "muster": "H03",
+        "punkte": 10,
+        "gruende": "S1 Glocke und Tippen; S2 seine Karte; S3 Behauptung mit Urteil; K1 Stempelkarte; K2 ja; K3 ja; W1 0 eher eine Annahme als sein Satz; W2 0; W3 D2 bis 10 s im Bild",
+        "raus": ""
+      },
+      {
+        "satz": "Zehn Stempel schafft jede Stammkundin locker. Stimmt nicht.",
+        "muster": "H03",
+        "punkte": 10,
+        "gruende": "S1 Glocke und Tippen; S2 seine Stammkundin; S3 Behauptung mit Urteil; K1 Stempel; K2 ja; K3 ja; W1 seine Annahme; W2 0; W3 0, dass sie es nicht schafft, kann das Video nicht belegen, nur die Wochen vorrechnen",
+        "raus": ""
+      },
+      {
+        "satz": "Jeden Samstag Brötchen, zehn Stempel. Das sind zehn Wochen Warten.",
+        "muster": "H03",
+        "punkte": 9,
+        "gruende": "S1 Glocke und Tippen; S2 seine Kundin; S3 0 nur eine Rechnung; K1 Brötchen und Stempel; K2 ja; K3 ja; W1 0; W2 ja, so hat er es selten gerechnet; W3 D2 bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Zehn Stempel bis zum Gratis-Brot? Weniger wäre doch verschenkt.",
+        "muster": "H03",
+        "punkte": 10,
+        "gruende": "S1 Glocke und Tippen; S2 sein Geld; S3 Einwand; K1 Stempel und Brot; K2 ja; K3 ja; W1 seine Sorge; W2 0; W3 0, ob weniger sich rechnet, kann das Video nicht ehrlich einlösen, es sagt nur, dass er die Zahl festlegt",
+        "raus": ""
+      },
+      {
+        "satz": "Wie lange braucht deine Stammkundin für zehn Stempel?",
+        "muster": "H05",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "Keine Behauptung, die einen Stempel Stimmt oder Stimmt nicht bekommen kann: passt nicht zum Einstieg von F09, und nicht im Muster der Vorlage"
+      }
+    ],
+    "meme": "",
+    "beleg": "D2 (der Laden legt selbst fest, wie viele Stempel es bis zur Belohnung braucht: Satz 3 bis 5, die Tafel zählt von 10 auf 6), D1 (Farben, Logo und Stempel-Symbol: Satz 10 und 11, die Karte entsteht im Bild), A1 (Apple Wallet und Google Wallet: Satz 15 und 16). Satz 6 und 7 sind ein erkennbares Beispiel (ein Besuch je Woche), keine Zusage.",
+    "idee": "Vorlage: Reel eines Mitbewerbers (eine Alltagszahl am Anfang, die kippt: zehn Stempel sind lang; dann eine kürzere Karte). Eigen sind Wortlaut, Laden, Bilder und Ton: Bäckerei Morgenrot, drei Behauptungen mit Stempel Stimmt nicht, die Zahl der Stempel und das Aussehen der Karte legt der Laden selbst fest."
+  },
+  "voice": {
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "poster": 1.6,
+  "scenes": [
+    {
+      "_hinweis": "Einstieg F09: die erste Behauptung wird getippt, ab Bild 0 klingt die Ladenglocke. Absenden und Kamera auf dem ersten Wort der zweiten Textzeile, der Stempel Stimmt nicht auf 'Stimmt'.",
+      "component": "comment-thread",
+      "params": {
+        "text": "Zehn Stempel für ein Gratis-Brötchen? Das macht man eben so.",
+        "typed": true,
+        "verdict": "falsch"
+      },
+      "anchors": {
+        "type": { "at": "start", "offset": 0.05 },
+        "send": { "cap": 1, "word": 0, "offset": -0.1 },
+        "verdict": { "cap": 2, "word": 0 }
+      },
+      "camera": [
+        { "cap": 1, "word": 0, "zoom": 1.1, "focus": [210, 880], "to": [210, 930], "dur": 0.3 }
+      ],
+      "sounds": [ { "sound": "ladenglocke", "at": "start", "offset": 0, "vol": 0.8 } ],
+      "captions": [
+        { "lines": ["Zehn Stempel für ein", "*Gratis-Brötchen?"], "instant": true, "scale": 1.2 },
+        { "lines": ["Das macht man | eben *so."] },
+        { "lines": ["*Stimmt *nicht."] }
+      ]
+    },
+    {
+      "_hinweis": "Erklärung zu Behauptung 1 (D2): die Tafel zählt von 10 auf 6, während der Satz sagt, wer die Zahl festlegt. Kamera erst nach dem Zählen.",
+      "component": "big-number",
+      "params": {
+        "value": " 6",
+        "from": "10",
+        "count": true,
+        "sub": "Du legst fest",
+        "label": "Stempel bis zum Gratis-Brötchen"
+      },
+      "anchors": { "show": { "cap": 0, "word": 5 } },
+      "camera": [
+        { "cap": 1, "word": 0, "zoom": 1.15, "focus": [540, 820], "to": [540, 860], "dur": 0.3 }
+      ],
+      "captions": [
+        { "lines": ["Wie viele | *Stempel | es braucht, | legst du | *selbst fest."] },
+        { "lines": ["*Sechs | reichen | völlig aus."] }
+      ]
+    },
+    {
+      "_hinweis": "Das Beispiel dazu im Laden, in 3D: erst kommt die Stammkundin durch die Tür, dann steht sie an der Theke. Ohne Handy (kein Scan, V8).",
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "baeckerei",
+            "shop": "Bäckerei Morgenrot",
+            "icon": "bread",
+            "stamps": 6,
+            "have": 4,
+            "start": "door",
+            "phone": false,
+            "customer": 2
+          },
+          "anchors": {
+            "enter": { "at": "start", "offset": 1.2 },
+            "order": { "cap": 0, "word": -3 }
+          },
+          "captions": [
+            { "lines": ["Deine *Stammkundin | holt jeden | *Samstag | ihre *Brötchen | bei dir."] }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "baeckerei",
+            "shop": "Bäckerei Morgenrot",
+            "icon": "bread",
+            "stamps": 6,
+            "have": 4,
+            "start": "counter",
+            "phone": false,
+            "bubble": false,
+            "customer": 2
+          },
+          "captions": [
+            { "lines": ["*Zehn Stempel | heißt | *zehn Wochen | warten, | *sechs | nur sechs."] }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Behauptung 2 (D1), ohne Tippen.",
+      "component": "comment-thread",
+      "params": {
+        "text": "Jede Stempelkarte im Handy sieht doch gleich aus.",
+        "typed": false,
+        "verdict": "falsch"
+      },
+      "anchors": {
+        "send": { "at": "start", "offset": 0.05 },
+        "verdict": { "cap": 1, "word": 0 }
+      },
+      "camera": [
+        { "cap": 1, "word": 0, "zoom": 1.1, "focus": [210, 880], "to": [210, 930], "dur": 0.3 }
+      ],
+      "captions": [
+        { "lines": ["Jede *Stempelkarte | im Handy | sieht doch | *gleich aus."] },
+        { "lines": ["Stimmt | *auch nicht."] }
+      ]
+    },
+    {
+      "_hinweis": "Erklärung zu Behauptung 2 (D1): die Karte entsteht im Bild, in den Farben der Bäckerei, mit Logo und Brot als Symbol. Danach der Laden: das Brot, das sie dort holt.",
+      "parts": [
+        {
+          "component": "phone-3d",
+          "params": {
+            "mode": "design",
+            "shop": "Bäckerei Morgenrot",
+            "icon": "bread",
+            "stamps": 6,
+            "before": 4,
+            "reward": "Gratis-Brötchen",
+            "colors": "#C9772E,#7A3E12"
+          },
+          "anchors": {
+            "paint": { "cap": 0, "word": 0 },
+            "logo": { "cap": 0, "word": 2 },
+            "symbol": { "cap": 1, "word": 1 }
+          },
+          "captions": [
+            { "lines": ["*Farben | und *Logo | wählst du."] },
+            { "lines": ["Als *Symbol | ein *Brot."] }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "baeckerei",
+            "shop": "Bäckerei Morgenrot",
+            "icon": "bread",
+            "stamps": 6,
+            "have": 4,
+            "start": "counter",
+            "phone": false,
+            "customer": 2
+          },
+          "anchors": {
+            "order": { "cap": 0, "word": 1 }
+          },
+          "captions": [
+            { "lines": ["Genau das, | was sie | bei dir *holt."] }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Behauptung 3 (A1), ohne Tippen.",
+      "component": "comment-thread",
+      "params": {
+        "text": "Und das klappt bestimmt nur mit dem iPhone.",
+        "typed": false,
+        "verdict": "falsch"
+      },
+      "anchors": {
+        "send": { "at": "start", "offset": 0.05 },
+        "verdict": { "cap": 1, "word": 0 }
+      },
+      "camera": [
+        { "cap": 1, "word": 0, "zoom": 1.1, "focus": [210, 880], "to": [210, 930], "dur": 0.3 }
+      ],
+      "captions": [
+        { "lines": ["Und das klappt | bestimmt nur | mit dem *iPhone."] },
+        { "lines": ["Stimmt | *wieder nicht."] }
+      ]
+    },
+    {
+      "_hinweis": "Erklärung zu Behauptung 3 (A1): erst das iPhone mit Apple Wallet, dann ein Android-Handy mit Google Wallet. Der Stand ohne Scan und ohne neuen Stempel (V8).",
+      "parts": [
+        {
+          "component": "phone-3d",
+          "params": {
+            "mode": "wallet",
+            "shop": "Bäckerei Morgenrot",
+            "icon": "bread",
+            "stamps": 6,
+            "before": 4,
+            "after": 4,
+            "reward": "Gratis-Brötchen",
+            "colors": "#C9772E,#7A3E12",
+            "scan": false,
+            "rise": false
+          },
+          "anchors": {
+            "card": { "cap": 0, "word": 1 }
+          },
+          "captions": [
+            { "lines": ["Die *Karte | liegt in | *Apple *Wallet."] }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "wallet",
+            "device": "android",
+            "shop": "Bäckerei Morgenrot",
+            "icon": "bread",
+            "stamps": 6,
+            "before": 4,
+            "after": 4,
+            "reward": "Gratis-Brötchen",
+            "colors": "#C9772E,#7A3E12",
+            "scan": false,
+            "rise": false,
+            "drop": false,
+            "angle": -14
+          },
+          "captions": [
+            { "lines": ["Oder in | *Google *Wallet, | je nach | ihrem *Handy."] }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": { "cap": -1, "word": -1 }
+      },
+      "captions": [
+        { "lines": ["Alles gewusst?"], "accent": 1, "keep": true, "mode": "zeile" },
+        { "role": "cta", "lines": ["Dann kommentiere jetzt BROT,{Brot,}", "und wir melden uns bei dir."], "gapBefore": 0.65 }
+      ]
+    }
+  ]
+}
