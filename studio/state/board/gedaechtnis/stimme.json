@@ -59,6 +59,27 @@
       "zeichen": 632,
       "zeit": "2026-11-24T06:16:20Z",
       "zweck": "neu"
+    },
+    {
+      "art": "voll",
+      "hinweis": "begleitete Sitzung, zweite Aufnahme des Tages mit Okay des Betreibers im Chat (von Hand gebucht, budget.mjs lässt nur eine am Tag zu)",
+      "id": "20261124T112704Z-voll",
+      "stand": "bestaetigt",
+      "tag": "2026-11-24",
+      "video": "2026-11-25-barber-nebenan",
+      "zeichen": 742,
+      "zeit": "2026-11-24T11:27:04Z",
+      "zweck": "neu"
+    },
+    {
+      "art": "voll",
+      "id": "20261125T062223Z-voll",
+      "stand": "bestaetigt",
+      "tag": "2026-11-25",
+      "video": "2026-11-26-doener-keine-app",
+      "zeichen": 619,
+      "zeit": "2026-11-25T06:22:23Z",
+      "zweck": "neu"
     }
   ],
   "format": 1

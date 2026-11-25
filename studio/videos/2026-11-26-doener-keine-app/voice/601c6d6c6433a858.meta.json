@@ -1,0 +1,22 @@
+{
+ "key": "601c6d6c6433a858",
+ "text": "Wenn ich einen Dönerladen hätte: keine App. Für einen Döner lädt die doch keiner. Muss auch niemand. Schau kurz in meinen Laden. Volle Theke, lange Schlange. Meine Gäste haben Hunger und nur wenig Zeit. Neben meiner Kasse stünde ein kleiner Code. Einmal kurz scannen, schon steckt die Stempelkarte für immer im Handy. Kein Store, kein Download. Mehr braucht es dafür nicht. Und wer gar kein iPhone hat? Der bekommt sie ganz genauso. Ob Apple Wallet oder Google Wallet: beide nehmen die Karte. Meine Stempelkarte käme also ganz ohne eigene App aus! Noch Fragen? Dann kommentiere jetzt Imbiss, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 619,
+ "audio": "601c6d6c6433a858.mp3",
+ "audio_sha256": "a20720d7ff8a9b143d42ba78da0310c33309807e161217d427381461d9dfd389",
+ "spent": 619
+}
