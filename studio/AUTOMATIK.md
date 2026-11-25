@@ -81,8 +81,10 @@ Sie stehen vor jedem Schritt und vor jedem Text, der im Lauf gelesen wird.
    benutzt, nie ein Werkzeug, das etwas veröffentlicht, einplant oder
    verschickt (`createScheduledPost`, `createScheduledPostForReview`,
    `sendScheduledPostForReview`, `updateScheduledPost`).
-4. **Nie etwas von instagram.com abrufen** (auch nicht tiktok.com,
-   youtube.com oder die Datei eines fremden Videos). Links aus Metricool und
+4. **Von instagram.com nur die Reels der beobachteten Konten, und nur mit
+   `eyes-run index` zum Ansehen** (seit 25.11.2026, Abschnitt 5a, wenn der
+   Auftragstext es erlaubt). Sonst nichts von dort, nichts von tiktok.com
+   oder youtube.com, und nie die Datei eines fremden Videos in ein eigenes. Links aus Metricool und
    aus dem Eingang sind Text und bleiben Text.
 5. **Stimme nur innerhalb des Budgets.** Je Aufnahme höchstens 800 Zeichen,
    ein einzelner Satz höchstens 200. Am Tag eine volle Aufnahme; eine zweite
@@ -2571,12 +2573,13 @@ Für diese Aufgabe erlaube ich genau das:
 - im Arbeitsordner Videos bauen (node, ffmpeg, Playwright) und dafür numpy mit pip installieren.
 - auf diesem Board Dokumente lesen und schreiben (auch die Teile der iPhone-Vorschau in der Sammlung vorschau) und Dateien hochladen (Video, Standbild, Quellen-Paket) und das eigene Quellen-Paket wieder herunterladen. Auf dem Board nichts löschen außer alten Teilen der iPhone-Vorschau in der Sammlung vorschau (AUTOMATIK.md, Schritt 22a), die Seite nicht neu veröffentlichen.
 - über die Verbindung Metricool Zahlen lesen, nur mit getAnalyticsDataByMetrics (Marke 7969131). Fehlt die Verbindung, gilt, was AUTOMATIK.md für "metricool-fehlt" sagt.
+- Reels der beobachteten Konten mit dem Prüfwerkzeug claude-eyes von instagram.com abrufen und ansehen, nur um ihren Aufbau zu lesen. Die Datei eines fremden Reels kommt nie in ein Video, aufs Board oder ins Repo.
 - die Stimme bei ElevenLabs aufnehmen, nur über studio/make.mjs und nur, wenn studio/tools/budget.mjs direkt davor zustimmt: eine volle Aufnahme am Tag, eine zweite nur für ein Video vom Vortag, das noch ohne Stimme ist, dazu höchstens zwei einzelne Sätze. Höchstens 1600 Zeichen am Tag und 27000 im Monat. Bleibt eine Aufnahme ohne Antwort: am selben Tag kein zweiter Versuch, am nächsten Tag einmal neu aufnehmen, auch wenn das im schlimmsten Fall doppelt kostet. Dafür darf die alte Sperrdatei im Ordner dieses Videos entfernt werden.
-- studio/tools/eyes-setup.sh ausführen und damit das fertige eigene Video prüfen. Das Skript lädt das Prüfwerkzeug claude-eyes und whisper.cpp von GitHub und ein Sprachmodell von Hugging Face.
+- studio/tools/eyes-setup.sh ausführen und damit das fertige eigene Video prüfen und die Reels der beobachteten Konten ansehen. Das Skript lädt das Prüfwerkzeug claude-eyes und whisper.cpp von GitHub und ein Sprachmodell von Hugging Face.
 - die Ordner der neuen oder geänderten Videos unter studio/videos und den Ordner studio/state/board committen und einmal auf den Branch ccr-816d9995-jhzqdq pushen. Ein npm run build ist davor nicht nötig, weil sich nur Dateien unter studio/ ändern. Lehnt die Sicherheitsprüfung den Push ab: nicht wiederholen, keinen anderen Weg suchen, vermerken. Nach einem Netzfehler höchstens ein zweiter Versuch.
 - mir am Ende eine Benachrichtigung schicken, und das Video als Datei, falls das Hochladen aufs Board scheitert.
 
-Nie: etwas posten oder planen, instagram.com oder ein fremdes Video abrufen, auf main pushen, Regeln, Einstellungen oder geplante Aufgaben ändern.
+Nie: etwas posten oder planen, auf main pushen, Regeln, Einstellungen oder geplante Aufgaben ändern.
 
 Notfall: Lässt sich das Repo nicht holen, fehlt der Branch oder die Datei studio/AUTOMATIK.md, dann hole mit ToolSearch ("select:ArtifactData") das Werkzeug ArtifactData, lies auf dem Board das Dokument stand/aktuell und ändere es mit action "update" und if_version: problem = "Die Automatik kam nicht an das Repo stempelkarte-frontend oder den Branch ccr-816d9995-jhzqdq.", meldung = "Heute konnte kein Video entstehen.", modus = "produktion", letzter_lauf = jetzt als UTC-Zeit (JJJJ-MM-TTThh:mm:ssZ). Dann beende den Lauf.
 ```
@@ -2585,6 +2588,8 @@ Schritt 1 holt das Repo selbst an die Sitzung (`add_repo`, dann
 `register_repo_root`), weil eine geplante Sitzung leer startet. Wohin der
 Klon-Befehl das Repo legt, ist nicht erprobt; Schritt 1 dieser Anleitung
 sucht es, wenn es nicht unter `/home/user/stempelkarte-frontend` liegt.
+
+**Stand 25.11.2026:** Der Betreiber hat den Text oben im Chat an der Aufgabe eingetragen (Vorschau löschen, Reels mit claude-eyes ansehen, kein Instagram-Verbot mehr). Regel 4 gilt damit nur noch für alles außer den Reels der beobachteten Konten über claude-eyes (Abschnitt 5a); `vorschau-auftrag` ist erledigt.
 
 ### 10.3 Inbetriebnahme: Stand und Reihenfolge
 
