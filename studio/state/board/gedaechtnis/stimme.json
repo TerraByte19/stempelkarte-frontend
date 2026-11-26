@@ -80,6 +80,28 @@
       "zeichen": 619,
       "zeit": "2026-11-25T06:22:23Z",
       "zweck": "neu"
+    },
+    {
+      "art": "voll",
+      "hinweis": "begleitete Sitzung, zweite Aufnahme des Tages mit Okay des Betreibers im Chat (von Hand gebucht)",
+      "id": "20261125T154044Z-voll",
+      "stand": "bestaetigt",
+      "tag": "2026-11-25",
+      "video": "2026-11-26-friseur-schuldet-dir-was",
+      "zeichen": 591,
+      "zeit": "2026-11-25T15:40:44Z",
+      "zweck": "neu"
+    },
+    {
+      "art": "satz",
+      "hinweis": "begleitete Sitzung: ein Wort neu, Aussprache",
+      "id": "20261125T161235Z-satz",
+      "stand": "bestaetigt",
+      "tag": "2026-11-25",
+      "video": "2026-11-26-friseur-schuldet-dir-was",
+      "zeichen": 9,
+      "zeit": "2026-11-25T16:12:35Z",
+      "zweck": "aenderung"
     }
   ],
   "format": 1
