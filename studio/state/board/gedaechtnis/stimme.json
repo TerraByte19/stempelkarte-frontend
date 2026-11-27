@@ -102,6 +102,16 @@
       "zeichen": 9,
       "zeit": "2026-11-25T16:12:35Z",
       "zweck": "aenderung"
+    },
+    {
+      "art": "voll",
+      "id": "20261127T065433Z-voll",
+      "stand": "bestaetigt",
+      "tag": "2026-11-27",
+      "video": "2026-11-28-barber-zwei-dinge",
+      "zeichen": 686,
+      "zeit": "2026-11-27T06:54:33Z",
+      "zweck": "neu"
     }
   ],
   "format": 1

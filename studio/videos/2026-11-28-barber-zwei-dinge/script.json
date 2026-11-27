@@ -1,0 +1,611 @@
+{
+  "meta": {
+    "title": "Wenn ich einen Barbershop hätte",
+    "slug": "barber-zwei-dinge",
+    "language": "de",
+    "datum": "2026-11-28",
+    "format": "F08",
+    "beleg_kern": "naehe",
+    "thema": "sperrbildschirm",
+    "branche": "friseur",
+    "hook_muster": "H08",
+    "hook_punkte": 11,
+    "meme": "",
+    "studie": "",
+    "hook_kandidaten": [
+      {
+        "satz": "Wenn ich einen Barbershop hätte, würde ich nicht auf Laufkundschaft hoffen.",
+        "muster": "H08",
+        "punkte": 11,
+        "gruende": "S1 Dach hebt ab mit Glocke, S2 sein Laden, S3 Widerspruch zum Üblichen, K1 kein Gegenstand außer dem Laden (0), K2 klar, K3 kurz, W1 seine Sorge, W2 Antwort kaum bekannt, W3 Karte meldet sich in der Nähe (C1) bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Wenn ich einen Barbershop hätte, würde sich meine Stempelkarte selbst melden.",
+        "muster": "H08",
+        "punkte": 9,
+        "gruende": "S1 Bewegung und Ton, S2 sein Laden, S3 keine Reibung (0), K1 Stempelkarte, K2 klar, K3 kurz, W1 kein Einwand (0), W2 unerwartet, W3 C1",
+        "raus": ""
+      },
+      {
+        "satz": "Wenn ich einen Barbershop hätte, stünde mein Laden auf dem Sperrbildschirm meiner Stammkunden.",
+        "muster": "H08",
+        "punkte": 8,
+        "gruende": "S1 Bewegung und Ton, S2 sein Laden, S3 keine Reibung (0), K1 kein Gegenstand (0), K2 klar, K3 kurz, W1 kein Einwand (0), W2 unerwartet, W3 C1",
+        "raus": ""
+      },
+      {
+        "satz": "Wenn ich einen Barbershop hätte, käme kein Stammkunde an mir vorbei.",
+        "muster": "H08",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "klingt nach Erfolgsversprechen (PRODUKT.md N5)"
+      },
+      {
+        "satz": "Wenn ich einen Barbershop hätte, bliebe bei mir kein Stuhl leer.",
+        "muster": "H08",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "zu nah am ersten Satz der Vorlage (Regel 7), dazu ein Versprechen"
+      },
+      {
+        "satz": "Wenn ich einen Barbershop hätte, gäbe es bei mir keine Rabatte.",
+        "muster": "H08",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "Inhalt eines fremden Hooks (HOOKS.md 2, H08), keine Aussage aus Klasse 1"
+      }
+    ],
+    "beleg": [
+      "C1",
+      "A2",
+      "A1",
+      "C3"
+    ],
+    "idee_id": "20261120-salon-vorbeigehen",
+    "idee": "Vorlage: Reel eines Mitbewerbers, im Lauf angesehen. Übernommen sind das Hook-Muster (Ich-Form: wenn ich so einen Laden hätte), die Reihenfolge der Takte (Ansage, Ankündigung, Punkt eins: die Karte meldet sich in der Nähe, ohne App, aus der Wallet; Punkt mit der Nachricht des Ladens; Merksatz zum wiederkehrenden Kunden; Aufruf) und die Art der Bilder (Laden, Straße mit Ring, große Handys). Eigen sind Wortlaut, Laden, Bilder und Ton. Zwei Takte der Vorlage fehlen, weil PRODUKT.md sie in Klasse 1 nicht deckt."
+  },
+  "poster": 1.6,
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "friseur",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "have": 5,
+            "start": "none",
+            "roof": true,
+            "phone": false,
+            "bubble": false,
+            "tones": false
+          },
+          "anchors": {
+            "roof": {
+              "at": "start",
+              "offset": 0.05
+            }
+          },
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.6
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Wenn ich einen",
+                "*Barbershop hätte,"
+              ],
+              "instant": true
+            }
+          ]
+        },
+        {
+          "component": "iso-street",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "accent": "#5A4FCF",
+            "rival": "Barber Nebenan",
+            "rivalIcon": "scissors",
+            "rivalAccent": "#E58A45",
+            "smoke": false,
+            "heart": false,
+            "walker": false,
+            "after": false,
+            "camera": "top"
+          },
+          "captions": [
+            {
+              "lines": [
+                "würde ich | nicht auf | *Laufkundschaft | hoffen."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "friseur",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "have": 5,
+            "start": "counter",
+            "phone": false
+          },
+          "anchors": {
+            "order": {
+              "cap": 0,
+              "word": 2
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Ich würde | genau *zwei | Dinge tun."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-street",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "accent": "#5A4FCF",
+            "rival": "Barber Nebenan",
+            "rivalIcon": "scissors",
+            "rivalAccent": "#E58A45",
+            "smoke": false,
+            "mode": "nah",
+            "frame": "stadt",
+            "then": "weiter",
+            "reward": "Gratis-Schnitt",
+            "left": 1,
+            "clock": "18:42"
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": 0
+            },
+            "near": {
+              "cap": 0,
+              "word": 6,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "*Erstens: | Kommt ein | Stammkunde | in die *Nähe | meines Ladens,"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "before": 5,
+            "after": 5,
+            "reward": "Gratis-Schnitt",
+            "mode": "lock",
+            "left": 1,
+            "clock": "18:42",
+            "date": "Samstag, 28. November",
+            "rise": false,
+            "wake": true,
+            "deko": false
+          },
+          "anchors": {
+            "notify": {
+              "cap": 0,
+              "word": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "meldet sich | meine *Stempelkarte | auf seinem | *Sperrbildschirm."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-street",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "accent": "#5A4FCF",
+            "rival": "Barber Nebenan",
+            "rivalIcon": "scissors",
+            "rivalAccent": "#E58A45",
+            "smoke": false,
+            "mode": "nah",
+            "frame": "laden",
+            "then": "dreht",
+            "reward": "Gratis-Schnitt",
+            "left": 1,
+            "clock": "18:42",
+            "tones": false
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": -2.6
+            },
+            "near": {
+              "at": "start",
+              "offset": -2
+            },
+            "turn": {
+              "cap": 0,
+              "word": 3,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Ganz von *selbst: | Noch *ein | Stempel | bis zum | *Gratis-Schnitt."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "friseur",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "have": 5,
+            "start": "counter",
+            "phone": false,
+            "bubble": false,
+            "phoneUi": "wallet",
+            "reward": "Gratis-Schnitt",
+            "customer": 2
+          },
+          "anchors": {
+            "ui": {
+              "at": "start",
+              "offset": 0.15
+            },
+            "uiAdd": {
+              "at": "start",
+              "offset": 0.8
+            },
+            "uiCard": {
+              "at": "start",
+              "offset": 1.4
+            },
+            "uiNoApp": {
+              "cap": 0,
+              "word": -1,
+              "offset": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Eine *App | braucht er | dafür *nicht."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "before": 5,
+            "after": 5,
+            "reward": "Gratis-Schnitt",
+            "mode": "wallet",
+            "scan": false,
+            "rise": false,
+            "drop": true,
+            "deko": false,
+            "angle": 10
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Die Karte | steckt in seiner | *Wallet."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-street",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "accent": "#5A4FCF",
+            "rival": "Barber Nebenan",
+            "rivalIcon": "scissors",
+            "rivalAccent": "#E58A45",
+            "smoke": false,
+            "heart": false,
+            "walker": false,
+            "after": false,
+            "phoneUi": "message",
+            "message": "Um 19 Uhr ist noch ein Stuhl frei!",
+            "camera": "front",
+            "tones": true
+          },
+          "anchors": {
+            "ui": {
+              "cap": 0,
+              "word": 1,
+              "offset": 0
+            },
+            "uiType": {
+              "cap": 0,
+              "word": 4,
+              "offset": 0
+            },
+            "uiSend": {
+              "cap": 0,
+              "word": -1,
+              "offset": 0
+            },
+            "uiOut": {
+              "at": "end",
+              "offset": -0.3
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "*Zweitens: | Ist wenig los, | schreibe ich | meinen Kunden | eine *Nachricht."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "before": 5,
+            "after": 5,
+            "reward": "Gratis-Schnitt",
+            "mode": "lock",
+            "device": "android",
+            "message": "Um 19 Uhr ist noch ein Stuhl frei!",
+            "clock": "18:44",
+            "date": "Samstag, 28. November",
+            "rise": false,
+            "wake": true,
+            "deko": false,
+            "angle": -12
+          },
+          "anchors": {
+            "notify": {
+              "cap": 0,
+              "word": 1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Sie landet | direkt auf | ihrem *Handy, | als Mitteilung | meiner *Karte."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "friseur",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "have": 5,
+            "start": "door",
+            "phone": false,
+            "customer": 3
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            },
+            "order": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Denn ein | Barbershop | lebt nicht vom | *einzelnen | Schnitt."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-street",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "accent": "#5A4FCF",
+            "rival": "Barber Nebenan",
+            "rivalIcon": "scissors",
+            "rivalAccent": "#E58A45",
+            "smoke": false,
+            "mode": "nah",
+            "frame": "laden",
+            "then": "rein",
+            "reward": "Gratis-Schnitt",
+            "left": 1,
+            "clock": "18:42",
+            "tones": false
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": -2.9
+            },
+            "near": {
+              "at": "start",
+              "offset": -2.3
+            },
+            "turn": {
+              "at": "start",
+              "offset": -1
+            },
+            "enter": {
+              "at": "end",
+              "offset": -0.2
+            }
+          },
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "anchor": "enter",
+              "vol": 0.8
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Er lebt von | den Kunden, | die immer | *wiederkommen."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-street",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "accent": "#5A4FCF",
+            "rival": "Barber Nebenan",
+            "rivalIcon": "scissors",
+            "rivalAccent": "#E58A45",
+            "smoke": false,
+            "heart": false,
+            "walker": false,
+            "crowd": 6,
+            "dark": 1,
+            "after": true,
+            "push": 0.15,
+            "orbit": 10
+          },
+          "captions": [
+            {
+              "lines": [
+                "Dafür gibt es"
+              ]
+            },
+            {
+              "role": "name",
+              "lines": [
+                "Stampit."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Klingt interessant?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt BARBER,{Barber,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ]
+}

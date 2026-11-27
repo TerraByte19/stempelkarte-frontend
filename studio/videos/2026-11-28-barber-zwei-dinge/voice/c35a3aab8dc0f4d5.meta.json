@@ -1,0 +1,22 @@
+{
+ "key": "c35a3aab8dc0f4d5",
+ "text": "Wenn ich einen Barbershop hätte, würde ich nicht auf Laufkundschaft hoffen. Ich würde genau zwei Dinge tun. Erstens: Kommt ein Stammkunde in die Nähe meines Ladens, meldet sich meine Stempelkarte auf seinem Sperrbildschirm. Ganz von selbst: Noch ein Stempel bis zum Gratis-Schnitt. Eine App braucht er dafür nicht. Die Karte steckt in seiner Wallet. Zweitens: Ist wenig los, schreibe ich meinen Kunden eine Nachricht. Sie landet direkt auf ihrem Handy, als Mitteilung meiner Karte. Denn ein Barbershop lebt nicht vom einzelnen Schnitt. Er lebt von den Kunden, die immer wiederkommen. Dafür gibt es Stämp-it. Klingt interessant? Dann kommentiere jetzt Barber, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 686,
+ "audio": "c35a3aab8dc0f4d5.mp3",
+ "audio_sha256": "89e65c2f01fda7aa572061eca2e89f371d2af7a5f8b6a1f38f1796373c1b3282",
+ "spent": 686
+}
