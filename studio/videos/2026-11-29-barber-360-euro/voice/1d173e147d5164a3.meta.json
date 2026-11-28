@@ -1,0 +1,22 @@
+{
+ "key": "1d173e147d5164a3",
+ "text": "dreihundertsechzig Euro im Jahr. Die holt sich der Barber gegenüber, mit einem einzigen deiner Stammkunden. Ein Beispiel: Er kommt einmal im Monat zu dir. Zwölf Schnitte im Jahr. Jeder bringt dir dreißig Euro. Zwölf mal dreißig: das macht dreihundertsechzig Euro. Eines Tages geht er rüber, nur zum Ausprobieren. Sein Stuhl bleibt leer. Und keiner sagt dir Bescheid. Was ihn hält? Stämp-it: deine Stempelkarte in seiner Wallet. Mit jedem Schnitt wächst sie. Ist sie voll, schneidest du einmal gratis. Und an ruhigen Tagen schickst du ihm eine Mitteilung. So sitzt er auch weiter auf deinem Stuhl. Lohnt sich's? Dann kommentiere jetzt Barber, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 669,
+ "audio": "1d173e147d5164a3.mp3",
+ "audio_sha256": "118290e083ca319da520cd890e2032079a2b721679fe0f3777e213e8c6970561",
+ "spent": 669
+}
