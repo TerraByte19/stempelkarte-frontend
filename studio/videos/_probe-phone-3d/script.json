@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "title": "Probe 3D: Handy mit Wallet, Sperrbildschirm und Design",
+    "slug": "probe-phone-3d",
+    "language": "de",
+    "_hinweis": "Kein Video zum Posten: Probe für den 3D-Baustein phone-3d, ohne Stimme gebaut. Zeigt die drei Ansichten nacheinander (Wallet mit Karte, Scan und Stempeln; Sperrbildschirm mit der Benachrichtigung aus C1; die Karte entsteht), wie sie neben Stil C aussehen und wie lange ein Bild braucht. Laden und Name sind eigene Beispiele."
+  },
+  "timing": {
+    "lead": 0.2,
+    "hold": 0.7,
+    "maxGap": 0.25
+  },
+  "captionStyle": {
+    "mode": "wort"
+  },
+  "scenes": [
+    {
+      "_hinweis": "Wallet: das Handy steigt ein, die Karte gleitet auf 'In' hinein, Scan auf 'Wallet', zwei Stempel auf 'Scan' und 'Stempel'.",
+      "component": "phone-3d",
+      "params": {
+        "mode": "wallet",
+        "shop": "Döner Palast",
+        "icon": "kebab",
+        "stamps": 10,
+        "before": 6,
+        "after": 8,
+        "reward": "Gratis-Döner"
+      },
+      "anchors": {
+        "card": {
+          "cap": 0,
+          "word": 0,
+          "offset": 0.0
+        },
+        "scan": {
+          "cap": 0,
+          "word": 2,
+          "offset": -0.05
+        },
+        "stamp1": {
+          "cap": 1,
+          "word": 0,
+          "offset": 0.1
+        },
+        "stamp2": {
+          "cap": 1,
+          "word": 1,
+          "offset": 0.05
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "In die *Wallet."
+          ],
+          "instant": true
+        },
+        {
+          "lines": [
+            "*Scan, | *Stempel."
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Sperrbildschirm: gedimmt, auf 'Meldet' leuchtet er auf und die Karte meldet sich mit dem Wortlaut aus C1.",
+      "component": "phone-3d",
+      "params": {
+        "mode": "lock",
+        "shop": "Döner Palast",
+        "icon": "kebab",
+        "stamps": 10,
+        "reward": "Gratis-Döner",
+        "left": 2,
+        "angle": -12
+      },
+      "anchors": {
+        "notify": {
+          "cap": 0,
+          "word": 0,
+          "offset": 0.05
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "*Meldet | sich."
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Design: grau, auf 'Farben' färbt sie sich, auf 'Logo' springt das Logo hinein, danach die Symbole.",
+      "component": "phone-3d",
+      "params": {
+        "mode": "design",
+        "shop": "Döner Palast",
+        "icon": "kebab",
+        "stamps": 10,
+        "before": 4,
+        "reward": "Gratis-Döner",
+        "colors": "#C2502E,#7A2617",
+        "rise": false,
+        "angle": 10
+      },
+      "anchors": {
+        "paint": {
+          "cap": 0,
+          "word": 0,
+          "offset": -0.12
+        },
+        "logo": {
+          "cap": 0,
+          "word": 1,
+          "offset": -0.12
+        },
+        "symbol": {
+          "cap": 0,
+          "word": 1,
+          "offset": 0.05
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "*Farben, | *Logo."
+          ]
+        }
+      ]
+    }
+  ]
+}

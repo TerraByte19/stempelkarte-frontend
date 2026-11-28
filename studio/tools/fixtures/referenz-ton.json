@@ -1,0 +1,15 @@
+{
+ "_hinweis": "Fingerabdrücke des Tons der beiden Referenzvideos, gemessen am 15.11.2026 mit dem unten genannten ffmpeg. voicePcmSha256: die 16-bit-Abtastwerte von launch-video/build/voice/liam.wav (die .wav selbst liegt nicht im Repo). voiceFileSha256: launch-video/final-build/voice/liam.mp3. mixSha256: die ersten mixSamples Abtastwerte des dekodierten Tons von Stampit-Werbevideo-v7.mp4 bzw. -v10.mp4 (die .mp4 liegen nicht im Repo). Eintragen erst nach dem Vergleich mit den echten Dateien, siehe tools/regress.mjs.",
+ "ffmpeg": "6.1.1-3ubuntu5",
+ "v7": {
+  "voiceSamples": 2063664,
+  "voicePcmSha256": "cd697d987d1f08ee7f75d5b795f38296122b0b527fc34153f381d05c9376b86f",
+  "mixSamples": 2197504,
+  "mixSha256": "c4f66b3e2f0fcbedb087e4d6d4f43ff2203db0d0b7db89478111029b93e663b3"
+ },
+ "v10": {
+  "voiceFileSha256": "d19d3d9f2dba475a6a1f51456ae6938347b835454bcc78e724773fca16b67db4",
+  "mixSamples": 2215936,
+  "mixSha256": "56fd249f610f1862a331a8abe010287af884d86ca378edd55edb83be89032e38"
+ }
+}

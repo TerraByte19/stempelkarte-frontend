@@ -1,0 +1,9 @@
+# Fertige Videos und Zwischenstaende gehoeren nicht ins Repo: sie sind gross
+# und lassen sich aus script.json + Stimme jederzeit neu bauen.
+videos/*/out/
+# Aufnahmen liegen als .mp3 (wie geliefert) samt Zeiten im Ordner voice/ und
+# gehoeren INS Repo: sie sind bezahlt. Eine .wav entsteht nur als
+# Zwischenergebnis und ist deshalb ausgenommen. Nie eine Aufnahme nur als
+# .wav ablegen - ein frischer Checkout haette sie nicht.
+*.wav
+__pycache__/

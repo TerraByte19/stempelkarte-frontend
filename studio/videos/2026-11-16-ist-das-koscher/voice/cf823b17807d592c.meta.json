@@ -1,0 +1,98 @@
+{
+ "key": "cf823b17807d592c",
+ "text": "Ist das koscher? Dein Handy meldet sich, genau wenn du an deinem Lieblingscafé vorbeigehst. Verfolgt dich das Café? Nein. Dein Handy sendet die Benachrichtigung selbst. Natürlich ist das koscher! Du hast die Stempelkarte selbst gespeichert. Einmal gescannt, ohne App, in Apple oder Google Wallet. In der Karte steht, wo der Laden ist. Ist die Karte voll und du kommst in die Nähe, zeigt dein Handy sie von selbst an. Der Laden schickt nichts. Und sieht nicht, wo du bist. Und wenn es dein Laden ist? Dann stehst du auf dem Sperrbildschirm deiner Stammkunden. Genau vor deiner Tür. Klingt interessant? Dann kommentiere jetzt Karte, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "extern",
+ "chars": 658,
+ "base": "593a18385cf458fa",
+ "cut": [
+  0,
+  15
+ ],
+ "sentence": "Ist das koscher?",
+ "clip": "cf823b17807d592c.clip.mp3",
+ "clip_sha256": "a5adfb3b3baa91f172f8a49552cd0ba4bae1aa40c2118312df9d1cd04ecb1645",
+ "gain": 0.8169639706611633,
+ "shift": 0.322,
+ "cut_from": 0.0,
+ "cut_to": 0.987,
+ "from": "koscher-frage-verwundert.mp3",
+ "spent": 0,
+ "clip_cut": [
+  3296,
+  56448
+ ],
+ "clip_pad": 4574,
+ "clip_gain": 0.816964,
+ "extern": {
+  "source": "extern",
+  "file": "koscher-frage-verwundert.mp3",
+  "sha256": "a5adfb3b3baa91f172f8a49552cd0ba4bae1aa40c2118312df9d1cd04ecb1645",
+  "tool": "clip-in.py",
+  "alignment_text": "[astonished] Ist das koscher?",
+  "hints": [
+   0.275,
+   0.38,
+   0.66
+  ],
+  "given_words": null,
+  "words": [
+   {
+    "word": "Ist",
+    "at": 0.04,
+    "in_file": 0.115,
+    "how": "anfang",
+    "onsets_inside": []
+   },
+   {
+    "word": "das",
+    "at": 0.305,
+    "in_file": 0.38,
+    "how": "vergleich+einsatz",
+    "onsets_inside": []
+   },
+   {
+    "word": "koscher?",
+    "at": 0.605,
+    "in_file": 0.68,
+    "how": "vergleich+einsatz",
+    "onsets_inside": [
+     [
+      0.11,
+      13.8
+     ],
+     [
+      0.38,
+      16.8
+     ]
+    ]
+   }
+  ],
+  "dtw_cost": 3.425,
+  "loudness": {
+   "neighbour_rms_db": -22.29,
+   "clip_rms_db": -20.53,
+   "wanted_db": -1.76,
+   "gain_db": -1.76,
+   "limited": false,
+   "peak_capped": false,
+   "peak_after_db": -7.68
+  },
+  "trimmed": {
+   "start": 0.075,
+   "end": 0.0
+  }
+ }
+}

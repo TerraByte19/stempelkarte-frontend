@@ -1,0 +1,17 @@
+{
+ "key": "593a18385cf458fa",
+ "use": "8e93df1410327006",
+ "sentences": [
+  {
+   "number": 1,
+   "sentence": "Ist das koscher?",
+   "clip": "koscher-frage-verwundert.mp3"
+  },
+  {
+   "number": 6,
+   "sentence": "Natürlich ist das koscher!",
+   "clip": "koscher-antwort-G-rachen-ch.mp3"
+  }
+ ],
+ "note": "Der Bau nimmt für diesen Text die Fassung \"use\" statt der Aufnahme \"key\" (tools/clip-in.py). Diese Datei löschen oder \"clip-in.py <ordner> --original\": dann gilt wieder die Aufnahme."
+}

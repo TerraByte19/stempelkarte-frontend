@@ -1,0 +1,22 @@
+{
+ "key": "eb17f99a588342f3",
+ "text": "Bei diesem Friseur ist die Karte im Handy, bevor die Haare trocken sind. Früher lag auch hier eine Papierkarte auf dem Tresen. Zerknickt, vergessen, verloren. Und wie nah er dran war, wusste keiner. Heute reicht ein Scan, ganz ohne App! Danach liegt die Karte in Apple oder Google Wallet. Beim nächsten Haarschnitt scannt der Friseur sie mit der Handy-Kamera, und der Stempel ist sofort auf seinem Handy. Und kommt er später wieder in die Nähe des Salons, zeigt sein Handy ihm die Karte von selbst. Auf dem Sperrbildschirm, mit dem Stand seiner Karte. Klingt interessant? Dann kommentiere jetzt Salon, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "api",
+ "chars": 629,
+ "audio": "eb17f99a588342f3.mp3",
+ "audio_sha256": "84e6e3b3f8baa8a466b752be30d2e212c3f8f44fc270cd25169e8872ef8a33dd",
+ "spent": 629
+}

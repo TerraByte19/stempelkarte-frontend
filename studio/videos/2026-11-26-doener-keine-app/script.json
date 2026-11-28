@@ -1,0 +1,487 @@
+{
+  "meta": {
+    "title": "Wenn ich einen Dönerladen hätte: keine App",
+    "slug": "doener-keine-app",
+    "language": "de",
+    "datum": "2026-11-26",
+    "format": "F03",
+    "beleg_kern": "ohne-app",
+    "thema": "kein-download",
+    "branche": "doener",
+    "hook_muster": "H08",
+    "hook_punkte": 11,
+    "meme": "",
+    "kern_bild": "kommentar",
+    "einstieg": "comment-thread",
+    "motive": [],
+    "schluss": "Noch Fragen?",
+    "hook_kandidaten": [
+      {
+        "satz": "Wenn ich einen Dönerladen hätte: keine App.",
+        "muster": "H08",
+        "punkte": 11,
+        "gruende": "S1 Glocke und Tippen, S2 sein Laden, S3 Entscheidung gegen die App, K1 Dönerladen und App, K2 ohne Vorwissen, K3 sieben Wörter, W1 seine Sorge, W2 erwartbar (0), W3 Antwort mit Scan bis 10 s",
+        "raus": ""
+      },
+      {
+        "satz": "Hätte ich einen Dönerladen, gäbe es keine App.",
+        "muster": "H08",
+        "punkte": 11,
+        "gruende": "S1 Glocke und Tippen, S2 sein Laden, S3 Entscheidung gegen die App, K1 Dönerladen, K2 klar, K3 acht Wörter, W1 seine Sorge, W2 erwartbar (0), W3 eingelöst; Gleichstand, der erste ist kürzer",
+        "raus": ""
+      },
+      {
+        "satz": "Mein eigener Dönerladen? Der bekäme keine App.",
+        "muster": "H08",
+        "punkte": 10,
+        "gruende": "S1 Glocke und Tippen, S2 sein Laden, S3 schwächer als Frage (1), K1 Dönerladen, K2 klar, K3 sieben Wörter, W1 kein Einwand (0), W2 erwartbar (0), W3 eingelöst",
+        "raus": ""
+      },
+      {
+        "satz": "Wenn ich einen Dönerladen hätte: Stempeln ohne App.",
+        "muster": "H08",
+        "punkte": 9,
+        "gruende": "S1 Glocke und Tippen, S2 sein Laden, S3 kaum Reibung (0), K1 Dönerladen und Stempeln, K2 klar, K3 acht Wörter, W1 seine Sorge, W2 erwartbar (0), W3 eingelöst",
+        "raus": ""
+      },
+      {
+        "satz": "Wenn ich einen Dönerladen hätte, würde bei mir niemand eine App laden.",
+        "muster": "H08",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "zwölf Wörter: Bild 0 zeigte nur einen halben Satz (1.4)"
+      },
+      {
+        "satz": "Wenn ich einen Imbiss hätte: Stempelkarte ja, App nein.",
+        "muster": "H08",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "neun Wörter in der ersten Tafel (1.4)"
+      }
+    ],
+    "beleg": [
+      "A2",
+      "A3",
+      "A1"
+    ],
+    "idee_id": "20261118-doener-wenn-ich",
+    "idee": "Vorlage: Reel eines Mitbewerbers, nur nach seinem Text bekannt. Übernommen sind das Hook-Muster (Ich-Form: wenn ich einen Laden hätte) und der Gedanke, es ohne App zu machen. Eigen sind Wortlaut, Laden (Döner Palast), Bilder und Ton; gebaut als Einwand mit Antwort (F03)."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "component": "comment-thread",
+      "params": {
+        "text": "Wenn ich einen Dönerladen hätte: keine App.",
+        "typed": true,
+        "reply": "Muss auch keiner laden. Einmal scannen reicht."
+      },
+      "anchors": {
+        "type": {
+          "at": "start",
+          "offset": 0.05
+        },
+        "send": {
+          "cap": 1,
+          "word": 0,
+          "offset": -0.1
+        },
+        "reply": {
+          "cap": 2,
+          "word": 0
+        }
+      },
+      "camera": [
+        {
+          "cap": 1,
+          "word": 0,
+          "zoom": 1.1,
+          "focus": [
+            210,
+            880
+          ],
+          "to": [
+            210,
+            930
+          ],
+          "dur": 0.3
+        }
+      ],
+      "sounds": [
+        {
+          "sound": "ladenglocke",
+          "at": "start",
+          "offset": 0,
+          "vol": 0.8
+        }
+      ],
+      "captions": [
+        {
+          "lines": [
+            "Wenn ich einen",
+            "*Dönerladen hätte:",
+            "*keine App."
+          ],
+          "instant": true
+        },
+        {
+          "lines": [
+            "Für einen *Döner | lädt die | doch *keiner."
+          ]
+        },
+        {
+          "lines": [
+            "Muss auch | *niemand."
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "have": 6,
+            "start": "counter",
+            "phone": false,
+            "bubble": false,
+            "roof": true,
+            "guests": 4,
+            "standing": 3,
+            "customer": 0
+          },
+          "anchors": {
+            "roof": {
+              "cap": 0,
+              "word": 2
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Schau kurz | in *meinen Laden."
+              ]
+            },
+            {
+              "lines": [
+                "Volle *Theke, | lange *Schlange."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "have": 0,
+            "start": "door",
+            "phone": false,
+            "customer": 3
+          },
+          "anchors": {
+            "enter": {
+              "at": "start",
+              "offset": 1.2
+            },
+            "order": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Meine Gäste | haben *Hunger | und nur | wenig *Zeit."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "have": 0,
+            "start": "counter",
+            "phone": false,
+            "bubble": false,
+            "phoneUi": "wallet",
+            "reward": "Gratis-Döner",
+            "customer": 3
+          },
+          "anchors": {
+            "ui": {
+              "cap": 0,
+              "word": -1
+            },
+            "uiAdd": {
+              "cap": 1,
+              "word": 2
+            },
+            "uiCard": {
+              "at": "end",
+              "offset": 5
+            },
+            "uiNoApp": {
+              "at": "end",
+              "offset": 6
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Neben meiner *Kasse | stünde ein | kleiner *Code."
+              ]
+            },
+            {
+              "lines": [
+                "*Einmal | kurz scannen,"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "wallet",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "before": 0,
+            "after": 0,
+            "reward": "Gratis-Döner",
+            "scan": false,
+            "rise": false,
+            "drop": true
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 3
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "schon steckt | die *Stempelkarte | *für *immer | im *Handy."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "doener",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "have": 0,
+            "start": "counter",
+            "phone": false,
+            "bubble": false,
+            "phoneUi": "wallet",
+            "reward": "Gratis-Döner",
+            "customer": 3,
+            "tones": false
+          },
+          "anchors": {
+            "ui": {
+              "at": "start",
+              "offset": -6
+            },
+            "uiAdd": {
+              "at": "start",
+              "offset": -4
+            },
+            "uiCard": {
+              "at": "start",
+              "offset": -2
+            },
+            "uiNoApp": {
+              "cap": 0,
+              "word": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Kein *Store, | kein *Download."
+              ]
+            },
+            {
+              "lines": [
+                "Mehr | braucht es | dafür *nicht."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "comment-thread",
+          "params": {
+            "text": "Und wer kein iPhone hat?",
+            "typed": false,
+            "reply": "Der bekommt sie genauso: in Google Wallet."
+          },
+          "anchors": {
+            "send": {
+              "at": "start",
+              "offset": 0.05
+            },
+            "reply": {
+              "cap": 1,
+              "word": 0
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.1,
+              "focus": [
+                210,
+                880
+              ],
+              "to": [
+                210,
+                930
+              ],
+              "dur": 0.3
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Und wer | gar kein *iPhone | hat?"
+              ]
+            },
+            {
+              "lines": [
+                "Der bekommt sie | ganz *genauso."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "phone-3d",
+          "enter": "cut",
+          "params": {
+            "mode": "wallet",
+            "shop": "Döner Palast",
+            "icon": "kebab",
+            "stamps": 10,
+            "before": 0,
+            "after": 0,
+            "reward": "Gratis-Döner",
+            "scan": false,
+            "rise": false,
+            "drop": false,
+            "device": "android",
+            "angle": -14
+          },
+          "captions": [
+            {
+              "lines": [
+                "Ob *Apple Wallet | oder *Google Wallet: | beide nehmen | die *Karte."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "stamp-check",
+      "params": {
+        "icon": "check"
+      },
+      "anchors": {
+        "hit": {
+          "cap": 0,
+          "word": -1,
+          "offset": 0.1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Meine *Stempelkarte | käme also | ganz ohne | *eigene *App aus!"
+          ],
+          "scale": 1.15
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Noch Fragen?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile",
+          "gapBefore": 0.55
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt IMBISS,{Imbiss,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ],
+  "poster": 2
+}

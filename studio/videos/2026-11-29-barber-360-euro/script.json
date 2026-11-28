@@ -1,0 +1,562 @@
+{
+  "meta": {
+    "title": "360 Euro im Jahr",
+    "slug": "barber-360-euro",
+    "language": "de",
+    "datum": "2026-11-29",
+    "format": "F04",
+    "beleg_kern": "rechnung",
+    "studie": "",
+    "thema": "rechnung",
+    "branche": "friseur",
+    "idee_id": "20261120-salon-rechnung",
+    "hook_muster": "H03",
+    "hook_punkte": 11,
+    "hook_kandidaten": [
+      {
+        "satz": "360 Euro im Jahr. Die holt sich der Barber gegenüber.",
+        "muster": "H03",
+        "punkte": 11,
+        "gruende": "S1 Tafel klappert mit Ton, S2 sein Geld und sein Kunde, S3 Verlust an den Laden gegenüber, K1 Barber gegenüber, K2 ohne Vorwissen, K3 vier Wörter, W1 nein: kein Satz von ihm, W2 die Summe kennt er nicht, W3 Rechnung bis 10 s im Bild",
+        "raus": ""
+      },
+      {
+        "satz": "Ein Kunde weniger. Das sind 360 Euro im Jahr.",
+        "muster": "H03",
+        "punkte": 10,
+        "gruende": "S1 Ton und Klappern, S2 sein Kunde, S3 Verlust, K1 nein: kein Gegenstand, K2 ja, K3 kurz, W1 Sorge, W2 Summe neu, W3 Rechnung im Bild",
+        "raus": ""
+      },
+      {
+        "satz": "Ein Stammkunde geht. Mit ihm 360 Euro im Jahr.",
+        "muster": "H03",
+        "punkte": 10,
+        "gruende": "S1 ja, S2 sein Stammkunde, S3 Verlust, K1 nein, K2 ja, K3 kurz, W1 Sorge, W2 Summe neu, W3 Rechnung im Bild",
+        "raus": ""
+      },
+      {
+        "satz": "Dein Stuhl bleibt einmal im Monat leer. Macht 360 Euro.",
+        "muster": "H03",
+        "punkte": 10,
+        "gruende": "S1 ja, S2 sein Stuhl, S3 Verlust, K1 Stuhl, K2 ja, K3 nein: zwei Gedanken, W1 nein, W2 ja, W3 ja",
+        "raus": ""
+      },
+      {
+        "satz": "Der Barber gegenüber nimmt dir 360 Euro. Jedes Jahr.",
+        "muster": "H03",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "zu nah am ersten Satz der Vorlage (HOOKS.md 1.6: kein Satz eines Mitbewerbers, auch nicht abgewandelt)"
+      },
+      {
+        "satz": "Was kostet dich ein Kunde, der zum Barber gegenüber geht?",
+        "muster": "H05",
+        "punkte": 0,
+        "gruende": "",
+        "raus": "erste Tafel über 8 Wörter (HOOKS.md 1.4)"
+      }
+    ],
+    "meme": "",
+    "kern_bild": "zahl",
+    "einstieg": "big-number",
+    "motive": [],
+    "schluss": "Lohnt sich's?",
+    "beleg": "Kernaussage: Beispielrechnung (12 Schnitte x 30 Euro = 360 Euro im Jahr, ein Kunde, als Beispiel angesagt, kein Versprechen). Daneben A1 (Karte in der Wallet) mit D2 (Belohnung nach vollen Stempeln, vom Laden festgelegt) und C3 (der Laden schickt selbst eine Mitteilung). Kein Scan-Bild, keine Nähe, kein Papier.",
+    "idee": "Vorlage: Reel eines Mitbewerbers, im Lauf angesehen. Übernommen sind das Hook-Muster (eine Summe im Jahr, die an den Laden gegenüber geht, mit einem einzigen Kunden) und die Reihenfolge der Takte. Eigen sind Wortlaut, Laden, Zahlen und Bilder."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "parts": [
+        {
+          "component": "big-number",
+          "params": {
+            "value": "360 €",
+            "from": "",
+            "sub": "Beispiel",
+            "label": "im Jahr, mit einem Kunden"
+          },
+          "anchors": {
+            "show": {
+              "at": "start",
+              "offset": 0.1
+            }
+          },
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.8
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "*360{dreihundertsechzig} Euro",
+                "im Jahr."
+              ],
+              "instant": true,
+              "scale": 1.2
+            }
+          ]
+        },
+        {
+          "component": "iso-street",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "accent": "#5A4FCF",
+            "rival": "Barber Nebenan",
+            "rivalIcon": "scissors",
+            "rivalAccent": "#E58A45",
+            "smoke": false,
+            "heart": true,
+            "walker": false,
+            "after": false,
+            "push": 0.12,
+            "orbit": 8
+          },
+          "anchors": {
+            "crack": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Die *holt sich | der Barber | *gegenüber,"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "friseur",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "phone": false,
+            "paper": false,
+            "stamps": 6,
+            "have": 4,
+            "start": "counter",
+            "roof": true,
+            "bubble": false,
+            "customer": 0
+          },
+          "anchors": {
+            "roof": {
+              "at": "start",
+              "offset": 0.05
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "mit *einem | einzigen | deiner Stammkunden."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "week-strip",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "rivalIcon": "scissors",
+            "weeks": 4,
+            "days": [
+              5
+            ],
+            "filled": 1,
+            "rivalWeek": 0
+          },
+          "anchors": {
+            "week1": {
+              "cap": 0,
+              "word": 4
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Ein *Beispiel: | Er kommt | einmal im *Monat | zu dir."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "calc-panel",
+          "enter": "cut",
+          "params": {
+            "rows": [
+              {
+                "big": "12",
+                "label": "Schnitte im Jahr"
+              },
+              {
+                "big": "× 30 €",
+                "label": "pro Schnitt"
+              }
+            ],
+            "result": {
+              "big": "= 360 €",
+              "label": "im Jahr, mit einem Kunden"
+            },
+            "coin": ""
+          },
+          "anchors": {
+            "panel": {
+              "at": "start",
+              "offset": 0.1
+            },
+            "row1": {
+              "cap": 0,
+              "word": 0
+            },
+            "row2": {
+              "cap": 1,
+              "word": 3
+            },
+            "result": {
+              "cap": 2,
+              "word": 5
+            }
+          },
+          "camera": [
+            {
+              "cap": 2,
+              "word": 0,
+              "zoom": 1.2,
+              "focus": [
+                540,
+                1060
+              ],
+              "to": [
+                540,
+                1120
+              ],
+              "dur": 0.2
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "*Zwölf Schnitte | im Jahr."
+              ]
+            },
+            {
+              "lines": [
+                "Jeder | bringt dir | *dreißig Euro."
+              ]
+            },
+            {
+              "lines": [
+                "Zwölf mal | dreißig: | das macht | *360{dreihundertsechzig} Euro."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "iso-street",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "accent": "#5A4FCF",
+            "rival": "Barber Nebenan",
+            "rivalIcon": "scissors",
+            "rivalAccent": "#E58A45",
+            "smoke": false,
+            "heart": true,
+            "walker": true,
+            "after": true,
+            "dark": 0.6
+          },
+          "anchors": {
+            "walk": {
+              "at": "start",
+              "offset": 0.2
+            },
+            "crack": {
+              "cap": 0,
+              "word": 4
+            },
+            "enter": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Eines Tages | geht er *rüber, | nur zum | *Ausprobieren."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "iso-shop",
+          "enter": "cut",
+          "params": {
+            "branch": "friseur",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "phone": false,
+            "paper": false,
+            "stamps": 6,
+            "have": 4,
+            "start": "none",
+            "bubble": false,
+            "dim": true,
+            "push": 0.15,
+            "orbit": 10
+          },
+          "captions": [
+            {
+              "lines": [
+                "Sein Stuhl | bleibt *leer."
+              ]
+            },
+            {
+              "lines": [
+                "Und *keiner | sagt dir | Bescheid."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "phone-3d",
+          "params": {
+            "mode": "wallet",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "before": 4,
+            "after": 4,
+            "reward": "Gratis-Schnitt",
+            "scan": false,
+            "rise": true,
+            "drop": true
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 2
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Was ihn *hält?"
+              ]
+            },
+            {
+              "lines": [
+                "*Stampit: | deine *Stempelkarte | in seiner *Wallet."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "tip-cards",
+          "enter": "cut",
+          "params": {
+            "head": "Deine Karte, deine Regel",
+            "rise": true,
+            "show": 1,
+            "numbered": false,
+            "items": [
+              {
+                "title": "Karte voll: ein Schnitt gratis.",
+                "icon": "scissors"
+              }
+            ]
+          },
+          "anchors": {
+            "card": {
+              "cap": 0,
+              "word": 0
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.2,
+              "focus": [
+                500,
+                1040
+              ],
+              "to": [
+                540,
+                1080
+              ],
+              "dur": 0.3
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Mit jedem *Schnitt | wächst sie."
+              ]
+            },
+            {
+              "lines": [
+                "Ist sie *voll, | schneidest du | einmal *gratis."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "iso-street",
+      "params": {
+        "shop": "Barber Haarscharf",
+        "icon": "scissors",
+        "accent": "#5A4FCF",
+        "rival": "Barber Nebenan",
+        "rivalIcon": "scissors",
+        "rivalAccent": "#E58A45",
+        "smoke": false,
+        "heart": false,
+        "walker": false,
+        "after": false,
+        "phoneUi": "message",
+        "message": "Heute sind noch Termine frei!",
+        "camera": "front",
+        "tones": true
+      },
+      "anchors": {
+        "ui": {
+          "cap": 0,
+          "word": 1,
+          "offset": 0
+        },
+        "uiType": {
+          "cap": 0,
+          "word": 4,
+          "offset": 0
+        },
+        "uiSend": {
+          "cap": 0,
+          "word": -1,
+          "offset": 0
+        },
+        "uiOut": {
+          "at": "end",
+          "offset": -0.3
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Und an | *ruhigen Tagen | schickst du ihm | eine *Mitteilung."
+          ]
+        }
+      ]
+    },
+    {
+      "component": "iso-shop",
+      "params": {
+        "branch": "friseur",
+        "shop": "Barber Haarscharf",
+        "icon": "scissors",
+        "phone": false,
+        "paper": false,
+        "stamps": 6,
+        "have": 4,
+        "start": "door",
+        "roof": true,
+        "bubble": false,
+        "customer": 0
+      },
+      "anchors": {
+        "roof": {
+          "at": "start",
+          "offset": 0.2
+        },
+        "enter": {
+          "at": "start",
+          "offset": 1.2
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "So sitzt er | auch weiter | auf *deinem Stuhl."
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Lohnt sich's?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt BARBER,{Barber,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ],
+  "poster": 0.8
+}

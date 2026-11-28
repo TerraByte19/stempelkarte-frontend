@@ -1,0 +1,400 @@
+{
+  "meta": {
+    "title": "TITEL DES VIDEOS",
+    "slug": "kurzer-name-ohne-leerzeichen",
+    "language": "de",
+    "format": "F??",
+    "kern_bild": "",
+    "einstieg": "",
+    "motive": [],
+    "schluss": "",
+    "beleg_kern": "",
+    "studie": "",
+    "hook_muster": "",
+    "meme": "",
+    "beleg": "",
+    "idee": "Ein Satz: Welche Beobachtung steckt hinter diesem Video und woher kam die Anregung? Anregung heißt Aufbau oder Kniff, nie Text oder Bild übernehmen. Im unbeaufsichtigten Lauf ohne Namen von Konten (AUTOMATIK.md, Regel 12).",
+    "_hinweis": "Diesen Ordner kopieren nach videos/<JJJJ-MM-TT>-<slug>/ und nur die Kopie ändern. Alles, was mit _ beginnt, ist ein Hinweis für dich und wird ignoriert. Die Szenen unten sind ein GERÜST, KEIN BEISPIEL: sie zeigen nur, wie Teile, Schnitte, Anker und Kamera geschrieben werden, und werden alle gelöscht. Reihenfolge, Bausteine und Text kommen aus den Takten des gewählten Formats (studio/FORMATE.md, Abschnitt 4) und den Regeln der Abwechslung (FORMATE.md, Abschnitt 2). In meta gehören format, beleg_kern (die Kernaussage) und bei F10 studie (FORMATE.md 2), datum, thema, branche, hook_muster und meme (HOOKS.md 0), beleg (PRODUKT.md); kern_bild, einstieg, motive und schluss liest node studio/tools/abwechslung.mjs felder aus dem fertigen Skript ab (AUTOMATIK.md Schritt 16). Regeln: studio/AUTOMATIK.md Abschnitt 6, studio/PLAYBOOK.md Abschnitt 'Stil C'. Die Blöcke captionStyle, timing, pace und mix oben stehen so in studio/state/konfig.json (skript, mix) und bleiben, wie sie sind."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "_hinweis": "Gerüst, Szene 1: der Einstieg. Die erste Textzeile trägt 'instant': true und steht ab Bild 0; das Bild darunter steht schon fertig da (hier 'rise': false). Jeder weitere Teil mit 'enter': 'cut' ist ein harter Schnitt.",
+      "parts": [
+        {
+          "component": "tip-cards",
+          "params": {
+            "head": "Gerüst, kein Beispiel",
+            "rise": false,
+            "show": 1,
+            "items": [
+              {
+                "title": "Erst das Format wählen."
+              },
+              {
+                "title": "Dann die Takte aus FORMATE.md."
+              },
+              {
+                "title": "Dann die Regeln der Abwechslung."
+              }
+            ]
+          },
+          "anchors": {
+            "card": {
+              "at": "start",
+              "offset": 0.05
+            }
+          },
+          "camera": [
+            {
+              "cap": 1,
+              "word": 0,
+              "zoom": 1.2,
+              "focus": [
+                500,
+                1040
+              ],
+              "to": [
+                540,
+                1080
+              ],
+              "dur": 0.3
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Erst das *Format,",
+                "dann der Text."
+              ],
+              "instant": true,
+              "scale": 1.2
+            },
+            {
+              "lines": [
+                "Diese Szenen | sind ein | *Gerüst."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "tip-cards",
+          "enter": "cut",
+          "params": {
+            "head": "Gerüst, kein Beispiel",
+            "show": 2,
+            "items": [
+              {
+                "title": "Erst das Format wählen."
+              },
+              {
+                "title": "Dann die Takte aus FORMATE.md."
+              },
+              {
+                "title": "Dann die Regeln der Abwechslung."
+              }
+            ]
+          },
+          "captions": [
+            {
+              "lines": [
+                "Die Takte | stehen in | *FORMATE.md.{Formate.}"
+              ]
+            }
+          ]
+        },
+        {
+          "component": "tip-cards",
+          "enter": "cut",
+          "params": {
+            "head": "Gerüst, kein Beispiel",
+            "show": 3,
+            "items": [
+              {
+                "title": "Erst das Format wählen."
+              },
+              {
+                "title": "Dann die Takte aus FORMATE.md."
+              },
+              {
+                "title": "Dann die Regeln der Abwechslung."
+              }
+            ]
+          },
+          "captions": [
+            {
+              "lines": [
+                "Die *Regeln | der Abwechslung | auch."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Gerüst, Szene 2: eine Frage als Kommentar (Format F03). Anker immer auf das gemeinte Wort setzen, die Vorgaben passen zu keinem neuen Text.",
+      "component": "comment-thread",
+      "params": {
+        "text": "Welches Format darf heute?",
+        "reply": "Eins, das die letzten drei nicht hatten."
+      },
+      "anchors": {
+        "type": {
+          "at": "start",
+          "offset": 0.05
+        },
+        "send": {
+          "cap": 0,
+          "word": -1
+        },
+        "reply": {
+          "cap": 1,
+          "word": 0
+        }
+      },
+      "camera": [
+        {
+          "cap": 1,
+          "word": 2,
+          "zoom": 1.1,
+          "focus": [
+            470,
+            880
+          ],
+          "to": [
+            470,
+            930
+          ],
+          "dur": 0.3
+        }
+      ],
+      "captions": [
+        {
+          "lines": [
+            "Welches | *Format | darf heute?"
+          ]
+        },
+        {
+          "lines": [
+            "Eins, | das die | *letzten *drei | nicht hatten."
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Gerüst, Szene 3: Duell in Runden (Format F06). 'score' ist der Stand vor der Runde.",
+      "parts": [
+        {
+          "component": "versus-split",
+          "params": {
+            "shop": "Laden aus THEMEN.md",
+            "icon": "check",
+            "round": 0,
+            "title": "Gerüst",
+            "scene": "start",
+            "winner": "none"
+          },
+          "captions": [
+            {
+              "lines": [
+                "Papier | gegen *Handy | ist eins davon."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "versus-split",
+          "enter": "cut",
+          "params": {
+            "shop": "Laden aus THEMEN.md",
+            "icon": "check",
+            "round": 1,
+            "title": "Regen",
+            "scene": "regen",
+            "winner": "right",
+            "score": [
+              0,
+              0
+            ],
+            "leftNote": "Matsch",
+            "rightNote": "Alles da"
+          },
+          "anchors": {
+            "action": {
+              "cap": 0,
+              "word": 0
+            },
+            "point": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Runde | für Runde, | mit *Spielstand."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Gerüst, Szene 4: ein Tag im Laden (Format F05). 'from' ist die Uhrzeit des Teils davor.",
+      "parts": [
+        {
+          "component": "day-clock",
+          "params": {
+            "shop": "Laden aus THEMEN.md",
+            "icon": "check",
+            "time": "07:10",
+            "from": "06:00",
+            "label": "Erster Kunde"
+          },
+          "anchors": {
+            "event": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Ein *Tag | im Laden | ist ein anderes."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "day-clock",
+          "enter": "cut",
+          "params": {
+            "shop": "Laden aus THEMEN.md",
+            "icon": "check",
+            "time": "12:15",
+            "from": "07:10",
+            "label": "Mittag",
+            "events": [
+              "07:10"
+            ]
+          },
+          "anchors": {
+            "event": {
+              "cap": 0,
+              "word": -1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Jede *Uhrzeit | ein Bild."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Gerüst, Szene 5: eine Zahl groß (Formate F04 und F10). Eine Quelle steht nie im Bild, sie wird gesprochen.",
+      "parts": [
+        {
+          "component": "big-number",
+          "params": {
+            "value": "12",
+            "sub": "Stil C",
+            "label": "Bildwechsel, mindestens"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": 1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Mindestens | *zwölf{zwölf} | Bildwechsel."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "enter": "cut",
+          "params": {
+            "value": "5 s",
+            "from": "12",
+            "sub": "Stil C",
+            "label": "steht ein Bild höchstens"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": 4
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und kein Bild | länger als | *fünf | Sekunden."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_hinweis": "Schluss: die Frage des Formats (FORMATE.md, je Format 'Schluss'; nicht dieselbe wie in einem der letzten zwei Videos), dann diese Aufforderung mit dem Stichwort des Ladens.",
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Deine Frage?"
+          ],
+          "accent": 1,
+          "keep": true,
+          "mode": "zeile"
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt WORT,{Wort,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ]
+}

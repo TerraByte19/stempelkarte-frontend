@@ -1,0 +1,115 @@
+{
+ "key": "37d40652afdb09b3",
+ "text": "Ist das koscher? Dein Handy meldet sich, genau wenn du an deinem Lieblingscafé vorbeigehst. Verfolgt dich das Café? Nein. Dein Handy sendet die Benachrichtigung selbst. Natürlich ist das koscher! Du hast die Stempelkarte selbst gespeichert. Einmal gescannt, ohne App, in Apple oder Google Wallet. In der Karte steht, wo der Laden ist. Ist die Karte voll und du kommst in die Nähe, zeigt dein Handy sie von selbst an. Der Laden schickt nichts. Und sieht nicht, wo du bist. Und wenn es dein Laden ist? Dann stehst du auf dem Sperrbildschirm deiner Stammkunden. Genau vor deiner Tür. Klingt interessant? Dann kommentiere jetzt Karte, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "extern",
+ "chars": 658,
+ "base": "cf823b17807d592c",
+ "cut": [
+  169,
+  194
+ ],
+ "sentence": "Natürlich ist das koscher!",
+ "clip": "37d40652afdb09b3.clip.mp3",
+ "clip_sha256": "cd3a2e863e2fbf0c4c2ce46869f9efb226900c7bb41965f16d15dabb9d474a9e",
+ "gain": 0.7199159860610962,
+ "shift": 0.837,
+ "cut_from": 12.055,
+ "cut_to": 13.546,
+ "from": "koscher-antwort-G-raues-ch.mp3",
+ "spent": 0,
+ "clip_cut": [
+  436,
+  103106
+ ],
+ "clip_pad": 0,
+ "clip_gain": 0.719916,
+ "extern": {
+  "source": "extern",
+  "file": "koscher-antwort-G-raues-ch.mp3",
+  "sha256": "cd3a2e863e2fbf0c4c2ce46869f9efb226900c7bb41965f16d15dabb9d474a9e",
+  "tool": "clip-in.py",
+  "alignment_text": "[joyful, sing-song, drawn out] Natüüürlich ist das koscher!",
+  "hints": [
+   0.302,
+   1.1,
+   1.36,
+   1.7
+  ],
+  "given_words": null,
+  "words": [
+   {
+    "word": "Natürlich",
+    "at": 0.04,
+    "in_file": 0.05,
+    "how": "anfang",
+    "onsets_inside": [
+     [
+      0.295,
+      28.8
+     ],
+     [
+      0.405,
+      18.7
+     ]
+    ]
+   },
+   {
+    "word": "ist",
+    "at": 1.2,
+    "in_file": 1.21,
+    "how": "vergleich+einsatz",
+    "onsets_inside": []
+   },
+   {
+    "word": "das",
+    "at": 1.435,
+    "in_file": 1.445,
+    "how": "vergleich+einsatz",
+    "onsets_inside": []
+   },
+   {
+    "word": "koscher!",
+    "at": 1.76,
+    "in_file": 1.77,
+    "how": "vergleich+einsatz",
+    "onsets_inside": [
+     [
+      0.085,
+      23.0
+     ],
+     [
+      0.43,
+      13.9
+     ]
+    ]
+   }
+  ],
+  "dtw_cost": 3.015,
+  "loudness": {
+   "neighbour_rms_db": -21.41,
+   "clip_rms_db": -18.56,
+   "wanted_db": -2.85,
+   "gain_db": -2.85,
+   "limited": false,
+   "peak_capped": false,
+   "peak_after_db": -6.52
+  },
+  "trimmed": {
+   "start": 0.01,
+   "end": 0.0
+  }
+ }
+}

@@ -1,0 +1,14 @@
+{
+  "db": {
+    "rules": [
+      {
+        "path": "",
+        "read": "owner",
+        "write": "owner"
+      }
+    ]
+  },
+  "assets": {},
+  "user": {},
+  "downloads": true
+}

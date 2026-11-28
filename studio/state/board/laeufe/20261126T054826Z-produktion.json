@@ -1,0 +1,11 @@
+{
+  "dauer_min": 19,
+  "ergebnis": "Kein Video für Freitag. 1 verworfenes Video beantwortet, 1 Reel bewertet, 5 alte Vorschauen gelöscht.",
+  "modus": "produktion",
+  "problem": "Die Reels der beobachteten Konten ließen sich nicht abrufen: Instagram verlangt eine Anmeldung (3 Versuche). Ohne gesehene Vorlage entsteht kein Video.",
+  "push": "ok",
+  "sitzung": "https://claude.ai/code/session_01EEzBTnHA88y34Ss8hxKRvk",
+  "stimme_zeichen": 0,
+  "video_id": "",
+  "zeit": "2026-11-26T06:08:11Z"
+}

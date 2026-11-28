@@ -1,0 +1,444 @@
+{
+  "meta": {
+    "title": "Dein Friseur schuldet dir was",
+    "slug": "friseur-schuldet-dir-was",
+    "language": "de",
+    "datum": "2026-11-26",
+    "format": "F07",
+    "beleg_kern": "stempeln",
+    "thema": "kunde-und-inhaber",
+    "branche": "friseur",
+    "hook_muster": "H12",
+    "hook_punkte": 0,
+    "hook_kandidaten": [],
+    "meme": "M18",
+    "kern_bild": "meme",
+    "einstieg": "iso-shop",
+    "motive": [
+      "naehe",
+      "scan"
+    ],
+    "schluss": "Willst du das auch?",
+    "beleg": [
+      "A3",
+      "A2",
+      "B1",
+      "B2",
+      "C1",
+      "D2"
+    ],
+    "idee": "Im Chat mit dem Betreiber entstanden: ein Video, das erst den Kunden anspricht und dann den Inhaber. Hook vom Betreiber gewählt, Pointe mit den Jugendwörtern Crashout und Peak."
+  },
+  "voice": {
+    "_hinweis": "Die Stimme, die der Nutzer gewählt hat (Liam, lebhaft, Tempo 1,05). Nicht ändern: jede Änderung ergibt eine neue, kostenpflichtige Aufnahme. Der Block darf auch ganz fehlen, das sind die Vorgaben.",
+    "stability": 0.35,
+    "similarity_boost": 0.75,
+    "style": 0.6,
+    "speed": 1.05
+  },
+  "timing": {
+    "_hinweis": "maxGap: stille Lücken der Aufnahme über 0,45 s werden beim Bau gekürzt. Eine gewollte Pause stellt 'gapBefore' an der Textzeile danach ein (nach der Pointe 0,55, vor der Aufforderung am Schluss 0,65).",
+    "lead": 0.35,
+    "hold": 3.2,
+    "maxGap": 0.45
+  },
+  "captionStyle": {
+    "_hinweis": "Ein Wort auf einmal oben im Bild. *Wort = Schlüsselwort (groß, lila), höchstens drei in Folge. | = Grenze zwischen zwei Tafeln. Weder * noch | werden gesprochen.",
+    "mode": "wort"
+  },
+  "pace": {
+    "maxStill": 5,
+    "minChanges": 12
+  },
+  "mix": {
+    "_hinweis": "Lautheit wie im zweiten Video: -14 LUFS, wahre Spitze höchstens -1 dBTP. Gilt erst mit Stimme; der Entwurf ohne Stimme läuft mit der festen Mischung.",
+    "lufs": -14,
+    "truePeak": -1
+  },
+  "scenes": [
+    {
+      "parts": [
+        {
+          "component": "iso-shop",
+          "params": {
+            "branch": "friseur",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "have": 4,
+            "start": "counter",
+            "phone": false,
+            "customer": 4,
+            "tones": false
+          },
+          "anchors": {
+            "order": {
+              "at": "start",
+              "offset": 0.3
+            }
+          },
+          "sounds": [
+            {
+              "sound": "ladenglocke",
+              "at": "start",
+              "offset": 0,
+              "vol": 0.6
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Dein *Friseur",
+                "*schuldet dir was."
+              ],
+              "instant": true,
+              "scale": 1.2
+            }
+          ]
+        },
+        {
+          "component": "week-strip",
+          "enter": "cut",
+          "params": {
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "weeks": 4,
+            "days": [
+              5
+            ],
+            "filled": 4,
+            "rivalWeek": 0
+          },
+          "anchors": {
+            "week1": {
+              "cap": 0,
+              "word": 0
+            },
+            "week2": {
+              "cap": 0,
+              "word": 2
+            },
+            "week3": {
+              "cap": 1,
+              "word": 0
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Seit *Jahren | gehst du | zu ihm."
+              ]
+            },
+            {
+              "lines": [
+                "Jeden Monat, | derselbe *Stuhl."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "big-number",
+          "enter": "cut",
+          "params": {
+            "value": "0",
+            "sub": "Stempel",
+            "label": "nach all den Jahren"
+          },
+          "anchors": {
+            "show": {
+              "cap": 0,
+              "word": 5
+            }
+          },
+          "sounds": [
+            {
+              "sound": "trauriger-trompeter",
+              "cap": 1,
+              "word": 0,
+              "offset": 0.1,
+              "vol": 0.5
+            }
+          ],
+          "captions": [
+            {
+              "lines": [
+                "Und was | kriegst du | dafür? | *Nichts."
+              ]
+            },
+            {
+              "lines": [
+                "*Crashout."
+              ],
+              "scale": 1.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "iso-street",
+      "params": {
+        "shop": "Barber Haarscharf",
+        "icon": "scissors",
+        "accent": "#5A4FCF",
+        "rival": "Barber Nebenan",
+        "rivalIcon": "scissors",
+        "rivalAccent": "#E58A45",
+        "smoke": false,
+        "heart": true,
+        "walker": false,
+        "after": false,
+        "push": 0.12
+      },
+      "captions": [
+        {
+          "lines": [
+            "Schick ihm | dieses *Video."
+          ],
+          "gapBefore": 0.55
+        }
+      ]
+    },
+    {
+      "component": "iso-shop",
+      "params": {
+        "branch": "friseur",
+        "shop": "Barber Haarscharf",
+        "icon": "scissors",
+        "stamps": 6,
+        "have": 4,
+        "start": "none",
+        "phone": false,
+        "bubble": false
+      },
+      "captions": [
+        {
+          "lines": [
+            "Und jetzt | zu dir, | *Friseur:"
+          ]
+        }
+      ]
+    },
+    {
+      "component": "iso-shop",
+      "params": {
+        "branch": "friseur",
+        "shop": "Barber Haarscharf",
+        "icon": "scissors",
+        "stamps": 6,
+        "have": 4,
+        "start": "counter",
+        "phone": false,
+        "bubble": false,
+        "phoneUi": "wallet",
+        "reward": "Gratis-Schnitt",
+        "customer": 4
+      },
+      "anchors": {
+        "ui": {
+          "cap": 0,
+          "word": 2
+        },
+        "uiAdd": {
+          "cap": 1,
+          "word": 1
+        },
+        "uiCard": {
+          "cap": 1,
+          "word": -1
+        },
+        "uiNoApp": {
+          "cap": 2,
+          "word": 0
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Dein Stammkunde | scannt *einmal | deinen *QR-Code."
+          ]
+        },
+        {
+          "lines": [
+            "Schon hat er | deine *Stempelkarte | im Handy."
+          ]
+        },
+        {
+          "lines": [
+            "Ohne *App."
+          ]
+        }
+      ]
+    },
+    {
+      "component": "iso-shop",
+      "params": {
+        "branch": "friseur",
+        "shop": "Barber Haarscharf",
+        "icon": "scissors",
+        "stamps": 6,
+        "have": 4,
+        "start": "counter",
+        "close": "phone",
+        "bubble": false,
+        "customer": 4
+      },
+      "anchors": {
+        "zoom": {
+          "cap": 0,
+          "word": 0
+        },
+        "scan": {
+          "cap": 0,
+          "word": 3
+        },
+        "stamp": {
+          "cap": 1,
+          "word": 1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Nach jedem *Schnitt | scannst du kurz | seine Karte:"
+          ]
+        },
+        {
+          "lines": [
+            "ein *Stempel | mehr."
+          ]
+        }
+      ]
+    },
+    {
+      "component": "iso-street",
+      "params": {
+        "shop": "Barber Haarscharf",
+        "icon": "scissors",
+        "accent": "#5A4FCF",
+        "rival": "Barber Nebenan",
+        "rivalIcon": "scissors",
+        "rivalAccent": "#E58A45",
+        "smoke": false,
+        "mode": "nah",
+        "frame": "stadt",
+        "then": "weiter",
+        "reward": "Gratis-Schnitt",
+        "left": 1,
+        "clock": "18:42"
+      },
+      "anchors": {
+        "walk": {
+          "at": "start",
+          "offset": 0
+        },
+        "near": {
+          "cap": 0,
+          "word": 4
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Ist er | in der *Nähe | deines Ladens,"
+          ]
+        },
+        {
+          "lines": [
+            "zeigt sein Handy | die Karte | von *selbst."
+          ]
+        }
+      ]
+    },
+    {
+      "parts": [
+        {
+          "component": "phone-3d",
+          "params": {
+            "mode": "wallet",
+            "shop": "Barber Haarscharf",
+            "icon": "scissors",
+            "stamps": 6,
+            "before": 5,
+            "after": 6,
+            "reward": "Gratis-Schnitt",
+            "scan": false,
+            "drop": false,
+            "rise": false
+          },
+          "anchors": {
+            "stamp1": {
+              "cap": 0,
+              "word": 1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Der *sechste | Schnitt | geht auf *dich."
+              ]
+            }
+          ]
+        },
+        {
+          "component": "stamp-check",
+          "enter": "cut",
+          "params": {
+            "icon": "check"
+          },
+          "anchors": {
+            "hit": {
+              "cap": 1,
+              "word": -1,
+              "offset": 0.1
+            }
+          },
+          "captions": [
+            {
+              "lines": [
+                "Und er hat | einen *Grund, | bei dir | zu *bleiben."
+              ]
+            },
+            {
+              "lines": [
+                "*Peak!"
+              ],
+              "scale": 1.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "cta-comment",
+      "anchors": {
+        "logo": {
+          "cap": -1,
+          "word": -1
+        }
+      },
+      "captions": [
+        {
+          "lines": [
+            "Willst du das auch?"
+          ],
+          "accent": 3,
+          "keep": true,
+          "mode": "zeile",
+          "gapBefore": 0.55
+        },
+        {
+          "role": "cta",
+          "lines": [
+            "Dann kommentiere jetzt BARBER,{Barber,}",
+            "und wir melden uns bei dir."
+          ],
+          "gapBefore": 0.65
+        }
+      ]
+    }
+  ],
+  "say": {
+    "Peak!": "Piek!"
+  }
+}

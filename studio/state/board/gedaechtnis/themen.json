@@ -1,0 +1,30 @@
+{
+  "format": 1,
+  "verwendet": [
+    {
+      "datum": "2026-11-17",
+      "idee_id": "20261117-salon-karte-im-handy",
+      "nr": "T18"
+    },
+    {
+      "datum": "2026-11-17",
+      "idee_id": "20261117-doener-stempelzahl",
+      "nr": "T06"
+    },
+    {
+      "datum": "2026-11-18",
+      "idee_id": "20261118-eis-stammgast-tipps",
+      "nr": "T28"
+    },
+    {
+      "datum": "2026-11-21",
+      "idee_id": "20261121-eis-winterpause",
+      "nr": "T13"
+    },
+    {
+      "datum": "2026-11-22",
+      "idee_id": "20261122-doener-tag-im-laden",
+      "nr": "T10"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+ "key": "665e323224cd1c1e",
+ "text": "Dein Friseur schuldet dir was. Seit Jahren gehst du zu ihm. Jeden Monat, derselbe Stuhl. Und was kriegst du dafür? Nichts. Crashout. Schick ihm dieses Video. Und jetzt zu dir, Friseur: Dein Stammkunde scannt einmal deinen Kuh-Err-Code. Schon hat er deine Stempelkarte im Handy. Ohne App. Nach jedem Schnitt scannst du kurz seine Karte: ein Stempel mehr. Ist er in der Nähe deines Ladens, zeigt sein Handy die Karte von selbst. Der sechste Schnitt geht auf dich. Und er hat einen Grund, bei dir zu bleiben. Peak! Willst du das auch? Dann kommentiere jetzt Barber, und wir melden uns bei dir.",
+ "settings": {
+  "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+  "model_id": "eleven_multilingual_v2",
+  "language_code": "de",
+  "output_format": "mp3_44100_128",
+  "seed": null,
+  "voice_settings": {
+   "stability": 0.35,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
+  }
+ },
+ "source": "splice",
+ "chars": 590,
+ "base": "a3b4dcf820db3056",
+ "cut": [
+  123,
+  132
+ ],
+ "sentence": "Crashout.",
+ "clip": "665e323224cd1c1e.clip.mp3",
+ "clip_sha256": "ed95a3083042a0c31b5f3a66128d5bc298818c9bff6d94e46fe5f94abfe9894e",
+ "gain": 1.547959804534912,
+ "shift": 0.645,
+ "cut_from": 9.12,
+ "cut_to": 9.961,
+ "spent": 9
+}
